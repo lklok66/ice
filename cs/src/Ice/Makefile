@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -15,10 +15,12 @@ TARGETS		= $(bindir)/$(LIBNAME)
 POLICY_TARGET	= $(POLICY).dll
 
 SRCS		= Acceptor.cs \
+		  AMDCallback.cs \
 		  Application.cs \
 		  Arrays.cs \
 		  AssemblyInfo.cs \
 		  AssemblyUtil.cs \
+		  AsyncIOThread.cs \
                   Base64.cs \
 		  BasicStream.cs \
 		  Buffer.cs \
@@ -29,9 +31,10 @@ SRCS		= Acceptor.cs \
 		  Collections.cs \
 		  ConnectRequestHandler.cs \
 		  ConnectionI.cs \
-		  ConnectionRequestHandler.cs \
 		  ConnectionFactory.cs \
 		  ConnectionMonitor.cs \
+		  ConnectionReaper.cs \
+		  ConnectionRequestHandler.cs \
 		  Connector.cs \
 		  DefaultsAndOverrides.cs \
                   DictionaryBase.cs \
@@ -41,6 +44,7 @@ SRCS		= Acceptor.cs \
 		  EndpointFactory.cs \
 		  EndpointFactoryManager.cs \
 		  EndpointHostResolver.cs \
+		  EventHandler.cs \
 		  Exception.cs \
 		  ImplicitContextI.cs \
 		  IncomingAsync.cs \
@@ -51,11 +55,13 @@ SRCS		= Acceptor.cs \
 		  LocatorInfo.cs \
 		  LoggerI.cs \
 		  LoggerPlugin.cs \
+		  Monitor.cs \
 		  Network.cs \
 		  ObjectAdapterFactory.cs \
 		  ObjectAdapterI.cs \
 		  Object.cs \
 		  ObjectFactoryManager.cs \
+		  OpaqueEndpointI.cs \
 		  Options.cs \
 		  OutgoingAsync.cs \
 		  Outgoing.cs \
@@ -76,18 +82,21 @@ SRCS		= Acceptor.cs \
 		  ReferenceFactory.cs \
                   ReplyStatus.cs \
                   RequestHandler.cs \
+		  RetryQueue.cs \
 		  RouterInfo.cs \
 		  ServantManager.cs \
-		  Set.cs \
 		  SliceChecksums.cs \
+		  SocketOperation.cs \
 		  Stream.cs \
 		  StreamI.cs \
+                  StreamWrapper.cs \
 		  StringUtil.cs \
 		  SysLoggerI.cs \
 		  TcpAcceptor.cs \
 		  TcpConnector.cs \
 		  TcpEndpointI.cs \
 		  TcpTransceiver.cs \
+		  ThreadHookPlugin.cs \
 		  ThreadPool.cs \
 		  TieBase.cs \
 		  Time.cs \
@@ -98,7 +107,6 @@ SRCS		= Acceptor.cs \
 		  UdpEndpointI.cs \
 		  UdpConnector.cs \
 		  UdpTransceiver.cs \
-		  UnknownEndpointI.cs \
 		  UserExceptionFactory.cs \
 		  Util.cs \
 		  ValueWriter.cs \
@@ -109,6 +117,7 @@ SLICE_SRCS	= $(SDIR)/BuiltinSequences.ice \
 		  $(SDIR)/Connection.ice \
 		  $(SDIR)/Current.ice \
 		  $(SDIR)/Endpoint.ice \
+		  $(SDIR)/EndpointTypes.ice \
 		  $(SDIR)/FacetMap.ice \
 		  $(SDIR)/Identity.ice \
 		  $(SDIR)/ImplicitContext.ice \
@@ -132,6 +141,7 @@ include $(top_srcdir)/config/Make.rules.cs
 
 MCSFLAGS	:= $(MCSFLAGS) -target:library -out:$(TARGETS) -warnaserror-
 MCSFLAGS	:= $(MCSFLAGS) -keyfile:$(KEYFILE)
+MCSFLAGS	:= $(MCSFLAGS) /doc:$(bindir)/$(PKG).xml /nowarn:1591
 
 ifeq ($(MANAGED),yes)
     MCSFLAGS	:= $(MCSFLAGS) -define:MANAGED
@@ -158,6 +168,15 @@ endif
 
 install:: all
 	(cd $(bindir); $(call installassembly,$(LIBNAME),$(PKG)); $(call installpolicy,$(POLICY)); \
-	 $(call installmdb,$(LIBNAME).mdb))
+	 $(call installmdb,$(LIBNAME).mdb); \
+	 $(call installdata,$(PKG).xml,$(install_bindir)))
+
+clean::
+	-rm -f $(bindir)/$(PKG).xml
+
+$(GDIR)/BuiltinSequences.cs: $(SDIR)/BuiltinSequences.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	rm -f $(GDIR)/BuiltinSequences.cs
+	$(SLICE2CS) $(SLICE2CSFLAGS) --stream $(SDIR)/BuiltinSequences.ice
+	mv BuiltinSequences.cs $(GDIR)
 
 include .depend

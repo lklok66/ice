@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,10 +9,10 @@
 
 #include <IceUtil/Options.h>
 #include <IceUtil/StringUtil.h>
+#include <IceUtil/FileUtil.h>
 #include <Ice/Service.h>
 #include <IcePatch2/FileServerI.h>
 #include <IcePatch2/Util.h>
-#include <OS.h>
 
 using namespace std;
 using namespace Ice;
@@ -49,7 +49,7 @@ public:
 
 protected:
 
-    virtual bool start(int, char*[]);
+    virtual bool start(int, char*[], int&);
     virtual bool stop();
 
 private:
@@ -64,7 +64,7 @@ IcePatch2::PatcherService::PatcherService()
 }
 
 bool
-IcePatch2::PatcherService::start(int argc, char* argv[])
+IcePatch2::PatcherService::start(int argc, char* argv[], int& status)
 {
     PropertiesPtr properties = communicator()->getProperties();
 
@@ -87,11 +87,13 @@ IcePatch2::PatcherService::start(int argc, char* argv[])
     if(opts.isSet("help"))
     {
         usage(argv[0]);
+        status = EXIT_SUCCESS;
         return false;
     }
     if(opts.isSet("version"))
     {
         print(ICE_STRING_VERSION);
+        status = EXIT_SUCCESS;
         return false;
     }
 
@@ -118,10 +120,10 @@ IcePatch2::PatcherService::start(int argc, char* argv[])
 
     try
     {
-        if(!isAbsolute(dataDir))
+        if(!IceUtilInternal::isAbsolutePath(dataDir))
         {
             string cwd;
-            if(OS::getcwd(cwd) != 0)
+            if(IceUtilInternal::getcwd(cwd) != 0)
             {
                 throw "cannot get the current directory:\n" + IceUtilInternal::lastErrorToString();
             }
@@ -209,15 +211,34 @@ IcePatch2::PatcherService::usage(const string& appName)
     print("Usage: " + appName + " [options] [DIR]\n" + options);
 }
 
+#ifdef _WIN32
+
+//COMPILERFIX: Borland C++ 2010 doesn't support wmain for console applications.
+#ifdef __BCCPLUSPLUS__
+
+int
+main(int argc, char* argv[])
+
+#else
+
+int
+wmain(int argc, wchar_t* argv[])
+
+#endif
+{
+    IcePatch2::PatcherService svc;
+    int status = EXIT_FAILURE;
+    status = svc.main(argc, argv);
+    return status;
+}
+
+#else
+
 int
 main(int argc, char* argv[])
 {
     IcePatch2::PatcherService svc;
     int status = EXIT_FAILURE;
-
-#ifdef _WIN32
-    status = svc.main(argc, argv);
-#else
     //
     // For UNIX, force --nochdir option, so the service isn't started
     // with / as the working directory. That way, if the data
@@ -232,7 +253,7 @@ main(int argc, char* argv[])
         args.push_back(argv[i]);
     }
     status = svc.main(args);
-#endif
-
     return status;
 }
+
+#endif

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -22,7 +22,7 @@ PlayerI::destroy(const Ice::Current& current)
     _evictor->remove(current.id);
 }
 
-void 
+void
 PlayerI::withdraw(int count, const Ice::Current&)
 {
     int newBalance = chips - count;
@@ -45,12 +45,11 @@ PlayerI::PlayerI() :
 {
 }
 
-void 
-PlayerI::init(const CasinoStore::PersistentPlayerPrx& myPrx, const Freeze::TransactionalEvictorPtr& evictor, 
+void
+PlayerI::init(const CasinoStore::PersistentPlayerPrx& myPrx, const Freeze::TransactionalEvictorPtr& evictor,
               const CasinoStore::PersistentBankPrx& bank)
 {
     _myPrx = myPrx;
     _evictor = evictor;
     _bank = bank;
 }
-

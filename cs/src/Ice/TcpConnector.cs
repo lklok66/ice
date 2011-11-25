@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,7 +14,7 @@ namespace IceInternal
     using System.Net;
     using System.Net.Sockets;
 
-    sealed class TcpConnector : Connector, IComparable
+    sealed class TcpConnector : Connector
     {
         internal const short TYPE = 1;
 
@@ -30,7 +30,9 @@ namespace IceInternal
             {
                 Socket fd = Network.createSocket(false, _addr.AddressFamily);
                 Network.setBlock(fd, false);
+#if !COMPACT
                 Network.setTcpBufSize(fd, _instance.initializationData().properties, _logger);
+#endif
 
                 //
                 // Nonblocking connect is handled by the transceiver.
@@ -50,50 +52,7 @@ namespace IceInternal
 
         public short type()
         {
-            return TcpEndpointI.TYPE;
-        }
-
-        public int CompareTo(object obj)
-        {
-            TcpConnector p = null;
-
-            try
-            {
-                p = (TcpConnector)obj;
-            }
-            catch(InvalidCastException)
-            {
-                try
-                {
-                    Connector e = (Connector)obj;
-                    return type() < e.type() ? -1 : 1;
-                }
-                catch(InvalidCastException)
-                {
-                    Debug.Assert(false);
-                }
-            }
-
-            if(this == p)
-            {
-                return 0;
-            }
-
-            if(_timeout < p._timeout)
-            {
-                return -1;
-            }
-            else if(p._timeout < _timeout)
-            {
-                return 1;
-            }
-
-            if(!_connectionId.Equals(p._connectionId))
-            {
-                return _connectionId.CompareTo(p._connectionId);
-            }
-
-            return Network.compareAddress(_addr, p._addr);
+            return Ice.UDPEndpointType.value;
         }
 
         //
@@ -115,7 +74,33 @@ namespace IceInternal
 
         public override bool Equals(object obj)
         {
-            return CompareTo(obj) == 0;
+            TcpConnector p = null;
+
+            try
+            {
+                p = (TcpConnector)obj;
+            }
+            catch(InvalidCastException)
+            {
+                return false;
+            }
+
+            if(this == p)
+            {
+                return true;
+            }
+
+            if(_timeout != p._timeout)
+            {
+                return false;
+            }
+
+            if(!_connectionId.Equals(p._connectionId))
+            {
+                return false;
+            }
+
+            return Network.compareAddress(_addr, p._addr) == 0;
         }
 
         public override string ToString()

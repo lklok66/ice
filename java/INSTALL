@@ -15,9 +15,9 @@ Requirements
 Operating systems
 -----------------
 
-Ice for Java has been tested under Linux, Solaris, HP-UX, MacOS X, and
-Windows XP/Server 2003/Vista, but due to the portability of Java, it is
-very likely that it will also work on other platforms for which a
+Ice for Java has been tested under Linux, Solaris, MacOS X, and
+Windows XP/Server 2003/Vista/7, but due to the portability of Java, it
+is very likely that it will also work on other platforms for which a
 suitable Java implementation is available.
 
 Note, however, that you will need the Slice to Java translator (see
@@ -35,11 +35,11 @@ Ice for Java requires J2SE 1.5.0 or later.
 
 You can download Java5 and Java6 for Solaris, Windows, and Linux from:
 
-  http://java.sun.com
+  http://www.oracle.com/technetwork/java/index.html
 
 Make sure to add javac and java to your PATH.
 
-When using the Ice for Java SSL plugin (IceSSL), you may experience
+When using the Ice for Java SSL plug-in (IceSSL), you may experience
 occasional hangs. The most likely reason is that your system's entropy
 pool is empty. If you have sufficient system privileges, you can solve
 this issue by editing the following file
@@ -81,7 +81,7 @@ Berkeley DB
 
 "Freeze" is an optional Ice component that provides a persistence
 facility for Ice applications. Freeze uses Berkeley DB as its
-underlying database and currently requires Berkeley DB 4.6.21.
+underlying database and currently requires Berkeley DB 4.8.30.
 
 ZeroC provides Berkeley DB binary distributions (with Java support)
 for many platforms: 
@@ -102,12 +102,12 @@ Java support. For Linux, this is done by specifying the --enable-java
 option when running the configure script. On Windows, you must select
 the project "db_java -- Win32 Release".
 
-Make sure to add db.jar to your CLASSPATH, and verify that the
-Berkeley DB shared libraries are in your java.library.path. On Linux,
-this can be achieved by adding <Berkeley DB home>/lib to your
-LD_LIBRARY_PATH, for example:
+In order to run an application that uses Freeze, you must add db.jar
+to your CLASSPATH and verify that the Berkeley DB shared libraries are
+in your java.library.path. On Linux, this can be achieved by adding
+<Berkeley DB home>/lib to your LD_LIBRARY_PATH, for example:
 
-  $ export LD_LIBRARY_PATH=/opt/db46/lib:$LD_LIBRARY_PATH
+  $ export LD_LIBRARY_PATH=/opt/db48/lib:$LD_LIBRARY_PATH
 
 
 bzip2
@@ -130,7 +130,7 @@ JGoodies
 --------
 
 The graphical IceGrid administrative tool (see "IceGrid Administrative
-Console") uses JGoodies Looks and JGoodies Forms.
+Console") uses JGoodies Common, JGoodies Forms, and JGoodies Looks.
 
 The libraries are available here:
 
@@ -139,8 +139,9 @@ The libraries are available here:
 The IceGrid administrative tool has been tested with the following
 versions:
 
-  JGoodies Looks 2.1.4
-  JGoodies Forms 1.2.0
+  JGoodies Common 1.2.0
+  JGoodies Forms 1.4.1
+  JGoodies Looks 2.4.1
 
 
 ProGuard
@@ -153,7 +154,18 @@ ProGuard is available here:
 
   http://proguard.sourceforge.net
 
-Ice for Java has been tested with ProGuard 4.1.
+Ice for Java has been tested with ProGuard 4.6.
+
+
+Android
+-------
+
+The Ice run time (lib/Ice.jar) is fully compatible with Android 2.1 or
+later. The IceSSL plug-in requires Android 2.2 or later (see the
+release notes for more information on SSL in Android).
+
+Refer to the sections "Eclipse Development" and "Using Ice in Android"
+below for additional details.
 
 
 ======================================================================
@@ -169,11 +181,20 @@ is available at the link below:
 
   http://ant.apache.org/
 
-To successfully compile Ice for Java, the Java run time for Berkeley
-DB (db.jar) must be in your CLASSPATH. The build system also requires
-the Slice translators from Ice for C++. If you have not built Ice for
-C++ in this source distribution, you must set the ICE_HOME environment
-variable with the path name of your Ice installation. For example:
+This source distribution cannot be compiled successfully without the
+Berkeley DB run time for Java (db.jar). On Unix platforms, the build
+system searches for this file in two locations:
+
+  * /usr/share/java/db-4.8.30.jar
+  * /opt/Ice-@ver@/lib/db.jar
+
+If neither of these files is present on your system, or if you are not
+using a Unix platform, you must add db.jar to your CLASSPATH.
+
+The build system also requires the Slice translators from Ice for C++.
+If you have not built Ice for C++ in this source distribution, you
+must set the ICE_HOME environment variable with the path name of your
+Ice installation. For example:
 
   # On Unix.
   $ export ICE_HOME=/opt/Ice-@ver@  (For local build)
@@ -204,8 +225,8 @@ To build only the Ice run time (Ice.jar), use the following command:
 
   ant ice-jar
 
-To build the Ice run time along with the IceGrid administrative
-console, use this command:
+To build the Ice run time along with Freeze and the IceGrid
+administrative console, use this command:
 
   ant jar
 
@@ -243,7 +264,65 @@ specified by the "prefix" variable in config/build.properties.
 It is not necessary to rebuild Ice for Java after changing the
 value of the prefix variable.
 
-After installation add Ice.jar to your CLASSPATH.
+After installation add Ice.jar (and optionally Freeze.jar) to your
+CLASSPATH.
+
+
+======================================================================
+Eclipse Development
+======================================================================
+
+ZeroC has created a Slice2Java plug-in for Eclipse that automates the
+translation of your Slice files. If you use Eclipse, we strongly
+recommend using this plug-in for your own development.
+
+Note that the Slice2Java plug-in is required if you intend to build
+any of the Android sample projects included in this distribution.
+
+For more information on installing the plug-in, please refer to the
+link below:
+
+  http://www.zeroc.com/eclipse.html
+
+The Ice manual provides usage instructions for the plug-in:
+
+  http://doc.zeroc.com/display/Ice/Eclipse+Plug-in
+
+
+======================================================================
+Using Ice in Android
+======================================================================
+
+Ice requires Android 2.1 or later. Aside from that, there are no other
+special requirements for using Ice in an Android application. We
+strongly recommend installing our Slice2Java plug-in for Eclipse to
+automate the compilation of your Slice definitions.
+
+
+Sample Projects
+---------------
+
+Several sample Android projects are provided in the demo/android
+subdirectory. You must use Eclipse and the Slice2Java plug-in to build
+these projects.
+
+In Eclipse, you can open a sample project by choosing File->Import...;
+in the "General" group, select "Existing Project into Workspace", then
+open one of the subdirectories of demo/android.
+
+The sample projects are configured to locate the Ice run time JAR file
+(Ice.jar) via the ICE_HOME classpath variable, as described in the Ice
+manual:
+
+  http://doc.zeroc.com/display/Ice/Eclipse+Plug-in
+
+If you installed Ice.jar in a different location, you will need to add
+it as an external JAR file in each sample project:
+
+ 1. Open the project's properties and select Java Build Path
+ 2. Click on the Libraries tab
+ 3. Click Add External JARs... and navigate to Ice.jar
+ 4. Click OK to save your settings
 
 
 ======================================================================
@@ -255,7 +334,7 @@ the Ice for C++ distribution. If you have not built Ice for C++ in
 this source distribution then you must set the ICE_HOME environment
 variable with the path name of your Ice installation:
 
-  # On Unix.
+  # On Unix
   $ export ICE_HOME=/opt/Ice-@ver@  (For local build)
   $ export ICE_HOME=/usr            (For RPM installation)
 
@@ -317,14 +396,3 @@ Ice.jar, IceGridGUI.jar, and the JGoodies libraries to your CLASSPATH.
 You can start the console with this command:
 
   java IceGridGUI.Main
-
-
-======================================================================
-MacOS X Notes
-======================================================================
-
-On MacOS X, an Ice server may not correctly detect the closure of
-client connections, which can lead to a hang during server shutdown.
-This appears to be caused by a problem in the JVM implementation, but
-we are still looking into this issue. Until we resolve this matter, We
-recommend the use of timeouts in object adapter endpoints.

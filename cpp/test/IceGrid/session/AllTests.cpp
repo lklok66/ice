@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -141,12 +141,7 @@ public:
 
         while(!_updated)
         {
-            if(!timedWait(IceUtil::Time::seconds(10)))
-            {
-                cerr << "timeout: " << file << ":" << line << endl;
-                ObserverBase::printStack();
-                test(false); // Timeout
-            }
+            wait();
         }
         --_updated;
     }
@@ -895,22 +890,8 @@ allTests(const Ice::CommunicatorPtr& communicator)
         {
         }
 
-        try
-        {
-            router1->destroySession();
-            test(false);
-        }
-        catch(const Ice::ConnectionLostException&)
-        {
-        }
-        try
-        {
-            router2->destroySession();
-            test(false);
-        }
-        catch(const Ice::ConnectionLostException&)
-        {
-        }
+        router1->destroySession();
+        router2->destroySession();
 
         AdminSessionPrx admSession1, admSession2;
 
@@ -976,20 +957,8 @@ allTests(const Ice::CommunicatorPtr& communicator)
         {
         }
 
-        try
-        {
-            adminRouter1->destroySession();
-        }
-        catch(const Ice::ConnectionLostException&)
-        {
-        }
-        try
-        {
-            adminRouter2->destroySession();
-        }
-        catch(const Ice::ConnectionLostException&)
-        {
-        }
+        adminRouter1->destroySession();
+        adminRouter2->destroySession();
 
         cout << "ok" << endl;
     }
@@ -1056,21 +1025,9 @@ allTests(const Ice::CommunicatorPtr& communicator)
         {
         }
 
-        try
-        {
-            router1->destroySession();
-        }
-        catch(const Ice::ConnectionLostException&)
-        {
-        }
-        try
-        {
-            router2->destroySession();
-        }
-        catch(const Ice::ConnectionLostException&)
-        {
-        }
-
+        router1->destroySession();
+        router2->destroySession();
+            
         AdminSessionPrx admSession1, admSession2;
 
         //
@@ -1132,20 +1089,8 @@ allTests(const Ice::CommunicatorPtr& communicator)
         {
         }
 
-        try
-        {
-            adminRouter1->destroySession();
-        }
-        catch(const Ice::ConnectionLostException&)
-        {
-        }
-        try
-        {
-            adminRouter2->destroySession();
-        }
-        catch(const Ice::ConnectionLostException&)
-        {
-        }
+        adminRouter1->destroySession();
+        adminRouter2->destroySession();
 
         cout << "ok" << endl;
     }
@@ -1768,6 +1713,8 @@ allTests(const Ice::CommunicatorPtr& communicator)
         server->exe = properties->getProperty("IceBinDir") + "/icegridnode";
         server->options.push_back("--nowarn");
         server->pwd = ".";
+        server->applicationDistrib = false;
+        server->allocatable = false;
         addProperty(server, "IceGrid.Node.Name", "node-1");
         addProperty(server, "IceGrid.Node.Data", properties->getProperty("TestDir") + "/db/node-1");
         addProperty(server, "IceGrid.Node.Endpoints", "default");
@@ -1817,6 +1764,8 @@ allTests(const Ice::CommunicatorPtr& communicator)
         server->id = "Server";
         server->exe = properties->getProperty("TestDir") + "/server";
         server->pwd = ".";
+        server->applicationDistrib = false;
+        server->allocatable = false;
         AdapterDescriptor adapter;
         adapter.name = "Server";
         adapter.id = "ServerAdapter";

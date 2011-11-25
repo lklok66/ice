@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,8 +10,8 @@
 #include <IceUtil/DisableWarnings.h>
 #include <Slice/Preprocessor.h>
 #include <Slice/Util.h>
-#include <Slice/SignalHandler.h>
 #include <IceUtil/StringUtil.h>
+#include <IceUtil/FileUtil.h>
 #include <IceUtil/UUID.h>
 #include <IceUtil/Unicode.h>
 #include <algorithm>
@@ -28,20 +28,6 @@ using namespace std;
 using namespace Slice;
 
 //
-// Callback for Crtl-C signal handling
-//
-static Preprocessor* _preprocess = 0;
-
-static void closeCallback()
-{
-    if(_preprocess != 0)
-    {
-        _preprocess->close();
-    }
-}
-
-
-//
 // mcpp defines
 //
 namespace Slice
@@ -50,29 +36,31 @@ namespace Slice
 enum Outdest
 {
     Out=0, Err=1, Dbg=2, Num_Outdest=3
-}; 
-
 };
+
+}
 
 extern "C" int   mcpp_lib_main(int argc, char** argv);
 extern "C" void  mcpp_use_mem_buffers(int tf);
 extern "C" char* mcpp_get_mem_buffer(Outdest od);
 
+Slice::PreprocessorPtr
+Slice::Preprocessor::create(const string& path, const string& fileName, const vector<string>& args)
+{
+    return new Preprocessor(path, fileName, args);
+}
+
 Slice::Preprocessor::Preprocessor(const string& path, const string& fileName, const vector<string>& args) :
     _path(path),
-    _fileName(fileName),
+    _fileName(fullPath(fileName)),
+    _shortFileName(fileName),
     _args(args),
     _cppHandle(0)
 {
-    _preprocess = this;
-    SignalHandler::setCallback(closeCallback);
 }
 
 Slice::Preprocessor::~Preprocessor()
 {
-    _preprocess = 0;
-    SignalHandler::setCallback(0);
-
     close();
 }
 
@@ -106,22 +94,43 @@ Slice::Preprocessor::normalizeIncludePath(const string& path)
 {
     string result = path;
 
-    replace(result.begin(), result.end(), '\\', '/');
+#ifdef _WIN32
+    //
+    // MCPP does not handle "-IC:/" well as an include path.
+    //
+    if(path.size() != 3 || !(path[0] >= 'A' && path[0] <= 'Z') || (path[0] >= 'a' && path[0] <= 'z') ||
+       path[1] != ':' || path[2] != '\\')
+#endif
+    {
+        replace(result.begin(), result.end(), '\\', '/');
+    }
 
+    string::size_type startReplace = 0;
+#ifdef _WIN32
+    //
+    // For UNC paths we need to ensure they are in the format that is
+    // used by MCPP. IE. "//MACHINE/PATH"
+    //
+    if(result.find("//") == 0)
+    {
+        startReplace = 2;
+    }
+#endif
     string::size_type pos;
-    while((pos = result.find("//")) != string::npos)
+    while((pos = result.find("//", startReplace)) != string::npos)
     {
         result.replace(pos, 2, "/");
     }
 
-    if(result == "/" || (result.size() == 3 && isalpha(result[0]) && result[1] == ':' && result[2] == '/'))
+    if(result == "/" || (result.size() == 3 && IceUtilInternal::isAlpha(result[0]) && result[1] == ':' && 
+                         result[2] == '/'))
     {
-	return result;
+        return result;
     }
-    
+
     if(result.size() > 1 && result[result.size() - 1] == '/')
     {
-	result.erase(result.size() - 1);
+        result.erase(result.size() - 1);
     }
 
     return result;
@@ -143,6 +152,8 @@ Slice::Preprocessor::preprocess(bool keepComments)
     {
         args.push_back("-C");
     }
+    args.push_back("-e");
+    args.push_back("en_us.utf8");
     args.push_back(_fileName);
 
     const char** argv = new const char*[args.size() + 1];
@@ -160,12 +171,24 @@ Slice::Preprocessor::preprocess(bool keepComments)
     delete[] argv;
 
     //
-    // Print errors to stderr.
+    // Display any errors.
     //
     char* err = mcpp_get_mem_buffer(Err);
     if(err)
     {
-        ::fputs(err, stderr);
+        vector<string> messages = filterMcppWarnings(err);
+        for(vector<string>::const_iterator i = messages.begin(); i != messages.end(); ++i)
+        {
+            emitRaw(i->c_str());
+
+            //
+            // MCPP FIX: mcpp does not always return non-zero exit status when there is an error.
+            //
+            if(i->find("error:") != string::npos)
+            {
+                status = 1;
+            }
+        }
     }
 
     if(status == 0)
@@ -175,18 +198,45 @@ Slice::Preprocessor::preprocess(bool keepComments)
         //
         char* buf = mcpp_get_mem_buffer(Out);
 
-        _cppFile = ".preprocess." + IceUtil::generateUUID();
-        SignalHandler::addFile(_cppFile);
+        //
+        // First try to open temporay file in tmp directory.
+        //
 #ifdef _WIN32
-        _cppHandle = ::_wfopen(IceUtil::stringToWstring(_cppFile).c_str(), IceUtil::stringToWstring("w+").c_str());
-#else
-        _cppHandle = ::fopen(_cppFile.c_str(), "w+");
-#endif
-        if(buf)
+        wchar_t* name = _wtempnam(NULL, L".preprocess");
+        if(name)
         {
-            ::fwrite(buf, strlen(buf), 1, _cppHandle);
+            _cppFile = IceUtil::wstringToString(name);
+            free(name);
+            _cppHandle = IceUtilInternal::fopen(_cppFile, "w+");
         }
-        ::rewind(_cppHandle);
+#else
+        _cppHandle = tmpfile();
+#endif
+
+        //
+        // If that fails try to open file in current directory.
+        //
+        if(_cppHandle == 0)
+        {
+            _cppFile = ".preprocess." + IceUtil::generateUUID();
+            _cppHandle = IceUtilInternal::fopen(_cppFile, "w+");
+        }
+
+        if(_cppHandle != 0)
+        {
+            if(buf)
+            {
+                ::fwrite(buf, strlen(buf), 1, _cppHandle);
+            }
+            ::rewind(_cppHandle);
+        }
+        else
+        {
+            ostream& os = getErrorStream();
+            os << _path << ": error: could not open temporary file: ";
+            os << _cppFile;
+            os << endl;
+        }
     }
 
     //
@@ -197,12 +247,13 @@ Slice::Preprocessor::preprocess(bool keepComments)
     return _cppHandle;
 }
 
-void
-Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<string>& includePaths)
+bool
+Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<string>& includePaths,
+                                               const string& cppSourceExt, const string& pyPrefix)
 {
     if(!checkInputFile())
     {
-        return;
+        return false;
     }
 
     //
@@ -210,6 +261,8 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
     //
     vector<string> args = _args;
     args.push_back("-M");
+    args.push_back("-e");
+    args.push_back("en_us.utf8");
     args.push_back(_fileName);
 
     const char** argv = new const char*[args.size() + 1];
@@ -217,7 +270,7 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
     {
         argv[i + 1] = args[i].c_str();
     }
-    
+
     //
     // Call mcpp using memory buffer.
     //
@@ -231,7 +284,11 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
     char* err = mcpp_get_mem_buffer(Err);
     if(err)
     {
-        ::fputs(err, stderr);
+        vector<string> messages = filterMcppWarnings(err);
+        for(vector<string>::const_iterator i = messages.begin(); i != messages.end(); ++i)
+        {
+            emitRaw(i->c_str());
+        }
     }
 
     if(status != 0)
@@ -240,7 +297,7 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
         // Calling this again causes the memory buffers to be freed.
         //
         mcpp_use_mem_buffers(1);
-        return;
+        return false;
     }
 
     //
@@ -277,7 +334,11 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
      string suffix = ".o:";
 #endif
     pos = unprocessed.find(suffix) + suffix.size();
-    string result = unprocessed.substr(0, pos);
+    string result;
+    if(lang != JavaXML)
+    {
+        result = unprocessed.substr(0, pos);
+    }
 
     vector<string> fullIncludePaths;
     vector<string>::const_iterator p;
@@ -285,7 +346,6 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
     {
         fullIncludePaths.push_back(fullPath(*p));
     }
-    string absoluteFileName = fullPath(_fileName);
 
     //
     // Process each dependency.
@@ -295,11 +355,11 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
     {
         end += 4;
         string file = IceUtilInternal::trim(unprocessed.substr(pos, end - pos));
-        if(isAbsolute(file))
+        if(IceUtilInternal::isAbsolutePath(file))
         {
-            if(file == absoluteFileName)
+            if(file == _fileName)
             {
-                file = _fileName;
+                file = _shortFileName;
             }
             else
             {
@@ -313,7 +373,7 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
                     if(file.compare(0, p->length(), *p) == 0)
                     {
                         string s = includePaths[p - fullIncludePaths.begin()] + file.substr(p->length());
-                        if(isAbsolute(newFile) || s.size() < newFile.size())
+                        if(IceUtilInternal::isAbsolutePath(newFile) || s.size() < newFile.size())
                         {
                             newFile = s;
                         }
@@ -323,41 +383,62 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
             }
         }
 
-        //
-        // Escape spaces in the file name.
-        //
-        string::size_type space = 0;
-        while((space = file.find(" ", space)) != string::npos)
+        if(lang == JavaXML)
         {
-            file.replace(space, 1, "\\ ");
-            space += 2;
+            if(result.size() == 0)
+            {
+                result = "  <source name=\"" + file + "\">";
+            }
+            else
+            {
+                result += "\n    <dependsOn name=\"" + file + "\"/>";
+            }
         }
+        else
+        {
+            //
+            // Escape spaces in the file name.
+            //
+            string::size_type space = 0;
+            while((space = file.find(" ", space)) != string::npos)
+            {
+                file.replace(space, 1, "\\ ");
+                space += 2;
+            }
 
-        //
-        // Add to result
-        //
-        result += " \\\n " + file;
+            //
+            // Add to result
+            //
+            result += " \\\n " + file;
+        }
         pos = end;
     }
-    result += "\n";
+    if(lang == JavaXML)
+    {
+        result += "\n  </source>\n";
+    }
+    else
+    {
+        result += "\n";
+    }
 
     /*
-     * icecpp emits dependencies in any of the following formats, depending on the
+     * Emit dependencies in any of the following formats, depending on the
      * length of the filenames:
      *
      * x.o[bj]: /path/x.ice /path/y.ice
      *
-     * x.o[bj]: /path/x.ice \ 
+     * x.o[bj]: /path/x.ice \
      *  /path/y.ice
      *
-     * x.o[bj]: /path/x.ice /path/y.ice \ 
+     * x.o[bj]: /path/x.ice /path/y.ice \
      *  /path/z.ice
      *
-     * x.o[bj]: \ 
+     * x.o[bj]: \
      *  /path/x.ice
      *
-     * x.o[bj]: \ 
-     *  /path/x.ice \ 
+     * x.o[bj]: \
+     *  /path/x.ice \
      *  /path/y.ice
      *
      * Spaces embedded within filenames are escaped with a backslash. Note that
@@ -369,15 +450,17 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
         case CPlusPlus:
         {
             //
-            // Change .o[bj] suffix to .cpp suffix.
+            // Change .o[bj] suffix to the cpp source extension suffix.
             //
             string::size_type pos;
             while((pos = result.find(suffix)) != string::npos)
             {
-                result.replace(pos, suffix.size() - 1, ".cpp");
+                result.replace(pos, suffix.size() - 1, "." + cppSourceExt);
             }
             break;
         }
+        case JavaXML:
+            break;
         case Java:
         {
             //
@@ -437,6 +520,46 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
             }
             break;
         }
+        case Python:
+        {
+            //
+            // Change .o[bj] suffix to .py suffix.
+            //
+            if(pyPrefix.size() != 0)
+            {
+                result = pyPrefix + result;
+            }
+            string::size_type pos;
+            while((pos = result.find(suffix)) != string::npos)
+            {
+                result.replace(pos, suffix.size() - 1, "_ice.py");
+            }
+            break;
+        }
+        case Ruby:
+        {
+            //
+            // Change .o[bj] suffix to .rb suffix.
+            //
+            string::size_type pos;
+            while((pos = result.find(suffix)) != string::npos)
+            {
+                result.replace(pos, suffix.size() - 1, ".rb");
+            }
+            break;
+        }
+        case PHP:
+        {
+            //
+            // Change .o[bj] suffix to .php suffix.
+            //
+            string::size_type pos;
+            while((pos = result.find(suffix)) != string::npos)
+            {
+                result.replace(pos, suffix.size() - 1, ".php");
+            }
+            break;
+        }
         default:
         {
             abort();
@@ -448,6 +571,7 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
     // Output result
     //
     fputs(result.c_str(), stdout);
+    return true;
 }
 
 bool
@@ -458,18 +582,17 @@ Slice::Preprocessor::close()
         int status = fclose(_cppHandle);
         _cppHandle = 0;
 
+        if(_cppFile.size() != 0)
+        {
+            IceUtilInternal::unlink(_cppFile);
+        }
+
         if(status != 0)
         {
             return false;
         }
-
-#ifdef _WIN32
-        _unlink(_cppFile.c_str());
-#else
-        unlink(_cppFile.c_str());
-#endif
     }
-    
+
     return true;
 }
 
@@ -481,19 +604,18 @@ Slice::Preprocessor::checkInputFile()
     string::size_type pos = base.rfind('.');
     if(pos != string::npos)
     {
-        suffix = base.substr(pos);
-        transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
+        suffix = IceUtilInternal::toLower(base.substr(pos));
     }
     if(suffix != ".ice")
     {
-        cerr << _path << ": input files must end with `.ice'" << endl;
+        getErrorStream() << _path << ": error: input files must end with `.ice'" << endl;
         return false;
     }
-    
+
     ifstream test(_fileName.c_str());
     if(!test)
     {
-        cerr << _path << ": can't open `" << _fileName << "' for reading" << endl;
+        getErrorStream() << _path << ": error: cannot open `" << _fileName << "' for reading" << endl;
         return false;
     }
     test.close();

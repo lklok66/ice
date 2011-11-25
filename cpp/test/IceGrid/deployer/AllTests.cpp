@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,6 +12,7 @@
 #include <IceGrid/Query.h>
 #include <IceGrid/Admin.h>
 #include <IceGrid/Registry.h>
+#include <IceUtil/FileUtil.h>
 #include <IceUtil/Thread.h>
 #include <TestCommon.h>
 #include <Test.h>
@@ -179,7 +180,7 @@ logTests(const Ice::CommunicatorPtr& comm, const AdminSessionPrx& session)
         //
         // Test with empty file.
         // 
-        ofstream os((testDir + "/log1.txt").c_str());
+        IceUtilInternal::ofstream os((testDir + "/log1.txt"));
         os.close();
 
         it = session->openServerLog("LogServer", testDir + "/log1.txt", -1);
@@ -208,7 +209,7 @@ logTests(const Ice::CommunicatorPtr& comm, const AdminSessionPrx& session)
         //
         // Test with log file with one line with no EOL on last line.
         // 
-        ofstream os((testDir + "/log2.txt").c_str());
+        IceUtilInternal::ofstream os((testDir + "/log2.txt"));
         os << "one line file with no EOL on last line";
         os.close();
 
@@ -246,7 +247,7 @@ logTests(const Ice::CommunicatorPtr& comm, const AdminSessionPrx& session)
         //
         // Test with log file with one line with EOL on last line.
         // 
-        ofstream os((testDir + "/log3.txt").c_str());
+        IceUtilInternal::ofstream os((testDir + "/log3.txt"));
         os << "one line file with EOL on last line" << endl;
         os.close();
 
@@ -292,7 +293,7 @@ logTests(const Ice::CommunicatorPtr& comm, const AdminSessionPrx& session)
         //
         // Test with log file with multiple lines
         // 
-        ofstream os((testDir + "/log4.txt").c_str());
+        IceUtilInternal::ofstream os((testDir + "/log4.txt"));
         os << "line 1" << endl;
         os << "line 2" << endl;
         os << "line 3" << endl;
@@ -341,7 +342,7 @@ logTests(const Ice::CommunicatorPtr& comm, const AdminSessionPrx& session)
 
     try
     {
-        ofstream os((testDir + "/log1.txt").c_str(), ios_base::out | ios_base::trunc);
+        IceUtilInternal::ofstream os((testDir + "/log1.txt").c_str(), ios_base::out | ios_base::trunc);
         os << flush;
 
         it = session->openServerLog("LogServer", testDir + "/log1.txt", -1);
@@ -544,6 +545,15 @@ allTests(const Ice::CommunicatorPtr& comm)
     test(obj->getProperty("TestServer1Identity") == "Server1");
     test(obj->getProperty("LogFilePath") == "test-Server1.log");
     test(obj->getProperty("LogFilePath-Server1") == "test.log");
+    test(obj->getProperty("PropertyWithSpaces") == "   test   ");
+    // \ is escaped in C++ string literals
+    test(obj->getProperty("WindowsPath") == "C:\\Program Files (x86)\\ZeroC\\");
+    test(obj->getProperty("UNCPath") == "\\\\server\\foo bar\\file");
+    test(obj->getProperty("PropertyWith=") == "foo=bar");
+    test(obj->getProperty("PropertyWithHash") == "foo#bar");
+    test(obj->getProperty("PropertyWithTab") == "foo\tbar");
+    test(obj->getProperty("PropertyWithEscapeSpace") == "foo\\ ");
+    test(obj->getProperty("PropertyWithProperty") == "Plugin.EntryPoint=foo:bar --Ice.Config=\\\\\\server\\foo bar\\file.cfg");
     cout << "ok" << endl;
 
     cout << "testing service configuration... " << flush;
@@ -553,6 +563,15 @@ allTests(const Ice::CommunicatorPtr& comm)
     test(obj->getProperty("TestService1Identity") == "IceBox1-Service1");
     test(obj->getProperty("LogFilePath") == "test-Service1.log");
     test(obj->getProperty("LogFilePath-Service1") == "test.log");
+    test(obj->getProperty("PropertyWithSpaces") == "   test   ");
+    // \ is escaped in C++ string literals
+    test(obj->getProperty("WindowsPath") == "C:\\Program Files (x86)\\ZeroC\\");
+    test(obj->getProperty("UNCPath") == "\\\\server\\foo bar\\file");
+    test(obj->getProperty("PropertyWith=") == "foo=bar");
+    test(obj->getProperty("PropertyWithHash") == "foo#bar");
+    test(obj->getProperty("PropertyWithTab") == "foo\tbar");
+    test(obj->getProperty("PropertyWithEscapeSpace") == "foo\\ ");
+    test(obj->getProperty("PropertyWithProperty") == "Plugin.EntryPoint=foo:bar --Ice.Config=\\\\\\server\\foo bar\\file.cfg");
 
     obj = TestIntfPrx::checkedCast(comm->stringToProxy("IceBox2-Service2@IceBox2Service2Adapter"));
     test(obj->getProperty("Service2.Type") == "freeze");
@@ -707,6 +726,8 @@ allTests(const Ice::CommunicatorPtr& comm)
     ServerDescriptorPtr server = ServerDescriptorPtr::dynamicCast(templ.descriptor);
     server->id = "test";
     server->exe = "${test.dir}/server";
+    server->applicationDistrib = false;
+    server->allocatable = false;
     ApplicationDescriptor desc;
     desc.name = "App";
     desc.serverTemplates["ServerTemplate"] = templ;

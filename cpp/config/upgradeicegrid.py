@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -10,20 +10,20 @@
 
 #
 # This script upgrades the IceGrid registry database environment for
-# 3.0.x version of IceGrid to the new format.
+# 3.1.x or 3.2.x version of IceGrid to the new format (>= 3.3).
 #
 # Usage:
 #
 # python upgradeicegrid.py olddbenv newdbenv
 #
-# Where:
+# Where for example:
 #
 # olddbenv is the path of the Ice 3.1.x registry database environment
-# newdbenv is the path of the Ice 3.2 registry database environment
+# newdbenv is the path of new registry database environment
 #
 #
-# NOTE: the 3.1 slice definitions for the IceGrid database are stored
-# in the icegrid-slice.3.1.tar.gz file. These definitions are used by
+# NOTE: the 3.x slice definitions for the IceGrid database are stored
+# in the icegrid-slice.3.x.tar.gz file. These definitions are used by
 # the script to perform the database transformation.
 #
 
@@ -34,14 +34,26 @@ newdbenv = None
 bindir = None
 slicedir = None
 
+transformdbExe = "transformdb"
+dumpdbExe = "dumpdb"
+
+win32 = (sys.platform == "win32")
+if win32:
+    transformdbExe += ".exe"
+    dumpdbExe += ".exe"
 #
 # Show usage information.
 #
 def usage():
     print "Usage: " + sys.argv[0] + " [options] olddbenv newdbenv"
     print
+    print "This script upgrades a 3.1 or 3.2 IceGrid registry database environment"
+    print "to an IceGrid registry 3.3 (or newer) database environment."
+    print
     print "Options:"
-    print "-h    Show this message."
+    print "-h                      Show this message."
+    print "--server-version VER    Specifies an alternate Ice version for your"
+    print "                        IceGrid servers."
     sys.exit(2)
 
 def printOutputFromPipe(pipe):
@@ -72,7 +84,7 @@ def transformdb(olddbenv, newdbenv, db, desc, oldslice, newslice):
     tmpfile.write(desc)
     tmpfile.close()
 
-    transformdb = os.path.join(bindir, "transformdb") + " -i" + \
+    transformdb = os.path.join(bindir, transformdbExe) + " -i" + \
                   " --old " + os.path.join(newdbenv, oldslice) + \
                   " --new " + os.path.join(newdbenv, newslice)
 
@@ -133,7 +145,7 @@ def upgrade32(olddbenv, newdbenv, iceServerVersion):
               '<record/></database>' + \
               '<database name="objects" key="::Ice::Identity" value="::IceGrid::ObjectInfo"><record/></database>'
 
-    if not iceServerVersion.startswith("3.3"):
+    if iceServerVersion and not iceServerVersion.startswith("3.3") and not iceServerVersion.startswith("3.4"):
         desc = \
              '<transformdb>' + \
              databases + \
@@ -165,7 +177,7 @@ def upgrade32(olddbenv, newdbenv, iceServerVersion):
 def getIceGridEnvVersion(dbenv):
     global bindir
 
-    pipe = os.popen(os.path.join(bindir, "dumpdb") + " -c " + dbenv + " 2>&1")
+    pipe = os.popen(os.path.join(bindir, dumpdbExe) + " -c " + dbenv + " 2>&1")
     ver = None
     for line in pipe.readlines():
         if line.find("value type = ::IceGrid::ApplicationDescriptor") > 0:
@@ -195,6 +207,7 @@ if not args or len(args) != 2:
 olddbenv = args[0]
 newdbenv = args[1]
 
+serverVersion = None
 for o, a in opts:
     if o in ("-h", "--help"):
         usage()
@@ -214,10 +227,29 @@ elif os.path.exists(os.path.join(newdbenv, "applications")) or \
 
 for bindir in [os.path.join(os.path.dirname(__file__), "..", "bin"), "/usr/bin"]:
     bindir = os.path.normpath(bindir)
-    if os.path.exists(os.path.join(bindir, "transformdb")):
+    if os.path.exists(os.path.join(bindir, transformdbExe)):
         break
+
 else:
-    error("can't locate the `transformdb' executable")
+    #
+    # Check if transformdb and dumpdb are present in path
+    #
+    print "Check " + transformdbExe + " -v"
+    if(os.system(transformdbExe + " -v") != 0):
+        print "...error"
+        error("can't locate the `" + transformdbExe + "' executable")
+    
+    print "Check " + dumpdbExe + " -v "
+    if(os.system(dumpdbExe + " -v") != 0):
+        print "...error"
+        error("can't locate the `" + dumpdbExe + "' executable")
+
+    #
+    # Use transformdb and dumpdb from system path
+    #
+    print "Using transformdb and dumpdb from system path"
+    bindir = ""
+
 
 dbEnvVersion = getIceGridEnvVersion(olddbenv)
 if dbEnvVersion == "3.1":
@@ -234,4 +266,4 @@ elif dbEnvVersion == "3.2":
     upgrade32(olddbenv, newdbenv, serverVersion)
     print "ok"
 else:
-    error("can't figure out the version of the IceGrid database environment " + olddbenv)
+    error("can't figure out the version of the IceGrid database environment `" + olddbenv + "'")

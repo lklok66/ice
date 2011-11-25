@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -15,19 +15,19 @@ namespace IceSSL
     using System.Net;
     using System.Net.Sockets;
 
-    sealed class ConnectorI : IceInternal.Connector, IComparable
+    sealed class ConnectorI : IceInternal.Connector
     {
         internal const short TYPE = 2;
 
         public IceInternal.Transceiver connect()
         {
             //
-            // The plugin may not be fully initialized.
+            // The plug-in may not be fully initialized.
             //
             if(!_instance.initialized())
             {
                 Ice.PluginInitializationException ex = new Ice.PluginInitializationException();
-                ex.reason = "IceSSL: plugin is not initialized";
+                ex.reason = "IceSSL: plug-in is not initialized";
                 throw ex;
             }
 
@@ -55,7 +55,7 @@ namespace IceSSL
                 //
                 // Nonblocking connect is handled by the transceiver.
                 //
-                return new TransceiverI(_instance, fd, _addr, false, _host, null);
+                return new TransceiverI(_instance, fd, _addr, _host, false, null);
             }
             catch(Ice.LocalException ex)
             {
@@ -73,56 +73,13 @@ namespace IceSSL
             return TYPE;
         }
 
-        public int CompareTo(object obj)
-        {
-            ConnectorI p = null;
-
-            try
-            {
-                p = (ConnectorI)obj;
-            }
-            catch(System.InvalidCastException)
-            {
-                try
-                {
-                    IceInternal.Connector e = (IceInternal.Connector)obj;
-                    return type() < e.type() ? -1 : 1;
-                }
-                catch(System.InvalidCastException)
-                {
-                    Debug.Assert(false);
-                }
-            }
-
-            if(this == p)
-            {
-                return 0;
-            }
-
-            if(_timeout < p._timeout)
-            {
-                return -1;
-            }
-            else if(p._timeout < _timeout)
-            {
-                return 1;
-            }
-
-            if(!_connectionId.Equals(p._connectionId))
-            {
-                return _connectionId.CompareTo(p._connectionId);
-            }
-
-            return IceInternal.Network.compareAddress(_addr, p._addr);
-        }
-
         //
         // Only for use by EndpointI.
         //
-        internal ConnectorI(Instance instance, IPEndPoint addr, int timeout, string connectionId)
+        internal ConnectorI(Instance instance, string host, IPEndPoint addr, int timeout, string connectionId)
         {
             _instance = instance;
-            _host = addr.Address.ToString();
+            _host = host;
             _logger = instance.communicator().getLogger();
             _addr = addr;
             _timeout = timeout;
@@ -135,7 +92,33 @@ namespace IceSSL
 
         public override bool Equals(object obj)
         {
-            return CompareTo(obj) == 0;
+            ConnectorI p = null;
+
+            try
+            {
+                p = (ConnectorI)obj;
+            }
+            catch(System.InvalidCastException)
+            {
+                return false;
+            }
+
+            if(this == p)
+            {
+                return true;
+            }
+
+            if(_timeout != p._timeout)
+            {
+                return false;
+            }
+
+            if(!_connectionId.Equals(p._connectionId))
+            {
+                return false;
+            }
+
+            return IceInternal.Network.compareAddress(_addr, p._addr) == 0;
         }
 
         public override string ToString()
@@ -149,8 +132,8 @@ namespace IceSSL
         }
 
         private Instance _instance;
-        private string _host;
         private Ice.Logger _logger;
+        private string _host;
         private IPEndPoint _addr;
         private int _timeout;
         private string _connectionId;

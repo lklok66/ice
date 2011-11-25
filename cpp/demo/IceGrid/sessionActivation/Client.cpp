@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -130,7 +130,7 @@ HelloClient::run(int argc, char* argv[])
         password = trim(password);
 
         try
-        {
+        {  
             session = registry->createSession(id, password);
             break;
         }

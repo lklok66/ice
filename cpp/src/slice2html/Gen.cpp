@@ -1,15 +1,20 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+#    define _CRT_SECURE_NO_DEPRECATE 1  // C4996 '<C function>' was declared deprecated
+#endif
+
 #include <IceUtil/DisableWarnings.h>
 #include <IceUtil/Functional.h>
-#include <Slice/SignalHandler.h>
+#include <IceUtil/StringUtil.h>
+#include <Slice/FileTracker.h>
 #include <Gen.h>
 
 #include <sys/types.h>
@@ -21,28 +26,14 @@
 #include <unistd.h>
 #endif
 
-#ifdef __BCPLUSPLUS__
-#  include <iterator>
-#endif
+#include <iterator>
+
+#include <string.h>
 
 using namespace std;
 using namespace Slice;
 using namespace IceUtil;
 using namespace IceUtilInternal;
-
-//
-// Callback for Crtl-C signal handling
-//
-static GeneratorBase* _genBase = 0;
-
-static void closeCallback()
-{
-    if(_genBase != 0)
-    {
-        _genBase->closeStream();
-    }
-}
-
 
 namespace Slice
 {
@@ -52,8 +43,6 @@ generate(const UnitPtr& unit, const string& dir, const string& header, const str
          const string& indexHeader, const string& indexFooter, const string& imageDir, const string& logoURL,
          const string& searchAction, unsigned indexCount, unsigned warnSummary)
 {
-    SignalHandler::setCallback(closeCallback);
-
     unit->mergeModules();
 
     //
@@ -212,12 +201,10 @@ Slice::GeneratorBase::setSymbols(const ContainedList& symbols)
 Slice::GeneratorBase::GeneratorBase(XMLOutput& o, const Files& files)
     : _out(o), _files(files)
 {
-    _genBase = this;
 }
 
 Slice::GeneratorBase::~GeneratorBase()
 {
-    _genBase = 0;
 }
 
 //
@@ -250,7 +237,6 @@ Slice::GeneratorBase::openDoc(const string& file, const string& title, const str
     {
         _out << h2;
     }
-    _indexFooter = getFooter(footer);
     _out.inc();
     _out.inc();
 }
@@ -291,11 +277,11 @@ Slice::GeneratorBase::openDoc(const ContainedPtr& c)
 // Close an open HTML file after writing the footer.
 //
 void
-Slice::GeneratorBase::closeDoc()
+Slice::GeneratorBase::closeDoc(const string& footer)
 {
     _out.dec();
     _out.dec();
-    _out << nl << (!_indexFooter.empty() ? _indexFooter : _footer);
+    _out << nl << (!footer.empty() ? footer : _footer);
     _out << nl;
 }
 
@@ -413,7 +399,7 @@ Slice::GeneratorBase::printComment(const ContainedPtr& p, const ContainerPtr& co
             }
             
             start("dt", "Symbol");
-            _out << toString(term, container, false, forIndex);
+            _out << toString(toSliceID(term, container->definitionContext()->filename()), container, false, forIndex);
             end();
             start("dd");
             _out << nl << item;
@@ -544,7 +530,7 @@ Slice::GeneratorBase::printComment(const ContainedPtr& p, const ContainerPtr& co
         for(StringList::const_iterator q = see.begin(); q != see.end(); ++q)
         {
             start("dt", "Symbol");
-            _out << toString(*q, container, false, forIndex);
+            _out << toString(toSliceID(*q, container->definitionContext()->filename()), container, false, forIndex);
             end();
         }
         end();
@@ -575,7 +561,7 @@ Slice::GeneratorBase::printMetaData(const ContainedPtr& p)
 }
 
 void
-Slice::GeneratorBase::printSummary(const ContainedPtr& p, const ContainerPtr& module, bool deprecated)
+Slice::GeneratorBase::printSummary(const ContainedPtr& p, const ContainerPtr& module, bool deprecated, bool forIndex)
 {
     ContainerPtr container = ContainerPtr::dynamicCast(p);
     if(!container)
@@ -588,7 +574,7 @@ Slice::GeneratorBase::printSummary(const ContainedPtr& p, const ContainerPtr& mo
         container = module;
     }
 
-    string summary = getComment(p, container, true, module);
+    string summary = getComment(p, container, true, forIndex);
     _out << nl << summary;
 
     if(deprecated)
@@ -738,23 +724,24 @@ Slice::GeneratorBase::printHeaderFooter(const ContainedPtr& c)
         }
         path += imageDir + "/";
 
-        prevImage = "<img class=\"" + prevClass + "\" src=\"" + path + prevImage + "\" alt=\"Previous\"/>";
-        nextImage = "<img class=\"" + nextClass + "\" src=\"" + path + nextImage + "\" alt=\"Next\"/>";
-        upImage = "<img class=\"" + upClass + "\" src=\"" + path + upImage + "\" alt=\"Up\"/>";
-        homeImage = "<img class=\"Button\" src=\"" + path + homeImage + "\" alt=\"Home\"/>";
-        indexImage = "<img class=\"Button\" src=\"" + path + indexImage + "\" alt=\"Index\"/>";
+        prevImage = "<img class=\"" + prevClass + "\" src=\"" + path + prevImage + "\" alt=\"Previous\">";
+        nextImage = "<img class=\"" + nextClass + "\" src=\"" + path + nextImage + "\" alt=\"Next\">";
+        upImage = "<img class=\"" + upClass + "\" src=\"" + path + upImage + "\" alt=\"Up\">";
+        homeImage = "<img class=\"Button\" src=\"" + path + homeImage + "\" alt=\"Home\">";
+        indexImage = "<img class=\"Button\" src=\"" + path + indexImage + "\" alt=\"Index\">";
     }
 
     _out << nl << "<!-- SwishCommand noindex -->";
 
-    start("div", "HeaderFooter");
-
-    start("table", "ButtonTable");
+    start("table", "HeaderFooter");
     start("tr");
+    start("td align=\"left\"");
 
+    start("table");
+    start("tr");
     start("td");
     _out << "<a href=\"" << homeLink << "\">" << homeImage << "</a>";
-    end();
+    end(); // td
 
     if(!imageDir.empty() || !isFirst)
     {
@@ -805,16 +792,22 @@ Slice::GeneratorBase::printHeaderFooter(const ContainedPtr& c)
     _out << "<a href=\"" << indexLink << "\">" << indexImage << "</a>";
     end();
 
-    end();
-    end();
+    end(); // tr
+    end(); // table
+    end(); // td
 
+    start("td align=\"center\"");
     printSearch();
-
-    printLogo(c, container, onEnumPage);
-
-    _out << nl << "<!-- SwishCommand index -->";
-
     end();
+
+    start("td align=\"right\"");
+    printLogo(c, container, onEnumPage);
+    end();
+
+    end(); // tr
+    end(); // table
+
+    _out << nl << "<!-- SwishCommand index -->" << nl;
 }
 
 void
@@ -822,9 +815,7 @@ Slice::GeneratorBase::printSearch()
 {
     if(!_searchAction.empty())
     {
-        _out << nl << "<div style=\"text-align: center;\">";
-        _out.inc();
-        start("table", "SearchTable");
+        start("table");
         start("tr");
         start("td");
         _out << nl << "<form method=\"get\" action=\"" << _searchAction << "\""
@@ -833,14 +824,12 @@ Slice::GeneratorBase::printSearch()
         start("div");
         _out << nl << "<input maxlength=\"100\" value=\"\" type=\"text\" name=\"query\">";
         _out << nl << "<input type=\"submit\" value=\"Search\" name=\"submit\">";
-        end();
         _out.dec();
+        end();
         _out << nl << "</form>";
-        end();
-        end();
-        end();
-        _out.dec();
-        _out << nl << "</div>";
+        end(); // td
+        end(); // tr
+        end(); // table
     }
 }
 
@@ -863,7 +852,7 @@ Slice::GeneratorBase::printLogo(const ContainedPtr& c, const ContainerPtr& conta
         {
             _out << "<a href=\"" + _logoURL + "\">";
         }
-        _out << "<img class=\"Logo\" src=\"" + path + "\" alt=\"Logo\"/>";
+        _out << "<img class=\"Logo\" src=\"" + path + "\" alt=\"Logo\">";
         if(!_logoURL.empty())
         {
             _out << "</a>";
@@ -1062,15 +1051,14 @@ string
 Slice::GeneratorBase::toString(const string& str, const ContainerPtr& container, bool asTarget, bool forIndex,
                                size_t* summarySize)
 {
-    string s = str;
 
-    TypeList types = container->lookupType(s, false);
+    TypeList types = container->lookupType(str, false);
     if(!types.empty())
     {
         return toString(types.front(), container, asTarget, forIndex, summarySize);
     }
 
-    ContainedList contList = container->lookupContained(s, false);
+    ContainedList contList = container->lookupContained(str, false);
     if(!contList.empty())
     {
         return toString(contList.front(), container, asTarget, forIndex, summarySize);
@@ -1080,7 +1068,7 @@ Slice::GeneratorBase::toString(const string& str, const ContainerPtr& container,
     // If we can't find the string, printing it in typewriter
     // font is the best we can do.
     //
-    return "<tt>" + s + "</tt>";
+    return "<tt>" + str + "</tt>";
 }
 
 string
@@ -1092,6 +1080,9 @@ Slice::GeneratorBase::getComment(const ContainedPtr& contained, const ContainerP
     string comment;
     for(unsigned int i = 0; i < s.size(); ++i)
     {
+        //
+        // TODO: Remove old-style link processing once we no longer support the [ident] syntax for links.
+        //
         if(s[i] == '\\' && i + 1 < s.size() && s[i + 1] == '[')
         {
             comment += '[';
@@ -1113,8 +1104,40 @@ Slice::GeneratorBase::getComment(const ContainedPtr& contained, const ContainerP
             size_t sz = 0;
             comment += toString(literal, container, false, forIndex, summary ? &sz : 0);
             summarySize += sz;
+
+            //
+            // TODO: Remove this warning once we no longer support the old javadoc syntax.
+            //
+            string fileName = contained->file();
+            if(_warnOldCommentFiles.find(fileName) == _warnOldCommentFiles.end())
+            {
+                _warnOldCommentFiles.insert(fileName);
+                cerr << fileName << ": warning: file contains old-style javadoc link syntax: `[" << literal << "]'"
+                     << endl;
+            }
         }
-        else if(summary && s[i] == '.' && (i + 1 >= s.size() || isspace(s[i + 1])))
+        else if(s[i] == '{')
+        {
+            static const string atLink = "{@link";
+            string::size_type pos = s.find(atLink, i);
+            if(pos != i)
+            {
+                comment += '{';
+                ++summarySize;
+                continue;
+            }
+            string::size_type endpos = s.find('}', pos);
+            if(endpos == string::npos)
+            {
+                continue;
+            }
+            string literal = s.substr(pos + atLink.size(), endpos - pos - atLink.size());
+            size_t sz = 0;
+            comment += toString(toSliceID(literal, contained->file()), container, false, forIndex, summary ? &sz : 0);
+            summarySize += sz;
+            i = static_cast<unsigned int>(endpos);
+        }
+        else if(summary && s[i] == '.' && (i + 1 >= s.size() || isspace(static_cast<unsigned char>(s[i + 1]))))
         {
             comment += '.';
             ++summarySize;
@@ -1129,8 +1152,8 @@ Slice::GeneratorBase::getComment(const ContainedPtr& contained, const ContainerP
 
     if(summary && _warnSummary && summarySize > _warnSummary)
     {
-        cerr << contained->definitionContext()->filename() << ": summary size (" << summarySize << ") exceeds "
-            << _warnSummary << " characters: `" << comment << "'" << endl;
+        cerr << contained->file() << ": warning: summary size (" << summarySize << ") exceeds " << _warnSummary
+             << " characters: `" << comment << "'" << endl;
     }
 
     return comment;
@@ -1258,14 +1281,14 @@ Slice::GeneratorBase::getLogoURL()
 void
 Slice::GeneratorBase::openStream(const string& path)
 {
-    SignalHandler::addFile(path);
-
     _out.open(path.c_str());
     if(!_out.isOpen())
     {
-        string err = "cannot open `" + path + "' for writing";
-        throw err;
+        ostringstream os;
+        os << "cannot open file `" << path << "': " << strerror(errno);
+        throw FileException(__FILE__, __LINE__, os.str());
     }
+    FileTracker::instance()->addFile(path);
 }
 
 void
@@ -1433,6 +1456,106 @@ Slice::GeneratorBase::getContainer(const SyntaxTreeBasePtr& p)
     return result;
 }
 
+//
+// TODO: remove warnOldStyleIdent() function once we no longer support
+// old-style javadoc comments ([...] instead of {@link ...} and
+// X::Y::Z instead of X.Y#Z).
+//
+//
+void
+Slice::GeneratorBase::warnOldStyleIdent(const string& str, const string& fileName)
+{
+    string newName;
+
+    string::size_type next = 0;
+    if(str.size() > 2 && str[0] == ':' && str[1] == ':')
+    {
+        next = 2;
+    }
+
+    int numIdents = 0;
+    string::size_type endpos;
+    while((endpos = str.find("::", next)) != string::npos)
+    {
+        if(numIdents != 0)
+        {
+            newName += ".";
+        }
+        newName += str.substr(next, endpos - next);
+        ++numIdents;
+        next = endpos;
+        if(next != string::npos)
+        {
+            next += 2;
+        }
+    }
+
+    if(numIdents != 0)
+    {
+        newName += ".";
+    }
+    newName += str.substr(next);
+
+    if(_warnOldCommentFiles.find(fileName) == _warnOldCommentFiles.end())
+    {
+        _warnOldCommentFiles.insert(fileName);
+
+        string::size_type pos;
+        pos = newName.rfind('.');
+        string alternateName;
+        string lastName;
+        if(pos != string::npos)
+        {
+            alternateName = newName;
+            alternateName[pos] = '#';
+            lastName = newName.substr(pos + 1);
+        }
+
+        cerr << fileName << ": warning: file contains old-style javadoc identifier syntax: `" << str << "'."
+             << " Use `'" << newName << "'";
+        if(!alternateName.empty())
+        {
+             cerr << " or `" << alternateName << "' if `" << lastName << "' is a member";
+        }
+        cerr << endl;
+    }
+}
+
+//
+// Convert a string of the form X.Y#Z into X::Y::Z (#Z converts to Z).
+// TODO: Remove the filename parameter once we no longer support old-style javadoc comments.
+//
+string
+Slice::GeneratorBase::toSliceID(const string& str, const string& filename)
+{
+    
+    const string s = IceUtilInternal::trim(str);
+    string result;
+    string::size_type pos;
+    string::size_type next = 0;
+    while((pos = s.find_first_of(".#", next)) != string::npos)
+    {
+        result += s.substr(next, pos - next);
+        if(s[pos] != '#' || pos != 0)
+        {
+            result += "::";
+        }
+        next = ++pos;
+    }
+    result += s.substr(next);
+
+    //
+    // TODO: Remove the warning once we no longer support the old-style
+    // javadoc syntax.
+    //
+    if(str.find("::") != string::npos)
+    {
+        warnOldStyleIdent(s, filename);
+    }
+
+    return result;
+}
+
 StringList
 Slice::GeneratorBase::toStringList(const ContainedPtr& c)
 {
@@ -1466,18 +1589,28 @@ Slice::GeneratorBase::makeDir(const string& dir)
     int rc = stat(dir.c_str(), &st);
     if(rc == 0)
     {
+        if(!(st.st_mode & S_IFDIR))
+        {
+            ostringstream os;
+            os << "failed to create package directory `" << dir
+               << "': file already exists and is not a directory";
+            throw FileException(__FILE__, __LINE__, os.str());
+        }
         return;
     }
+
 #ifdef _WIN32
-    rc = mkdir(dir.c_str());
+    rc = _mkdir(dir.c_str());
 #else
     rc = mkdir(dir.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
 #endif
     if(rc != 0)
     {
-        string err = "cannot create directory `" + dir + "'";
-        throw err;
+        ostringstream os;
+        os << "cannot create directory `" << dir << "': " << strerror(errno);
+        throw FileException(__FILE__, __LINE__, os.str());
     }
+    FileTracker::instance()->addDirectory(dir);
 }
 
 string
@@ -1486,8 +1619,9 @@ Slice::GeneratorBase::readFile(const string& file)
     ifstream in(file.c_str());
     if(!in)
     {
-        string err = "cannot open `" + file + "' for reading";
-        throw err;
+        ostringstream os;
+        os << "cannot open file `" << file << "': " << strerror(errno);
+        throw FileException(__FILE__, __LINE__, os.str());
     }
 
     ostringstream result;
@@ -1559,8 +1693,9 @@ Slice::GeneratorBase::readFile(const string& file, string& part1, string& part2)
     ifstream in(file.c_str());
     if(!in)
     {
-        string err = "cannot open `" + file + "' for reading";
-        throw err;
+        ostringstream os;
+        os << "cannot open file `" << file << "': " << strerror(errno);
+        throw FileException(__FILE__, __LINE__, os.str());
     }
 
     string line;
@@ -1646,9 +1781,10 @@ Slice::StartPageGenerator::generate(const ModulePtr& m)
 void
 Slice::StartPageGenerator::printHeaderFooter()
 {
-    start("div", "HeaderFooter");
-
-    start("table", "ButtonTable");
+    start("table", "HeaderFooter");
+    start("tr");
+    start("td align=\"left\"");
+    start("table");
     start("tr");
     start("td");
     string imageDir = getImageDir();
@@ -1659,17 +1795,21 @@ Slice::StartPageGenerator::printHeaderFooter()
     else
     {
         string src = imageDir + "/index.gif";
-        _out << "<a href=\"_sindex.html\"><img class=\"Button\" src=\"" + src + "\" alt=\"Index Button\"/></a>";
+        _out << "<a href=\"_sindex.html\"><img class=\"Button\" src=\"" + src + "\" alt=\"Index Button\"></a>";
     }
-    end();
-    end();
-    end();
+    end(); // td
+    end(); // tr
+    end(); // table
+    end(); // td
 
+    start("td align=\"center\"");
     printSearch();
+    end(); // td
 
     if(!imageDir.empty())
     {
-        start("table", "LogoTable");
+	start("td align=\"right\"");
+        start("table");
         start("tr");
         start("td");
         string logoURL = getLogoURL();
@@ -1677,17 +1817,19 @@ Slice::StartPageGenerator::printHeaderFooter()
         {
             _out << "<a href=\"" + logoURL + "\">";
         }
-        _out << "<img class=\"Logo\" src=\"" + imageDir + "/logo.gif\" alt=\"Logo\"/>";
+        _out << "<img class=\"Logo\" src=\"" + imageDir + "/logo.gif\" alt=\"Logo\">";
         if(!logoURL.empty())
         {
             _out << "</a>";
         }
-        end();
-        end();
-        end();
+        end(); // td
+        end(); // tr
+        end(); // table
+	end(); // td
     }
 
-    end();
+    end(); // tr
+    end(); // table
 }
 
 Slice::FileVisitor::FileVisitor(Files& files)
@@ -1704,53 +1846,53 @@ Slice::FileVisitor::visitUnitStart(const UnitPtr& u)
 bool
 Slice::FileVisitor::visitModuleStart(const ModulePtr& m)
 {
-    _files.insert(m->definitionContext()->filename());
+    _files.insert(m->file());
     return true;
 }
 
 bool
 Slice::FileVisitor::visitExceptionStart(const ExceptionPtr& e)
 {
-    _files.insert(e->definitionContext()->filename());
+    _files.insert(e->file());
     return false;
 }
 
 bool
 Slice::FileVisitor::visitClassDefStart(const ClassDefPtr& c)
 {
-    _files.insert(c->definitionContext()->filename());
+    _files.insert(c->file());
     return false;
 }
 
 void
 Slice::FileVisitor::visitClassDecl(const ClassDeclPtr& c)
 {
-    _files.insert(c->definitionContext()->filename());
+    _files.insert(c->file());
 }
 
 bool
 Slice::FileVisitor::visitStructStart(const StructPtr& s)
 {
-    _files.insert(s->definitionContext()->filename());
+    _files.insert(s->file());
     return false;
 }
 
 void
 Slice::FileVisitor::visitSequence(const SequencePtr& s)
 {
-    _files.insert(s->definitionContext()->filename());
+    _files.insert(s->file());
 }
 
 void
 Slice::FileVisitor::visitDictionary(const DictionaryPtr& d)
 {
-    _files.insert(d->definitionContext()->filename());
+    _files.insert(d->file());
 }
 
 void
 Slice::FileVisitor::visitEnum(const EnumPtr& e)
 {
-    _files.insert(e->definitionContext()->filename());
+    _files.insert(e->file());
 }
 
 Slice::StartPageVisitor::StartPageVisitor(const Files& files)
@@ -1774,6 +1916,7 @@ Slice::StartPageVisitor::visitModuleStart(const ModulePtr& m)
 TOCGenerator::TOCGenerator(const Files& files, const string& header, const string& footer)
     : GeneratorBase(_out, files)
 {
+    _footer = footer;
     openDoc("_sindex.html", "Slice API Index", header, footer);
 
     start("h1");
@@ -1820,7 +1963,8 @@ TOCGenerator::writeTOC()
     _symbols.sort();
     _symbols.unique();
 
-    closeDoc();
+    string f = getFooter(_footer);
+    closeDoc(getFooter(_footer));
 }
 
 const ContainedList&
@@ -2031,7 +2175,7 @@ Slice::ModuleGenerator::visitContainer(const ContainerPtr& p)
             end();
             start("dd");
             string metadata;
-            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata));
+            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata), true);
             end();
         }
         end();
@@ -2060,7 +2204,7 @@ Slice::ModuleGenerator::visitContainer(const ContainerPtr& p)
             end();
             start("dd");
             string metadata;
-            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata));
+            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata), true);
             end();
         }
         end();
@@ -2081,7 +2225,7 @@ Slice::ModuleGenerator::visitContainer(const ContainerPtr& p)
             end();
             start("dd");
             string metadata;
-            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata));
+            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata), true);
             end();
         }
         end();
@@ -2104,7 +2248,7 @@ Slice::ModuleGenerator::visitContainer(const ContainerPtr& p)
             end();
             start("dd");
             string metadata;
-            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata));
+            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata), true);
             end();
         }
         end();
@@ -2127,7 +2271,7 @@ Slice::ModuleGenerator::visitContainer(const ContainerPtr& p)
             end();
             start("dd");
             string metadata;
-            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata));
+            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata), true);
             end();
         }
         end();
@@ -2150,7 +2294,7 @@ Slice::ModuleGenerator::visitContainer(const ContainerPtr& p)
             end();
             start("dd");
             string metadata;
-            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata));
+            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata), true);
             end();
         }
         end();
@@ -2173,7 +2317,7 @@ Slice::ModuleGenerator::visitContainer(const ContainerPtr& p)
             end();
             start("dd");
             string metadata;
-            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata));
+            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata), true);
             end();
         }
         end();
@@ -2196,7 +2340,7 @@ Slice::ModuleGenerator::visitContainer(const ContainerPtr& p)
             end();
             start("dd");
             string metadata;
-            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata));
+            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata), true);
             end();
         }
         end();
@@ -2219,7 +2363,7 @@ Slice::ModuleGenerator::visitContainer(const ContainerPtr& p)
             end();
             start("dd");
             string metadata;
-            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata));
+            printSummary(*q, p, (*q)->findMetaData("deprecate", metadata), true);
             end();
         }
         end();
@@ -2416,7 +2560,7 @@ Slice::ExceptionGenerator::generate(const ExceptionPtr& e)
             end();
             start("dd");
             string metadata;
-            printSummary(*q, e, (*q)->findMetaData("deprecate", metadata));
+            printSummary(*q, e, (*q)->findMetaData("deprecate", metadata), false);
             end();
         }
         end();
@@ -2546,7 +2690,7 @@ Slice::ClassGenerator::generate(const ClassDefPtr& c)
             end();
             start("dd");
             string metadata;
-            printSummary(*q, c, (*q)->findMetaData("deprecate", metadata));
+            printSummary(*q, c, (*q)->findMetaData("deprecate", metadata), false);
             end();
         }
         end();
@@ -2567,7 +2711,7 @@ Slice::ClassGenerator::generate(const ClassDefPtr& c)
             end();
             start("dd");
             string metadata;
-            printSummary(*q, c, (*q)->findMetaData("deprecate", metadata));
+            printSummary(*q, c, (*q)->findMetaData("deprecate", metadata), false);
             end();
         }
         end();
@@ -2728,7 +2872,7 @@ Slice::StructGenerator::generate(const StructPtr& s)
             end();
             start("dd");
             string metadata;
-            printSummary(*q, s, (*q)->findMetaData("deprecate", metadata));
+            printSummary(*q, s, (*q)->findMetaData("deprecate", metadata), false);
             end();
         }
         end();

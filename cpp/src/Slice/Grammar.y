@@ -2,7 +2,7 @@
 
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -76,7 +76,6 @@ slice_error(const char* s)
 %token ICE_CONST
 %token ICE_FALSE
 %token ICE_TRUE
-%token ICE_NONMUTATING
 %token ICE_IDEMPOTENT
 
 //
@@ -149,7 +148,6 @@ definitions
     {
 	contained->setMetaData(metaData->v);
     }
-    unit->setSeenDefinition();
 }
 ';' definitions
 | error ';'
@@ -228,6 +226,7 @@ module_def
 // ----------------------------------------------------------------------
 : ICE_MODULE ICE_IDENTIFIER
 {
+    unit->setSeenDefinition();
     StringTokPtr ident = StringTokPtr::dynamicCast($2);
     ContainerPtr cont = unit->currentContainer();
     ModulePtr module = cont->createModule(ident->v);
@@ -618,17 +617,42 @@ data_member
     DataMemberPtr dm;
     if(cl)
     {
-	dm = cl->createDataMember(name, type);
+	dm = cl->createDataMember(name, type, 0, "", "");
     }
     StructPtr st = StructPtr::dynamicCast(unit->currentContainer());
     if(st)
     {
-	dm = st->createDataMember(name, type);
+	dm = st->createDataMember(name, type, 0, "", "");
     }
     ExceptionPtr ex = ExceptionPtr::dynamicCast(unit->currentContainer());
     if(ex)
     {
-	dm = ex->createDataMember(name, type);
+	dm = ex->createDataMember(name, type, 0, "", "");
+    }
+    unit->currentContainer()->checkIntroduced(name, dm);
+    $$ = dm;
+}
+| type_id '=' const_initializer
+{
+    TypePtr type = TypeStringTokPtr::dynamicCast($1)->v.first;
+    string name = TypeStringTokPtr::dynamicCast($1)->v.second;
+    ConstDefTokPtr value = ConstDefTokPtr::dynamicCast($3);
+
+    ClassDefPtr cl = ClassDefPtr::dynamicCast(unit->currentContainer());
+    DataMemberPtr dm;
+    if(cl)
+    {
+	dm = cl->createDataMember(name, type, value->v.value, value->v.valueAsString, value->v.valueAsLiteral);
+    }
+    StructPtr st = StructPtr::dynamicCast(unit->currentContainer());
+    if(st)
+    {
+	dm = st->createDataMember(name, type, value->v.value, value->v.valueAsString, value->v.valueAsLiteral);
+    }
+    ExceptionPtr ex = ExceptionPtr::dynamicCast(unit->currentContainer());
+    if(ex)
+    {
+	dm = ex->createDataMember(name, type, value->v.value, value->v.valueAsString, value->v.valueAsLiteral);
     }
     unit->currentContainer()->checkIntroduced(name, dm);
     $$ = dm;
@@ -640,17 +664,17 @@ data_member
     ClassDefPtr cl = ClassDefPtr::dynamicCast(unit->currentContainer());
     if(cl)
     {
-	$$ = cl->createDataMember(name, type); // Dummy
+	$$ = cl->createDataMember(name, type, 0, "", ""); // Dummy
     }
     StructPtr st = StructPtr::dynamicCast(unit->currentContainer());
     if(st)
     {
-	$$ = st->createDataMember(name, type); // Dummy
+	$$ = st->createDataMember(name, type, 0, "", ""); // Dummy
     }
     ExceptionPtr ex = ExceptionPtr::dynamicCast(unit->currentContainer());
     if(ex)
     {
-	$$ = ex->createDataMember(name, type); // Dummy
+	$$ = ex->createDataMember(name, type, 0, "", ""); // Dummy
     }
     assert($$);
     unit->error("keyword `" + name + "' cannot be used as data member name");
@@ -661,17 +685,17 @@ data_member
     ClassDefPtr cl = ClassDefPtr::dynamicCast(unit->currentContainer());
     if(cl)
     {
-        $$ = cl->createDataMember(IceUtil::generateUUID(), type); // Dummy
+        $$ = cl->createDataMember(IceUtil::generateUUID(), type, 0, "", ""); // Dummy
     }
     StructPtr st = StructPtr::dynamicCast(unit->currentContainer());
     if(st)
     {
-	$$ = st->createDataMember(IceUtil::generateUUID(), type); // Dummy
+	$$ = st->createDataMember(IceUtil::generateUUID(), type, 0, "", ""); // Dummy
     }
     ExceptionPtr ex = ExceptionPtr::dynamicCast(unit->currentContainer());
     if(ex)
     {
-	$$ = ex->createDataMember(IceUtil::generateUUID(), type); // Dummy
+	$$ = ex->createDataMember(IceUtil::generateUUID(), type, 0, "", ""); // Dummy
     }
     assert($$);
     unit->error("missing data member name");
@@ -703,47 +727,6 @@ operation_preamble
 	{
 	    cl->checkIntroduced(name, op);
 	    unit->pushContainer(op);
-	    $$ = op;
-	}
-	else
-	{
-	    $$ = 0;
-	}
-    }
-    else
-    {
-        $$ = 0;
-    }
-}
-| ICE_NONMUTATING return_type ICE_IDENT_OP
-{
-    TypePtr returnType = TypePtr::dynamicCast($2);
-    string name = StringTokPtr::dynamicCast($3)->v;
-    ClassDefPtr cl = ClassDefPtr::dynamicCast(unit->currentContainer());
-    if(cl)
-    {
-	OperationPtr op = cl->createOperation(name, returnType, Operation::Nonmutating);
-	if(op)
-	{
-	    cl->checkIntroduced(name, op);
-	    unit->pushContainer(op);
-	    static bool firstWarning = true;  
-	    
-	    string msg = "the keyword 'nonmutating' is deprecated";
-	    if(firstWarning)
-	    {
-		msg += ";\n";
-		msg += "You should use instead 'idempotent' plus:\n";
-		msg += " - Freeze metadata ([\"freeze:read\"], [\"freeze:write\"]) if you implement your objects with a Freeze evictor\n";
-		msg += " - [\"nonmutating\"], if you need to maintain compatibility with operations that expect ";
-		msg += "'Nonmutating' as operation-mode. With this metadata, the generated code sends ";
-		msg += "'Nonmutating' instead of 'Idempotent'\n";
-		msg += " - [\"cpp:const\"], to get a const member function on the generated C++ servant base class";
-
-		firstWarning = false;
-	    }
-	    
-	    unit->warning(msg); 
 	    $$ = op;
 	}
 	else
@@ -802,30 +785,6 @@ operation_preamble
     else
     {
         $$ = 0;
-    }
-}
-| ICE_NONMUTATING return_type ICE_KEYWORD_OP
-{
-    TypePtr returnType = TypePtr::dynamicCast($2);
-    string name = StringTokPtr::dynamicCast($3)->v;
-    ClassDefPtr cl = ClassDefPtr::dynamicCast(unit->currentContainer());
-    if(cl)
-    {
-	OperationPtr op = cl->createOperation(name, returnType, Operation::Nonmutating);
-	if(op)
-	{
-	    unit->pushContainer(op);
-	    unit->error("keyword `" + name + "' cannot be used as operation name");
-	    $$ = op; // Dummy
-	}
-	else
-	{
-	    $$ = 0;
-	}
-    }
-    else
-    {
-    	$$ = 0;
     }
 }
 | ICE_IDEMPOTENT return_type ICE_KEYWORD_OP
@@ -1617,14 +1576,30 @@ const_initializer
     if(cl.empty())
     {
         def->v.type = TypePtr(0);
-        def->v.value = TypePtr(0);
+        def->v.value = SyntaxTreeBasePtr(0);
         def->v.valueAsString = scoped->v;
         def->v.valueAsLiteral = scoped->v;
     }
     else
     {
 	EnumeratorPtr enumerator = EnumeratorPtr::dynamicCast(cl.front());
-	if(!enumerator)
+        ConstPtr constant = ConstPtr::dynamicCast(cl.front());
+	if(enumerator)
+        {
+            unit->currentContainer()->checkIntroduced(scoped->v, enumerator);
+            def->v.type = enumerator->type();
+            def->v.value = enumerator;
+            def->v.valueAsString = scoped->v;
+            def->v.valueAsLiteral = scoped->v;
+        }
+        else if(constant)
+        {
+            unit->currentContainer()->checkIntroduced(scoped->v, constant);
+            def->v.value = constant;
+            def->v.valueAsString = constant->value();
+            def->v.valueAsLiteral = constant->value();
+        }
+        else
 	{
 	    string msg = "illegal initializer: `" + scoped->v + "' is a";
 	    static const string vowels = "aeiou";
@@ -1636,11 +1611,6 @@ const_initializer
 	    msg += " " + kindOf;
 	    unit->error(msg); // $$ is dummy
 	}
-	unit->currentContainer()->checkIntroduced(scoped->v, enumerator);
-        def->v.type = enumerator->type();
-        def->v.value = enumerator;
-        def->v.valueAsString = scoped->v;
-        def->v.valueAsLiteral = scoped->v;
     }
     $$ = def;
 }
@@ -1662,7 +1632,7 @@ const_initializer
     ConstDefTokPtr def = new ConstDefTok;
     def->v.type = type;
     def->v.value = type;
-    def->v.valueAsString = literal->v;
+    def->v.valueAsString = "false";
     def->v.valueAsLiteral = "false";
     $$ = def;
 }
@@ -1673,7 +1643,7 @@ const_initializer
     ConstDefTokPtr def = new ConstDefTok;
     def->v.type = type;
     def->v.value = type;
-    def->v.valueAsString = literal->v;
+    def->v.valueAsString = "true";
     def->v.valueAsLiteral = "true";
     $$ = def;
 }
@@ -1688,8 +1658,8 @@ const_def
     TypePtr const_type = TypePtr::dynamicCast($3);
     StringTokPtr ident = StringTokPtr::dynamicCast($4);
     ConstDefTokPtr value = ConstDefTokPtr::dynamicCast($6);
-    $$ = unit->currentContainer()->createConst(ident->v, const_type, metaData->v,
-                                               value->v.value, value->v.valueAsString, value->v.valueAsLiteral);
+    $$ = unit->currentContainer()->createConst(ident->v, const_type, metaData->v, value->v.value,
+                                               value->v.valueAsString, value->v.valueAsLiteral);
 }
 | ICE_CONST meta_data type '=' const_initializer
 {
@@ -1697,9 +1667,8 @@ const_def
     TypePtr const_type = TypePtr::dynamicCast($3);
     ConstDefTokPtr value = ConstDefTokPtr::dynamicCast($5);
     unit->error("missing constant name");
-    $$ = unit->currentContainer()->createConst(IceUtil::generateUUID(), const_type, metaData->v,
-                                               value->v.value, value->v.valueAsString,
-                                               value->v.valueAsLiteral, Dummy); // Dummy
+    $$ = unit->currentContainer()->createConst(IceUtil::generateUUID(), const_type, metaData->v, value->v.value,
+                                               value->v.valueAsString, value->v.valueAsLiteral, Dummy); // Dummy
 }
 ;
 
@@ -1785,9 +1754,6 @@ keyword
 {
 }
 | ICE_TRUE
-{
-}
-| ICE_NONMUTATING
 {
 }
 | ICE_IDEMPOTENT

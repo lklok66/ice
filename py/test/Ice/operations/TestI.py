@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -9,12 +9,32 @@
 
 import Ice, Test
 
+def test(b):
+    if not b:
+        raise RuntimeError('test assertion failed')
+
 class MyDerivedClassI(Test.MyDerivedClass):
+    def ice_isA(self, id, current=None):
+        test(current.mode == Ice.OperationMode.Nonmutating)
+        return Test.MyDerivedClass.ice_isA(self, id, current)
+
+    def ice_ping(self, current=None):
+        test(current.mode == Ice.OperationMode.Nonmutating)
+        Test.MyDerivedClass.ice_ping(self, current)
+
+    def ice_ids(self, current=None):
+        test(current.mode == Ice.OperationMode.Nonmutating)
+        return Test.MyDerivedClass.ice_ids(self, current)
+
+    def ice_id(self, current=None):
+        test(current.mode == Ice.OperationMode.Nonmutating)
+        return Test.MyDerivedClass.ice_id(self, current)
+
     def shutdown(self, current=None):
         current.adapter.getCommunicator().shutdown()
 
     def opVoid(self, current=None):
-        pass
+        test(current.mode == Ice.OperationMode.Normal)
 
     def opByte(self, p1, p2, current=None):
         return (p1, p1 ^ p2)
@@ -154,6 +174,18 @@ class MyDerivedClassI(Test.MyDerivedClass):
         r.update(p2)
         return (r, p3)
 
+    def opMyEnumStringD(self, p1, p2, current=None):
+        p3 = p1.copy()
+        r = p1.copy()
+        r.update(p2)
+        return (r, p3)
+
+    def opMyStructMyEnumD(self, p1, p2, current=None):
+        p3 = p1.copy()
+        r = p1.copy()
+        r.update(p2)
+        return (r, p3)
+
     def opIntS(self, s, current=None):
         return [-x for x in s]
 
@@ -162,6 +194,18 @@ class MyDerivedClassI(Test.MyDerivedClass):
 
     def opContext(self, current=None):
         return current.ctx
+
+    def opDoubleMarshaling(self, p1, p2, current=None):
+        d = 1278312346.0 / 13.0;
+        test(p1 == d)
+        for i in p2:
+            test(i == d)
+
+    def opIdempotent(self, current=None):
+        test(current.mode == Ice.OperationMode.Idempotent)
+
+    def opNonmutating(self, current=None):
+        test(current.mode == Ice.OperationMode.Nonmutating)
 
     def opDerived(self, current=None):
         pass

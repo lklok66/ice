@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,9 +12,10 @@
 // the C++ & Java timers and it's not clear what is the cost of
 // scheduling and cancelling timers.
 //
-
+    
 namespace IceInternal
 {
+    using System;
     using System.Diagnostics;
     using System.Threading;
     using System.Collections.Generic;
@@ -28,7 +29,8 @@ namespace IceInternal
     {
         public void destroy()
         {
-            lock(this)
+            _m.Lock();
+            try
             {
                 if(_instance == null)
                 {
@@ -36,10 +38,14 @@ namespace IceInternal
                 }
 
                 _instance = null;
-                Monitor.Pulse(this);
+                _m.Notify();
             
                 _tokens.Clear();
                 _tasks.Clear();
+            }
+            finally
+            {
+                _m.Unlock();
             }
 
             _thread.Join();
@@ -47,7 +53,8 @@ namespace IceInternal
 
         public void schedule(TimerTask task, long delay)
         {
-            lock(this)
+            _m.Lock();
+            try
             {
                 if(_instance == null)
                 {
@@ -68,14 +75,19 @@ namespace IceInternal
             
                 if(token.scheduledTime < _wakeUpTime)
                 {
-                    Monitor.Pulse(this);
+                    _m.Notify();
                 }
+            }
+            finally
+            {
+                _m.Unlock();
             }
         }
 
         public void scheduleRepeated(TimerTask task, long period)
         {
-            lock(this)
+            _m.Lock();
+            try
             {
                 if(_instance == null)
                 {
@@ -96,14 +108,19 @@ namespace IceInternal
 
                 if(token.scheduledTime < _wakeUpTime)
                 {
-                    Monitor.Pulse(this);
+                    _m.Notify();
                 }
+            }
+            finally
+            {
+                _m.Unlock();
             }
         } 
         
         public bool cancel(TimerTask task)
         {
-            lock(this)
+            _m.Lock();
+            try
             {
                 if(_instance == null)
                 {
@@ -119,24 +136,42 @@ namespace IceInternal
                 _tokens.Remove(token);
                 return true;
             }
+            finally
+            {
+                _m.Unlock();
+            }
         }
 
         //
         // Only for use by Instance.
         //
+        internal Timer(IceInternal.Instance instance, ThreadPriority priority)
+        {
+            init(instance, priority, true);
+        }
+
         internal Timer(IceInternal.Instance instance)
         {
+            init(instance, ThreadPriority.Normal, false);
+        }
+
+        internal void init(IceInternal.Instance instance, ThreadPriority priority, bool hasPriority)
+        {
             _instance = instance;
-            
+
             string threadName = _instance.initializationData().properties.getProperty("Ice.ProgramName");
             if(threadName.Length > 0)
             {
                 threadName += "-";
             }
-            
+
             _thread = new Thread(new ThreadStart(Run));
             _thread.IsBackground = true;
             _thread.Name = threadName + "Ice.Timer";
+            if(hasPriority)
+            {
+                _thread.Priority = priority;
+            }
             _thread.Start();
         }
 
@@ -145,7 +180,8 @@ namespace IceInternal
             Token token = null;
             while(true)
             {
-                lock(this)
+                _m.Lock();
+                try
                 {
                     if(_instance != null)
                     {
@@ -172,7 +208,7 @@ namespace IceInternal
                     if(_tokens.Count == 0)
                     {
                         _wakeUpTime = System.Int64.MaxValue;
-                        Monitor.Wait(this);
+                        _m.Wait();
                     }
             
                     if(_instance == null)
@@ -204,13 +240,17 @@ namespace IceInternal
                         }
                     
                         _wakeUpTime = first.scheduledTime;
-                        Monitor.Wait(this, (int)(first.scheduledTime - now));
+                        _m.TimedWait((int)(first.scheduledTime - now));
                     }
                 
                     if(_instance == null)
                     {
                         break;
                     }
+                }
+                finally
+                {
+                    _m.Unlock();
                 }
 
                 if(token != null)
@@ -221,13 +261,18 @@ namespace IceInternal
                     }
                     catch(System.Exception ex)
                     {
-                        lock(this)
+                        _m.Lock();
+                        try
                         {
                             if(_instance != null)
                             {
                                 string s = "unexpected exception from task run method in timer thread:\n" + ex;
                                 _instance.initializationData().logger.error(s);
                             }
+                        }
+                        finally
+                        {
+                            _m.Unlock();
                         }
                     } 
                 }
@@ -272,17 +317,49 @@ namespace IceInternal
                 return 0;
             }
 
+	    public override bool Equals(object o)
+	    {
+		Token t = null;
+
+		try
+		{
+		    t = (Token)o;
+		}
+		catch(InvalidCastException)
+		{
+		    return false;
+		}
+
+	        if(this == t)
+		{
+		    return true;
+		}
+
+		return CompareTo(t) == 0;
+	    }
+
+	    public override int GetHashCode()
+	    {
+	        return id ^ (int)scheduledTime;
+	    }
+
             public long scheduledTime;
             public int id; // Since we can't compare references, we need to use another id.
             public long delay;
             public TimerTask task;
         }
 
+#if COMPACT
+        private IDictionary<Token, object> _tokens = new SortedList<Token, object>();
+#else
         private IDictionary<Token, object> _tokens = new SortedDictionary<Token, object>();
+#endif
         private IDictionary<TimerTask, Token> _tasks = new Dictionary<TimerTask, Token>();
         private Instance _instance;
         private long _wakeUpTime = System.Int64.MaxValue;
         private int _tokenId = 0;
         private Thread _thread;
+
+        private readonly IceUtilInternal.Monitor _m = new IceUtilInternal.Monitor();
    }
 }

@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -8,6 +8,30 @@
 # **********************************************************************
 
 def twoways(communicator, p)
+    #
+    # ice_ping
+    #
+    p.ice_ping
+
+    #
+    # ice_isA
+    #
+    test(p.ice_isA(Test::MyClass::ice_staticId()))
+
+    #
+    # ice_ids
+    #
+    ids = p.ice_ids
+    test(ids.length == 3)
+    test(ids[0] == "::Ice::Object")
+    test(ids[1] == "::Test::MyClass")
+    test(ids[2] == "::Test::MyDerivedClass")
+
+    #
+    # ice_id
+    #
+    test(p.ice_id == Test::MyDerivedClass::ice_staticId())
+
     #
     # opVoid
     #
@@ -125,19 +149,9 @@ def twoways(communicator, p)
 
     rso, bso = p.opByteS(bsi1, bsi2)
     test(bso.length == 4)
-    test(bso[0] == 0x22)
-    test(bso[1] == 0x12)
-    test(bso[2] == 0x11)
-    test(bso[3] == 0x01)
+    test(bso == "\x22\x12\x11\x01")
     test(rso.length == 8)
-    test(rso[0] == 0x01)
-    test(rso[1] == 0x11)
-    test(rso[2] == 0x12)
-    test(rso[3] == 0x22)
-    test(rso[4] == 0xf1)
-    test(rso[5] == 0xf2)
-    test(rso[6] == 0xf3)
-    test(rso[7] == 0xf4)
+    test(rso == "\x01\x11\x12\x22\xf1\xf2\xf3\xf4")
 
     #
     # opBoolS
@@ -232,23 +246,18 @@ def twoways(communicator, p)
     rso, bso = p.opByteSS(bsi1, bsi2)
     test(bso.length == 2)
     test(bso[0].length == 1)
-    test(bso[0][0] == 0xff)
+    test(bso[0] == "\xff")
     test(bso[1].length == 3)
-    test(bso[1][0] == 0x01)
-    test(bso[1][1] == 0x11)
-    test(bso[1][2] == 0x12)
+    test(bso[1] == "\x01\x11\x12")
     test(rso.length == 4)
     test(rso[0].length == 3)
-    test(rso[0][0] == 0x01)
-    test(rso[0][1] == 0x11)
-    test(rso[0][2] == 0x12)
+    test(rso[0] == "\x01\x11\x12")
     test(rso[1].length == 1)
-    test(rso[1][0] == 0xff)
+    test(rso[1] == "\xff")
     test(rso[2].length == 1)
-    test(rso[2][0] == 0x0e)
+    test(rso[2] == "\x0e")
     test(rso[3].length == 2)
-    test(rso[3][0] == 0xf2)
-    test(rso[3][1] == 0xf1)
+    test(rso[3] == "\xf2\xf1")
 
     #
     # opFloatDoubleSS
@@ -419,6 +428,47 @@ def twoways(communicator, p)
     test(ro["Hello!!"] == Test::MyEnum::Enum2)
 
     #
+    # opMyEnumStringD
+    #
+    di1 = {Test::MyEnum::Enum1=>'abc'}
+    di2 = {Test::MyEnum::Enum2=>'Hello!!', Test::MyEnum::Enum3=>'qwerty'}
+
+    ro, d = p.opMyEnumStringD(di1, di2)
+
+    test(d == di1)
+    test(ro.length == 3)
+    test(ro[Test::MyEnum::Enum1] == "abc")
+    test(ro[Test::MyEnum::Enum2] == "Hello!!")
+    test(ro[Test::MyEnum::Enum3] == "qwerty")
+
+    #
+    # opMyStructMyEnumD
+    #
+    s11 = Test::MyStruct.new
+    s11.i = 1
+    s11.j = 1
+    s12 = Test::MyStruct.new
+    s12.i = 1
+    s12.j = 2
+    s22 = Test::MyStruct.new
+    s22.i = 2
+    s22.j = 2
+    s23 = Test::MyStruct.new
+    s23.i = 2
+    s23.j = 3
+    di1 = {s11=>Test::MyEnum::Enum1, s12=>Test::MyEnum::Enum2}
+    di2 = {s11=>Test::MyEnum::Enum1, s22=>Test::MyEnum::Enum3, s23=>Test::MyEnum::Enum2}
+
+    ro, d = p.opMyStructMyEnumD(di1, di2)
+
+    test(d == di1)
+    test(ro.length == 4)
+    test(ro[s11] == Test::MyEnum::Enum1)
+    test(ro[s12] == Test::MyEnum::Enum2)
+    test(ro[s22] == Test::MyEnum::Enum3)
+    test(ro[s23] == Test::MyEnum::Enum2)
+
+    #
     # opIntS
     #
     lengths = [ 0, 1, 2, 126, 127, 128, 129, 253, 254, 255, 256, 257, 1000 ]
@@ -455,45 +505,14 @@ def twoways(communicator, p)
     test(r == ctx)
 
     #
-    # Test that default context is obtained correctly from communicator.
+    # opIdempotent
     #
-# DEPRECATED
-#    dflt = {'a'=>'b'}
-#    communicator.setDefaultContext(dflt)
-#    test(p.opContext() != dflt)
-#
-#    p2 = Test::MyClassPrx::uncheckedCast(p.ice_context({}))
-#    test(p2.opContext().length == 0)
-#
-#    p2 = Test::MyClassPrx::uncheckedCast(p.ice_defaultContext())
-#    test(p2.opContext() == dflt)
-#
-#    communicator.setDefaultContext({})
-#    test(p2.opContext().length > 0)
-#
-#    communicator.setDefaultContext(dflt)
-#    c = Test::MyClassPrx::checkedCast(communicator.stringToProxy("test:default -p 12010 -t 10000"))
-#    test(c.opContext() == dflt)
-#
-#    dflt['a'] = 'c'
-#    c2 = Test::MyClassPrx::uncheckedCast(c.ice_context(dflt))
-#    test(c2.opContext()['a'] == 'c')
-#
-#    dflt = {}
-#    c3 = Test::MyClassPrx::uncheckedCast(c2.ice_context(dflt))
-#    tmp = c3.opContext()
-#    test(!tmp.has_key?('a'))
-#
-#    c4 = Test::MyClassPrx::uncheckedCast(c2.ice_defaultContext())
-#    test(c4.opContext()['a'] == 'b')
-#
-#    dflt['a'] = 'd'
-#    communicator.setDefaultContext(dflt)
-#
-#    c5 = Test::MyClassPrx::uncheckedCast(c.ice_defaultContext())
-#    test(c5.opContext()['a'] == 'd')
-#
-#    communicator.setDefaultContext({})
+    p.opIdempotent
+
+    #
+    # opNonmutating
+    #
+    p.opNonmutating
 
     #
     # Test implicit context propagation
@@ -503,12 +522,12 @@ def twoways(communicator, p)
         initData = Ice::InitializationData.new
         initData.properties = communicator.getProperties().clone()
         initData.properties.setProperty('Ice.ImplicitContext', i)
-        ic = Ice.initialize(initData)
-        
+        ic = Ice::initialize(initData)
+
         ctx = {'one'=>'ONE', 'two'=>'TWO', 'three'=>'THREE'}
-        
-        p = Test::MyClassPrx::uncheckedCast(ic.stringToProxy('test:default -p 12010 -t 10000'))
-        
+
+        p = Test::MyClassPrx::uncheckedCast(ic.stringToProxy('test:default -p 12010'))
+
         ic.getImplicitContext().setContext(ctx)
         test(ic.getImplicitContext().getContext() == ctx)
         test(p.opContext() == ctx)
@@ -518,24 +537,24 @@ def twoways(communicator, p)
         test(r == '');
         test(ic.getImplicitContext().containsKey('zero') == true);
         test(ic.getImplicitContext().get('zero') == 'ZERO');
-        
+
         ctx = ic.getImplicitContext().getContext()
         test(p.opContext() == ctx)
-        
+
         prxContext = {'one'=>'UN', 'four'=>'QUATRE'}
-        
+
         combined = ctx.clone()
         combined.update(prxContext)
         test(combined['one'] == 'UN')
-        
+
         p = Test::MyClassPrx::uncheckedCast(p.ice_context(prxContext))
         ic.getImplicitContext().setContext({})
         test(p.opContext() == prxContext)
-        
+
         ic.getImplicitContext().setContext(ctx)
         test(p.opContext() == combined)
 
-        test(ic.getImplicitContext().remove('one') == 'ONE');  
+        test(ic.getImplicitContext().remove('one') == 'ONE');
 
         ic.destroy()
     end

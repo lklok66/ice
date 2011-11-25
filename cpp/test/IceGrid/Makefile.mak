@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -12,7 +12,20 @@ top_srcdir	= ..\..
 !include $(top_srcdir)/config/Make.rules.mak
 
 
-SUBDIRS		= simple deployer session update activation replicaGroup allocation replication distribution
+SUBDIRS		= simple \
+		  admin
+
+!if "$(BCPLUSPLUS)" != "yes" && "$(CPP_COMPILER)" != "VC60"
+SUBDIRS		= $(SUBDIRS) \
+		  activation \
+		  allocation \
+		  deployer \
+		  distribution \
+		  replicaGroup \
+		  replication \
+		  session \
+		  update
+!endif
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \

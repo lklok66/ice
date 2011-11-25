@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -14,16 +14,13 @@ include $(top_srcdir)/config/Make.rules
 SUBDIRS		= IceUtil \
 		  Slice \
 		  slice2cpp \
-		  slice2cppe \
 		  slice2cs \
 		  slice2freeze \
 		  slice2freezej \
-		  slice2docbook \
 		  slice2java \
-		  slice2javae \
+		  slice2php \
 		  slice2py \
 		  slice2rb \
-		  slice2sl \
 		  slice2html \
 		  Ice \
 		  IceXML \
@@ -31,8 +28,12 @@ SUBDIRS		= IceUtil \
 		  Freeze \
 		  FreezeScript \
 		  IceBox \
+		  Glacier2Lib \
 		  Glacier2 \
+		  IceDB \
+		  IcePatch2Lib \
 		  IcePatch2 \
+		  IceStormLib \
 		  IceGridLib \
 		  IceStorm \
 		  IceGrid \

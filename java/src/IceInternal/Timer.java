@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -17,12 +17,6 @@ package IceInternal;
 // regular basis is required to allow canceled timer task objects to
 // be garbage collected.
 //
-
-interface TimerTask
-{
-    void runTimerTask();
-}
-
 public final class Timer extends Thread
 {
     //
@@ -241,11 +235,7 @@ public final class Timer extends Thread
                     {
                         if(_instance != null)
                         {
-                            java.io.StringWriter sw = new java.io.StringWriter();
-                            java.io.PrintWriter pw = new java.io.PrintWriter(sw);
-                            ex.printStackTrace(pw);
-                            pw.flush();
-                            String s = "unexpected exception from task run method in timer thread:\n" + sw.toString();
+                            String s = "unexpected exception from task run method in timer thread:\n" + Ex.toString(ex);
                             _instance.initializationData().logger.error(s);
                         }
                     }
@@ -254,7 +244,7 @@ public final class Timer extends Thread
         }
     }
 
-    static private class Token implements Comparable
+    static private class Token implements Comparable<Token>
     {
         public
         Token(long scheduledTime, int id, long delay, TimerTask task)
@@ -266,12 +256,11 @@ public final class Timer extends Thread
         }
 
         public int
-        compareTo(Object o)
+        compareTo(Token r)
         {
             //
             // Token are sorted by scheduled time and token id.
             //
-            Token r = (Token)o;
             if(scheduledTime < r.scheduledTime)
             {
                 return -1;
@@ -292,6 +281,26 @@ public final class Timer extends Thread
 
             return 0;
         }
+
+	public boolean
+	equals(Object obj)
+	{
+	    if(this == obj)
+	    {
+	        return true;
+	    }
+	    if(obj instanceof Token)
+	    {
+		return compareTo((Token)obj) == 0;
+	    }
+	    return false;
+	}
+
+	public int
+	hashCode()
+	{
+	     return id ^ (int)scheduledTime;
+	}
 
         long scheduledTime;
         int id; // Since we can't compare references, we need to use another id.

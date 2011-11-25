@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -52,11 +52,7 @@ public:
         Lock sync(*this);
         while(!_response && !_exception)
         {
-            if(!timedWait(IceUtil::Time::seconds(3)))
-            {
-                cerr << "timeout: " << file << ":" << line << endl;
-                test(false); // Timeout
-            }
+            wait();
         }
     }
 

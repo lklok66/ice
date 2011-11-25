@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -51,7 +51,7 @@ public final class EndpointFactoryManager
         if(s.length() == 0)
         {
             Ice.EndpointParseException e = new Ice.EndpointParseException();
-            e.str = str;
+            e.str = "value has no non-whitespace characters";
             throw e;
         }
 
@@ -78,12 +78,12 @@ public final class EndpointFactoryManager
 
                 /*
                 EndpointI e = f.create(s.substring(m.end()), oaEndpoint);
-                BasicStream bs = new BasicStream(_instance, true);
+                BasicStream bs = new BasicStream(_instance, true, false);
                 e.streamWrite(bs);
                 java.nio.ByteBuffer buf = bs.getBuffer();
                 buf.position(0);
                 short type = bs.readShort();
-                EndpointI ue = new IceInternal.UnknownEndpointI(type, bs);
+                EndpointI ue = new IceInternal.OpaqueEndpointI(type, bs);
                 System.err.println("Normal: " + e);
                 System.err.println("Opaque: " + ue);
                 return e;
@@ -97,7 +97,7 @@ public final class EndpointFactoryManager
         //
         if(protocol.equals("opaque"))
         {
-            EndpointI ue = new UnknownEndpointI(s.substring(m.end()));
+            EndpointI ue = new OpaqueEndpointI(s.substring(m.end()));
             for(int i = 0; i < _factories.size(); i++)
             {
                 EndpointFactory f = _factories.get(i);
@@ -108,11 +108,11 @@ public final class EndpointFactoryManager
                     // and ask the factory to read the endpoint data from that stream to create
                     // the actual endpoint.
                     //
-                    BasicStream bs = new BasicStream(_instance, true);
+                    BasicStream bs = new BasicStream(_instance, true, false);
                     ue.streamWrite(bs);
                     Buffer buf = bs.getBuffer();
                     buf.b.position(0);
-                    short type = bs.readShort();
+                    bs.readShort(); // type
                     return f.read(bs);
                 }
             }
@@ -125,7 +125,6 @@ public final class EndpointFactoryManager
     public synchronized EndpointI
     read(BasicStream s)
     {
-        EndpointI v;
         short type = s.readShort();
 
         for(int i = 0; i < _factories.size(); i++)
@@ -136,7 +135,7 @@ public final class EndpointFactoryManager
                 return f.read(s);
             }
         }
-        return new UnknownEndpointI(type, s);
+        return new OpaqueEndpointI(type, s);
     }
 
     void

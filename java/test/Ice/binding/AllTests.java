@@ -1,13 +1,22 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-import Test.*;
+package test.Ice.binding;
+
+import java.io.PrintWriter;
+
+import test.Ice.binding.Test.RemoteCommunicatorPrx;
+import test.Ice.binding.Test.RemoteCommunicatorPrxHelper;
+import test.Ice.binding.Test.RemoteObjectAdapterPrx;
+import test.Ice.binding.Test.TestIntfPrx;
+import test.Ice.binding.Test.TestIntfPrxHelper;
+import test.Ice.binding.Test.Callback_TestIntf_getAdapterName;
 
 public class AllTests
 {
@@ -20,25 +29,20 @@ public class AllTests
         }
     }
 
-    static class GetAdapterNameCB extends AMI_TestIntf_getAdapterName
+    static class GetAdapterNameCB extends Ice.Callback
     {
         synchronized public void
-        ice_response(String adapterName)
+        completed(Ice.AsyncResult result)
         {
-            _name = adapterName;
-            notify();
-        }
-
-        public void
-        ice_exception(Ice.LocalException ex)
-        {
-            test(false);
-        }
-
-        public void
-        ice_exception(Ice.UserException ex)
-        {
-            test(false);
+            try
+            {
+                _name = TestIntfPrxHelper.uncheckedCast(result.getProxy()).end_getAdapterName(result);
+                notify();
+            }
+            catch(Ice.LocalException ex)
+            {
+                test(false);
+            }
         }
 
         synchronized public String
@@ -64,7 +68,7 @@ public class AllTests
     getAdapterNameWithAMI(TestIntfPrx test)
     {
         GetAdapterNameCB cb = new GetAdapterNameCB();
-        test.getAdapterName_async(cb);
+        test.begin_getAdapterName(cb);
         return cb.getResult();
     }
 
@@ -73,10 +77,9 @@ public class AllTests
     {
         java.util.List<Ice.Endpoint> endpoints = new java.util.ArrayList<Ice.Endpoint>();
         TestIntfPrx test = null;
-        java.util.Iterator<RemoteObjectAdapterPrx> p = adapters.iterator();
-        while(p.hasNext())
+        for(RemoteObjectAdapterPrx p : adapters)
         {
-            test = p.next().getTestIntf();
+            test = p.getTestIntf();
             Ice.Endpoint[] edpts = test.ice_getEndpoints();
             endpoints.addAll(java.util.Arrays.asList(edpts));
         }
@@ -87,21 +90,20 @@ public class AllTests
     private static void
     deactivate(RemoteCommunicatorPrx communicator, java.util.List<RemoteObjectAdapterPrx> adapters)
     {
-        java.util.Iterator<RemoteObjectAdapterPrx> p = adapters.iterator();
-        while(p.hasNext())
+        for(RemoteObjectAdapterPrx p : adapters)
         {
-            communicator.deactivateObjectAdapter(p.next());
+            communicator.deactivateObjectAdapter(p);
         }
     }
 
     public static void
-    allTests(Ice.Communicator communicator)
+    allTests(Ice.Communicator communicator, PrintWriter out)
     {
-        String ref = "communicator:default -p 12010 -t 10000";
+        String ref = "communicator:default -p 12010";
         RemoteCommunicatorPrx com = RemoteCommunicatorPrxHelper.uncheckedCast(communicator.stringToProxy(ref));
 
-        System.out.print("testing binding with single endpoint... ");
-        System.out.flush();
+		out.print("testing binding with single endpoint... ");
+        out.flush();
         {
             RemoteObjectAdapterPrx adapter = com.createObjectAdapter("Adapter", "default");
 
@@ -123,14 +125,18 @@ public class AllTests
                 test3.ice_ping();
                 test(false);
             }
-            catch(Ice.ConnectionRefusedException ex)
+            catch(Ice.ConnectFailedException ex)
             {
+                //
+                // Usually the actual type of this exception is ConnectionRefusedException,
+                // but not always. See bug 3179.
+                //
             }
         }
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing binding with multiple endpoints... ");
-        System.out.flush();
+        out.print("testing binding with multiple endpoints... ");
+        out.flush();
         {
             java.util.List<RemoteObjectAdapterPrx> adapters = new java.util.ArrayList<RemoteObjectAdapterPrx>();
             adapters.add(com.createObjectAdapter("Adapter11", "default"));
@@ -168,10 +174,9 @@ public class AllTests
             // always send the request over the same connection.)
             //
             {
-                java.util.Iterator<RemoteObjectAdapterPrx> p = adapters.iterator();
-                while(p.hasNext())
+                for(RemoteObjectAdapterPrx p : adapters)
                 {
-                    p.next().getTestIntf().ice_ping();
+                    p.getTestIntf().ice_ping();
                 }
 
                 TestIntfPrx test = createTestIntfPrx(adapters);
@@ -181,10 +186,9 @@ public class AllTests
                 for(i = 0; i < nRetry && test.getAdapterName().equals(name); i++);
                 test(i == nRetry);
 
-                p = adapters.iterator();
-                while(p.hasNext())
+                for(RemoteObjectAdapterPrx p : adapters)
                 {
-                    p.next().getTestIntf().ice_getConnection().close(false);
+                    p.getTestIntf().ice_getConnection().close(false);
                 }
             }
 
@@ -223,10 +227,114 @@ public class AllTests
 
             deactivate(com, adapters);
         }
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing binding with multiple endpoints and AMI... ");
-        System.out.flush();
+        out.print("testing binding with multiple random endpoints... ");
+        out.flush();
+        {
+            java.util.Random rand = new java.util.Random();
+
+            RemoteObjectAdapterPrx[] adapters = new RemoteObjectAdapterPrx[5];
+            adapters[0] = com.createObjectAdapter("AdapterRandom11", "default");
+            adapters[1] = com.createObjectAdapter("AdapterRandom12", "default");
+            adapters[2] = com.createObjectAdapter("AdapterRandom13", "default");
+            adapters[3] = com.createObjectAdapter("AdapterRandom14", "default");
+            adapters[4] = com.createObjectAdapter("AdapterRandom15", "default");
+
+            boolean shortenTest =
+                System.getProperty("os.name").startsWith("Windows") ||
+                System.getProperty("java.vendor").toLowerCase().indexOf("android") >= 0;
+
+            int count;
+            if(shortenTest)
+            {
+                count = 60;
+            }
+            else
+            {
+                count = 20;
+            }
+
+            int adapterCount = adapters.length;
+            while(--count > 0)
+            {
+                TestIntfPrx[] proxies;
+                if(shortenTest)
+                {
+                    if(count == 10)
+                    {
+                        com.deactivateObjectAdapter(adapters[4]);
+                        --adapterCount;
+                    }
+                    proxies = new TestIntfPrx[10];
+                }
+                else
+                {
+                    if(count < 60 && count % 10 == 0)
+                    {
+                        com.deactivateObjectAdapter(adapters[count / 10 - 1]);
+                        --adapterCount;
+                    }
+                    proxies = new TestIntfPrx[40];
+                }
+
+                int i;
+                for(i = 0; i < proxies.length; ++i)
+                {
+                    RemoteObjectAdapterPrx[] adpts = new RemoteObjectAdapterPrx[rand.nextInt(adapters.length)];
+                    if(adpts.length == 0)
+                    {
+                        adpts = new RemoteObjectAdapterPrx[1];
+                    }
+                    for(int j = 0; j < adpts.length; ++j)
+                    {
+                        adpts[j] = adapters[rand.nextInt(adapters.length)];
+                    }
+                    proxies[i] = createTestIntfPrx(java.util.Arrays.asList((adpts)));
+                }
+
+                for(TestIntfPrx p : proxies)
+                {
+                    p.begin_getAdapterName();
+                }
+                for(TestIntfPrx p : proxies)
+                {
+                    try
+                    {
+                        p.ice_ping();
+                    }
+                    catch(Ice.LocalException ex)
+                    {
+                    }
+                }
+
+                java.util.Set<Ice.Connection> connections = new java.util.HashSet<Ice.Connection>();
+                for(TestIntfPrx p : proxies)
+                {
+                    if(p.ice_getCachedConnection() != null)
+                    {
+                        connections.add(p.ice_getCachedConnection());
+                    }
+                }
+                test(connections.size() <= adapterCount);
+
+                for(RemoteObjectAdapterPrx a : adapters)
+                {
+                    try
+                    {
+                        a.getTestIntf().ice_getConnection().close(false);
+                    }
+                    catch(Ice.LocalException ex)
+                    {
+                        // Expected if adapter is down.
+                    }
+                }
+            }
+        }
+        out.println("ok");
+
+        out.print("testing binding with multiple endpoints and AMI... ");
+        out.flush();
         {
             java.util.List<RemoteObjectAdapterPrx> adapters = new java.util.ArrayList<RemoteObjectAdapterPrx>();
             adapters.add(com.createObjectAdapter("AdapterAMI11", "default"));
@@ -264,10 +372,9 @@ public class AllTests
             // always send the request over the same connection.)
             //
             {
-                java.util.Iterator<RemoteObjectAdapterPrx> p = adapters.iterator();
-                while(p.hasNext())
+                for(RemoteObjectAdapterPrx p : adapters)
                 {
-                    p.next().getTestIntf().ice_ping();
+                    p.getTestIntf().ice_ping();
                 }
 
                 TestIntfPrx test = createTestIntfPrx(adapters);
@@ -277,10 +384,9 @@ public class AllTests
                 for(i = 0; i < nRetry &&  getAdapterNameWithAMI(test).equals(name); i++);
                 test(i == nRetry);
 
-                p = adapters.iterator();
-                while(p.hasNext())
+                for(RemoteObjectAdapterPrx p : adapters)
                 {
-                    p.next().getTestIntf().ice_getConnection().close(false);
+                    p.getTestIntf().ice_getConnection().close(false);
                 }
             }
 
@@ -319,10 +425,10 @@ public class AllTests
 
             deactivate(com, adapters);
         }
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing random endpoint selection... ");
-        System.out.flush();
+        out.print("testing random endpoint selection... ");
+        out.flush();
         {
             java.util.List<RemoteObjectAdapterPrx> adapters = new java.util.ArrayList<RemoteObjectAdapterPrx>();
             adapters.add(com.createObjectAdapter("Adapter21", "default"));
@@ -356,10 +462,10 @@ public class AllTests
 
             deactivate(com, adapters);
         }
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing ordered endpoint selection... ");
-        System.out.flush();
+        out.print("testing ordered endpoint selection... ");
+        out.flush();
         {
             java.util.List<RemoteObjectAdapterPrx> adapters = new java.util.ArrayList<RemoteObjectAdapterPrx>();
             adapters.add(com.createObjectAdapter("Adapter31", "default"));
@@ -390,8 +496,12 @@ public class AllTests
             {
                 test.getAdapterName();
             }
-            catch(Ice.ConnectionRefusedException ex)
+            catch(Ice.ConnectFailedException ex)
             {
+                //
+                // Usually the actual type of this exception is ConnectionRefusedException,
+                // but not always. See bug 3179.
+                //
             }
 
             Ice.Endpoint[] endpoints = test.ice_getEndpoints();
@@ -416,10 +526,10 @@ public class AllTests
 
             deactivate(com, adapters);
         }
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing per request binding with single endpoint... ");
-        System.out.flush();
+        out.print("testing per request binding with single endpoint... ");
+        out.flush();
         {
             RemoteObjectAdapterPrx adapter = com.createObjectAdapter("Adapter41", "default");
 
@@ -439,14 +549,18 @@ public class AllTests
                 test(test3.ice_getConnection() == test1.ice_getConnection());
                 test(false);
             }
-            catch(Ice.ConnectionRefusedException ex)
+            catch(Ice.ConnectFailedException ex)
             {
+                //
+                // Usually the actual type of this exception is ConnectionRefusedException,
+                // but not always. See bug 3179.
+                //
             }
         }
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing per request binding with multiple endpoints... ");
-        System.out.flush();
+        out.print("testing per request binding with multiple endpoints... ");
+        out.flush();
         {
             java.util.List<RemoteObjectAdapterPrx> adapters = new java.util.ArrayList<RemoteObjectAdapterPrx>();
             adapters.add(com.createObjectAdapter("Adapter51", "default"));
@@ -480,10 +594,10 @@ public class AllTests
 
             deactivate(com, adapters);
         }
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing per request binding with multiple endpoints and AMI... ");
-        System.out.flush();
+        out.print("testing per request binding with multiple endpoints and AMI... ");
+        out.flush();
         {
             java.util.List<RemoteObjectAdapterPrx> adapters = new java.util.ArrayList<RemoteObjectAdapterPrx>();
             adapters.add(com.createObjectAdapter("AdapterAMI51", "default"));
@@ -517,10 +631,10 @@ public class AllTests
 
             deactivate(com, adapters);
         }
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing per request binding and ordered endpoint selection... ");
-        System.out.flush();
+        out.print("testing per request binding and ordered endpoint selection... ");
+        out.flush();
         {
             java.util.List<RemoteObjectAdapterPrx> adapters = new java.util.ArrayList<RemoteObjectAdapterPrx>();
             adapters.add(com.createObjectAdapter("Adapter61", "default"));
@@ -553,8 +667,12 @@ public class AllTests
             {
                 test.getAdapterName();
             }
-            catch(Ice.ConnectionRefusedException ex)
+            catch(Ice.ConnectFailedException ex)
             {
+                //
+                // Usually the actual type of this exception is ConnectionRefusedException,
+                // but not always. See bug 3179.
+                //
             }
 
             Ice.Endpoint[] endpoints = test.ice_getEndpoints();
@@ -577,10 +695,10 @@ public class AllTests
 
             deactivate(com, adapters);
         }
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing per request binding and ordered endpoint selection and AMI... ");
-        System.out.flush();
+        out.print("testing per request binding and ordered endpoint selection and AMI... ");
+        out.flush();
         {
             java.util.List<RemoteObjectAdapterPrx> adapters = new java.util.ArrayList<RemoteObjectAdapterPrx>();
             adapters.add(com.createObjectAdapter("AdapterAMI61", "default"));
@@ -613,8 +731,12 @@ public class AllTests
             {
                 test.getAdapterName();
             }
-            catch(Ice.ConnectionRefusedException ex)
+            catch(Ice.ConnectFailedException ex)
             {
+                //
+                // Usually the actual type of this exception is ConnectionRefusedException,
+                // but not always. See bug 3179.
+                //
             }
 
             Ice.Endpoint[] endpoints = test.ice_getEndpoints();
@@ -637,10 +759,10 @@ public class AllTests
 
             deactivate(com, adapters);
         }
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing endpoint mode filtering... ");
-        System.out.flush();
+        out.print("testing endpoint mode filtering... ");
+        out.flush();
         {
             java.util.List<RemoteObjectAdapterPrx> adapters = new java.util.ArrayList<RemoteObjectAdapterPrx>();
             adapters.add(com.createObjectAdapter("Adapter71", "default"));
@@ -659,12 +781,12 @@ public class AllTests
             {
             }
         }
-        System.out.println("ok");
+        out.println("ok");
 
         if(communicator.getProperties().getProperty("Ice.Plugin.IceSSL").length() > 0)
         {
-            System.out.print("testing unsecure vs. secure endpoints... ");
-            System.out.flush();
+            out.print("testing unsecure vs. secure endpoints... ");
+            out.flush();
             {
                 java.util.List<RemoteObjectAdapterPrx> adapters = new java.util.ArrayList<RemoteObjectAdapterPrx>();
                 adapters.add(com.createObjectAdapter("Adapter81", "ssl"));
@@ -708,13 +830,17 @@ public class AllTests
                     testSecure.ice_ping();
                     test(false);
                 }
-                catch(Ice.ConnectionRefusedException ex)
+                catch(Ice.ConnectFailedException ex)
                 {
+                    //
+                    // Usually the actual type of this exception is ConnectionRefusedException,
+                    // but not always. See bug 3179.
+                    //
                 }
 
                 deactivate(com, adapters);
             }
-            System.out.println("ok");
+            out.println("ok");
         }
 
         com.shutdown();

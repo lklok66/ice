@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,18 +9,26 @@
 
 public class Client extends Ice.Application
 {
-    private void 
+    //
+    // Number of bets placed by each player
+    // You can (should) increase these values by a factor of 5 or more
+    // on a fast system
+    //
+    static final int betCount1 = 100;
+    static final int betCount2 = 20;
+
+    private void
     printBalances(Casino.PlayerPrx[] players)
     {
         for(int i = 0; i < players.length; ++i)
         {
             Casino.PlayerPrx player = players[i];
-            
+
             if(player != null)
             {
                 try
                 {
-                    System.out.println(player.ice_getIdentity().name + ": " + player.getChips() + " chips"); 
+                    System.out.println(player.ice_getIdentity().name + ": " + player.getChips() + " chips");
                 }
                 catch(Ice.ObjectNotExistException one)
                 {
@@ -49,20 +57,20 @@ public class Client extends Ice.Application
 
         Casino.BankPrx bank = Casino.BankPrxHelper.
             uncheckedCast(communicator().propertyToProxy("Bank.Proxy"));
-        
+
         Casino.PlayerPrx[] players = bank.getPlayers();
         System.out.println("ok");
 
         System.out.println("Starting balances");
         printBalances(players);
-       
+
         System.out.println("Current bank earnings: " + bank.getEarnings() + " chips");
 
         System.out.println("All chips accounted for? " + (bank.checkAllChips() ? "yes" : "no"));
-        
+
         System.out.print("Each player buys 3,000 chips... ");
         System.out.flush();
-        
+
         for(int i = 0; i < players.length; ++i)
         {
             Casino.PlayerPrx player = players[i];
@@ -70,7 +78,7 @@ public class Client extends Ice.Application
             {
                 if(!bank.buyChips(3000, player))
                 {
-                    System.out.print("(" + player.ice_getIdentity().name + "is gone) ");
+                    System.out.print("(" + player.ice_getIdentity().name + " is gone) ");
                     players[i] = null;
                 }
             }
@@ -78,11 +86,11 @@ public class Client extends Ice.Application
         System.out.println("ok");
 
         System.out.println("All chips accounted for? " + (bank.checkAllChips() ? "yes" : "no"));
-            
-        System.out.print("Create 500 10-chips bets... ");
+
+        System.out.print("Create " + betCount1 + " 10-chips bets... ");
         System.out.flush();
 
-        for(int b = 0; b < 500; ++b)
+        for(int b = 0; b < betCount1; ++b)
         {
             Casino.BetPrx bet = bank.createBet(10, 200 + random.nextInt(4000));
             for(int i = 0; i < players.length; ++i)
@@ -103,7 +111,7 @@ public class Client extends Ice.Application
                     catch(Casino.OutOfChipsException ex)
                     {
                         System.out.print("(" + player.ice_getIdentity().name + " is out) ");
-                        
+
                         players[i] = null;
                     }
                 }
@@ -112,7 +120,7 @@ public class Client extends Ice.Application
         System.out.println(" ok");
 
         System.out.println("Live bets: " + bank.getLiveBetCount());
-       
+
         int index = random.nextInt(players.length);
         Casino.PlayerPrx gonner = players[index];
         players[index] = null;
@@ -134,9 +142,9 @@ public class Client extends Ice.Application
         }
 
         System.out.println("All chips accounted for? " + (bank.checkAllChips() ? "yes" : "no"));
-        
+
         System.out.println("Sleep for 2 seconds");
-        
+
         try
         {
             Thread.sleep(2000);
@@ -146,11 +154,10 @@ public class Client extends Ice.Application
         }
         System.out.println("Live bets: " + bank.getLiveBetCount());
 
-
-        System.out.print("Create 100 10-chips bets... ");
+        System.out.print("Create " + betCount2 + " 10-chips bets... ");
         System.out.flush();
 
-        for(int b = 0; b < 100; ++b)
+        for(int b = 0; b < betCount2; ++b)
         {
             Casino.BetPrx bet = bank.createBet(10, 200 + random.nextInt(4000));
             for(int i = 0; i < players.length; ++i)
@@ -171,14 +178,14 @@ public class Client extends Ice.Application
                     catch(Casino.OutOfChipsException ex)
                     {
                         System.out.print("(" + player.ice_getIdentity().name + " is out) ");
-                        
+
                         players[i] = null;
                     }
                 }
             }
         }
         System.out.println(" ok");
-        
+
         System.out.println("Live bets: " + bank.getLiveBetCount());
         System.out.println("Sleep for 10 seconds");
         try
@@ -189,10 +196,10 @@ public class Client extends Ice.Application
         {
         }
         System.out.println("Live bets: " + bank.getLiveBetCount());
-        
+
         System.out.println("Ending balances");
         printBalances(players);
-       
+
         System.out.println("Current bank earnings: " + bank.getEarnings() + " chips");
 
         System.out.println("All chips accounted for? " + (bank.checkAllChips() ? "yes" : "no"));

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,7 +12,7 @@
 
 #include <IceUtil/Time.h>
 #include <Ice/Plugin.h>
-#include <Ice/ConnectionF.h>
+#include <IceSSL/ConnectionInfo.h>
 
 #include <vector>
 #include <list>
@@ -355,52 +355,21 @@ private:
 };
 
 //
-// ConnectionInfo contains information that may be of use to a
-// CertificateVerifier or an application that wants information
-// about its peer.
+// NativeConnectionInfo is an extension of IceSSL::ConnectionInfo that
+// provides access to native certificates.
 //
-struct ConnectionInfo
+class NativeConnectionInfo : public ConnectionInfo
 {
+public:
+
     //
     // The certificate chain. This may be empty if the peer did not
     // supply a certificate. The peer's certificate (if any) is the
     // first one in the chain.
     //
-    std::vector<CertificatePtr> certs;
-
-    //
-    // The name of the negotiated cipher.
-    //
-    std::string cipher;
-
-    //
-    // The local TCP/IP host & port.
-    //
-    struct sockaddr_storage localAddr;
-
-    //
-    // The remote TCP/IP host & port.
-    //
-    // NOTE:
-    //
-    // This value may not be available when using IPv6 on Windows XP SP2 due to a bug in
-    // the IPv6 implementation. In this case, remoteAddr.ss_family is set to AF_UNSPEC and
-    // the remainder of the value is filled with zeroes.
-    //
-    struct sockaddr_storage remoteAddr;
-
-    //
-    // If the connection is incoming this bool is true, false
-    // otherwise.
-    //
-    bool incoming;
-
-    //
-    // The name of the object adapter that hosts this endpoint, if
-    // any.
-    //
-    std::string adapterName;
+    std::vector<CertificatePtr> nativeCerts;
 };
+typedef IceUtil::Handle<NativeConnectionInfo> NativeConnectionInfoPtr;
 
 //
 // An application can customize the certificate verification process
@@ -414,7 +383,7 @@ public:
     // Return false if the connection should be rejected, or true to
     // allow it.
     //
-    virtual bool verify(const ConnectionInfo&) = 0;
+    virtual bool verify(const NativeConnectionInfoPtr&) = 0;
 };
 typedef IceUtil::Handle<CertificateVerifier> CertificateVerifierPtr;
 
@@ -428,10 +397,10 @@ typedef IceUtil::Handle<CertificateVerifier> CertificateVerifierPtr;
 // so the application can supply an implementation of PasswordPrompt
 // to take responsibility for obtaining the password.
 //
-// Note that the password is needed during plugin initialization, so
+// Note that the password is needed during plug-in initialization, so
 // in general you will need to delay initialization (by defining
 // IceSSL.DelayInit=1), configure the PasswordPrompt, then manually
-// initialize the plugin.
+// initialize the plug-in.
 //
 class PasswordPrompt : public IceUtil::Shared
 {
@@ -452,13 +421,16 @@ public:
 
     //
     // Establish the OpenSSL context. This must be done before the
-    // plugin is initialized, therefore the application must define
+    // plug-in is initialized, therefore the application must define
     // the property Ice.InitPlugins=0, set the context, and finally
     // invoke initializePlugins on the PluginManager.
     //
     // When the application supplies its own OpenSSL context, the
-    // plugin skips its normal property-based configuration.
+    // plug-in ignores configuration properties related to certificates,
+    // keys, and passwords.
     // 
+    // Note that the plugin assumes ownership of the given context.
+    //
     virtual void setContext(SSL_CTX*) = 0;
 
     //
@@ -475,38 +447,11 @@ public:
 
     //
     // Establish the password prompt object. This must be done before
-    // the plugin is initialized.
+    // the plug-in is initialized.
     //
     virtual void setPasswordPrompt(const PasswordPromptPtr&) = 0;
 };
 typedef IceUtil::Handle<Plugin> PluginPtr;
-
-//
-// Thrown if getConnectionInfo cannot retrieve the ConnectionInfo.
-//
-class ICE_SSL_API ConnectionInvalidException : public IceUtil::Exception
-{
-public:
-
-    ConnectionInvalidException(const char*, int, const std::string&);
-    virtual ~ConnectionInvalidException() throw();
-    virtual std::string ice_name() const;
-    virtual IceUtil::Exception* ice_clone() const;
-    virtual void ice_throw() const;
-
-    std::string reason;
-
-private:
-
-    static const char* _name;
-};
-
-//
-// This function obtains a ConnectionInfo value that describes a
-// Connection. The function raises ConnectionInvalidException if the
-// connection is closed or is not an SSL connection.
-//
-ICE_SSL_API ConnectionInfo getConnectionInfo(const ::Ice::ConnectionPtr&);
 
 }
 

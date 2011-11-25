@@ -1,27 +1,30 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
+#include <IceUtil/IceUtil.h>
 #include <Ice/Ice.h>
-#include <Glacier2/Router.h>
+#include <Glacier2/Glacier2.h>
 #include <CallbackI.h>
 
 using namespace std;
 using namespace Demo;
 
-class CallbackClient : public Ice::Application
+class CallbackClient : public Glacier2::Application
 {
 public:
 
     CallbackClient();
-
-    virtual int run(int, char*[]);
+    
+    virtual int runWithSession(int, char*[]);
+    virtual Glacier2::SessionPrx createSession();
 };
+
 
 int
 main(int argc, char* argv[])
@@ -42,6 +45,7 @@ menu()
         "v: set/reset override context field\n"
         "F: set/reset fake category\n"
         "s: shutdown server\n"
+        "r: restart the session\n"
         "x: exit\n"
         "?: help\n";
 }
@@ -51,34 +55,15 @@ CallbackClient::CallbackClient() :
     // Since this is an interactive demo we don't want any signal
     // handling.
     //
-    Ice::Application(Ice::NoSignalHandling)
+    Glacier2::Application(Ice::NoSignalHandling)
 {
 }
 
-int
-CallbackClient::run(int argc, char* argv[])
+Glacier2::SessionPrx
+CallbackClient::createSession()
 {
-    if(argc > 1)
-    {
-        cerr << appName() << ": too many arguments" << endl;
-        return EXIT_FAILURE;
-    }
-
-    Ice::RouterPrx defaultRouter = communicator()->getDefaultRouter();
-    if(!defaultRouter)
-    {
-        cerr << argv[0] << ": no default router set" << endl;
-        return EXIT_FAILURE;
-    }
-
-    Glacier2::RouterPrx router = Glacier2::RouterPrx::checkedCast(defaultRouter);
-    if(!router)
-    {
-        cerr << argv[0] << ": configured router is not a Glacier2 router" << endl;
-        return EXIT_FAILURE;
-    }
-
-    while(true)
+    Glacier2::SessionPrx session;
+     while(true)
     {
         cout << "This demo accepts any user-id / password combination.\n";
 
@@ -92,18 +77,32 @@ CallbackClient::run(int argc, char* argv[])
     
         try
         {
-            router->createSession(id, pw);
+            session = router()->createSession(id, pw);
             break;
         }
         catch(const Glacier2::PermissionDeniedException& ex)
         {
             cout << "permission denied:\n" << ex.reason << endl;
         }
+        catch(const Glacier2::CannotCreateSessionException ex)
+        {
+            cout << "cannot create session:\n" << ex.reason << endl;
+        }
     }
+    return session;
+}
 
-    Ice::Identity callbackReceiverIdent;
-    callbackReceiverIdent.name = "callbackReceiver";
-    callbackReceiverIdent.category = router->getCategoryForClient();
+int
+CallbackClient::runWithSession(int argc, char* argv[])
+{
+    if(argc > 1)
+    {
+        cerr << appName() << ": too many arguments" << endl;
+        return EXIT_FAILURE;
+    }
+    
+    Ice::Identity callbackReceiverIdent = createCallbackIdentity("callbackReceiver");
+
     Ice::Identity callbackReceiverFakeIdent;
     callbackReceiverFakeIdent.name = "callbackReceiver";
     callbackReceiverFakeIdent.category = "fake";
@@ -113,12 +112,13 @@ CallbackClient::run(int argc, char* argv[])
     CallbackPrx oneway = CallbackPrx::uncheckedCast(twoway->ice_oneway());
     CallbackPrx batchOneway = CallbackPrx::uncheckedCast(twoway->ice_batchOneway());
     
-    Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("Callback.Client");
-    adapter->add(new CallbackReceiverI, callbackReceiverIdent);
-    adapter->add(new CallbackReceiverI, callbackReceiverFakeIdent); // Should never be called for the fake identity. 
-    adapter->activate();
+    objectAdapter()->add(new CallbackReceiverI, callbackReceiverIdent);
+    
+    // Should never be called for the fake identity. 
+    objectAdapter()->add(new CallbackReceiverI, callbackReceiverFakeIdent);
 
-    CallbackReceiverPrx twowayR = CallbackReceiverPrx::uncheckedCast(adapter->createProxy(callbackReceiverIdent));
+    CallbackReceiverPrx twowayR = CallbackReceiverPrx::uncheckedCast(
+                                           objectAdapter()->createProxy(callbackReceiverIdent));
     CallbackReceiverPrx onewayR = CallbackReceiverPrx::uncheckedCast(twowayR->ice_oneway());
 
     string override;
@@ -129,114 +129,97 @@ CallbackClient::run(int argc, char* argv[])
     char c;
     do
     {
-        try
+        cout << "==> ";
+        cin >> c;
+        if(c == 't')
         {
-            cout << "==> ";
-            cin >> c;
-            if(c == 't')
+            Ice::Context context;
+            context["_fwd"] = "t";
+            if(!override.empty())
             {
-                Ice::Context context;
-                context["_fwd"] = "t";
-                if(!override.empty())
-                {
-                    context["_ovrd"] = override;
-                }
-                twoway->initiateCallback(twowayR, context);
+                context["_ovrd"] = override;
             }
-            else if(c == 'o')
+            twoway->initiateCallback(twowayR, context);
+        }
+        else if(c == 'o')
+        {
+            Ice::Context context;
+            context["_fwd"] = "o";
+            if(!override.empty())
             {
-                Ice::Context context;
-                context["_fwd"] = "o";
-                if(!override.empty())
-                {
-                    context["_ovrd"] = override;
-                }
-                oneway->initiateCallback(onewayR, context);
+                context["_ovrd"] = override;
             }
-            else if(c == 'O')
+            oneway->initiateCallback(onewayR, context);
+        }
+        else if(c == 'O')
+        {
+            Ice::Context context;
+            context["_fwd"] = "O";
+            if(!override.empty())
             {
-                Ice::Context context;
-                context["_fwd"] = "O";
-                if(!override.empty())
-                {
-                    context["_ovrd"] = override;
-                }
-                batchOneway->initiateCallback(onewayR, context);
+                context["_ovrd"] = override;
             }
-            else if(c == 'f')
+            batchOneway->initiateCallback(onewayR, context);
+        }
+        else if(c == 'f')
+        {
+            communicator()->flushBatchRequests();
+        }
+        else if(c == 'v')
+        {
+            if(override.empty())
             {
-                communicator()->flushBatchRequests();
-            }
-            else if(c == 'v')
-            {
-                if(override.empty())
-                {
-                    override = "some_value";
-                    cout << "override context field is now `" << override << "'" << endl;
-                }
-                else
-                {
-                    override.clear();
-                    cout << "override context field is empty" << endl;
-                }
-            }
-            else if(c == 'F')
-            {
-                fake = !fake;
-
-                if(fake)
-                {
-                    twowayR = CallbackReceiverPrx::uncheckedCast(twowayR->ice_identity(callbackReceiverFakeIdent));
-                    onewayR = CallbackReceiverPrx::uncheckedCast(onewayR->ice_identity(callbackReceiverFakeIdent));
-                }
-                else
-                {
-                    twowayR = CallbackReceiverPrx::uncheckedCast(twowayR->ice_identity(callbackReceiverIdent));
-                    onewayR = CallbackReceiverPrx::uncheckedCast(onewayR->ice_identity(callbackReceiverIdent));
-                }
-                
-                cout << "callback receiver identity: " << communicator()->identityToString(twowayR->ice_getIdentity())
-                     << endl;
-            }
-            else if(c == 's')
-            {
-                twoway->shutdown();
-            }
-            else if(c == 'x')
-            {
-                // Nothing to do
-            }
-            else if(c == '?')
-            {
-                menu();
+                override = "some_value";
+                cout << "override context field is now `" << override << "'" << endl;
             }
             else
             {
-                cout << "unknown command `" << c << "'" << endl;
-                menu();
+                override.clear();
+                cout << "override context field is empty" << endl;
             }
         }
-        catch(const Ice::Exception& ex)
+        else if(c == 'F')
         {
-            cerr << ex << endl;
+            fake = !fake;
+
+            if(fake)
+            {
+                twowayR = CallbackReceiverPrx::uncheckedCast(twowayR->ice_identity(callbackReceiverFakeIdent));
+                onewayR = CallbackReceiverPrx::uncheckedCast(onewayR->ice_identity(callbackReceiverFakeIdent));
+            }
+            else
+            {
+                twowayR = CallbackReceiverPrx::uncheckedCast(twowayR->ice_identity(callbackReceiverIdent));
+                onewayR = CallbackReceiverPrx::uncheckedCast(onewayR->ice_identity(callbackReceiverIdent));
+            }
+            
+            cout << "callback receiver identity: " << communicator()->identityToString(twowayR->ice_getIdentity())
+                 << endl;
+        }
+        else if(c == 's')
+        {
+            twoway->shutdown();
+        }
+        else if(c == 'r')
+        {
+            restart();
+        }
+        else if(c == 'x')
+        {
+            // Nothing to do
+        }
+        else if(c == '?')
+        {
+            menu();
+        }
+        else
+        {
+            cout << "unknown command `" << c << "'" << endl;
+            menu();
         }
     }
     while(cin.good() && c != 'x');
 
-    try
-    {
-        router->destroySession();
-    }
-    catch(const Glacier2::SessionNotExistException& ex)
-    {
-        cerr << ex << endl;
-    }
-    catch(const Ice::ConnectionLostException&)
-    {
-        //
-        // Expected: the router closed the connection.
-        //
-    }
-
+    
     return EXIT_SUCCESS;
 }

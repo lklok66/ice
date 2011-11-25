@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,12 +10,9 @@
 #include <IceUtil/Options.h>
 #include <IceUtil/Unicode.h>
 #include <IceUtil/StringUtil.h>
+#include <IceUtil/FileUtil.h>
 #include <IcePatch2/Util.h>
-#include <OS.h>
-
-#ifdef __BCPLUSPLUS__
-#  include <iterator>
-#endif
+#include <iterator>
 
 using namespace std;
 using namespace Ice;
@@ -42,7 +39,7 @@ struct IFileInfoPathEqual: public binary_function<const FileInfo&, const FileInf
 
         for(string::size_type i = 0; i < lhs.path.size(); ++i)
         {
-            if(::tolower(lhs.path[i]) != ::tolower(rhs.path[i]))
+            if(::tolower(static_cast<unsigned char>(lhs.path[i])) != ::tolower(static_cast<unsigned char>(rhs.path[i])))
             {
                 return false;
             }
@@ -59,11 +56,12 @@ struct IFileInfoPathLess: public binary_function<const FileInfo&, const FileInfo
     {
         for(string::size_type i = 0; i < lhs.path.size() && i < rhs.path.size(); ++i)
         {
-            if(::tolower(lhs.path[i]) < ::tolower(rhs.path[i]))
+            if(::tolower(static_cast<unsigned char>(lhs.path[i])) < ::tolower(static_cast<unsigned char>(rhs.path[i])))
             {
                 return true;
             }
-            else if(::tolower(lhs.path[i]) > ::tolower(rhs.path[i]))
+            else if(::tolower(static_cast<unsigned char>(lhs.path[i])) > 
+                    ::tolower(static_cast<unsigned char>(rhs.path[i])))
             {
                 return false;
             }
@@ -99,7 +97,7 @@ public:
 };
 
 void
-usage(const char* appName)
+usage(const string& appName)
 {
     cerr << "Usage: " << appName << " [options] DIR [FILES...]\n";
     cerr <<     
@@ -113,9 +111,22 @@ usage(const char* appName)
         ;
 }
 
+//COMPILERFIX: Borland C++ 2010 doesn't support wmain for console applications.
+#if defined(_WIN32 ) && !defined(__BCPLUSPLUS__)
+
+int
+wmain(int argc, wchar_t* argv[])
+
+#else
+
 int
 main(int argc, char* argv[])
+
+#endif
 {
+    Ice::StringSeq originalArgs = Ice::argsToStringSeq(argc, argv);
+    assert(originalArgs.size() > 0);
+    const string appName = originalArgs[0];
     string dataDir;
     StringSeq fileSeq;
     int compress = 1;
@@ -133,18 +144,18 @@ main(int argc, char* argv[])
     vector<string> args;
     try
     {
-        args = opts.parse(argc, (const char**)argv);
+        args = opts.parse(originalArgs);
     }
     catch(const IceUtilInternal::BadOptException& e)
     {
         cerr << e.reason << endl;
-        usage(argv[0]);
+        usage(appName);
         return EXIT_FAILURE;
     }
 
     if(opts.isSet("help"))
     {
-        usage(argv[0]);
+        usage(appName);
         return EXIT_SUCCESS;
     }
     if(opts.isSet("version"))
@@ -156,8 +167,8 @@ main(int argc, char* argv[])
     bool dontCompress = opts.isSet("no-compress");
     if(doCompress && dontCompress)
     {
-        cerr << argv[0] << ": only one of -z and -Z are mutually exclusive" << endl;
-        usage(argv[0]);
+        cerr << appName << ": only one of -z and -Z are mutually exclusive" << endl;
+        usage(appName);
         return EXIT_FAILURE;
     }
     if(doCompress)
@@ -173,8 +184,8 @@ main(int argc, char* argv[])
 
     if(args.empty())
     {
-        cerr << argv[0] << ": no data directory specified" << endl;
-        usage(argv[0]);
+        cerr << appName << ": no data directory specified" << endl;
+        usage(appName);
         return EXIT_FAILURE;
     }
     dataDir = simplify(args[0]);
@@ -190,19 +201,19 @@ main(int argc, char* argv[])
         string absDataDir = dataDir;
     
         string cwd;
-        if(OS::getcwd(cwd) != 0)
+        if(IceUtilInternal::getcwd(cwd) != 0)
         {
             throw "cannot get the current directory:\n" + IceUtilInternal::lastErrorToString();
         }
 
-        if(!isAbsolute(absDataDir))
+        if(!IceUtilInternal::isAbsolutePath(absDataDir))
         {
             absDataDir = simplify(cwd + '/' + absDataDir);
         }
         
         for(p = fileSeq.begin(); p != fileSeq.end(); ++p)
         {
-            if(!isAbsolute(*p))
+            if(!IceUtilInternal::isAbsolutePath(*p))
             {
                 *p = cwd + '/' + *p;
             }
@@ -303,12 +314,12 @@ main(int argc, char* argv[])
     }
     catch(const string& ex)
     {
-        cerr << argv[0] << ": " << ex << endl;
+        cerr << appName << ": " << ex << endl;
         return EXIT_FAILURE;
     }
     catch(const char* ex)
     {
-        cerr << argv[0] << ": " << ex << endl;
+        cerr << appName << ": " << ex << endl;
         return EXIT_FAILURE;
     }
 

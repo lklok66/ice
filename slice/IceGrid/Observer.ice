@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,6 +9,8 @@
 
 #ifndef ICE_GRID_OBSERVER_ICE
 #define ICE_GRID_OBSERVER_ICE
+
+[["cpp:header-ext:h"]]
 
 #include <Glacier2/Session.ice>
 #include <IceGrid/Exception.ice>
@@ -59,7 +61,7 @@ struct ServerDynamicInfo
  * A sequence of server dynamic information structures.
  * 
  **/
-["java:type:{java.util.LinkedList}"] sequence<ServerDynamicInfo> ServerDynamicInfoSeq;
+["java:type:java.util.LinkedList<ServerDynamicInfo>"] sequence<ServerDynamicInfo> ServerDynamicInfoSeq;
 
 /**
  *
@@ -88,7 +90,7 @@ struct AdapterDynamicInfo
  * A sequence of adapter dynamic information structures.
  *
  **/
-["java:type:{java.util.LinkedList}"] sequence<AdapterDynamicInfo> AdapterDynamicInfoSeq;
+["java:type:java.util.LinkedList<AdapterDynamicInfo>"] sequence<AdapterDynamicInfo> AdapterDynamicInfoSeq;
 
 /**
  *
@@ -133,7 +135,7 @@ sequence<NodeDynamicInfo> NodeDynamicInfoSeq;
  * nodes.
  * 
  **/
-interface NodeObserver
+["ami"] interface NodeObserver
 {
     /**
      *
@@ -143,7 +145,7 @@ interface NodeObserver
      * @param nodes The current state of the nodes.
      *
      **/
-    ["ami"] void nodeInit(NodeDynamicInfoSeq nodes);
+    void nodeInit(NodeDynamicInfoSeq nodes);
 
     /**
      *
@@ -187,7 +189,7 @@ interface NodeObserver
      * @param updatedInfo The new adapter state.
      * 
      **/
-    void updateAdapter(string node, AdapterDynamicInfo updatedInfo);
+     void updateAdapter(string node, AdapterDynamicInfo updatedInfo);
 };
 
 /**
@@ -264,11 +266,7 @@ interface AdapterObserver
      * <tt>adapterInit</tt> is called after registration of
      * an observer to indicate the state of the registry.
      *
-     * @param serial The current serial number of the registry
-     * database. This serial number allows observers to make sure that
-     * their internal state is synchronized with the registry.
-     *
-     * @param adapters The adapters that were dynamically registered
+     * @param adpts The adapters that were dynamically registered
      * with the registry (not through the deployment mechanism).
      *
      **/
@@ -279,6 +277,7 @@ interface AdapterObserver
      * The <tt>adapterAdded</tt> operation is called to notify an observer when
      * a dynamically-registered adapter was added.
      *
+     * @param info The details of the new adapter.
      **/
     void adapterAdded(AdapterInfo info);
 
@@ -287,6 +286,8 @@ interface AdapterObserver
      * The adapterUpdated operation is called to notify an observer when
      * a dynamically-registered adapter was updated.
      *
+     * @param info The details of the updated adapter.
+     *
      **/
     void adapterUpdated(AdapterInfo info);
 
@@ -294,6 +295,8 @@ interface AdapterObserver
      *
      * The adapterRemoved operation is called to notify an observer when
      * a dynamically-registered adapter was removed.
+     *
+     * @param id The ID of the removed adapter.
      *
      **/
     void adapterRemoved(string id);
@@ -311,11 +314,7 @@ interface ObjectObserver
      * <tt>objectInit</tt> is called after the registration of
      * an observer to indicate the state of the registry.
      *
-     * @param serial The current serial number of the registry database. This
-     * serial number allows observers to make sure that their internal state
-     * is synchronized with the registry.
-     *
-     * @param objects The objects registered with the [Admin]
+     * @param objects The objects registered with the {@link Admin}
      * interface (not through the deployment mechanism).
      *
      **/
@@ -324,7 +323,9 @@ interface ObjectObserver
     /**
      *
      * The <tt>objectAdded</tt> operation is called to notify an observer when an
-     * object was added to the [Admin] interface.
+     * object was added to the {@link Admin} interface.
+     *
+     * @param info The details of the added object.
      *
      **/
     void objectAdded(ObjectInfo info);
@@ -332,7 +333,9 @@ interface ObjectObserver
     /**
      *
      * <tt>objectUpdated</tt> is called to notify an observer when
-     * an object registered with the [Admin] interface was updated.
+     * an object registered with the {@link Admin} interface was updated.
+     *
+     * @param info The details of the updated object.
      *
      **/
     void objectUpdated(ObjectInfo info);
@@ -340,7 +343,9 @@ interface ObjectObserver
     /**
      *
      * <tt>objectRemoved</tt> is called to notify an observer when
-     * an object registered with the [Admin] interface was removed.
+     * an object registered with the {@link Admin} interface was removed.
+     *
+     * @param id The identity of the removed object.
      *
      **/
     void objectRemoved(Ice::Identity id);

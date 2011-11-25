@@ -1,13 +1,15 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
+#include <IceUtil/FileUtil.h>
 #include <Ice/Ice.h>
+#include <Ice/Instance.h>
 #include <IceGrid/ServerI.h>
 #include <IceGrid/TraceLevels.h>
 #include <IceGrid/Activator.h>
@@ -17,10 +19,9 @@
 #include <IceGrid/DescriptorHelper.h>
 
 #include <IcePatch2/Util.h>
-#include <IcePatch2/OS.h>
+#include <IceUtil/FileUtil.h>
 
 #include <sys/types.h>
-#include <sys/stat.h>
 
 #ifdef _WIN32
 #  include <direct.h>
@@ -32,8 +33,6 @@
 #  include <unistd.h>
 #  include <dirent.h>
 #endif
-
-#include <fstream>
 
 using namespace std;
 using namespace IceGrid;
@@ -85,16 +84,19 @@ chownRecursive(const string& path, uid_t uid, gid_t gid)
         assert(!name.empty());
         free(namelist[i]);
 
-        if(name != ".." && name != ".")
+        if(name == ".")
         {
-            name = path + "/" + name;
-            if(chown(name.c_str(), uid, gid) != 0)
+            if(chown(path.c_str(), uid, gid) != 0)
             {
                 throw "can't change permissions on `" + name + "':\n" + IceUtilInternal::lastErrorToString();
             }
+        }
+        else if(name != "..")
+        {
+            name = path + "/" + name;
 
-            OS::structstat buf;
-            if(OS::osstat(name, &buf) == -1)
+            IceUtilInternal::structstat buf;
+            if(IceUtilInternal::stat(name, &buf) == -1)
             {
                 throw "cannot stat `" + name + "':\n" + IceUtilInternal::lastErrorToString();
             }
@@ -102,6 +104,13 @@ chownRecursive(const string& path, uid_t uid, gid_t gid)
             if(S_ISDIR(buf.st_mode))
             {
                 chownRecursive(name, uid, gid);
+            }
+            else
+            {
+                if(chown(name.c_str(), uid, gid) != 0)
+                {
+                    throw "can't change permissions on `" + name + "':\n" + IceUtilInternal::lastErrorToString();
+                }
             }
         }
     }
@@ -265,6 +274,7 @@ private:
 
 struct EnvironmentEval : std::unary_function<string, string>
 {
+    
     string
     operator()(const std::string& value)
     {
@@ -279,7 +289,8 @@ struct EnvironmentEval : std::unary_function<string, string>
         string::size_type beg = 0;
         string::size_type end;
 #ifdef _WIN32
-        char buf[32767];
+        vector<wchar_t> buf;
+        buf.resize(32767);
         while((beg = v.find("%", beg)) != string::npos && beg < v.size() - 1)
         {
             end = v.find("%", beg + 1);
@@ -288,8 +299,8 @@ struct EnvironmentEval : std::unary_function<string, string>
                 break;
             }
             string variable = v.substr(beg + 1, end - beg - 1);
-            int ret = GetEnvironmentVariable(variable.c_str(), buf, sizeof(buf));
-            string valstr = (ret > 0 && ret < sizeof(buf)) ? string(buf) : string("");
+            DWORD ret = GetEnvironmentVariableW(IceUtil::stringToWstring(variable).c_str(), &buf[0], static_cast<DWORD>(buf.size()));
+            string valstr = (ret > 0 && ret < buf.size()) ? IceUtil::wstringToString(&buf[0]) : string("");
             v.replace(beg, end - beg + 1, valstr);
             beg += valstr.size();
         }
@@ -309,7 +320,7 @@ struct EnvironmentEval : std::unary_function<string, string>
             else
             {
                 end = beg + 1;
-                while((isalnum(v[end]) || v[end] == '_')  && end < v.size())
+                while((isalnum(static_cast<unsigned char>(v[end])) || v[end] == '_')  && end < v.size())
                 {
                     ++end;
                 }
@@ -325,6 +336,7 @@ struct EnvironmentEval : std::unary_function<string, string>
 #endif
         return value.substr(0, assignment) + "=" + v;
     }
+
 };
 
 }
@@ -346,7 +358,14 @@ void
 TimedServerCommand::startTimer()
 {
     _timerTask = new CommandTimeoutTimerTask(this);
-    _timer->schedule(_timerTask, IceUtil::Time::seconds(_timeout));
+    try
+    {
+        _timer->schedule(_timerTask, IceUtil::Time::seconds(_timeout));
+    }
+    catch(const IceUtil::Exception&)
+    {
+        // Ignore, timer is destroyed because node is shutting down.
+    }
 }
 
 void
@@ -827,6 +846,7 @@ void
 ServerI::setProcess_async(const AMD_Server_setProcessPtr& amdCB, const Ice::ProcessPrx& process, const Ice::Current&)
 {
     bool deact = false;
+    ServerAdapterDict adpts;
     ServerCommandPtr command;
     {
         Lock sync(*this);
@@ -838,17 +858,32 @@ ServerI::setProcess_async(const AMD_Server_setProcessPtr& amdCB, const Ice::Proc
         }
         else
         {
-            checkActivation();
+            if(checkActivation())
+            {
+                adpts = _adapters;
+            }
             command = nextCommand();
         }
     }
     amdCB->ice_response();
 
+    for(ServerAdapterDict::iterator r = adpts.begin(); r != adpts.end(); ++r)
+    {
+        try
+        {
+            r->second->activationCompleted();
+        }
+        catch(const Ice::ObjectNotExistException&)
+        {
+        }
+    }
+
     if(deact)
     {
         deactivate();
     }
-    else if(command)
+
+    if(command)
     {
         command->execute();
     }
@@ -896,7 +931,8 @@ ServerI::isAdapterActivatable(const string& id) const
     }
     else if(_state < Destroying)
     {
-        return true; // The server is being deactivated.
+        return _node->getActivator()->isActive(); // The server is being deactivated and the
+                                                  // node isn't shutting down yet.
     }
     else
     {
@@ -1049,7 +1085,7 @@ ServerI::load(const AMD_Node_loadServerPtr& amdCB, const InternalServerDescripto
         }
         return 0;
     }
-    
+
     if(!StopCommand::isStopped(_state) && !_stop)
     {
         _stop = new StopCommand(this, _node->getTimer(), _deactivationTimeout);
@@ -1166,13 +1202,14 @@ ServerI::finishPatch()
         }
     }
 #endif
-    setState(Inactive);
+    setState(ServerI::Inactive);
 }
 
 void
 ServerI::adapterActivated(const string& id)
 {
     ServerCommandPtr command;
+    ServerAdapterDict adpts;
     {
         Lock sync(*this);
         if(_state != ServerI::Activating && 
@@ -1182,8 +1219,24 @@ ServerI::adapterActivated(const string& id)
             return;
         }
         _activatedAdapters.insert(id);
-        checkActivation();
+        if(checkActivation())
+        {
+            adpts = _adapters;
+        }
         command = nextCommand();
+    }
+    for(ServerAdapterDict::iterator r = adpts.begin(); r != adpts.end(); ++r)
+    {
+        if(r->first != id)
+        {
+            try
+            {
+                r->second->activationCompleted();
+            }
+            catch(const Ice::ObjectNotExistException&)
+            {
+            }
+        }
     }
     if(command)
     {
@@ -1251,29 +1304,6 @@ ServerI::disableOnFailure()
 }
 
 void
-ServerI::enableAfterFailure(bool force)
-{
-    if(_disableOnFailure == 0 || _failureTime == IceUtil::Time())
-    {
-        return;
-    }
-
-    if(force ||
-       (_disableOnFailure > 0 && 
-       (_failureTime + IceUtil::Time::seconds(_disableOnFailure) < IceUtil::Time::now(IceUtil::Time::Monotonic))))
-    {
-        _activation = _previousActivation;
-        _failureTime = IceUtil::Time();
-    }
-
-    if(_timerTask)
-    {
-        _node->getTimer()->cancel(_timerTask);
-        _timerTask = 0;
-    }
-}
-
-void
 ServerI::activationTimedOut()
 {
     ServerCommandPtr command;
@@ -1324,87 +1354,106 @@ ServerI::activate()
     uid_t uid;
     gid_t gid;
 #endif
-    {
-        Lock sync(*this);
-        assert(_state == Activating && _desc);
-        desc = _desc;
-        adpts = _adapters;
-
-        //
-        // The first time the server is started, we ensure that the
-        // replication of its descriptor is completed. This is to make
-        // sure all the replicas are up to date when the server
-        // starts for the first time with a given descriptor.
-        //
-        waitForReplication = _waitForReplication;
-        _waitForReplication = false;
-
-        _process = 0;
-        
-#ifndef _WIN32
-        uid = _uid;
-        gid = _gid;
-#endif
-    }
-
-    //
-    // We first ensure that the application is replicated on all the
-    // registries before to start the server. We only do this each
-    // time the server is updated or the initialy loaded on the node.
-    //
-    if(waitForReplication)
-    {
-        NodeSessionPrx session = _node->getMasterNodeSession();
-        if(session)
-        {
-            AMI_NodeSession_waitForApplicationUpdatePtr cb = new WaitForApplicationUpdateCB(this);
-            _node->getMasterNodeSession()->waitForApplicationUpdate_async(cb, desc->uuid, desc->revision);
-            return;
-        }
-    }
-
-    //
-    // Compute the server command line options.
-    //
-    Ice::StringSeq options;
-    copy(desc->options.begin(), desc->options.end(), back_inserter(options));
-    options.push_back("--Ice.Config=" + escapeProperty(_serverDir + "/config/config"));
-
-    Ice::StringSeq envs;
-    transform(desc->envs.begin(), desc->envs.end(), back_inserter(envs), EnvironmentEval());
-
-    //
-    // Clear the adapters direct proxy (this is usefull if the server
-    // was manually activated).
-    //
-    for(ServerAdapterDict::iterator p = adpts.begin(); p != adpts.end(); ++p)
-    {
-        try
-        {
-            p->second->clear();
-        }
-        catch(const Ice::ObjectNotExistException&)
-        {
-        }
-    }
-
     string failure;
     try
     {
+        {
+            Lock sync(*this);
+            assert(_state == Activating && _desc);
+            desc = _desc;
+            adpts = _adapters;
+
+            if(_activation == Disabled)
+            {
+                throw string("The server is disabled.");
+            }
+
+            //
+            // The first time the server is started, we ensure that the
+            // replication of its descriptor is completed. This is to make
+            // sure all the replicas are up to date when the server
+            // starts for the first time with a given descriptor.
+            //
+            waitForReplication = _waitForReplication;
+            _waitForReplication = false;
+
+            _process = 0;
+        
+#ifndef _WIN32
+            uid = _uid;
+            gid = _gid;
+#endif
+        }
+
+        //
+        // We first ensure that the application is replicated on all the
+        // registries before to start the server. We only do this each
+        // time the server is updated or the initialy loaded on the node.
+        //
+        if(waitForReplication)
+        {
+            NodeSessionPrx session = _node->getMasterNodeSession();
+            if(session)
+            {
+                AMI_NodeSession_waitForApplicationUpdatePtr cb = new WaitForApplicationUpdateCB(this);
+                _node->getMasterNodeSession()->waitForApplicationUpdate_async(cb, desc->uuid, desc->revision);
+                return;
+            }
+        }
+
+        //
+        // Compute the server command line options.
+        //
+        Ice::StringSeq options;
+        copy(desc->options.begin(), desc->options.end(), back_inserter(options));
+        options.push_back("--Ice.Config=" + escapeProperty(_serverDir + "/config/config"));
+
+        Ice::StringSeq envs;
+        transform(desc->envs.begin(), desc->envs.end(), back_inserter(envs), EnvironmentEval());
+
+        //
+        // Clear the adapters direct proxy (this is usefull if the server
+        // was manually activated).
+        //
+        for(ServerAdapterDict::iterator p = adpts.begin(); p != adpts.end(); ++p)
+        {
+            try
+            {
+                p->second->clear();
+            }
+            catch(const Ice::ObjectNotExistException&)
+            {
+            }
+        }
+
 #ifndef _WIN32
         int pid = _node->getActivator()->activate(desc->id, desc->exe, desc->pwd, uid, gid, options, envs, this);
 #else
         int pid = _node->getActivator()->activate(desc->id, desc->exe, desc->pwd, options, envs, this);
 #endif
         ServerCommandPtr command;
+        bool active = false;
         {
             Lock sync(*this);
             assert(_state == Activating);
             _pid = pid;
             setStateNoSync(ServerI::WaitForActivation);
-            checkActivation();
+            active = checkActivation();
             command = nextCommand();
             notifyAll(); // Terminated might be waiting for the state change.
+        }
+        if(active)
+        {
+            for(ServerAdapterDict::iterator r = adpts.begin(); r != adpts.end(); ++r)
+            {
+                try
+                {
+                    r->second->activationCompleted();
+                }
+                catch(const Ice::ObjectNotExistException&)
+                {
+                }
+            }
         }
         if(command)
         {
@@ -1416,7 +1465,7 @@ ServerI::activate()
     {
         failure = ex;
     }
-    catch(const Ice::SyscallException& ex)
+    catch(const Ice::Exception& ex)
     {
         Ice::Warning out(_node->getTraceLevels()->logger);
         out << "activation failed for server `" << _id << "':\n";
@@ -1675,6 +1724,19 @@ ServerI::terminated(const string& msg, int status)
 }
 
 void
+ServerI::shutdown()
+{
+    Lock sync(*this);
+    assert(_state == ServerI::Inactive);
+    assert(!_destroy);
+    assert(!_stop);
+    assert(!_load);
+    assert(!_patch);
+    assert(!_start);
+    _timerTask = 0;
+}
+
+void
 ServerI::update()
 {
     ServerCommandPtr command;
@@ -1686,6 +1748,7 @@ ServerI::update()
         }
 
         InternalServerDescriptorPtr oldDescriptor = _desc;
+        bool disabled = oldDescriptor && _activation == Disabled;
         try
         {
             if(_load->clearDir())
@@ -1778,6 +1841,10 @@ ServerI::update()
             _load->failed(ex);
         }
 
+        if(oldDescriptor && disabled != (_activation == Disabled))
+        {
+            _node->observerUpdateServer(getDynamicInfo());
+        }
         setStateNoSync(Inactive);
         command = nextCommand();
     }
@@ -1888,6 +1955,11 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
         _timerTask = 0;
     }   
 
+#ifndef _WIN32
+    _uid = getuid();
+    _gid = getgid();
+#endif
+
     //
     // Don't change the user if the server has the session activation
     // mode and if it's not currently owned by a session.
@@ -1901,7 +1973,7 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
         // Check if the node is running as root, if that's the case we
         // make sure that a user is set for the process.
         //
-        if(getuid() == 0 && user.empty())
+        if(_uid == 0 && user.empty())
         {
             //
             // If no user is configured and if this server is owned by
@@ -1912,10 +1984,6 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
         }
 #endif
     }
-
-#ifndef _WIN32
-    bool newUser = false;
-#endif
 
     if(!user.empty())
     {
@@ -1958,7 +2026,7 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
         if(!success)
         {
             Ice::SyscallException ex(__FILE__, __LINE__);
-            ex.error = getSystemErrno();
+            ex.error = IceInternal::getSystemErrno();
             throw ex;
         }
         if(user != string(&buf[0]))
@@ -1981,8 +2049,7 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
         // running the node we throw, a regular user can't run a
         // process as another user.
         //
-        uid_t uid = getuid();
-        if(uid != 0 && pw->pw_uid != uid)
+        if(_uid != 0 && pw->pw_uid != _uid)
         {
             throw "node has insufficient privileges to load server under user account `" + user + "'";
         }
@@ -1994,25 +2061,10 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
 	    throw "running server as `root' is not allowed";
 	}
 
-        newUser = _uid != pw->pw_uid || _gid != pw->pw_gid;
         _uid = pw->pw_uid;
         _gid = pw->pw_gid;
 #endif
     }
-#ifndef _WIN32
-    else
-    {    
-        //
-        // If no user is specified, we'll run the process as the
-        // current user.
-        //
-        uid_t uid = getuid();
-        uid_t gid = getgid();
-        newUser = _uid != uid || _gid != gid;
-        _uid = uid;
-        _gid = gid;
-    }
-#endif
 
     istringstream at(_desc->activationTimeout);
     if(!(at >> _activationTimeout) || !at.eof() || _activationTimeout == 0)
@@ -2032,7 +2084,7 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
     for(Ice::StringSeq::const_iterator p = _desc->logs.begin(); p != _desc->logs.end(); ++p)
     {
         string path = IcePatch2::simplify(*p);
-        if(IcePatch2::isAbsolute(path))
+        if(IceUtilInternal::isAbsolutePath(path))
         {
             _logs.push_back(path);
         }
@@ -2123,13 +2175,17 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
     // Create the configuration files, remove the old ones.
     //
     {
+        //
+        // We do not want to esapce the properties if the Ice version is 
+        // previous to Ice 3.3.
+        //
         Ice::StringSeq knownFiles;
         for(PropertyDescriptorSeqDict::const_iterator p = properties.begin(); p != properties.end(); ++p)
         {
             knownFiles.push_back(p->first);
 
             const string configFilePath = _serverDir + "/config/" + p->first;
-            ofstream configfile(configFilePath.c_str());
+            IceUtilInternal::ofstream configfile(configFilePath); // configFilePath is a UTF-8 string
             if(!configfile.good())
             {
                 throw "couldn't create configuration file: " + configFilePath;
@@ -2143,7 +2199,7 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
                 }
                 else
                 {
-                    configfile << escapeProperty(r->name) << "=" << escapeProperty(r->value) << endl;
+                    configfile << r->name << "=" << r->value << endl;
                 }
             }
             configfile.close();
@@ -2189,7 +2245,8 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
             if(!(*q)->properties.empty())
             {
                 string file = dbEnvHome + "/DB_CONFIG";
-                ofstream configfile(file.c_str());
+
+                IceUtilInternal::ofstream configfile(file); // file is a UTF-8 string
                 if(!configfile.good())
                 {
                     throw "couldn't create configuration file `" + file + "'";
@@ -2234,12 +2291,7 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
     }
 
 #ifndef _WIN32
-    if(newUser)
-    {
-        chownRecursive(_serverDir + "/config", _uid, _gid);
-        chownRecursive(_serverDir + "/dbs", _uid, _gid);
-        chownRecursive(_serverDir + "/distrib", _uid, _gid);
-    }
+    chownRecursive(_serverDir, _uid, _gid);
 #endif
 }
 
@@ -2261,7 +2313,7 @@ ServerI::checkRevision(const string& replicaName, const string& uuid, int revisi
     else
     {
         string idFilePath = _serverDir + "/revision";
-        ifstream is(idFilePath.c_str());
+        IceUtilInternal::ifstream is(idFilePath); // idFilePath is a UTF-8 string
         if(!is.good())
         {
             return;
@@ -2299,7 +2351,7 @@ ServerI::updateRevision(const string& uuid, int revision)
     _desc->revision = revision;
 
     string idFilePath = _serverDir + "/revision";
-    ofstream os(idFilePath.c_str());
+    IceUtilInternal::ofstream os(idFilePath); // idFilePath is a UTF-8 string
     if(os.good())
     {
         os << "#" << endl;
@@ -2310,7 +2362,7 @@ ServerI::updateRevision(const string& uuid, int revision)
     }
 }
 
-void
+bool
 ServerI::checkActivation()
 {
     //assert(locked());
@@ -2325,8 +2377,10 @@ ServerI::checkActivation()
                     _serverLifetimeAdapters.begin(), _serverLifetimeAdapters.end()))
         {
             setStateNoSync(ServerI::Active);
+            return true;
         }
     }
+    return false;
 }
 
 void
@@ -2502,6 +2556,12 @@ ServerI::setStateNoSync(InternalServerState st, const std::string& reason)
         break;
     }
 
+    if(_timerTask)
+    {
+        _node->getTimer()->cancel(_timerTask);
+        _timerTask = 0;
+    }
+
     if(_state == Destroyed && !_load)
     {
         //
@@ -2522,8 +2582,16 @@ ServerI::setStateNoSync(InternalServerState st, const std::string& reason)
     {
         if(_activation == Always)
         {
+            assert(!_timerTask);
             _timerTask = new DelayedStart(this, _node->getTraceLevels());
-            _node->getTimer()->schedule(_timerTask, IceUtil::Time::milliSeconds(500));
+            try
+            {
+                _node->getTimer()->schedule(_timerTask, IceUtil::Time::milliSeconds(500));
+            }
+            catch(const IceUtil::Exception&)
+            {
+                // Ignore, timer is destroyed because node is shutting down.
+            }
         }
         else if(_activation == Disabled && _disableOnFailure > 0 && _failureTime != IceUtil::Time())
         {
@@ -2534,9 +2602,26 @@ ServerI::setStateNoSync(InternalServerState st, const std::string& reason)
             // server will be ready to be reactivated when the
             // callback is executed.  
             //
+            assert(!_timerTask);
             _timerTask = new DelayedStart(this, _node->getTraceLevels());
-            _node->getTimer()->schedule(_timerTask, 
-                                        IceUtil::Time::seconds(_disableOnFailure) + IceUtil::Time::milliSeconds(500));
+            try
+            {
+                IceUtil::Time now = IceUtil::Time::now(IceUtil::Time::Monotonic);
+                if(now - _failureTime < IceUtil::Time::seconds(_disableOnFailure))
+                {
+                    _node->getTimer()->schedule(_timerTask, 
+                                                IceUtil::Time::seconds(_disableOnFailure) - now + _failureTime +
+                                                IceUtil::Time::milliSeconds(500));
+                }
+                else
+                {
+                    _node->getTimer()->schedule(_timerTask, IceUtil::Time::milliSeconds(500));
+                }
+            }
+            catch(const IceUtil::Exception&)
+            {
+                // Ignore, timer is destroyed because node is shutting down.
+            }
         }
     }
 
@@ -2627,12 +2712,6 @@ ServerI::createOrUpdateDirectory(const string& dir)
     catch(const string&)
     {
     }
-#ifndef _WIN32
-    if(chown(dir.c_str(), _uid, _gid) != 0)
-    {
-        throw "can't set permissions on directory `" + dir + "'";
-    }    
-#endif
 }
 
 ServerState
@@ -2730,7 +2809,7 @@ ServerI::getFilePath(const string& filename) const
     else if(!filename.empty() && filename[0] == '#')
     {
         string path = IcePatch2::simplify(filename.substr(1));
-        if(!IcePatch2::isAbsolute(path))
+        if(!IceUtilInternal::isAbsolutePath(path))
         {
             path = _node->getPlatformInfo().getCwd() + "/" + path;
         }

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -21,10 +21,11 @@ class DirectoryI(Filesystem.Directory):
 
         # Create an identity. The root directory has the fixed identity "RootDir"
         #
+        self._id = Ice.Identity()
         if self._parent:
-            self._id = communicator.stringToIdentity(Ice.generateUUID())
+            self._id.name = Ice.generateUUID()
         else:
-            self._id = communicator.stringToIdentity("RootDir")
+            self._id.name = "RootDir"
 
     # Slice Node::name() operation
 
@@ -59,7 +60,8 @@ class FileI(Filesystem.File):
 
         # Create an identity
         #
-        self._id = communicator.stringToIdentity(Ice.generateUUID())
+        self._id = Ice.Identity()
+        self._id.name = Ice.generateUUID()
 
     # Slice Node::name() operation
 
@@ -91,7 +93,8 @@ class Server(Ice.Application):
 
         # Create an object adapter
         #
-        adapter = self.communicator().createObjectAdapterWithEndpoints("SimpleFileSystem", "default -p 10000")
+        adapter = self.communicator().createObjectAdapterWithEndpoints(
+                                        "SimpleFileSystem", "default -h 127.0.0.1 -p 10000")
 
         # Create the root directory (with name "/" and no parent)
         #

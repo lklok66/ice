@@ -7,5 +7,6 @@ IntLongMap.cpp
 db/__*
 db/data/*
 db/logs/*
+db/__Freeze
 hotbackup
 hotbackup.1

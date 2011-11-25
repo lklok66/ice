@@ -1,13 +1,17 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-import Test.*;
+package test.Ice.servantLocator;
+
+import test.Ice.servantLocator.Test.TestImpossibleException;
+import test.Ice.servantLocator.Test.TestIntfUserException;
+import test.Ice.servantLocator.Test._TestIntfDisp;
 
 public final class TestI extends _TestIntfDisp
 {
@@ -75,10 +79,26 @@ public final class TestI extends _TestIntfDisp
         //
         return "Hello";
     }
-    
+
+    public void
+    asyncResponse(Ice.Current current) throws TestIntfUserException, TestImpossibleException
+    {
+        //
+        // Only relevant for AMD.
+        //
+    }
+
+    public void
+    asyncException(Ice.Current current) throws TestIntfUserException, TestImpossibleException
+    {
+        //
+        // Only relevant for AMD.
+        //
+    }
+
     public void
     shutdown(Ice.Current current)
     {
-        current.adapter.deactivate();
+        current.adapter.getCommunicator().shutdown();
     }
 }

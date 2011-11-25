@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,17 +11,16 @@ package IceInternal;
 
 public final class LocatorManager
 {
-    LocatorManager()
+    LocatorManager(Ice.Properties properties)
     {
+        _background = properties.getPropertyAsInt("Ice.BackgroundLocatorCacheUpdates") > 0;
     }
 
     synchronized void
     destroy()
     {
-        java.util.Iterator<LocatorInfo> i = _table.values().iterator();
-        while(i.hasNext())
+        for(LocatorInfo info : _table.values())
         {
-            LocatorInfo info = i.next();
             info.destroy();
         }
         _table.clear();
@@ -66,13 +65,15 @@ public final class LocatorManager
                     _locatorTables.put(locator.ice_getIdentity(), table);
                 }
 
-                info = new LocatorInfo(locator, table);
+                info = new LocatorInfo(locator, table, _background);
                 _table.put(locator, info);
             }
 
             return info;
         }
     }
+
+    final private boolean _background;
 
     private java.util.HashMap<Ice.LocatorPrx, LocatorInfo> _table =
         new java.util.HashMap<Ice.LocatorPrx, LocatorInfo>();

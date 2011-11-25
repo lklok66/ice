@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -45,7 +45,7 @@ public:
     int securityTraceLevel() const;
     std::string securityTraceCategory() const;
 
-    void verifyPeer(SSL*, SOCKET, const std::string&, const std::string&, bool);
+    void verifyPeer(SSL*, SOCKET, const std::string&, const NativeConnectionInfoPtr&);
 
     std::string sslErrors() const;
 
@@ -70,10 +70,12 @@ private:
     IceInternal::ProtocolPluginFacadePtr _facade;
     int _securityTraceLevel;
     std::string _securityTraceCategory;
+    bool _initialized;
     SSL_CTX* _ctx;
     std::string _defaultDir;
     bool _checkCertName;
     int _verifyDepthMax;
+    int _verifyPeer;
     std::string _password;
 #ifndef OPENSSL_NO_DH
     DHParamsPtr _dhParams;

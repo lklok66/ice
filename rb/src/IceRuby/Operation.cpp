@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,8 +11,11 @@
 #include <Proxy.h>
 #include <Types.h>
 #include <Util.h>
+#include <Ice/Communicator.h>
 #include <Ice/Initialize.h>
 #include <Ice/LocalException.h>
+#include <Ice/Logger.h>
+#include <Ice/Properties.h>
 #include <Ice/Proxy.h>
 #include <Slice/RubyUtil.h>
 
@@ -136,7 +139,7 @@ IceRuby::ParamInfo::unmarshaled(VALUE val, VALUE target, void* closure)
 {
     assert(TYPE(target) == T_ARRAY);
     long i = reinterpret_cast<long>(closure);
-    RARRAY(target)->ptr[i] = val;
+    RARRAY_PTR(target)[i] = val;
 }
 
 //
@@ -176,10 +179,10 @@ IceRuby::OperationI::OperationI(VALUE name, VALUE mode, VALUE sendMode, VALUE am
     // inParams
     //
     _sendsClasses = false;
-    for(i = 0; i < RARRAY(inParams)->len; ++i)
+    for(i = 0; i < RARRAY_LEN(inParams); ++i)
     {
         ParamInfoPtr param = new ParamInfo;
-        param->type = getType(RARRAY(inParams)->ptr[i]);
+        param->type = getType(RARRAY_PTR(inParams)[i]);
         _inParams.push_back(param);
         if(!_sendsClasses)
         {
@@ -191,10 +194,10 @@ IceRuby::OperationI::OperationI(VALUE name, VALUE mode, VALUE sendMode, VALUE am
     // outParams
     //
     _returnsClasses = false;
-    for(i = 0; i < RARRAY(outParams)->len; ++i)
+    for(i = 0; i < RARRAY_LEN(outParams); ++i)
     {
         ParamInfoPtr param = new ParamInfo;
-        param->type = getType(RARRAY(outParams)->ptr[i]);
+        param->type = getType(RARRAY_PTR(outParams)[i]);
         _outParams.push_back(param);
         if(!_returnsClasses)
         {
@@ -218,9 +221,9 @@ IceRuby::OperationI::OperationI(VALUE name, VALUE mode, VALUE sendMode, VALUE am
     //
     // exceptions
     //
-    for(i = 0; i < RARRAY(exceptions)->len; ++i)
+    for(i = 0; i < RARRAY_LEN(exceptions); ++i)
     {
-        _exceptions.push_back(getException(RARRAY(exceptions)->ptr[i]));
+        _exceptions.push_back(getException(RARRAY_PTR(exceptions)[i]));
     }
 }
 
@@ -285,13 +288,13 @@ IceRuby::OperationI::invoke(const Ice::ObjectPrx& proxy, VALUE args, VALUE hctx)
             //
             volatile VALUE results = unmarshalResults(result, communicator);
 
-            if(RARRAY(results)->len > 1)
+            if(RARRAY_LEN(results)> 1)
             {
                 return results;
             }
             else
             {
-                return RARRAY(results)->ptr[0];
+                return RARRAY_PTR(results)[0];
             }
         }
     }
@@ -319,7 +322,7 @@ IceRuby::OperationI::prepareRequest(const Ice::CommunicatorPtr& communicator, VA
     //
     // Validate the number of arguments.
     //
-    long argc = RARRAY(args)->len;
+    long argc = RARRAY_LEN(args);
     long paramCount = static_cast<long>(_inParams.size());
     if(argc != paramCount)
     {
@@ -338,7 +341,7 @@ IceRuby::OperationI::prepareRequest(const Ice::CommunicatorPtr& communicator, VA
         long i = 0;
         for(ParamInfoList::iterator p = _inParams.begin(); p != _inParams.end(); ++p, ++i)
         {
-            volatile VALUE arg = RARRAY(args)->ptr[i];
+            volatile VALUE arg = RARRAY_PTR(args)[i];
             if(!(*p)->type->validate(arg))
             {
                 string opName;
@@ -383,13 +386,11 @@ IceRuby::OperationI::unmarshalResults(const vector<Ice::Byte>& bytes, const Ice:
     {
         void* closure = reinterpret_cast<void*>(i);
         (*p)->type->unmarshal(is, *p, results, closure);
-        RARRAY(results)->len++; // Increment len for each new element to prevent premature GC.
     }
 
     if(_returnType)
     {
         _returnType->type->unmarshal(is, _returnType, results, 0);
-        RARRAY(results)->len++; // Increment len for each new element to prevent premature GC.
     }
 
     if(_returnsClasses)
@@ -403,11 +404,17 @@ IceRuby::OperationI::unmarshalResults(const vector<Ice::Byte>& bytes, const Ice:
 VALUE
 IceRuby::OperationI::unmarshalException(const vector<Ice::Byte>& bytes, const Ice::CommunicatorPtr& communicator)
 {
+    int traceSlicing = -1;
+
     Ice::InputStreamPtr is = Ice::createInputStream(communicator, bytes);
 
-    is->readBool(); // usesClasses
+    bool usesClasses;
+    is->read(usesClasses);
 
-    string id = is->readString();
+    string id;
+    is->read(id);
+    const string origId = id;
+
     while(!id.empty())
     {
         ExceptionInfoPtr info = lookupExceptionInfo(id);
@@ -429,14 +436,37 @@ IceRuby::OperationI::unmarshalException(const vector<Ice::Byte>& bytes, const Ic
                 volatile VALUE path = callRuby(rb_class_path, cls);
                 assert(TYPE(path) == T_STRING);
                 Ice::UnknownUserException e(__FILE__, __LINE__);
-                e.unknown = RSTRING(path)->ptr;
+                e.unknown = RSTRING_PTR(path);
                 throw e;
             }
         }
         else
         {
-            is->skipSlice();
-            id = is->readString();
+            if(traceSlicing == -1)
+            {
+                traceSlicing = communicator->getProperties()->getPropertyAsInt("Ice.Trace.Slicing") > 0;
+            }
+
+            if(traceSlicing > 0)
+            {
+                communicator->getLogger()->trace("Slicing", "unknown exception type `" + id + "'");
+            }
+
+            is->skipSlice(); // Slice off what we don't understand.
+
+            try
+            {
+                is->read(id); // Read type id for next slice.
+            }
+            catch(Ice::UnmarshalOutOfBoundsException& ex)
+            {
+                //
+                // When readString raises this exception it means we've seen the last slice,
+                // so we set the reason member to a more helpful message.
+                //
+                ex.reason = "unknown exception type `" + origId + "'";
+                throw;
+            }
         }
     }
 
@@ -446,7 +476,7 @@ IceRuby::OperationI::unmarshalException(const vector<Ice::Byte>& bytes, const Ic
     // have a factory for. This means that sender and receiver disagree
     // about the Slice definitions they use.
     //
-    throw Ice::UnknownUserException(__FILE__, __LINE__);
+    throw Ice::UnknownUserException(__FILE__, __LINE__, "unknown exception type `" + origId + "'");
 }
 
 bool

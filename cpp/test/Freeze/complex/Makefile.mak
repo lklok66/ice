@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -35,9 +35,9 @@ $(CLIENT): $(OBJS)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
 
-ComplexDict.h ComplexDict.cpp: Complex.ice $(SLICE2FREEZE) $(SLICEPARSERLIB)
+ComplexDict.h ComplexDict.cpp: Complex.ice "$(SLICE2FREEZE)" "$(SLICEPARSERLIB)"
 	del /q ComplexDict.h ComplexDict.cpp
-	$(SLICE2FREEZE) -I$(slicedir) --dict Complex::ComplexDict,Complex::Key,Complex::Node ComplexDict Complex.ice
+	"$(SLICE2FREEZE)" -I"$(slicedir)" --dict Complex::ComplexDict,Complex::Key,Complex::Node ComplexDict Complex.ice
 
 Scanner.cpp : Scanner.l
 	flex Scanner.l
@@ -55,9 +55,8 @@ Grammar.cpp Grammar.h: Grammar.y
 
 clean::
 	del /q Complex.cpp Complex.h
-	del /q Grammar.cpp Grammar.h
-	del /q Scanner.cpp
 	del /q ComplexDict.h ComplexDict.cpp
-	for %f in (db\*) do if not %f == db\.gitignore del /q %f
+	-if exist db\__Freeze rmdir /q /s db\__Freeze
+	-for %f in (db\*) do if not %f == db\.gitignore del /q %f
 
-!include .depend
+!include .depend.mak

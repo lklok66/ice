@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -25,20 +25,12 @@ CC		= bcc32.exe
 LINK 		= ilink32.exe
 RC		= brc32.exe
 
+BASE		= -b
 PREOUT		= ,
 PRELIBS		= ,,
+PRELIBPATH      = -L
 
 SETARGV		= wildargs.obj
-
-!if "$(ice_src_dist)" != ""
-
-# If building a source distribution, use THIRDPARTY_HOME for the 3rd party libraries
-!if "$(THIRDPARTY_HOME)" != ""
-CPPFLAGS        = -I"$(THIRDPARTY_HOME)\include"
-LDFLAGS		= -L"$(THIRDPARTY_HOME)\lib"
-!endif
-
-!endif
 
 CPPFLAGS	= $(CPPFLAGS) -q -w-par -w-lvc -w-rch -vi- -tWM -c -DNO_STRICT;_NO_VCL;_RTLDLL
 
@@ -48,11 +40,6 @@ CPPFLAGS	= $(CPPFLAGS) -O2 -k- -DNDEBUG
 CPPFLAGS	= $(CPPFLAGS) -Od -v -k -D_DEBUG
 !endif
 
-!if "$(ice_src_dist)" != ""
-LDFLAGS		= $(LDFLAGS) -L"$(libdir)"
-!else
-LDFLAGS		= $(LDFLAGS) -L"$(ice_dir)\lib"
-!endif
 LDFLAGS		= $(LDFLAGS) -L"$(BDS)\lib" -q -Gn -v -x
 
 LD_DLLFLAGS	= $(LDFLAGS) -Gi -Tpd c0d32.obj
@@ -64,6 +51,6 @@ BASELIBS	= iceutil$(LIBSUFFIX).lib $(ICE_OS_LIBS)
 LIBS		= ice$(LIBSUFFIX).lib $(BASELIBS)
 
 BZIP2_LIBS      = libbz2.lib
-DB_LIBS         = libdb46.lib
+DB_LIBS         = libdb48.lib
 MCPP_LIBS       = mcpp.lib
 ICONV_LIB       = libiconv-bcc.lib

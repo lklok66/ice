@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -13,31 +13,57 @@ top_srcdir	= ..
 
 SUBDIRS		= IceUtil \
 		  Slice \
-		  slice2cpp \
-		  slice2cppe \
+		  slice2cpp
+
+
+!if "$(CPP_COMPILER)" != "VC60"
+SUBDIRS		= $(SUBDIRS) \
+		  slice2freeze
+
+!if "$(BCPLUSPLUS)" != "yes"
+SUBDIRS		= $(SUBDIRS) \
 		  slice2cs \
-		  slice2freeze \
 		  slice2freezej \
-		  slice2docbook \
 		  slice2java \
-		  slice2javae \
 		  slice2py \
-		  slice2rb \
-		  slice2sl \
-		  slice2html \
+		  slice2html
+!endif
+
+!endif
+
+!if "$(BCPLUSPLUS)" != "yes"
+SUBDIRS		= $(SUBDIRS) \
+		  slice2php \
+		  slice2rb
+!endif
+
+SUBDIRS		= $(SUBDIRS) \
 		  Ice \
-		  IceXML \
 		  IceSSL \
+		  ca
+
+!if "$(CPP_COMPILER)" != "VC60"
+SUBDIRS		= $(SUBDIRS) \
+		  IceXML \
+		  Freeze \
+		  FreezeScript \
+		  IcePatch2Lib \
+		  Glacier2Lib \
+		  IceStormLib \
+		  IceGridLib \
+
+!if "$(BCPLUSPLUS)" != "yes"
+SUBDIRS		= $(SUBDIRS) \
 		  IceBox \
 		  IcePatch2 \
 		  Glacier2 \
-		  Freeze \
-		  FreezeScript \
-		  IceGridLib \
+		  IceDB \
 		  IceStorm \
 		  IceGrid \
-                  iceserviceinstall \
-		  ca
+                  iceserviceinstall
+!endif
+
+!endif
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \

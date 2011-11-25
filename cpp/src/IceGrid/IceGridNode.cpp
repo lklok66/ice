@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,6 +10,7 @@
 #include <IceUtil/UUID.h>
 #include <IceUtil/Timer.h>
 #include <IceUtil/StringUtil.h>
+#include <IceUtil/FileUtil.h>
 #include <Ice/Ice.h>
 #include <Ice/Locator.h>
 #include <Ice/Service.h>
@@ -20,27 +21,14 @@
 #include <IceGrid/NodeI.h>
 #include <IceGrid/NodeSessionManager.h>
 #include <IceGrid/TraceLevels.h>
-#ifdef __BCPLUSPLUS__
-#  include <IceGrid/ServerI.h>
-#  include <IceGrid/AdminSessionI.h>
-#  include <IceGrid/ReapThread.h>
-#  include <IceGrid/Database.h>
-#  include <IceGrid/WellKnownObjectsManager.h>
-#endif
 #include <IceGrid/DescriptorParser.h>
+#include <IceGrid/Util.h>
 #include <IcePatch2/Util.h>
 
 #ifdef _WIN32
 #   include <direct.h>
 #   include <sys/types.h>
-#   include <sys/stat.h>
 #   include <winsock2.h>
-#   ifdef _MSC_VER
-#      define S_ISDIR(mode) ((mode) & _S_IFDIR)
-#      define S_ISREG(mode) ((mode) & _S_IFREG)
-#   endif
-#else
-#   include <sys/stat.h>
 #endif
 
 using namespace std;
@@ -71,12 +59,14 @@ class NodeService : public Service
 public:
 
     NodeService();
+    ~NodeService();
 
     virtual bool shutdown();
 
 protected:
 
-    virtual bool start(int, char*[]);
+    virtual bool start(int, char*[], int&);
+    bool startImpl(int, char*[], int&);
     virtual void waitForShutdown();
     virtual bool stop();
     virtual CommunicatorPtr initializeCommunicator(int&, char*[], const InitializationData&);
@@ -132,6 +122,29 @@ private:
     ObjectPtr _servant;
 };
 
+#ifdef _WIN32
+void
+setNoIndexingAttribute(const string& pa)
+{
+    wstring path = IceUtil::stringToWstring(pa);
+    DWORD attrs = GetFileAttributesW(path.c_str());
+    if(attrs == INVALID_FILE_ATTRIBUTES)
+    {
+        FileException ex(__FILE__, __LINE__);
+        ex.path = pa;
+        ex.error = IceInternal::getSystemErrno();
+        throw ex;
+    }
+    if(!SetFileAttributesW(path.c_str(), attrs | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED))
+    {
+        FileException ex(__FILE__, __LINE__);
+        ex.path = pa;
+        ex.error = IceInternal::getSystemErrno();
+        throw ex;
+    }
+}
+#endif
+
 } 
 
 
@@ -172,6 +185,11 @@ NodeService::NodeService()
 {
 }
 
+NodeService::~NodeService()
+{
+}
+
+
 bool
 NodeService::shutdown()
 {
@@ -182,7 +200,26 @@ NodeService::shutdown()
 }
 
 bool
-NodeService::start(int argc, char* argv[])
+NodeService::start(int argc, char* argv[], int& status)
+{
+    try
+    {
+        if(!startImpl(argc, argv, status))
+        {
+            stop();
+            return false;
+        }
+    }
+    catch(...)
+    {
+        stop();
+        throw;
+    }
+    return true;
+}
+
+bool
+NodeService::startImpl(int argc, char* argv[], int& status)
 {
     bool nowarn = false;
     bool readonly = false;
@@ -193,11 +230,13 @@ NodeService::start(int argc, char* argv[])
         if(strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
         {
             usage(argv[0]);
+            status = EXIT_SUCCESS;
             return false;
         }
         else if(strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0)
         {
             print(ICE_STRING_VERSION);
+            status = EXIT_SUCCESS;
             return false;
         }
         else if(strcmp(argv[i], "--nowarn") == 0)
@@ -255,47 +294,7 @@ NodeService::start(int argc, char* argv[])
         out << "you should set individual adapter thread pools instead.";
     }
     
-    int size = properties->getPropertyAsIntWithDefault("IceGrid.Node.ThreadPool.Size", 0);
-    if(size <= 0)
-    {
-        properties->setProperty("IceGrid.Node.ThreadPool.Size", "1");
-        size = 1;
-    }
-
-    int sizeMax = properties->getPropertyAsIntWithDefault("IceGrid.Node.ThreadPool.SizeMax", 0);
-    if(sizeMax <= 0)
-    {
-        if(size >= sizeMax)
-        {
-            sizeMax = size * 10;
-        }
-        
-        ostringstream os;
-        os << sizeMax;
-        properties->setProperty("IceGrid.Node.ThreadPool.SizeMax", os.str());
-    }
-
-    size = properties->getPropertyAsIntWithDefault("Ice.ThreadPool.Client.Size", 0);
-    if(size <= 0)
-    {
-        properties->setProperty("Ice.ThreadPool.Client.Size", "1");
-        size = 1;
-    }
-    sizeMax = properties->getPropertyAsIntWithDefault("Ice.ThreadPool.Client.SizeMax", 0);
-    if(sizeMax <= 0)
-    {
-        if(size >= sizeMax)
-        {
-            sizeMax = size * 10;
-        }
-        if(sizeMax < 100)
-        {
-            sizeMax = 100;
-        }
-        ostringstream os;
-        os << sizeMax;
-        properties->setProperty("Ice.ThreadPool.Client.SizeMax", os.str());
-    }
+    setupThreadPool(properties, "IceGrid.Node.ThreadPool", 1, 100);
 
     //
     // Create the activator.
@@ -349,31 +348,16 @@ NodeService::start(int argc, char* argv[])
     }
     else
     {
-#ifdef _WIN32
-        struct _stat filestat;
-        if(::_stat(dataPath.c_str(), &filestat) != 0 || !S_ISDIR(filestat.st_mode))
+        if(!IceUtilInternal::directoryExists(dataPath))
         {
             ostringstream os;
             FileException ex(__FILE__, __LINE__);
             ex.path = dataPath;
-            ex.error = getSystemErrno();
+            ex.error = IceInternal::getSystemErrno();
             os << ex;
             error("property `IceGrid.Node.Data' is set to an invalid path:\n" + os.str());
             return false;
-        }            
-#else
-        struct stat filestat;
-        if(::stat(dataPath.c_str(), &filestat) != 0 || !S_ISDIR(filestat.st_mode))
-        {
-            ostringstream os;
-            FileException ex(__FILE__, __LINE__);
-            ex.path = dataPath;
-            ex.error = getSystemErrno();
-            os << ex;
-            error("property `IceGrid.Node.Data' is set to an invalid path:\n" + os.str());
-            return false;
-        }            
-#endif
+        }
 
         //
         // Creates subdirectories.
@@ -386,6 +370,29 @@ NodeService::start(int argc, char* argv[])
         IcePatch2::createDirectory(dataPath + "servers");
         IcePatch2::createDirectory(dataPath + "tmp");
         IcePatch2::createDirectory(dataPath + "distrib");
+
+#ifdef _WIN32
+        //
+        // Make sure these directories are not indexed by the Windows
+        // indexing service (which can cause random "Access Denied"
+        // errors if indexing runs at the same time as the node is
+        // creating/deleting files).
+        //
+        try
+        {
+            setNoIndexingAttribute(dataPath + "servers");
+            setNoIndexingAttribute(dataPath + "tmp");
+            setNoIndexingAttribute(dataPath + "distrib");
+        }
+        catch(const FileException& ex)
+        {
+            if(!nowarn)
+            {
+                Warning out(communicator()->getLogger());
+                out << "couldn't disable file indexing:\n" << ex;
+            }
+        }
+#endif
     }
 
     //
@@ -488,7 +495,7 @@ NodeService::start(int argc, char* argv[])
     {
         try
         {
-            communicator()->getDefaultLocator()->ice_timeout(15000)->ice_ping();
+            communicator()->getDefaultLocator()->ice_timeout(1000)->ice_ping();
         }
         catch(const Ice::LocalException& ex)
         {
@@ -521,7 +528,7 @@ NodeService::start(int argc, char* argv[])
         catch(const Ice::NotRegisteredException&)
         {
             //
-            // Some plugin removed the Process facet, so we don't replace it.
+            // Some plug-in removed the Process facet, so we don't replace it.
             // (unlikely error though)
             // 
         }
@@ -668,43 +675,53 @@ NodeService::waitForShutdown()
 bool
 NodeService::stop()
 {
-    try
+    if(_activator)
     {
-        _activator->destroy();
-    }
-    catch(...)
-    {
-        assert(false);
-    }
-
-    //
-    // The timer must be destroyed after the activator and before the
-    // communicator is shutdown.
-    //
-    try
-    {
-        _timer->destroy();
-    }
-    catch(...)
-    {
-        assert(false);
+        try
+        {
+            _activator->shutdown();
+            _activator->destroy();
+        }
+        catch(...)
+        {
+            assert(false);
+        }
+        _activator = 0;
     }
 
-    _activator = 0;
+    if(_timer)
+    {
+        //
+        // The timer must be destroyed after the activator and before the
+        // communicator is shutdown.
+        //
+        try
+        {
+            _timer->destroy();
+        }
+        catch(...)
+        {
+            assert(false);
+        }
+        _timer = 0;
+    }
 
     //
     // Deactivate the node object adapter.
     //
-    try
+    if(_adapter)
     {
-        _adapter->deactivate();
-        _adapter = 0;
-    }
-    catch(const Ice::LocalException& ex)
-    {
-        ostringstream ostr;
-        ostr << "unexpected exception while shutting down node:\n" << ex;
-        warning(ostr.str());
+        try
+        {
+            _adapter->deactivate();
+            _adapter = 0;
+        }
+        catch(const Ice::LocalException& ex)
+        {
+            ostringstream ostr;
+            ostr << "unexpected exception while shutting down node:\n" << ex;
+            warning(ostr.str());
+        }
     }
 
     //
@@ -715,13 +732,10 @@ NodeService::stop()
     //
     // Stop the platform info thread.
     //
-    _node->getPlatformInfo().stop();
-
-    //
-    // Break cylic reference counts.
-    //
-    _node->destroy();
-    _node = 0;
+    if(_node)
+    {
+        _node->getPlatformInfo().stop();
+    }
 
     //
     // We can now safely shutdown the communicator.
@@ -736,6 +750,15 @@ NodeService::stop()
         ostringstream ostr;
         ostr << "unexpected exception while shutting down node:\n" << ex;
         warning(ostr.str());
+    }
+
+    //
+    // Break cylic reference counts.
+    //
+    if(_node)
+    {
+        _node->shutdown();
+        _node = 0;
     }
 
     //
@@ -767,6 +790,20 @@ NodeService::initializeCommunicator(int& argc, char* argv[],
     //
     initData.properties->setProperty("Ice.Admin.DelayCreation", "1");
 
+    //
+    // Default backend database plugin is Freeze if none is specified.
+    //
+    if(initData.properties->getPropertyAsInt("IceGrid.Node.CollocateRegistry") > 0 &&
+       initData.properties->getProperty("Ice.Plugin.DB").empty())
+    {
+        initData.properties->setProperty("Ice.Plugin.DB", "IceGridFreezeDB:createFreezeDB");
+    }
+
+    //
+    // Setup the client thread pool size.
+    //
+    setupThreadPool(initData.properties, "Ice.ThreadPool.Client", 1, 100);
+
     return Service::initializeCommunicator(argc, argv, initData);
 }
 
@@ -796,8 +833,18 @@ NodeService::usage(const string& appName)
     print("Usage: " + appName + " [options]\n" + options);
 }
 
+//COMPILERFIX: Borland C++ 2010 doesn't support wmain for console applications.
+#if defined(_WIN32 ) && !defined(__BCPLUSPLUS__)
+
+int
+wmain(int argc, wchar_t* argv[])
+
+#else
+
 int
 main(int argc, char* argv[])
+
+#endif
 {
     NodeService svc;
     return svc.main(argc, argv);

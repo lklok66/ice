@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -78,8 +78,6 @@ public final class TraceUtil
     public static void
     dumpStream(BasicStream stream)
     {
-        final int inc = 8;
-
         int pos = stream.pos();
         stream.pos(0);
 
@@ -307,21 +305,21 @@ public final class TraceUtil
         {
             byte mode = stream.readByte();
             out.write("\nmode = " + (int)mode + ' ');
-            switch(mode)
+            switch(Ice.OperationMode.values()[mode])
             {
-                case Ice.OperationMode._Normal:
+                case Normal:
                 {
                     out.write("(normal)");
                     break;
                 }
                 
-                case Ice.OperationMode._Nonmutating:
+                case Nonmutating:
                 {
                     out.write("(nonmutating)");
                     break;
                 }
                 
-                case Ice.OperationMode._Idempotent:
+                case Idempotent:
                 {
                     out.write("(idempotent)");
                     break;
@@ -356,19 +354,22 @@ public final class TraceUtil
     private static byte
     printHeader(java.io.Writer out, BasicStream stream)
     {
-        byte magic;
-        magic = stream.readByte();  // Don't bother printing the magic number
-        magic = stream.readByte();
-        magic = stream.readByte();
-        magic = stream.readByte();
+        stream.readByte();  // Don't bother printing the magic number
+        stream.readByte();
+        stream.readByte();
+        stream.readByte();
         
-        byte pMajor = stream.readByte();
-        byte pMinor = stream.readByte();
-//            out.write("\nprotocol version = " + (int)pMajor + "." + (int)pMinor);
+//        byte pMajor = stream.readByte();
+//        byte pMinor = stream.readByte();
+//        out.write("\nprotocol version = " + (int)pMajor + "." + (int)pMinor);
+        stream.readByte(); // major
+        stream.readByte(); // minor
         
-        byte eMajor = stream.readByte();
-        byte eMinor = stream.readByte();
-//            out.write("\nencoding version = " + (int)eMajor + "." + (int)eMinor);
+//        byte eMajor = stream.readByte();
+//        byte eMinor = stream.readByte();
+//        out.write("\nencoding version = " + (int)eMajor + "." + (int)eMinor);
+        stream.readByte(); // major
+        stream.readByte(); // minor
         
         byte type = stream.readByte();
 

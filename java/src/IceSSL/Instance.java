@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,20 +9,24 @@
 
 package IceSSL;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 class Instance
 {
     Instance(Ice.Communicator communicator)
     {
         _logger = communicator.getLogger();
-        _facade = Ice.Util.getProtocolPluginFacade(communicator);
+        _facade = IceInternal.Util.getProtocolPluginFacade(communicator);
         _securityTraceLevel = communicator.getProperties().getPropertyAsIntWithDefault("IceSSL.Trace.Security", 0);
         _securityTraceCategory = "Security";
         _trustManager = new TrustManager(communicator);
 
-        // 
+        //
         // Register the endpoint factory. We have to do this now, rather than
         // in initialize, because the communicator may need to interpret
-        // proxies before the plugin is fully initialized.
+        // proxies before the plug-in is fully initialized.
         //
         _facade.addEndpointFactory(new EndpointFactoryI(this));
     }
@@ -31,7 +35,7 @@ class Instance
     initialize()
     {
         if(_initialized)
-        {   
+        {
             return;
         }
 
@@ -54,9 +58,9 @@ class Instance
         if(protocols.length != 0)
         {
             java.util.ArrayList<String> l = new java.util.ArrayList<String>();
-            for(int i = 0; i < protocols.length; ++i)
+            for(String prot : protocols)
             {
-                String s = protocols[i].toLowerCase();
+                String s = prot.toLowerCase();
                 if(s.equals("ssl3") || s.equals("sslv3"))
                 {
                     l.add("SSLv3");
@@ -68,7 +72,7 @@ class Instance
                 else
                 {
                     Ice.PluginInitializationException e = new Ice.PluginInitializationException();
-                    e.reason = "IceSSL: unrecognized protocol `" + protocols[i] + "'";
+                    e.reason = "IceSSL: unrecognized protocol `" + prot + "'";
                     throw e;
                 }
             }
@@ -89,12 +93,17 @@ class Instance
         //
         _verifyDepthMax = properties.getPropertyAsIntWithDefault(prefix + "VerifyDepthMax", 2);
 
-        //  
+        //
+        // VerifyPeer determines whether certificate validation failures abort a connection.
+        //
+        _verifyPeer = communicator().getProperties().getPropertyAsIntWithDefault("IceSSL.VerifyPeer", 2);
+
+        //
         // Check for a certificate verifier.
-        //      
+        //
         final String certVerifierClass = properties.getProperty(prefix + "CertVerifier");
         if(certVerifierClass.length() > 0)
-        {   
+        {
             if(_verifier != null)
             {
                 Ice.PluginInitializationException e = new Ice.PluginInitializationException();
@@ -102,17 +111,15 @@ class Instance
                 throw e;
             }
 
-            Class cls = null;
+            Class<?> cls = null;
             try
             {
-                cls = Class.forName(certVerifierClass);
+                cls = _facade.findClass(certVerifierClass);
             }
             catch(Throwable ex)
             {
-                Ice.PluginInitializationException e = new Ice.PluginInitializationException();
-                e.reason = "IceSSL: unable to load certificate verifier class " + certVerifierClass;
-                e.initCause(ex);
-                throw e;
+                throw new Ice.PluginInitializationException(
+                    "IceSSL: unable to load certificate verifier class " + certVerifierClass, ex);
             }
 
             try
@@ -121,10 +128,8 @@ class Instance
             }
             catch(Throwable ex)
             {
-                Ice.PluginInitializationException e = new Ice.PluginInitializationException();
-                e.reason = "IceSSL: unable to instantiate certificate verifier class " + certVerifierClass;
-                e.initCause(ex);
-                throw e;
+                throw new Ice.PluginInitializationException(
+                    "IceSSL: unable to instantiate certificate verifier class " + certVerifierClass, ex);
             }
         }
 
@@ -141,17 +146,15 @@ class Instance
                 throw e;
             }
 
-            Class cls = null;
+            Class<?> cls = null;
             try
             {
-                cls = Class.forName(passwordCallbackClass);
+                cls = _facade.findClass(passwordCallbackClass);
             }
             catch(Throwable ex)
             {
-                Ice.PluginInitializationException e = new Ice.PluginInitializationException();
-                e.reason = "IceSSL: unable to load password callback class " + passwordCallbackClass;
-                e.initCause(ex);
-                throw e;
+                throw new Ice.PluginInitializationException(
+                    "IceSSL: unable to load password callback class " + passwordCallbackClass, ex);
             }
 
             try
@@ -160,10 +163,8 @@ class Instance
             }
             catch(Throwable ex)
             {
-                Ice.PluginInitializationException e = new Ice.PluginInitializationException();
-                e.reason = "IceSSL: unable to instantiate password callback class " + passwordCallbackClass;
-                e.initCause(ex);
-                throw e;
+                throw new Ice.PluginInitializationException(
+                    "IceSSL: unable to instantiate password callback class " + passwordCallbackClass, ex);
             }
         }
 
@@ -200,47 +201,70 @@ class Instance
                 final String seedFiles = properties.getProperty(prefix + "Random");
                 if(seedFiles.length() > 0)
                 {
-                    byte[] seed = null;
-                    int start = 0;
                     final String[] arr = seedFiles.split(java.io.File.pathSeparator);
-                    for(int i = 0; i < arr.length; ++i)
+                    for(String file : arr)
                     {
-                        Ice.StringHolder seedFile = new Ice.StringHolder(arr[i]);
-                        if(!checkPath(seedFile, false))
-                        {
-                            Ice.PluginInitializationException e = new Ice.PluginInitializationException();
-                            e.reason = "IceSSL: random seed file not found:\n" + arr[i];
-                            throw e;
-                        }
-                        java.io.File f = new java.io.File(seedFile.value);
-                        int num = (int)f.length();
-                        if(seed == null)
-                        {
-                            seed = new byte[num];
-                        }
-                        else
-                        {
-                            byte[] tmp = new byte[seed.length + num];
-                            System.arraycopy(seed, 0, tmp, 0, seed.length);
-                            start = seed.length;
-                            seed = tmp;
-                        }
                         try
                         {
-                            java.io.FileInputStream in = new java.io.FileInputStream(f);
-                            in.read(seed, start, num);
-                            in.close();
+                            java.io.InputStream seedStream = openResource(file);
+                            if(seedStream == null)
+                            {
+                                Ice.PluginInitializationException e = new Ice.PluginInitializationException();
+                                e.reason = "IceSSL: random seed file not found:\n" + file;
+                                throw e;
+                            }
+
+                            _seeds.add(seedStream);
                         }
                         catch(java.io.IOException ex)
                         {
-                            Ice.PluginInitializationException e = new Ice.PluginInitializationException();
-                            e.reason = "IceSSL: error while reading random seed file:\n" + arr[i];
-                            e.initCause(ex);
-                            throw e;
+                            throw new Ice.PluginInitializationException(
+                                "IceSSL: unable to access random seed file:\n" + file, ex);
+                        }
+                    }
+                }
+
+                if(!_seeds.isEmpty())
+                {
+                    byte[] seed = null;
+                    int start = 0;
+                    for(InputStream in : _seeds)
+                    {
+                        try
+                        {
+                            int num = in.available();
+                            if(seed == null)
+                            {
+                                seed = new byte[num];
+                            }
+                            else
+                            {
+                                byte[] tmp = new byte[seed.length + num];
+                                System.arraycopy(seed, 0, tmp, 0, seed.length);
+                                start = seed.length;
+                                seed = tmp;
+                            }
+                            in.read(seed, start, num);
+                        }
+                        catch(java.io.IOException ex)
+                        {
+                            throw new Ice.PluginInitializationException("IceSSL: error while reading random seed", ex);
+                        }
+                        finally
+                        {
+                            try
+                            {
+                                in.close();
+                            }
+                            catch(java.io.IOException e)
+                            {
+                                // Ignore.
+                            }
                         }
                     }
                     rand.setSeed(seed);
                 }
+                _seeds.clear();
 
                 //
                 // We call nextInt() in order to force the object to perform any time-consuming
@@ -251,7 +275,7 @@ class Instance
                 //
                 // The keystore holds private keys and associated certificates.
                 //
-                Ice.StringHolder keystorePath = new Ice.StringHolder(properties.getProperty(prefix + "Keystore"));
+                String keystorePath = properties.getProperty(prefix + "Keystore");
 
                 //
                 // The password for the keys.
@@ -264,7 +288,8 @@ class Instance
                 String keystorePassword = properties.getProperty(prefix + "KeystorePassword");
 
                 //
-                // The default keystore type value is "JKS", but it can also be "PKCS12".
+                // The default keystore type is usually "JKS", but the legal values are determined
+                // by the JVM implementation. Other possibilities include "PKCS12" and "BKS".
                 //
                 final String defaultType = java.security.KeyStore.getDefaultType();
                 final String keystoreType = properties.getPropertyWithDefault(prefix + "KeystoreType", defaultType);
@@ -277,7 +302,7 @@ class Instance
                 //
                 // The truststore holds the certificates of trusted CAs.
                 //
-                Ice.StringHolder truststorePath = new Ice.StringHolder(properties.getProperty(prefix + "Truststore"));
+                String truststorePath = properties.getProperty(prefix + "Truststore");
 
                 //
                 // The password for the truststore.
@@ -285,7 +310,8 @@ class Instance
                 String truststorePassword = properties.getProperty(prefix + "TruststorePassword");
 
                 //
-                // The truststore type defaults to "JKS", but it can also be "PKCS12".
+                // The default truststore type is usually "JKS", but the legal values are determined
+                // by the JVM implementation. Other possibilities include "PKCS12" and "BKS".
                 //
                 final String truststoreType =
                     properties.getPropertyWithDefault(prefix + "TruststoreType",
@@ -295,17 +321,28 @@ class Instance
                 // Collect the key managers.
                 //
                 javax.net.ssl.KeyManager[] keyManagers = null;
-                if(keystorePath.value.length() > 0)
+                java.security.KeyStore keys = null;
+                if(_keystoreStream != null || keystorePath.length() > 0)
                 {
-                    if(!checkPath(keystorePath, false))
-                    {
-                        Ice.PluginInitializationException e = new Ice.PluginInitializationException();
-                        e.reason = "IceSSL: keystore file not found:\n" + keystorePath.value;
-                        throw e;
-                    }
-                    java.security.KeyStore keys = java.security.KeyStore.getInstance(keystoreType);
+                    java.io.InputStream keystoreStream = null;
                     try
                     {
+                        if(_keystoreStream != null)
+                        {
+                            keystoreStream = _keystoreStream;
+                        }
+                        else
+                        {
+                            keystoreStream = openResource(keystorePath);
+                            if(keystoreStream == null)
+                            {
+                                Ice.PluginInitializationException e = new Ice.PluginInitializationException();
+                                e.reason = "IceSSL: keystore not found:\n" + keystorePath;
+                                throw e;
+                            }
+                        }
+
+                        keys = java.security.KeyStore.getInstance(keystoreType);
                         char[] passwordChars = null;
                         if(keystorePassword.length() > 0)
                         {
@@ -315,10 +352,13 @@ class Instance
                         {
                             passwordChars = _passwordCallback.getKeystorePassword();
                         }
+                        else if(keystoreType.equals("BKS"))
+                        {
+                            // Bouncy Castle does not permit null passwords.
+                            passwordChars = new char[0];
+                        }
 
-                        java.io.BufferedInputStream bis =
-                            new java.io.BufferedInputStream(new java.io.FileInputStream(keystorePath.value));
-                        keys.load(bis, passwordChars);
+                        keys.load(keystoreStream, passwordChars);
 
                         if(passwordChars != null)
                         {
@@ -328,16 +368,28 @@ class Instance
                     }
                     catch(java.io.IOException ex)
                     {
-                        Ice.PluginInitializationException e = new Ice.PluginInitializationException();
-                        e.reason = "IceSSL: unable to load keystore:\n" + keystorePath.value;
-                        e.initCause(ex);
-                        throw e;
+                        throw new Ice.PluginInitializationException(
+                            "IceSSL: unable to load keystore:\n" + keystorePath, ex);
+                    }
+                    finally
+                    {
+                        if(keystoreStream != null)
+                        {
+                            try
+                            {
+                                keystoreStream.close();
+                            }
+                            catch(java.io.IOException e)
+                            {
+                                // Ignore.
+                            }
+                        }
                     }
 
                     String algorithm = javax.net.ssl.KeyManagerFactory.getDefaultAlgorithm();
                     javax.net.ssl.KeyManagerFactory kmf = javax.net.ssl.KeyManagerFactory.getInstance(algorithm);
                     char[] passwordChars = new char[0]; // This password cannot be null.
-                    if(password.length() > 0) 
+                    if(password.length() > 0)
                     {
                         passwordChars = password.toCharArray();
                     }
@@ -374,85 +426,130 @@ class Instance
                 }
 
                 //
+                // Load the truststore.
+                //
+                java.security.KeyStore ts = null;
+                if(_truststoreStream != null || truststorePath.length() > 0)
+                {
+                    //
+                    // If the trust store and the key store are the same input
+                    // stream or file, don't create another key store.
+                    //
+                    if((_truststoreStream != null && _truststoreStream == _keystoreStream) ||
+                       (truststorePath.length() > 0 && truststorePath.equals(keystorePath)))
+                    {
+                        assert keys != null;
+                        ts = keys;
+                    }
+                    else
+                    {
+                        java.io.InputStream truststoreStream = null;
+                        try
+                        {
+                            if(_truststoreStream != null)
+                            {
+                                truststoreStream = _truststoreStream;
+                            }
+                            else
+                            {
+                                truststoreStream = openResource(truststorePath);
+                                if(truststoreStream == null)
+                                {
+                                    Ice.PluginInitializationException e = new Ice.PluginInitializationException();
+                                    e.reason = "IceSSL: truststore not found:\n" + truststorePath;
+                                    throw e;
+                                }
+                            }
+
+                            ts = java.security.KeyStore.getInstance(truststoreType);
+
+                            char[] passwordChars = null;
+                            if(truststorePassword.length() > 0)
+                            {
+                                passwordChars = truststorePassword.toCharArray();
+                            }
+                            else if(_passwordCallback != null)
+                            {
+                                passwordChars = _passwordCallback.getTruststorePassword();
+                            }
+                            else if(truststoreType.equals("BKS"))
+                            {
+                                // Bouncy Castle does not permit null passwords.
+                                passwordChars = new char[0];
+                            }
+
+                            ts.load(truststoreStream, passwordChars);
+
+                            if(passwordChars != null)
+                            {
+                                java.util.Arrays.fill(passwordChars, '\0');
+                            }
+                            truststorePassword = null;
+                        }
+                        catch(java.io.IOException ex)
+                        {
+                            throw new Ice.PluginInitializationException(
+                                "IceSSL: unable to load truststore:\n" + truststorePath, ex);
+                        }
+                        finally
+                        {
+                            if(truststoreStream != null)
+                            {
+                                try
+                                {
+                                    truststoreStream.close();
+                                }
+                                catch(java.io.IOException e)
+                                {
+                                    // Ignore.
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    ts = keys;
+                }
+
+                //
                 // Collect the trust managers.
                 //
                 javax.net.ssl.TrustManager[] trustManagers = null;
-                if(truststorePath.value.length() > 0)
                 {
-                    if(!checkPath(truststorePath, false))
-                    {
-                        Ice.PluginInitializationException e = new Ice.PluginInitializationException();
-                        e.reason = "IceSSL: truststore file not found:\n" + truststorePath.value;
-                        throw e;
-                    }
-                    java.security.KeyStore ts = java.security.KeyStore.getInstance(truststoreType);
-                    try
-                    {
-                        char[] passwordChars = null;
-                        if(truststorePassword.length() > 0)
-                        {
-                            passwordChars = truststorePassword.toCharArray();
-                        }
-                        else if(_passwordCallback != null)
-                        {
-                            passwordChars = _passwordCallback.getTruststorePassword();
-                        }
-
-                        java.io.BufferedInputStream bis =
-                            new java.io.BufferedInputStream(new java.io.FileInputStream(truststorePath.value));
-                        ts.load(bis, passwordChars);
-
-                        if(passwordChars != null)
-                        {
-                            java.util.Arrays.fill(passwordChars, '\0');
-                        }
-                        truststorePassword = null;
-                    }
-                    catch(java.io.IOException ex)
-                    {
-                        Ice.PluginInitializationException e = new Ice.PluginInitializationException();
-                        e.reason = "IceSSL: unable to load truststore:\n" + truststorePath.value;
-                        e.initCause(ex);
-                        throw e;
-                    }
-
                     String algorithm = javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm();
                     javax.net.ssl.TrustManagerFactory tmf = javax.net.ssl.TrustManagerFactory.getInstance(algorithm);
                     tmf.init(ts);
                     trustManagers = tmf.getTrustManagers();
+                    assert(trustManagers != null);
                 }
 
                 //
-                // The default TrustManager implementation in IBM's JDK does not accept
-                // anonymous ciphers, so we have to install our own.
+                // Wrap each trust manager.
                 //
-                if(trustManagers == null)
+                for(int i = 0; i < trustManagers.length; ++i)
                 {
-                    trustManagers = new javax.net.ssl.TrustManager[1];
-                    trustManagers[0] = new X509TrustManagerI(null);
-                }
-                else
-                {
-                    for(int i = 0; i < trustManagers.length; ++i)
-                    {
-                        trustManagers[i] = new X509TrustManagerI((javax.net.ssl.X509TrustManager)trustManagers[i]);
-                    }
+                    trustManagers[i] = new X509TrustManagerI(this, (javax.net.ssl.X509TrustManager)trustManagers[i]);
                 }
 
                 //
                 // Initialize the SSL context.
                 //
-                _context = javax.net.ssl.SSLContext.getInstance("SSL");
+                _context = javax.net.ssl.SSLContext.getInstance("TLS");
                 _context.init(keyManagers, trustManagers, rand);
             }
             catch(java.security.GeneralSecurityException ex)
             {
-                Ice.PluginInitializationException e = new Ice.PluginInitializationException();
-                e.reason = "IceSSL: unable to initialize context";
-                e.initCause(ex);
-                throw e;
+                throw new Ice.PluginInitializationException("IceSSL: unable to initialize context", ex);
             }
         }
+
+        //
+        // Clear cached input streams.
+        //
+        _seeds.clear();
+        _keystoreStream = null;
+        _truststoreStream = null;
 
         _initialized = true;
     }
@@ -463,7 +560,7 @@ class Instance
         if(_initialized)
         {
             Ice.PluginInitializationException ex = new Ice.PluginInitializationException();
-            ex.reason = "IceSSL: plugin is already initialized";
+            ex.reason = "IceSSL: plug-in is already initialized";
             throw ex;
         }
 
@@ -498,6 +595,38 @@ class Instance
     getPasswordCallback()
     {
         return _passwordCallback;
+    }
+
+    void
+    setKeystoreStream(java.io.InputStream stream)
+    {
+        if(_initialized)
+        {
+            Ice.PluginInitializationException ex = new Ice.PluginInitializationException();
+            ex.reason = "IceSSL: plugin is already initialized";
+            throw ex;
+        }
+
+        _keystoreStream = stream;
+    }
+
+    void
+    setTruststoreStream(java.io.InputStream stream)
+    {
+        if(_initialized)
+        {
+            Ice.PluginInitializationException ex = new Ice.PluginInitializationException();
+            ex.reason = "IceSSL: plugin is already initialized";
+            throw ex;
+        }
+
+        _truststoreStream = stream;
+    }
+
+    void
+    addSeedStream(java.io.InputStream stream)
+    {
+        _seeds.add(stream);
     }
 
     Ice.Communicator
@@ -555,9 +684,17 @@ class Instance
     }
 
     javax.net.ssl.SSLEngine
-    createSSLEngine(boolean incoming)
+    createSSLEngine(boolean incoming, java.net.InetSocketAddress peerAddr)
     {
-        javax.net.ssl.SSLEngine engine = _context.createSSLEngine();
+        javax.net.ssl.SSLEngine engine;
+        if(peerAddr != null)
+        {
+            engine = _context.createSSLEngine(peerAddr.getHostName(), peerAddr.getPort());
+        }
+        else
+        {
+            engine = _context.createSSLEngine();
+        }
         engine.setUseClientMode(!incoming);
 
         String[] cipherSuites = filterCiphers(engine.getSupportedCipherSuites(), engine.getEnabledCipherSuites());
@@ -567,19 +704,17 @@ class Instance
         }
         catch(IllegalArgumentException ex)
         {
-            Ice.SecurityException e = new Ice.SecurityException();
-            e.reason = "IceSSL: invalid ciphersuite";
-            e.initCause(ex);
-            throw e;
+            throw new Ice.SecurityException("IceSSL: invalid ciphersuite", ex);
         }
 
         if(_securityTraceLevel >= 1)
         {
-            StringBuffer s = new StringBuffer();
+            StringBuilder s = new StringBuilder(128);
             s.append("enabling SSL ciphersuites:");
-            for(int i = 0; i < cipherSuites.length; ++i)
+            for(String suite : cipherSuites)
             {
-                s.append("\n  " + cipherSuites[i]);
+                s.append("\n  ");
+                s.append(suite);
             }
             _logger.trace(_securityTraceCategory, s.toString());
         }
@@ -592,22 +727,18 @@ class Instance
             }
             catch(IllegalArgumentException ex)
             {
-                Ice.SecurityException e = new Ice.SecurityException();
-                e.reason = "IceSSL: invalid protocol";
-                e.initCause(ex);
-                throw e;
+                throw new Ice.SecurityException("IceSSL: invalid protocol", ex);
             }
         }
 
         if(incoming)
         {
-            int verifyPeer = communicator().getProperties().getPropertyAsIntWithDefault("IceSSL.VerifyPeer", 2);
-            if(verifyPeer == 0)
+            if(_verifyPeer == 0)
             {
                 engine.setWantClientAuth(false);
                 engine.setNeedClientAuth(false);
             }
-            else if(verifyPeer == 1)
+            else if(_verifyPeer == 1)
             {
                 engine.setWantClientAuth(true);
             }
@@ -623,10 +754,7 @@ class Instance
         }
         catch(javax.net.ssl.SSLException ex)
         {
-            Ice.SecurityException e = new Ice.SecurityException();
-            e.reason = "IceSSL: handshake error";
-            e.initCause(ex);
-            throw e;
+            throw new Ice.SecurityException("IceSSL: handshake error", ex);
         }
 
         return engine;
@@ -638,24 +766,23 @@ class Instance
         java.util.LinkedList<String> result = new java.util.LinkedList<String>();
         if(_allCiphers)
         {
-            for(int i = 0; i < supportedCiphers.length; ++i)
+            for(String cipher : supportedCiphers)
             {
-                result.add(supportedCiphers[i]);
+                result.add(cipher);
             }
         }
         else if(!_noCiphers)
         {
-            for(int i = 0; i < defaultCiphers.length; ++i)
+            for(String cipher : defaultCiphers)
             {
-                result.add(defaultCiphers[i]);
+                result.add(cipher);
             }
         }
 
         if(_ciphers != null)
         {
-            for(int i = 0; i < _ciphers.length; ++i)
+            for(CipherExpression ce : _ciphers)
             {
-                CipherExpression ce = (CipherExpression)_ciphers[i];
                 if(ce.not)
                 {
                     java.util.Iterator<String> e = result.iterator();
@@ -689,12 +816,12 @@ class Instance
                     else
                     {
                         assert(ce.re != null);
-                        for(int j = 0; j < supportedCiphers.length; ++j)
+                        for(String cipher : supportedCiphers)
                         {
-                            java.util.regex.Matcher m = ce.re.matcher(supportedCiphers[j]);
+                            java.util.regex.Matcher m = ce.re.matcher(cipher);
                             if(m.find())
                             {
-                                result.add(0, supportedCiphers[j]);
+                                result.add(0, cipher);
                             }
                         }
                     }
@@ -713,7 +840,6 @@ class Instance
         return _protocols;
     }
 
-    // TODO: Remove
     void
     traceConnection(java.nio.channels.SocketChannel fd, javax.net.ssl.SSLEngine engine, boolean incoming)
     {
@@ -726,41 +852,29 @@ class Instance
     }
 
     void
-    verifyPeer(ConnectionInfo info, java.nio.channels.SelectableChannel fd, String address, boolean incoming)
+    verifyPeer(NativeConnectionInfo info, java.nio.channels.SelectableChannel fd, String address)
     {
-        if(_verifyDepthMax > 0 && info.certs != null && info.certs.length > _verifyDepthMax)
+        //
+        // For an outgoing connection, we compare the proxy address (if any) against
+        // fields in the server's certificate (if any).
+        //
+        if(info.nativeCerts != null && info.nativeCerts.length > 0 && address.length() > 0)
         {
-            String msg = (incoming ? "incoming" : "outgoing") + " connection rejected:\n" +
-                "length of peer's certificate chain (" + info.certs.length + ") exceeds maximum of " +
-                _verifyDepthMax + "\n" +
-                IceInternal.Network.fdToString(fd);
-            if(_securityTraceLevel >= 1)
-            {
-                _logger.trace(_securityTraceCategory, msg);
-            }
-            Ice.SecurityException ex = new Ice.SecurityException();
-            ex.reason = msg;
-            throw ex;
-        }
+            java.security.cert.X509Certificate cert = (java.security.cert.X509Certificate)info.nativeCerts[0];
 
-        //
-        // Extract the IP addresses and the DNS names from the subject
-        // alternative names.
-        //
-        if(info.certs != null)
-        {
+            //
+            // Extract the IP addresses and the DNS names from the subject
+            // alternative names.
+            //
+            java.util.ArrayList<String> ipAddresses = new java.util.ArrayList<String>();
+            java.util.ArrayList<String> dnsNames = new java.util.ArrayList<String>();
             try
             {
-                java.util.Collection<java.util.List<?> > subjectAltNames =
-                    ((java.security.cert.X509Certificate)info.certs[0]).getSubjectAlternativeNames();
-                java.util.ArrayList<String> ipAddresses = new java.util.ArrayList<String>();
-                java.util.ArrayList<String> dnsNames = new java.util.ArrayList<String>();
+                java.util.Collection<java.util.List<?> > subjectAltNames = cert.getSubjectAlternativeNames();
                 if(subjectAltNames != null)
                 {
-                    java.util.Iterator<java.util.List<?> > i = subjectAltNames.iterator();
-                    while(i.hasNext())
+                    for(java.util.List<?> l : subjectAltNames)
                     {
-                        java.util.List<?> l = i.next();
                         assert(!l.isEmpty());
                         Integer n = (Integer)l.get(0);
                         if(n.intValue() == 7)
@@ -773,80 +887,125 @@ class Instance
                         }
                     }
                 }
-
-                //
-                // Compare the peer's address against the dnsName and ipAddress values.
-                // This is only relevant for an outgoing connection.
-                //
-                if(address.length() > 0)
-                {
-                    boolean certNameOK = ipAddresses.contains(address);
-                    if(!certNameOK)
-                    {
-                        certNameOK = dnsNames.contains(address.toLowerCase());
-                    }
-
-                    //
-                    // Log a message if the name comparison fails. If CheckCertName is defined,
-                    // we also raise an exception to abort the connection. Don't log a message if
-                    // CheckCertName is not defined and a verifier is present.
-                    //
-                    if(!certNameOK && (_checkCertName || (_securityTraceLevel >= 1 && _verifier == null)))
-                    {
-                        StringBuffer sb = new StringBuffer();
-                        sb.append("IceSSL: ");
-                        if(!_checkCertName)
-                        {
-                            sb.append("ignoring ");
-                        }
-                        sb.append("certificate validation failure:\npeer certificate does not contain `" +
-                                  address + "' in its subjectAltName extension");
-                        if(!dnsNames.isEmpty())
-                        {
-                            sb.append("\nDNS names found in certificate: ");
-                            for(int j = 0; j < dnsNames.size(); ++j)
-                            {
-                                if(j > 0)
-                                {
-                                    sb.append(", ");
-                                }
-                                sb.append(dnsNames.get(j).toString());
-                            }
-                        }
-                        if(!ipAddresses.isEmpty())
-                        {
-                            sb.append("\nIP addresses found in certificate: ");
-                            for(int j = 0; j < ipAddresses.size(); ++j)
-                            {
-                                if(j > 0)
-                                {
-                                    sb.append(", ");
-                                }
-                                sb.append(ipAddresses.get(j).toString());
-                            }
-                        }
-                        if(_securityTraceLevel >= 1)
-                        {
-                            _logger.trace(_securityTraceCategory, sb.toString());
-                        }
-                        if(_checkCertName)
-                        {
-                            Ice.SecurityException ex = new Ice.SecurityException();
-                            ex.reason = sb.toString();
-                            throw ex;
-                        }
-                    }
-                }
             }
             catch(java.security.cert.CertificateParsingException ex)
             {
                 assert(false);
             }
+
+            //
+            // Compare the peer's address against the common name as well as
+            // the dnsName and ipAddress values in the subject alternative name.
+            //
+            boolean certNameOK = false;
+            String dn = "";
+            String addrLower = address.toLowerCase();
+            {
+                javax.security.auth.x500.X500Principal principal = cert.getSubjectX500Principal();
+                dn = principal.getName(javax.security.auth.x500.X500Principal.CANONICAL);
+                //
+                // Canonical format is already in lower case.
+                //
+                String cn = "cn=" + addrLower;
+                int pos = dn.indexOf(cn);
+                if(pos >= 0)
+                {
+                    //
+                    // Ensure we match the entire common name.
+                    //
+                    certNameOK = (pos + cn.length() == dn.length()) || (dn.charAt(pos + cn.length()) == ',');
+                }
+            }
+
+            //
+            // Compare the peer's address against the the dnsName and ipAddress
+            // values in the subject alternative name.
+            //
+            if(!certNameOK)
+            {
+                certNameOK = ipAddresses.contains(addrLower);
+            }
+            if(!certNameOK)
+            {
+                certNameOK = dnsNames.contains(addrLower);
+            }
+
+            //
+            // Log a message if the name comparison fails. If CheckCertName is defined,
+            // we also raise an exception to abort the connection. Don't log a message if
+            // CheckCertName is not defined and a verifier is present.
+            //
+            if(!certNameOK && (_checkCertName || (_securityTraceLevel >= 1 && _verifier == null)))
+            {
+                StringBuilder sb = new StringBuilder(128);
+                sb.append("IceSSL: ");
+                if(!_checkCertName)
+                {
+                    sb.append("ignoring ");
+                }
+                sb.append("certificate validation failure:\npeer certificate does not have `");
+                sb.append(address);
+                sb.append("' as its commonName or in its subjectAltName extension");
+                if(dn.length() > 0)
+                {
+                    sb.append("\nSubject DN: ");
+                    sb.append(dn);
+                }
+                if(!dnsNames.isEmpty())
+                {
+                    sb.append("\nDNS names found in certificate: ");
+                    for(int j = 0; j < dnsNames.size(); ++j)
+                    {
+                        if(j > 0)
+                        {
+                            sb.append(", ");
+                        }
+                        sb.append(dnsNames.get(j));
+                    }
+                }
+                if(!ipAddresses.isEmpty())
+                {
+                    sb.append("\nIP addresses found in certificate: ");
+                    for(int j = 0; j < ipAddresses.size(); ++j)
+                    {
+                        if(j > 0)
+                        {
+                            sb.append(", ");
+                        }
+                        sb.append(ipAddresses.get(j));
+                    }
+                }
+                if(_securityTraceLevel >= 1)
+                {
+                    _logger.trace(_securityTraceCategory, sb.toString());
+                }
+                if(_checkCertName)
+                {
+                    Ice.SecurityException ex = new Ice.SecurityException();
+                    ex.reason = sb.toString();
+                    throw ex;
+                }
+            }
+        }
+
+        if(_verifyDepthMax > 0 && info.nativeCerts != null && info.nativeCerts.length > _verifyDepthMax)
+        {
+            String msg = (info.incoming ? "incoming" : "outgoing") + " connection rejected:\n" +
+                "length of peer's certificate chain (" + info.nativeCerts.length + ") exceeds maximum of " +
+                _verifyDepthMax + "\n" +
+                IceInternal.Network.fdToString(fd);
+            if(_securityTraceLevel >= 1)
+            {
+                _logger.trace(_securityTraceCategory, msg);
+            }
+            Ice.SecurityException ex = new Ice.SecurityException();
+            ex.reason = msg;
+            throw ex;
         }
 
         if(!_trustManager.verify(info))
         {
-            String msg = (incoming ? "incoming" : "outgoing") + " connection rejected by trust manager\n" +
+            String msg = (info.incoming ? "incoming" : "outgoing") + " connection rejected by trust manager\n" +
                 IceInternal.Network.fdToString(fd);
             if(_securityTraceLevel >= 1)
             {
@@ -859,16 +1018,40 @@ class Instance
 
         if(_verifier != null && !_verifier.verify(info))
         {
-            String msg = (incoming ? "incoming" : "outgoing") + " connection rejected by certificate verifier\n" +
+            String msg = (info.incoming ? "incoming" : "outgoing") + " connection rejected by certificate verifier\n" +
                 IceInternal.Network.fdToString(fd);
-            
-            if(_securityTraceLevel > 0)
+            if(_securityTraceLevel >= 1)
             {
                 _logger.trace(_securityTraceCategory, msg);
             }
-            
             Ice.SecurityException ex = new Ice.SecurityException();
             ex.reason = msg;
+            throw ex;
+        }
+    }
+
+    void
+    trustManagerFailure(boolean incoming, java.security.cert.CertificateException ex)
+        throws java.security.cert.CertificateException
+    {
+        if(_verifyPeer == 0)
+        {
+            if(_securityTraceLevel >= 1)
+            {
+                String msg = "ignoring peer verification failure";
+                if(_securityTraceLevel > 1)
+                {
+                    java.io.StringWriter sw = new java.io.StringWriter();
+                    java.io.PrintWriter pw = new java.io.PrintWriter(sw);
+                    ex.printStackTrace(pw);
+                    pw.flush();
+                    msg += ":\n" + sw.toString();
+                }
+                _logger.trace(_securityTraceCategory, msg);
+            }
+        }
+        else
+        {
             throw ex;
         }
     }
@@ -934,10 +1117,8 @@ class Instance
                     }
                     catch(java.util.regex.PatternSyntaxException ex)
                     {
-                        Ice.PluginInitializationException e = new Ice.PluginInitializationException();
-                        e.reason = "IceSSL: invalid cipher expression `" + exp + "'";
-                        e.initCause(ex);
-                        throw e;
+                        throw new Ice.PluginInitializationException(
+                            "IceSSL: invalid cipher expression `" + exp + "'", ex);
                     }
                 }
                 else
@@ -952,33 +1133,27 @@ class Instance
         cipherList.toArray(_ciphers);
     }
 
-    private boolean
-    checkPath(Ice.StringHolder path, boolean dir)
+    private java.io.InputStream
+    openResource(String path)
+        throws java.io.IOException
     {
         //
-        // Check if file exists. If not, try prepending the default
-        // directory and check again. If the file is found, the
-        // string argument is modified and true is returned. Otherwise
-        // false is returned.
+        // This method wraps a call to IceInternal.Util.openResource. If the first call fails and
+        // IceSSL.DefaultDir is defined, prepend the default directory and try again.
         //
-        java.io.File f = new java.io.File(path.value);
-        if(f.exists())
+        java.io.InputStream stream = IceInternal.Util.openResource(getClass().getClassLoader(), path);
+        if(stream == null && _defaultDir.length() > 0)
         {
-            return dir ? f.isDirectory() : f.isFile();
+            stream = IceInternal.Util.openResource(getClass().getClassLoader(),
+                                                   _defaultDir + java.io.File.separator + path);
         }
 
-        if(_defaultDir.length() > 0)
+        if(stream != null)
         {
-            String s = _defaultDir + java.io.File.separator + path.value;
-            f = new java.io.File(s);
-            if(f.exists() && ((!dir && f.isFile()) || (dir && f.isDirectory())))
-            {
-                path.value = s;
-                return true;
-            }
+            stream = new java.io.BufferedInputStream(stream);
         }
 
-        return false;
+        return stream;
     }
 
     private static class CipherExpression
@@ -1001,7 +1176,12 @@ class Instance
     private String[] _protocols;
     private boolean _checkCertName;
     private int _verifyDepthMax;
+    private int _verifyPeer;
     private CertificateVerifier _verifier;
     private PasswordCallback _passwordCallback;
     private TrustManager _trustManager;
+
+    private InputStream _keystoreStream;
+    private InputStream _truststoreStream;
+    private List<InputStream> _seeds = new ArrayList<InputStream>();
 }

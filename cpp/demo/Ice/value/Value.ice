@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -24,7 +24,7 @@ class Printer
     void printBackwards();
 };
 
-class DerivedPrinter extends Printer
+["cpp:virtual"]class DerivedPrinter extends Printer
 {
     string derivedMessage;
     void printUppercase();
@@ -35,7 +35,7 @@ exception DerivedPrinterException
     DerivedPrinter derived;
 };
 
-class Initial
+interface Initial
 {
     Simple getSimple();
     void getPrinter(out Printer impl, out Printer* proxy);

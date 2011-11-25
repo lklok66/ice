@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,6 +9,8 @@
 
 #ifndef ICE_GRID_EXCEPTION_ICE
 #define ICE_GRID_EXCEPTION_ICE
+
+[["cpp:header-ext:h"]]
 
 #include <Ice/Identity.ice>
 #include <Ice/BuiltinSequences.ice>
@@ -319,7 +321,7 @@ exception AllocationTimeoutException extends AllocationException
  * This exception is raised if a client is denied the ability to create
  * a session with IceGrid.
  *
- * @see SessionFactory::createSession
+ * @see SessionFactory#createSession
  *
  **/
 exception PermissionDeniedException
@@ -337,8 +339,8 @@ exception PermissionDeniedException
  * This exception is raised if an observer is already registered with
  * the registry.
  *
- * @see AdminSession::setObservers
- * @see AdminSession::setObserversByIdentity
+ * @see AdminSession#setObservers
+ * @see AdminSession#setObserversByIdentity
  *
  **/
 exception ObserverAlreadyRegisteredException
@@ -355,12 +357,12 @@ exception ObserverAlreadyRegisteredException
  *
  * This exception is raised if a file is not available.
  *
- * @see AdminSession::openServerStdOut
- * @see AdminSession::openServerStdErr
- * @see AdminSession::openNodeStdOut
- * @see AdminSession::openNodeStdErr
- * @see AdminSession::openRegistryStdOut
- * @see AdminSession::openRegistryStdErr
+ * @see AdminSession#openServerStdOut
+ * @see AdminSession#openServerStdErr
+ * @see AdminSession#openNodeStdOut
+ * @see AdminSession#openNodeStdErr
+ * @see AdminSession#openRegistryStdOut
+ * @see AdminSession#openRegistryStdErr
  *
  **/
 exception FileNotAvailableException

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,15 +11,16 @@ namespace IceInternal
 {
 
     using System.Collections;
+    using System.Collections.Generic;
     using System.Diagnostics;
-    using IceUtilInternal;
 
     public sealed class ObjectAdapterFactory
     {
         public void shutdown()
         {
-            Hashtable adapters;
-            lock(this)
+            List<Ice.ObjectAdapterI> adapters;
+            _m.Lock();
+            try
             {
                 //
                 // Ignore shutdown requests if the object adapter factory has
@@ -30,19 +31,23 @@ namespace IceInternal
                     return;
                 }
 
-                adapters = _adapters;
+                adapters = new List<Ice.ObjectAdapterI>(_adapters);
                 
                 instance_ = null;
                 _communicator = null;
                 
-                System.Threading.Monitor.PulseAll(this);
+                _m.NotifyAll();
+            }
+            finally
+            {
+                _m.Unlock();
             }
 
             //
             // Deactivate outside the thread synchronization, to avoid
             // deadlocks.
             //
-            foreach(Ice.ObjectAdapter adapter in adapters.Values)
+            foreach(Ice.ObjectAdapter adapter in adapters)
             {
                 adapter.deactivate();
             }
@@ -50,55 +55,44 @@ namespace IceInternal
         
         public void waitForShutdown()
         {
-            Hashtable adapters;
-            lock(this)
+            List<Ice.ObjectAdapterI> adapters;
+            _m.Lock();
+            try
             {
                 //
                 // First we wait for the shutdown of the factory itself.
                 //
                 while(instance_ != null)
                 {
-                    System.Threading.Monitor.Wait(this);
+                    _m.Wait();
                 }
                 
-                //
-                // If some other thread is currently shutting down, we wait
-                // until this thread is finished.
-                //
-                while(_waitForShutdown)
-                {
-                    System.Threading.Monitor.Wait(this);
-                }
-                _waitForShutdown = true;
-                adapters = _adapters;
+                adapters = new List<Ice.ObjectAdapterI>(_adapters);
+            }
+            finally
+            {
+                _m.Unlock();
             }
 
             //
             // Now we wait for deactivation of each object adapter.
             //
-            if(adapters != null)
+            foreach(Ice.ObjectAdapter adapter in adapters)
             {
-                foreach(Ice.ObjectAdapter adapter in adapters.Values)
-                {
-                    adapter.waitForDeactivate();
-                }
-            }
-            
-            lock(this)
-            {
-                //
-                // Signal that waiting is complete.
-                //
-                _waitForShutdown = false;
-                System.Threading.Monitor.PulseAll(this);
+                adapter.waitForDeactivate();
             }
         }
 
         public bool isShutdown()
         {
-            lock(this)
+            _m.Lock();
+            try
             {
                 return instance_ == null;
+            }
+            finally
+            {
+                _m.Unlock();
             }
         }
 
@@ -109,78 +103,86 @@ namespace IceInternal
             //
             waitForShutdown();
 
-            Hashtable adapters;
-            lock(this)
+            List<Ice.ObjectAdapterI> adapters;
+            _m.Lock();
+            try
             {
-                adapters = _adapters;
-
-                //
-                // We set _adapters to null because our destructor must not
-                // invoke methods on member objects.
-                //
-                _adapters = null;
+                adapters = new List<Ice.ObjectAdapterI>(_adapters);
+            }
+            finally
+            {
+                _m.Unlock();
             }
 
-            if(adapters != null)
+            foreach(Ice.ObjectAdapter adapter in adapters)
             {
-                foreach(Ice.ObjectAdapter adapter in adapters.Values)
-                {
-                    adapter.destroy();
-                }
+                adapter.destroy();
+            }
+
+            _m.Lock();
+            try
+            {
+                _adapters.Clear();
+            }
+            finally
+            {
+                _m.Unlock();
             }
         }
         
-        public Ice.ObjectAdapter createObjectAdapter(string name, string endpoints, Ice.RouterPrx router)
+        public Ice.ObjectAdapter createObjectAdapter(string name, Ice.RouterPrx router)
         {
-            lock(this)
+            _m.Lock();
+            try
             {
                 if(instance_ == null)
                 {
                     throw new Ice.ObjectAdapterDeactivatedException();
                 }
                 
-                Ice.ObjectAdapter adapter = (Ice.ObjectAdapter)_adapters[name];
-                if(adapter != null)
-                {
-                    Ice.AlreadyRegisteredException ex = new Ice.AlreadyRegisteredException();
-                    ex.kindOfObject = "object adapter";
-                    ex.id = name;
-                    throw ex;
-                }
-
-                if(name.Length == 0 && (endpoints.Length != 0 || router != null))
-                {
-                    Ice.InitializationException ex = new Ice.InitializationException();
-                    ex.reason = "Cannot configure endpoints or router with nameless object adapter";
-                    throw ex;
-                }
-                
+                Ice.ObjectAdapterI adapter = null;
                 if(name.Length == 0)
                 {
-                    string uuid = Ice.Util.generateUUID();
-                    adapter = new Ice.ObjectAdapterI(instance_, _communicator, this, uuid, "", null, true);
-                    _adapters[uuid] = adapter;
+                    string uuid = System.Guid.NewGuid().ToString();
+                    adapter = new Ice.ObjectAdapterI(instance_, _communicator, this, uuid, null, true);
                 }
                 else
                 {
-                    adapter = new Ice.ObjectAdapterI(instance_, _communicator, this, name, endpoints, router, false);
-                    _adapters[name] = adapter;
+                    if(_adapterNamesInUse.Contains(name))
+                    {
+                        Ice.AlreadyRegisteredException ex = new Ice.AlreadyRegisteredException();
+                        ex.kindOfObject = "object adapter";
+                        ex.id = name;
+                        throw ex;
+                    }
+                    adapter = new Ice.ObjectAdapterI(instance_, _communicator, this, name, router, false);
+                    _adapterNamesInUse.Add(name);
                 }
+                _adapters.Add(adapter);
                 return adapter;
+            }
+            finally
+            {
+                _m.Unlock();
             }
         }
         
         public Ice.ObjectAdapter findObjectAdapter(Ice.ObjectPrx proxy)
         {
-            ArrayList adapters;
-            lock(this)
+            List<Ice.ObjectAdapterI> adapters;
+            _m.Lock();
+            try
             {
                 if(instance_ == null)
                 {
                     return null;
                 }
                 
-                adapters = new ArrayList(_adapters.Values);
+                adapters = new List<Ice.ObjectAdapterI>(_adapters);
+            }
+            finally
+            {
+                _m.Unlock();
             }
             
             foreach(Ice.ObjectAdapterI adapter in adapters)
@@ -201,35 +203,41 @@ namespace IceInternal
             return null;
         }
 
-        public void removeObjectAdapter(string name)
+        public void removeObjectAdapter(Ice.ObjectAdapterI adapter)
         {
-            lock(this)
+            _m.Lock();
+            try
             {
                 if(instance_ == null)
                 {
                     return;
                 }
 
-                _adapters.Remove(name);
+                _adapters.Remove(adapter);
+                _adapterNamesInUse.Remove(adapter.getName());
+            }
+            finally
+            {
+                _m.Unlock();
             }
         }
-        
-        public void flushBatchRequests()
+
+        public void flushAsyncBatchRequests(CommunicatorBatchOutgoingAsync outAsync)
         {
-            ArrayList adapters;
-            lock(this)
+            List<Ice.ObjectAdapterI> adapters;
+            _m.Lock();
+            try
             {
-                if(_adapters == null)
-                {
-                    return;
-                }
-                
-                adapters = new ArrayList(_adapters.Values);
+                adapters = new List<Ice.ObjectAdapterI>(_adapters);
+            }
+            finally
+            {
+                _m.Unlock();
             }
 
             foreach(Ice.ObjectAdapterI adapter in adapters)
             {
-                adapter.flushBatchRequests();
+                adapter.flushAsyncBatchRequests(outAsync);
             }
         }
         
@@ -240,14 +248,16 @@ namespace IceInternal
         {
             instance_ = instance;
             _communicator = communicator;
-            _adapters = new Hashtable();
-            _waitForShutdown = false;
+            _adapterNamesInUse = new HashSet<string>();
+            _adapters = new List<Ice.ObjectAdapterI>();
         }
         
         private Instance instance_;
         private Ice.Communicator _communicator;
-        private Hashtable _adapters;
-        private bool _waitForShutdown;
+        private HashSet<string> _adapterNamesInUse;
+        private List<Ice.ObjectAdapterI> _adapters;
+
+        private readonly IceUtilInternal.Monitor _m = new IceUtilInternal.Monitor();
     }
 
 }

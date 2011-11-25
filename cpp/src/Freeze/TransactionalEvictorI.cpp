@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -356,10 +356,10 @@ Freeze::TransactionalEvictorI::dispatch(Request& request)
                 }
                 catch(...)
                 {
-                    _dbEnv->setCurrentTransaction(0);
+                    assert(_dbEnv->getCurrent() == 0);
                     throw;
                 }
-                _dbEnv->setCurrentTransaction(0);
+                assert(_dbEnv->getCurrent() == 0);
             }
         }
 
@@ -423,8 +423,7 @@ Freeze::TransactionalEvictorI::dispatch(Request& request)
 
     int operationAttributes = sample->ice_operationAttributes(current.operation);
                 
-    bool readOnly = (_useNonmutating && current.mode == Nonmutating) 
-        || (!_useNonmutating && (operationAttributes & 0x1) == 0);
+    bool readOnly = (operationAttributes & 0x1) == 0;
                 
     int txMode = (operationAttributes & 0x6) >> 1;
                 
@@ -557,14 +556,6 @@ Freeze::TransactionalEvictorI::dispatch(Request& request)
                         
                         return dispatchStatus;
                     }
-#ifdef __HP_aCC
-		    // COMPILER BUG
-		    catch(const std::exception&)
-		    {
-			ctx->rollback();
-                        throw;
-		    }
-#endif
                     catch(...)
                     {
                         //
@@ -625,7 +616,7 @@ Freeze::TransactionalEvictorI::dispatch(Request& request)
     }
 
     //
-    // Can be reached
+    // Can't be reached
     //
     assert(0);
     throw OperationNotExistException(__FILE__, __LINE__);
@@ -637,6 +628,17 @@ Freeze::TransactionalEvictorI::deactivate(const string&)
 {
     if(_deactivateController.deactivate())
     {
+        {
+            Lock sync(*this);
+     
+            //
+            // Set the evictor size to zero, meaning that we will evict
+            // everything possible.
+            //
+            _evictorSize = 0;
+            evict();
+        }
+
         //
         // Break cycle
         //

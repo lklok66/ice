@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -15,9 +15,10 @@
 
 //
 // We include Handle.h here to make sure that the Ice::Handle template
-// is defined before any definition of incRef() or decRef() (see
-// http://gcc.gnu.org/bugzilla/show_bug.cgi?id=25495 for information
-// on why this is necessary.)
+// is defined before any definition of upCast().
+//
+// See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=25495 for information
+// on why this is necessary.
 //
 #include <Ice/Handle.h>
 
@@ -88,13 +89,29 @@ uncheckedCastHelper(const ::IceInternal::ProxyHandle<Y>& b, T*)
 template<typename T, typename Y> inline ProxyHandle<T> 
 checkedCastHelper(const ::IceInternal::ProxyHandle<Y>& b, void*, const ::Ice::Context* ctx)
 {
+#ifdef __SUNPRO_CC
+    //
+    // Sun CC bug introduced in version 5.10
+    //
+    const ::Ice::ObjectPrx& o = b;
+    return checkedCastImpl<ProxyHandle<T> >(o, ctx);
+#else
     return checkedCastImpl<ProxyHandle<T> >(b, ctx);
+#endif
 }
 
 template<typename T, typename Y> inline ProxyHandle<T> 
 uncheckedCastHelper(const ::IceInternal::ProxyHandle<Y>& b, void*)
 {
+#ifdef __SUNPRO_CC
+    //
+    // Sun CC bug introduced in version 5.10
+    //
+    const ::Ice::ObjectPrx& o = b;
+    return uncheckedCastImpl<ProxyHandle<T> >(o);
+#else
     return uncheckedCastImpl<ProxyHandle<T> >(b);
+#endif
 }
 
 //
@@ -106,6 +123,17 @@ template<typename T>
 class ProxyHandle : public ::IceUtil::HandleBase<T>
 {
 public:
+
+#if defined(__BCPLUSPLUS__) && (__BCPLUSPLUS__ >= 0x0600)
+    //
+    // C++Builder 2009 does not allow setting Prx to 0.
+    //
+    ProxyHandle(int p)
+    {
+	assert(p == 0);
+        this->_ptr = 0;
+    }
+#endif
     
     ProxyHandle(T* p = 0)
     {
@@ -252,7 +280,15 @@ public:
     static ProxyHandle checkedCast(const ProxyHandle<Y>& r, const std::string& f)
     {
         Ice::Context* ctx = 0;
+#ifdef __SUNPRO_CC
+        //
+        // Sun CC bug introduced in version 5.10
+        //
+        const ::Ice::ObjectPrx& o = r;
+        return ::IceInternal::checkedCastImpl<ProxyHandle>(o, f, ctx);
+#else
         return ::IceInternal::checkedCastImpl<ProxyHandle>(r, f, ctx);
+#endif
     }
 
     template<class Y>
@@ -265,7 +301,15 @@ public:
     template<class Y>
     static ProxyHandle checkedCast(const ProxyHandle<Y>& r, const std::string& f, const ::Ice::Context& ctx)
     {
+#ifdef __SUNPRO_CC
+        //
+        // Sun CC bug introduced in version 5.10
+        //
+        const ::Ice::ObjectPrx& o = r;
+        return ::IceInternal::checkedCastImpl<ProxyHandle>(o, f, &ctx);
+#else
         return ::IceInternal::checkedCastImpl<ProxyHandle>(r, f, &ctx);
+#endif
     }
 
     template<class Y>
@@ -278,10 +322,17 @@ public:
     template<class Y>
     static ProxyHandle uncheckedCast(const ProxyHandle<Y>& r, const std::string& f)
     {
+#ifdef __SUNPRO_CC
+        //
+        // Sun CC bug introduced in version 5.10
+        //
+        const ::Ice::ObjectPrx& o = r;
+        return ::IceInternal::uncheckedCastImpl<ProxyHandle<T> >(o, f);
+#else
         return ::IceInternal::uncheckedCastImpl<ProxyHandle>(r, f);
+#endif
     }
 };
-
 
 }
 

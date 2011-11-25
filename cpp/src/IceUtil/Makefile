@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -21,7 +21,7 @@ OBJS		= ArgVector.o \
 		  CountDownLatch.o \
 		  CtrlCHandler.o \
 		  Exception.o \
-		  Shared.o \
+		  FileUtil.o \
 		  InputUtil.o \
 		  Options.o \
 		  OutputUtil.o \
@@ -29,13 +29,15 @@ OBJS		= ArgVector.o \
 		  RWRecMutex.o \
 		  RecMutex.o \
 		  StaticMutex.o \
+		  Shared.o \
 		  StringUtil.o \
 		  Thread.o \
 		  ThreadException.o \
 		  Time.o \
 		  Timer.o \
 		  UUID.o \
-		  Unicode.o
+		  Unicode.o \
+		  MutexProtocol.o
 
 SRCS		= $(OBJS:.o=.cpp)
 

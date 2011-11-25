@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -45,14 +45,14 @@ protected:
 
     void openDoc(const ::std::string&, const std::string&, const std::string& = "", const std::string& = "");
     void openDoc(const ContainedPtr&);
-    void closeDoc();
+    void closeDoc(const std::string& = "");
 
     void start(const ::std::string&, const ::std::string& = ::std::string());
     void end();
 
     void printComment(const ContainedPtr&, const ContainerPtr&, const ::std::string&, bool = false);
     void printMetaData(const ContainedPtr&);
-    void printSummary(const ContainedPtr&, const ContainerPtr&, bool);
+    void printSummary(const ContainedPtr&, const ContainerPtr&, bool, bool);
 
     void printHeaderFooter(const ContainedPtr&);
     void printSearch();
@@ -69,6 +69,8 @@ protected:
 
     static ::std::string getImageDir();
     static ::std::string getLogoURL();
+
+    static ::std::string getFooter(const ::std::string&);
 
     ::IceUtilInternal::XMLOutput& _out;
 
@@ -89,7 +91,6 @@ private:
     static ::std::string readFile(const ::std::string&);
     static void readFile(const ::std::string&, ::std::string&, ::std::string&);
     static void getHeaders(const ::std::string&, ::std::string&, ::std::string&);
-    static ::std::string getFooter(const ::std::string&);
 
     ::std::string _indexFooter;
     const Files _files;
@@ -102,6 +103,16 @@ private:
     static ::std::string _logoURL;
     static ::std::string _searchAction;
     static ContainedList _symbols;
+
+    //
+    // TODO:
+    // Members below exist to emit warnings for old-style javadoc comments (using [...] instead of {@link ...}),
+    // and to emit warnings for old-style scoped names (X::Y::Z instead of X.Y#Z).
+    // Once we remove support for the old style comments, we also need to remove these members.
+    //
+    ::std::set< ::std::string> _warnOldCommentFiles;
+    ::std::string toSliceID(const ::std::string&, const ::std::string&);
+    void warnOldStyleIdent(const ::std::string&, const ::std::string&);
 };
 
 class StartPageGenerator : private GeneratorBase
@@ -171,6 +182,7 @@ private:
 
     void writeEntry(const ContainedPtr&);
 
+    ::std::string _footer;
     ModuleList _modules;
     ContainedList _symbols;
     ::IceUtilInternal::XMLOutput _out;

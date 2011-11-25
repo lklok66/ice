@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -9,8 +9,7 @@
 
 top_srcdir	= ..\..\..
 
-TARGETS		= client.exe
-TARGETS_CONFIG	= $(TARGETS:.exe=.exe.config)
+TARGETS		= client.exe Serializable.dll
 
 C_SRCS		= Client.cs
 
@@ -24,9 +23,16 @@ GDIR		= generated
 
 MCSFLAGS	= $(MCSFLAGS) -target:exe
 
-SLICE2CSFLAGS	= $(SLICE2CSFLAGS) --stream -I.
+SLICE2CSFLAGS	= $(SLICE2CSFLAGS) --stream -I. -I"$(slicedir)"
 
-client.exe: $(C_SRCS) $(GEN_SRCS)
-	$(MCS) $(MCSFLAGS) -out:$@ -r:$(refdir)\Ice.dll $(C_SRCS) $(GEN_SRCS)
+!if "$(COMPACT)" == "yes"
+SLICE2CSFLAGS	= $(SLICE2CSFLAGS) -DCOMPACT
+!endif
 
-!include .depend
+client.exe: $(C_SRCS) $(GEN_SRCS) Serializable.dll
+	$(MCS) $(MCSFLAGS) -out:$@ -r:"$(refdir)\Ice.dll" -r:Serializable.dll $(C_SRCS) $(GEN_SRCS)
+
+Serializable.dll: Serializable.cs
+	$(MCS) $(MCSFLAGS) -target:library -out:Serializable.dll /keyfile:$(KEYFILE) Serializable.cs
+
+!include .depend.mak

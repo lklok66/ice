@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -16,7 +16,8 @@
 #include <Ice/Instance.h>
 #include <Ice/Properties.h>
 #include <Ice/ReplyStatus.h>
-#include <IceUtil/StaticMutex.h>
+#include <IceUtil/Mutex.h>
+#include <IceUtil/MutexPtrLock.h>
 
 using namespace std;
 using namespace Ice;
@@ -24,7 +25,31 @@ using namespace IceInternal;
 
 IceUtil::Shared* IceInternal::upCast(IncomingAsync* p) { return p; }
 IceUtil::Shared* IceInternal::upCast(AMD_Object_ice_invoke* p) { return p; }
-IceUtil::Shared* IceInternal::upCast(AMD_Array_Object_ice_invoke* p) { return p; }
+
+namespace
+{
+
+IceUtil::Mutex* globalMutex = 0;
+
+class Init
+{
+public:
+
+    Init()
+    {
+        globalMutex = new IceUtil::Mutex;
+    }
+
+    ~Init()
+    {
+        delete globalMutex;
+        globalMutex = 0;
+    }
+};
+
+Init init;
+
+}
 
 IceInternal::IncomingAsync::IncomingAsync(Incoming& in) :
     IncomingBase(in),
@@ -44,7 +69,7 @@ IceInternal::IncomingAsync::__deactivate(Incoming& in)
 {
     assert(_retriable);
     {
-        IceUtil::StaticMutex::Lock lock(IceUtil::globalMutex);
+        IceUtilInternal::MutexPtrLock<IceUtil::Mutex> lock(globalMutex);
         if(!_active)
         {
             //
@@ -60,14 +85,118 @@ IceInternal::IncomingAsync::__deactivate(Incoming& in)
 }
 
 void
+IceInternal::IncomingAsync::ice_exception(const ::std::exception& ex)
+{
+    //
+    // Only call __exception if this incoming is not retriable or if
+    // all the interceptors return true and no response has been sent
+    // yet.
+    //
+
+    if(_retriable)
+    {
+        try
+        {
+            for(deque<Ice::DispatchInterceptorAsyncCallbackPtr>::iterator p = _interceptorAsyncCallbackQueue.begin();
+                p != _interceptorAsyncCallbackQueue.end(); ++p)
+            {
+                if((*p)->exception(ex) == false)
+                {
+                    return;
+                }
+            }
+        }
+        catch(...)
+        {
+            return;
+        }
+    
+        IceUtilInternal::MutexPtrLock<IceUtil::Mutex> lock(globalMutex);
+        if(!_active)
+        {
+            return;
+        }
+        _active = false;
+    }
+
+    if(_connection)
+    {
+        __exception(ex);
+    }
+    else
+    {
+        //
+        // Response has already been sent.
+        //
+        if(_os.instance()->initializationData().properties->getPropertyAsIntWithDefault("Ice.Warn.Dispatch", 1) > 0)
+        {
+            __warning(ex.what());
+        }
+    }
+}
+
+void
+IceInternal::IncomingAsync::ice_exception()
+{
+    //
+    // Only call __exception if this incoming is not retriable or if
+    // all the interceptors return true and no response has been sent
+    // yet.
+    //
+
+    if(_retriable)
+    {
+        try
+        {
+            for(deque<Ice::DispatchInterceptorAsyncCallbackPtr>::iterator p = _interceptorAsyncCallbackQueue.begin();
+                p != _interceptorAsyncCallbackQueue.end(); ++p)
+            {
+                if((*p)->exception() == false)
+                {
+                    return;
+                }
+            }
+        }
+        catch(...)
+        {
+            return;
+        }
+    
+        IceUtilInternal::MutexPtrLock<IceUtil::Mutex> lock(globalMutex);
+        if(!_active)
+        {
+            return;
+        }
+        _active = false;
+    }
+
+    if(_connection)
+    {
+        __exception();
+    }
+    else
+    {
+        //
+        // Response has already been sent.
+        //
+        if(_os.instance()->initializationData().properties->getPropertyAsIntWithDefault("Ice.Warn.Dispatch", 1) > 0)
+        {
+            __warning("unknown exception");
+        }
+    }
+}
+
+void
 IceInternal::IncomingAsync::__response(bool ok)
 {
     try
     {
-        if(!__servantLocatorFinished())
+        if(_locator && !__servantLocatorFinished())
         {
             return;
         }
+
+        assert(_connection);
 
         if(_response)
         {
@@ -88,6 +217,8 @@ IceInternal::IncomingAsync::__response(bool ok)
         {
             _connection->sendNoResponse();
         }
+
+        _connection = 0;
     }
     catch(const LocalException& ex)
     {
@@ -100,7 +231,7 @@ IceInternal::IncomingAsync::__exception(const std::exception& exc)
 {
     try
     {
-        if(!__servantLocatorFinished())
+        if(_locator && !__servantLocatorFinished())
         {
             return;
         }
@@ -118,7 +249,7 @@ IceInternal::IncomingAsync::__exception()
 {
     try
     {
-        if(!__servantLocatorFinished())
+        if(_locator && !__servantLocatorFinished())
         {
             return;
         }
@@ -132,161 +263,42 @@ IceInternal::IncomingAsync::__exception()
 }
 
 bool
-IceInternal::IncomingAsync::__servantLocatorFinished()
-{
-    try
-    {
-        if(_locator && _servant)
-        {
-            try
-            {
-                _locator->finished(_current, _servant, _cookie);
-            }
-            catch(const UserException& ex)
-            {
-                //
-                // The operation may have already marshaled a reply; we must overwrite that reply.
-                //
-                if(_response)
-                {
-                    _os.endWriteEncaps();
-                    _os.b.resize(headerSize + 4); // Reply status position.
-                    _os.write(replyUserException);
-                    _os.startWriteEncaps();
-                    _os.write(ex);
-                    _os.endWriteEncaps();
-                    _connection->sendResponse(&_os, _compress);
-                }
-                else
-                {
-                    _connection->sendNoResponse();
-                }
-                return false;
-            }
-        }
-        return true;
-    }
-    catch(const std::exception& ex)
-    {
-        __handleException(ex);
-        return false;
-    }
-    catch(...)
-    {
-        __handleException();
-        return false;
-    }
-}
-
-bool
 IceInternal::IncomingAsync::__validateResponse(bool ok)
 {
-    if(!_retriable)
+    //
+    // Only returns true if this incoming is not retriable or if all
+    // the interceptors return true and no response has been sent
+    // yet. Upon getting a true return value, the caller should send
+    // the response.
+    //
+
+    if(_retriable)
     {
-        return true;
-    }
-    
-    try
-    {
-        for(std::deque<Ice::DispatchInterceptorAsyncCallbackPtr>::iterator p = _interceptorAsyncCallbackQueue.begin();
-            p != _interceptorAsyncCallbackQueue.end(); ++p)
+        try
         {
-            if((*p)->response(ok) == false)
+            for(deque<DispatchInterceptorAsyncCallbackPtr>::iterator p = _interceptorAsyncCallbackQueue.begin();
+                p != _interceptorAsyncCallbackQueue.end(); ++p)
             {
-                return false;
+                if((*p)->response(ok) == false)
+                {
+                    return false;
+                }
             }
         }
-    }
-    catch(...)
-    {
-        return false;
-    }
-    
-    IceUtil::StaticMutex::Lock lock(IceUtil::globalMutex);
-    if(_active)
-    {
-        _active = false;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-    
-bool 
-IceInternal::IncomingAsync::__validateException(const std::exception& ex)
-{
-    if(!_retriable)
-    {
-        return true;
-    }
-    
-    try
-    {
-        for(std::deque<Ice::DispatchInterceptorAsyncCallbackPtr>::iterator p = _interceptorAsyncCallbackQueue.begin();
-            p != _interceptorAsyncCallbackQueue.end(); ++p)
+        catch(...)
         {
-            if((*p)->exception(ex) == false)
-            {
-                return false;
-            }
+            return false;
         }
-    }
-    catch(...)
-    {
-        return false;
-    }
-    
-    IceUtil::StaticMutex::Lock lock(IceUtil::globalMutex);
-    if(_active)
-    {
-        _active = false;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool 
-IceInternal::IncomingAsync::__validateException()
-{
-    if(!_retriable)
-    {
-        return true;
-    }
-    
-    try
-    {
-        for(std::deque<Ice::DispatchInterceptorAsyncCallbackPtr>::iterator p = _interceptorAsyncCallbackQueue.begin();
-            p != _interceptorAsyncCallbackQueue.end(); ++p)
+        
+        IceUtilInternal::MutexPtrLock<IceUtil::Mutex> lock(globalMutex);
+        if(!_active)
         {
-            if((*p)->exception() == false)
-            {
-                return false;
-            }
+            return false;
         }
-    }
-    catch(...)
-    {
-        return false;
-    }
-    
-    IceUtil::StaticMutex::Lock lock(IceUtil::globalMutex);
-    if(_active)
-    {
         _active = false;
-        return true;
     }
-    else
-    {
-        return false;
-    }
+    return true;
 }
-
 
 IceAsync::Ice::AMD_Object_ice_invoke::AMD_Object_ice_invoke(Incoming& in) :
     IncomingAsync(in)
@@ -312,30 +324,7 @@ IceAsync::Ice::AMD_Object_ice_invoke::ice_response(bool ok, const vector<Byte>& 
 }
 
 void
-IceAsync::Ice::AMD_Object_ice_invoke::ice_exception(const std::exception& ex)
-{
-    if(__validateException(ex))
-    {
-        __exception(ex);
-    }
-}
-
-void
-IceAsync::Ice::AMD_Object_ice_invoke::ice_exception()
-{
-    if(__validateException())
-    {
-        __exception();
-    }
-}
-
-IceAsync::Ice::AMD_Array_Object_ice_invoke::AMD_Array_Object_ice_invoke(Incoming& in) :
-    IncomingAsync(in)
-{
-}
-
-void
-IceAsync::Ice::AMD_Array_Object_ice_invoke::ice_response(bool ok, const pair<const Byte*, const Byte*>& outParams)
+IceAsync::Ice::AMD_Object_ice_invoke::ice_response(bool ok, const pair<const Byte*, const Byte*>& outParams)
 {
     if(__validateResponse(ok))
     {
@@ -349,23 +338,5 @@ IceAsync::Ice::AMD_Array_Object_ice_invoke::ice_response(bool ok, const pair<con
             return;
         }
         __response(ok);
-    }
-}
-
-void
-IceAsync::Ice::AMD_Array_Object_ice_invoke::ice_exception(const std::exception& ex)
-{ 
-    if(__validateException(ex))
-    {
-        __exception(ex);
-    }
-}
-
-void
-IceAsync::Ice::AMD_Array_Object_ice_invoke::ice_exception()
-{
-    if(__validateException())
-    {
-        __exception();
     }
 }

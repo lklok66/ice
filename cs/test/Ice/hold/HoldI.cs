@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -28,17 +28,18 @@ public sealed class HoldI : HoldDisp_
     public override void
     putOnHold(int milliSeconds, Ice.Current current)
     {
-        if(milliSeconds <= 0)
+        if(milliSeconds < 0)
+        {
+            _adapter.hold();
+        }
+        else if(milliSeconds == 0)
         {
             _adapter.hold();
             _adapter.activate();
         }
         else
         {
-            System.Timers.Timer timer = new System.Timers.Timer(milliSeconds);
-            timer.AutoReset = false;
-            timer.Elapsed += new System.Timers.ElapsedEventHandler(
-                delegate(object source, System.Timers.ElapsedEventArgs e)
+            new DelayedTask(milliSeconds, delegate()
                 {
                     try
                     {
@@ -48,7 +49,43 @@ public sealed class HoldI : HoldDisp_
                     {
                     }
                 });
-            timer.Enabled = true;
+        }
+    }
+
+    public override void
+    waitForHold(Ice.Current current)
+    {
+        lock(this)
+        {
+            if(++_waitForHold == 1)
+            {
+                new DelayedTask(1, delegate()
+                    {
+                        while(true)
+                        {
+                            lock(this)
+                            {
+                                if(--_waitForHold < 0)
+                                {
+                                    return;
+                                }
+                            }
+                            try
+                            {
+                                current.adapter.waitForHold();
+                                current.adapter.activate();
+                            }
+                            catch(Ice.ObjectAdapterDeactivatedException)
+                            {
+                                //
+                                // This shouldn't occur. The test ensures all the waitForHold timers are
+                                // finished before shutting down the communicator.
+                                //
+                                test(false);
+                            }
+                        }
+                    });
+            }
         }
     }
 
@@ -82,6 +119,33 @@ public sealed class HoldI : HoldDisp_
         _adapter.getCommunicator().shutdown();
     }
 
+    //
+    // The .NET Compact Framework doesn't support the System.Timers.Timer class,
+    // but a simple thread does what we need in this test.
+    //
+    private delegate void Task();
+
+    private class DelayedTask
+    {
+        internal DelayedTask(int timeout, Task task)
+        {
+            _timeout = timeout;
+            _task = task;
+            System.Threading.Thread t = new System.Threading.Thread(new System.Threading.ThreadStart(run));
+            t.Start();
+        }
+
+        private void run()
+        {
+            System.Threading.Thread.Sleep(_timeout);
+            _task();
+        }
+
+        private int _timeout;
+        private Task _task;
+    }
+
     private Ice.ObjectAdapter _adapter;
     private int _last = 0;
+    private int _waitForHold = 0;
 }

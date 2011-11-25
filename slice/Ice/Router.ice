@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,6 +10,8 @@
 #ifndef ICE_ROUTER_ICE
 #define ICE_ROUTER_ICE
 
+[["cpp:header-ext:h"]]
+
 #include <Ice/BuiltinSequences.ice>
 
 module Ice
@@ -18,7 +20,7 @@ module Ice
 /**
  *
  * The Ice router interface. Routers can be set either globally with
- * [Communicator::setDefaultRouter], or with [ice_router] on specific
+ * {@link Communicator.setDefaultRouter}, or with <tt>ice_router</tt> on specific
  * proxies.
  *
  **/

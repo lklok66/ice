@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -34,7 +34,7 @@ public class Server
                     usage();
                     return 0;
                 }
-                else if(!args[i].StartsWith("--"))
+                else if(!args[i].StartsWith("--", StringComparison.CurrentCulture))
                 {
                     Console.Error.WriteLine("Server: unknown option `" + args[i] + "'");
                     usage();
@@ -42,23 +42,19 @@ public class Server
                 }
             }
 
-            ServiceManagerI serviceManagerImpl = new ServiceManagerI(args);
+            ServiceManagerI serviceManagerImpl = new ServiceManagerI(communicator(), args);
             return serviceManagerImpl.run();
         }
     }
 
-    public static void Main(string[] args)
+    public static int Main(string[] args)
     {
         Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties();
         initData.properties.setProperty("Ice.Admin.DelayCreation", "1");
 
         App server = new App();
-        int status = server.main(args, initData);
-        if(status != 0)
-        {
-            System.Environment.Exit(status);
-        }
+        return server.main(args, initData);
     }
 }
 }

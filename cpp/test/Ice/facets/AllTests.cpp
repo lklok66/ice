@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -27,12 +27,13 @@ allTests(const Ice::CommunicatorPtr& communicator)
     communicator->getProperties()->setProperty("Ice.Admin.Facets", "foobar");
     Ice::StringSeq facetFilter = communicator->getProperties()->getPropertyAsList("Ice.Admin.Facets");
     test(facetFilter.size() == 1 && facetFilter[0] == "foobar");
-    communicator->getProperties()->setProperty("Ice.Admin.Facets", "foo'bar");
+    communicator->getProperties()->setProperty("Ice.Admin.Facets", "foo\\'bar");
     facetFilter = communicator->getProperties()->getPropertyAsList("Ice.Admin.Facets");
     test(facetFilter.size() == 1 && facetFilter[0] == "foo'bar");
     communicator->getProperties()->setProperty("Ice.Admin.Facets", "'foo bar' toto 'titi'");
     facetFilter = communicator->getProperties()->getPropertyAsList("Ice.Admin.Facets");
-    test(facetFilter.size() == 3 && facetFilter[0] == "foo bar" && facetFilter[1] == "toto" && facetFilter[2] == "titi");
+    test(facetFilter.size() == 3 && facetFilter[0] == "foo bar" && facetFilter[1] == "toto" && 
+         facetFilter[2] == "titi");
     communicator->getProperties()->setProperty("Ice.Admin.Facets", "'foo bar\\' toto' 'titi'");
     facetFilter = communicator->getProperties()->getPropertyAsList("Ice.Admin.Facets");
     test(facetFilter.size() == 2 && facetFilter[0] == "foo bar' toto" && facetFilter[1] == "titi");
@@ -98,7 +99,7 @@ allTests(const Ice::CommunicatorPtr& communicator)
     adapter->deactivate();
 
     cout << "testing stringToProxy... " << flush;
-    string ref = "d:default -p 12010 -t 10000";
+    string ref = "d:default -p 12010";
     Ice::ObjectPrx db = communicator->stringToProxy(ref);
     test(db);
     cout << "ok" << endl;

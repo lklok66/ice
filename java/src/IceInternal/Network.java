@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -15,45 +15,6 @@ public final class Network
     public final static int EnableIPv4 = 0;
     public final static int EnableIPv6 = 1;
     public final static int EnableBoth = 2;
-
-    public static boolean
-    connectionLost(java.io.IOException ex)
-    {
-        //
-        // TODO: The JDK raises a generic IOException for certain
-        // cases of connection loss. Unfortunately, our only choice is
-        // to search the exception message for distinguishing phrases.
-        //
-        String msg = ex.getMessage();
-        if(msg != null)
-        {
-            msg = msg.toLowerCase();
-
-            final String[] msgs =
-            {
-                "connection reset by peer", // ECONNRESET
-                "cannot send after socket shutdown", // ESHUTDOWN (Win32)
-                "cannot send after transport endpoint shutdown", // ESHUTDOWN (Linux)
-                "software caused connection abort", // ECONNABORTED
-                "an existing connection was forcibly closed", // unknown
-                "connection closed by remote host", // unknown
-                "an established connection was aborted by the software in your host machine", // unknown (Win32)
-                "broken pipe", // EPIPE
-                "there is no process to read data written to a pipe", // EPIPE? (AIX JDK 1.4.2)
-                "socket is closed" // unknown (AIX JDK 1.4.2)
-            };
-
-            for(int i = 0; i < msgs.length; i++)
-            {
-                if(msg.indexOf(msgs[i]) != -1)
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
 
     public static boolean
     connectionRefused(java.net.ConnectException ex)
@@ -75,9 +36,9 @@ public final class Network
                 "remote host refused an attempted connect operation" // ECONNREFUSED (AIX JDK 1.4.2)
             };
 
-            for(int i = 0; i < msgs.length; i++)
+            for(String m : msgs)
             {
-                if(msg.indexOf(msgs[i]) != -1)
+                if(msg.indexOf(m) != -1)
                 {
                     return true;
                 }
@@ -102,9 +63,9 @@ public final class Network
                 "too many open files in system" // ENFILE
             };
 
-            for(int i = 0; i < msgs.length; i++)
+            for(String m : msgs)
             {
-                if(msg.indexOf(msgs[i]) != -1)
+                if(msg.indexOf(m) != -1)
                 {
                     return true;
                 }
@@ -127,9 +88,7 @@ public final class Network
         }
         catch(java.io.IOException ex)
         {
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -150,9 +109,7 @@ public final class Network
         }
         catch(java.io.IOException ex)
         {
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -165,9 +122,7 @@ public final class Network
         }
         catch(java.io.IOException ex)
         {
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -193,9 +148,7 @@ public final class Network
         }
         catch(java.io.IOException ex)
         {
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -209,9 +162,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -225,9 +176,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -241,9 +190,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -259,9 +206,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -277,9 +222,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -301,9 +244,7 @@ public final class Network
                     continue;
                 }
 
-                Ice.SocketException se = new Ice.SocketException();
-                se.initCause(ex);
-                throw se;
+                throw new Ice.SocketException(ex);
             }
         }
 
@@ -315,9 +256,7 @@ public final class Network
         }
         catch(java.io.IOException ex)
         {
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
 
         return fd;
@@ -337,24 +276,24 @@ public final class Network
         {
             closeSocketNoThrow(fd);
 
-            Ice.ConnectFailedException se;
             if(connectionRefused(ex))
             {
-                se = new Ice.ConnectionRefusedException();
+                throw new Ice.ConnectionRefusedException(ex);
             }
             else
             {
-                se = new Ice.ConnectFailedException();
+                throw new Ice.ConnectFailedException(ex);
             }
-            se.initCause(ex);
-            throw se;
         }
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
+        }
+        catch(java.lang.SecurityException ex)
+        {
+            closeSocketNoThrow(fd);
+            throw new Ice.SocketException(ex);
         }
 
         if(System.getProperty("os.name").equals("Linux"))
@@ -404,23 +343,18 @@ public final class Network
         }
         catch(java.net.ConnectException ex)
         {
-            Ice.ConnectFailedException se;
             if(connectionRefused(ex))
             {
-                se = new Ice.ConnectionRefusedException();
+                throw new Ice.ConnectionRefusedException(ex);
             }
             else
             {
-                se = new Ice.ConnectFailedException();
+                throw new Ice.ConnectFailedException(ex);
             }
-            se.initCause(ex);
-            throw se;
         }
         catch(java.io.IOException ex)
         {
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -435,24 +369,19 @@ public final class Network
         {
             closeSocketNoThrow(fd);
 
-            Ice.ConnectFailedException se;
             if(connectionRefused(ex))
             {
-                se = new Ice.ConnectionRefusedException();
+                throw new Ice.ConnectionRefusedException(ex);
             }
             else
             {
-                se = new Ice.ConnectFailedException();
+                throw new Ice.ConnectFailedException(ex);
             }
-            se.initCause(ex);
-            throw se;
         }
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -475,8 +404,7 @@ public final class Network
                         {
                             try
                             {
-                                java.nio.channels.SelectionKey key =
-                                    fd.register(selector, java.nio.channels.SelectionKey.OP_ACCEPT);
+                                fd.register(selector, java.nio.channels.SelectionKey.OP_ACCEPT);
                                 int n;
                                 if(timeout > 0)
                                 {
@@ -504,9 +432,7 @@ public final class Network
                                 {
                                     continue;
                                 }
-                                Ice.SocketException se = new Ice.SocketException();
-                                se.initCause(ex);
-                                throw se;
+                                throw new Ice.SocketException(ex);
                             }
                         }
                     }
@@ -529,9 +455,7 @@ public final class Network
                 {
                     continue;
                 }
-                Ice.SocketException se = new Ice.SocketException();
-                se.initCause(ex);
-                throw se;
+                throw new Ice.SocketException(ex);
             }
         }
 
@@ -543,9 +467,7 @@ public final class Network
         }
         catch(java.io.IOException ex)
         {
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
 
         return result;
@@ -562,9 +484,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -580,9 +500,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
         return size;
     }
@@ -598,9 +516,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -616,9 +532,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
         return size;
     }
@@ -634,9 +548,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -652,9 +564,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
         return size;
     }
@@ -670,9 +580,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -688,9 +596,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
         return size;
     }
@@ -706,9 +612,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
     }
 
@@ -724,9 +628,7 @@ public final class Network
         catch(java.io.IOException ex)
         {
             closeSocketNoThrow(fd);
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(ex);
-            throw se;
+            throw new Ice.SocketException(ex);
         }
         return size;
     }
@@ -804,9 +706,7 @@ public final class Network
             //
         }
 
-        if(addr == null ||
-           (addr instanceof java.net.Inet4Address && protocol == EnableIPv6) ||
-           (addr instanceof java.net.Inet6Address && protocol == EnableIPv4))
+        if(addr == null || !isValidAddr(addr, protocol))
         {
             //
             // Iterate over the network interfaces and pick an IP
@@ -817,9 +717,7 @@ public final class Network
             while(addr == null && iter.hasNext())
             {
                 java.net.InetAddress a = iter.next();
-                if(protocol == EnableBoth ||
-                   (protocol == EnableIPv4 && a instanceof java.net.Inet4Address) ||
-                   (protocol == EnableIPv6 && a instanceof java.net.Inet6Address))
+                if(protocol == EnableBoth || isValidAddr(a, protocol))
                 {
                     addr = a;
                 }
@@ -852,21 +750,21 @@ public final class Network
                 addrs = java.net.InetAddress.getAllByName(host);
             }
 
-            for(int i = 0; i < addrs.length; ++i)
+            for(java.net.InetAddress addr : addrs)
             {
-                if(protocol == EnableBoth ||
-                   (protocol == EnableIPv4 && addrs[i] instanceof java.net.Inet4Address) ||
-                   (protocol == EnableIPv6 && addrs[i] instanceof java.net.Inet6Address))
+                if(protocol == EnableBoth || isValidAddr(addr, protocol))
                 {
-                    addresses.add(new java.net.InetSocketAddress(addrs[i], port));
+                    addresses.add(new java.net.InetSocketAddress(addr, port));
                 }
             }
         }
         catch(java.net.UnknownHostException ex)
         {
-            Ice.DNSException e = new Ice.DNSException();
-            e.host = host;
-            throw e;
+            throw new Ice.DNSException(0, host, ex);
+        }
+        catch(java.lang.SecurityException ex)
+        {
+            throw new Ice.SocketException(ex);
         }
     
         //
@@ -874,9 +772,7 @@ public final class Network
         //
         if(addresses.size() == 0)
         {
-            Ice.DNSException e = new Ice.DNSException();
-            e.host = host;
-            throw e;
+            throw new Ice.DNSException(0, host);
         }
 
         return addresses;
@@ -898,9 +794,7 @@ public final class Network
                     java.net.InetAddress addr = addrs.nextElement();
                     if(!addr.isLoopbackAddress())
                     {
-                        if(protocol == EnableBoth ||
-                           (protocol == EnableIPv4 && addr instanceof java.net.Inet4Address) ||
-                           (protocol == EnableIPv6 && addr instanceof java.net.Inet6Address))
+                        if(protocol == EnableBoth || isValidAddr(addr, protocol))
                         {
                             result.add(addr);
                         }
@@ -908,11 +802,13 @@ public final class Network
                 }
             }
         }
-        catch(java.net.SocketException e)
+        catch(java.net.SocketException ex)
         {
-            Ice.SocketException se = new Ice.SocketException();
-            se.initCause(e);
-            throw se;
+            throw new Ice.SocketException(ex);
+        }
+        catch(java.lang.SecurityException ex)
+        {
+            throw new Ice.SocketException(ex);
         }
 
         return result;
@@ -930,21 +826,19 @@ public final class Network
         SocketPair fds = new SocketPair();
         try
         {
-          java.nio.channels.Pipe pipe = java.nio.channels.Pipe.open();
-          fds.sink = pipe.sink();
-          fds.source = pipe.source();
+            java.nio.channels.Pipe pipe = java.nio.channels.Pipe.open();
+            fds.sink = pipe.sink();
+            fds.source = pipe.source();
         }
         catch(java.io.IOException ex)
         {
-          Ice.SocketException se = new Ice.SocketException();
-          se.initCause(ex);
-          throw se;
+            throw new Ice.SocketException(ex);
         }
         return fds;
     }
 
     public static java.util.ArrayList<String>
-    getHostsForEndpointExpand(String host, int protocolSupport)
+    getHostsForEndpointExpand(String host, int protocolSupport, boolean includeLoopback)
     {
         boolean wildcard = (host == null || host.length() == 0);
         if(!wildcard)
@@ -956,27 +850,29 @@ public final class Network
             catch(java.net.UnknownHostException ex)
             {
             }
+            catch(java.lang.SecurityException ex)
+            {
+                throw new Ice.SocketException(ex);
+            }
         }
 
         java.util.ArrayList<String> hosts = new java.util.ArrayList<String>();
         if(wildcard)
         {
             java.util.ArrayList<java.net.InetAddress> addrs = getLocalAddresses(protocolSupport);
-            java.util.Iterator<java.net.InetAddress> p = addrs.iterator();
-            while(p.hasNext())
+            for(java.net.InetAddress addr : addrs)
             {
                 //
                 // NOTE: We don't publish link-local IPv6 addresses as these addresses can only 
                 // be accessed in general with a scope-id.
                 //
-                java.net.InetAddress addr = p.next();
                 if(!addr.isLinkLocalAddress())
                 {
                     hosts.add(addr.getHostAddress());
                 }
             }
             
-            if(hosts.isEmpty())
+            if(includeLoopback || hosts.isEmpty())
             {
                 if(protocolSupport != EnableIPv6)
                 {
@@ -1125,11 +1021,9 @@ public final class Network
     public static String
     addressesToString(java.net.InetAddress localAddr, int localPort, java.net.InetAddress remoteAddr, int remotePort)
     {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder(128);
         s.append("local address = ");
-        s.append(localAddr.getHostAddress());
-        s.append(':');
-        s.append(localPort);
+        s.append(addrToString(localAddr, localPort));
         if(remoteAddr == null)
         {
             s.append("\nremote address = <not connected>");
@@ -1137,9 +1031,7 @@ public final class Network
         else
         {
             s.append("\nremote address = ");
-            s.append(remoteAddr.getHostAddress());
-            s.append(':');
-            s.append(remotePort);
+            s.append(addrToString(remoteAddr, remotePort));
         }
 
         return s.toString();
@@ -1148,7 +1040,7 @@ public final class Network
     public static String
     addrToString(java.net.InetSocketAddress addr)
     {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder(128);
         s.append(addr.getAddress().getHostAddress());
         s.append(':');
         s.append(addr.getPort());
@@ -1158,9 +1050,48 @@ public final class Network
     public static boolean
     interrupted(java.io.IOException ex)
     {
-        return ex instanceof java.io.InterruptedIOException ||
-            ex.getMessage().indexOf("Interrupted system call") >= 0 ||
-            ex.getMessage().indexOf("A system call received an interrupt") >= 0; // AIX JDK 1.4.2
+        return ex instanceof java.io.InterruptedIOException;
+    }
+
+    private static boolean
+    isValidAddr(java.net.InetAddress addr, int protocol)
+    {
+	 byte[] bytes = null;
+	 if(addr != null)
+	 {
+	     bytes = addr.getAddress();
+	 }
+	 return bytes != null && 
+	       ((bytes.length == 16 && protocol == EnableIPv6) ||
+	        (bytes.length == 4 && protocol == EnableIPv4));
+    }
+
+    public static String
+    addrToString(java.net.InetAddress addr, int port)
+    {
+        StringBuffer s = new StringBuffer();
+
+        //
+        // In early Android releases, sockets don't correctly report their address and
+        // port information.
+        //
+
+        if(addr == null || addr.isAnyLocalAddress())
+        {
+            s.append("<not available>");
+        }
+        else
+        {
+            s.append(addr.getHostAddress());
+        }
+
+        if(port > 0)
+        {
+            s.append(':');
+            s.append(port);
+        }
+
+        return s.toString();
     }
 
     private static java.net.InetSocketAddress
@@ -1185,29 +1116,27 @@ public final class Network
                 addrs = java.net.InetAddress.getAllByName(host);
             }
 
-            for(int i = 0; i < addrs.length; ++i)
+            for(java.net.InetAddress addr : addrs)
             {
-                if(protocol == EnableBoth ||
-                   (protocol == EnableIPv4 && addrs[i] instanceof java.net.Inet4Address) ||
-                   (protocol == EnableIPv6 && addrs[i] instanceof java.net.Inet6Address))
+                if(protocol == EnableBoth || isValidAddr(addr, protocol))
                 {
-                    return new java.net.InetSocketAddress(addrs[i], port);
+                    return new java.net.InetSocketAddress(addr, port);
                 }
             }
         }
         catch(java.net.UnknownHostException ex)
         {
-            Ice.DNSException e = new Ice.DNSException();
-            e.host = host;
-            throw e;
+            throw new Ice.DNSException(0, host, ex);
+        }
+        catch(java.lang.SecurityException ex)
+        {
+            throw new Ice.SocketException(ex);
         }
 
         //
         // No Inet4Address/Inet6Address available.
         //
-        Ice.DNSException e = new Ice.DNSException();
-        e.host = host;
-        throw e;
+        throw new Ice.DNSException(0, host);
     }
 
     private static java.net.InetAddress[]
@@ -1232,6 +1161,10 @@ public final class Network
             assert(false);
             return null;
         }
+        catch(java.lang.SecurityException ex)
+        {
+            throw new Ice.SocketException(ex);
+        }
     }
 
     private static java.net.InetAddress[]
@@ -1255,6 +1188,10 @@ public final class Network
         {
             assert(false);
             return null;
+        }
+        catch(java.lang.SecurityException ex)
+        {
+            throw new Ice.SocketException(ex);
         }
     }
 }

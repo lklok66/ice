@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -24,7 +24,7 @@ propertyClasses = {}
 
 commonPreamble = """// **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -316,8 +316,8 @@ class CppPropertyHandler(PropertyHandler):
                 os.remove(self.className + ".cpp")
 
     def startFiles(self):
-        self.hFile = open(self.className + ".h", "w")
-        self.cppFile = open(self.className + ".cpp", "w")
+        self.hFile = open(self.className + ".h", "wb")
+        self.cppFile = open(self.className + ".cpp", "wb")
         self.hFile.write(cppHeaderPreamble % {'inputfile' : self.inputfile, 'classname' : self.className})
         self.cppFile.write(cppSrcPreamble % {'inputfile' : self.inputfile, 'classname' : self.className})
 
@@ -373,8 +373,13 @@ const IceInternal::PropertyArray
 """ % { 'className' : self.className, 'section': self.currentSection })
 
     def moveFiles(self, location):
-        shutil.move(self.className + ".h", os.path.join(location, "cpp", "src", "Ice"))
-        shutil.move(self.className + ".cpp", os.path.join(location, "cpp", "src", "Ice"))
+        dest = os.path.join(location, "cpp", "src", "Ice")
+        if os.path.exists(os.path.join(dest, self.className + ".h")):
+            os.remove(os.path.join(dest, self.className + ".h"))
+        if os.path.exists(os.path.join(dest, self.className + ".cpp")):
+            os.remove(os.path.join(dest, self.className + ".cpp"))
+        shutil.move(self.className + ".h", dest)
+        shutil.move(self.className + ".cpp", dest)
 
 class JavaPropertyHandler(PropertyHandler):
     def __init__(self, inputfile, c):
@@ -388,7 +393,7 @@ class JavaPropertyHandler(PropertyHandler):
                 os.remove(self.className + ".java")
 
     def startFiles(self):
-        self.srcFile = file(self.className + ".java", "w")
+        self.srcFile = file(self.className + ".java", "wb")
         self.srcFile.write(javaPreamble % {'inputfile' : self.inputfile, 'classname' : self.className})
 
     def closeFiles(self):
@@ -441,7 +446,10 @@ class JavaPropertyHandler(PropertyHandler):
         self.srcFile.write("    };\n\n")
 
     def moveFiles(self, location):
-        shutil.move(self.className + ".java", os.path.join(location, "java", "src", "IceInternal"))
+        dest = os.path.join(location, "java", "src", "IceInternal")
+        if os.path.exists(os.path.join(dest, self.className + ".java")):
+            os.remove(os.path.join(dest, self.className + ".java"))
+        shutil.move(self.className + ".java", dest)
 
 class CSPropertyHandler(PropertyHandler):
     def __init__(self, inputfile, c):
@@ -455,7 +463,7 @@ class CSPropertyHandler(PropertyHandler):
                 os.remove(self.className + ".cs")
 
     def startFiles(self):
-        self.srcFile = file(self.className + ".cs", "w")
+        self.srcFile = file(self.className + ".cs", "wb")
         self.srcFile.write(csPreamble % {'inputfile' : self.inputfile, 'classname' : self.className})
 
     def closeFiles(self):
@@ -503,7 +511,10 @@ class CSPropertyHandler(PropertyHandler):
         self.srcFile.write("\n")
 
     def moveFiles(self, location):
-        shutil.move(self.className + ".cs", os.path.join(location, "cs", "src", "Ice"))
+        dest = os.path.join(location, "cs", "src", "Ice")
+        if os.path.exists(os.path.join(dest, self.className + ".cs")):
+            os.remove(os.path.join(dest, self.className + ".cs"))
+        shutil.move(self.className + ".cs", dest)
 
 class MultiHandler(PropertyHandler):
     def __init__(self, inputfile, c):

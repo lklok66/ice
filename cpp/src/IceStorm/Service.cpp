@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -8,10 +8,14 @@
 // **********************************************************************
 
 #include <IceUtil/DisableWarnings.h>
+
+#include <Ice/PluginManagerI.h> // For loadPlugin
+
 #include <IceStorm/TopicI.h>
 #include <IceStorm/TopicManagerI.h>
 #include <IceStorm/TransientTopicManagerI.h>
 #include <IceStorm/Instance.h>
+#include <IceStorm/DB.h>
 
 #define ICE_STORM_API ICE_DECLSPEC_EXPORT
 #include <IceStorm/Service.h>
@@ -28,7 +32,6 @@
 
 using namespace std;
 using namespace Ice;
-using namespace Freeze;
 using namespace IceStorm;
 using namespace IceStormInternal;
 using namespace IceStormElection;
@@ -138,35 +141,87 @@ ServiceI::start(
 
     if(properties->getPropertyAsIntWithDefault(name+ ".Transient", 0))
     {
-        _instance = new Instance(instanceName, name, communicator, publishAdapter, topicAdapter);
+        _instance = new Instance(instanceName, name, communicator, 0, publishAdapter, topicAdapter, 0);
         try
         {
             TransientTopicManagerImplPtr manager = new TransientTopicManagerImpl(_instance);
             _managerProxy = TopicManagerPrx::uncheckedCast(topicAdapter->add(manager, topicManagerId));
         }
-        catch(const Ice::Exception&)
+        catch(const Ice::Exception& ex)
         {
             _instance = 0;
-            throw;
+
+            ostringstream s;
+            s << "exception while starting IceStorm service " << name << ":\n";
+            s << ex;
+
+            IceBox::FailureException e(__FILE__, __LINE__);
+            e.reason = s.str();
+            throw e;
         }
         topicAdapter->activate();
         publishAdapter->activate();
         return;
     }
 
+    //
+    // Create the database cache.
+    //
+    DatabasePluginPtr plugin;
+    try
+    {
+        plugin = DatabasePluginPtr::dynamicCast(communicator->getPluginManager()->getPlugin("DB"));
+    }
+    catch(const NotRegisteredException&)
+    {
+        try
+        {
+            Ice::StringSeq cmdArgs;
+            IceInternal::loadPlugin(communicator, "DB", "IceStormFreezeDB:createFreezeDB", cmdArgs);
+            plugin = DatabasePluginPtr::dynamicCast(communicator->getPluginManager()->getPlugin("DB"));
+        }
+        catch(const Ice::LocalException& ex)
+        {
+            ostringstream s;
+            s << "failed to load default Freeze database plugin:\n" << ex;
+
+            IceBox::FailureException e(__FILE__, __LINE__);
+            e.reason = s.str();
+            throw e;
+        }
+    }
+
+    if(!plugin)
+    {
+        ostringstream s;
+        s << "no database plugin configured with `Ice.Plugin.DB' or plugin is not an IceStorm database plugin";
+        
+        IceBox::FailureException e(__FILE__, __LINE__);
+        e.reason = s.str();
+        throw e;
+    }
+    DatabaseCachePtr databaseCache = plugin->getDatabaseCache(name);
+
     if(id == -1) // No replication.
     {
-        _instance = new Instance(instanceName, name, communicator, publishAdapter, topicAdapter);
+        _instance = new Instance(instanceName, name, communicator, databaseCache, publishAdapter, topicAdapter);
 
         try
         {
             _manager = new TopicManagerImpl(_instance);
             _managerProxy = TopicManagerPrx::uncheckedCast(topicAdapter->add(_manager->getServant(), topicManagerId));
         }
-        catch(const Ice::Exception&)
+        catch(const Ice::Exception& ex)
         {
             _instance = 0;
-            throw;
+
+            ostringstream s;
+            s << "exception while starting IceStorm service " << name << ":\n";
+            s << ex;
+
+            IceBox::FailureException e(__FILE__, __LINE__);
+            e.reason = s.str();
+            throw e;
         }
     }
     else
@@ -209,7 +264,7 @@ ServiceI::start(
                 Ice::Error error(communicator->getLogger());
                 error << "deployment error: `" << topicManagerAdapterId << "' prefix does not match `"
                       << nodeAdapterId << "'";
-                throw "IceGrid deployment is incorrect";
+                throw IceBox::FailureException(__FILE__, __LINE__, "IceGrid deployment is incorrect");
             }
 
             // Determine the set of node id and node proxies.
@@ -239,19 +294,19 @@ ServiceI::start(
                 {
                     Ice::Error error(communicator->getLogger());
                     error << "deployment error: `" << adapterid << "' does not start with `" << instanceName << "'";
-                    throw "IceGrid deployment is incorrect";
+                    throw IceBox::FailureException(__FILE__, __LINE__, "IceGrid deployment is incorrect");
                 }
 
                 // The node id follows. We find the first digit (the
                 // start of the node id, and then the end of the
                 // digits).
                 string::size_type start = instanceName.size();
-                while(start < adapterid.size() && !isdigit(adapterid[start]))
+                while(start < adapterid.size() && !IceUtilInternal::isDigit(adapterid[start]))
                 {
                     ++start;
                 }
                 string::size_type end = start;
-                while(end < adapterid.size() && isdigit(adapterid[end]))
+                while(end < adapterid.size() && IceUtilInternal::isDigit(adapterid[end]))
                 {
                     ++end;
                 }
@@ -262,7 +317,7 @@ ServiceI::start(
                     Ice::Error error(communicator->getLogger());
                     error << "deployment error: node id does not follow instance name. instance name:"
                           << instanceName << " adapter id: " << adapterid;
-                    throw "IceGrid deployment is incorrect";
+                    throw IceBox::FailureException(__FILE__, __LINE__, "IceGrid deployment is incorrect");
                 }
 
                 int nodeid = atoi(adapterid.substr(start, end-start).c_str());
@@ -280,7 +335,7 @@ ServiceI::start(
         {
             Ice::Error error(communicator->getLogger());
             error << "Replication requires at least 3 Nodes";
-            throw "error";
+            throw IceBox::FailureException(__FILE__, __LINE__, "Replication requires at least 3 Nodes");
         }
 
         try
@@ -297,8 +352,8 @@ ServiceI::start(
             }
             Ice::ObjectAdapterPtr nodeAdapter = communicator->createObjectAdapter(name + ".Node");
 
-            _instance = new Instance(instanceName, name, communicator, publishAdapter, topicAdapter, nodeAdapter,
-                                     nodes[id]);
+            _instance = new Instance(instanceName, name, communicator, databaseCache, publishAdapter, topicAdapter, 
+                                     nodeAdapter, nodes[id]);
             _instance->observers()->setMajority(static_cast<unsigned int>(nodes.size())/2);
             
             // Trace replication information.
@@ -343,10 +398,17 @@ ServiceI::start(
 
             node->start();
         }
-        catch(const Ice::Exception&)
+        catch(const Ice::Exception& ex)
         {
             _instance = 0;
-            throw;
+
+            ostringstream s;
+            s << "exception while starting IceStorm service " << name << ":\n";
+            s << ex;
+
+            IceBox::FailureException e(__FILE__, __LINE__);
+            e.reason = s.str();
+            throw e;
         }
     }
         
@@ -371,17 +433,23 @@ ServiceI::start(const CommunicatorPtr& communicator,
     // This is for IceGrid only and as such we use a transient
     // implementation of IceStorm.
     string instanceName = communicator->getProperties()->getPropertyWithDefault(name + ".InstanceName", "IceStorm");
-    _instance = new Instance(instanceName, name, communicator, publishAdapter, topicAdapter);
+    _instance = new Instance(instanceName, name, communicator, 0, publishAdapter, topicAdapter);
 
     try
     {
         TransientTopicManagerImplPtr manager = new TransientTopicManagerImpl(_instance);
         _managerProxy = TopicManagerPrx::uncheckedCast(topicAdapter->add(manager, id));
     }
-    catch(const Ice::Exception&)
+    catch(const Ice::Exception& ex)
     {
         _instance = 0;
-        throw;
+        ostringstream s;
+        s << "exception while starting IceStorm service " << name << ":\n";
+        s << ex;
+
+        IceBox::FailureException e(__FILE__, __LINE__);
+        e.reason = s.str();
+        throw e;
     }
 }
 
@@ -478,6 +546,12 @@ ServiceI::validateProperties(const string& name, const PropertiesPtr& properties
         "Trace.TopicManager",
         "Send.Timeout",
         "Discard.Interval",
+        "SQL.DatabaseType",
+        "SQL.HostName",
+        "SQL.Port",
+        "SQL.DatabaseName",
+        "SQL.UserName",
+        "SQL.Password"
     };
 
     vector<string> unknownProps;

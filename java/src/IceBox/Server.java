@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -29,28 +29,28 @@ public final class Server extends Ice.Application
         initData.properties.setProperty("Ice.Admin.DelayCreation", "1");
 
         Server server = new Server();
-        server.main("IceBox.Server", args, initData);
+        System.exit(server.main("IceBox.Server", args, initData));
     }
 
     public int
     run(String[] args)
     {
-        for(int i = 1; i < args.length; ++i)
+        for(String arg : args)
         {
-            if(args[i].equals("-h") || args[i].equals("--help"))
+            if(arg.equals("-h") || arg.equals("--help"))
             {
                 usage();
                 return 0;
             }
-            else if(!args[i].startsWith("--"))
+            else if(!arg.startsWith("--"))
             {
-                System.err.println("Server: unknown option `" + args[i] + "'");
+                System.err.println("Server: unknown option `" + arg + "'");
                 usage();
                 return 1;
             }
         }
 
-        ServiceManagerI serviceManagerImpl = new ServiceManagerI(this, args);
+        ServiceManagerI serviceManagerImpl = new ServiceManagerI(communicator(), args);
         return serviceManagerImpl.run();
     }
 }

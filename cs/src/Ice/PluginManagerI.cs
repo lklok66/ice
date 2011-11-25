@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,8 +14,20 @@ namespace Ice
     using System.Collections.Generic;
     using System.Diagnostics;
 
+    /// <summary>
+    /// Applications implement this interface to provide a plug-in factory
+    /// to the Ice run time.
+    /// </summary>
     public interface PluginFactory
     {
+        /// <summary>
+        /// Called by the Ice run time to create a new plug-in.
+        /// </summary>
+        ///
+        /// <param name="communicator">The communicator that is in the process of being initialized.</param>
+        /// <param name="name">The name of the plug-in.</param>
+        /// <param name="args">The arguments that are specified in the plug-ins configuration.</param>
+        /// <returns>The plug-in that was created by this method.</returns>
         Plugin create(Communicator communicator, string name, string[] args);
     }
 
@@ -28,12 +40,12 @@ namespace Ice
             if(_initialized)
             {
                 InitializationException ex = new InitializationException();
-                ex.reason = "plugins already initialized";
+                ex.reason = "plug-ins already initialized";
                 throw ex;
             }
 
             //
-            // Invoke initialize() on the plugins, in the order they were loaded.
+            // Invoke initialize() on the plug-ins, in the order they were loaded.
             //
             ArrayList initializedPlugins = new ArrayList();
             try
@@ -44,10 +56,10 @@ namespace Ice
                     initializedPlugins.Add(p);
                 }
             }
-            catch(Exception)
+            catch(System.Exception)
             {
                 //
-                // Destroy the plugins that have been successfully initialized, in the
+                // Destroy the plug-ins that have been successfully initialized, in the
                 // reverse order.
                 //
                 initializedPlugins.Reverse();
@@ -57,7 +69,7 @@ namespace Ice
                     {
                         p.destroy();
                     }
-                    catch(Exception)
+                    catch(System.Exception)
                     {
                         // Ignore.
                     }
@@ -66,6 +78,19 @@ namespace Ice
             }
 
             _initialized = true;
+        }
+
+        public string[] getPlugins()
+        {
+            lock(this)
+            {
+                ArrayList names = new ArrayList();
+                foreach(DictionaryEntry entry in _plugins)
+                {
+                    names.Add(entry.Key);
+                }
+                return (string[])names.ToArray(typeof(string));
+            }
         }
 
         public Plugin getPlugin(string name)
@@ -115,9 +140,22 @@ namespace Ice
             {
                 if(_communicator != null)
                 {
-                    foreach(Plugin plugin in _plugins.Values)
+                    if(_initialized)
                     {
-                        plugin.destroy();
+                        foreach(DictionaryEntry entry in _plugins)
+                        {
+                            try
+                            {
+                                Plugin plugin = (Plugin)entry.Value;
+                                plugin.destroy();
+                            }
+                            catch(System.Exception ex)
+                            {
+                                Ice.Util.getProcessLogger().warning("unexpected exception raised by plug-in `" + 
+                                                                    entry.Key.ToString() + "' destruction:\n" + 
+                                                                    ex.ToString());
+                            }
+                        }
                     }
                 
                     _communicator = null;
@@ -150,8 +188,8 @@ namespace Ice
             // Ice.Plugin.Logger=logger, Version=0.0.0.0, Culture=neutral:LoginPluginFactory
             //
             // If the Ice.PluginLoadOrder property is defined, load the
-            // specified plugins in the specified order, then load any
-            // remaining plugins.
+            // specified plug-ins in the specified order, then load any
+            // remaining plug-ins.
             //
             string prefix = "Ice.Plugin.";
             Properties properties = _communicator.getProperties();
@@ -168,7 +206,7 @@ namespace Ice
                 if(_plugins.Contains(loadOrder[i]))
                 {
                     PluginInitializationException e = new PluginInitializationException();
-                    e.reason = "plugin `" + loadOrder[i] + "' already loaded";
+                    e.reason = "plug-in `" + loadOrder[i] + "' already loaded";
                     throw e;
                 }
 
@@ -193,13 +231,13 @@ namespace Ice
                 else
                 {
                     PluginInitializationException e = new PluginInitializationException();
-                    e.reason = "plugin `" + loadOrder[i] + "' not defined";
+                    e.reason = "plug-in `" + loadOrder[i] + "' not defined";
                     throw e;
                 }
             }
 
             //
-            // Load any remaining plugins that weren't specified in PluginLoadOrder.
+            // Load any remaining plug-ins that weren't specified in PluginLoadOrder.
             //
             while(plugins.Count > 0)
             {
@@ -253,16 +291,6 @@ namespace Ice
                     loadPlugin(name, val, ref cmdArgs);
                 }
             }
-
-            //      
-            // An application can set Ice.InitPlugins=0 if it wants to postpone
-            // initialization until after it has interacted directly with the
-            // plugins.
-            //      
-            if(properties.getPropertyAsIntWithDefault("Ice.InitPlugins", 1) > 0)
-            {           
-                initializePlugins();
-            }
         }
         
         private void loadPlugin(string name, string pluginSpec, ref string[] cmdArgs)
@@ -309,7 +337,7 @@ namespace Ice
                 {
                     entryPoint = pluginSpec.Substring(0, pos);
                     char[] delims = { ' ', '\t', '\n' };
-                    args = pluginSpec.Substring(pos).Trim().Split(delims, pos);
+                    args = pluginSpec.Substring(pos).Trim().Split(delims);
                 }
             }
             
@@ -326,8 +354,18 @@ namespace Ice
             //
             // Retrieve the assembly name and the type.
             //
-            string err = "unable to load plugin '" + entryPoint + "': ";
+            string err = "unable to load plug-in '" + entryPoint + "': ";
             int sepPos = entryPoint.IndexOf(':');
+            if(sepPos != -1)
+            {
+                if(entryPoint.Length > 3 &&
+                   sepPos == 1 &&
+                   System.Char.IsLetter(entryPoint[0]) &&
+                   (entryPoint[2] == '\\' || entryPoint[2] == '/'))
+                {
+                    sepPos = entryPoint.IndexOf(':', 3);
+                }
+            }
             if (sepPos == -1)
             {
                 PluginInitializationException e = new PluginInitializationException();
@@ -339,19 +377,47 @@ namespace Ice
             string assemblyName = entryPoint.Substring(0, sepPos);
             try
             {
-                if (System.IO.File.Exists(assemblyName))
-                {
-                    pluginAssembly = System.Reflection.Assembly.LoadFrom(assemblyName);
-                }
-                else
+                //
+                // First try to load the assemby using Assembly.Load which will succeed
+                // if full name is configured or partial name has been qualified in config.
+                // If that fails, try Assembly.LoadFrom() which will succeed if a file name
+                // is configured or partial name is configured and DEVPATH is used.
+                //
+                try
                 {
                     pluginAssembly = System.Reflection.Assembly.Load(assemblyName);
+                }
+                catch(System.IO.IOException ex)
+                {
+                    try
+                    {
+                        pluginAssembly = System.Reflection.Assembly.LoadFrom(assemblyName);
+                    }
+                    catch(System.IO.IOException)
+                    {
+                         throw ex;
+                    }
                 }
             }
             catch(System.Exception ex)
             {
+#if COMPACT
                 //
-                // IceSSL is not supported with Mono 1.2. We avoid throwing an exception in that case,
+                // IceSSL is not supported with the Compact Framework.
+                //
+                if(name == "IceSSL")
+                {
+                    if(!_sslWarnOnce)
+                    {
+                        _communicator.getLogger().warning(
+                            "IceSSL plug-in not loaded: IceSSL is not supported with the .NET Compact Framework");
+                        _sslWarnOnce = true;
+                    }
+                    return;
+                }
+#else
+                //
+                // IceSSL is not yet supported with Mono. We avoid throwing an exception in that case,
                 // so the same configuration can be used with Mono or Visual C#.
                 //
                 if(IceInternal.AssemblyUtil.runtime_ == IceInternal.AssemblyUtil.Runtime.Mono && name == "IceSSL")
@@ -359,26 +425,31 @@ namespace Ice
                     if(!_sslWarnOnce)
                     {
                         _communicator.getLogger().warning(
-                            "IceSSL plugin not loaded: IceSSL is not supported with Mono");
+                            "IceSSL plug-in not loaded: IceSSL is not supported with Mono");
                         _sslWarnOnce = true;
                     }
                     return;
                 }
+#endif
 
                 PluginInitializationException e = new PluginInitializationException();
                 e.reason = err + "unable to load assembly: '" + assemblyName + "': " + ex.ToString();
                 throw e;
             }
-            
+
             //
             // Instantiate the class.
             //
             PluginFactory pluginFactory = null;
             string className = entryPoint.Substring(sepPos + 1);
-            System.Type c = pluginAssembly.GetType(className);
-            if(c == null)
+            System.Type c = null;
+            try
             {
-                PluginInitializationException e = new PluginInitializationException();
+                c = pluginAssembly.GetType(className, true);
+            }
+            catch(System.Exception ex)
+            {
+                PluginInitializationException e = new PluginInitializationException(ex);
                 e.reason = err + "GetType failed for '" + className + "'";
                 throw e;
             }

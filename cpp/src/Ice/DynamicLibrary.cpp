@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -8,6 +8,7 @@
 // **********************************************************************
 
 #include <Ice/DynamicLibrary.h>
+#include <IceUtil/StringUtil.h>
 
 #ifndef _WIN32
 #   include <dlfcn.h>
@@ -89,10 +90,26 @@ IceInternal::DynamicLibrary::loadEntryPoint(const string& entryPoint, bool useIc
     string lib;
 
 #ifdef _WIN32
-    lib = libName + version;
+    lib = libName;
+
+#   ifdef COMPSUFFIX
+    //
+    // If using unique dll names we need to add compiler suffix
+    // to IceSSL so that we do not have to use compiler suffix
+    // in the configuration.
+    //
+    if(IceUtilInternal::toLower(libName) == "icessl")
+    {
+        lib += COMPSUFFIX;
+    }
+#   endif
+
+    lib += version;
+
 #   ifdef _DEBUG
     lib += 'd';
 #   endif
+
     lib += ".dll";
 #elif defined(__APPLE__)
     lib = "lib" + libName;
@@ -147,19 +164,23 @@ IceInternal::DynamicLibrary::load(const string& lib)
 #endif
 
     _hnd = dlopen(lib.c_str(), flags);
+#endif
     if(_hnd == 0)
     {
         //
         // Remember the most recent error in _err.
         //
+#ifdef _WIN32
+        _err = IceUtilInternal::lastErrorToString();
+#else
         const char* err = dlerror();
-
         if(err)
         {
             _err = err;
         }
-    }
 #endif
+    }
+
     return _hnd != 0;
 }
 
@@ -170,25 +191,30 @@ IceInternal::DynamicLibrary::getSymbol(const string& name)
 #ifdef _WIN32
 #  ifdef __BCPLUSPLUS__
     string newName = "_" + name;
-    return GetProcAddress(_hnd, newName.c_str());
+    symbol_type result = GetProcAddress(_hnd, newName.c_str());
 #  else
-    return GetProcAddress(_hnd, name.c_str());
+    symbol_type result = GetProcAddress(_hnd,name.c_str());
 #  endif
 #else
     symbol_type result = dlsym(_hnd, name.c_str());
+#endif
+	
     if(result == 0)
     {
         //
         // Remember the most recent error in _err.
         //
-        const char* err = dlerror();
+#ifdef _WIN32
+	_err = IceUtilInternal::lastErrorToString();
+#else
+	const char* err = dlerror();
         if(err)
         {
             _err = err;
         }
+#endif
     }
     return result;
-#endif
 }
 
 const string&

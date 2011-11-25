@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,6 +10,8 @@
 #ifndef ICE_PROPERTIES_ICE
 #define ICE_PROPERTIES_ICE
 
+[["cpp:header-ext:h"]]
+
 #include <Ice/BuiltinSequences.ice>
 
 module Ice
@@ -18,9 +20,9 @@ module Ice
 /**
  *
  * A simple collection of properties, represented as a dictionary of
- * key/value pairs. Both key and value are [string]s.
+ * key/value pairs. Both key and value are strings.
  *
- * @see Properties::getPropertiesForPrefix
+ * @see Properties#getPropertiesForPrefix
  *
  **/
 dictionary<string, string> PropertyDict;
@@ -29,7 +31,7 @@ dictionary<string, string> PropertyDict;
  *
  * A property set used to configure Ice and Ice applications.
  * Properties are key/value pairs, with both keys and values
- * being [string]s. By convention, property keys should have the form
+ * being strings. By convention, property keys should have the form
  * <em>application-name</em>\[.<em>category</em>\[.<em>sub-category</em>]].<em>name</em>.
  *
  **/
@@ -44,7 +46,7 @@ local interface Properties
      *
      * @return The property value.
      *
-     * @see setProperty
+     * @see #setProperty
      *
      **/
     string getProperty(string key);
@@ -61,7 +63,7 @@ local interface Properties
      *
      * @return The property value or the default value.
      *
-     * @see setProperty
+     * @see #setProperty
      *
      **/
     string getPropertyWithDefault(string key, string value);
@@ -75,7 +77,7 @@ local interface Properties
      *
      * @return The property value interpreted as an integer.
      *
-     * @see setProperty
+     * @see #setProperty
      *
      **/
     int getPropertyAsInt(string key);
@@ -93,12 +95,12 @@ local interface Properties
      * @return The property value interpreted as an integer, or the
      * default value.
      *
-     * @see setProperty
+     * @see #setProperty
      *
      **/
     int getPropertyAsIntWithDefault(string key, int value);
 
-    
+
      /**
      *
      * Get a property as a list of strings. If the property is not set,
@@ -113,7 +115,7 @@ local interface Properties
      *
      * @return The property value interpreted as a list of strings.
      *
-     * @see setProperty
+     * @see #setProperty
      *
      **/
     StringSeq getPropertyAsList(string key);
@@ -135,7 +137,7 @@ local interface Properties
      * @return The property value interpreted as list of strings, or the
      * default value.
      *
-     * @see setProperty
+     * @see #setProperty
      *
      **/
     StringSeq getPropertyAsListWithDefault(string key, StringSeq value);
@@ -147,6 +149,7 @@ local interface Properties
      * <em>prefix</em> is an empty string,
      * then all properties are returned.
      *
+     * @param prefix The prefix to search for (empty string if none).
      * @return The matching property set.
      *
      **/
@@ -160,7 +163,7 @@ local interface Properties
      * @param key The property key.
      * @param value The property value.
      *
-     * @see getProperty
+     * @see #getProperty
      *
      **/
     void setProperty(string key, string value);
@@ -257,10 +260,11 @@ interface PropertiesAdmin
      * <em>prefix</em> is an empty string,
      * then all properties are returned.
      *
+     * @param prefix The prefix to search for (empty string if none).
      * @return The matching property set.
      *
      **/
-    ["ami", "java:type:{java.util.TreeMap}"] PropertyDict getPropertiesForPrefix(string prefix);    
+    ["ami", "java:type:java.util.TreeMap<String, String>"] PropertyDict getPropertiesForPrefix(string prefix);
 };
 
 };

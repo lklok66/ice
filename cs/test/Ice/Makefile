@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -16,23 +16,32 @@ SUBDIRS		= application \
 		  exceptions \
 		  facets \
 		  faultTolerance \
+		  info \
 		  inheritance \
+		  invoke \
 		  hold \
 		  location \
 		  objects \
 		  binding \
 		  proxy \
+                  properties \
 		  operations \
+		  ami \
+		  dispatcher \
 		  slicing \
 		  checksum \
 		  stream \
 		  retry \
 		  timeout \
 		  servantLocator \
-                  interceptor \
-                  dictMapping \
-                  seqMapping \
-                  background
+		  interceptor \
+		  dictMapping \
+		  seqMapping \
+		  background \
+		  udp \
+		  defaultServant \
+		  defaultValue \
+		  threadPoolPriority
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \

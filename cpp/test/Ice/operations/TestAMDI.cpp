@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,9 +11,7 @@
 #include <TestAMDI.h>
 #include <TestCommon.h>
 #include <functional>
-#ifdef __BCPLUSPLUS__
-#  include <iterator>
-#endif
+#include <iterator>
 
 class Thread_opVoid : public IceUtil::Thread
 {
@@ -34,6 +32,34 @@ private:
     const Test::AMD_MyClass_opVoidPtr _cb;
 };
 
+bool
+MyDerivedClassI::ice_isA(const std::string& id, const Ice::Current& current) const
+{
+    test(current.mode == Ice::Nonmutating);
+    return Test::MyDerivedClass::ice_isA(id, current);
+}
+
+void
+MyDerivedClassI::ice_ping(const Ice::Current& current) const
+{
+    test(current.mode == Ice::Nonmutating);
+    Test::MyDerivedClass::ice_ping(current);
+}
+
+std::vector<std::string>
+MyDerivedClassI::ice_ids(const Ice::Current& current) const
+{
+    test(current.mode == Ice::Nonmutating);
+    return Test::MyDerivedClass::ice_ids(current);
+}
+
+const std::string&
+MyDerivedClassI::ice_id(const Ice::Current& current) const
+{
+    test(current.mode == Ice::Nonmutating);
+    return Test::MyDerivedClass::ice_id(current);
+}
+
 void
 MyDerivedClassI::shutdown_async(const Test::AMD_MyClass_shutdownPtr& cb, const Ice::Current& current)
 {
@@ -51,8 +77,17 @@ MyDerivedClassI::shutdown_async(const Test::AMD_MyClass_shutdownPtr& cb, const I
 }
 
 void
-MyDerivedClassI::opVoid_async(const Test::AMD_MyClass_opVoidPtr& cb, const Ice::Current&)
+MyDerivedClassI::delay_async(const Test::AMD_MyClass_delayPtr& cb, Ice::Int ms, const Ice::Current& current)
 {
+    IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(ms));
+    cb->ice_response();
+}
+
+void
+MyDerivedClassI::opVoid_async(const Test::AMD_MyClass_opVoidPtr& cb, const Ice::Current& current)
+{
+    test(current.mode == Ice::Normal);
+
     IceUtil::Mutex::Lock sync(_opVoidMutex);
     if(_opVoidThread)
     {
@@ -361,6 +396,30 @@ MyDerivedClassI::opStringMyEnumD_async(const Test::AMD_MyClass_opStringMyEnumDPt
 }
 
 void
+MyDerivedClassI::opMyEnumStringD_async(const Test::AMD_MyClass_opMyEnumStringDPtr& cb,
+                                       const Test::MyEnumStringD& p1,
+                                       const Test::MyEnumStringD& p2,
+                                       const Ice::Current&)
+{
+    Test::MyEnumStringD p3 = p1;
+    Test::MyEnumStringD r = p1;
+    std::set_union(p1.begin(), p1.end(), p2.begin(), p2.end(), std::inserter(r, r.end()));
+    cb->ice_response(r, p3);
+}
+
+void
+MyDerivedClassI::opMyStructMyEnumD_async(const Test::AMD_MyClass_opMyStructMyEnumDPtr& cb,
+                                       const Test::MyStructMyEnumD& p1,
+                                       const Test::MyStructMyEnumD& p2,
+                                       const Ice::Current&)
+{
+    Test::MyStructMyEnumD p3 = p1;
+    Test::MyStructMyEnumD r = p1;
+    std::set_union(p1.begin(), p1.end(), p2.begin(), p2.end(), std::inserter(r, r.end()));
+    cb->ice_response(r, p3);
+}
+
+void
 MyDerivedClassI::opIntS_async(const Test::AMD_MyClass_opIntSPtr& cb, const Test::IntS& s, const Ice::Current&)
 {
     Test::IntS r;
@@ -392,6 +451,20 @@ MyDerivedClassI::opDoubleMarshaling_async(const Test::AMD_MyClass_opDoubleMarsha
     {
         test(p2[i] == d);
     }
+    cb->ice_response();
+}
+
+void
+MyDerivedClassI::opIdempotent_async(const Test::AMD_MyClass_opIdempotentPtr& cb, const Ice::Current& current)
+{
+    test(current.mode == Ice::Idempotent);
+    cb->ice_response();
+}
+
+void
+MyDerivedClassI::opNonmutating_async(const Test::AMD_MyClass_opNonmutatingPtr& cb, const Ice::Current& current)
+{
+    test(current.mode == Ice::Nonmutating);
     cb->ice_response();
 }
 

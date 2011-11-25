@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -333,11 +333,18 @@ NodePrxSeq
 ReplicaSessionManager::getNodes(const NodePrxSeq& nodes) const
 {
     assert(_thread && _thread->getRegistry());
-    try
+    if(_thread->getSession())
     {
-        return _thread->getRegistry()->getNodes();
+        try
+        {
+            return _thread->getRegistry()->getNodes();
+        }
+        catch(const Ice::LocalException&)
+        {
+            return nodes;
+        }
     }
-    catch(const Ice::LocalException&)
+    else 
     {
         return nodes;
     }
@@ -346,16 +353,19 @@ ReplicaSessionManager::getNodes(const NodePrxSeq& nodes) const
 void
 ReplicaSessionManager::destroy()
 {
+    ThreadPtr thread;
     {
         Lock sync(*this);
         if(!_thread)
         {
             return;
         }
+        thread = _thread;
+        _thread = 0;
     }
 
-    _thread->terminate();
-    _thread->getThreadControl().join();
+    thread->terminate();
+    thread->getThreadControl().join();
 
     _database = 0;
     _wellKnownObjects = 0;
@@ -445,12 +455,24 @@ ReplicaSessionManager::createSession(InternalRegistryPrx& registry, IceUtil::Tim
 
         if(!session)
         {
-            for(vector<QueryPrx>::const_iterator p = _queryObjects.begin(); p != _queryObjects.end(); ++p)
+            vector<Ice::AsyncResultPtr> results;
+            for(vector<QueryPrx>::const_iterator q = _queryObjects.begin(); q != _queryObjects.end(); ++q)
             {
+                results.push_back((*q)->begin_findObjectById(registry->ice_getIdentity()));
+            }
+            
+            for(vector<Ice::AsyncResultPtr>::const_iterator p = results.begin(); p != results.end(); ++p)
+            {
+                QueryPrx query = QueryPrx::uncheckedCast((*p)->getProxy());
+                if(isDestroyed())
+                {
+                    break;
+                }
+
                 InternalRegistryPrx newRegistry;
                 try
                 {
-                    Ice::ObjectPrx obj = (*p)->findObjectById(registry->ice_getIdentity());
+                    Ice::ObjectPrx obj = query->end_findObjectById(*p);
                     newRegistry = InternalRegistryPrx::uncheckedCast(obj);
                     if(newRegistry && used.find(newRegistry) == used.end())
                     {

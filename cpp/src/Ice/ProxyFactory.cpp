@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,6 +14,7 @@
 #include <Ice/Proxy.h>
 #include <Ice/ReferenceFactory.h>
 #include <Ice/LocatorInfo.h>
+#include <Ice/RouterInfo.h>
 #include <Ice/BasicStream.h>
 #include <Ice/Properties.h>
 #include <Ice/LoggerUtil.h>
@@ -25,32 +26,8 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-namespace
-{
-
-class RetryTask : public IceUtil::TimerTask
-{
-public:
-    
-    RetryTask(const OutgoingAsyncPtr& out) : _out(out)
-    {
-    }
-                    
-    virtual void
-    runTimerTask()
-    {
-        _out->__send();
-    }
-
-private:
-
-    const OutgoingAsyncPtr _out;
-};
-
-}
-
 IceUtil::Shared* IceInternal::upCast(ProxyFactory* p) { return p; }
-    
+
 ObjectPrx
 IceInternal::ProxyFactory::stringToProxy(const string& str) const
 {
@@ -77,6 +54,19 @@ IceInternal::ProxyFactory::propertyToProxy(const string& prefix) const
     string proxy = _instance->initializationData().properties->getProperty(prefix);
     ReferencePtr ref = _instance->referenceFactory()->create(proxy, prefix);
     return referenceToProxy(ref);
+}
+
+PropertyDict
+IceInternal::ProxyFactory::proxyToProperty(const ObjectPrx& proxy, const string& prefix) const
+{
+    if(proxy)
+    {
+        return proxy->__reference()->toProperty(prefix);
+    }
+    else
+    {
+        return PropertyDict();
+    }
 }
 
 ObjectPrx
@@ -119,10 +109,10 @@ IceInternal::ProxyFactory::referenceToProxy(const ReferencePtr& ref) const
     }
 }
 
-void
+int
 IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex, 
                                                     const ReferencePtr& ref, 
-                                                    OutgoingAsync* out,
+                                                    bool sleep,
                                                     int& cnt) const
 {
     TraceLevelsPtr traceLevels = _instance->traceLevels();
@@ -142,16 +132,7 @@ IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex,
 
     if(one)
     {
-        LocatorInfoPtr li = ref->getLocatorInfo();
-        if(li && ref->isIndirect())
-        {
-            //
-            // We retry ObjectNotExistException if the reference is
-            // indirect.
-            //
-            li->clearObjectCache(ref);
-        }
-        else if(ref->getRouterInfo() && one->operation == "ice_add_proxy")
+        if(ref->getRouterInfo() && one->operation == "ice_add_proxy")
         {
             //
             // If we have a router, an ObjectNotExistException with an
@@ -161,17 +142,32 @@ IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex,
             // must *always* retry, so that the missing proxy is added
             // to the router.
             //
+
+            ref->getRouterInfo()->clearCache(ref);
+
             if(traceLevels->retry >= 1)
             {
                 Trace out(logger, traceLevels->retryCat);
                 out << "retrying operation call to add proxy to router\n" << ex;
             }
 
-            if(out)
+            return 0; // We must always retry, so we don't look at the retry count.
+        }
+        else if(ref->isIndirect())
+        {
+            //
+            // We retry ObjectNotExistException if the reference is
+            // indirect.
+            //
+
+            if(ref->isWellKnown())
             {
-                out->__send();
+                LocatorInfoPtr li = ref->getLocatorInfo();
+                if(li)
+                {
+                    li->clearCache(ref);
+                }
             }
-            return; // We must always retry, so we don't look at the retry count.
         }
         else
         {
@@ -220,8 +216,18 @@ IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex,
 
     ++cnt;
     assert(cnt > 0);
-    
-    if(cnt > static_cast<int>(_retryIntervals.size()))
+
+    int interval;
+    if(cnt == static_cast<int>(_retryIntervals.size() + 1) && 
+       dynamic_cast<const CloseConnectionException*>(&ex))
+    {
+        //
+        // A close connection exception is always retried at least once, even if the retry
+        // limit is reached.
+        //
+        interval = 0;
+    } 
+    else if(cnt > static_cast<int>(_retryIntervals.size()))
     {
         if(traceLevels->retry >= 1)
         {
@@ -230,8 +236,10 @@ IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex,
         }
         ex.ice_throw();
     }
-
-    int interval = _retryIntervals[cnt - 1];
+    else
+    {
+        interval = _retryIntervals[cnt - 1];
+    }
 
     if(traceLevels->retry >= 1)
     {
@@ -243,35 +251,15 @@ IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex,
         }
         out << " because of exception\n" << ex;
     }
-    
-    if(interval > 0)
+
+    if(sleep && interval > 0)
     {
-        if(out)
-        {
-            try
-            {
-                _instance->timer()->schedule(new RetryTask(out), IceUtil::Time::milliSeconds(interval));
-            }
-            catch(const IceUtil::IllegalArgumentException&) // Expected if the communicator destroyed the timer.
-            {
-                throw CommunicatorDestroyedException(__FILE__, __LINE__); 
-            }
-        }
-        else
-        {
-            //
-            // Sleep before retrying.
-            //
-            IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(interval));
-        }
+        //
+        // Sleep before retrying.
+        //
+        IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(interval));
     }
-    else
-    {
-        if(out)
-        {
-            out->__send();
-        }
-    }
+    return interval;
 }
 
 IceInternal::ProxyFactory::ProxyFactory(const InstancePtr& instance) :

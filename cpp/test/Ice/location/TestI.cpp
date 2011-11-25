@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,18 +13,13 @@
 
 using namespace Test;
 
-ServerManagerI::ServerManagerI(const Ice::ObjectAdapterPtr& adapter, 
-                               const ServerLocatorRegistryPtr& registry,
+ServerManagerI::ServerManagerI(const ServerLocatorRegistryPtr& registry,
                                const Ice::InitializationData& initData) :
-    _adapter(adapter), _registry(registry), _initData(initData)
+    _registry(registry), _initData(initData), _nextPort(12011)
 {
-    _initData.properties->setProperty("TestAdapter.Endpoints", "default");
     _initData.properties->setProperty("TestAdapter.AdapterId", "TestAdapter");
-    _initData.properties->setProperty("TestAdapter.ReplicaGroupId", "ReplicatedAdapter");
-    
-    _initData.properties->setProperty("TestAdapter2.Endpoints", "default");
+    _initData.properties->setProperty("TestAdapter.ReplicaGroupId", "ReplicatedAdapter");    
     _initData.properties->setProperty("TestAdapter2.AdapterId", "TestAdapter2");
-
     _initData.properties->setProperty("Ice.PrintAdapterReady", "0");
 }
 
@@ -46,9 +41,23 @@ ServerManagerI::startServer(const Ice::Current& current)
     // its endpoints with the locator and create references containing
     // the adapter id instead of the endpoints.
     //
-    
     Ice::CommunicatorPtr serverCommunicator = Ice::initialize(_initData);
     _communicators.push_back(serverCommunicator);
+
+    //
+    // Use fixed port to ensure that OA re-activation doesn't re-use previous port from
+    // another OA (e.g.: TestAdapter2 is re-activated using port of TestAdapter).
+    //
+    {
+        std::ostringstream os;
+        os << "default -p " << _nextPort++;
+        serverCommunicator->getProperties()->setProperty("TestAdapter.Endpoints", os.str());
+    }
+    {
+        std::ostringstream os;
+        os << "default -p " << _nextPort++;
+        serverCommunicator->getProperties()->setProperty("TestAdapter2.Endpoints", os.str());
+    }
 
     Ice::ObjectAdapterPtr adapter = serverCommunicator->createObjectAdapter("TestAdapter");
     Ice::ObjectAdapterPtr adapter2 = serverCommunicator->createObjectAdapter("TestAdapter2");
@@ -60,19 +69,20 @@ ServerManagerI::startServer(const Ice::Current& current)
     Ice::ObjectPtr object = new TestI(adapter, adapter2, _registry);
     _registry->addObject(adapter->add(object, serverCommunicator->stringToIdentity("test")));
     _registry->addObject(adapter->add(object, serverCommunicator->stringToIdentity("test2")));
+    adapter->add(object, serverCommunicator->stringToIdentity("test3"));
 
     adapter->activate();
     adapter2->activate();
 }
 
 void
-ServerManagerI::shutdown(const Ice::Current&)
+ServerManagerI::shutdown(const Ice::Current& current)
 {
     for(::std::vector<Ice::CommunicatorPtr>::const_iterator i = _communicators.begin(); i != _communicators.end(); ++i)
     {
         (*i)->destroy();
     }
-    _adapter->getCommunicator()->shutdown();
+    current.adapter->getCommunicator()->shutdown();
 }
 
 

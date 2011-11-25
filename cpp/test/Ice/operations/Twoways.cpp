@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -24,9 +24,57 @@
 
 using namespace std;
 
+namespace
+{
+
+class PerThreadContextInvokeThread : public IceUtil::Thread
+{
+public:
+    
+PerThreadContextInvokeThread(const Test::MyClassPrx& proxy) : _proxy(proxy)
+{
+}
+    
+virtual void
+run()
+{
+    Ice::Context ctx = _proxy->ice_getCommunicator()->getImplicitContext()->getContext();
+    test(ctx.empty());
+    ctx["one"] = "UN";
+    _proxy->ice_getCommunicator()->getImplicitContext()->setContext(ctx);
+    test(_proxy->opContext() == ctx);
+}
+    
+private:
+    
+    Test::MyClassPrx _proxy;
+};
+
+}
+    
 void
 twoways(const Ice::CommunicatorPtr& communicator, const Test::MyClassPrx& p)
 {
+    {
+        p->ice_ping();
+    }
+
+    {
+        test(p->ice_isA(Test::MyClass::ice_staticId()));
+    }
+
+    {
+        test(p->ice_id() == Test::MyDerivedClass::ice_staticId());
+    }
+
+    {
+        Ice::StringSeq ids = p->ice_ids();
+        test(ids.size() == 3);
+        test(ids[0] == "::Ice::Object");
+        test(ids[1] == "::Test::MyClass");
+        test(ids[2] == "::Test::MyDerivedClass");
+    }
+
     {
         p->opVoid();
     }
@@ -599,9 +647,51 @@ twoways(const Ice::CommunicatorPtr& communicator, const Test::MyClassPrx& p)
     }
 
     {
+        Test::MyEnumStringD di1;
+        di1[Test::enum1] = "abc";
+        Test::MyEnumStringD di2;
+        di2[Test::enum2] = "Hello!!";
+        di2[Test::enum3] = "qwerty";
+
+        Test::MyEnumStringD _do;
+        Test::MyEnumStringD ro = p->opMyEnumStringD(di1, di2, _do);
+
+        test(_do == di1);
+        test(ro.size() == 3);
+        test(ro[Test::enum1] == "abc");
+        test(ro[Test::enum2] == "Hello!!");
+        test(ro[Test::enum3] == "qwerty");
+    }
+
+    {
+        Test::MyStruct s11 = { 1, 1 };
+        Test::MyStruct s12 = { 1, 2 };
+        Test::MyStructMyEnumD di1;
+        di1[s11] = Test::enum1;
+        di1[s12] = Test::enum2;
+
+        Test::MyStruct s22 = { 2, 2 };
+        Test::MyStruct s23 = { 2, 3 };
+        Test::MyStructMyEnumD di2;
+        di2[s11] = Test::enum1;
+        di2[s22] = Test::enum3;
+        di2[s23] = Test::enum2;
+
+        Test::MyStructMyEnumD _do;
+        Test::MyStructMyEnumD ro = p->opMyStructMyEnumD(di1, di2, _do);
+
+        test(_do == di1);
+        test(ro.size() == 4);
+        test(ro[s11] == Test::enum1);
+        test(ro[s12] == Test::enum2);
+        test(ro[s22] == Test::enum3);
+        test(ro[s23] == Test::enum2);
+    }
+
+    {
         const int lengths[] = { 0, 1, 2, 126, 127, 128, 129, 253, 254, 255, 256, 257, 1000 };
 
-        for(int l = 0; l != sizeof(lengths) / sizeof(*lengths); ++l)
+        for(unsigned int l = 0; l != sizeof(lengths) / sizeof(*lengths); ++l)
         {
             Test::IntS s;
             for(int i = 0; i < lengths[l]; ++i)
@@ -641,52 +731,6 @@ twoways(const Ice::CommunicatorPtr& communicator, const Test::MyClassPrx& p)
             test(r == ctx);
         }
 
-        {
-            //
-            // Test that default context is obtained correctly from communicator.
-            //
-/* DEPRECATED
-            Ice::Context dflt;
-            dflt["a"] = "b";
-            communicator->setDefaultContext(dflt);
-            test(p->opContext() != dflt);
-
-            Test::MyClassPrx p2 = Test::MyClassPrx::uncheckedCast(p->ice_context(Ice::Context()));
-            test(p2->opContext().empty());
-
-            p2 = Test::MyClassPrx::uncheckedCast(p->ice_defaultContext());
-            test(p2->opContext() == dflt);
-
-            communicator->setDefaultContext(Ice::Context());
-            test(!p2->opContext().empty());
-
-            communicator->setDefaultContext(dflt);
-            Test::MyClassPrx c = Test::MyClassPrx::checkedCast(
-                                        communicator->stringToProxy("test:default -p 12010 -t 10000"));
-            test(c->opContext() == dflt);
-
-            dflt["a"] = "c";
-            Test::MyClassPrx c2 = Test::MyClassPrx::uncheckedCast(c->ice_context(dflt));
-            test(c2->opContext()["a"] == "c");
-
-            dflt.clear();
-            Test::MyClassPrx c3 = Test::MyClassPrx::uncheckedCast(c2->ice_context(dflt));
-            Ice::Context tmp = c3->opContext();
-            test(tmp.find("a") == tmp.end());
-
-            Test::MyClassPrx c4 = Test::MyClassPrx::uncheckedCast(c2->ice_defaultContext());
-            test(c4->opContext()["a"] == "b");
-
-            dflt["a"] = "d";
-            communicator->setDefaultContext(dflt);
-
-            Test::MyClassPrx c5 = Test::MyClassPrx::uncheckedCast(c->ice_defaultContext());
-            test(c5->opContext()["a"] == "d");
-
-            communicator->setDefaultContext(Ice::Context());
-*/
-        }
-        
         {
             //
             // Test implicit context propagation
@@ -739,11 +783,18 @@ twoways(const Ice::CommunicatorPtr& communicator, const Test::MyClassPrx& p)
                 test(p->opContext() == combined);
 
                 test(ic->getImplicitContext()->remove("one") == "ONE");
-                
+
+                if(impls[i] == "PerThread")
+                {
+                    IceUtil::ThreadPtr thread = new PerThreadContextInvokeThread(p->ice_context(Ice::Context()));
+                    thread->start();
+                    thread->getThreadControl().join();
+                }
+
+                ic->getImplicitContext()->setContext(Ice::Context()); // Clear the context to avoid leak report.
                 ic->destroy();
             }
         }
-        
     }
 
     {
@@ -751,4 +802,8 @@ twoways(const Ice::CommunicatorPtr& communicator, const Test::MyClassPrx& p)
         Test::DoubleS ds(5, d);
         p->opDoubleMarshaling(d, ds);
     }
+
+    p->opIdempotent();
+
+    p->opNonmutating();
 }

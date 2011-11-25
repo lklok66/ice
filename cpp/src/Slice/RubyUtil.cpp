@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,10 +12,7 @@
 #include <Slice/Util.h>
 #include <IceUtil/Functional.h>
 #include <IceUtil/InputUtil.h>
-
-#ifdef __BCPLUSPLUS__
 #include <iterator>
-#endif
 
 using namespace std;
 using namespace Slice;
@@ -65,23 +62,33 @@ private:
     void writeType(const TypePtr&);
 
     //
-    // Get a default value for a given type.
+    // Get an initializer value for a given type.
     //
-    string getDefaultValue(const TypePtr&);
+    string getInitializer(const TypePtr&);
 
     //
     // Add a value to a hash code.
     //
     void writeHash(const string&, const TypePtr&, int&);
 
+    //
+    // Write a constant value.
+    //
+    void writeConstantValue(const TypePtr&, const SyntaxTreeBasePtr&, const string&);
+
     struct MemberInfo
     {
         string lowerName; // Mapped name beginning with a lower-case letter for use as the name of a local variable.
         string fixedName;
-        TypePtr type;
         bool inherited;
+        DataMemberPtr dataMember;
     };
     typedef list<MemberInfo> MemberInfoList;
+
+    //
+    // Write constructor parameters with default values.
+    //
+    void writeConstructorParams(const MemberInfoList&);
 
     void collectClassMembers(const ClassDefPtr&, MemberInfoList&, bool);
     void collectExceptionMembers(const ExceptionPtr&, MemberInfoList&, bool);
@@ -109,9 +116,12 @@ lookupKwd(const string& name)
     static const string keywordList[] = 
     {       
         "BEGIN", "END", "alias", "and", "begin", "break", "case", "class", "clone", "def", "display", "do", "dup",
-        "else", "elsif", "end", "ensure", "extend", "false", "for", "freeze", "hash", "if", "in", "inspect", "method",
-        "methods", "module", "new", "next", "nil", "not", "or", "redo", "rescue", "retry", "return", "self", "send",
-        "super", "taint", "then", "true", "undef", "unless", "untaint", "until", "when", "while", "yield"
+        "else", "elsif", "end", "ensure", "extend", "false", "for", "freeze", "hash", "if", "in", "initialize_copy",
+        "inspect", "instance_eval", "instance_variable_get", "instance_variable_set", "instance_variables", "method",
+        "method_missing", "methods", "module", "new", "next", "nil", "not", "object_id", "or", "private_methods",
+        "protected_methods", "public_methods", "redo", "rescue", "retry", "return", "self", "send",
+        "singleton_methods", "super", "taint", "then", "to_a", "to_s", "true", "undef", "unless", "untaint", "until",
+        "when", "while", "yield"
     };
     bool found =  binary_search(&keywordList[0],
                                 &keywordList[sizeof(keywordList) / sizeof(*keywordList)],
@@ -440,24 +450,24 @@ Slice::Ruby::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
         //
         MemberInfoList allMembers;
         collectClassMembers(p, allMembers, false);
-        bool inheritsMembers = false;
         if(!allMembers.empty())
         {
-            _out << sp << nl << "def initialize";
-            _out << spar;
+            _out << sp << nl << "def initialize(";
+            writeConstructorParams(allMembers);
+            _out << ')';
+            _out.inc();
+
             MemberInfoList::iterator q;
+            bool inheritsMembers = false;
             for(q = allMembers.begin(); q != allMembers.end(); ++q)
             {
-                ostringstream ostr;
-                ostr << q->lowerName << '=' << getDefaultValue(q->type);
-                _out << ostr.str();
                 if(q->inherited)
                 {
                     inheritsMembers = true;
+                    break;
                 }
             }
-            _out << epar;
-            _out.inc();
+
             if(inheritsMembers)
             {
                 _out << nl << "super" << spar;
@@ -470,6 +480,7 @@ Slice::Ruby::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
                 }
                 _out << epar;
             }
+
             for(q = allMembers.begin(); q != allMembers.end(); ++q)
             {
                 if(!q->inherited)
@@ -477,6 +488,7 @@ Slice::Ruby::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
                     _out << nl << '@' << q->fixedName << " = " << q->lowerName;
                 }
             }
+
             _out.dec();
             _out << nl << "end";
         }
@@ -594,8 +606,8 @@ Slice::Ruby::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
     _out << nl << "end";
     _classHistory.insert(scoped); // Avoid redundant declarations.
 
-    _out << sp << nl << "T_" << name << ".defineClass(" << name << ", "
-         << (p->isAbstract() ? "true" : "false") << ", ";
+    bool isAbstract = p->isInterface() || p->allOperations().size() > 0; // Don't use isAbstract() here - see bug 3739
+    _out << sp << nl << "T_" << name << ".defineClass(" << name << ", " << (isAbstract ? "true" : "false") << ", ";
     if(!base)
     {
         _out << "nil";
@@ -816,18 +828,16 @@ Slice::Ruby::CodeVisitor::visitExceptionStart(const ExceptionPtr& p)
     bool inheritsMembers = false;
     if(!allMembers.empty())
     {
-        _out << spar;
+        _out << '(';
+        writeConstructorParams(allMembers);
+        _out << ')';
         for(MemberInfoList::iterator q = allMembers.begin(); q != allMembers.end(); ++q)
         {
-            ostringstream ostr;
-            ostr << q->lowerName << '=' << getDefaultValue(q->type);
-            _out << ostr.str();
             if(q->inherited)
             {
                 inheritsMembers = true;
             }
         }
-        _out << epar;
     }
     _out.inc();
     if(!allMembers.empty())
@@ -861,15 +871,6 @@ Slice::Ruby::CodeVisitor::visitExceptionStart(const ExceptionPtr& p)
     _out << sp << nl << "def to_s";
     _out.inc();
     _out << nl << "'" << scoped.substr(2) << "'";
-    _out.dec();
-    _out << nl << "end";
-
-    //
-    // inspect
-    //
-    _out << sp << nl << "def inspect";
-    _out.inc();
-    _out << nl << "return ::Ice::__stringifyException(self)";
     _out.dec();
     _out << nl << "end";
 
@@ -956,7 +957,8 @@ Slice::Ruby::CodeVisitor::visitStructStart(const StructPtr& p)
             memberList.push_back(MemberInfo());
             memberList.back().lowerName = fixIdent((*q)->name(), IdentToLower);
             memberList.back().fixedName = fixIdent((*q)->name(), IdentNormal);
-            memberList.back().type = (*q)->type();
+            memberList.back().inherited = false;
+            memberList.back().dataMember = *q;
         }
     }
 
@@ -967,14 +969,7 @@ Slice::Ruby::CodeVisitor::visitStructStart(const StructPtr& p)
     if(!memberList.empty())
     {
         _out << nl << "def initialize(";
-        for(r = memberList.begin(); r != memberList.end(); ++r)
-        {
-            if(r != memberList.begin())
-            {
-                _out << ", ";
-            }
-            _out << r->lowerName << '=' << getDefaultValue(r->type);
-        }
+        writeConstructorParams(memberList);
         _out << ")";
         _out.inc();
         for(r = memberList.begin(); r != memberList.end(); ++r)
@@ -994,7 +989,7 @@ Slice::Ruby::CodeVisitor::visitStructStart(const StructPtr& p)
     int iter = 0;
     for(r = memberList.begin(); r != memberList.end(); ++r)
     {
-        writeHash("@" + r->fixedName, r->type, iter);
+        writeHash("@" + r->fixedName, r->dataMember->type(), iter);
     }
     _out << nl << "_h % 0x7fffffff";
     _out.dec();
@@ -1017,6 +1012,17 @@ Slice::Ruby::CodeVisitor::visitStructStart(const StructPtr& p)
     }
     _out.dec();
     _out << nl << "true";
+    _out.dec();
+    _out << nl << "end";
+
+    //
+    // eql?
+    //
+    // This method is used to determine the equality of keys in a Hash object.
+    //
+    _out << sp << nl << "def eql?(other)";
+    _out.inc();
+    _out << nl << "return other.class == self.class && other == self";
     _out.dec();
     _out << nl << "end";
 
@@ -1071,7 +1077,7 @@ Slice::Ruby::CodeVisitor::visitStructStart(const StructPtr& p)
             _out << ',' << nl;
         }
         _out << "[\"" << r->fixedName << "\", ";
-        writeType(r->type);
+        writeType(r->dataMember->type());
         _out << ']';
     }
     if(memberList.size() > 1)
@@ -1281,141 +1287,10 @@ void
 Slice::Ruby::CodeVisitor::visitConst(const ConstPtr& p)
 {
     Slice::TypePtr type = p->type();
-    string value = p->value();
     string name = fixIdent(p->name(), IdentToUpper);
 
     _out << sp << nl << name << " = ";
-
-    Slice::BuiltinPtr b = Slice::BuiltinPtr::dynamicCast(type);
-    Slice::EnumPtr en = Slice::EnumPtr::dynamicCast(type);
-    if(b)
-    {
-        switch(b->kind())
-        {
-        case Slice::Builtin::KindBool:
-        {
-            _out << value;
-            break;
-        }
-        case Slice::Builtin::KindByte:
-        case Slice::Builtin::KindShort:
-        case Slice::Builtin::KindInt:
-        case Slice::Builtin::KindFloat:
-        case Slice::Builtin::KindDouble:
-        {
-            _out << value;
-            break;
-        }
-        case Slice::Builtin::KindLong:
-        {
-            IceUtil::Int64 l;
-            IceUtilInternal::stringToInt64(value, l);
-            _out << value;
-            break;
-        }
-
-        case Slice::Builtin::KindString:
-        {
-            //
-            // Expand strings into the basic source character set. We can't use isalpha() and the like
-            // here because they are sensitive to the current locale.
-            //
-            static const string basicSourceChars = "abcdefghijklmnopqrstuvwxyz"
-                                                   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                                   "0123456789"
-                                                   "_{}[]#()<>%:;.?*+-/^&|~!=, '";
-            static const set<char> charSet(basicSourceChars.begin(), basicSourceChars.end());
-
-            _out << "\"";                                      // Opening "
-
-            for(string::const_iterator c = value.begin(); c != value.end(); ++c)
-            {
-                switch(*c)
-                {
-                case '"':
-                {
-                    _out << "\\\"";
-                    break;
-                }
-                case '\\':
-                {
-                    _out << "\\\\";
-                    break;
-                }
-                case '\r':
-                {
-                    _out << "\\r";
-                    break;
-                }
-                case '\n':
-                {
-                    _out << "\\n";
-                    break;
-                }
-                case '\t':
-                {
-                    _out << "\\t";
-                    break;
-                }
-                case '\b':
-                {
-                    _out << "\\b";
-                    break;
-                }
-                case '\f':
-                {
-                    _out << "\\f";
-                    break;
-                }
-                default:
-                {
-                    if(charSet.find(*c) == charSet.end())
-                    {
-                        unsigned char uc = *c;            // Char may be signed, so make it positive.
-                        stringstream s;
-                        s << "\\";                            // Print as octal if not in basic source character set.
-                        s.flags(ios_base::oct);
-                        s.width(3);
-                        s.fill('0');
-                        s << static_cast<unsigned>(uc);
-                        _out << s.str();
-                    }
-                    else
-                    {
-                        _out << *c;                          // Print normally if in basic source character set.
-                    }
-                    break;
-                }
-                }
-            }
-
-            _out << "\"";                                      // Closing "
-            break;
-        }
-
-        case Slice::Builtin::KindObject:
-        case Slice::Builtin::KindObjectProxy:
-        case Slice::Builtin::KindLocalObject:
-            assert(false);
-        }
-    }
-    else if(en)
-    {
-        _out << getAbsolute(en, IdentToUpper) << "::";
-        string::size_type colon = value.rfind(':');
-        if(colon != string::npos)
-        {
-            _out << fixIdent(value.substr(colon + 1), IdentToUpper);
-        }
-        else
-        {
-            _out << fixIdent(value, IdentToUpper);
-        }
-    }
-    else
-    {
-        assert(false); // Unknown const type.
-    }
+    writeConstantValue(type, p->valueType(), p->value());
 }
 
 void
@@ -1498,7 +1373,7 @@ Slice::Ruby::CodeVisitor::writeType(const TypePtr& p)
 }
 
 string
-Slice::Ruby::CodeVisitor::getDefaultValue(const TypePtr& p)
+Slice::Ruby::CodeVisitor::getInitializer(const TypePtr& p)
 {
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(p);
     if(builtin)
@@ -1557,6 +1432,168 @@ Slice::Ruby::CodeVisitor::writeHash(const string& name, const TypePtr& p, int& i
 }
 
 void
+Slice::Ruby::CodeVisitor::writeConstantValue(const TypePtr& type, const SyntaxTreeBasePtr& valueType,
+                                             const string& value)
+{
+    ConstPtr constant = ConstPtr::dynamicCast(valueType);
+    if(constant)
+    {
+        _out << fixIdent(constant->scoped(), IdentToUpper);
+    }
+    else
+    {
+        Slice::BuiltinPtr b = Slice::BuiltinPtr::dynamicCast(type);
+        Slice::EnumPtr en = Slice::EnumPtr::dynamicCast(type);
+        if(b)
+        {
+            switch(b->kind())
+            {
+            case Slice::Builtin::KindBool:
+            case Slice::Builtin::KindByte:
+            case Slice::Builtin::KindShort:
+            case Slice::Builtin::KindInt:
+            case Slice::Builtin::KindFloat:
+            case Slice::Builtin::KindDouble:
+            {
+                _out << value;
+                break;
+            }
+            case Slice::Builtin::KindLong:
+            {
+                IceUtil::Int64 l;
+                IceUtilInternal::stringToInt64(value, l);
+                _out << value;
+                break;
+            }
+            case Slice::Builtin::KindString:
+            {
+                //
+                // Expand strings into the basic source character set. We can't use isalpha() and the like
+                // here because they are sensitive to the current locale.
+                //
+                static const string basicSourceChars = "abcdefghijklmnopqrstuvwxyz"
+                                                       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                                       "0123456789"
+                                                       "_{}[]#()<>%:;.?*+-/^&|~!=, '";
+                static const set<char> charSet(basicSourceChars.begin(), basicSourceChars.end());
+
+                _out << "\"";                                      // Opening "
+
+                for(string::const_iterator c = value.begin(); c != value.end(); ++c)
+                {
+                    switch(*c)
+                    {
+                    case '"':
+                    {
+                        _out << "\\\"";
+                        break;
+                    }
+                    case '\\':
+                    {
+                        _out << "\\\\";
+                        break;
+                    }
+                    case '\r':
+                    {
+                        _out << "\\r";
+                        break;
+                    }
+                    case '\n':
+                    {
+                        _out << "\\n";
+                        break;
+                    }
+                    case '\t':
+                    {
+                        _out << "\\t";
+                        break;
+                    }
+                    case '\b':
+                    {
+                        _out << "\\b";
+                        break;
+                    }
+                    case '\f':
+                    {
+                        _out << "\\f";
+                        break;
+                    }
+                    default:
+                    {
+                        if(charSet.find(*c) == charSet.end())
+                        {
+                            unsigned char uc = *c;              // Char may be signed, so make it positive.
+                            stringstream s;
+                            s << "\\";                          // Print as octal if not in basic source character set.
+                            s.flags(ios_base::oct);
+                            s.width(3);
+                            s.fill('0');
+                            s << static_cast<unsigned>(uc);
+                            _out << s.str();
+                        }
+                        else
+                        {
+                            _out << *c;                         // Print normally if in basic source character set.
+                        }
+                        break;
+                    }
+                    }
+                }
+
+                _out << "\"";                                   // Closing "
+                break;
+            }
+
+            case Slice::Builtin::KindObject:
+            case Slice::Builtin::KindObjectProxy:
+            case Slice::Builtin::KindLocalObject:
+                assert(false);
+            }
+        }
+        else if(en)
+        {
+            _out << getAbsolute(en, IdentToUpper) << "::";
+            string::size_type colon = value.rfind(':');
+            if(colon != string::npos)
+            {
+                _out << fixIdent(value.substr(colon + 1), IdentToUpper);
+            }
+            else
+            {
+                _out << fixIdent(value, IdentToUpper);
+            }
+        }
+        else
+        {
+            assert(false); // Unknown const type.
+        }
+    }
+}
+
+void
+Slice::Ruby::CodeVisitor::writeConstructorParams(const MemberInfoList& members)
+{
+    for(MemberInfoList::const_iterator p = members.begin(); p != members.end(); ++p)
+    {
+        if(p != members.begin())
+        {
+            _out << ", ";
+        }
+        _out << p->lowerName << "=";
+
+        const DataMemberPtr member = p->dataMember;
+        if(member->defaultValueType())
+        {
+            writeConstantValue(member->type(), member->defaultValueType(), member->defaultValue());
+        }
+        else
+        {
+            _out << getInitializer(member->type());
+        }
+    }
+}
+
+void
 Slice::Ruby::CodeVisitor::collectClassMembers(const ClassDefPtr& p, MemberInfoList& allMembers, bool inherited)
 {
     ClassList bases = p->bases();
@@ -1572,8 +1609,8 @@ Slice::Ruby::CodeVisitor::collectClassMembers(const ClassDefPtr& p, MemberInfoLi
         MemberInfo m;
         m.lowerName = fixIdent((*q)->name(), IdentToLower);
         m.fixedName = fixIdent((*q)->name(), IdentNormal);
-        m.type = (*q)->type();
         m.inherited = inherited;
+        m.dataMember = *q;
         allMembers.push_back(m);
     }
 }
@@ -1594,8 +1631,8 @@ Slice::Ruby::CodeVisitor::collectExceptionMembers(const ExceptionPtr& p, MemberI
         MemberInfo m;
         m.lowerName = fixIdent((*q)->name(), IdentToLower);
         m.fixedName = fixIdent((*q)->name(), IdentNormal);
-        m.type = (*q)->type();
         m.inherited = inherited;
+        m.dataMember = *q;
         allMembers.push_back(m);
     }
 }
@@ -1728,7 +1765,7 @@ Slice::Ruby::printHeader(IceUtilInternal::Output& out)
     static const char* header =
 "# **********************************************************************\n"
 "#\n"
-"# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.\n"
+"# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.\n"
 "#\n"
 "# This copy of Ice is licensed to you under the terms described in the\n"
 "# ICE_LICENSE file included in this distribution.\n"
@@ -1737,5 +1774,7 @@ Slice::Ruby::printHeader(IceUtilInternal::Output& out)
         ;
 
     out << header;
-    out << "\n# Ice version " << ICE_STRING_VERSION;
+    out << "#\n";
+    out << "# Ice version " << ICE_STRING_VERSION << "\n";
+    out << "#\n";
 }

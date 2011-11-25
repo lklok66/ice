@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -28,39 +28,70 @@ class OnewaysAMI
             _called = false;
         }
 
-        public bool check()
+        public void check()
         {
-            lock(this)
+            _m.Lock();
+            try
             {
                 while(!_called)
                 {
-                    Monitor.Wait(this, TimeSpan.FromMilliseconds(5000));
-
-                    if(!_called)
-                    {
-                        return false; // Must be timeout.
-                    }
+                    _m.Wait();
                 }
 
                 _called = false;
-                return true;
+            }
+            finally
+            {
+                _m.Unlock();
             }
         }
 
         public void called()
         {
-            lock(this)
+            _m.Lock();
+            try
             {
                 Debug.Assert(!_called);
                 _called = true;
-                Monitor.Pulse(this);
+                _m.Notify();
+            }
+            finally
+            {
+                _m.Unlock();
             }
         }
 
         private bool _called;
+        private readonly IceUtilInternal.Monitor _m = new IceUtilInternal.Monitor();
     }
 
     private class AMI_MyClass_opVoidI : Test.AMI_MyClass_opVoid
+    {
+        public override void ice_response()
+        {
+            test(false);
+        }
+
+        public override void ice_exception(Ice.Exception ex)
+        {
+            test(false);
+        }
+    }
+
+    private class AMI_MyClass_opIdempotentI : Test.AMI_MyClass_opIdempotent
+    {
+        public override void ice_response()
+        {
+            test(false);
+        }
+
+        public override void ice_exception(Ice.Exception ex)
+        {
+            test(false);
+        }
+    }
+
+    private class AMI_MyClass_opNonmutatingI : Test.AMI_MyClass_opNonmutating
     {
         public override void ice_response()
         {
@@ -86,9 +117,9 @@ class OnewaysAMI
             callback.called();
         }
 
-        public bool check()
+        public void check()
         {
-            return callback.check();
+            callback.check();
         }
 
         private Callback callback = new Callback();
@@ -107,9 +138,9 @@ class OnewaysAMI
             callback.called();
         }
 
-        public bool check()
+        public void check()
         {
-            return callback.check();
+            callback.check();
         }
 
         private Callback callback = new Callback();
@@ -127,6 +158,16 @@ class OnewaysAMI
         }
 
         {
+            AMI_MyClass_opIdempotentI cb = new AMI_MyClass_opIdempotentI();
+            p.opIdempotent_async(cb);
+        }
+
+        {
+            AMI_MyClass_opNonmutatingI cb = new AMI_MyClass_opNonmutatingI();
+            p.opNonmutating_async(cb);
+        }
+
+        {
             // Check that a call to a void operation raises NoEndpointException
             // in the ice_exception() callback instead of at the point of call.
             Test.MyClassPrx indirect = Test.MyClassPrxHelper.uncheckedCast(p.ice_adapterId("dummy"));
@@ -139,13 +180,13 @@ class OnewaysAMI
             {
                 test(false);
             }
-            test(cb.check());
+            cb.check();
         }
 
         {
             AMI_MyClass_opByteExI cb = new AMI_MyClass_opByteExI();
             p.opByte_async(cb, (byte)0xff, (byte)0x0f);
-            test(cb.check());
+            cb.check();
         }
     }
 }

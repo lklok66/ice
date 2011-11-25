@@ -3,19 +3,18 @@ Build instructions
 
 Ice for .NET has been built and tested with:
 
-- Microsoft Visual Studio 2005 Version 8.0.50727.762 and .NET
-  Framework Version 2.0.50727 SP1.
+- Microsoft Visual Studio 2008 SP1 and .NET Framework Version 3.5 SP1
 
-- Microsoft Visual Studio 2008 Version 9.0.21022.8 RTM and .NET
-  Framework Version 3.5.
+- Microsoft Visual Studio 2010 SP1 and .NET Framework Version 4.0
+
+- Microsoft Visual Studio 2008 SP1 and .NET Compact Framework Version 3.5 SP1
 
 Unpack the archive. The .NET sources will be contained in the
 Ice-@ver@\cs subdirectory.
 
 You will need the Slice to C# translator and supporting executables
-and libraries from the Ice for C++ distribution. You can download a
-binary distribution from the ZeroC web site, or you can build Ice for
-C++ yourself.
+and libraries from Ice for C++. You can download a binary distribution
+from the ZeroC web site, or you can build Ice for C++ yourself.
 
 Binary distributions for the supported platforms are available at
 
@@ -23,14 +22,13 @@ Binary distributions for the supported platforms are available at
 
 Follow these steps to build the source:
 
-1) If you have not built Ice for C++ from the cpp subdirectory, set
+1) If you have not built Ice for C++ in the "cpp" subdirectory, set
    ICE_HOME to the directory of your Ice for C++ installation.
    For example:
 
    > set ICE_HOME=C:\Ice-@ver@
 
-2) Change to the top-level directory of the Ice for .NET source
-   distribution.
+2) Change to the "cs" subdirectory of the Ice source distribution:
 
    > cd Ice-@ver@\cs
 
@@ -43,8 +41,23 @@ Follow these steps to build the source:
    > nmake /f Makefile.mak
 
 The tests and sample programs are built automatically. If you modify
-the source code of a sample program, you can rebuild it using nmake,
-or you can open the Visual Studio solution located in demo\demo.sln.
+the source code of a sample program, you can rebuild it using nmake.
+
+You can also build the demos using the Visual Studio solution located 
+in demo\demo.sln. Note that the demo projects require the Ice Visual
+Studio Add-In. The add-in is installed automatically when you
+use the Ice installer, or you can install the add-in manually by
+following the instructions in ..\vsaddin\INSTALL.txt.
+
+
+Managed Code
+------------
+
+By default, Ice for .NET uses unmanaged code for performing protocol
+compression and for handling signals in the Ice.Application class.
+You can build a managed version of Ice for .NET that lacks the
+aforementioned features by editing config/Make.rules.mak.cs and
+uncommenting the MANAGED=yes line before you build.
 
 
 SSL Notes
@@ -81,11 +94,11 @@ Ice applications.
 Running the tests
 -----------------
 
-Some of the Ice for .NET tests employ applications that are part of the
-Ice for C++ distribution. If you have not built Ice for C++ from the cpp
-subdirectory then you need to set the ICE_HOME environment variable to
-the path where these applications are installed for these tests to run
-properly:
+Some of the Ice for .NET tests employ applications that are part of
+Ice for C++. If you have not built Ice for C++ from the cpp
+subdirectory, then you need to set the ICE_HOME environment variable
+to the path where these applications are installed for the tests to
+run properly:
 
   > set ICE_HOME=c:\Ice-@ver@
 
@@ -110,23 +123,29 @@ case of a failure, the tests abort with "failed".
 Running the demos
 -----------------
 
-To run the demos, you need to have the Ice bin directory in your PATH.
-See the README file in each demo directory for a description of the
-demo.
+To run the demos, you need to have the cpp\bin directory in your PATH 
+and the cs\bin directory in your DEVPATH. See the README file in each
+demo directory for a description of the demo.
 
-Note that in demos that use IceSSL, the IceSSL plugin configuration
+Note that for demos that use IceSSL, the IceSSL plug-in configuration
 does not contain the fully-qualified name (FQN) for the IceSSL
 assembly. Instead it just contains the partial name:
 
   Ice.Plugin.IceSSL=IceSSL:IceSSL.PluginFactory
 
-The FQN is found in the *.exe.config files that are generated when the
-demos are built. If you want to run an application using the IceSSL
-assembly installed in the GAC without the use of the *.exe.config
-files, you must add the FQN to the IceSSL plugin configuration, as
-shown below:
+The IceSSL assembly is found though the use of DEVPATH, which is
+enabled in the *.exe.config files. If you want to run an application
+using the IceSSL assembly installed in the GAC without the use of the
+*.exe.config files, you must add the FQN to the IceSSL plug-in
+configuration, as shown below:
 
-  Ice.Plugin.IceSSL=IceSSL, Version=@ver@.0, Culture=neutral, PublicKeyToken=1f998c50fec78381:IceSSL.PluginFactory
+  Ice.Plugin.IceSSL=IceSSL, Version=@ver@.0, Culture=neutral, PublicKeyToken=cdd571ade22f2f16:IceSSL.PluginFactory
+
+Note that "cdd571ade22f2f16" is the token corresponding to ZeroC's
+public key for signing the assemblies in binary distributions. If you
+built Ice from sources, your assemblies were signed using the
+development key instead, which you can find in config/IceDevKey.snk.
+The token for the development key is "1f998c50fec78381".
 
 
 Installation
@@ -144,19 +163,19 @@ GAC Installation
 You can add the assemblies to the Global Assembly Cache (GAC). To do
 this, open Windows Explorer and navigate to the directory
 C:\WINDOWS\assembly. Next, drag and drop (or copy and paste) the
-assemblies from IceNET-@ver@\bin into the right-hand pane to install
+assemblies from Ice-@ver@\bin into the right-hand pane to install
 them in the cache.
 
-Or you can use gacutil from the command line to achieve the same
+You can also use gacutil from the command line to achieve the same
 result:
 
   > gacutil /i <library.dll>
 
-You can find gacutil.exe in the SDK\Tools\Bin folder of your Visual C#
-installation. For example, if you have installed Visual C# 8.0 in
-C:\Program Files, the path to gacutil is
+The gacutil tool is included with your Visual C# installation. For
+example, if you have installed Visual C# 9.0 in C:\Program Files, the
+path to gacutil is
 
-  C:\Program Files\Microsoft Visual Studio 8\SDK\v2.0\Bin\gacutil.exe
+  C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin\gacutil.exe
 
 Once installed in the cache, the assemblies will always be located
 correctly without having to set environment variables or copy them
@@ -165,17 +184,17 @@ into the same directory as an executable.
 If you want line numbers for stack traces, you must also install the
 PDB (.pdb) files in the GAC. Unfortunately, you cannot do this using
 Explorer, so you have to do it from the command line. Open a command
-shell window and navigate to C:\WINDOWS\assembly\GAC\Ice. (Assuming
-C:\WINDOWS is your system root.) Doing a directory listing there, you
-will find a directory named @dotnetver@__<UUID>, for example:
+shell window and navigate to C:\WINDOWS\assembly\GAC_MSIL\Ice
+(assuming C:\WINDOWS is your system root). Doing a directory listing
+there, you will find a directory named @dotnetver@__<UUID>, for 
+example:
 
   @dotnetver@__1f998c50fec78381
 
 Change to that directory (making sure that you use the correct version
-number for this release of Ice). In this directory, you will see a
-file called __AssemblyInfo__.ini and the Ice.dll you installed into
-the GAC in the preceding step. Now copy the Ice.pdb file into this
-directory:
+number for this release of Ice). In this directory, you will see the 
+Ice.dll you installed into the GAC in the preceding step. Now copy the
+Ice.pdb file into this directory:
 
   > copy <path_to_ice.pdb> .
 
@@ -188,24 +207,54 @@ protocol compression. On 64-bit Windows, you have to make sure that
 the 64-bit version of bzip2.dll is found instead of the 32-bit
 version. The bzip2 libraries are installed in <prefix>\bin\x64 and
 <prefix>\bin, respectively. For 64-bit Windows, you need to make sure
-that <prefix>\bin\x64 appears in the application's PATH instead of
-<prefix>\bin. (The Ice run time prints a warning to the console if it
-detects a bzip2.dll format mismatch during start-up.)
+that <prefix>\bin\x64 appears before <prefix>\bin in your
+application's PATH. (The Ice run time prints a warning to the console
+if it detects a bzip2.dll format mismatch during start-up.)
+
+
+.NET Compact Framework
+----------------------
+
+The default configuration in config\Make.rules.mak.cs produces an
+Ice assembly for use with .NET. If you wish to use Ice with the .NET
+Compact Framework, you must re-build the sources.
+
+The build processes for both Ice for .NET and Ice for .NET Compact
+Framework generate the same assembly in bin\Ice.dll. If you intend to
+use both versions of Ice, ensure that you make a copy of bin\Ice.dll
+prior to re-building the sources.
+
+Similarly, the installation process described in "Installation" above
+will overwrite the Ice.dll assembly, therefore we recommend that you
+set a different value for the "prefix" variable prior to installing
+the .NET Compact Framework version of Ice.dll.
+
+If you have already built Ice for .NET and intend to re-build the
+sources for the .NET Compact Framework, you should first clean the
+source tree as shown below:
+
+ > nmake /f Makefile.mak clean
+
+To build Ice for .NET Compact Framework, open config\Make.rules.mak.cs
+and set COMPACT=yes. Run nmake as before:
+
+ > nmake /f Makefile.mak
+
+This distribution includes a sample program that demonstrates the use
+of Ice for .NET Compact Framework. The source code for this demo can
+be found in cs\demo\Ice\compact. Note however that this demo is not
+built by the NMAKE build process. Instead, start Visual Studio and
+open the solution demo\democf.sln to build the demo. The README file
+in cs\demo\Ice\compact provides more information.
 
 
 Binary compatibility of patch releases
 --------------------------------------
 
-Patch releases of Ice are binary compatible. For example, version
-3.2.1 is compatible with 3.2.0, so you can run applications
-compiled with 3.2.0 with the 3.2.1 Ice assemblies without
-having to recompile.
+Ice patch releases are binary compatible. For example, Ice version 
+@mmver@.1 is compatible with @mmver@.0: you can run an application built 
+against Ice @mmver@.0 with Ice @mmver@.1 (or later) without having to
+recompile or relink this application.
 
-Ice for .NET includes policy assemblies in Ice-@ver@/cs/bin that
-supply the .NET run time with the required compatibility information.
-Policy assemblies have names of the form policy.<major>.<minor>.<package>.dll.
-For example, the policy assembly for IceBox 3.2 is called policy.3.2.IceBox.dll.
-
-To upgrade an existing application to a new patch release, the policy
-assemblies must be present in your PATH, or they must be
-installed into the GAC as described in the previous section.
+Please refer to the Ice @ver@ Release Notes for detailed upgrade 
+instructions.

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -45,11 +45,16 @@ public sealed class CallbackReceiverI : CallbackReceiverDisp_
     public override void
     callback(Ice.Current current)
     {
-        lock(this)
+        _m.Lock();
+        try
         {
             Debug.Assert(!_callback);
             _callback = true;
-            System.Threading.Monitor.Pulse(this);
+            _m.Notify();
+        }
+        finally
+        {
+            _m.Unlock();
         }
     }
 
@@ -63,24 +68,25 @@ public sealed class CallbackReceiverI : CallbackReceiverDisp_
         throw ex;
     }
 
-    public bool
+    public void
     callbackOK()
     {
-        lock(this)
+        _m.Lock();
+        try
         {
             while(!_callback)
             {
-                System.Threading.Monitor.Wait(this, 5000);
-                if(!_callback)
-                {
-                    return false;
-                }
+                _m.Wait();
             }
             
             _callback = false;
-            return true;
+        }
+        finally
+        {
+            _m.Unlock();
         }
     }
 
     private bool _callback;
+    private readonly IceUtilInternal.Monitor _m = new IceUtilInternal.Monitor();
 }

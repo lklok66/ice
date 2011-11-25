@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -26,10 +26,11 @@ OBJS		= Scanner.o \
 		  PythonUtil.o \
 		  DotNetNames.o \
 		  RubyUtil.o \
+		  PHPUtil.o \
 		  Util.o \
+		  FileTracker.o \
 		  MD5.o \
-		  MD5I.o \
-		  SignalHandler.o
+		  MD5I.o
 
 SRCS		= $(OBJS:.o=.cpp)
 
@@ -56,10 +57,6 @@ $(libdir)/$(LIBNAME): $(libdir)/$(SONAME)
 	rm -f $@
 	ln -s $(SONAME) $@
 endif
-
-clean::
-	-rm -f Grammar.cpp Grammar.h
-	-rm -f Scanner.cpp
 
 install:: all
 	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))

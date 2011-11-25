@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,6 +9,8 @@
 
 #ifndef ICE_LOGGER_ICE
 #define ICE_LOGGER_ICE
+
+[["cpp:header-ext:h"]]
 
 module Ice
 {
@@ -46,7 +48,7 @@ local interface Logger
      *
      * @param message The warning message to log.
      *
-     * @see error
+     * @see #error
      *
      **/
     void warning(string message);
@@ -57,10 +59,19 @@ local interface Logger
      *
      * @param message The error message to log.
      *
-     * @see warning
+     * @see #warning
      *
      **/
     void error(string message);
+    
+    /**
+     *
+     * Returns a clone of the logger with a new prefix.
+     *
+     * @param prefix The new prefix for the logger.
+     *
+     */
+    Logger cloneWithPrefix(string prefix);
 };
 
 };

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -58,11 +58,19 @@ sequence<MyClassS> MyClassSS;
 
 sequence<StringSS> StringSSS;
 
+struct MyStruct
+{
+    int i;
+    int j;
+};
+
 dictionary<byte, bool> ByteBoolD;
 dictionary<short, int> ShortIntD;
 dictionary<long, float> LongFloatD;
 dictionary<string, string> StringStringD;
 dictionary<string, MyEnum> StringMyEnumD;
+dictionary<MyEnum, string> MyEnumStringD;
+dictionary<MyStruct, MyEnum> MyStructMyEnumD;
 
 ["ami", "amd"] class MyClass
 {
@@ -141,12 +149,23 @@ dictionary<string, MyEnum> StringMyEnumD;
     StringMyEnumD opStringMyEnumD(StringMyEnumD p1, StringMyEnumD p2,
                                   out StringMyEnumD p3);
 
+    MyEnumStringD opMyEnumStringD(MyEnumStringD p1, MyEnumStringD p2,
+                                  out MyEnumStringD p3);
+
+    MyStructMyEnumD opMyStructMyEnumD(MyStructMyEnumD p1, MyStructMyEnumD p2,
+                                      out MyStructMyEnumD p3);
+
     IntS opIntS(IntS s);
 
     void opByteSOneway(ByteS s);
 
     StringStringD opContext();
 
+    void opDoubleMarshaling(double p1, DoubleS p2);
+
+    idempotent void opIdempotent();
+
+    ["nonmutating"] idempotent void opNonmutating();
 };
 
 ["ami", "amd"] class MyDerivedClass extends MyClass

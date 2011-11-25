@@ -29,6 +29,10 @@ In order to run this demo under 64 bit Windows you must add
 <ice-install-dir>\bin to your PATH, since that is where iceboxnet.exe
 is located.
 
+Note for Visual Studio 2010 / .NET 4.0 users:
+
+You need to configure iceboxnet.exe to use the .NET 4.0 runtime. See
+the release notes for details.
 
 Setup
 -----
@@ -127,3 +131,19 @@ Follow these steps:
    DemoGlacier2 is configured to use a built-in permissions verifier
    that does not validate passwords, so you can log in using any
    username/password combination.
+
+
+Vista Note
+----------
+
+On Vista-derived operating systems, the IceGrid node may emit the
+following warning:
+
+  warning: Unable to lookup the performance counter name:
+  Unable to connect to the specified computer or the computer is
+  offline. This usually occurs when you do not have sufficient
+  privileges.
+
+This issue can be resolved by granting appropriate permissions to the
+node's user account. Please refer to the Troubleshooting section of
+Appendix H in the Ice manual for more information.

@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -22,12 +22,8 @@ class CallbackBase:
         self._cond.acquire()
         try:
             while not self._called:
-                self._cond.wait(5.0)
-            if self._called:
-                self._called = False
-                return True
-            else:
-                return False
+                self._cond.wait()
+            self._called = False
         finally:
             self._cond.release()
 
@@ -38,6 +34,26 @@ class CallbackBase:
         self._cond.release()
 
 class AMI_MyClass_opVoidI(CallbackBase):
+    def __init__(self):
+        CallbackBase.__init__(self)
+
+    def ice_response(self):
+        self.called()
+
+    def ice_exception(self, ex):
+        test(False)
+
+class AMI_MyClass_opIdempotentI(CallbackBase):
+    def __init__(self):
+        CallbackBase.__init__(self)
+
+    def ice_response(self):
+        self.called()
+
+    def ice_exception(self, ex):
+        test(False)
+
+class AMI_MyClass_opNonmutatingI(CallbackBase):
     def __init__(self):
         CallbackBase.__init__(self)
 
@@ -78,6 +94,12 @@ def onewaysAMI(communicator, p):
     # Let's check if we can reuse the same callback object for another call.
     p.opVoid_async(cb)
 
+    cb = AMI_MyClass_opIdempotentI()
+    p.opIdempotent_async(cb)
+
+    cb = AMI_MyClass_opNonmutatingI()
+    p.opNonmutating_async(cb)
+
     # Check that a call to a void operation raises NoEndpointException
     # in the ice_exception() callback instead of at the point of call.
     indirect = Test.MyClassPrx.uncheckedCast(p.ice_adapterId("dummy"))
@@ -86,11 +108,11 @@ def onewaysAMI(communicator, p):
         indirect.opVoid_async(cb)
     except Ice.Exception:
         test(False)
-    test(cb.check())
+    cb.check()
 
     cb = AMI_MyClass_opByteExI()
     try:
         p.opByte_async(cb, 0, 0)
     except Ice.Exception:
         test(False)
-    test(cb.check())
+    cb.check()

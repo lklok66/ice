@@ -1,19 +1,20 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
+package test.Ice.background;
 
-final class Connector implements IceInternal.Connector, java.lang.Comparable
+final class Connector implements IceInternal.Connector
 {
     public IceInternal.Transceiver
     connect()
     {
         _configuration.checkConnectException();
-        return new Transceiver(_connector.connect());
+        return new Transceiver(_configuration, _connector.connect());
     }
 
     public short
@@ -37,23 +38,14 @@ final class Connector implements IceInternal.Connector, java.lang.Comparable
     //
     // Only for use by Endpoint
     //
-    Connector(IceInternal.Connector connector)
+    Connector(Configuration configuration, IceInternal.Connector connector)
     {
-        _configuration = Configuration.getInstance();
+        _configuration = configuration;
         _connector = connector;
     }
 
-    //
-    // Compare connectors for sorting purposes
-    //
     public boolean
     equals(java.lang.Object obj)
-    {
-        return compareTo(obj) == 0;
-    }
-
-    public int
-    compareTo(java.lang.Object obj) // From java.lang.Comparable
     {
         Connector p = null;
 
@@ -63,31 +55,16 @@ final class Connector implements IceInternal.Connector, java.lang.Comparable
         }
         catch(ClassCastException ex)
         {
-            try
-            {
-                IceInternal.Connector c = (IceInternal.Connector)obj;
-                return type() < c.type() ? -1 : 1;
-            }
-            catch(ClassCastException ee)
-            {
-                assert(false);
-            }
+            return false;
         }
 
         if(this == p)
         {
-            return 0;
+            return true;
         }
 
-        return _connector.compareTo(p._connector);
+        return _connector.equals(p._connector);
     } 
-
-    protected synchronized void
-    finalize()
-        throws Throwable
-    {
-        super.finalize();
-    }
 
     final private IceInternal.Connector _connector;
     final private Configuration _configuration;

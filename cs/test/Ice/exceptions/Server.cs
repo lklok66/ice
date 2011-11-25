@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -34,6 +34,11 @@ public sealed class DummyLogger : Ice.Logger
     public void error(string message)
     {
     }
+
+    public Ice.Logger cloneWithPrefix(string prefix)
+    {
+        return new DummyLogger();
+    }
 }
 
 public class Server
@@ -43,21 +48,23 @@ public class Server
         Ice.Properties properties = communicator.getProperties();
         // We don't need to disable warnings because we have a dummy logger.
         //properties.setProperty("Ice.Warn.Dispatch", "0");
-        properties.setProperty("TestAdapter.Endpoints", "default -p 12010 -t 2000:udp");
+        properties.setProperty("TestAdapter.Endpoints", "default -p 12010:udp");
         Ice.ObjectAdapter adapter = communicator.createObjectAdapter("TestAdapter");
-        Ice.Object @object = new ThrowerI(adapter);
+        Ice.Object @object = new ThrowerI();
         adapter.add(@object, communicator.stringToIdentity("thrower"));
         adapter.activate();
         communicator.waitForShutdown();
         return 0;
     }
-    
-    public static void Main(string[] args)
+
+    public static int Main(string[] args)
     {
         int status = 0;
         Ice.Communicator communicator = null;
-        
+
+#if !COMPACT
         Debug.Listeners.Add(new ConsoleTraceListener());
+#endif
 
         try
         {
@@ -75,7 +82,7 @@ public class Server
             System.Console.WriteLine(ex);
             status = 1;
         }
-        
+
         if(communicator != null)
         {
             try
@@ -88,10 +95,7 @@ public class Server
                 status = 1;
             }
         }
-        
-        if(status != 0)
-        {
-            System.Environment.Exit(status);
-        }
+
+        return status;
     }
 }

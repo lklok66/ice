@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -16,12 +16,13 @@
 #include <Logger.h>
 #include <ObjectAdapter.h>
 #include <ObjectFactory.h>
+#include <Operation.h>
 #include <Properties.h>
 #include <Proxy.h>
 #include <ThreadNotification.h>
 #include <Util.h>
 #include <Ice/Initialize.h>
-#include <Ice/Communicator.h>
+#include <Ice/CommunicatorAsync.h>
 #include <Ice/LocalException.h>
 #include <Ice/Locator.h>
 #include <Ice/ObjectAdapter.h>
@@ -133,7 +134,7 @@ communicatorInit(CommunicatorObject* self, PyObject* args, PyObject* /*kwds*/)
     //
     // Use the with-args or the without-args version of initialize()?
     //
-    bool hasArgs = !seq.empty();
+    bool hasArgs = argList != 0;
 
     Ice::InitializationData data;
     if(initData)
@@ -166,7 +167,14 @@ communicatorInit(CommunicatorObject* self, PyObject* args, PyObject* /*kwds*/)
 
     try
     {
-        data.properties = Ice::createProperties(seq, data.properties);
+        if(argList)
+        {
+            data.properties = Ice::createProperties(seq, data.properties);
+        }
+        else if(!data.properties)
+        {
+            data.properties = Ice::createProperties();
+        }
     }
     catch(const Ice::Exception& ex)
     {
@@ -183,7 +191,7 @@ communicatorInit(CommunicatorObject* self, PyObject* args, PyObject* /*kwds*/)
    
     //
     // Remaining command line options are passed to the communicator
-    // as an argument vector in case they contain plugin properties.
+    // as an argument vector in case they contain plug-in properties.
     //
     int argc = static_cast<int>(seq.size());
     char** argv = new char*[argc + 1];
@@ -275,7 +283,6 @@ communicatorDealloc(CommunicatorObject* self)
         (*self->shutdownThread)->getThreadControl().join();
     }
     delete self->communicator;
-    Py_XDECREF(self->wrapper);
     delete self->shutdownMonitor;
     delete self->shutdownThread;
     PyObject_Del(self);
@@ -298,6 +305,12 @@ communicatorDestroy(CommunicatorObject* self)
         setPythonException(ex);
         return 0;
     }
+
+    //
+    // Break cyclic reference between this object and its Python wrapper.
+    //
+    Py_XDECREF(self->wrapper);
+    self->wrapper = 0;
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -453,6 +466,10 @@ communicatorStringToProxy(CommunicatorObject* self, PyObject* args)
     try
     {
         proxy = (*self->communicator)->stringToProxy(str);
+        if(proxy)
+        {
+            return createProxy(proxy, *self->communicator);
+        }
     }
     catch(const Ice::Exception& ex)
     {
@@ -460,7 +477,8 @@ communicatorStringToProxy(CommunicatorObject* self, PyObject* args)
         return 0;
     }
 
-    return createProxy(proxy, *self->communicator);
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 #ifdef WIN32
@@ -470,12 +488,17 @@ static PyObject*
 communicatorProxyToString(CommunicatorObject* self, PyObject* args)
 {
     PyObject* obj;
-    if(!PyArg_ParseTuple(args, STRCAST("O!"), &ProxyType, &obj))
+    if(!PyArg_ParseTuple(args, STRCAST("O"), &obj))
     {
         return 0;
     }
 
-    Ice::ObjectPrx proxy = getProxy(obj);
+    Ice::ObjectPrx proxy;
+    if(!getProxyArg(obj, "proxyToString", "obj", proxy))
+    {
+        return 0;
+    }
+
     string str;
 
     assert(self->communicator);
@@ -515,6 +538,10 @@ communicatorPropertyToProxy(CommunicatorObject* self, PyObject* args)
     try
     {
         proxy = (*self->communicator)->propertyToProxy(str);
+        if(proxy)
+        {
+            return createProxy(proxy, *self->communicator);
+        }
     }
     catch(const Ice::Exception& ex)
     {
@@ -522,7 +549,61 @@ communicatorPropertyToProxy(CommunicatorObject* self, PyObject* args)
         return 0;
     }
 
-    return createProxy(proxy, *self->communicator);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+#ifdef WIN32
+extern "C"
+#endif
+static PyObject*
+communicatorProxyToProperty(CommunicatorObject* self, PyObject* args)
+{
+    //
+    // We don't want to accept None here, so we can specify ProxyType and force
+    // the caller to supply a proxy object.
+    //
+    PyObject* proxyObj;
+    PyObject* strObj;
+    if(!PyArg_ParseTuple(args, STRCAST("O!O"), &ProxyType, &proxyObj, &strObj))
+    {
+        return 0;
+    }
+
+    Ice::ObjectPrx proxy = getProxy(proxyObj);
+    string str;
+    if(!getStringArg(strObj, "property", str))
+    {
+        return 0;
+    }
+
+    assert(self->communicator);
+    Ice::PropertyDict dict;
+    try
+    {
+        dict = (*self->communicator)->proxyToProperty(proxy, str);
+    }
+    catch(const Ice::Exception& ex)
+    {
+        setPythonException(ex);
+        return 0;
+    }
+
+    PyObjectHandle result = PyDict_New();
+    if(result.get())
+    {
+        for(Ice::PropertyDict::iterator p = dict.begin(); p != dict.end(); ++p)
+        {
+            PyObjectHandle key = createString(p->first);
+            PyObjectHandle val = createString(p->second);
+            if(!val.get() || PyDict_SetItem(result.get(), key.get(), val.get()) < 0)
+            {
+                return 0;
+            }
+        }
+    }
+
+    return result.release();
 }
 
 #ifdef WIN32
@@ -603,6 +684,214 @@ communicatorFlushBatchRequests(CommunicatorObject* self)
     {
         AllowThreads allowThreads; // Release Python's global interpreter lock to avoid a potential deadlock.
         (*self->communicator)->flushBatchRequests();
+    }
+    catch(const Ice::Exception& ex)
+    {
+        setPythonException(ex);
+        return 0;
+    }
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+#ifdef WIN32
+extern "C"
+#endif
+static PyObject*
+communicatorBeginFlushBatchRequests(CommunicatorObject* self, PyObject* args, PyObject* kwds)
+{
+    assert(self->communicator);
+
+    static char* argNames[] =
+    {
+        const_cast<char*>("_ex"),
+        const_cast<char*>("_sent"),
+        0
+    };
+    PyObject* ex = Py_None;
+    PyObject* sent = Py_None;
+    if(!PyArg_ParseTupleAndKeywords(args, kwds, STRCAST("|OO"), argNames, &ex, &sent))
+    {
+        return 0;
+    }
+
+    if(ex == Py_None)
+    {
+        ex = 0;
+    }
+    if(sent == Py_None)
+    {
+        sent = 0;
+    }
+
+    if(!ex && sent)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+            STRCAST("exception callback must also be provided when sent callback is used"));
+        return 0;
+    }
+
+    Ice::Callback_Communicator_flushBatchRequestsPtr cb;
+    if(ex || sent)
+    {
+        FlushCallbackPtr d = new FlushCallback(ex, sent, "flushBatchRequests");
+        cb = Ice::newCallback_Communicator_flushBatchRequests(d, &FlushCallback::exception, &FlushCallback::sent);
+    }
+
+    Ice::AsyncResultPtr result;
+    try
+    {
+        AllowThreads allowThreads; // Release Python's global interpreter lock during remote invocations.
+
+        if(cb)
+        {
+            result = (*self->communicator)->begin_flushBatchRequests(cb);
+        }
+        else
+        {
+            result = (*self->communicator)->begin_flushBatchRequests();
+        }
+    }
+    catch(const Ice::Exception& ex)
+    {
+        setPythonException(ex);
+        return 0;
+    }
+
+    return createAsyncResult(result, 0, 0, reinterpret_cast<PyObject*>(self));
+}
+
+#ifdef WIN32
+extern "C"
+#endif
+static PyObject*
+communicatorEndFlushBatchRequests(CommunicatorObject* self, PyObject* args)
+{
+    assert(self->communicator);
+
+    PyObject* result;
+    if(!PyArg_ParseTuple(args, STRCAST("O!"), &AsyncResultType, &result))
+    {
+        return 0;
+    }
+
+    Ice::AsyncResultPtr r = getAsyncResult(result);
+    try
+    {
+        AllowThreads allowThreads; // Release Python's global interpreter lock during blocking invocations.
+        (*self->communicator)->end_flushBatchRequests(r);
+    }
+    catch(const Ice::Exception& ex)
+    {
+        setPythonException(ex);
+        return 0;
+    }
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+#ifdef WIN32
+extern "C"
+#endif
+static PyObject*
+communicatorGetAdmin(CommunicatorObject* self)
+{
+    assert(self->communicator);
+    Ice::ObjectPrx proxy;
+    try
+    {
+        proxy = (*self->communicator)->getAdmin();
+        if(proxy)
+        {
+            return createProxy(proxy, *self->communicator);
+        }
+    }
+    catch(const Ice::Exception& ex)
+    {
+        setPythonException(ex);
+        return 0;
+    }
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+#ifdef WIN32
+extern "C"
+#endif
+static PyObject*
+communicatorAddAdminFacet(CommunicatorObject* self, PyObject* args)
+{
+    PyObject* objectType = lookupType("Ice.Object");
+    PyObject* servant;
+    PyObject* facetObj;
+    if(!PyArg_ParseTuple(args, STRCAST("O!O"), objectType, &servant, &facetObj))
+    {
+        return 0;
+    }
+
+    string facet;
+    if(!getStringArg(facetObj, "facet", facet))
+    {
+        return 0;
+    }
+
+    ServantWrapperPtr wrapper = createServantWrapper(servant);
+    if(PyErr_Occurred())
+    {
+        return 0;
+    }
+
+    assert(self->communicator);
+    try
+    {
+        (*self->communicator)->addAdminFacet(wrapper, facet);
+    }
+    catch(const Ice::Exception& ex)
+    {
+        setPythonException(ex);
+        return 0;
+    }
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+#ifdef WIN32
+extern "C"
+#endif
+static PyObject*
+communicatorRemoveAdminFacet(CommunicatorObject* self, PyObject* args)
+{
+    PyObject* facetObj;
+    if(!PyArg_ParseTuple(args, STRCAST("O"), &facetObj))
+    {
+        return 0;
+    }
+
+    string facet;
+    if(!getStringArg(facetObj, "facet", facet))
+    {
+        return 0;
+    }
+
+    assert(self->communicator);
+    try
+    {
+        //
+        // The facet being removed may not be implemented by a Python servant
+        // (e.g., it could be the Process or Properties facet), in which case
+        // we return None.
+        //
+        Ice::ObjectPtr obj = (*self->communicator)->removeAdminFacet(facet);
+        assert(obj);
+        ServantWrapperPtr wrapper = ServantWrapperPtr::dynamicCast(obj);
+        if(wrapper)
+        {
+            return wrapper->getObject();
+        }
     }
     catch(const Ice::Exception& ex)
     {
@@ -783,81 +1072,14 @@ communicatorFindObjectFactory(CommunicatorObject* self, PyObject* args)
 extern "C"
 #endif
 static PyObject*
-communicatorSetDefaultContext(CommunicatorObject* self, PyObject* args)
-{
-    PyErr_Warn(PyExc_DeprecationWarning, STRCAST("setDefaultContext is deprecated, use per-proxy contexts or implicit contexts (if applicable) instead."));
-
-    PyObject* dict;
-    if(!PyArg_ParseTuple(args, STRCAST("O!"), &PyDict_Type, &dict))
-    {
-        return 0;
-    }
-
-    Ice::Context ctx;
-    if(!dictionaryToContext(dict, ctx))
-    {
-        return 0;
-    }
-
-    try
-    {
-        (*self->communicator)->setDefaultContext(ctx);
-    }
-    catch(const Ice::Exception& ex)
-    {
-        setPythonException(ex);
-        return 0;
-
-    }
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-#ifdef WIN32
-extern "C"
-#endif
-static PyObject*
-communicatorGetDefaultContext(CommunicatorObject* self)
-{
-    PyErr_Warn(PyExc_DeprecationWarning, STRCAST("getDefaultContext is deprecated, use per-proxy contexts or implicit contexts (if applicable) instead."));
-
-    Ice::Context ctx;
-    try
-    {
-        ctx = (*self->communicator)->getDefaultContext();
-    }
-    catch(const Ice::Exception& ex)
-    {
-        setPythonException(ex);
-        return 0;
-    }
-
-    PyObjectHandle dict = PyDict_New();
-    if(!dict.get())
-    {
-        return 0;
-    }
-
-    if(!contextToDictionary(ctx, dict.get()))
-    {
-        return 0;
-    }
-
-    return dict.release();
-}
-
-#ifdef WIN32
-extern "C"
-#endif
-static PyObject*
 communicatorGetImplicitContext(CommunicatorObject* self)
 {
     Ice::ImplicitContextPtr implicitContext = (*self->communicator)->getImplicitContext();
     
     if(implicitContext == 0)
     {
-        return 0;
+        Py_INCREF(Py_None);
+        return Py_None;
     }
 
     return createImplicitContext(implicitContext);
@@ -967,8 +1189,8 @@ static PyObject*
 communicatorCreateObjectAdapterWithRouter(CommunicatorObject* self, PyObject* args)
 {
     PyObject* nameObj;
-    PyObject* proxy;
-    if(!PyArg_ParseTuple(args, STRCAST("OO"), &nameObj, &proxy))
+    PyObject* p;
+    if(!PyArg_ParseTuple(args, STRCAST("OO"), &nameObj, &p))
     {
         return 0;
     }
@@ -979,25 +1201,19 @@ communicatorCreateObjectAdapterWithRouter(CommunicatorObject* self, PyObject* ar
         return 0;
     }
 
-    PyObject* routerProxyType = lookupType("Ice.RouterPrx");
-    assert(routerProxyType);
-    Ice::RouterPrx router;
-    if(PyObject_IsInstance(proxy, routerProxyType))
+    Ice::ObjectPrx proxy;
+    if(!getProxyArg(p, "createObjectAdapterWithRouter", "rtr", proxy, "Ice.RouterPrx"))
     {
-        router = Ice::RouterPrx::uncheckedCast(getProxy(proxy));
-    }
-    else if(proxy != Py_None)
-    {
-        PyErr_Format(PyExc_ValueError, STRCAST("createObjectAdapterWithRouter requires None or Ice.RouterPrx"));
         return 0;
     }
 
-    AllowThreads allowThreads; // Release Python's global interpreter lock to avoid a potential deadlock.
+    Ice::RouterPrx router = Ice::RouterPrx::uncheckedCast(proxy);
 
     assert(self->communicator);
     Ice::ObjectAdapterPtr adapter;
     try
     {
+        AllowThreads allowThreads; // Release Python's global interpreter lock to avoid a potential deadlock.
         adapter = (*self->communicator)->createObjectAdapterWithRouter(name, router);
     }
     catch(const Ice::Exception& ex)
@@ -1056,24 +1272,19 @@ extern "C"
 static PyObject*
 communicatorSetDefaultRouter(CommunicatorObject* self, PyObject* args)
 {
-    PyObject* proxy;
-    if(!PyArg_ParseTuple(args, STRCAST("O"), &proxy))
+    PyObject* p;
+    if(!PyArg_ParseTuple(args, STRCAST("O"), &p))
     {
         return 0;
     }
 
-    PyObject* routerProxyType = lookupType("Ice.RouterPrx");
-    assert(routerProxyType);
-    Ice::RouterPrx router;
-    if(PyObject_IsInstance(proxy, routerProxyType))
+    Ice::ObjectPrx proxy;
+    if(!getProxyArg(p, "setDefaultRouter", "rtr", proxy, "Ice.RouterPrx"))
     {
-        router = Ice::RouterPrx::uncheckedCast(getProxy(proxy));
-    }
-    else if(proxy != Py_None)
-    {
-        PyErr_Format(PyExc_ValueError, STRCAST("setDefaultRouter requires None or Ice.RouterPrx"));
         return 0;
     }
+
+    Ice::RouterPrx router = Ice::RouterPrx::uncheckedCast(proxy);
 
     assert(self->communicator);
     try
@@ -1125,24 +1336,19 @@ extern "C"
 static PyObject*
 communicatorSetDefaultLocator(CommunicatorObject* self, PyObject* args)
 {
-    PyObject* proxy;
-    if(!PyArg_ParseTuple(args, STRCAST("O"), &proxy))
+    PyObject* p;
+    if(!PyArg_ParseTuple(args, STRCAST("O"), &p))
     {
         return 0;
     }
 
-    PyObject* locatorProxyType = lookupType("Ice.LocatorPrx");
-    assert(locatorProxyType);
-    Ice::LocatorPrx locator;
-    if(PyObject_IsInstance(proxy, locatorProxyType))
+    Ice::ObjectPrx proxy;
+    if(!getProxyArg(p, "setDefaultLocator", "loc", proxy, "Ice.LocatorPrx"))
     {
-        locator = Ice::LocatorPrx::uncheckedCast(getProxy(proxy));
-    }
-    else if(proxy != Py_None)
-    {
-        PyErr_Format(PyExc_ValueError, STRCAST("setDefaultLocator requires None or Ice.LocatorPrx"));
         return 0;
     }
+
+    Ice::LocatorPrx locator = Ice::LocatorPrx::uncheckedCast(proxy);
 
     assert(self->communicator);
     try
@@ -1175,6 +1381,8 @@ static PyMethodDef CommunicatorMethods[] =
         PyDoc_STR(STRCAST("proxyToString(Ice.ObjectPrx) -> string")) },
     { STRCAST("propertyToProxy"), reinterpret_cast<PyCFunction>(communicatorPropertyToProxy), METH_VARARGS,
         PyDoc_STR(STRCAST("propertyToProxy(str) -> Ice.ObjectPrx")) },
+    { STRCAST("proxyToProperty"), reinterpret_cast<PyCFunction>(communicatorProxyToProperty), METH_VARARGS,
+        PyDoc_STR(STRCAST("proxyToProperty(Ice.ObjectPrx, str) -> dict")) },
     { STRCAST("stringToIdentity"), reinterpret_cast<PyCFunction>(communicatorStringToIdentity), METH_VARARGS,
         PyDoc_STR(STRCAST("stringToIdentity(str) -> Ice.Identity")) },
     { STRCAST("identityToString"), reinterpret_cast<PyCFunction>(communicatorIdentityToString), METH_VARARGS,
@@ -1191,10 +1399,6 @@ static PyMethodDef CommunicatorMethods[] =
         PyDoc_STR(STRCAST("addObjectFactory(factory, id) -> None")) },
     { STRCAST("findObjectFactory"), reinterpret_cast<PyCFunction>(communicatorFindObjectFactory), METH_VARARGS,
         PyDoc_STR(STRCAST("findObjectFactory(id) -> Ice.ObjectFactory")) },
-    { STRCAST("setDefaultContext"), reinterpret_cast<PyCFunction>(communicatorSetDefaultContext), METH_VARARGS,
-        PyDoc_STR(STRCAST("setDefaultContext(ctx) -> None")) },
-    { STRCAST("getDefaultContext"), reinterpret_cast<PyCFunction>(communicatorGetDefaultContext), METH_NOARGS,
-        PyDoc_STR(STRCAST("getDefaultContext() -> Ice.Context")) },
     { STRCAST("getImplicitContext"), reinterpret_cast<PyCFunction>(communicatorGetImplicitContext), METH_NOARGS,
       PyDoc_STR(STRCAST("getImplicitContext() -> Ice.ImplicitContext")) },
     { STRCAST("getProperties"), reinterpret_cast<PyCFunction>(communicatorGetProperties), METH_NOARGS,
@@ -1211,6 +1415,17 @@ static PyMethodDef CommunicatorMethods[] =
         PyDoc_STR(STRCAST("setDefaultLocator(proxy) -> None")) },
     { STRCAST("flushBatchRequests"), reinterpret_cast<PyCFunction>(communicatorFlushBatchRequests), METH_NOARGS,
         PyDoc_STR(STRCAST("flushBatchRequests() -> None")) },
+    { STRCAST("begin_flushBatchRequests"), reinterpret_cast<PyCFunction>(communicatorBeginFlushBatchRequests),
+        METH_VARARGS | METH_KEYWORDS,
+        PyDoc_STR(STRCAST("begin_flushBatchRequests([_ex][, _sent]) -> Ice.AsyncResult")) },
+    { STRCAST("end_flushBatchRequests"), reinterpret_cast<PyCFunction>(communicatorEndFlushBatchRequests),
+        METH_VARARGS, PyDoc_STR(STRCAST("end_flushBatchRequests(Ice.AsyncResult) -> None")) },
+    { STRCAST("getAdmin"), reinterpret_cast<PyCFunction>(communicatorGetAdmin), METH_NOARGS,
+        PyDoc_STR(STRCAST("getAdmin() -> Ice.ObjectPrx")) },
+    { STRCAST("addAdminFacet"), reinterpret_cast<PyCFunction>(communicatorAddAdminFacet), METH_VARARGS,
+        PyDoc_STR(STRCAST("addAdminFacet(servant, facet) -> None")) },
+    { STRCAST("removeAdminFacet"), reinterpret_cast<PyCFunction>(communicatorRemoveAdminFacet), METH_VARARGS,
+        PyDoc_STR(STRCAST("removeAdminFacet(facet) -> Ice.Object")) },
     { STRCAST("_setWrapper"), reinterpret_cast<PyCFunction>(communicatorSetWrapper), METH_VARARGS,
         PyDoc_STR(STRCAST("internal function")) },
     { STRCAST("_getWrapper"), reinterpret_cast<PyCFunction>(communicatorGetWrapper), METH_NOARGS,

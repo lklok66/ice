@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -38,8 +38,18 @@ class TcpAcceptor implements Acceptor
 
         if(_traceLevels.network >= 1)
         {
-            String s = "accepting tcp connections at " + toString();
-            _logger.trace(_traceLevels.networkCat, s);
+            StringBuffer s = new StringBuffer("accepting tcp connections at ");
+	    s.append(toString());
+
+            java.util.List<String> interfaces = 
+                Network.getHostsForEndpointExpand(_addr.getAddress().getHostAddress(), _instance.protocolSupport(),
+                                                  true);
+            if(!interfaces.isEmpty())
+            {
+                s.append("\nlocal interfaces: ");
+                s.append(IceUtilInternal.StringUtil.joinString(interfaces, ", "));
+            }
+            _logger.trace(_traceLevels.networkCat, s.toString());
         }
     }
 
@@ -56,7 +66,7 @@ class TcpAcceptor implements Acceptor
             _logger.trace(_traceLevels.networkCat, s);
         }
 
-        return new TcpTransceiver(_instance, fd, true);
+        return new TcpTransceiver(_instance, fd, true, null);
     }
 
     public String
@@ -130,5 +140,4 @@ class TcpAcceptor implements Acceptor
     private java.nio.channels.ServerSocketChannel _fd;
     private int _backlog;
     private java.net.InetSocketAddress _addr;
-    private java.nio.channels.Selector _selector;
 }

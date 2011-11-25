@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -18,64 +18,45 @@ namespace IceInternal
 
     sealed class TcpTransceiver : Transceiver
     {
-        public Socket fd()
+        public int initialize()
         {
-            Debug.Assert(_fd != null);
-            return _fd;
-        }
-
-        public bool restartable()
-        {
-            return true;
-        }
-
-        public bool initialize(AsyncCallback callback)
-        {
-            try
+            if(_state == StateNeedConnect)
             {
-                if(_state == StateNeedBeginConnect)
+                _state = StateConnectPending;
+                return SocketOperation.Connect;
+            }
+            else if(_state <= StateConnectPending)
+            {
+                try
                 {
-                    Debug.Assert(callback != null);
-                    Debug.Assert(_addr != null);
-
-                    _state = StateNeedEndConnect;
-                    _result = Network.doBeginConnectAsync(_fd, _addr, callback);
-
-                    if(!_result.CompletedSynchronously)
-                    {
-                        //
-                        // Return now if the I/O request needs an asynchronous callback.
-                        //
-                        return false;
-                    }
-                }
-
-                if(_state == StateNeedEndConnect)
-                {
-                    Debug.Assert(_result != null);
-                    Network.doEndConnectAsync(_result);
-                    _result = null;
+                    Network.doFinishConnectAsync(_fd, _writeResult);
+                    _writeResult = null;
                     _state = StateConnected;
                     _desc = Network.fdToString(_fd);
-                    if(_traceLevels.network >= 1)
+                }
+                catch(Ice.LocalException ex)
+                {
+                    if(_traceLevels.network >= 2)
                     {
-                        string s = "tcp connection established\n" + _desc;
-                        _logger.trace(_traceLevels.networkCat, s);
+                        System.Text.StringBuilder s = new System.Text.StringBuilder();
+                        s.Append("failed to establish tcp connection\n");
+                        s.Append(Network.fdLocalAddressToString(_fd));
+                        Debug.Assert(_addr != null);
+                        s.Append("\nremote address = " + _addr.ToString() + "\n");
+                        s.Append(ex.ToString());
+                        _logger.trace(_traceLevels.networkCat, s.ToString());
                     }
+                    throw;
                 }
 
-                Debug.Assert(_state == StateConnected);
-                return true;
-            }
-            catch(Ice.LocalException ex)
-            {
-                if(_traceLevels.network >= 2)
+                if(_traceLevels.network >= 1)
                 {
-                    string s = "failed to establish tcp connection\n" + Network.fdToString(_fd) + "\n" + ex;
+                    string s = "tcp connection established\n" + _desc;
                     _logger.trace(_traceLevels.networkCat, s);
                 }
-                throw;
             }
+            Debug.Assert(_state == StateConnected);
+            return SocketOperation.None;
         }
 
         public void close()
@@ -107,12 +88,33 @@ namespace IceInternal
 
         public bool write(Buffer buf)
         {
-            int size = buf.b.limit();
-            int packetSize = size - buf.b.position();
-            if(_maxPacketSize > 0 && packetSize > _maxPacketSize)
+#if COMPACT
+            //
+            // The Compact Framework does not support the use of synchronous socket
+            // operations on a non-blocking socket. Returning false here forces the
+            // caller to schedule an asynchronous operation.
+            //
+            return false;
+#else
+            int packetSize = buf.b.remaining();
+            if(AssemblyUtil.platform_ == AssemblyUtil.Platform.Windows)
             {
-                packetSize = _maxPacketSize;
-                buf.b.limit(buf.b.position() + packetSize);
+                //
+                // On Windows, limiting the buffer size is important to prevent
+                // poor throughput performance when transferring large amounts of
+                // data. See Microsoft KB article KB823764.
+                //
+                if(_maxSendPacketSize > 0 && packetSize > _maxSendPacketSize / 2)
+                {
+                    packetSize = _maxSendPacketSize / 2;
+                }
+            }
+            else
+            {
+                if(_blocking > 0)
+                {
+                    return false;
+                }
             }
 
             while(buf.b.hasRemaining())
@@ -124,20 +126,12 @@ namespace IceInternal
                     int ret;
                     try
                     {
-                        ret = _fd.Send(buf.b.rawBytes(), buf.b.position(), buf.b.remaining(), SocketFlags.None);
+                        ret = _fd.Send(buf.b.rawBytes(), buf.b.position(), packetSize, SocketFlags.None);
                     }
                     catch(Win32Exception e)
                     {
                         if(Network.wouldBlock(e))
                         {
-                            //
-                            // Writing would block, so we reset the limit (if necessary) and return true to indicate
-                            // that more data must be sent.
-                            //
-                            if(packetSize == _maxPacketSize)
-                            {
-                                buf.b.limit(size);
-                            }
                             return false;
                         }
                         throw;
@@ -147,7 +141,7 @@ namespace IceInternal
 
                     if(_traceLevels.network >= 3)
                     {
-                        string s = "sent " + ret + " of " + buf.b.remaining() + " bytes via tcp\n" + ToString();
+                        string s = "sent " + ret + " of " + packetSize + " bytes via tcp\n" + ToString();
                         _logger.trace(_traceLevels.networkCat, s);
                     }
 
@@ -157,16 +151,9 @@ namespace IceInternal
                     }
 
                     buf.b.position(buf.b.position() + ret);
-
-                    if(packetSize == _maxPacketSize)
+                    if(packetSize > buf.b.remaining())
                     {
-                        Debug.Assert(buf.b.position() == buf.b.limit());
-                        packetSize = size - buf.b.position();
-                        if(packetSize > _maxPacketSize)
-                        {
-                            packetSize = _maxPacketSize;
-                        }
-                        buf.b.limit(buf.b.position() + packetSize);
+                        packetSize = buf.b.remaining();
                     }
                 }
                 catch(SocketException ex)
@@ -181,10 +168,27 @@ namespace IceInternal
             }
 
             return true; // No more data to send.
+#endif
         }
 
         public bool read(Buffer buf)
         {
+#if COMPACT
+            //
+            // The .NET Compact Framework does not support the use of synchronous socket
+            // operations on a non-blocking socket.
+            //
+            return false;
+#else
+            // COMPILERFIX: Workaround for Mac OS X broken poll(), see Mono bug #470120
+            if(AssemblyUtil.osx_)
+            {
+                if(_blocking > 0)
+                {
+                    return false;
+                }
+            }
+
             int remaining = buf.b.remaining();
             int position = buf.b.position();
 
@@ -259,16 +263,32 @@ namespace IceInternal
             }
 
             return true;
+#endif
         }
 
-        public IAsyncResult beginRead(Buffer buf, AsyncCallback callback, object state)
+        public bool startRead(Buffer buf, AsyncCallback callback, object state)
         {
-            Debug.Assert(_fd != null);
+            Debug.Assert(_fd != null && _readResult == null);
+
+            // COMPILERFIX: Workaround for Mac OS X broken poll(), see Mono bug #470120
+            if(AssemblyUtil.osx_)
+            {
+                if(++_blocking == 1)
+                {
+                    Network.setBlock(_fd, true);
+                }
+            }
+
+            int packetSize = buf.b.remaining();
+            if(_maxReceivePacketSize > 0 && packetSize > _maxReceivePacketSize)
+            {
+                packetSize = _maxReceivePacketSize;
+            }
 
             try
             {
-                return _fd.BeginReceive(buf.b.rawBytes(), buf.b.position(), buf.b.remaining(), SocketFlags.None,
-                                        callback, state);
+                _readResult = _fd.BeginReceive(buf.b.rawBytes(), buf.b.position(), packetSize, SocketFlags.None, 
+                                               callback, state);
             }
             catch(Win32Exception ex)
             {
@@ -279,25 +299,47 @@ namespace IceInternal
 
                 throw new Ice.SocketException(ex);
             }
+
+            return _readResult.CompletedSynchronously;
         }
 
-        public void endRead(Buffer buf, IAsyncResult result)
+        public void finishRead(Buffer buf)
         {
-            Debug.Assert(_fd != null);
+            if(_fd == null) // Transceiver was closed
+            {
+                _readResult = null;
+                return;
+            }
+
+            Debug.Assert(_fd != null && _readResult != null);
 
             try
             {
-                int ret = _fd.EndReceive(result);
+                int ret = _fd.EndReceive(_readResult);
+                _readResult = null;
                 if(ret == 0)
                 {
                     throw new Ice.ConnectionLostException();
                 }
 
+                // COMPILERFIX: Workaround for Mac OS X broken poll(), see Mono bug #470120
+                if(AssemblyUtil.osx_)
+                {
+                    if(--_blocking == 0)
+                    {
+                        Network.setBlock(_fd, false);
+                    }
+                }
                 Debug.Assert(ret > 0);
 
                 if(_traceLevels.network >= 3)
                 {
-                    string s = "received " + ret + " of " + buf.b.remaining() + " bytes via tcp\n" + ToString();
+                    int packetSize = buf.b.remaining();
+                    if(_maxReceivePacketSize > 0 && packetSize > _maxReceivePacketSize)
+                    {
+                        packetSize = _maxReceivePacketSize;
+                    }
+                    string s = "received " + ret + " of " + packetSize + " bytes via tcp\n" + ToString();
                     _logger.trace(_traceLevels.networkCat, s);
                 }
 
@@ -315,11 +357,6 @@ namespace IceInternal
                     throw new Ice.ConnectionLostException(ex);
                 }
 
-                if(Network.operationAborted(ex))
-                {
-                    throw new ReadAbortedException(ex);
-                }
-
                 throw new Ice.SocketException(ex);
             }
             catch(ObjectDisposedException ex)
@@ -328,14 +365,40 @@ namespace IceInternal
             }
         }
 
-        public IAsyncResult beginWrite(Buffer buf, AsyncCallback callback, object state)
+        public bool startWrite(Buffer buf, AsyncCallback callback, object state, out bool completed)
         {
-            Debug.Assert(_fd != null);
+            Debug.Assert(_fd != null && _writeResult == null);
+
+            // COMPILERFIX: Workaround for Mac OS X broken poll(), see Mono bug #470120
+            if(AssemblyUtil.osx_)
+            {
+                if(++_blocking == 1)
+                {
+                    Network.setBlock(_fd, true);
+                }
+            }
+
+            if(_state < StateConnected)
+            {
+                _writeResult = Network.doConnectAsync(_fd, _addr, callback, state);
+                completed = false;
+                return _writeResult.CompletedSynchronously;
+            }
+
+            //
+            // We limit the packet size for beginWrite to ensure connection timeouts are based
+            // on a fixed packet size.
+            //
+            int packetSize = buf.b.remaining();
+            if(_maxSendPacketSize > 0 && packetSize > _maxSendPacketSize)
+            {
+                packetSize = _maxSendPacketSize;
+            }
 
             try
             {
-                return _fd.BeginSend(buf.b.rawBytes(), buf.b.position(), buf.b.remaining(), SocketFlags.None, callback,
-                                     state);
+                _writeResult = _fd.BeginSend(buf.b.rawBytes(), buf.b.position(), packetSize, SocketFlags.None, 
+                                             callback, state);
             }
             catch(Win32Exception ex)
             {
@@ -350,25 +413,57 @@ namespace IceInternal
             {
                 throw new Ice.ConnectionLostException(ex);
             }
+            
+            completed = packetSize == buf.b.remaining();
+            return _writeResult.CompletedSynchronously;
         }
 
-        public void endWrite(Buffer buf, IAsyncResult result)
+        public void finishWrite(Buffer buf)
         {
-            Debug.Assert(_fd != null);
+            if(_fd == null) // Transceiver was closed
+            {
+                if(buf.size() - buf.b.position() < _maxSendPacketSize)
+                {
+                    buf.b.position(buf.size()); // Assume all the data was sent for at-most-once semantics.
+                }
+                _writeResult = null;
+                return;
+            }
+
+            Debug.Assert(_fd != null && _writeResult != null);
+
+            if(_state < StateConnected)
+            {
+                return;
+            }
 
             try
             {
-                int ret = _fd.EndSend(result);
+                int ret = _fd.EndSend(_writeResult);
+                _writeResult = null;
                 if(ret == 0)
                 {
                     throw new Ice.ConnectionLostException();
                 }
-
                 Debug.Assert(ret > 0);
+
+                // COMPILERFIX: Workaround for Mac OS X broken poll(), see Mono bug #470120
+                if(AssemblyUtil.osx_)
+                {
+                    if(--_blocking == 0)
+                    {
+                        Network.setBlock(_fd, false);
+                    }
+                }
 
                 if(_traceLevels.network >= 3)
                 {
-                    string s = "sent " + ret + " of " + buf.b.remaining() + " bytes via tcp\n" + ToString();
+                    int packetSize = buf.b.remaining();
+                    if(_maxSendPacketSize > 0 && packetSize > _maxSendPacketSize)
+                    {
+                        packetSize = _maxSendPacketSize;
+                    }
+                    string s = "sent " + ret + " of " + packetSize + " bytes via tcp\n" + ToString();
                     _logger.trace(_traceLevels.networkCat, s);
                 }
 
@@ -399,11 +494,33 @@ namespace IceInternal
             return "tcp";
         }
 
+        public Ice.ConnectionInfo
+        getInfo()
+        {
+            Debug.Assert(_fd != null);
+            Ice.TCPConnectionInfo info = new Ice.TCPConnectionInfo();
+            IPEndPoint localEndpoint = Network.getLocalAddress(_fd);
+            info.localAddress = localEndpoint.Address.ToString();
+            info.localPort = localEndpoint.Port;
+            IPEndPoint remoteEndpoint = Network.getRemoteAddress(_fd);
+            if(remoteEndpoint != null)
+            {
+                info.remoteAddress = remoteEndpoint.Address.ToString();
+                info.remotePort = remoteEndpoint.Port;
+            }
+            else
+            {
+                info.remoteAddress = "";
+                info.remotePort = -1;
+            }
+            return info;
+        }
+
         public void checkSendSize(Buffer buf, int messageSizeMax)
         {
             if(buf.size() > messageSizeMax)
             {
-                throw new Ice.MemoryLimitException();
+                Ex.throwMemoryLimitException(buf.size(), messageSizeMax);
             }
         }
 
@@ -422,22 +539,19 @@ namespace IceInternal
             _traceLevels = instance.traceLevels();
             _logger = instance.initializationData().logger;
             _stats = instance.initializationData().stats;
-            _state = connected ? StateConnected : StateNeedBeginConnect;
+            _state = connected ? StateConnected : StateNeedConnect;
             _desc = connected ? Network.fdToString(_fd) : "<not connected>";
 
-            _maxPacketSize = 0;
-            if(AssemblyUtil.platform_ == AssemblyUtil.Platform.Windows)
+            _maxSendPacketSize = Network.getSendBufferSize(fd);
+            if(_maxSendPacketSize < 512)
             {
-		//
-		// On Windows, limiting the buffer size is important to prevent
-		// poor throughput performances when transfering large amount of
-		// data. See Microsoft KB article KB823764.
-		//
-                _maxPacketSize = Network.getSendBufferSize(fd) / 2;
-                if(_maxPacketSize < 512)
-                {
-                    _maxPacketSize = 0;
-                }
+                _maxSendPacketSize = 0;
+            }
+
+            _maxReceivePacketSize = Network.getRecvBufferSize(fd);
+            if(_maxReceivePacketSize < 512)
+            {
+                _maxReceivePacketSize = 0;
             }
         }
 
@@ -448,11 +562,15 @@ namespace IceInternal
         private Ice.Stats _stats;
         private string _desc;
         private int _state;
-        private int _maxPacketSize;
-        private IAsyncResult _result;
+        private int _maxSendPacketSize;
+        private int _maxReceivePacketSize;
 
-        private const int StateNeedBeginConnect = 0;
-        private const int StateNeedEndConnect = 1;
+        private int _blocking = 0;
+        private IAsyncResult _writeResult;
+        private IAsyncResult _readResult;
+
+        private const int StateNeedConnect = 0;
+        private const int StateConnectPending = 1;
         private const int StateConnected = 2;
     }
 

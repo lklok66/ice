@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -15,7 +15,7 @@ namespace Ice
         {
             _communicator = communicator;
 
-            _is = new IceInternal.BasicStream(Util.getInstance(communicator));
+            _is = new IceInternal.BasicStream(IceInternal.Util.getInstance(communicator));
             _is.closure(this);
             _is.resize(data.Length, true);
             IceInternal.Buffer buf = _is.getBuffer();
@@ -52,6 +52,11 @@ namespace Ice
         public byte[] readByteSeq()
         {
             return _is.readByteSeq();
+        }
+
+        public object readSerializable()
+        {
+            return _is.readSerializable();
         }
 
         public short readShort()
@@ -119,6 +124,11 @@ namespace Ice
             return _is.readSize();
         }
 
+        public int readAndCheckSeqSize(int minSize)
+        {
+            return _is.readAndCheckSeqSize(minSize);
+        }
+
         public ObjectPrx readProxy()
         {
             return _is.readProxy();
@@ -176,7 +186,7 @@ namespace Ice
 
         public void endEncapsulation()
         {
-            _is.endReadEncaps();
+            _is.endReadEncapsChecked();
         }
 
         public void skipEncapsulation()
@@ -199,6 +209,12 @@ namespace Ice
             _is.readPendingObjects();
         }
 
+        public void rewind()
+        {
+            _is.clear();
+            _is.getBuffer().b.position(0);
+        }
+
         public void destroy()
         {
             if(_is != null)
@@ -214,7 +230,7 @@ namespace Ice
     public class OutputStreamI : OutputStream
     {
         public OutputStreamI(Communicator communicator) :
-            this(communicator, new IceInternal.BasicStream(Util.getInstance(communicator)))
+            this(communicator, new IceInternal.BasicStream(IceInternal.Util.getInstance(communicator)))
         {
         }
 
@@ -248,6 +264,11 @@ namespace Ice
         public void writeByteSeq(byte[] v)
         {
             _os.writeByteSeq(v);
+        }
+
+        public void writeSerializable(object v)
+        {
+            _os.writeSerializable(v);
         }
 
         public void writeShort(short v)
@@ -312,6 +333,11 @@ namespace Ice
 
         public void writeSize(int sz)
         {
+            if(sz < 0)
+            {
+                throw new MarshalException();
+            }
+
             _os.writeSize(sz);
         }
 
@@ -352,7 +378,7 @@ namespace Ice
 
         public void endEncapsulation()
         {
-            _os.endWriteEncaps();
+            _os.endWriteEncapsChecked();
         }
 
         public void writeBlob(byte[] data)
@@ -372,6 +398,22 @@ namespace Ice
             buf.b.get(result);
 
             return result;
+        }
+
+        public void reset(bool clearBuffer)
+        {
+            _os.clear();
+
+            IceInternal.Buffer buf = _os.getBuffer();
+            if(clearBuffer)
+            {
+                buf.clear();
+            }
+            else
+            {
+                buf.reset();
+            }
+            buf.b.position(0);
         }
 
         public void destroy()

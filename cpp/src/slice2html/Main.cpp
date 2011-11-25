@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -8,8 +8,12 @@
 // **********************************************************************
 
 #include <IceUtil/Options.h>
+#include <IceUtil/CtrlCHandler.h>
+#include <IceUtil/Mutex.h>
+#include <IceUtil/MutexPtrLock.h>
 #include <Slice/Preprocessor.h>
-#include <Slice/SignalHandler.h>
+#include <Slice/FileTracker.h>
+#include <Slice/Util.h>
 #include <Gen.h>
 #include <stdlib.h>
 
@@ -17,11 +21,45 @@ using namespace std;
 using namespace Slice;
 using namespace IceUtil;
 
+namespace
+{
+
+IceUtil::Mutex* mutex = 0;
+bool interrupted = false;
+
+class Init
+{
+public:
+
+    Init()
+    {
+        mutex = new IceUtil::Mutex;
+    }
+
+    ~Init()
+    {
+        delete mutex;
+        mutex = 0;
+    }
+};
+
+Init init;
+
+}
+
+void
+interruptedCallback(int signal)
+{
+    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(mutex);
+
+    interrupted = true;
+}
+
 void
 usage(const char* n)
 {
-    cerr << "Usage: " << n << " [options] slice-files...\n";
-    cerr <<
+    getErrorStream() << "Usage: " << n << " [options] slice-files...\n";
+    getErrorStream() <<
         "Options:\n"
         "-h, --help           Show this message.\n"
         "-v, --version        Display the Ice version.\n"
@@ -42,11 +80,12 @@ usage(const char* n)
         "--summary NUM        Print a warning if a summary sentence exceeds NUM characters.\n"
         "-d, --debug          Print debug messages.\n"
         "--ice                Permit `Ice' prefix (for building Ice source code only).\n"
+        "--ice                Permit underscores in Slice identifiers.\n"
         ;
 }
 
 int
-main(int argc, char* argv[])
+compile(int argc, char* argv[])
 {
     IceUtilInternal::Options opts;
     opts.addOpt("h", "help");
@@ -67,6 +106,7 @@ main(int argc, char* argv[])
     opts.addOpt("", "summary", IceUtilInternal::Options::NeedArg, "0");
     opts.addOpt("d", "debug");
     opts.addOpt("", "ice");
+    opts.addOpt("", "underscore");
 
     vector<string> args;
     try
@@ -75,7 +115,7 @@ main(int argc, char* argv[])
     }
     catch(const IceUtilInternal::BadOptException& e)
     {
-        cerr << argv[0] << ": " << e.reason << endl;
+        getErrorStream() << argv[0] << ": error: " << e.reason << endl;
         usage(argv[0]);
         return EXIT_FAILURE;
     }
@@ -88,7 +128,7 @@ main(int argc, char* argv[])
 
     if(opts.isSet("version"))
     {
-        cout << ICE_STRING_VERSION << endl;
+        getErrorStream() << ICE_STRING_VERSION << endl;
         return EXIT_SUCCESS;
     }
 
@@ -132,7 +172,8 @@ main(int argc, char* argv[])
         s >>  indexCount;
         if(!s)
         {
-            cerr << argv[0] << ": the --index operation requires a positive integer argument" << endl;
+            getErrorStream() << argv[0] << ": error: the --index operation requires a positive integer argument"
+                             << endl;
             usage(argv[0]);
             return EXIT_FAILURE;
         }
@@ -152,7 +193,8 @@ main(int argc, char* argv[])
         s >>  summaryCount;
         if(!s)
         {
-            cerr << argv[0] << ": the --summary operation requires a positive integer argument" << endl;
+            getErrorStream() << argv[0] << ": error: the --summary operation requires a positive integer argument"
+                             << endl;
             usage(argv[0]);
             return EXIT_FAILURE;
         }
@@ -162,23 +204,26 @@ main(int argc, char* argv[])
 
     bool ice = opts.isSet("ice");
 
+    bool underscore = opts.isSet("underscore");
+
     if(args.empty())
     {
-        cerr << argv[0] << ": no input file" << endl;
+        getErrorStream() << argv[0] << ": error: no input file" << endl;
         usage(argv[0]);
         return EXIT_FAILURE;
     }
 
-    UnitPtr p = Unit::createUnit(true, false, ice, false);
+    UnitPtr p = Unit::createUnit(true, false, ice, underscore);
 
     int status = EXIT_SUCCESS;
 
-    SignalHandler sigHandler;
+    IceUtil::CtrlCHandler ctrlCHandler;
+    ctrlCHandler.setCallback(interruptedCallback);
 
     for(vector<string>::size_type idx = 0; idx < args.size(); ++idx)
     {
-        Preprocessor icecpp(argv[0], args[idx], cppArgs);
-        FILE* cppHandle = icecpp.preprocess(true);
+        PreprocessorPtr icecpp = Preprocessor::create(argv[0], args[idx], cppArgs);
+        FILE* cppHandle = icecpp->preprocess(true);
 
         if(cppHandle == 0)
         {
@@ -202,10 +247,19 @@ main(int argc, char* argv[])
             status = p->parse(args[idx], cppHandle, debug);
         }
 
-        if(!icecpp.close())
+        if(!icecpp->close())
         {
             p->destroy();
             return EXIT_FAILURE;
+        }
+
+        {
+            IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(mutex);
+
+            if(interrupted)
+            {
+                return EXIT_FAILURE;
+            }
         }
     }
 
@@ -216,19 +270,69 @@ main(int argc, char* argv[])
             Slice::generate(p, output, header, footer, indexHeader, indexFooter, imageDir, logoURL,
                             searchAction, indexCount, summaryCount);
         }
+        catch(const Slice::FileException& ex)
+        {
+            // If a file could not be created, then cleanup any
+            // created files.
+            FileTracker::instance()->cleanup();
+            p->destroy();
+            getErrorStream() << argv[0] << ": error: " << ex.reason() << endl;
+            return EXIT_FAILURE;
+        }
         catch(const string& err)
         {
-            cerr << argv[0] << ": " << err << endl;
+            FileTracker::instance()->cleanup();
+            getErrorStream() << argv[0] << ": error: " << err << endl;
             status = EXIT_FAILURE;
         }
         catch(const char* err)
         {
-            cerr << argv[0] << ": " << err << endl;
+            FileTracker::instance()->cleanup();
+            getErrorStream() << argv[0] << ": error: " << err << endl;
             status = EXIT_FAILURE;
         }
     }
 
     p->destroy();
 
+    {
+        IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(mutex);
+
+        if(interrupted)
+        {
+            FileTracker::instance()->cleanup();
+            return EXIT_FAILURE;
+        }
+    }
+
     return status;
+}
+
+int
+main(int argc, char* argv[])
+{
+    try
+    {
+        return compile(argc, argv);
+    }
+    catch(const std::exception& ex)
+    {
+        getErrorStream() << argv[0] << ": error:" << ex.what() << endl;
+        return EXIT_FAILURE;
+    }
+    catch(const std::string& msg)
+    {
+        getErrorStream() << argv[0] << ": error:" << msg << endl;
+        return EXIT_FAILURE;
+    }
+    catch(const char* msg)
+    {
+        getErrorStream() << argv[0] << ": error:" << msg << endl;
+        return EXIT_FAILURE;
+    }
+    catch(...)
+    {
+        getErrorStream() << argv[0] << ": error:" << "unknown exception" << endl;
+        return EXIT_FAILURE;
+    }
 }

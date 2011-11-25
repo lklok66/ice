@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,6 +10,9 @@
 #ifndef TEST_ICE
 #define TEST_ICE
 
+#include <Ice/BuiltinSequences.ice>
+
+[["java:package:test.Ice.stream"]]
 module Test
 {
 
@@ -21,6 +24,8 @@ enum MyEnum
 };
 
 class MyClass;
+
+["java:serializable:test.Ice.stream.Serialize.Small"] sequence<byte> SerialSmall;
 
 struct SmallStruct
 {
@@ -34,27 +39,20 @@ struct SmallStruct
     string str;
     MyEnum e;
     MyClass* p;
+    SerialSmall ss;
 };
 
-sequence<bool> BoolS;
-sequence<byte> ByteS;
-sequence<short> ShortS;
-sequence<int> IntS;
-sequence<long> LongS;
-sequence<float> FloatS;
-sequence<double> DoubleS;
-sequence<string> StringS;
 sequence<MyEnum> MyEnumS;
 sequence<MyClass> MyClassS;
 
-sequence<BoolS> BoolSS;
-sequence<ByteS> ByteSS;
-sequence<ShortS> ShortSS;
-sequence<IntS> IntSS;
-sequence<LongS> LongSS;
-sequence<FloatS> FloatSS;
-sequence<DoubleS> DoubleSS;
-sequence<StringS> StringSS;
+sequence<Ice::BoolSeq> BoolSS;
+sequence<Ice::ByteSeq> ByteSS;
+sequence<Ice::ShortSeq> ShortSS;
+sequence<Ice::IntSeq> IntSS;
+sequence<Ice::LongSeq> LongSS;
+sequence<Ice::FloatSeq> FloatSS;
+sequence<Ice::DoubleSeq> DoubleSS;
+sequence<Ice::StringSeq> StringSS;
 sequence<MyEnumS> MyEnumSS;
 sequence<MyClassS> MyClassSS;
 
@@ -69,14 +67,14 @@ class MyClass
     MyClass c;
     Object o;
     SmallStruct s;
-    BoolS seq1;
-    ByteS seq2;
-    ShortS seq3;
-    IntS seq4;
-    LongS seq5;
-    FloatS seq6;
-    DoubleS seq7;
-    StringS seq8;
+    Ice::BoolSeq seq1;
+    Ice::ByteSeq seq2;
+    Ice::ShortSeq seq3;
+    Ice::IntSeq seq4;
+    Ice::LongSeq seq5;
+    Ice::FloatSeq seq6;
+    Ice::DoubleSeq seq7;
+    Ice::StringSeq seq8;
     MyEnumS seq9;
     MyClassS seq10;
     StringMyClassD d;
@@ -84,6 +82,11 @@ class MyClass
 
 interface MyInterface
 {
+};
+
+exception MyException
+{
+    MyClass c;
 };
 
 };

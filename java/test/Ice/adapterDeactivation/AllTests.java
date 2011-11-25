@@ -1,13 +1,18 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-import Test.*;
+package test.Ice.adapterDeactivation;
+
+import java.io.PrintStream;
+
+import test.Ice.adapterDeactivation.Test.TestIntfPrx;
+import test.Ice.adapterDeactivation.Test.TestIntfPrxHelper;
 
 public class AllTests
 {
@@ -21,30 +26,30 @@ public class AllTests
     }
 
     public static TestIntfPrx
-    allTests(Ice.Communicator communicator)
+    allTests(Ice.Communicator communicator, java.io.PrintWriter out)
     {
-        System.out.print("testing stringToProxy... ");
-        System.out.flush();
-        String ref = "test:default -p 12010 -t 10000";
+	out.print("testing stringToProxy... ");
+        out.flush();
+        String ref = "test:default -p 12010";
         Ice.ObjectPrx base = communicator.stringToProxy(ref);
         test(base != null);
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing checked cast... ");
-        System.out.flush();
+        out.print("testing checked cast... ");
+        out.flush();
         TestIntfPrx obj = TestIntfPrxHelper.checkedCast(base);
         test(obj != null);
         test(obj.equals(base));
-        System.out.println("ok");
+        out.println("ok");
 
         {
-            System.out.print("creating/destroying/recreating object adapter... ");
-            System.out.flush();
+            out.print("creating/destroying/recreating object adapter... ");
+            out.flush();
             Ice.ObjectAdapter adapter = 
-                communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9999");
+                communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default");
             try
             {
-                communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9998");
+                communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default");
                 test(false);
             }
             catch(Ice.AlreadyRegisteredException ex)
@@ -54,23 +59,23 @@ public class AllTests
             //
             // Use a different port than the first adapter to avoid an "address already in use" error.
             //
-            adapter = communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9998");
+            adapter = communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default");
             adapter.destroy();
-            System.out.println("ok");
+            out.println("ok");
         }
 
-        System.out.print("creating/activating/deactivating object adapter in one operation... ");
-        System.out.flush();
+        out.print("creating/activating/deactivating object adapter in one operation... ");
+        out.flush();
         obj._transient();
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("deactivating object adapter in the server... ");
-        System.out.flush();
+        out.print("deactivating object adapter in the server... ");
+        out.flush();
         obj.deactivate();
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing whether server is gone... ");
-        System.out.flush();
+        out.print("testing whether server is gone... ");
+        out.flush();
         try
         {
             obj.ice_ping();
@@ -78,7 +83,7 @@ public class AllTests
         }
         catch(Ice.LocalException ex)
         {
-            System.out.println("ok");
+            out.println("ok");
         }
 
         return obj;

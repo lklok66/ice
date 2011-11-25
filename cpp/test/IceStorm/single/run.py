@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -11,24 +11,27 @@
 import os, sys
 import time
 
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "TestUtil.py")):
-        break
-else:
+path = [ ".", "..", "../..", "../../..", "../../../.." ]
+head = os.path.dirname(sys.argv[0])
+if len(head) > 0:
+    path = [os.path.join(head, p) for p in path]
+path = [os.path.abspath(p) for p in path if os.path.exists(os.path.join(p, "scripts", "TestUtil.py")) ]
+if len(path) == 0:
     raise "can't find toplevel directory!"
+sys.path.append(os.path.join(path[0]))
+from scripts import *
 
-sys.path.append(os.path.join(toplevel, "config"))
-import TestUtil
-TestUtil.processCmdLine()
+publisher = os.path.join(os.getcwd(), "publisher")
+subscriber = os.path.join(os.getcwd(), "subscriber")
 
-name = os.path.join("IceStorm", "single")
-testdir = os.path.dirname(os.path.abspath(__file__))
-
-import IceStormUtil
+targets = []
+if TestUtil.appverifier:
+    targets = [TestUtil.getIceBox(), publisher, subscriber, TestUtil.getIceBoxAdmin(), \
+               TestUtil.getIceStormAdmin()]
+    TestUtil.setAppVerifierSettings(targets, cwd = os.getcwd())
 
 def dotest(type):
-    icestorm = IceStormUtil.init(toplevel, testdir, type)
+    icestorm = IceStormUtil.init(TestUtil.toplevel, os.getcwd(), type)
 
     icestorm.start()
 
@@ -37,14 +40,9 @@ def dotest(type):
     icestorm.admin("create single")
     print "ok"
 
-    publisher = os.path.join(testdir, "publisher")
-    subscriber = os.path.join(testdir, "subscriber")
-
     print "starting subscriber...",
     sys.stdout.flush()
-    subscriberPipe = TestUtil.startServer(subscriber, icestorm.reference())
-    TestUtil.getServerPid(subscriberPipe)
-    TestUtil.getAdapterReady(subscriberPipe, True, 5)
+    subscriberProc = TestUtil.startServer(subscriber, icestorm.reference(), count = 5)
     print "ok"
 
     #
@@ -53,11 +51,12 @@ def dotest(type):
     #
     print "starting publisher...",
     sys.stdout.flush()
-    publisherPipe = TestUtil.startClient(publisher, icestorm.reference())
+    publisherProc = TestUtil.startClient(publisher, icestorm.reference(), startReader = False)
     print "ok"
+    publisherProc.startReader()
 
-    subscriberStatus = TestUtil.specificServerStatus(subscriberPipe, 30)
-    publisherStatus = TestUtil.closePipe(publisherPipe)
+    subscriberProc.waitTestSuccess()
+    publisherProc.waitTestSuccess()
 
     #
     # Destroy the topic.
@@ -72,12 +71,11 @@ def dotest(type):
     #
     icestorm.stop()
 
-    if TestUtil.serverStatus() or subscriberStatus or publisherStatus:
-        TestUtil.killServers()
-        sys.exit(1)
-
 dotest("persistent")
 dotest("transient")
 dotest("replicated")
+
+if TestUtil.appverifier:
+    TestUtil.appVerifierAfterTestEnd([targets], cwd = os.getcwd())
 
 sys.exit(0)

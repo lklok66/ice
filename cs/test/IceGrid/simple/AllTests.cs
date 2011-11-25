@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -24,11 +24,12 @@ public class AllTests
 
         public void run()
         {
-            lock(this)
+            _m.Lock();
+            try
             {
                 while(!_terminated)
                 {
-                    System.Threading.Monitor.Wait(this, _timeout);
+                    _m.TimedWait(_timeout);
                     if(_terminated)
                     {
                         break;
@@ -43,20 +44,30 @@ public class AllTests
                     }
                 }
             }
+            finally
+            {
+                _m.Unlock();
+            }
         }
 
         public void terminate()
         {
-            lock(this)
+            _m.Lock();
+            try
             {
                 _terminated = true;
-                System.Threading.Monitor.Pulse(this);
+                _m.Notify();
+            }
+            finally
+            {
+                _m.Unlock();
             }
         }
 
         private IceGrid.AdminSessionPrx _session;
         private int _timeout;
         private bool _terminated;
+        private readonly IceUtilInternal.Monitor _m = new IceUtilInternal.Monitor();
     }
 
     private static void
@@ -75,6 +86,11 @@ public class AllTests
         String rf = "test @ TestAdapter";
         Ice.ObjectPrx @base = communicator.stringToProxy(rf);
         test(@base != null);
+        Console.Out.WriteLine("ok");
+
+        Console.Out.Write("testing IceGrid.Locator is present... ");
+        IceGrid.LocatorPrx locator = IceGrid.LocatorPrxHelper.uncheckedCast(@base);
+        test(locator != null);
         Console.Out.WriteLine("ok");
 
         Console.Out.Write("testing checked cast... ");

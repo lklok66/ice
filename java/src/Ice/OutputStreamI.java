@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,7 +14,7 @@ public class OutputStreamI implements OutputStream
     public
     OutputStreamI(Communicator communicator)
     {
-        this(communicator, new IceInternal.BasicStream(Util.getInstance(communicator)));
+        this(communicator, new IceInternal.BasicStream(IceInternal.Util.getInstance(communicator), false, false));
     }
 
     public
@@ -53,6 +53,12 @@ public class OutputStreamI implements OutputStream
     writeByteSeq(byte[] v)
     {
         _os.writeByteSeq(v);
+    }
+
+    public void
+    writeSerializable(java.io.Serializable v)
+    {
+        _os.writeSerializable(v);
     }
 
     public void
@@ -130,6 +136,11 @@ public class OutputStreamI implements OutputStream
     public void
     writeSize(int sz)
     {
+        if(sz < 0)
+        {
+            throw new MarshalException();
+        }
+
         _os.writeSize(sz);
     }
 
@@ -178,7 +189,7 @@ public class OutputStreamI implements OutputStream
     public void
     endEncapsulation()
     {
-        _os.endWriteEncaps();
+        _os.endWriteEncapsChecked();
     }
 
     public void
@@ -195,6 +206,23 @@ public class OutputStreamI implements OutputStream
         buf.b.get(result);
 
         return result;
+    }
+
+    public void
+    reset(boolean clearBuffer)
+    {
+        _os.clear();
+
+        IceInternal.Buffer buf = _os.getBuffer();
+        if(clearBuffer)
+        {
+            buf.clear();
+        }
+        else
+        {
+            buf.reset();
+        }
+        buf.b.position(0);
     }
 
     public void

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -145,8 +145,6 @@ protected:
 
     bool _deadlockWarning;
 
-    bool _useNonmutating;
-
 private:
 
     Ice::ObjectPtr _pingObject;
@@ -238,6 +236,9 @@ protected:
 #if defined(__BCPLUSPLUS__) || (defined(_MSC_VER) && (_MSC_VER < 1300))
             std::pair<StoreMap::iterator, bool> ir = 
                 _storeMap.insert(StoreMap::value_type(facet, 0));
+#elif (defined(_MSC_VER) && (_MSC_VER >= 1600))
+	    std::pair<typename StoreMap::iterator, bool> ir = 
+                _storeMap.insert(typename StoreMap::value_type(facet, nullptr));
 #else
             std::pair<typename StoreMap::iterator, bool> ir = 
                 _storeMap.insert(typename StoreMap::value_type(facet, 0));

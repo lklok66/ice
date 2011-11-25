@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,16 +12,15 @@
 
 using namespace Test;
 
-ThrowerI::ThrowerI(const Ice::ObjectAdapterPtr& adapter) :
-    _adapter(adapter)
+ThrowerI::ThrowerI()
 {
 }
 
 void
 ThrowerI::shutdown_async(const AMD_Thrower_shutdownPtr& cb,
-                         const Ice::Current&)
+                         const Ice::Current& current)
 {
-    _adapter->getCommunicator()->shutdown();
+    current.adapter->getCommunicator()->shutdown();
     cb->ice_response();
 }
 
@@ -182,4 +181,20 @@ ThrowerI::throwAssertException_async(const AMD_Thrower_throwAssertExceptionPtr&,
                                      const Ice::Current&)
 {
     assert(false); // Not supported in C++.
+}
+
+void
+ThrowerI::throwAfterResponse_async(const AMD_Thrower_throwAfterResponsePtr& cb, const Ice::Current&)
+{
+    cb->ice_response();
+
+    throw std::string();
+}
+
+void
+ThrowerI::throwAfterException_async(const AMD_Thrower_throwAfterExceptionPtr& cb, const Ice::Current&)
+{
+    cb->ice_exception(A());
+
+    throw std::string();
 }

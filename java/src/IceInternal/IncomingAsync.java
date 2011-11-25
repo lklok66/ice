@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,7 +9,7 @@
 
 package IceInternal;
 
-public class IncomingAsync extends IncomingBase
+public class IncomingAsync extends IncomingBase implements Ice.AMDCallback
 {
     public
     IncomingAsync(Incoming in) // Adopts the argument. It must not be used afterwards.
@@ -21,6 +21,61 @@ public class IncomingAsync extends IncomingBase
         {
             in.setActive(this);
             _active = true;
+        }
+    }
+
+    public void
+    ice_exception(java.lang.Exception ex)
+    {
+        //
+        // Only call __exception if this incoming is not retriable or if
+        // all the interceptors return true and no response has been sent
+        // yet.
+        //
+
+        if(_retriable)
+        {
+            try
+            {
+                if(_interceptorAsyncCallbackList != null)
+                {
+                    for(Ice.DispatchInterceptorAsyncCallback cb : _interceptorAsyncCallbackList)
+                    {
+                        if(cb.exception(ex) == false)
+                        {
+                            return;
+                        }
+                    }
+                }
+            }
+            catch(java.lang.RuntimeException exc)
+            {
+                return;
+            }
+    
+            synchronized(this)
+            {
+                if(!_active)
+                {
+                    return;
+                }
+                _active = false;
+            }
+        }
+
+        if(_connection != null)
+        {
+            __exception(ex);
+        }
+        else
+        {
+            //
+            // Response has already been sent.
+            //
+            if(_instance.initializationData().properties.getPropertyAsIntWithDefault("Ice.Warn.Dispatch", 1) > 0)
+            {
+                __warning(ex);
+            }
         }
     }
 
@@ -50,10 +105,12 @@ public class IncomingAsync extends IncomingBase
     {
         try
         {
-            if(!__servantLocatorFinished())
+            if(_locator != null && !__servantLocatorFinished())
             {
                 return;
             }
+
+            assert(_connection != null);
 
             if(_response)
             {
@@ -79,6 +136,8 @@ public class IncomingAsync extends IncomingBase
             {
                 _connection.sendNoResponse();
             }
+
+            _connection = null;
         }
         catch(Ice.LocalException ex)
         {
@@ -89,10 +148,9 @@ public class IncomingAsync extends IncomingBase
     final protected void
     __exception(java.lang.Exception exc)
     {
-
         try
         {
-            if(!__servantLocatorFinished())
+            if(_locator != null && !__servantLocatorFinished())
             {
                 return;
             }
@@ -105,137 +163,46 @@ public class IncomingAsync extends IncomingBase
         }
     }
 
-    final private boolean
-    __servantLocatorFinished()
-    {
-        try
-        {
-            if(_locator != null && _servant != null)
-            {
-                try
-                {
-                    _locator.finished(_current, _servant, _cookie.value);
-                }
-                catch(Ice.UserException ex)
-                {
-                    // The operation may have already marshaled a reply; we must overwrite that reply.
-                    //
-                    if(_response)
-                    {
-                        _os.endWriteEncaps();
-                        _os.resize(Protocol.headerSize + 4, false); // Reply status position.
-                        _os.writeByte(ReplyStatus.replyUserException);
-                        _os.startWriteEncaps();
-                        _os.writeUserException(ex);
-                        _os.endWriteEncaps();
-                        _connection.sendResponse(_os, _compress);
-                    }
-                    else
-                    {
-                        _connection.sendNoResponse();
-                    }
-                    return false;
-                }
-            }
-            return true;
-        }
-        catch(java.lang.Exception ex)
-        {
-            __handleException(ex);
-            return false;
-        }
-    }
-
     final protected boolean
     __validateResponse(boolean ok)
     {
-        if(!_retriable)
-        {
-            return true;
-        }
+        //
+        // Only returns true if this incoming is not retriable or if all
+        // the interceptors return true and no response has been sent
+        // yet. Upon getting a true return value, the caller should send
+        // the response.
+        //
 
-        try
+        if(_retriable)
         {
-            if(_interceptorAsyncCallbackList != null)
+            try
             {
-                java.util.Iterator p = _interceptorAsyncCallbackList.iterator();
-                while(p.hasNext())
+                if(_interceptorAsyncCallbackList != null)
                 {
-                    Ice.DispatchInterceptorAsyncCallback cb = (Ice.DispatchInterceptorAsyncCallback)p.next();
-                    if(cb.response(ok) == false)
+                    for(Ice.DispatchInterceptorAsyncCallback cb : _interceptorAsyncCallbackList)
                     {
-                        return false;
+                        if(cb.response(ok) == false)
+                        {
+                            return false;
+                        }
                     }
                 }
             }
-        }
-        catch(java.lang.RuntimeException ex)
-        {
-            return false;
-        }
-
-        //
-        // interceptorAsyncCallbackList is null or all its elements returned OK
-        //
-
-        synchronized(this)
-        {
-            if(_active)
-            {
-                _active = false;
-                return true;
-            }
-            else
+            catch(java.lang.RuntimeException ex)
             {
                 return false;
             }
-        }
-    }
 
-    final protected boolean
-    __validateException(java.lang.Exception exc)
-    {
-        if(!_retriable)
-        {
-            return true;
-        }
-
-        try
-        {
-            if(_interceptorAsyncCallbackList != null)
+            synchronized(this)
             {
-                java.util.Iterator<Ice.DispatchInterceptorAsyncCallback> p = _interceptorAsyncCallbackList.iterator();
-                while(p.hasNext())
+                if(!_active)
                 {
-                    Ice.DispatchInterceptorAsyncCallback cb = p.next();
-                    if(cb.exception(exc) == false)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
-            }
-        }
-        catch(java.lang.RuntimeException ex)
-        {
-            return false;
-        }
-
-        //
-        // interceptorAsyncCallbackList is null or all its elements returned OK
-        //
-
-        synchronized(this)
-        {
-            if(_active)
-            {
                 _active = false;
-                return true;
-            }
-            else
-            {
-                return false;
             }
         }
+        return true;
     }
 
     final protected BasicStream

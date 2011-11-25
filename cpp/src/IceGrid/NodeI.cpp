@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -8,9 +8,9 @@
 // **********************************************************************
 
 #include <IceUtil/Timer.h>
+#include <IceUtil/FileUtil.h>
 #include <Ice/Ice.h>
 #include <IcePatch2/Util.h>
-#include <IcePatch2/OS.h>
 #include <IcePatch2/ClientUtil.h>
 #include <IceGrid/NodeI.h>
 #include <IceGrid/Activator.h>
@@ -188,6 +188,140 @@ private:
     string _dest;
 };
 
+class NodeUp : public NodeI::Update, public AMI_NodeObserver_nodeUp
+{
+public:
+
+    NodeUp(const NodeIPtr& node, const NodeObserverPrx& observer, NodeDynamicInfo info) : 
+        NodeI::Update(node, observer), _info(info)
+    {
+    }
+
+    virtual bool
+    send()
+    {
+        try
+        {
+            _observer->nodeUp_async(this, _info);
+        }
+        catch(const Ice::LocalException&)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    virtual void
+    ice_response()
+    {
+        finished(true);
+    }
+
+    virtual void
+    ice_exception(const Ice::Exception&)
+    {
+        finished(false);
+    }
+    
+private:
+    
+    NodeDynamicInfo _info;
+};
+
+class UpdateServer : public NodeI::Update, public AMI_NodeObserver_updateServer
+{
+public:
+
+    UpdateServer(const NodeIPtr& node, const NodeObserverPrx& observer, ServerDynamicInfo info) : 
+        NodeI::Update(node, observer), _info(info)
+    {
+    }
+
+    virtual bool
+    send()
+    {
+        try
+        {
+            _observer->updateServer_async(this, _node->getName(), _info);
+        }
+        catch(const Ice::LocalException&)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    virtual void
+    ice_response()
+    {
+        finished(true);
+    }
+
+    virtual void
+    ice_exception(const Ice::Exception&)
+    {
+        finished(false);
+    }
+    
+private:
+    
+    ServerDynamicInfo _info;
+};
+
+class UpdateAdapter : public NodeI::Update, public AMI_NodeObserver_updateAdapter
+{
+public:
+
+    UpdateAdapter(const NodeIPtr& node, const NodeObserverPrx& observer, AdapterDynamicInfo info) : 
+        NodeI::Update(node, observer), _info(info)
+    {
+    }
+
+    virtual bool
+    send()
+    {
+        try
+        {
+            _observer->updateAdapter_async(this, _node->getName(), _info);
+        }
+        catch(const Ice::LocalException&)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    virtual void
+    ice_response()
+    {
+        finished(true);
+    }
+
+    virtual void
+    ice_exception(const Ice::Exception&)
+    {
+        finished(false);
+    }
+    
+private:
+    
+    AdapterDynamicInfo _info;
+};
+
+}
+
+NodeI::Update::Update(const NodeIPtr& node, const NodeObserverPrx& observer) : _node(node), _observer(observer)
+{
+}
+
+NodeI::Update::~Update()
+{
+}
+
+void
+NodeI::Update::finished(bool success)
+{
+    _node->dequeueUpdate(_observer, this, !success);
 }
 
 NodeI::NodeI(const Ice::ObjectAdapterPtr& adapter,
@@ -229,63 +363,23 @@ NodeI::NodeI(const Ice::ObjectAdapterPtr& adapter,
     //
     // Parse the properties override property.
     //
-    string overrides = props->getProperty("IceGrid.Node.PropertiesOverride");
+    vector<string> overrides = props->getPropertyAsList("IceGrid.Node.PropertiesOverride");
     if(!overrides.empty())
     {
-        string::size_type end = 0;
-        while(end != string::npos)
+        for(vector<string>::iterator p = overrides.begin(); p != overrides.end(); ++p)
         {
-            const string delim = " \t\r\n";
+            if(p->find("--") != 0)
+            {
+                *p = "--" + *p;
+            }
+        }
 
-            string::size_type beg = overrides.find_first_not_of(delim, end);
-            if(beg == string::npos)
-            {
-                break;
-            }
-         
-            end = overrides.find_first_of(delim, beg);
-            string arg;
-            if(end == string::npos)
-            {
-                arg = overrides.substr(beg);
-            }
-            else
-            {
-                arg = overrides.substr(beg, end - beg); 
-            }
-
-            if(arg.find("--") == 0)
-            {
-                arg = arg.substr(2);
-            }
-
-            //
-            // Extract the key/value
-            //
-            string::size_type argEnd = arg.find_first_of(delim + "=");
-            if(argEnd == string::npos)
-            {
-                continue;
-            }
-        
-            string key = arg.substr(0, argEnd);
-        
-            argEnd = arg.find('=', argEnd);
-            if(argEnd == string::npos)
-            {
-                return;
-            }
-            ++argEnd;
-        
-            string value;
-            string::size_type argBeg = arg.find_first_not_of(delim, argEnd);
-            if(argBeg != string::npos)
-            {
-                argEnd = arg.length();
-                value = arg.substr(argBeg, argEnd - argBeg);
-            }
-    
-            _propertiesOverride.push_back(createProperty(key, value));
+        Ice::PropertiesPtr p = Ice::createProperties();
+        p->parseCommandLineOptions("", overrides);
+        Ice::PropertyDict propDict = p->getPropertiesForPrefix("");
+        for(Ice::PropertyDict::const_iterator q = propDict.begin(); q != propDict.end(); ++q)
+        {
+            _propertiesOverride.push_back(createProperty(q->first, q->second));
         }
     }
 }
@@ -418,6 +512,8 @@ NodeI::destroyServer_async(const AMD_Node_destroyServerPtr& amdCB,
         }
         catch(const Ice::ObjectNotExistException&)
         {
+            amdCB->ice_response();
+            return;
         }
     }
     if(command)
@@ -677,6 +773,12 @@ NodeI::getLoad(const Ice::Current&) const
     return _platform.getLoadInfo();
 }
 
+int
+NodeI::getProcessorSocketCount(const Ice::Current&) const
+{
+    return _platform.getProcessorSocketCount();
+}
+
 void
 NodeI::shutdown(const Ice::Current&) const
 {
@@ -697,9 +799,17 @@ NodeI::read(const string& filename, Ice::Long pos, int size, Ice::Long& newPos, 
 }
 
 void
-NodeI::destroy()
+NodeI::shutdown()
 {
     IceUtil::Mutex::Lock sync(_serversLock);
+    for(map<string, set<ServerIPtr> >::const_iterator p = _serversByApplication.begin();
+        p != _serversByApplication.end(); ++p)
+    {    
+        for(set<ServerIPtr>::const_iterator q = p->second.begin(); q != p->second.end(); ++q)
+        {
+            (*q)->shutdown();
+        }
+    }
     _serversByApplication.clear();
 }
 
@@ -847,6 +957,8 @@ NodeI::addObserver(const NodeSessionPrx& session, const NodeObserverPrx& observe
     assert(_observers.find(session) == _observers.end());
     _observers.insert(make_pair(session, observer));
 
+    _observerUpdates.erase(observer); // Remove any updates from the previous session.
+
     ServerDynamicInfoSeq serverInfos;
     AdapterDynamicInfoSeq adapterInfos;
     for(map<string, ServerDynamicInfo>::const_iterator p = _serversDynamicInfo.begin(); 
@@ -863,19 +975,11 @@ NodeI::addObserver(const NodeSessionPrx& session, const NodeObserverPrx& observe
         adapterInfos.push_back(q->second);
     }
 
-    try
-    {
-        NodeDynamicInfo info;
-        info.info = _platform.getNodeInfo();
-        info.servers = serverInfos;
-        info.adapters = adapterInfos;
-        observer->nodeUp(info);
-    }
-    catch(const Ice::LocalException& ex)
-    {
-        Ice::Warning out(_traceLevels->logger);
-        out << "unexpected observer exception:\n" << ex;
-    }
+    NodeDynamicInfo info;
+    info.info = _platform.getNodeInfo();
+    info.servers = serverInfos;
+    info.adapters = adapterInfos;
+    queueUpdate(observer, new NodeUp(this, observer, info));
 }
 
 void
@@ -910,15 +1014,7 @@ NodeI::observerUpdateServer(const ServerDynamicInfo& info)
     {
         if(sent.find(p->second) == sent.end())
         {
-            try
-            {
-                p->second->updateServer(_name, info);
-                sent.insert(p->second);
-            }
-            catch(const Ice::LocalException&)
-            {
-                // IGNORE
-            }
+            queueUpdate(p->second, new UpdateServer(this, p->second, info));
         }
     }
 }
@@ -948,15 +1044,49 @@ NodeI::observerUpdateAdapter(const AdapterDynamicInfo& info)
     {
         if(sent.find(p->second) == sent.end())
         {
-            try
-            {
-                p->second->updateAdapter(_name, info);
-            }
-            catch(const Ice::LocalException&)
-            {
-                // IGNORE
-            }
+            queueUpdate(p->second, new UpdateAdapter(this, p->second, info));
         }
+    }
+}
+
+void 
+NodeI::queueUpdate(const NodeObserverPrx& proxy, const UpdatePtr& update)
+{
+    //Lock sync(*this); Called within the synchronization
+    map<NodeObserverPrx, deque<UpdatePtr> >::iterator p = _observerUpdates.find(proxy);
+    if(p == _observerUpdates.end()) 
+    {
+        if(update->send())
+        {
+            _observerUpdates[proxy].push_back(update);
+        }
+    }
+    else
+    {
+        p->second.push_back(update);
+    }
+}
+
+void 
+NodeI::dequeueUpdate(const NodeObserverPrx& proxy, const UpdatePtr& update, bool all)
+{
+    IceUtil::Mutex::Lock sync(_observerMutex);
+    map<NodeObserverPrx, deque<UpdatePtr> >::iterator p = _observerUpdates.find(proxy);
+    if(p == _observerUpdates.end() || p->second.front().get() != update.get())
+    {
+        return;
+    }
+
+    p->second.pop_front();
+
+    if(all || (!p->second.empty() && !p->second.front()->send()))
+    {
+        p->second.clear();
+    }
+
+    if(p->second.empty())
+    {
+        _observerUpdates.erase(p);
     }
 }
 
@@ -986,8 +1116,7 @@ NodeI::removeServer(const ServerIPtr& server, const std::string& application)
             _serversByApplication.erase(p);
             
             string appDir = _dataDir + "/distrib/" + application;
-            OS::structstat buf;
-            if(OS::osstat(appDir, &buf) != -1 && S_ISDIR(buf.st_mode))
+            if(IceUtilInternal::directoryExists(appDir))
             {
                 try
                 {
@@ -1133,7 +1262,6 @@ NodeI::canRemoveServerDirectory(const string& name)
     Ice::StringSeq c = readDirectory(_serversDir + "/" + name);
     set<string> contents(c.begin(), c.end());
     contents.erase("dbs");
-    contents.erase("dbs");
     contents.erase("config");
     contents.erase("distrib");
     contents.erase("revision");
@@ -1159,6 +1287,7 @@ NodeI::canRemoveServerDirectory(const string& name)
         {
             Ice::StringSeq files = readDirectory(_serversDir + "/" + name + "/dbs/" + *p);
             files.erase(remove(files.begin(), files.end(), "DB_CONFIG"), files.end());
+            files.erase(remove(files.begin(), files.end(), "__Freeze"), files.end());
             if(!files.empty())
             {
                 return false;

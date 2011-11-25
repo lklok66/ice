@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,20 +14,26 @@ public class BasicStream
     public
     BasicStream(Instance instance)
     {
-        initialize(instance, false);
+        this(instance, false);
     }
 
     public
     BasicStream(Instance instance, boolean unlimited)
     {
-        initialize(instance, unlimited);
+        initialize(instance, unlimited, instance.cacheMessageBuffers() > 1);
+    }
+
+    public
+    BasicStream(Instance instance, boolean unlimited, boolean direct)
+    {
+        initialize(instance, unlimited, direct);
     }
 
     private void
-    initialize(Instance instance, boolean unlimited)
+    initialize(Instance instance, boolean unlimited, boolean direct)
     {
         _instance = instance;
-        _buf = new Buffer(_instance.messageSizeMax());
+        _buf = new Buffer(_instance.messageSizeMax(), direct);
         _closure = null;
         _unlimited = unlimited;
 
@@ -42,7 +48,7 @@ public class BasicStream
 
         _messageSizeMax = _instance.messageSizeMax(); // Cached for efficiency.
 
-        _seqDataStack = null;
+        _startSeq = -1;
         _objectList = null;
     }
 
@@ -54,20 +60,38 @@ public class BasicStream
     reset()
     {
         _buf.reset();
+        clear();
+    }
 
+    public void
+    clear()
+    {
         if(_readEncapsStack != null)
         {
             assert(_readEncapsStack.next == null);
             _readEncapsStack.next = _readEncapsCache;
             _readEncapsCache = _readEncapsStack;
-            _readEncapsStack = null;
             _readEncapsCache.reset();
+            _readEncapsStack = null;
         }
+
+        if(_writeEncapsStack != null)
+        {
+            assert(_writeEncapsStack.next == null);
+            _writeEncapsStack.next = _writeEncapsCache;
+            _writeEncapsCache = _writeEncapsStack;
+            _writeEncapsCache.reset();
+            _writeEncapsStack = null;
+        }
+
+        _startSeq = -1;
 
         if(_objectList != null)
         {
             _objectList.clear();
         }
+
+        _sliceObjects = true;
     }
 
     public Instance
@@ -127,9 +151,13 @@ public class BasicStream
         other._writeSlice = _writeSlice;
         _writeSlice = tmpWriteSlice;
 
-        SeqData tmpSeqDataStack = other._seqDataStack;
-        other._seqDataStack = _seqDataStack;
-        _seqDataStack = tmpSeqDataStack;
+        int tmpStartSeq = other._startSeq;
+        other._startSeq = _startSeq;
+        _startSeq = tmpStartSeq;
+
+        int tmpMinSeqSize = other._minSeqSize;
+        other._minSeqSize = _minSeqSize;
+        _minSeqSize = tmpMinSeqSize;
 
         java.util.ArrayList<Ice.Object> tmpObjectList = other._objectList;
         other._objectList = _objectList;
@@ -148,7 +176,7 @@ public class BasicStream
         //
         if(!_unlimited && sz > _messageSizeMax)
         {
-            throw new Ice.MemoryLimitException();
+            Ex.throwMemoryLimitException(sz, _messageSizeMax);
         }
 
         _buf.resize(sz, reading);
@@ -167,157 +195,6 @@ public class BasicStream
     getBuffer()
     {
         return _buf;
-    }
-
-    //
-    // startSeq() and endSeq() sanity-check sequence sizes during
-    // unmarshaling and prevent malicious messages with incorrect
-    // sequence sizes from causing the receiver to use up all
-    // available memory by allocating sequences with an impossibly
-    // large number of elements.
-    //
-    // The code generator inserts calls to startSeq() and endSeq()
-    // around the code to unmarshal a sequence. startSeq() is called
-    // immediately after reading the sequence size, and endSeq() is
-    // called after reading the final element of a sequence.
-    //
-    // For sequences that contain constructed types that, in turn,
-    // contain sequences, the code generator also inserts a call to
-    // endElement() after unmarshaling each element.
-    //
-    // startSeq() is passed the unmarshaled element count, plus the
-    // minimum size (in bytes) occupied by the sequence's element
-    // type. numElements * minSize is the smallest possible number of
-    // bytes that the sequence will occupy on the wire.
-    //
-    // Every time startSeq() is called, it pushes the element count
-    // and the minimum size on a stack. Every time endSeq() is called,
-    // it pops the stack.
-    //
-    // For an ordinary sequence (one that does not (recursively)
-    // contain nested sequences), numElements * minSize must be less
-    // than the number of bytes remaining in the stream.
-    //
-    // For a sequence that is nested within some other sequence, there
-    // must be enough bytes remaining in the stream for this sequence
-    // (numElements + minSize), plus the sum of the bytes required by
-    // the remaining elements of all the enclosing sequences.
-    //
-    // For the enclosing sequences, numElements - 1 is the number of
-    // elements for which unmarshaling has not started yet. (The call
-    // to endElement() in the generated code decrements that number
-    // whenever a sequence element is unmarshaled.)
-    //
-    // For sequence that variable-length elements, checkSeq() is
-    // called whenever an element is unmarshaled. checkSeq() also
-    // checks whether the stream has a sufficient number of bytes
-    // remaining.  This means that, for messages with bogus sequence
-    // sizes, unmarshaling is aborted at the earliest possible point.
-    //
-
-    public void
-    startSeq(int numElements, int minSize)
-    {
-        if(numElements == 0) // Optimization to avoid pushing a useless stack frame.
-        {
-            return;
-        }
-
-        //
-        // Push the current sequence details on the stack.
-        //
-        SeqData sd = new SeqData(numElements, minSize);
-        sd.previous = _seqDataStack;
-        _seqDataStack = sd;
-
-        int bytesLeft = _buf.b.remaining();
-        if(_seqDataStack.previous == null) // Outermost sequence
-        {
-            //
-            // The sequence must fit within the message.
-            //
-            if(numElements * minSize > bytesLeft) 
-            {
-                throw new Ice.UnmarshalOutOfBoundsException();
-            }
-        }
-        else // Nested sequence
-        {
-            checkSeq(bytesLeft);
-        }
-    }
-
-    //
-    // Check, given the number of elements requested for this
-    // sequence, that this sequence, plus the sum of the sizes of the
-    // remaining number of elements of all enclosing sequences, would
-    // still fit within the message.
-    //
-    public void
-    checkSeq()
-    {
-        checkSeq(_buf.b.remaining());
-    }
-
-    public void
-    checkSeq(int bytesLeft)
-    {
-        int size = 0;
-        SeqData sd = _seqDataStack;
-        do
-        {
-            size += (sd.numElements - 1) * sd.minSize;
-            sd = sd.previous;
-        }
-        while(sd != null);
-
-        if(size > bytesLeft)
-        {
-            throw new Ice.UnmarshalOutOfBoundsException();
-        }
-    }
-
-    public void
-    checkFixedSeq(int numElements, int elemSize)
-    {
-        int bytesLeft = _buf.b.remaining();
-        if(_seqDataStack == null) // Outermost sequence
-        {
-            //
-            // The sequence must fit within the message.
-            //
-            if(numElements * elemSize > bytesLeft) 
-            {
-                throw new Ice.UnmarshalOutOfBoundsException();
-            }
-        }
-        else // Nested sequence
-        {
-            checkSeq(bytesLeft - numElements * elemSize);
-        }
-    }
-
-    public void
-    endSeq(int sz)
-    {
-        if(sz == 0) // Pop only if something was pushed previously.
-        {
-            return;
-        }
-
-        //
-        // Pop the sequence stack.
-        //
-        SeqData oldSeqData = _seqDataStack;
-        assert(oldSeqData != null);
-        _seqDataStack = oldSeqData.previous;
-    }
-
-    public void
-    endElement()
-    {
-        assert(_seqDataStack != null);
-        --_seqDataStack.numElements;
     }
 
     final private static byte[] _encapsBlob =
@@ -365,6 +242,17 @@ public class BasicStream
     }
 
     public void
+    endWriteEncapsChecked() // Used by public stream API.
+    {
+        if(_writeEncapsStack == null)
+        {
+            throw new Ice.EncapsulationException("not in an encapsulation");
+        }
+
+        endWriteEncaps();
+    }
+
+    public void
     startReadEncaps()
     {
         {
@@ -392,12 +280,12 @@ public class BasicStream
         // readSize()/writeSize(), it could be 1 or 5 bytes.
         //
         int sz = readInt();
-        if(sz < 0)
+        if(sz < 6)
         {
-            throw new Ice.NegativeSizeException();
+            throw new Ice.UnmarshalOutOfBoundsException();
         }
 
-        if(sz - 4 > _buf.b.limit())
+        if(sz - 4 > _buf.b.remaining())
         {
             throw new Ice.UnmarshalOutOfBoundsException();
         }
@@ -414,8 +302,8 @@ public class BasicStream
             e.minor = Protocol.encodingMinor;
             throw e;
         }
-        _readEncapsStack.encodingMajor = eMajor;
-        _readEncapsStack.encodingMinor = eMinor;
+        // _readEncapsStack.encodingMajor = eMajor; // Currently unused
+        // _readEncapsStack.encodingMinor = eMinor; // Currently unused
     }
 
     public void
@@ -456,9 +344,9 @@ public class BasicStream
     skipEmptyEncaps()
     {
         int sz = readInt();
-        if(sz < 0)
+        if(sz < 6)
         {
-            throw new Ice.NegativeSizeException();
+            throw new Ice.UnmarshalOutOfBoundsException();
         }
 
         if(sz != 6)
@@ -476,6 +364,17 @@ public class BasicStream
         }
     }
 
+    public void
+    endReadEncapsChecked() // Used by public stream API.
+    {
+        if(_readEncapsStack == null)
+        {
+            throw new Ice.EncapsulationException("not in an encapsulation");
+        }
+
+        endReadEncaps();
+    }
+
     public int
     getReadEncapsSize()
     {
@@ -487,9 +386,9 @@ public class BasicStream
     skipEncaps()
     {
         int sz = readInt();
-        if(sz < 0)
+        if(sz < 6)
         {
-            throw new Ice.NegativeSizeException();
+            throw new Ice.UnmarshalOutOfBoundsException();
         }
         try
         {
@@ -517,9 +416,9 @@ public class BasicStream
     public void startReadSlice()
     {
         int sz = readInt();
-        if(sz < 0)
+        if(sz < 4)
         {
-            throw new Ice.NegativeSizeException();
+            throw new Ice.UnmarshalOutOfBoundsException();
         }
         _readSlice = _buf.b.position();
     }
@@ -531,9 +430,9 @@ public class BasicStream
     public void skipSlice()
     {
         int sz = readInt();
-        if(sz < 0)
+        if(sz < 4)
         {
-            throw new Ice.NegativeSizeException();
+            throw new Ice.UnmarshalOutOfBoundsException();
         }
         try
         {
@@ -543,6 +442,56 @@ public class BasicStream
         {
             throw new Ice.UnmarshalOutOfBoundsException();
         }
+    }
+
+    public int
+    readAndCheckSeqSize(int minSize)
+    {
+        int sz = readSize();
+        
+        if(sz == 0)
+        {
+            return 0;
+        }
+        
+        //
+        // The _startSeq variable points to the start of the sequence for which
+        // we expect to read at least _minSeqSize bytes from the stream.
+        //
+        // If not initialized or if we already read more data than _minSeqSize, 
+        // we reset _startSeq and _minSeqSize for this sequence (possibly a 
+        // top-level sequence or enclosed sequence it doesn't really matter).
+        //
+        // Otherwise, we are reading an enclosed sequence and we have to bump
+        // _minSeqSize by the minimum size that this sequence will  require on
+        // the stream.
+        //
+        // The goal of this check is to ensure that when we start un-marshalling
+        // a new sequence, we check the minimal size of this new sequence against
+        // the estimated remaining buffer size. This estimatation is based on 
+        // the minimum size of the enclosing sequences, it's _minSeqSize.
+        //
+        if(_startSeq == -1 || _buf.b.position() > (_startSeq + _minSeqSize))
+        {
+            _startSeq = _buf.b.position();
+            _minSeqSize = sz * minSize;
+        }
+        else
+        {
+            _minSeqSize += sz * minSize;
+        }
+        
+        //
+        // If there isn't enough data to read on the stream for the sequence (and
+        // possibly enclosed sequences), something is wrong with the marshalled 
+        // data: it's claiming having more data that what is possible to read.
+        //
+        if(_startSeq + _minSeqSize > _buf.size())
+        {
+            throw new Ice.UnmarshalOutOfBoundsException();
+        }
+        
+        return sz;
     }
 
     public void
@@ -572,7 +521,7 @@ public class BasicStream
                 int v = _buf.b.getInt();
                 if(v < 0)
                 {
-                    throw new Ice.NegativeSizeException();
+                    throw new Ice.UnmarshalOutOfBoundsException();
                 }
                 return v;
             }
@@ -590,6 +539,14 @@ public class BasicStream
     public void
     writeTypeId(String id)
     {
+        if(_writeEncapsStack == null || _writeEncapsStack.typeIdMap == null)
+        {
+            //
+            // writeObject() must be called first.
+            //
+            throw new Ice.MarshalException("type ids require an encapsulation");
+        }
+
         Integer index = _writeEncapsStack.typeIdMap.get(id);
         if(index != null)
         {
@@ -598,7 +555,7 @@ public class BasicStream
         }
         else
         {
-            index = new Integer(++_writeEncapsStack.typeIdIndex);
+            index = Integer.valueOf(++_writeEncapsStack.typeIdIndex);
             _writeEncapsStack.typeIdMap.put(id, index);
             writeBool(false);
             writeString(id);
@@ -608,12 +565,20 @@ public class BasicStream
     public String
     readTypeId()
     {
+        if(_readEncapsStack == null || _readEncapsStack.typeIdMap == null)
+        {
+            //
+            // readObject() must be called first.
+            //
+            throw new Ice.MarshalException("type ids require an encapsulation");
+        }
+
         String id;
         Integer index;
         final boolean isIndex = readBool();
         if(isIndex)
         {
-            index = new Integer(readSize());
+            index = Integer.valueOf(readSize());
             id = _readEncapsStack.typeIdMap.get(index);
             if(id == null)
             {
@@ -623,7 +588,7 @@ public class BasicStream
         else
         {
             id = readString();
-            index = new Integer(++_readEncapsStack.typeIdIndex);
+            index = Integer.valueOf(++_readEncapsStack.typeIdIndex);
             _readEncapsStack.typeIdMap.put(index, id);
         }
         return id;
@@ -632,6 +597,10 @@ public class BasicStream
     public void
     writeBlob(byte[] v)
     {
+        if(v == null)
+        {
+            return;
+        }
         expand(v.length);
         _buf.b.put(v);
     }
@@ -639,6 +608,10 @@ public class BasicStream
     public void
     writeBlob(byte[] v, int off, int len)
     {
+        if(v == null)
+        {
+            return;
+        }
         expand(len);
         _buf.b.put(v, off, len);
     }
@@ -646,6 +619,10 @@ public class BasicStream
     public byte[]
     readBlob(int sz)
     {
+        if(_buf.b.remaining() < sz)
+        {
+            throw new Ice.UnmarshalOutOfBoundsException();
+        }
         byte[] v = new byte[sz];
         try
         {
@@ -690,6 +667,28 @@ public class BasicStream
         }
     }
 
+    public void
+    writeSerializable(java.io.Serializable o)
+    {
+        if(o == null)
+        {
+            writeSize(0);
+            return;
+        }
+        try
+        {
+            OutputStreamWrapper w = new OutputStreamWrapper(this);
+            java.io.ObjectOutputStream out = new java.io.ObjectOutputStream(w);
+            out.writeObject(o);
+            out.close();
+            w.close();
+        }
+        catch(java.lang.Exception ex)
+        {
+            throw new Ice.MarshalException("cannot serialize object: " + ex);
+        }
+    }
+
     public byte
     readByte()
     {
@@ -719,8 +718,7 @@ public class BasicStream
     {
         try
         {
-            final int sz = readSize();
-            checkFixedSeq(sz, 1);
+            final int sz = readAndCheckSeqSize(1);
             byte[] v = new byte[sz];
             _buf.b.get(v);
             return v;
@@ -728,6 +726,26 @@ public class BasicStream
         catch(java.nio.BufferUnderflowException ex)
         {
             throw new Ice.UnmarshalOutOfBoundsException();
+        }
+    }
+
+    public java.io.Serializable
+    readSerializable()
+    {
+        int sz = readAndCheckSeqSize(1);
+        if (sz == 0)
+        {
+            return null;
+        }
+        try
+        {
+            InputStreamWrapper w = new InputStreamWrapper(sz, this);
+            ObjectInputStream in = new ObjectInputStream(_instance, w);
+            return (java.io.Serializable)in.readObject();
+        }
+        catch(java.lang.Exception ex)
+        {
+            throw new Ice.MarshalException("cannot deserialize object", ex);
         }
     }
 
@@ -749,9 +767,9 @@ public class BasicStream
         {
             writeSize(v.length);
             expand(v.length);
-            for(int i = 0; i < v.length; i++)
+            for(boolean b : v)
             {
-                _buf.b.put(v[i] ? (byte)1 : (byte)0);
+                _buf.b.put(b ? (byte)1 : (byte)0);
             }
         }
     }
@@ -774,8 +792,7 @@ public class BasicStream
     {
         try
         {
-            final int sz = readSize();
-            checkFixedSeq(sz, 1);
+            final int sz = readAndCheckSeqSize(1);
             boolean[] v = new boolean[sz];
             for(int i = 0; i < sz; i++)
             {
@@ -852,8 +869,7 @@ public class BasicStream
     {
         try
         {
-            final int sz = readSize();
-            checkFixedSeq(sz, 2);
+            final int sz = readAndCheckSeqSize(2);
             short[] v = new short[sz];
             java.nio.ShortBuffer shortBuf = _buf.b.asShortBuffer();
             shortBuf.get(v);
@@ -929,8 +945,7 @@ public class BasicStream
     {
         try
         {
-            final int sz = readSize();
-            checkFixedSeq(sz, 4);
+            final int sz = readAndCheckSeqSize(4);
             int[] v = new int[sz];
             java.nio.IntBuffer intBuf = _buf.b.asIntBuffer();
             intBuf.get(v);
@@ -985,8 +1000,7 @@ public class BasicStream
     {
         try
         {
-            final int sz = readSize();
-            checkFixedSeq(sz, 8);
+            final int sz = readAndCheckSeqSize(8);
             long[] v = new long[sz];
             java.nio.LongBuffer longBuf = _buf.b.asLongBuffer();
             longBuf.get(v);
@@ -1041,8 +1055,7 @@ public class BasicStream
     {
         try
         {
-            final int sz = readSize();
-            checkFixedSeq(sz, 4);
+            final int sz = readAndCheckSeqSize(4);
             float[] v = new float[sz];
             java.nio.FloatBuffer floatBuf = _buf.b.asFloatBuffer();
             floatBuf.get(v);
@@ -1097,8 +1110,7 @@ public class BasicStream
     {
         try
         {
-            final int sz = readSize();
-            checkFixedSeq(sz, 8);
+            final int sz = readAndCheckSeqSize(8);
             double[] v = new double[sz];
             java.nio.DoubleBuffer doubleBuf = _buf.b.asDoubleBuffer();
             doubleBuf.get(v);
@@ -1157,9 +1169,7 @@ public class BasicStream
                         }
                         catch(java.nio.charset.CharacterCodingException ex)
                         {
-                            Ice.MarshalException e = new Ice.MarshalException();
-                            e.initCause(ex);
-                            throw e;
+                            throw new Ice.MarshalException(ex);
                         }
                         writeSize(b.limit());
                         expand(b.limit());
@@ -1189,9 +1199,9 @@ public class BasicStream
         else
         {
             writeSize(v.length);
-            for(int i = 0; i < v.length; i++)
+            for(String e : v)
             {
-                writeString(v[i]);
+                writeString(e);
             }
         }
     }
@@ -1207,6 +1217,15 @@ public class BasicStream
         }
         else
         {
+
+            //
+            // Check the buffer has enough bytes to read.
+            //
+            if(_buf.b.remaining() < len)
+            {
+                throw new Ice.UnmarshalOutOfBoundsException();
+            }
+
             try
             {
                 //
@@ -1269,16 +1288,12 @@ public class BasicStream
     public String[]
     readStringSeq()
     {
-        final int sz = readSize();
-        startSeq(sz, 1);
+        final int sz = readAndCheckSeqSize(1);
         String[] v = new String[sz];
         for(int i = 0; i < sz; i++)
         {
             v[i] = readString();
-            checkSeq();
-            endElement();
         }
-        endSeq(sz);
         return v;
     }
 
@@ -1335,7 +1350,7 @@ public class BasicStream
                     // create a new index, and insert it into the
                     // to-be-marshaled map.
                     //
-                    q = new Integer(++_writeEncapsStack.writeIndex);
+                    q = Integer.valueOf(++_writeEncapsStack.writeIndex);
                     _writeEncapsStack.toBeMarshaledMap.put(v, q);
                 }
                 p = q;
@@ -1375,37 +1390,44 @@ public class BasicStream
 
         int index = readInt();
 
-        if(index == 0)
+        if(patcher != null)
         {
-            patcher.patch(null);
-            return;
-        }
-
-        if(index < 0 && patcher != null)
-        {
-            Integer i = new Integer(-index);
-            java.util.LinkedList<Patcher> patchlist = _readEncapsStack.patchMap.get(i);
-            if(patchlist == null)
+            if(index == 0)
             {
-                //
-                // We have no outstanding instances to be patched for
-                // this index, so make a new entry in the patch map.
-                //
-                patchlist = new java.util.LinkedList<Patcher>();
-                _readEncapsStack.patchMap.put(i, patchlist);
+                patcher.patch(null);
+                return;
             }
-            //
-            // Append a patcher for this instance and see if we can
-            // patch the instance. (The instance may have been
-            // unmarshaled previously.)
-            //
-            patchlist.add(patcher);
-            patchReferences(null, i);
-            return;
+
+            if(index < 0)
+            {
+                Integer i = Integer.valueOf(-index);
+                java.util.LinkedList<Patcher> patchlist = _readEncapsStack.patchMap.get(i);
+                if(patchlist == null)
+                {
+                    //
+                    // We have no outstanding instances to be patched for
+                    // this index, so make a new entry in the patch map.
+                    //
+                    patchlist = new java.util.LinkedList<Patcher>();
+                    _readEncapsStack.patchMap.put(i, patchlist);
+                }
+                //
+                // Append a patcher for this instance and see if we can
+                // patch the instance. (The instance may have been
+                // unmarshaled previously.)
+                //
+                patchlist.add(patcher);
+                patchReferences(null, i);
+                return;
+            }
+        }
+        if(index < 0)
+        {
+            throw new Ice.MarshalException("Invalid class instance index");
         }
 
         String mostDerivedId = readTypeId();
-        String id = new String(mostDerivedId);
+        String id = mostDerivedId;
 
         while(true)
         {
@@ -1483,7 +1505,7 @@ public class BasicStream
                 }
             }
 
-            Integer i = new Integer(index);
+            Integer i = Integer.valueOf(index);
             _readEncapsStack.unmarshaledMap.put(i, v);
 
             //
@@ -1521,6 +1543,7 @@ public class BasicStream
         boolean usesClasses = readBool();
 
         String id = readString();
+        final String origId = id;
 
         for(;;)
         {
@@ -1565,8 +1588,21 @@ public class BasicStream
                 {
                     TraceUtil.traceSlicing("exception", id, _slicingCat, _instance.initializationData().logger);
                 }
+
                 skipSlice(); // Slice off what we don't understand.
-                id = readString(); // Read type id for next slice.
+
+                try
+                {
+                    id = readString(); // Read type id for next slice.
+                }
+                catch(Ice.UnmarshalOutOfBoundsException ex)
+                {
+                    //
+                    // When readString raises this exception it means we've seen the last slice,
+                    // so we set the reason member to a more helpful message.
+                    //
+                    throw new Ice.UnmarshalOutOfBoundsException("unknown exception type `" + origId + "'", ex);
+                }
             }
         }
 
@@ -1590,8 +1626,7 @@ public class BasicStream
                 java.util.IdentityHashMap<Ice.Object, Integer> savedMap =
                     new java.util.IdentityHashMap<Ice.Object, Integer>(_writeEncapsStack.toBeMarshaledMap);
                 writeSize(savedMap.size());
-                java.util.Iterator<java.util.Map.Entry<Ice.Object, Integer> > p = savedMap.entrySet().iterator();
-                while(p.hasNext())
+                for(java.util.Map.Entry<Ice.Object, Integer> p : savedMap.entrySet())
                 {
                     //
                     // Add an instance from the old to-be-marshaled
@@ -1600,9 +1635,8 @@ public class BasicStream
                     // instances that are triggered by the classes
                     // marshaled are added to toBeMarshaledMap.
                     //
-                    java.util.Map.Entry<Ice.Object, Integer> e = p.next();
-                    _writeEncapsStack.marshaledMap.put(e.getKey(), e.getValue());
-                    writeInstance(e.getKey(), e.getValue());
+                    _writeEncapsStack.marshaledMap.put(p.getKey(), p.getValue());
+                    writeInstance(p.getKey(), p.getValue());
                 }
             
                 //
@@ -1610,10 +1644,9 @@ public class BasicStream
                 // substract what we have marshaled from the
                 // toBeMarshaledMap.
                 //
-                java.util.Iterator<Ice.Object> q = savedMap.keySet().iterator();
-                while(q.hasNext())
+                for(Ice.Object p : savedMap.keySet())
                 {
-                    _writeEncapsStack.toBeMarshaledMap.remove(q.next());
+                    _writeEncapsStack.toBeMarshaledMap.remove(p);
                 }
             }
         }
@@ -1634,6 +1667,15 @@ public class BasicStream
         }
         while(num > 0);
 
+        if(_readEncapsStack != null && _readEncapsStack.patchMap != null && _readEncapsStack.patchMap.size() != 0)
+        {
+            //
+            // If any entries remain in the patch map, the sender has sent an index for an object, but failed
+            // to supply the object.
+            //
+            throw new Ice.MarshalException("Index for class received, but no instance");
+        }
+
         //
         // Iterate over unmarshaledMap and invoke ice_postUnmarshal on
         // each object. We must do this after all objects in this
@@ -1642,24 +1684,16 @@ public class BasicStream
         //
         if(_objectList != null)
         {
-            java.util.Iterator<Ice.Object> e = _objectList.iterator();
-            while(e.hasNext())
+            for(Ice.Object obj : _objectList)
             {
-                Ice.Object obj = e.next();
                 try
                 {
                     obj.ice_postUnmarshal();
                 }
                 catch(java.lang.Exception ex)
                 {
-                    java.io.StringWriter sw = new java.io.StringWriter();
-                    java.io.PrintWriter pw = new java.io.PrintWriter(sw);
-                    IceUtilInternal.OutputBase out = new IceUtilInternal.OutputBase(pw);
-                    out.setUseTab(false);
-                    out.print("exception raised by ice_postUnmarshal:\n");
-                    ex.printStackTrace(pw);
-                    pw.flush();
-                    _instance.initializationData().logger.warning(sw.toString());
+                    String s = "exception raised by ice_postUnmarshal:\n" + Ex.toString(ex);
+                    _instance.initializationData().logger.warning("exception raised by ice_postUnmarshal:\n");
                 }
             }
         }
@@ -1681,14 +1715,8 @@ public class BasicStream
         }
         catch(java.lang.Exception ex)
         {
-            java.io.StringWriter sw = new java.io.StringWriter();
-            java.io.PrintWriter pw = new java.io.PrintWriter(sw);
-            IceUtilInternal.OutputBase out = new IceUtilInternal.OutputBase(pw);
-            out.setUseTab(false);
-            out.print("exception raised by ice_preMarshal:\n");
-            ex.printStackTrace(pw);
-            pw.flush();
-            _instance.initializationData().logger.warning(sw.toString());
+            String s = "exception raised by ice_preUnmarshal:\n" + Ex.toString(ex);
+            _instance.initializationData().logger.warning("exception raised by ice_preUnmarshal:\n");
         }
         v.__write(this);
     }
@@ -1741,19 +1769,15 @@ public class BasicStream
         //
         // Patch all references that refer to the instance.
         //
-        for(java.util.Iterator<Patcher> i = patchlist.iterator(); i.hasNext(); )
+        for(Patcher p : patchlist)
         {
-            Patcher p = i.next();
             try
             {
                 p.patch(v);
             }
             catch(ClassCastException ex)
             {
-                Ice.NoObjectFactoryException nof = new Ice.NoObjectFactoryException();
-                nof.type = p.type();
-                nof.initCause(ex);
-                throw nof;
+                throw new Ice.NoObjectFactoryException("no object factory", p.type(), ex);
             }
         }
 
@@ -1870,6 +1894,7 @@ public class BasicStream
             // Otherwise, allocate an array to hold a copy of the uncompressed data.
             //
             data = new byte[size()];
+            pos(0);
             _buf.b.get(data);
         }
 
@@ -1887,7 +1912,7 @@ public class BasicStream
             //
             bos.write((int)'B');
             bos.write((int)'Z');
-            java.lang.Object[] args = new java.lang.Object[]{ bos, new Integer(compressionLevel) };
+            java.lang.Object[] args = new java.lang.Object[]{ bos, Integer.valueOf(compressionLevel) };
             java.io.OutputStream os = (java.io.OutputStream)_bzOutputStreamCtor.newInstance(args);
             os.write(data, offset + headerSize, uncompressedLen);
             os.close();
@@ -1895,10 +1920,7 @@ public class BasicStream
         }
         catch(Exception ex)
         {
-            Ice.CompressionException e = new Ice.CompressionException();
-            e.reason = "bzip2 compression failure";
-            e.initCause(ex);
-            throw e;
+            throw new Ice.CompressionException("bzip2 compression failure", ex);
         }
 
         //
@@ -1965,6 +1987,7 @@ public class BasicStream
             // Otherwise, allocate an array to hold a copy of the compressed data.
             //
             compressed = new byte[size()];
+            pos(0);
             _buf.b.get(compressed);
         }
 
@@ -2006,10 +2029,7 @@ public class BasicStream
         }
         catch(Exception ex)
         {
-            Ice.CompressionException e = new Ice.CompressionException();
-            e.reason = "bzip2 uncompression failure";
-            e.initCause(ex);
-            throw e;
+            throw new Ice.CompressionException("bzip2 uncompression failure", ex);
         }
 
         //
@@ -2021,19 +2041,19 @@ public class BasicStream
         return ucStream;
     }
 
-    private void
+    public void
     expand(int n)
     {
         if(!_unlimited && _buf.b != null && _buf.b.position() + n > _messageSizeMax)
         {
-            throw new Ice.MemoryLimitException();
+            Ex.throwMemoryLimitException(_buf.b.position() + n, _messageSizeMax);
         }
         _buf.expand(n);
     }
 
     private static final class DynamicObjectFactory implements Ice.ObjectFactory
     {
-        DynamicObjectFactory(Class c)
+        DynamicObjectFactory(Class<?> c)
         {
             _class = c;
         }
@@ -2047,9 +2067,7 @@ public class BasicStream
             }
             catch(java.lang.Exception ex)
             {
-                Ice.SyscallException e = new Ice.SyscallException();
-                e.initCause(ex);
-                throw e;
+                throw new Ice.SyscallException(ex);
             }
         }
 
@@ -2058,7 +2076,7 @@ public class BasicStream
         {
         }
 
-        private Class _class;
+        private Class<?> _class;
     }
 
     private Ice.ObjectFactory
@@ -2068,7 +2086,7 @@ public class BasicStream
 
         try
         {
-            Class c = findClass(id);
+            Class<?> c = findClass(id);
             if(c != null)
             {
                 Ice.ObjectFactory dynamicFactory = new DynamicObjectFactory(c);
@@ -2101,10 +2119,7 @@ public class BasicStream
         }
         catch(LinkageError ex)
         {
-            Ice.NoObjectFactoryException e = new Ice.NoObjectFactoryException();
-            e.type = id;
-            e.initCause(ex);
-            throw e;
+            throw new Ice.NoObjectFactoryException("no object factory", id, ex);
         }
 
         return factory;
@@ -2113,7 +2128,7 @@ public class BasicStream
     private static final class DynamicUserExceptionFactory
         implements UserExceptionFactory
     {
-        DynamicUserExceptionFactory(Class c)
+        DynamicUserExceptionFactory(Class<?> c)
         {
             _class = c;
         }
@@ -2132,9 +2147,7 @@ public class BasicStream
             }
             catch(java.lang.Exception ex)
             {
-                Ice.SyscallException e = new Ice.SyscallException();
-                e.initCause(ex);
-                throw e;
+                throw new Ice.SyscallException(ex);
             }
         }
 
@@ -2143,7 +2156,7 @@ public class BasicStream
         {
         }
 
-        private Class _class;
+        private Class<?> _class;
     }
 
     private UserExceptionFactory
@@ -2160,7 +2173,7 @@ public class BasicStream
         {
             try
             {
-                Class c = findClass(id);
+                Class<?> c = findClass(id);
                 if(c != null)
                 {
                     factory = new DynamicUserExceptionFactory(c);
@@ -2168,9 +2181,7 @@ public class BasicStream
             }
             catch(LinkageError ex)
             {
-                Ice.MarshalException e = new Ice.MarshalException();
-                e.initCause(ex);
-                throw e;
+                throw new Ice.MarshalException(ex);
             }
 
             if(factory != null)
@@ -2185,11 +2196,11 @@ public class BasicStream
         return factory;
     }
 
-    private Class
+    private Class<?>
     findClass(String id)
         throws LinkageError
     {
-        Class c = null;
+        Class<?> c = null;
 
         //
         // To convert a Slice type id into a Java class, we do the following:
@@ -2229,13 +2240,14 @@ public class BasicStream
         return c;
     }
 
-    private Class
+    private Class<?>
     getConcreteClass(String className)
         throws LinkageError
     {
-        try
+        Class<?> c = _instance.findClass(className);
+
+        if(c != null)
         {
-            Class c = Class.forName(className);
             //
             // Ensure the class is instantiable. The constants are
             // defined in the JVM specification (0x200 = interface,
@@ -2246,10 +2258,6 @@ public class BasicStream
             {
                 return c;
             }
-        }
-        catch(ClassNotFoundException ex)
-        {
-            // Ignore
         }
 
         return null;
@@ -2284,10 +2292,10 @@ public class BasicStream
     {
         if(!id.startsWith("::"))
         {
-            throw new Ice.MarshalException();
+            throw new Ice.MarshalException("expected type id but received `" + id + "'");
         }
 
-        StringBuffer buf = new StringBuffer(id.length());
+        StringBuilder buf = new StringBuilder(id.length());
 
         int start = 2;
         boolean done = false;
@@ -2326,8 +2334,8 @@ public class BasicStream
         int start;
         int sz;
 
-        byte encodingMajor;
-        byte encodingMinor;
+        // byte encodingMajor; // Currently unused
+        // byte encodingMinor; // Currently unused
 
         java.util.TreeMap<Integer, java.util.LinkedList<Patcher> > patchMap;
         java.util.TreeMap<Integer, Ice.Object> unmarshaledMap;
@@ -2389,19 +2397,8 @@ public class BasicStream
     private int _messageSizeMax;
     private boolean _unlimited;
 
-    private static final class SeqData
-    {
-        public SeqData(int numElements, int minSize)
-        {
-            this.numElements = numElements;
-            this.minSize = minSize;
-        }
-
-        public int numElements;
-        public int minSize;
-        public SeqData previous;
-    }
-    SeqData _seqDataStack;
+    private int _startSeq;
+    private int _minSeqSize;
 
     private java.util.ArrayList<Ice.Object> _objectList;
 
@@ -2409,32 +2406,44 @@ public class BasicStream
         new java.util.HashMap<String, UserExceptionFactory>();
     private static java.lang.Object _factoryMutex = new java.lang.Object(); // Protects _exceptionFactories.
 
-    public static boolean
+    private static boolean _checkedBZip2 = false;
+    private static java.lang.reflect.Constructor<?> _bzInputStreamCtor;
+    private static java.lang.reflect.Constructor<?> _bzOutputStreamCtor;
+
+    public synchronized static boolean
     compressible()
     {
+        //
+        // Use lazy initialization when determining whether support for bzip2 compression
+        // is available.
+        //
+        if(!_checkedBZip2)
+        {
+            _checkedBZip2 = true;
+            try
+            {
+                Class<?> cls;
+                Class<?>[] types = new Class<?>[1];
+                cls = IceInternal.Util.findClass("org.apache.tools.bzip2.CBZip2InputStream", null);
+                if(cls != null)
+                {
+                    types[0] = java.io.InputStream.class;
+                    _bzInputStreamCtor = cls.getDeclaredConstructor(types);
+                }
+                cls = IceInternal.Util.findClass("org.apache.tools.bzip2.CBZip2OutputStream", null);
+                if(cls != null)
+                {
+                    types = new Class[2];
+                    types[0] = java.io.OutputStream.class;
+                    types[1] = Integer.TYPE;
+                    _bzOutputStreamCtor = cls.getDeclaredConstructor(types);
+                }
+            }
+            catch(Exception ex)
+            {
+                // Ignore - bzip2 compression not available.
+            }
+        }
         return _bzInputStreamCtor != null && _bzOutputStreamCtor != null;
-    }
-
-    private static java.lang.reflect.Constructor _bzInputStreamCtor;
-    private static java.lang.reflect.Constructor _bzOutputStreamCtor;
-    static
-    {
-        try
-        {
-            Class<?> cls;
-            Class<?>[] types = new Class<?>[1];
-            cls = Class.forName("org.apache.tools.bzip2.CBZip2InputStream");
-            types[0] = java.io.InputStream.class;
-            _bzInputStreamCtor = cls.getDeclaredConstructor(types);
-            cls = Class.forName("org.apache.tools.bzip2.CBZip2OutputStream");
-            types = new Class[2];
-            types[0] = java.io.OutputStream.class;
-            types[1] = Integer.TYPE;
-            _bzOutputStreamCtor = cls.getDeclaredConstructor(types);
-        }
-        catch(Exception ex)
-        {
-            // Ignore - bzip2 compression not available.
-        }
     }
 }

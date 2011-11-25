@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -24,29 +24,28 @@ public class Collocated
     {
         public override int run(string[] args)
         {
-            communicator().getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000");
+            communicator().getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010");
             communicator().getProperties().setProperty("Ice.Warn.Dispatch", "0");
 
             Ice.ObjectAdapter adapter = communicator().createObjectAdapter("TestAdapter");
             adapter.addServantLocator(new ServantLocatorI("category"), "category");
             adapter.addServantLocator(new ServantLocatorI(""), "");
             adapter.add(new TestI(), communicator().stringToIdentity("asm"));
+            adapter.add(new TestActivationI(), communicator().stringToIdentity("test/activation"));
 
             AllTests.allTests(communicator(), true);
 
             return 0;
         }
     }
-    
-    public static void Main(string[] args)
+
+    public static int Main(string[] args)
     {
+#if !COMPACT
         Debug.Listeners.Add(new ConsoleTraceListener());
+#endif
 
         App app = new App();
-        int result = app.main(args);
-        if(result != 0)
-        {
-            System.Environment.Exit(result);
-        }
+        return app.main(args);
     }
 }

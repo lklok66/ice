@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -17,7 +17,7 @@ class CallbackSenderI(Demo.CallbackSender):
     def initiateCallback(self, proxy, current=None):
         print "initiating callback"
         try:
-            proxy.callback(current.ctx)
+            proxy.callback()
         except:
             traceback.print_exc()
 
@@ -35,7 +35,7 @@ class Server(Ice.Application):
             return 1
 
         adapter = self.communicator().createObjectAdapter("Callback.Server")
-        adapter.add(CallbackSenderI(), self.communicator().stringToIdentity("callback"))
+        adapter.add(CallbackSenderI(), self.communicator().stringToIdentity("callbackSender"))
         adapter.activate()
         self.communicator().waitForShutdown()
         return 0

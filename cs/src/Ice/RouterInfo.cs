@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -243,6 +243,14 @@ namespace IceInternal
             }
         }
 
+        public void clearCache(Reference @ref)
+        {
+            lock(this)
+            {
+                _identities.Remove(@ref.getIdentity());
+            }
+        }
+
         private EndpointI[] setClientEndpoints(Ice.ObjectPrx clientProxy)
         {
             lock(this)
@@ -341,7 +349,7 @@ namespace IceInternal
         private EndpointI[] _clientEndpoints;
         private EndpointI[] _serverEndpoints;
         private Ice.ObjectAdapter _adapter;
-        private IceUtilInternal.Set _identities = new IceUtilInternal.Set();
+        private HashSet<Ice.Identity> _identities = new HashSet<Ice.Identity>();
         private List<Ice.Identity> _evictedIdentities = new List<Ice.Identity>();
     }
 

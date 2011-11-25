@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,14 +12,13 @@ using Test;
 
 public class ThrowerI : ThrowerDisp_
 {
-    public ThrowerI(Ice.ObjectAdapter adapter)
+    public ThrowerI()
     {
-        _adapter = adapter;
     }
 
     public override void shutdown_async(AMD_Thrower_shutdown cb, Ice.Current current)
     {
-        _adapter.getCommunicator().shutdown();
+        current.adapter.getCommunicator().shutdown();
         cb.ice_response();
     }
 
@@ -30,7 +29,7 @@ public class ThrowerI : ThrowerDisp_
 
     public override void supportsAssertException_async(AMD_Thrower_supportsAssertException cb, Ice.Current current)
     {
-        cb.ice_response(true);
+        cb.ice_response(false);
     }
 
     public override void throwAasA_async(AMD_Thrower_throwAasA cb, int a, Ice.Current current)
@@ -140,5 +139,17 @@ public class ThrowerI : ThrowerDisp_
         Debug.Assert(false);
     }
 
-    private Ice.ObjectAdapter _adapter;
+    public override void throwAfterResponse_async(AMD_Thrower_throwAfterResponse cb, Ice.Current current)
+    {
+        cb.ice_response();
+
+        throw new System.Exception();
+    }
+
+    public override void throwAfterException_async(AMD_Thrower_throwAfterException cb, Ice.Current current)
+    {
+        cb.ice_exception(new A());
+
+        throw new System.Exception();
+    }
 }

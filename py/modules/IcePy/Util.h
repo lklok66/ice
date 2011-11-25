@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -60,9 +60,14 @@ inline PyObject* createString(const std::string& str)
 std::string getString(PyObject*);
 
 //
-// Validate and retrieve a string argument.
+// Validate and retrieve a string argument; None is also legal.
 //
 bool getStringArg(PyObject*, const std::string&, std::string&);
+
+//
+// Get the name of the current Python function.
+//
+std::string getFunction();
 
 //
 // Invokes Py_DECREF on a Python object.
@@ -200,9 +205,8 @@ void setPythonException(const Ice::Exception&);
 void setPythonException(PyObject*);
 
 //
-// Converts a Python exception into an Ice exception and throws it.
-// If no exception is provided, the interpreter's current exception
-// is obtained. The second argument is an optional traceback object.
+// Converts the interpreter's current exception into an Ice exception
+// and throws it.
 //
 void throwPythonException();
 

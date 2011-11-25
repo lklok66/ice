@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -21,9 +21,11 @@ public class FileI extends _FileDisp
 
         assert(_parent != null);
 
+        //
         // Create an identity
         //
-        _id = communicator.stringToIdentity(Ice.Util.generateUUID());
+        _id = new Ice.Identity();
+        _id.name = java.util.UUID.randomUUID().toString();
     }
 
     // Slice Node::name() operation

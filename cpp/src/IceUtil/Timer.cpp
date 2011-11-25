@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,9 +13,22 @@
 using namespace std;
 using namespace IceUtil;
 
-Timer::Timer() : _destroyed(false)
+Timer::Timer() :
+    Thread("IceUtil timer thread"),
+    _destroyed(false)
 {
+    __setNoDelete(true);
     start();
+    __setNoDelete(false);
+}
+
+Timer::Timer(int priority) :
+    Thread("IceUtil timer thread"),
+    _destroyed(false)
+{
+    __setNoDelete(true);
+    start(0, priority);
+    __setNoDelete(false);
 }
 
 void
@@ -52,7 +65,13 @@ Timer::schedule(const TimerTaskPtr& task, const IceUtil::Time& delay)
         throw IllegalArgumentException(__FILE__, __LINE__, "timer destroyed");
     }
 
-    IceUtil::Time time = IceUtil::Time::now(IceUtil::Time::Monotonic) + delay;
+    IceUtil::Time now = IceUtil::Time::now(IceUtil::Time::Monotonic);
+    IceUtil::Time time = now + delay;
+    if(delay > IceUtil::Time() && time < now)
+    {
+        throw IllegalArgumentException(__FILE__, __LINE__, "invalid delay");
+    }
+
     bool inserted = _tasks.insert(make_pair(task, time)).second;
     if(!inserted)
     {
@@ -75,7 +94,13 @@ Timer::scheduleRepeated(const TimerTaskPtr& task, const IceUtil::Time& delay)
         throw IllegalArgumentException(__FILE__, __LINE__, "timer destroyed");
     }
 
-    const Token token(IceUtil::Time::now(IceUtil::Time::Monotonic) + delay, delay, task);
+    IceUtil::Time now = IceUtil::Time::now(IceUtil::Time::Monotonic);
+    const Token token(now + delay, delay, task);
+    if(delay > IceUtil::Time() && token.scheduledTime < now) 
+    {
+        throw IllegalArgumentException(__FILE__, __LINE__, "invalid delay");
+    }
+
     bool inserted = _tasks.insert(make_pair(task, token.scheduledTime)).second;
     if(!inserted)
     {
@@ -165,7 +190,26 @@ Timer::run()
                 }
                 
                 _wakeUpTime = first.scheduledTime;
-                _monitor.timedWait(first.scheduledTime - now);
+                try 
+                {
+                    _monitor.timedWait(first.scheduledTime - now);
+                } 
+                catch(const IceUtil::InvalidTimeoutException&)
+                {
+                    IceUtil::Time timeout = (first.scheduledTime - now) / 2;
+                    while(timeout > IceUtil::Time())
+                    {
+                        try 
+                        {
+                            _monitor.timedWait(timeout);
+                            break;
+                        } 
+                        catch(const IceUtil::InvalidTimeoutException&)
+                        {
+                            timeout = timeout / 2;
+                        }
+                    }
+                }
             }
 
             if(_destroyed)
@@ -180,6 +224,14 @@ Timer::run()
             {
                 token.task->runTimerTask();
             }
+            catch(const IceUtil::Exception& e)
+            {
+                cerr << "IceUtil::Timer::run(): uncaught exception:\n" << e.what();
+#ifdef __GNUC__
+                cerr << "\n" << e.ice_stackTrace();
+#endif
+                cerr << endl;
+            } 
             catch(const std::exception& e)
             {
                 cerr << "IceUtil::Timer::run(): uncaught exception:\n" << e.what() << endl;

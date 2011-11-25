@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -25,7 +25,7 @@ class BetResolver
     {
         java.util.TimerTask task = new java.util.TimerTask()
             {
-                public void 
+                public void
                 run()
                 {
                     //
@@ -65,9 +65,9 @@ class BetResolver
     void
     cancel()
     {
-        for(int i = 0; i < _timers.length; ++i)
+        for(java.util.Timer timer : _timers)
         {
-            _timers[i].cancel();
+            timer.cancel();
         }
     }
 

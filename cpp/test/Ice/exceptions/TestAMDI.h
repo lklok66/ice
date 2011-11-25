@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -16,7 +16,7 @@ class ThrowerI : public Test::Thrower
 {
 public:
 
-    ThrowerI(const Ice::ObjectAdapterPtr&);
+    ThrowerI();
 
     virtual void shutdown_async(const Test::AMD_Thrower_shutdownPtr&,
                                 const Ice::Current&);
@@ -56,9 +56,8 @@ public:
     virtual void throwAssertException_async(const Test::AMD_Thrower_throwAssertExceptionPtr&,
                                             const Ice::Current&);
 
-private:
-
-    Ice::ObjectAdapterPtr _adapter;
+    virtual void throwAfterResponse_async(const Test::AMD_Thrower_throwAfterResponsePtr&, const Ice::Current&);
+    virtual void throwAfterException_async(const Test::AMD_Thrower_throwAfterExceptionPtr&, const Ice::Current&);
 };
 
 #endif

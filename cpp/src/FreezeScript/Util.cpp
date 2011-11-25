@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -90,8 +90,8 @@ FreezeScript::createEvictorSliceTypes(const Slice::UnitPtr& u)
     {
         identity = ice->createStruct("Identity", false);
         Slice::TypePtr str = u->builtin(Slice::Builtin::KindString);
-        identity->createDataMember("name", str);
-        identity->createDataMember("category", str);
+        identity->createDataMember("name", str, 0, "", "");
+        identity->createDataMember("category", str, 0, "", "");
     }
     else
     {
@@ -132,9 +132,9 @@ FreezeScript::createEvictorSliceTypes(const Slice::UnitPtr& u)
     {
         stats = freeze->createStruct("Statistics", false);
         Slice::TypePtr tl = u->builtin(Slice::Builtin::KindLong);
-        stats->createDataMember("creationTime", tl);
-        stats->createDataMember("lastSaveTime", tl);
-        stats->createDataMember("avgSaveTime", tl);
+        stats->createDataMember("creationTime", tl, 0, "", "");
+        stats->createDataMember("lastSaveTime", tl, 0, "", "");
+        stats->createDataMember("avgSaveTime", tl, 0, "", "");
     }
     else
     {
@@ -155,8 +155,8 @@ FreezeScript::createEvictorSliceTypes(const Slice::UnitPtr& u)
     {
         Slice::StructPtr rec = freeze->createStruct("ObjectRecord", false);
         Slice::TypePtr obj = u->builtin(Slice::Builtin::KindObject);
-        rec->createDataMember("servant", obj);
-        rec->createDataMember("stats", stats);
+        rec->createDataMember("servant", obj, 0, "", "");
+        rec->createDataMember("stats", stats, 0, "", "");
     }
     else
     {
@@ -177,9 +177,9 @@ FreezeScript::parseSlice(const string& n, const Slice::UnitPtr& u, const vector<
     //
     for(vector<string>::const_iterator p = files.begin(); p != files.end(); ++p)
     {
-        Preprocessor icecpp(n, *p, cppArgs);
+        PreprocessorPtr icecpp = Preprocessor::create(n, *p, cppArgs);
 
-        FILE* cppHandle = icecpp.preprocess(false);
+        FILE* cppHandle = icecpp->preprocess(false);
 
         if(cppHandle == 0)
         {
@@ -188,7 +188,7 @@ FreezeScript::parseSlice(const string& n, const Slice::UnitPtr& u, const vector<
 
         int status = u->parse(*p, cppHandle, debug);
 
-        if(!icecpp.close())
+        if(!icecpp->close())
         {
             return false;            
         }
@@ -210,11 +210,6 @@ FreezeScript::readCatalog(const Ice::CommunicatorPtr& communicator, const string
     CatalogDataMap result;
 
     DbEnv dbEnv(0);
-#ifdef _WIN32
-    int mode = 0;
-#else
-    int mode = S_IRUSR | S_IWUSR;
-#endif
     try
     {
 #ifdef _WIN32
@@ -228,8 +223,8 @@ FreezeScript::readCatalog(const Ice::CommunicatorPtr& communicator, const string
         // Open the database environment.
         //
         {
-            u_int32_t flags = DB_INIT_LOG | DB_INIT_MPOOL | DB_INIT_TXN | DB_CREATE | DB_THREAD | DB_RECOVER;
-            dbEnv.open(dbEnvName.c_str(), flags, mode);
+            u_int32_t flags = DB_THREAD | DB_CREATE | DB_INIT_TXN | DB_INIT_MPOOL;
+            dbEnv.open(dbEnvName.c_str(), flags, 0);
         }
 
         Freeze::ConnectionPtr connection = Freeze::createConnection(communicator, dbEnvName, dbEnv);
@@ -244,10 +239,15 @@ FreezeScript::readCatalog(const Ice::CommunicatorPtr& communicator, const string
         dbEnv.close(0);
         throw FailureException(__FILE__, __LINE__, string("database error: ") + ex.what());
     }
+    catch(const IceUtil::FileLockException&)
+    {
+        dbEnv.close(0);
+        throw FailureException(__FILE__, __LINE__, "environment `" + dbEnvName + "' is locked");
+    }
     catch(...)
     {
         dbEnv.close(0);
-        throw FailureException(__FILE__, __LINE__, "unknown exception");
+        throw;
     }
 
     dbEnv.close(0);

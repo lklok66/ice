@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -24,7 +24,7 @@ public class AllTests
     {
         Console.Out.Write("testing stringToProxy... ");
         Console.Out.Flush();
-        string @ref = "test:default -p 12010 -t 2000";
+        string @ref = "test:default -p 12010";
         Ice.ObjectPrx @base = communicator.stringToProxy(@ref);
         test(@base != null);
         Console.Out.WriteLine("ok");
@@ -40,10 +40,10 @@ public class AllTests
             Console.Out.Write("creating/destroying/recreating object adapter... ");
             Console.Out.Flush();
             Ice.ObjectAdapter adapter =
-                communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9999");
+                communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default");
             try
             {
-                communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9998");
+                communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default");
                 test(false);
             }
             catch(Ice.AlreadyRegisteredException)
@@ -54,7 +54,7 @@ public class AllTests
             //
             // Use a different port than the first adapter to avoid an "address already in use" error.
             //
-            adapter = communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9998");
+            adapter = communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default");
             adapter.destroy();
             Console.Out.WriteLine("ok");
         }

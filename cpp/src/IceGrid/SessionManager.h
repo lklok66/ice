@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -43,6 +43,7 @@ class SessionKeepAliveThread : public IceUtil::Thread, public IceUtil::Monitor<I
 public:
 
     SessionKeepAliveThread(const InternalRegistryPrx& registry, const Ice::LoggerPtr& logger) : 
+        IceUtil::Thread("IceGrid session keepalive thread"),
         _registry(registry),
         _logger(logger),
         _state(InProgress),
@@ -55,7 +56,7 @@ public:
     {
         TPrx session;
         InternalRegistryPrx registry;
-        IceUtil::Time timeout = IceUtil::Time::seconds(15); 
+        IceUtil::Time timeout = IceUtil::Time::seconds(10); 
         Action action = Connect;
 
         try
@@ -102,12 +103,12 @@ public:
                     {
                         if(_state == Connected || action == Connect || action == KeepAlive)
                         {
-                            IceUtil::Time now = IceUtil::Time::now();
+                            IceUtil::Time now = IceUtil::Time::now(IceUtil::Time::Monotonic);
                             IceUtil::Time wakeTime = now + timeout;
                             while(_state != Destroyed && _nextAction == None && wakeTime > now)
                             {
                                 timedWait(wakeTime - now);
-                                now = IceUtil::Time::now();
+                                now = IceUtil::Time::now(IceUtil::Time::Monotonic);
                             }
                         }
                         if(_nextAction == None)
@@ -189,7 +190,7 @@ public:
     }
 
     virtual void
-    tryCreateSession(bool waitForTry = true)
+    tryCreateSession(bool waitForTry = true, const IceUtil::Time& timeout = IceUtil::Time())
     {
         {
             Lock sync(*this);
@@ -215,7 +216,17 @@ public:
             // Wait until the action is executed and the state changes.
             while(_nextAction == Connect || _nextAction == KeepAlive || _state == InProgress)
             {
-                wait();
+                if(timeout == IceUtil::Time())
+                {
+                    wait();
+                }
+                else
+                {
+                    if(!timedWait(timeout))
+                    {
+                        break;
+                    }
+                }
             }
         }
     }
@@ -261,6 +272,13 @@ public:
         notifyAll();
     }
 
+    bool
+    isDestroyed()
+    {
+        Lock sync(*this);
+        return _state == Destroyed;
+    }
+
     TPrx
     getSession()
     {
@@ -281,7 +299,7 @@ public:
         Lock sync(*this);
         return _registry;
     }
-    
+
     virtual TPrx createSession(InternalRegistryPrx&, IceUtil::Time&) = 0;
     virtual void destroySession(const TPrx&) = 0;
     virtual bool keepAlive(const TPrx&) = 0;

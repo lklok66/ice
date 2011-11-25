@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -10,11 +10,8 @@
 import Ice, Test
 
 class ThrowerI(Test.Thrower):
-    def __init__(self, adapter):
-        self._adapter = adapter
-
     def shutdown(self, current=None):
-        self._adapter.getCommunicator().shutdown()
+        current.adapter.getCommunicator().shutdown()
 
     def supportsUndeclaredExceptions(self, current=None):
         return True
@@ -91,3 +88,15 @@ class ThrowerI(Test.Thrower):
 
     def throwAssertException(self, current=None):
         raise RuntimeError("operation `throwAssertException' not supported")
+
+    def throwAfterResponse(self, current=None):
+        #
+        # Only relevant for AMD.
+        #
+        pass
+
+    def throwAfterException(self, current=None):
+        #
+        # Only relevant for AMD.
+        #
+        raise Test.A()

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -25,12 +25,12 @@ IceInternal::TransceiverPtr
 IceSSL::ConnectorI::connect()
 {
     //
-    // The plugin may not be initialized.
+    // The plug-in may not be initialized.
     //
     if(!_instance->context())
     {
         PluginInitializationException ex(__FILE__, __LINE__);
-        ex.reason = "IceSSL: plugin is not initialized";
+        ex.reason = "IceSSL: plug-in is not initialized";
         throw ex;
     }
 
@@ -42,36 +42,7 @@ IceSSL::ConnectorI::connect()
 
     try
     {
-        SOCKET fd = IceInternal::createSocket(false, _addr.ss_family);
-        IceInternal::setBlock(fd, false);
-        IceInternal::setTcpBufSize(fd, _instance->communicator()->getProperties(), _logger);
-        bool connected = IceInternal::doConnect(fd, _addr);
-
-        // This static_cast is necessary due to 64bit windows. There SOCKET is a non-int type.
-        BIO* bio = BIO_new_socket(static_cast<int>(fd), BIO_CLOSE);
-        if(!bio)
-        {
-            IceInternal::closeSocketNoThrow(fd);
-            SecurityException ex(__FILE__, __LINE__);
-            ex.reason = "openssl failure";
-            throw ex;
-        }
-
-        SSL* ssl = SSL_new(_instance->context());
-        if(!ssl)
-        {
-            BIO_free(bio); // Also closes the socket.
-            SecurityException ex(__FILE__, __LINE__);
-            ex.reason = "openssl failure";
-            throw ex;
-        }
-        SSL_set_bio(ssl, bio, bio);
-
-        //
-        // SSL handshaking is performed in TransceiverI::initialize, since
-        // connect must not block.
-        //
-        return new TransceiverI(_instance, ssl, fd, connected, false);
+        return new TransceiverI(_instance, IceInternal::createSocket(false, _addr.ss_family), _host, _addr);
     }
     catch(const Ice::LocalException& ex)
     {
@@ -159,10 +130,11 @@ IceSSL::ConnectorI::operator<(const IceInternal::Connector& r) const
     return IceInternal::compareAddress(_addr, p->_addr) == -1;
 }
 
-IceSSL::ConnectorI::ConnectorI(const InstancePtr& instance, const struct sockaddr_storage& addr, Ice::Int timeout,
-                               const string& connectionId) :
+IceSSL::ConnectorI::ConnectorI(const InstancePtr& instance, const string& host, const struct sockaddr_storage& addr,
+                               Ice::Int timeout, const string& connectionId) :
     _instance(instance),
     _logger(instance->communicator()->getLogger()),
+    _host(host),
     _addr(addr),
     _timeout(timeout),
     _connectionId(connectionId)

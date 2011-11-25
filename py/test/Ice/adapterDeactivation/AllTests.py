@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -16,7 +16,7 @@ def test(b):
 def allTests(communicator):
     print "testing stringToProxy... ",
     sys.stdout.flush()
-    base = communicator.stringToProxy("test:default -p 12010 -t 10000")
+    base = communicator.stringToProxy("test:default -p 12010")
     test(base)
     print "ok"
 
@@ -29,15 +29,15 @@ def allTests(communicator):
 
     print "creating/destroying/recreating object adapter... ",
     sys.stdout.flush()
-    adapter = communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9999")
+    adapter = communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default")
     try:
-        communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9998")
+        communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default")
         test(False)
     except Ice.LocalException:
         pass
     adapter.destroy()
 
-    adapter = communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9998")
+    adapter = communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default")
     adapter.destroy()
     print "ok"
 

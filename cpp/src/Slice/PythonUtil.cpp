@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,9 +14,7 @@
 #include <IceUtil/StringUtil.h>
 #include <IceUtil/InputUtil.h>
 #include <climits>
-#ifdef __BCPLUSPLUS__
-#  include <iterator>
-#endif
+#include <iterator>
 
 using namespace std;
 using namespace Slice;
@@ -32,6 +30,7 @@ class MetaDataVisitor : public ParserVisitor
 {
 public:
 
+    virtual bool visitUnitStart(const UnitPtr&);
     virtual bool visitModuleStart(const ModulePtr&);
     virtual void visitClassDecl(const ClassDeclPtr&);
     virtual bool visitClassDefStart(const ClassDefPtr&);
@@ -47,14 +46,9 @@ public:
 private:
 
     //
-    // Validates global metadata.
-    //
-    void validateGlobal(const DefinitionContextPtr&);
-
-    //
     // Validates sequence metadata.
     //
-    void validateSequence(const DefinitionContextPtr&, const string&, const TypePtr&, const StringList&);
+    void validateSequence(const string&, const string&, const TypePtr&, const StringList&);
 
     //
     // Checks a definition that doesn't currently support Python metadata.
@@ -125,9 +119,9 @@ private:
     void writeType(const TypePtr&);
 
     //
-    // Write a default value for a given type.
+    // Write an initializer value for a given type.
     //
-    void writeDefaultValue(const TypePtr&);
+    void writeInitializer(const TypePtr&);
 
     //
     // Add a value to a hash code.
@@ -147,14 +141,30 @@ private:
     struct MemberInfo
     {
         string fixedName;
-        TypePtr type;
         bool inherited;
-        StringList metaData;
+        DataMemberPtr dataMember;
     };
     typedef list<MemberInfo> MemberInfoList;
 
+    //
+    // Write a member assignment statement for a constructor.
+    //
+    void writeAssign(const MemberInfo&);
+
+    //
+    // Write a constant value.
+    //
+    void writeConstantValue(const TypePtr&, const SyntaxTreeBasePtr&, const string&);
+
+    //
+    // Write constructor parameters with default values.
+    //
+    void writeConstructorParams(const MemberInfoList&);
+
     void collectClassMembers(const ClassDefPtr&, MemberInfoList&, bool);
     void collectExceptionMembers(const ExceptionPtr&, MemberInfoList&, bool);
+
+    string editComment(const string&);
 
     Output& _out;
     set<string>& _moduleHistory;
@@ -171,9 +181,9 @@ lookupKwd(const string& name)
     //
     // Keyword list. *Must* be kept in alphabetical order.
     //
-    static const string keywordList[] = 
-    {       
-        "and", "assert", "break", "class", "continue", "def", "del", "elif", "else", "except", "exec",
+    static const string keywordList[] =
+    {
+        "None", "and", "assert", "break", "class", "continue", "def", "del", "elif", "else", "except", "exec",
         "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "not", "or", "pass",
         "print", "raise", "return", "try", "while", "yield"
     };
@@ -340,6 +350,13 @@ Slice::Python::CodeVisitor::visitModuleStart(const ModulePtr& p)
         _moduleHistory.insert(abs);
     }
     _out << nl << "__name__ = '" << abs << "'";
+
+    string comment = p->comment();
+    if(!comment.empty())
+    {
+        _out << nl << "_M_" << abs << ".__doc__ = '''" << editComment(comment) << "'''";
+    }
+
     _moduleStack.push_front(abs);
     return true;
 }
@@ -393,6 +410,7 @@ Slice::Python::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
     ClassDefPtr base;
     OperationList ops = p->operations();
     OperationList::iterator oli;
+    bool isAbstract = p->isInterface() || p->allOperations().size() > 0; // Don't use isAbstract() - see bug 3739
 
     //
     // Define the class.
@@ -431,29 +449,28 @@ Slice::Python::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
 
     _out.inc();
 
+    string comment = p->comment();
+    if(!comment.empty())
+    {
+        _out << nl << "'''" << editComment(comment) << "'''";
+    }
+
     //
     // __init__
     //
     _out << nl << "def __init__(self";
     MemberInfoList allMembers;
     collectClassMembers(p, allMembers, false);
-    if(!allMembers.empty())
-    {
-        for(MemberInfoList::iterator q = allMembers.begin(); q != allMembers.end(); ++q)
-        {
-            _out << ", " << q->fixedName << '=';
-            writeDefaultValue(q->type);
-        }
-    }
+    writeConstructorParams(allMembers);
     _out << "):";
     _out.inc();
-    if(!base && !p->hasDataMembers() && !p->isAbstract())
+    if(!base && !p->hasDataMembers() && !isAbstract)
     {
         _out << nl << "pass";
     }
     else
     {
-        if(p->isAbstract())
+        if(isAbstract)
         {
             _out << nl << "if __builtin__.type(self) == _M_" << abs << ':';
             _out.inc();
@@ -476,7 +493,7 @@ Slice::Python::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
         {
             if(!q->inherited)
             {
-                _out << nl << "self." << q->fixedName << " = " << q->fixedName;;
+                writeAssign(*q);
             }
         }
     }
@@ -543,16 +560,12 @@ Slice::Python::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
         //
         // Emit a placeholder for each operation.
         //
-        _out << sp
-             << nl << "#"
-             << nl << "# Operation signatures."
-             << nl << "#";
         for(oli = ops.begin(); oli != ops.end(); ++oli)
         {
             string fixedOpName = fixIdent((*oli)->name());
             if(!p->isLocal() && (p->hasMetaData("amd") || (*oli)->hasMetaData("amd")))
             {
-                _out << nl << "# def " << fixedOpName << "_async(self, _cb";
+                _out << sp << nl << "def " << fixedOpName << "_async(self, _cb";
 
                 ParamDeclList params = (*oli)->parameters();
 
@@ -568,10 +581,18 @@ Slice::Python::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
                     _out << ", current=None";
                 }
                 _out << "):";
+                _out.inc();
+                comment = (*oli)->comment();
+                if(!comment.empty())
+                {
+                    _out << nl << "'''" << editComment(comment) << "'''";
+                }
+                _out << nl << "pass";
+                _out.dec();
             }
             else
             {
-                _out << nl << "# def " << fixedOpName << "(self";
+                _out << sp << nl << "def " << fixedOpName << "(self";
 
                 ParamDeclList params = (*oli)->parameters();
 
@@ -587,6 +608,14 @@ Slice::Python::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
                     _out << ", current=None";
                 }
                 _out << "):";
+                _out.inc();
+                comment = (*oli)->comment();
+                if(!comment.empty())
+                {
+                    _out << nl << "'''" << editComment(comment) << "'''";
+                }
+                _out << nl << "pass";
+                _out.dec();
             }
         }
     }
@@ -651,7 +680,18 @@ Slice::Python::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
                 }
             }
 
-            _out << sp << nl << "def " << fixedOpName << "(self";
+            comment = (*oli)->comment();
+            if(!comment.empty())
+            {
+                comment = "'''" + editComment(comment) + "'''";
+            }
+
+            _out << sp;
+            if(!comment.empty())
+            {
+                _out << nl << comment;
+            }
+            _out << nl << "def " << fixedOpName << "(self";
             if(!inParams.empty())
             {
                 _out << ", " << inParams;
@@ -666,15 +706,57 @@ Slice::Python::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
             _out << "), _ctx))";
             _out.dec();
 
+            //
+            // Async operations.
+            //
+            _out << sp;
+            if(!comment.empty())
+            {
+                _out << nl << comment;
+            }
+            _out << nl << "def begin_" << (*oli)->name() << "(self";
+            if(!inParams.empty())
+            {
+                _out << ", " << inParams;
+            }
+            _out << ", _response=None, _ex=None, _sent=None, _ctx=None):";
+            _out.inc();
+            _out << nl << "return _M_" << abs << "._op_" << (*oli)->name() << ".begin(self, ((" << inParams;
+            if(!inParams.empty() && inParams.find(',') == string::npos)
+            {
+                _out << ", ";
+            }
+            _out << "), _response, _ex, _sent, _ctx))";
+            _out.dec();
+
+            _out << sp;
+            if(!comment.empty())
+            {
+                _out << nl << comment;
+            }
+            _out << nl << "def end_" << (*oli)->name() << "(self, _r):";
+            _out.inc();
+            _out << nl << "return _M_" << abs << "._op_" << (*oli)->name() << ".end(self, _r)";
+            _out.dec();
+
+            //
+            // Old AMI operations.
+            //
             if(p->hasMetaData("ami") || (*oli)->hasMetaData("ami"))
             {
-                _out << sp << nl << "def " << fixedOpName << "_async(self, _cb";
+                _out << sp;
+                if(!comment.empty())
+                {
+                    _out << nl << comment;
+                }
+                _out << nl << "def " << fixedOpName << "_async(self, _cb";
                 if(!inParams.empty())
                 {
                     _out << ", " << inParams;
                 }
                 _out << ", _ctx=None):";
                 _out.inc();
+
                 _out << nl << "return _M_" << abs << "._op_" << (*oli)->name() << ".invokeAsync(self, (_cb, ("
                      << inParams;
                 if(!inParams.empty() && inParams.find(',') == string::npos)
@@ -714,7 +796,7 @@ Slice::Python::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
     DataMemberList members = p->dataMembers();
     _out << sp << nl << "_M_" << type << " = IcePy.defineClass('" << scoped << "', " << name << ", ";
     writeMetaData(p->getMetaData());
-    _out << ", " << (p->isAbstract() ? "True" : "False") << ", ";
+    _out << ", " << (isAbstract ? "True" : "False") << ", ";
     if(!base)
     {
         _out << "None";
@@ -787,7 +869,7 @@ Slice::Python::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
         _out << nl;
     }
     _out << "))";
-    _out << nl << name << ".ice_type = _M_" << type;
+    _out << nl << name << "._ice_type = _M_" << type;
 
     //
     // Define each operation. The arguments to the IcePy.Operation constructor are:
@@ -941,6 +1023,12 @@ Slice::Python::CodeVisitor::visitExceptionStart(const ExceptionPtr& p)
     _out << "):";
     _out.inc();
 
+    string comment = p->comment();
+    if(!comment.empty())
+    {
+        _out << nl << "'''" << editComment(comment) << "'''";
+    }
+
     DataMemberList members = p->dataMembers();
     DataMemberList::iterator dmli;
 
@@ -950,14 +1038,7 @@ Slice::Python::CodeVisitor::visitExceptionStart(const ExceptionPtr& p)
     _out << nl << "def __init__(self";
     MemberInfoList allMembers;
     collectExceptionMembers(p, allMembers, false);
-    if(!allMembers.empty())
-    {
-        for(MemberInfoList::iterator q = allMembers.begin(); q != allMembers.end(); ++q)
-        {
-            _out << ", " << q->fixedName << '=';
-            writeDefaultValue(q->type);
-        }
-    }
+    writeConstructorParams(allMembers);
     _out << "):";
     _out.inc();
     if(!base && members.empty())
@@ -982,18 +1063,10 @@ Slice::Python::CodeVisitor::visitExceptionStart(const ExceptionPtr& p)
         {
             if(!q->inherited)
             {
-                _out << nl << "self." << q->fixedName << " = " << q->fixedName;;
+                writeAssign(*q);
             }
         }
     }
-    _out.dec();
-
-    //
-    // ice_name
-    //
-    _out << sp << nl << "def ice_name(self):";
-    _out.inc();
-    _out << nl << "return '" << scoped.substr(2) << "'";
     _out.dec();
 
     //
@@ -1004,6 +1077,11 @@ Slice::Python::CodeVisitor::visitExceptionStart(const ExceptionPtr& p)
     _out << nl << "return IcePy.stringifyException(self)";
     _out.dec();
     _out << sp << nl << "__repr__ = __str__";
+
+    //
+    // _ice_name
+    //
+    _out << sp << nl << "_ice_name = '" << scoped.substr(2) << "'";
 
     _out.dec();
 
@@ -1057,7 +1135,7 @@ Slice::Python::CodeVisitor::visitExceptionStart(const ExceptionPtr& p)
         _out << nl;
     }
     _out << "))";
-    _out << nl << name << ".ice_type = _M_" << type;
+    _out << nl << name << "._ice_type = _M_" << type;
 
     registerName(name);
 
@@ -1081,8 +1159,8 @@ Slice::Python::CodeVisitor::visitStructStart(const StructPtr& p)
         {
             memberList.push_back(MemberInfo());
             memberList.back().fixedName = fixIdent((*q)->name());
-            memberList.back().type = (*q)->type();
-            memberList.back().metaData = (*q)->getMetaData();
+            memberList.back().inherited = false;
+            memberList.back().dataMember = *q;
         }
     }
 
@@ -1091,17 +1169,20 @@ Slice::Python::CodeVisitor::visitStructStart(const StructPtr& p)
     _out << nl << "_M_" << abs << " = Ice.createTempClass()";
     _out << nl << "class " << name << "(object):";
     _out.inc();
-    _out << nl << "def __init__(self";
-    for(r = memberList.begin(); r != memberList.end(); ++r)
+
+    string comment = p->comment();
+    if(!comment.empty())
     {
-        _out << ", " << r->fixedName << '=';
-        writeDefaultValue(r->type);
+        _out << nl << "'''" << editComment(comment) << "'''";
     }
+
+    _out << nl << "def __init__(self";
+    writeConstructorParams(memberList);
     _out << "):";
     _out.inc();
     for(r = memberList.begin(); r != memberList.end(); ++r)
     {
-        _out << nl << "self." << r->fixedName << " = " << r->fixedName;
+        writeAssign(*r);
     }
     _out.dec();
 
@@ -1112,30 +1193,69 @@ Slice::Python::CodeVisitor::visitStructStart(const StructPtr& p)
     for(r = memberList.begin(); r != memberList.end(); ++r)
     {
         string s = "self." + r->fixedName;
-        writeHash(s, r->type, iter);
+        writeHash(s, r->dataMember->type(), iter);
     }
     _out << nl << "return _h % 0x7fffffff";
     _out.dec();
 
-    _out << sp << nl << "def __cmp__(self, other):";
-    _out.inc();
-    _out << nl << "if other == None:";
-    _out.inc();
-    _out << nl << "return 1";
-    _out.dec();
-    for(r = memberList.begin(); r != memberList.end(); ++r)
+    //
+    // Rich operators.  __lt__, __le__, __eq__, __ne__, __gt__, __ge__
+    //
+    static const char* richOps[] = {
+        "__lt__", "<",
+        "__le__", "<=",
+        "__eq__", "==",
+        "__ne__", "!=",
+        "__gt__", ">",
+        "__ge__", ">="
+    };
+    for(int opIndex = 0; opIndex != sizeof(richOps)/sizeof(richOps[0]); opIndex += 2)
     {
-        _out << nl << "if self." << r->fixedName << " < other." << r->fixedName << ':';
+        string opName = richOps[opIndex];
+        string opSymbol = richOps[opIndex+1];
+
+        _out << sp << nl << "def " << opName << "(self, other):";
         _out.inc();
-        _out << nl << "return -1";
+        _out << nl << "if isinstance(other, _M_" << abs << "):";
+        _out.inc();
+        if(!memberList.empty())
+        {
+            _out << nl << "return ";
+            for(r = memberList.begin(); r != memberList.end(); ++r)
+            {
+                if(r != memberList.begin())
+                {
+                    if(opName == "__eq__")
+                    {
+                        _out << " and ";
+                    }
+                    else
+                    {
+                        _out << " or ";
+                    }
+                }
+                _out << "self." << r->fixedName << " " << opSymbol << " other." << r->fixedName;
+            }
+        }
+        else
+        {
+            _out << nl << "return False";
+        }
         _out.dec();
-        _out << nl << "elif self." << r->fixedName << " > other." << r->fixedName << ':';
+        _out << nl << "elif other == None:";
         _out.inc();
-        _out << nl << "return 1";
+        if(opName == "__ne__")
+        {
+            _out << nl << "return True";
+        }
+        else
+        {
+            _out << nl << "return False";
+        }
+        _out.dec();
+        _out << nl << "return NotImplemented";
         _out.dec();
     }
-    _out << nl << "return 0";
-    _out.dec();
 
     //
     // __str__
@@ -1173,9 +1293,9 @@ Slice::Python::CodeVisitor::visitStructStart(const StructPtr& p)
             _out << ',' << nl;
         }
         _out << "('" << r->fixedName << "', ";
-        writeMetaData(r->metaData);
+        writeMetaData(r->dataMember->getMetaData());
         _out << ", ";
-        writeType(r->type);
+        writeType(r->dataMember->type());
         _out << ')';
     }
     if(memberList.size() == 1)
@@ -1199,17 +1319,46 @@ Slice::Python::CodeVisitor::visitStructStart(const StructPtr& p)
 void
 Slice::Python::CodeVisitor::visitSequence(const SequencePtr& p)
 {
+    static const string protobuf = "python:protobuf:";
+    StringList metaData = p->getMetaData();
+    bool isCustom = false;
+    string customType;
+    for(StringList::const_iterator q = metaData.begin(); q != metaData.end(); ++q)
+    {
+        if(q->find(protobuf) == 0)
+        {
+            BuiltinPtr builtin = BuiltinPtr::dynamicCast(p->type());
+            if(!builtin || builtin->kind() != Builtin::KindByte)
+            {
+                continue;
+            }
+            isCustom = true;
+            customType = q->substr(protobuf.size());
+            break;
+        }
+    }
+
     //
     // Emit the type information.
     //
     string scoped = p->scoped();
     _out << sp << nl << "if not " << getDictLookup(p, "_t_") << ':';
     _out.inc();
-    _out << nl << "_M_" << getAbsolute(p, "_t_") << " = IcePy.defineSequence('" << scoped << "', ";
-    writeMetaData(p->getMetaData());
-    _out << ", ";
-    writeType(p->type());
-    _out << ")";
+    if(isCustom)
+    {
+        string package = customType.substr(0, customType.find('.'));
+        _out << nl << "import " << package;
+        _out << nl << "_M_" << getAbsolute(p, "_t_")
+             << " = IcePy.defineCustom('" << scoped << "', " << customType << ")";
+    }
+    else
+    {
+        _out << nl << "_M_" << getAbsolute(p, "_t_") << " = IcePy.defineSequence('" << scoped << "', ";
+        writeMetaData(metaData);
+        _out << ", ";
+        writeType(p->type());
+        _out << ")";
+    }
     _out.dec();
 }
 
@@ -1247,6 +1396,13 @@ Slice::Python::CodeVisitor::visitEnum(const EnumPtr& p)
     _out << nl << "_M_" << abs << " = Ice.createTempClass()";
     _out << nl << "class " << name << "(object):";
     _out.inc();
+
+    string comment = p->comment();
+    if(!comment.empty())
+    {
+        _out << nl << "'''" << editComment(comment) << "'''";
+    }
+
     _out << sp << nl << "def __init__(self, val):";
     _out.inc();
     {
@@ -1256,37 +1412,61 @@ Slice::Python::CodeVisitor::visitEnum(const EnumPtr& p)
     }
     _out << nl << "self.value = val";
     _out.dec();
+
     _out << sp << nl << "def __str__(self):";
     _out.inc();
-    for(q = enums.begin(), i = 0; q != enums.end(); ++q, ++i)
-    {
-        _out << nl;
-        if(q == enums.begin())
-        {
-            _out << "if";
-        }
-        else
-        {
-            _out << "elif";
-        }
-        ostringstream idx;
-        idx << i;
-        _out << " self.value == " << idx.str() << ':';
-        _out.inc();
-        _out << nl << "return '" << (*q)->name() << "'";
-        _out.dec();
-    }
-    _out << nl << "return None";
+    _out << nl << "return self._names[self.value]";
     _out.dec();
     _out << sp << nl << "__repr__ = __str__";
     _out << sp << nl << "def __hash__(self):";
     _out.inc();
     _out << nl << "return self.value";
     _out.dec();
-    _out << sp << nl << "def __cmp__(self, other):";
-    _out.inc();
-    _out << nl << "return cmp(self.value, other.value)";
-    _out.dec();
+
+    //
+    // Rich operators.  __lt__, __le__, __eq__, __ne__, __gt__, __ge__
+    //
+    static const char* richOps[] = {
+        "__lt__", "<",
+        "__le__", "<=",
+        "__eq__", "==",
+        "__ne__", "!=",
+        "__gt__", ">",
+        "__ge__", ">="
+    };
+    for(int opIndex = 0; opIndex != sizeof(richOps)/sizeof(richOps[0]); opIndex += 2)
+    {
+        const char* opName = richOps[opIndex];
+        const char* opSymbol = richOps[opIndex+1];
+
+        _out << sp << nl << "def " << opName << "(self, other):";
+        _out.inc();
+        _out << nl << "if isinstance(other, _M_" << abs << "):";
+        _out.inc();
+        _out << nl << "return self.value " << opSymbol << " other.value;";
+        _out.dec();
+        _out << nl << "elif other == None:";
+        _out.inc();
+        _out << nl << "return False";
+        _out.dec();
+        _out << nl << "return NotImplemented";
+        _out.dec();
+    }
+
+    _out << sp << nl << "_names = (";
+    for(q = enums.begin(), i = 0; q != enums.end(); ++q, ++i)
+    {
+        if(q != enums.begin())
+        {
+            _out << ", ";
+        }
+        _out << "'" << (*q)->name() << "'";
+    }
+    if(enums.size() == 1)
+    {
+        _out << ',';
+    }
+    _out << ')';
     _out.dec();
 
     _out << sp;
@@ -1329,154 +1509,10 @@ void
 Slice::Python::CodeVisitor::visitConst(const ConstPtr& p)
 {
     Slice::TypePtr type = p->type();
-    string value = p->value();
     string name = fixIdent(p->name());
 
     _out << sp << nl << "_M_" << getAbsolute(p) << " = ";
-
-    Slice::BuiltinPtr b = Slice::BuiltinPtr::dynamicCast(type);
-    Slice::EnumPtr en = Slice::EnumPtr::dynamicCast(type);
-    if(b)
-    {
-        switch(b->kind())
-        {
-        case Slice::Builtin::KindBool:
-        {
-            _out << (value == "true" ? "True" : "False");
-            break;
-        }
-        case Slice::Builtin::KindByte:
-        case Slice::Builtin::KindShort:
-        case Slice::Builtin::KindInt:
-        case Slice::Builtin::KindFloat:
-        case Slice::Builtin::KindDouble:
-        {
-            _out << value;
-            break;
-        }
-        case Slice::Builtin::KindLong:
-        {
-            IceUtil::Int64 l;
-            IceUtilInternal::stringToInt64(value, l);
-            //
-            // The platform's 'long' type may not be 64 bits, so we store 64-bit
-            // values as a string.
-            //
-            if(sizeof(IceUtil::Int64) > sizeof(long) && (l < LONG_MIN || l > LONG_MAX))
-            {
-                _out << "'" << value << "'";
-            }
-            else
-            {
-                _out << value;
-            }
-            break;
-        }
-
-        case Slice::Builtin::KindString:
-        {
-            //
-            // Expand strings into the basic source character set. We can't use isalpha() and the like
-            // here because they are sensitive to the current locale.
-            //
-            static const string basicSourceChars = "abcdefghijklmnopqrstuvwxyz"
-                                                   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                                   "0123456789"
-                                                   "_{}[]#()<>%:;.?*+-/^&|~!=, '";
-            static const set<char> charSet(basicSourceChars.begin(), basicSourceChars.end());
-
-            _out << "\"";                                       // Opening "
-
-            for(string::const_iterator c = value.begin(); c != value.end(); ++c)
-            {
-                switch(*c)
-                {
-                case '"':
-                {
-                    _out << "\\\"";
-                    break;
-                }
-                case '\\':
-                {
-                    _out << "\\\\";
-                    break;
-                }
-                case '\r':
-                {
-                    _out << "\\r";
-                    break;
-                }
-                case '\n':
-                {
-                    _out << "\\n";
-                    break;
-                }
-                case '\t':
-                {
-                    _out << "\\t";
-                    break;
-                }
-                case '\b':
-                {
-                    _out << "\\b";
-                    break;
-                }
-                case '\f':
-                {
-                    _out << "\\f";
-                    break;
-                }
-                default:
-                {
-                    if(charSet.find(*c) == charSet.end())
-                    {
-                        unsigned char uc = *c;                  // Char may be signed, so make it positive.
-                        stringstream s;
-                        s << "\\";                              // Print as octal if not in basic source character set.
-                        s.flags(ios_base::oct);
-                        s.width(3);
-                        s.fill('0');
-                        s << static_cast<unsigned>(uc);
-                        _out << s.str();
-                    }
-                    else
-                    {
-                        _out << *c;                             // Print normally if in basic source character set.
-                    }
-                    break;
-                }
-                }
-            }
-
-            _out << "\"";                                       // Closing "
-            break;
-        }
-
-        case Slice::Builtin::KindObject:
-        case Slice::Builtin::KindObjectProxy:
-        case Slice::Builtin::KindLocalObject:
-            assert(false);
-        }
-    }
-    else if(en)
-    {
-        string enumName = getSymbol(en);
-        string::size_type colon = value.rfind(':');
-        string enumerator;
-        if(colon != string::npos)
-        {
-            enumerator = fixIdent(value.substr(colon + 1));
-        }
-        else
-        {
-            enumerator = fixIdent(value);
-        }
-        _out << enumName << '.' << enumerator;
-    }
-    else
-    {
-        assert(false); // Unknown const type.
-    }
+    writeConstantValue(type, p->valueType(), p->value());
 }
 
 string
@@ -1576,7 +1612,7 @@ Slice::Python::CodeVisitor::writeType(const TypePtr& p)
 }
 
 void
-Slice::Python::CodeVisitor::writeDefaultValue(const TypePtr& p)
+Slice::Python::CodeVisitor::writeInitializer(const TypePtr& p)
 {
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(p);
     if(builtin)
@@ -1629,7 +1665,13 @@ Slice::Python::CodeVisitor::writeDefaultValue(const TypePtr& p)
     StructPtr st = StructPtr::dynamicCast(p);
     if(st)
     {
-        _out << getSymbol(st) << "()";
+        //
+        // We cannot emit a call to the struct's constructor here because Python
+        // only evaluates this expression once (see bug 3676). Instead, we emit
+        // a marker that allows us to determine whether the application has
+        // supplied a value.
+        //
+        _out << "Ice._struct_marker";
         return;
     }
 
@@ -1701,6 +1743,187 @@ Slice::Python::CodeVisitor::writeMetaData(const StringList& meta)
     _out << ')';
 }
 
+void
+Slice::Python::CodeVisitor::writeAssign(const MemberInfo& info)
+{
+    //
+    // Structures are treated differently (see bug 3676).
+    //
+    StructPtr st = StructPtr::dynamicCast(info.dataMember->type());
+    if(st)
+    {
+        _out << nl << "if " << info.fixedName << " is Ice._struct_marker:";
+        _out.inc();
+        _out << nl << "self." << info.fixedName << " = " << getSymbol(st) << "()";
+        _out.dec();
+        _out << nl << "else:";
+        _out.inc();
+        _out << nl << "self." << info.fixedName << " = " << info.fixedName;
+        _out.dec();
+    }
+    else
+    {
+        _out << nl << "self." << info.fixedName << " = " << info.fixedName;
+    }
+}
+
+void
+Slice::Python::CodeVisitor::writeConstantValue(const TypePtr& type, const SyntaxTreeBasePtr& valueType,
+                                               const string& value)
+{
+    ConstPtr constant = ConstPtr::dynamicCast(valueType);
+    if(constant)
+    {
+        _out << "_M_" << getAbsolute(constant);
+    }
+    else
+    {
+        Slice::BuiltinPtr b = Slice::BuiltinPtr::dynamicCast(type);
+        Slice::EnumPtr en = Slice::EnumPtr::dynamicCast(type);
+        if(b)
+        {
+            switch(b->kind())
+            {
+            case Slice::Builtin::KindBool:
+            {
+                _out << (value == "true" ? "True" : "False");
+                break;
+            }
+            case Slice::Builtin::KindByte:
+            case Slice::Builtin::KindShort:
+            case Slice::Builtin::KindInt:
+            case Slice::Builtin::KindFloat:
+            case Slice::Builtin::KindDouble:
+            case Slice::Builtin::KindLong:
+            {
+                _out << value;
+                break;
+            }
+            case Slice::Builtin::KindString:
+            {
+                //
+                // Expand strings into the basic source character set. We can't use isalpha() and the like
+                // here because they are sensitive to the current locale.
+                //
+                static const string basicSourceChars = "abcdefghijklmnopqrstuvwxyz"
+                                                       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                                       "0123456789"
+                                                       "_{}[]#()<>%:;.?*+-/^&|~!=, '";
+                static const set<char> charSet(basicSourceChars.begin(), basicSourceChars.end());
+
+                _out << "\"";                                       // Opening "
+
+                for(string::const_iterator c = value.begin(); c != value.end(); ++c)
+                {
+                    switch(*c)
+                    {
+                    case '"':
+                    {
+                        _out << "\\\"";
+                        break;
+                    }
+                    case '\\':
+                    {
+                        _out << "\\\\";
+                        break;
+                    }
+                    case '\r':
+                    {
+                        _out << "\\r";
+                        break;
+                    }
+                    case '\n':
+                    {
+                        _out << "\\n";
+                        break;
+                    }
+                    case '\t':
+                    {
+                        _out << "\\t";
+                        break;
+                    }
+                    case '\b':
+                    {
+                        _out << "\\b";
+                        break;
+                    }
+                    case '\f':
+                    {
+                        _out << "\\f";
+                        break;
+                    }
+                    default:
+                    {
+                        if(charSet.find(*c) == charSet.end())
+                        {
+                            unsigned char uc = *c;              // Char may be signed, so make it positive.
+                            stringstream s;
+                            s << "\\";                          // Print as octal if not in basic source character set.
+                            s.flags(ios_base::oct);
+                            s.width(3);
+                            s.fill('0');
+                            s << static_cast<unsigned>(uc);
+                            _out << s.str();
+                        }
+                        else
+                        {
+                            _out << *c;                         // Print normally if in basic source character set.
+                        }
+                        break;
+                    }
+                    }
+                }
+
+                _out << "\"";                                   // Closing "
+                break;
+            }
+            case Slice::Builtin::KindObject:
+            case Slice::Builtin::KindObjectProxy:
+            case Slice::Builtin::KindLocalObject:
+                assert(false);
+            }
+        }
+        else if(en)
+        {
+            string enumName = getSymbol(en);
+            string::size_type colon = value.rfind(':');
+            string enumerator;
+            if(colon != string::npos)
+            {
+                enumerator = fixIdent(value.substr(colon + 1));
+            }
+            else
+            {
+                enumerator = fixIdent(value);
+            }
+            _out << enumName << '.' << enumerator;
+        }
+        else
+        {
+            assert(false); // Unknown const type.
+        }
+    }
+}
+
+void
+Slice::Python::CodeVisitor::writeConstructorParams(const MemberInfoList& members)
+{
+    for(MemberInfoList::const_iterator p = members.begin(); p != members.end(); ++p)
+    {
+        _out << ", " << p->fixedName << "=";
+
+        const DataMemberPtr member = p->dataMember;
+        if(member->defaultValueType())
+        {
+            writeConstantValue(member->type(), member->defaultValueType(), member->defaultValue());
+        }
+        else
+        {
+            writeInitializer(member->type());
+        }
+    }
+}
+
 string
 Slice::Python::CodeVisitor::getOperationMode(Slice::Operation::Mode mode)
 {
@@ -1742,9 +1965,8 @@ Slice::Python::CodeVisitor::collectClassMembers(const ClassDefPtr& p, MemberInfo
         {
             m.fixedName = fixIdent((*q)->name());
         }
-        m.type = (*q)->type();
         m.inherited = inherited;
-        m.metaData = (*q)->getMetaData();
+        m.dataMember = *q;
         allMembers.push_back(m);
     }
 }
@@ -1764,11 +1986,220 @@ Slice::Python::CodeVisitor::collectExceptionMembers(const ExceptionPtr& p, Membe
     {
         MemberInfo m;
         m.fixedName = fixIdent((*q)->name());
-        m.type = (*q)->type();
         m.inherited = inherited;
-        m.metaData = (*q)->getMetaData();
+        m.dataMember = *q;
         allMembers.push_back(m);
     }
+}
+
+string
+Slice::Python::CodeVisitor::editComment(const string& comment)
+{
+    //
+    // Strip HTML markup and javadoc links.
+    //
+    string result = comment;
+    string::size_type pos = 0;
+    do
+    {
+        pos = result.find('<', pos);
+        if(pos != string::npos)
+        {
+            string::size_type endpos = result.find('>', pos);
+            if(endpos == string::npos)
+            {
+                break;
+            }
+            result.erase(pos, endpos - pos + 1);
+        }
+    } while(pos != string::npos);
+
+    const string link = "{@link";
+    pos = 0;
+    do
+    {
+        pos = result.find(link, pos);
+        if(pos != string::npos)
+        {
+            result.erase(pos, link.size());
+            string::size_type endpos = result.find('}', pos);
+            if(endpos != string::npos)
+            {
+                string::size_type identpos = result.find_first_not_of(" \t#", pos);
+                if(identpos != string::npos && identpos < endpos)
+                {
+                    string ident = result.substr(identpos, endpos - identpos);
+                    result.replace(pos, endpos - pos + 1, fixIdent(ident));
+                }
+            }
+        }
+    } while(pos != string::npos);
+
+    //
+    // Strip @see sections.
+    //
+    static const string seeTag = "@see";
+    pos = 0;
+    do
+    {
+        //
+        // Look for the next @ and delete up to that, or
+        // to the end of the string, if not found.
+        //
+        pos = result.find(seeTag, pos);
+        if(pos != string::npos)
+        {
+            string::size_type next = result.find('@', pos + seeTag.size());
+            if(next != string::npos)
+            {
+                result.erase(pos, next - pos);
+            }
+            else
+            {
+                result.erase(pos, string::npos);
+            }
+        }
+    } while(pos != string::npos);
+
+    //
+    // Reformat @param, @return, and @throws.
+    //
+    static const string paramTag = "@param";
+    pos = 0;
+    bool first = true;
+    do
+    {
+        pos = result.find(paramTag, pos);
+        if(pos != string::npos)
+        {
+            result.replace(pos, paramTag.size() + 1, "    ");
+
+            if(first)
+            {
+                string::size_type bol = result.rfind('\n', pos);
+                if(bol == string::npos)
+                {
+                    bol = 0;
+                }
+                else
+                {
+                    bol++;
+                }
+                result.insert(bol, "Arguments:\n");
+                first = false;
+            }
+        }
+    } while(pos != string::npos);
+
+    static const string returnTag = "@return";
+    pos = result.find(returnTag);
+    first = true;
+    if(pos != string::npos)
+    {
+        result.replace(pos, returnTag.size() + 1, "    ");
+        string::size_type bol = result.rfind('\n', pos);
+        if(bol == string::npos)
+        {
+            bol = 0;
+        }
+        else
+        {
+            bol++;
+        }
+        result.insert(bol, "Returns:\n");
+    }
+
+    static const string throwsTag = "@throws";
+    pos = 0;
+    first = true;
+    do
+    {
+        pos = result.find(throwsTag, pos);
+        if(pos != string::npos)
+        {
+            result.replace(pos, throwsTag.size() + 1, "    ");
+
+            if(first)
+            {
+                string::size_type bol = result.rfind('\n', pos);
+                if(bol == string::npos)
+                {
+                    bol = 0;
+                }
+                else
+                {
+                    bol++;
+                }
+                result.insert(bol, "Exceptions:\n");
+                first = false;
+            }
+        }
+    } while(pos != string::npos);
+
+    //
+    // Escape triple quotes.
+    //
+    static const string quotes = "'''";
+    pos = 0;
+    do
+    {
+        pos = result.find(quotes, pos);
+        if(pos != string::npos)
+        {
+            result.insert(pos, "\\");
+            pos += quotes.size() + 1;
+        }
+    } while(pos != string::npos);
+
+    //
+    // Fold multiple empty lines.
+    //
+    pos = 0;
+    while(true)
+    {
+        pos = result.find('\n', pos);
+        if(pos == string::npos)
+        {
+            break;
+        }
+
+        //
+        // Skip the next LF or CR/LF, if present.
+        //
+        if(pos < result.size() - 1 && result[pos + 1] == '\n')
+        {
+            pos += 2;
+        }
+        else if(pos < result.size() - 2 && result[pos + 1] == '\r' && result[pos + 2] == '\n')
+        {
+            pos += 3;
+        }
+        else
+        {
+            ++pos;
+            continue;
+        }
+
+        //
+        // Erase any more CR/LF characters.
+        //
+        string::size_type next = result.find_first_not_of("\r\n", pos);
+        if(next != string::npos)
+        {
+            result.erase(pos, next - pos);
+        }
+    }
+
+    //
+    // Remove trailing whitespace.
+    //
+    pos = result.find_last_not_of(" \t\r\n");
+    if(pos != string::npos)
+    {
+        result.erase(pos + 1, result.size() - pos - 1);
+    }
+
+    return result;
 }
 
 void
@@ -1866,20 +2297,19 @@ Slice::Python::fixIdent(const string& ident)
 string
 Slice::Python::getPackageMetadata(const ContainedPtr& cont)
 {
-    string package;
+    UnitPtr unit = cont->container()->unit();
+    string file = cont->file();
+    assert(!file.empty());
 
-    DefinitionContextPtr dc = cont->definitionContext();
-    if(dc)
+    static const string prefix = "python:package:";
+    DefinitionContextPtr dc = unit->findDefinitionContext(file);
+    assert(dc);
+    string q = dc->findMetaData(prefix);
+    if(!q.empty())
     {
-        static const string prefix = "python:package:";
-        string metadata = dc->findMetaData(prefix);
-        if(!metadata.empty())
-        {
-            package = metadata.substr(prefix.size());
-        }
+        q = q.substr(prefix.size());
     }
-
-    return package;
+    return q;
 }
 
 string
@@ -1916,7 +2346,7 @@ Slice::Python::printHeader(IceUtilInternal::Output& out)
     static const char* header =
 "# **********************************************************************\n"
 "#\n"
-"# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.\n"
+"# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.\n"
 "#\n"
 "# This copy of Ice is licensed to you under the terms described in the\n"
 "# ICE_LICENSE file included in this distribution.\n"
@@ -1925,19 +2355,50 @@ Slice::Python::printHeader(IceUtilInternal::Output& out)
         ;
 
     out << header;
-    out << "\n# Ice version " << ICE_STRING_VERSION;
+    out << "#\n";
+    out << "# Ice version " << ICE_STRING_VERSION << "\n";
+    out << "#\n";
+}
+
+bool
+Slice::Python::MetaDataVisitor::visitUnitStart(const UnitPtr& p)
+{
+    static const string prefix = "python:";
+
+    //
+    // Validate global metadata in the top-level file and all included files.
+    //
+    StringList files = p->allFiles();
+
+    for(StringList::iterator q = files.begin(); q != files.end(); ++q)
+    {
+        string file = *q;
+        DefinitionContextPtr dc = p->findDefinitionContext(file);
+        assert(dc);
+        StringList globalMetaData = dc->getMetaData();
+        for(StringList::const_iterator r = globalMetaData.begin(); r != globalMetaData.end(); ++r)
+        {
+            string s = *r;
+            if(_history.count(s) == 0)
+            {
+                if(s.find(prefix) == 0)
+                {
+                    static const string packagePrefix = "python:package:";
+                    if(s.find(packagePrefix) != 0 || s.size() == packagePrefix.size())
+                    {
+                        emitWarning(file, "", "ignoring invalid global metadata `" + s + "'");
+                    }
+                }
+                _history.insert(s);
+            }
+        }
+    }
+    return true;
 }
 
 bool
 Slice::Python::MetaDataVisitor::visitModuleStart(const ModulePtr& p)
 {
-    if(!ModulePtr::dynamicCast(p->container()))
-    {
-        //
-        // We only need to validate global metadata for top-level modules.
-        //
-        validateGlobal(p->definitionContext());
-    }
     reject(p);
     return true;
 }
@@ -1972,32 +2433,52 @@ Slice::Python::MetaDataVisitor::visitStructStart(const StructPtr& p)
 void
 Slice::Python::MetaDataVisitor::visitOperation(const OperationPtr& p)
 {
-    DefinitionContextPtr dc = p->definitionContext();
-    assert(dc);
-
     TypePtr ret = p->returnType();
     if(ret)
     {
-        validateSequence(dc, p->line(), ret, p->getMetaData());
+        validateSequence(p->file(), p->line(), ret, p->getMetaData());
     }
 
     ParamDeclList params = p->parameters();
     for(ParamDeclList::iterator q = params.begin(); q != params.end(); ++q)
     {
-        validateSequence(dc, (*q)->line(), (*q)->type(), (*q)->getMetaData());
+        validateSequence(p->file(), (*q)->line(), (*q)->type(), (*q)->getMetaData());
     }
 }
 
 void
 Slice::Python::MetaDataVisitor::visitDataMember(const DataMemberPtr& p)
 {
-    validateSequence(p->definitionContext(), p->line(), p->type(), p->getMetaData());
+    validateSequence(p->file(), p->line(), p->type(), p->getMetaData());
 }
 
 void
 Slice::Python::MetaDataVisitor::visitSequence(const SequencePtr& p)
 {
-    validateSequence(p->definitionContext(), p->line(), p, p->getMetaData());
+    static const string protobuf = "python:protobuf:";
+    StringList metaData = p->getMetaData();
+    const string file = p->file();
+    const string line = p->line();
+    for(StringList::const_iterator q = metaData.begin(); q != metaData.end(); )
+    {
+        string s = *q++;
+        if(s.find(protobuf) == 0)
+        {
+            //
+            // Remove from list so validateSequence does not try to handle as well.
+            //
+            metaData.remove(s);
+
+            BuiltinPtr builtin = BuiltinPtr::dynamicCast(p->type());
+            if(!builtin || builtin->kind() != Builtin::KindByte)
+            {
+                emitWarning(file, line, "ignoring invalid metadata `" + s + ": " +
+                            "`protobuf' encoding must be a byte sequence");
+            }
+        }
+    }
+
+    validateSequence(file, line, p, metaData);
 }
 
 void
@@ -2019,32 +2500,7 @@ Slice::Python::MetaDataVisitor::visitConst(const ConstPtr& p)
 }
 
 void
-Slice::Python::MetaDataVisitor::validateGlobal(const DefinitionContextPtr& dc)
-{
-    StringList globalMetaData = dc->getMetaData();
-
-    static const string prefix = "python:";
-
-    for(StringList::const_iterator p = globalMetaData.begin(); p != globalMetaData.end(); ++p)
-    {
-        string s = *p;
-        if(_history.count(s) == 0)
-        {
-            if(s.find(prefix) == 0)
-            {
-                static const string packagePrefix = "python:package:";
-                if(s.find(packagePrefix) != 0 || s.size() == packagePrefix.size())
-                {
-                    cout << dc->filename() << ": warning: ignoring invalid global metadata `" << s << "'" << endl;
-                }
-            }
-            _history.insert(s);
-        }
-    }
-}
-
-void
-Slice::Python::MetaDataVisitor::validateSequence(const DefinitionContextPtr& dc, const string& line,
+Slice::Python::MetaDataVisitor::validateSequence(const string& file, const string& line,
                                                  const TypePtr& type, const StringList& meta)
 {
     static const string prefix = "python:";
@@ -2067,7 +2523,7 @@ Slice::Python::MetaDataVisitor::validateSequence(const DefinitionContextPtr& dc,
                     }
                 }
             }
-            cout << dc->filename() << ":" << line << ": warning: ignoring metadata `" << s << "'" << endl;
+            emitWarning(file, line, "ignoring invalid metadata `" + s + "'");
         }
     }
 }
@@ -2083,9 +2539,7 @@ Slice::Python::MetaDataVisitor::reject(const ContainedPtr& cont)
     {
         if(p->find(prefix) == 0)
         {
-            DefinitionContextPtr dc = cont->definitionContext();
-            assert(dc);
-            cout << dc->filename() << ":" << cont->line() << ": warning: ignoring metadata `" << *p << "'" << endl;
+            emitWarning(cont->file(), cont->line(), "ignoring invalid metadata `" + *p + "'");
         }
     }
 }

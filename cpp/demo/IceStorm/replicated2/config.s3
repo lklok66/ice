@@ -69,6 +69,7 @@ IceStorm.Trace.TopicManager=2
 #
 # 0 = no tracing
 # 1 = trace unsubscription diagnostics
+# 2 = like 1, but with more detailed subscription information
 #
 IceStorm.Trace.Topic=1
 
@@ -78,6 +79,7 @@ IceStorm.Trace.Topic=1
 # 0 = no tracing
 # 1 = subscriber diagnostics (subscription, unsubscription, event
 #     propagation failures)
+# 2 = like 1, but with more detailed subscription information
 #
 IceStorm.Trace.Subscriber=1
 
@@ -102,3 +104,10 @@ IceStorm.Flush.Timeout=2000
 # database environment for the IceStorm service.
 #
 Freeze.DbEnv.IceStorm.DbHome=db3
+
+#
+# IceStorm SQL configuration if using SQL database.
+#
+#Ice.Plugin.DB=IceStormSqlDB:createSqlDB
+#IceStorm.SQL.DatabaseType=QSQLITE
+#IceStorm.SQL.DatabaseName=db3/IceStorm.db

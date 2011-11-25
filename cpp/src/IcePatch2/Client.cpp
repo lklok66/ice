@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -8,6 +8,7 @@
 // **********************************************************************
 
 #include <IceUtil/Options.h>
+#include <IceUtil/StringUtil.h>
 #include <Ice/Application.h>
 #include <IcePatch2/Util.h>
 #include <IcePatch2/ClientUtil.h>
@@ -54,7 +55,7 @@ public:
         {
             cout << "Do a thorough patch? (yes/no)" << endl;
             cin >> answer;
-            transform(answer.begin(), answer.end(), answer.begin(), ::tolower);
+            answer = IceUtilInternal::toLower(answer);
             if(answer == "no")
             {
                 return false;
@@ -169,11 +170,7 @@ private:
     keyPressed()
     {
         bool pressed = false;
-#ifdef __BCPLUSPLUS__
-        while(kbhit())
-#else
         while(_kbhit())
-#endif
         {
             pressed = true;
             _getch();
@@ -329,8 +326,18 @@ Client::usage(const string& appName)
     cerr << options << endl;
 }
 
+//COMPILERFIX: Borland C++ 2010 doesn't support wmain for console applications.
+#if defined(_WIN32 ) && !defined(__BCPLUSPLUS__)
+
+int
+wmain(int argc, wchar_t* argv[])
+
+#else
+
 int
 main(int argc, char* argv[])
+
+#endif
 {
     Client app;
     return app.main(argc, argv);

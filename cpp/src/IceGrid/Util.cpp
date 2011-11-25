@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,11 +11,18 @@
 #include <IcePatch2/Util.h>
 #include <IceGrid/Util.h>
 #include <IceGrid/Admin.h>
-
-#include <fstream>
+#include <IceGrid/Internal.h>
 
 using namespace std;
+using namespace Ice;
 using namespace IceGrid;
+
+void
+IceGrid::SynchronizationException::ice_print(ostream& out) const
+{
+    Exception::ice_print(out);
+    out << ":\nsynchronization exception";
+}
 
 string 
 IceGrid::toString(const vector<string>& v, const string& sep)
@@ -98,28 +105,112 @@ IceGrid::createProperty(const string& name, const string& value)
 }
 
 string
-IceGrid::escapeProperty(const string& s)
+IceGrid::escapeProperty(const string& s, bool escapeEqual)
 {
+    size_t firstChar = s.find_first_not_of(' ');
+    size_t lastChar = s.find_last_not_of(' ');
     string result;
+    bool previousCharIsEscape = false;
+
     for(unsigned int i = 0; i < s.size(); ++i)
     {
         char c = s[i];
         switch(c)
         {
-          case '\\':
           case ' ':
+	  {
+	      //
+	      // We only escape the space character when it's at the beginning
+	      // or at the end of the string
+	      //
+	      if(i < firstChar || i > lastChar)
+	      {
+		  if(previousCharIsEscape)
+		  {
+		      result.push_back('\\'); // escape the previous char, by adding another escape.
+		  }
+
+		  result.push_back('\\');
+	      }
+	      result.push_back(c);
+	      previousCharIsEscape = false;
+	      break;
+	  }
+  
+	  case '\\':
           case '#':
           case '=':
-            result.push_back('\\');
-            result.push_back(c);
-            break;
+	  {
+	      if(c == '=' && !escapeEqual)
+	      {
+		  previousCharIsEscape = false;
+	      }
+	      else
+	      {
+		  //
+		  // We only escape the \ character when it is followed by a
+		  // character that we escape, e.g. \# is encoded as \\\#, not \#
+		  // and \\server is encoded as \\\server.
+		  //
+		  if(previousCharIsEscape)
+		  {
+		      result.push_back('\\'); // escape the previous char, by adding another escape.
+		  }
+		  if(c == '\\')
+		  {
+		      previousCharIsEscape = true; // deferring the potential escaping to the next loop
+		  }
+		  else
+		  {
+		      result.push_back('\\');
+		      previousCharIsEscape = false;
+		  }
+	      }
+	      result.push_back(c);
+	      break;
+	  }
 
           default:
-            result.push_back(c);
-            break;
+	  {
+	      result.push_back(c);
+	      previousCharIsEscape = false;
+	      break;
+	  }
         }
     }
     return result;
+}
+
+void
+IceGrid::setupThreadPool(const PropertiesPtr& properties, const string& name, int size, int sizeMax, bool serialize)
+{
+    if(properties->getPropertyAsIntWithDefault(name + ".Size", 0) < size)
+    {
+        ostringstream os;
+        os << size;
+        properties->setProperty(name + ".Size", os.str());
+    }
+    else
+    {
+        size = properties->getPropertyAsInt(name + ".Size");
+    }
+
+    if(sizeMax > 0 && properties->getPropertyAsIntWithDefault(name + ".SizeMax", 0) < sizeMax)
+    {
+        if(size >= sizeMax)
+        {
+            sizeMax = size * 10;
+        }
+        
+        ostringstream os;
+        os << sizeMax;
+        properties->setProperty(name + ".SizeMax", os.str());
+    }
+
+    if(serialize)
+    {
+        properties->setProperty(name + ".Serialize", "1");
+    }
 }
 
 int

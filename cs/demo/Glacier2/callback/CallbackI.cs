@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -17,7 +17,7 @@ public sealed class CallbackI : CallbackDisp_
         Console.WriteLine("initiating callback to: " + current.adapter.getCommunicator().proxyToString(proxy));
         try
         {
-            proxy.callback(current.ctx);
+            proxy.callback();
         }
         catch(System.Exception ex)
         {
@@ -27,7 +27,7 @@ public sealed class CallbackI : CallbackDisp_
 
     public override void shutdown(Ice.Current current)
     {
-        Console.WriteLine("Shutting down...");
+        Console.WriteLine("shutting down...");
         try
         {
             current.adapter.getCommunicator().shutdown();

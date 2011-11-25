@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -67,14 +67,14 @@ Test::AccountI::transfer2_async(const AMD_Account_transfer2Ptr& cb, int amount, 
     cb->ice_response();
 }
 
-
 class ResponseThread : public IceUtil::Thread, private IceUtil::Monitor<IceUtil::Mutex>
 {
 public:
         
     ResponseThread(const Test::AMD_Account_transfer3Ptr& cb) :
         _cb(cb),
-        _response(false)
+        _response(false),
+        _cancelled(false)
     {
     }
 
@@ -92,6 +92,13 @@ public:
         notify();
     }
 
+    void cancel()
+    {
+        Lock sync(*this);
+        _cancelled = true;
+        notify();
+    }
+
 
     virtual void run()
     {
@@ -99,12 +106,12 @@ public:
 
         bool timedOut = false;
 
-        while(!timedOut && _response == false && _exception.get() == 0)
+        while(!timedOut && _response == false && _cancelled == false && _exception.get() == 0)
         {
             timedOut = !timedWait(IceUtil::Time::seconds(1));
         }
 
-        if(timedOut)
+        if(_cancelled)
         {
             return;
         }
@@ -126,9 +133,13 @@ public:
 private:
     Test::AMD_Account_transfer3Ptr _cb;
     bool _response;
+    bool _cancelled;
     std::auto_ptr<Ice::UserException> _exception;
 };
 typedef IceUtil::Handle<ResponseThread> ResponseThreadPtr;
+
+
+
 
 
 void 
@@ -139,8 +150,8 @@ Test::AccountI::transfer3_async(const AMD_Account_transfer3Ptr& cb, int amount, 
     //
 
     ResponseThreadPtr thread = new ResponseThread(cb);
-    thread->start(33000).detach();
- 
+    IceUtil::ThreadControl tc = thread->start(33000);
+    
     test(_evictor->getCurrentTransaction() != 0);
 
     try
@@ -150,6 +161,8 @@ Test::AccountI::transfer3_async(const AMD_Account_transfer3Ptr& cb, int amount, 
     }
     catch(const Ice::UserException& e)
     {
+        tc.detach();
+
         //
         // Need to rollback here -- "rollback on user exception" does not work
         // when the dispatch commits before it gets any response!
@@ -157,9 +170,17 @@ Test::AccountI::transfer3_async(const AMD_Account_transfer3Ptr& cb, int amount, 
         _evictor->getCurrentTransaction()->rollback();
         
         thread->exception(e);
+
         return;
     }
+    catch(...)
+    {
+        thread->cancel();
+        tc.join();
+        throw;
+    }
 
+    tc.detach();
     thread->response();
 }
 
@@ -496,13 +517,11 @@ private:
 };
 
 
-Test::RemoteEvictorI::RemoteEvictorI(const ObjectAdapterPtr& adapter, const string& envName,
+Test::RemoteEvictorI::RemoteEvictorI(const CommunicatorPtr& communicator, const string& envName,
                                      const string& category, bool transactional) :
-    _adapter(adapter),
     _envName(envName),
     _category(category)
 {
-    CommunicatorPtr communicator = adapter->getCommunicator();
     _evictorAdapter = communicator->createObjectAdapterWithEndpoints(IceUtil::generateUUID(), "default");
  
     Initializer* initializer = new Initializer;
@@ -515,6 +534,14 @@ Test::RemoteEvictorI::RemoteEvictorI(const ObjectAdapterPtr& adapter, const stri
     {
         _evictor = Freeze::createBackgroundSaveEvictor(_evictorAdapter, envName, category, initializer);
     }
+
+    //
+    // Check that we can get an iterator on a non-existing facet
+    //
+    Freeze::EvictorIteratorPtr p = _evictor->getIterator("foo", 1);
+    test(p->hasNext() == false);
+
+
     initializer->init(this, _evictor);
 
     _evictorAdapter->addServantLocator(_evictor, category);
@@ -574,7 +601,7 @@ void
 Test::RemoteEvictorI::deactivate(const Current& current)
 {
     _evictorAdapter->destroy();
-    _adapter->remove(_adapter->getCommunicator()->stringToIdentity(_category));
+    current.adapter->remove(current.adapter->getCommunicator()->stringToIdentity(_category));
 }
 
 
@@ -593,10 +620,7 @@ Test::RemoteEvictorI::destroyAllServants(const string& facetName, const Current&
     }
 }
 
-
-Test::RemoteEvictorFactoryI::RemoteEvictorFactoryI(const ObjectAdapterPtr& adapter,
-                                                   const std::string& envName) :
-    _adapter(adapter),
+Test::RemoteEvictorFactoryI::RemoteEvictorFactoryI(const std::string& envName) :
     _envName(envName)
 {
 }
@@ -604,13 +628,14 @@ Test::RemoteEvictorFactoryI::RemoteEvictorFactoryI(const ObjectAdapterPtr& adapt
 ::Test::RemoteEvictorPrx
 Test::RemoteEvictorFactoryI::createEvictor(const string& name, bool transactional, const Current& current)
 {
-    RemoteEvictorIPtr remoteEvictor = new RemoteEvictorI(_adapter, _envName, name, transactional);  
-    return RemoteEvictorPrx::uncheckedCast(_adapter->add(remoteEvictor, 
-                                                         _adapter->getCommunicator()->stringToIdentity(name)));
+    RemoteEvictorIPtr remoteEvictor = 
+        new RemoteEvictorI(current.adapter->getCommunicator(), _envName, name, transactional);  
+    return RemoteEvictorPrx::uncheckedCast(
+        current.adapter->add(remoteEvictor, current.adapter->getCommunicator()->stringToIdentity(name)));
 }
 
 void
-Test::RemoteEvictorFactoryI::shutdown(const Current&)
+Test::RemoteEvictorFactoryI::shutdown(const Current& current)
 {
-    _adapter->getCommunicator()->shutdown();
+    current.adapter->getCommunicator()->shutdown();
 }

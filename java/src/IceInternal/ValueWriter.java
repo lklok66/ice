@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -106,70 +106,13 @@ public final class ValueWriter
                     writeFields(name, value, c, objectTable, out);
                 }
             }
+            else if(value instanceof java.lang.Enum)
+            {
+                writeName(name, out);
+                out.print(((java.lang.Enum)value).name());
+            }
             else
             {
-                //
-                // Check for enum characteristics.
-                //
-                while(true)
-                {
-                    try
-                    {
-                        java.lang.reflect.Field __value = c.getDeclaredField("__value");
-                        if(!__value.getType().equals(Integer.TYPE) ||
-                           !java.lang.reflect.Modifier.isPrivate(__value.getModifiers()) ||
-                           java.lang.reflect.Modifier.isStatic(__value.getModifiers()))
-                        {
-                            break;
-                        }
-                        java.lang.reflect.Field __values = c.getDeclaredField("__values");
-                        if(!__values.getType().isArray() ||
-                           !__values.getType().getComponentType().equals(c) ||
-                           !java.lang.reflect.Modifier.isPrivate(__values.getModifiers()) ||
-                           !java.lang.reflect.Modifier.isStatic(__values.getModifiers()))
-                        {
-                            break;
-                        }
-                        java.lang.reflect.Method valueMethod = c.getDeclaredMethod("value", new Class[0]);
-                        if(!valueMethod.getReturnType().equals(Integer.TYPE) ||
-                           !java.lang.reflect.Modifier.isPublic(valueMethod.getModifiers()) ||
-                           java.lang.reflect.Modifier.isStatic(valueMethod.getModifiers()))
-                        {
-                            break;
-                        }
-
-                        java.lang.Object val = valueMethod.invoke(value, new java.lang.Object[0]);
-                        assert(val instanceof Integer);
-                        java.lang.reflect.Field[] fields = c.getDeclaredFields();
-                        for(int i = 0; i < fields.length; i++)
-                        {
-                            if(java.lang.reflect.Modifier.isPublic(fields[i].getModifiers()) &&
-                               fields[i].getType().equals(Integer.TYPE) &&
-                               fields[i].getName().startsWith("_") &&
-                               fields[i].get(null).equals(val))
-                            {
-                                writeName(name, out);
-                                out.print(fields[i].getName().substring(1));
-                                return;
-                            }
-                        }
-                    }
-                    catch(NoSuchFieldException ex)
-                    {
-                    }
-                    catch(NoSuchMethodException ex)
-                    {
-                    }
-                    catch(IllegalAccessException eX)
-                    {
-                    }
-                    catch(java.lang.reflect.InvocationTargetException ex)
-                    {
-                    }
-
-                    break;
-                }
-
                 //
                 // Must be struct.
                 //
@@ -179,7 +122,7 @@ public final class ValueWriter
     }
 
     private static void
-    writeFields(String name, java.lang.Object obj, Class c,
+    writeFields(String name, java.lang.Object obj, Class<?> c,
                 java.util.Map<java.lang.Object, java.lang.Object> objectTable, IceUtilInternal.OutputBase out)
     {
         if(!c.equals(java.lang.Object.class))
@@ -190,22 +133,41 @@ public final class ValueWriter
             writeFields(name, obj, c.getSuperclass(), objectTable, out);
 
             //
-            // Write the declared fields of the given class.
+            // Write the declared fields of the given class. We prefer to use the declared
+            // fields because it includes protected fields that may have been defined using
+            // the Slice "protected" metadata. However, if a security manager prevents us
+            // from obtaining the declared fields, we will fall back to using the public ones.
             //
-            java.lang.reflect.Field[] fields = c.getDeclaredFields();
-            for(int i = 0; i < fields.length; i++)
+            java.lang.reflect.Field[] fields = null;
+            try
+            {
+                fields = c.getDeclaredFields();
+            }
+            catch(java.lang.SecurityException ex)
+            {
+                try
+                {
+                    fields = c.getFields();
+                }
+                catch(java.lang.SecurityException e)
+                {
+                    return; // Nothing else we can do.
+                }
+            }
+            assert(fields != null);
+            for(java.lang.reflect.Field field : fields)
             {
                 //
                 // Only write public, non-static fields.
                 //
-                int mods = fields[i].getModifiers();
+                int mods = field.getModifiers();
                 if(java.lang.reflect.Modifier.isPublic(mods) && !java.lang.reflect.Modifier.isStatic(mods))
                 {
-                    String fieldName = (name != null ? name + '.' + fields[i].getName() : fields[i].getName());
+                    String fieldName = (name != null ? name + '.' + field.getName() : field.getName());
 
                     try
                     {
-                        java.lang.Object value = fields[i].get(obj);
+                        java.lang.Object value = field.get(obj);
                         writeValue(fieldName, value, objectTable, out);
                     }
                     catch(IllegalAccessException ex)

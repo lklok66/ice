@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,6 +13,9 @@
 #include <limits>
 
 using namespace std;
+
+namespace
+{
 
 class CallbackBase : public IceUtil::Monitor<IceUtil::Mutex>
 {
@@ -27,18 +30,14 @@ public:
     {
     }
 
-    bool check()
+    void check()
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
         while(!_called)
         {
-            if(!timedWait(IceUtil::Time::seconds(5)))
-            {
-                return false;
-            }
+            wait();
         }
         _called = false;
-        return true;
     }
 
 protected:
@@ -72,6 +71,40 @@ public:
 };
 
 typedef IceUtil::Handle<AMI_MyClass_onewayOpVoidI> AMI_MyClass_onewayOpVoidIPtr;
+
+class AMI_MyClass_onewayOpIdempotentI : public Test::AMI_MyClass_opIdempotent, public CallbackBase
+{
+public:
+
+    virtual void ice_response()
+    {
+        called();
+    }
+
+    virtual void ice_exception(const ::Ice::Exception&)
+    {
+        test(false);
+    }
+};
+
+typedef IceUtil::Handle<AMI_MyClass_onewayOpIdempotentI> AMI_MyClass_onewayOpIdempotentIPtr;
+
+class AMI_MyClass_onewayOpNonmutatingI : public Test::AMI_MyClass_opNonmutating, public CallbackBase
+{
+public:
+
+    virtual void ice_response()
+    {
+        called();
+    }
+
+    virtual void ice_exception(const ::Ice::Exception&)
+    {
+        test(false);
+    }
+};
+
+typedef IceUtil::Handle<AMI_MyClass_onewayOpNonmutatingI> AMI_MyClass_onewayOpNonmutatingIPtr;
 
 class AMI_MyClass_onewayOpVoidExI : public Test::AMI_MyClass_opVoid, public CallbackBase
 {
@@ -109,6 +142,8 @@ public:
 
 typedef IceUtil::Handle<AMI_MyClass_onewayOpByteExI> AMI_MyClass_onewayOpByteExIPtr;
 
+}
+
 void
 onewaysAMI(const Ice::CommunicatorPtr& communicator, const Test::MyClassPrx& proxy)
 {
@@ -119,6 +154,16 @@ onewaysAMI(const Ice::CommunicatorPtr& communicator, const Test::MyClassPrx& pro
         p->opVoid_async(cb);
         // Let's check if we can reuse the same callback object for another call.
         p->opVoid_async(cb);
+    }
+
+    {
+        AMI_MyClass_onewayOpIdempotentIPtr cb = new AMI_MyClass_onewayOpIdempotentI();
+        p->opIdempotent_async(cb);
+    }
+
+    {
+        AMI_MyClass_onewayOpNonmutatingIPtr cb = new AMI_MyClass_onewayOpNonmutatingI();
+        p->opNonmutating_async(cb);
     }
 
     {
@@ -134,12 +179,12 @@ onewaysAMI(const Ice::CommunicatorPtr& communicator, const Test::MyClassPrx& pro
         {
             test(false);
         }
-        test(cb->check());
+        cb->check();
     }
 
     {
         AMI_MyClass_onewayOpByteExIPtr cb = new AMI_MyClass_onewayOpByteExI();
         p->opByte_async(cb, 0, 0);
-        test(cb->check());
+        cb->check();
     }
 }

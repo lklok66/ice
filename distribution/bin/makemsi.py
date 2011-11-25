@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -12,9 +12,9 @@ import getopt, os, re, shutil, string, sys, zipfile, fileinput
 import logging, cStringIO, glob
 import textwrap
 
-iceVersion = '3.3.0'
-looksVersion = '2.1.4'
-formsVersion = '1.2.0'
+iceVersion = '3.4.2'
+looksVersion = '2.2.2'
+formsVersion = '1.2.1'
 
 timeStampingURL = 'http://timestamp.verisign.com/scripts/timstamp.dll'
 
@@ -77,7 +77,7 @@ def environmentCheck(target):
 
     if target == "vc60":
         required.extend(["PHP_HOME", "PHP_SRC_HOME"])
-    elif target == "vc80":
+    elif target == "vc80" or target == "vc90":
         required.extend(["PYTHON_HOME_X86", "PYTHON_HOME_X64"])
 
     fail = False
@@ -165,7 +165,7 @@ def buildIceDists(stageDir, sourcesDir, iceVersion, installVersion):
     os.chdir(os.path.join(iceCppHome, "src"))
     runprog("nmake /f Makefile.mak")
    
-    if installVersion == "vc80":
+    if installVersion == "vc80" or installVersion == "vc90":
 
         #
         # Ice for Python
@@ -265,7 +265,7 @@ def buildIceDists(stageDir, sourcesDir, iceVersion, installVersion):
         os.chdir(os.path.join(iceCppHome, "src"))
         runprog("nmake /f Makefile.mak")
   
-        if installVersion == "vc80":
+        if installVersion == "vc80" or installVersion == "vc90":
             #
             # Ice for Python
             #
@@ -374,7 +374,7 @@ def main():
         try:
             optionList, args = getopt.getopt(
                 sys.argv[1:], "dhil:", [ "help", "clean", "skip-build", "skip-installer", "info", "debug",
-                "logfile", "vc60", "vc80", "vc90", "bcc", "thirdpartyhome=", "sources=", "buildDir=", "pfxfile=", "pfxpassword="])
+                "logfile", "vc60", "vc80", "vc90", "bcc2007", "bcc2009", "thirdpartyhome=", "sources=", "buildDir=", "pfxfile=", "pfxpassword="])
         except getopt.GetoptError:
             usage()
             sys.exit(2)
@@ -411,8 +411,10 @@ def main():
                 target = 'vc80'
             elif o == '--vc90':
                 target = 'vc90'
-            elif o == '--bcc':
-                target = 'bcc'  
+            elif o == '--bcc2007':
+                target = 'bcc2007'
+            elif o == '--bcc2009':
+                target = 'bcc2009'  
             elif o == '--pfxfile':
                 os.environ['PFX_FILE'] = a
             elif o == '--pfxpassword':
@@ -484,7 +486,7 @@ def main():
         else:
             defaults['installdir'] = "C:\\Ice-%s-%s" % (iceVersion, target.upper())
 
-        if target == 'bcc':
+        if target == 'bcc2007' or target == 'bcc2009':
             defaults['pdb'] = 'tds'
         else:
             defaults['pdb'] = 'pdb'
@@ -573,8 +575,11 @@ libraries."""
         if build:
             buildIceDists(stageDir, buildDir, iceVersion, target)
 
-        if target == "bcc":
+        if target == "bcc2007":
             setDefaultCompiler(os.path.join(buildDir, "release", "Ice-%s" % iceVersion, "cpp", "config", "Make.rules.mak"), "BCC2007")
+
+        if target == "bcc2009":
+            setDefaultCompiler(os.path.join(buildDir, "release", "Ice-%s" % iceVersion, "cpp", "config", "Make.rules.mak"), "BCC2009")
 
         #
         # Stage Ice!

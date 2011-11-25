@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -23,7 +23,10 @@ SUBDIRS		= minimal \
 		  session \
 		  converter \
 		  async \
-		  multicast
+		  multicast \
+		  nrvo \
+		  plugin \
+		  interleaved
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \

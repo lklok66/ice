@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -22,12 +22,14 @@ COBJS		= Test.o \
 		  Twoways.o \
 		  Oneways.o \
 		  TwowaysAMI.o \
+		  TwowaysNewAMI.o \
 		  OnewaysAMI.o \
+		  OnewaysNewAMI.o \
 		  BatchOneways.o
 
 SOBJS		= Test.o \
 		  TestI.o \
-		  Server.o
+		  Server.o \
 
 SAMDOBJS	= TestAMD.o \
 		  TestAMDI.o \
@@ -40,7 +42,9 @@ COLOBJS		= Test.o \
 		  Twoways.o \
 		  Oneways.o \
 		  TwowaysAMI.o \
+		  TwowaysNewAMI.o \
 		  OnewaysAMI.o \
+		  OnewaysNewAMI.o \
 		  BatchOneways.o
 
 SRCS		= $(COBJS:.o=.cpp) \
@@ -56,18 +60,18 @@ CPPFLAGS	:= -I. -I../../include $(CPPFLAGS)
 
 $(CLIENT): $(COBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(COBJS) $(LIBS)
 
 $(SERVER): $(SOBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(SOBJS) $(LIBS)
 
 $(SERVERAMD): $(SAMDOBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SAMDOBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(SAMDOBJS) $(LIBS)
 
 $(COLLOCATED): $(COLOBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COLOBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(COLOBJS) $(LIBS)
 
 include .depend

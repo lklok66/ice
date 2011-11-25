@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -28,16 +28,39 @@ protected:
     virtual void writeInheritedOperations(const ClassDefPtr&);
     virtual void writeDispatchAndMarshalling(const ClassDefPtr&, bool);
     virtual std::vector<std::string> getParams(const OperationPtr&);
-    virtual std::vector<std::string> getParamsAsync(const OperationPtr&, bool);
-    virtual std::vector<std::string> getParamsAsyncCB(const OperationPtr&);
+    virtual std::vector<std::string> getParamsAsync(const OperationPtr&, bool, bool = false);
+    virtual std::vector<std::string> getParamsAsyncCB(const OperationPtr&, bool = false, bool = true);
     virtual std::vector<std::string> getArgs(const OperationPtr&);
-    virtual std::vector<std::string> getArgsAsync(const OperationPtr&);
-    virtual std::vector<std::string> getArgsAsyncCB(const OperationPtr&);
+    virtual std::vector<std::string> getArgsAsync(const OperationPtr&, bool = false);
+    virtual std::vector<std::string> getArgsAsyncCB(const OperationPtr&, bool = false, bool = false);
 
     void emitAttributes(const ContainedPtr&);
-    ::std::string getParamAttributes(const ParamDeclPtr&);
+    void emitComVisibleAttribute();
+    void emitGeneratedCodeAttribute();
+    void emitPartialTypeAttributes();
 
-    ::std::string writeValue(const TypePtr&);
+    std::string getParamAttributes(const ParamDeclPtr&);
+
+    std::string writeValue(const TypePtr&);
+
+    void writeConstantValue(const TypePtr&, const SyntaxTreeBasePtr&, const std::string&);
+
+    //
+    // Generate assignment statements for those data members that have default values.
+    //
+    void writeDataMemberInitializers(const DataMemberList&, int = 0, bool = false);
+
+    std::string toCsIdent(const std::string&);
+    std::string editMarkup(const std::string&);
+    StringList splitIntoLines(const std::string&);
+    void splitComment(const ContainedPtr&, StringList&, StringList&);
+    StringList getSummary(const ContainedPtr&);
+    void writeDocComment(const ContainedPtr&, const std::string&, const std::string& = "");
+    void writeDocCommentOp(const OperationPtr&);
+
+    enum ParamDir { InParam, OutParam };
+    void writeDocCommentAsync(const OperationPtr&, ParamDir, const std::string& = "", bool = false);
+    void writeDocCommentParam(const OperationPtr&, ParamDir, bool = false);
 
     ::IceUtilInternal::Output& _out;
 };
@@ -47,15 +70,12 @@ class Gen : private ::IceUtil::noncopyable
 public:
 
     Gen(const std::string&,
-        const std::string&,
         const std::vector<std::string>&,
         const std::string&,
         bool,
         bool,
         bool);
     ~Gen();
-
-    bool operator!() const; // Returns true if there was a constructor error
 
     void generate(const UnitPtr&);
     void generateTie(const UnitPtr&);
@@ -79,14 +99,9 @@ private:
     {
     public:
 
-        UnitVisitor(::IceUtilInternal::Output&, bool);
+        UnitVisitor(::IceUtilInternal::Output&);
 
-        virtual bool visitModuleStart(const ModulePtr&);
-
-    private:
-
-        bool _stream;
-        bool _globalMetaDataDone;
+        virtual bool visitUnitStart(const UnitPtr&);
     };
 
     class TypesVisitor : public CsVisitor
@@ -116,6 +131,19 @@ private:
         void writeMemberEquals(const DataMemberList&, int);
 
         bool _stream;
+    };
+
+    class AsyncDelegateVisitor : public CsVisitor
+    {
+    public:
+
+        AsyncDelegateVisitor(::IceUtilInternal::Output&);
+
+        virtual bool visitModuleStart(const ModulePtr&);
+        virtual void visitModuleEnd(const ModulePtr&);
+        virtual bool visitClassDefStart(const ClassDefPtr&);
+        virtual void visitClassDefEnd(const ClassDefPtr&);
+	virtual void visitOperation(const OperationPtr&);
     };
 
     class ProxyVisitor : public CsVisitor
@@ -240,7 +268,7 @@ private:
 
     private:
 
-        typedef ::std::set< ::std::string> NameSet;
+        typedef std::set<std::string> NameSet;
         void writeInheritedOperationsWithOpNames(const ClassDefPtr&, NameSet&);
     };
 

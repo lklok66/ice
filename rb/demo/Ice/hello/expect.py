@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -10,37 +10,22 @@
 
 import sys, os
 
-try:
-    import demoscript
-except ImportError:
-    for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-        toplevel = os.path.normpath(toplevel)
-        if os.path.exists(os.path.join(toplevel, "demoscript")):
-            break
-    else:
-        raise "can't find toplevel directory!"
-    sys.path.append(os.path.join(toplevel))
-    import demoscript
+path = [ ".", "..", "../..", "../../..", "../../../.." ]
+head = os.path.dirname(sys.argv[0])
+if len(head) > 0:
+    path = [os.path.join(head, p) for p in path]
+path = [os.path.abspath(p) for p in path if os.path.exists(os.path.join(p, "demoscript")) ]
+if len(path) == 0:
+    raise "can't find toplevel directory!"
+sys.path.append(path[0])
 
-if os.path.exists("../../../../cpp"):
-    iceHome = "../../../../cpp"
-elif os.path.exists("../../../demo"):
-    iceHome = "../../../"
-else:
-    print "Cannot find C++ demos"
-    sys.exit(1)
+from demoscript import *
+from demoscript.Ice import hello
 
-import demoscript.Util
-demoscript.Util.defaultLanguage = "Ruby"
-import demoscript.Ice.hello
-
-cwd = os.getcwd()
-os.chdir('%s/demo/Ice/hello' % (iceHome))
-server = demoscript.Util.spawn('./server --Ice.PrintAdapterReady', language="C++")
+server = Util.spawn('./server --Ice.PrintAdapterReady --Ice.Warn.Connections=0', Util.getMirrorDir("cpp"), mapping="cpp")
 server.expect('.* ready')
-os.chdir(cwd)
 
-client = demoscript.Util.spawn('ruby Client.rb')
+client = Util.spawn('ruby Client.rb --Ice.Warn.Connections=0')
 client.expect('.*==>')
 
-demoscript.Ice.hello.run(client, server)
+hello.run(client, server)

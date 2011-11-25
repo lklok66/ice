@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -19,20 +19,18 @@ public final class PluginManagerI implements PluginManager
         if(_initialized)
         {
             InitializationException ex = new InitializationException();
-            ex.reason = "plugins already initialized";
+            ex.reason = "plug-ins already initialized";
             throw ex;
         }
 
         //
-        // Invoke initialize() on the plugins, in the order they were loaded.
+        // Invoke initialize() on the plug-ins, in the order they were loaded.
         //
         java.util.List<Plugin> initializedPlugins = new java.util.ArrayList<Plugin>();
         try
         {
-            java.util.Iterator<Plugin> i = _initOrder.iterator();
-            while(i.hasNext())
+            for(Plugin p : _initOrder)
             {
-                Plugin p = i.next();
                 p.initialize();
                 initializedPlugins.add(p);
             }
@@ -40,7 +38,7 @@ public final class PluginManagerI implements PluginManager
         catch(RuntimeException ex)
         {
             //
-            // Destroy the plugins that have been successfully initialized, in the
+            // Destroy the plug-ins that have been successfully initialized, in the
             // reverse order.
             //
             java.util.ListIterator<Plugin> i = initializedPlugins.listIterator(initializedPlugins.size());
@@ -60,6 +58,17 @@ public final class PluginManagerI implements PluginManager
         }
 
         _initialized = true;
+    }
+
+    public synchronized String[]
+    getPlugins()
+    {
+        java.util.ArrayList<String> names = new java.util.ArrayList<String>();
+        for(java.util.Map.Entry<String, Plugin> p : _plugins.entrySet())
+        {
+            names.add(p.getKey());
+        }
+        return names.toArray(new String[0]);
     }
 
     public synchronized Plugin
@@ -104,11 +113,20 @@ public final class PluginManagerI implements PluginManager
     {
         if(_communicator != null)
         {
-            java.util.Iterator<Plugin> i = _plugins.values().iterator();
-            while(i.hasNext())
+            if(_initialized)
             {
-                Plugin p = i.next();
-                p.destroy();
+                for(java.util.Map.Entry<String, Plugin> p : _plugins.entrySet())
+                {
+                    try
+                    {
+                        p.getValue().destroy();
+                    }
+                    catch(RuntimeException ex)
+                    {
+                        Ice.Util.getProcessLogger().warning("unexpected exception raised by plug-in `" + p.getKey() +
+                                                            "' destruction:\n" + ex.toString());
+                    }
+                }
             }
 
             _communicator = null;
@@ -135,51 +153,51 @@ public final class PluginManagerI implements PluginManager
         // Ice.Plugin.name[.<language>]=entry_point [args]
         //
         // If the Ice.PluginLoadOrder property is defined, load the
-        // specified plugins in the specified order, then load any
-        // remaining plugins.
+        // specified plug-ins in the specified order, then load any
+        // remaining plug-ins.
         //
         final String prefix = "Ice.Plugin.";
         Properties properties = _communicator.getProperties();
         java.util.Map<String, String> plugins = properties.getPropertiesForPrefix(prefix);
 
         final String[] loadOrder = properties.getPropertyAsList("Ice.PluginLoadOrder");
-        for(int i = 0; i < loadOrder.length; ++i)
+        for(String name : loadOrder)
         {
-            if(_plugins.containsKey(loadOrder[i]))
+            if(_plugins.containsKey(name))
             {
                 PluginInitializationException ex = new PluginInitializationException();
-                ex.reason = "plugin `" + loadOrder[i] + "' already loaded";
+                ex.reason = "plug-in `" + name + "' already loaded";
                 throw ex;
             }
 
-            String key = "Ice.Plugin." + loadOrder[i] + ".java";
+            String key = "Ice.Plugin." + name + ".java";
             boolean hasKey = plugins.containsKey(key);
             if(hasKey)
             {
-                plugins.remove("Ice.Plugin." + loadOrder[i]);
+                plugins.remove("Ice.Plugin." + name);
             }
             else
             {
-                key = "Ice.Plugin." + loadOrder[i];
+                key = "Ice.Plugin." + name;
                 hasKey = plugins.containsKey(key);
             }
             
             if(hasKey)
             {
-                final String value = (String)plugins.get(key);
-                loadPlugin(loadOrder[i], value, cmdArgs);
+                final String value = plugins.get(key);
+                loadPlugin(name, value, cmdArgs);
                 plugins.remove(key);
             }
             else
             {
                 PluginInitializationException ex = new PluginInitializationException();
-                ex.reason = "plugin `" + loadOrder[i] + "' not defined";
+                ex.reason = "plug-in `" + name + "' not defined";
                 throw ex;
             }
         }
 
         //
-        // Load any remaining plugins that weren't specified in PluginLoadOrder.
+        // Load any remaining plug-ins that weren't specified in PluginLoadOrder.
         //
         while(!plugins.isEmpty())
         {
@@ -236,16 +254,6 @@ public final class PluginManagerI implements PluginManager
                 loadPlugin(name, value, cmdArgs);
             }
         }
-
-        //
-        // An application can set Ice.InitPlugins=0 if it wants to postpone
-        // initialization until after it has interacted directly with the
-        // plugins.
-        //
-        if(properties.getPropertyAsIntWithDefault("Ice.InitPlugins", 1) > 0)
-        {
-            initializePlugins();
-        }
     }
 
     private void
@@ -293,7 +301,13 @@ public final class PluginManagerI implements PluginManager
         PluginFactory pluginFactory = null;
         try
         {
-            Class c = Class.forName(className);
+            Class<?> c = IceInternal.Util.getInstance(_communicator).findClass(className);
+            if(c == null)
+            {
+                PluginInitializationException e = new PluginInitializationException();
+                e.reason = "class " + className + " not found";
+                throw e;
+            }
             java.lang.Object obj = c.newInstance();
             try
             {
@@ -301,32 +315,17 @@ public final class PluginManagerI implements PluginManager
             }
             catch(ClassCastException ex)
             {
-                PluginInitializationException e = new PluginInitializationException();
-                e.reason = "class " + className + " does not implement Ice.PluginFactory";
-                e.initCause(ex);
-                throw e;
+                throw new PluginInitializationException(
+                    "class " + className + " does not implement Ice.PluginFactory", ex);
             }
-        }
-        catch(ClassNotFoundException ex)
-        {
-            PluginInitializationException e = new PluginInitializationException();
-            e.reason = "class " + className + " not found";
-            e.initCause(ex);
-            throw e;
         }
         catch(IllegalAccessException ex)
         {
-            PluginInitializationException e = new PluginInitializationException();
-            e.reason = "unable to access default constructor in class " + className;
-            e.initCause(ex);
-            throw e;
+            throw new PluginInitializationException("unable to access default constructor in class " + className, ex);
         }
         catch(InstantiationException ex)
         {
-            PluginInitializationException e = new PluginInitializationException();
-            e.reason = "unable to instantiate class " + className;
-            e.initCause(ex);
-            throw e;
+            throw new PluginInitializationException("unable to instantiate class " + className, ex);
         }
 
         //
@@ -343,17 +342,12 @@ public final class PluginManagerI implements PluginManager
         }
         catch(Throwable ex)
         {
-            PluginInitializationException e = new PluginInitializationException();
-            e.reason = "exception in factory " + className;
-            e.initCause(ex);
-            throw e;
+            throw new PluginInitializationException("exception in factory " + className, ex);
         }
    
         if(plugin == null)
         {
-            PluginInitializationException e = new PluginInitializationException();
-            e.reason = "failure in factory " + className;
-            throw e;
+            throw new PluginInitializationException("failure in factory " + className);
         }
 
         _plugins.put(name, plugin);

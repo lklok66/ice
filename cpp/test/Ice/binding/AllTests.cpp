@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -26,12 +26,12 @@ struct RandomNumberGenerator : public std::unary_function<ptrdiff_t, ptrdiff_t>
     }
 };
 
-class GetAdapterNameCB : public AMI_TestIntf_getAdapterName, public IceUtil::Monitor<IceUtil::Mutex>
+class GetAdapterNameCB : public IceUtil::Shared, public IceUtil::Monitor<IceUtil::Mutex>
 {
 public:
 
-    virtual void
-    ice_response(const string& name)
+    void
+    response(const string& name)
     {
         Lock sync(*this);
         assert(!name.empty());
@@ -39,8 +39,8 @@ public:
         notify();
     }
 
-    virtual void
-    ice_exception(const Ice::Exception&)
+    void
+    exception(const Ice::Exception&)
     {
         test(false);
     }
@@ -66,7 +66,8 @@ string
 getAdapterNameWithAMI(const TestIntfPrx& test)
 {
     GetAdapterNameCBPtr cb = new GetAdapterNameCB();
-    test->getAdapterName_async(cb);
+    test->begin_getAdapterName(
+        newCallback_TestIntf_getAdapterName(cb, &GetAdapterNameCB::response,  &GetAdapterNameCB::exception));
     return cb->getResult();
 }
 
@@ -96,7 +97,7 @@ deactivate(const RemoteCommunicatorPrx& com, vector<RemoteObjectAdapterPrx>& ada
 void
 allTests(const Ice::CommunicatorPtr& communicator)
 {
-    string ref = "communicator:default -p 12010 -t 10000";
+    string ref = "communicator:default -p 12010";
     RemoteCommunicatorPrx com = RemoteCommunicatorPrx::uncheckedCast(communicator->stringToProxy(ref));
 
     RandomNumberGenerator rng;
@@ -217,6 +218,95 @@ allTests(const Ice::CommunicatorPtr& communicator)
         test(test->getAdapterName() == "Adapter12");    
 
         deactivate(com, adapters);
+    }
+    cout << "ok" << endl;
+
+    cout << "testing binding with multiple random endpoints... " << flush;
+    {
+        vector<RemoteObjectAdapterPrx> adapters;
+        adapters.push_back(com->createObjectAdapter("AdapterRandom11", "default"));
+        adapters.push_back(com->createObjectAdapter("AdapterRandom12", "default"));
+        adapters.push_back(com->createObjectAdapter("AdapterRandom13", "default"));
+        adapters.push_back(com->createObjectAdapter("AdapterRandom14", "default"));
+        adapters.push_back(com->createObjectAdapter("AdapterRandom15", "default"));
+
+#ifdef _WIN32
+        int count = 60;
+#else
+        int count = 20;
+#endif
+        int adapterCount = static_cast<int>(adapters.size());
+        while(--count > 0)
+        {
+#ifdef _WIN32
+            if(count == 10)
+            {
+                com->deactivateObjectAdapter(adapters[4]);
+                --adapterCount;
+            }
+            vector<TestIntfPrx> proxies;
+            proxies.resize(10);
+#else
+            if(count < 60 && count % 10 == 0)
+            {
+                com->deactivateObjectAdapter(adapters[count / 10 - 1]);
+                --adapterCount;
+            }
+            vector<TestIntfPrx> proxies;
+            proxies.resize(40);
+#endif
+            unsigned int i;
+            for(i = 0; i < proxies.size(); ++i)
+            {
+                vector<RemoteObjectAdapterPrx> adpts;
+                adpts.resize(IceUtilInternal::random(static_cast<int>(adapters.size())));
+                if(adpts.empty())
+                {
+                    adpts.resize(1);
+                }
+                for(vector<RemoteObjectAdapterPrx>::iterator p = adpts.begin(); p != adpts.end(); ++p)
+                {
+                    *p = adapters[IceUtilInternal::random(static_cast<int>(adapters.size()))];
+                }
+                proxies[i] = createTestIntfPrx(adpts);
+            }
+            
+            for(i = 0; i < proxies.size(); i++)
+            {
+                proxies[i]->begin_getAdapterName();
+            }
+            for(i = 0; i < proxies.size(); i++)
+            {
+                try
+                {
+                    proxies[i]->ice_ping();
+                }
+                catch(const Ice::LocalException&)
+                {
+                }
+            }
+            set<Ice::ConnectionPtr> connections;
+            for(i = 0; i < proxies.size(); i++)
+            {
+                if(proxies[i]->ice_getCachedConnection())
+                {
+                    connections.insert(proxies[i]->ice_getCachedConnection());
+                }
+            }
+            test(static_cast<int>(connections.size()) <= adapterCount);
+
+            for(vector<RemoteObjectAdapterPrx>::const_iterator q = adapters.begin(); q != adapters.end(); ++q)
+            {
+                try
+                {
+                    (*q)->getTestIntf()->ice_getConnection()->close(false);
+                }
+                catch(const Ice::LocalException&)
+                {
+                    // Expected if adapter is down.
+                }
+            }
+        }
     }
     cout << "ok" << endl;
 
@@ -461,7 +551,6 @@ allTests(const Ice::CommunicatorPtr& communicator)
         }
 
         com->deactivateObjectAdapter(adapters[2]);
-
 
         test(test->getAdapterName() == "Adapter52");
         

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -16,7 +16,17 @@ class MyDerivedClassI : public Test::MyDerivedClass
 {
 public:
 
+    //
+    // Override the Object "pseudo" operations to verify the operation mode.
+    //
+    virtual bool ice_isA(const std::string&, const Ice::Current&) const;
+    virtual void ice_ping(const Ice::Current&) const;
+    virtual std::vector<std::string> ice_ids(const Ice::Current&) const;
+    virtual const std::string& ice_id(const Ice::Current&) const;
+
     virtual void shutdown(const Ice::Current&);
+
+    virtual void delay(Ice::Int, const Ice::Current&);
 
     virtual void opVoid(const Ice::Current&);
 
@@ -144,6 +154,14 @@ public:
                                                 Test::StringMyEnumD&,
                                                 const Ice::Current&);
 
+    virtual Test::MyEnumStringD opMyEnumStringD(const Test::MyEnumStringD&, const Test::MyEnumStringD&,
+                                                Test::MyEnumStringD&,
+                                                const Ice::Current&);
+
+    virtual Test::MyStructMyEnumD opMyStructMyEnumD(const Test::MyStructMyEnumD&, const Test::MyStructMyEnumD&,
+                                                    Test::MyStructMyEnumD&,
+                                                    const Ice::Current&);
+
     virtual Test::IntS opIntS(const Test::IntS&, const Ice::Current&);
 
     virtual void opByteSOneway(const Test::ByteS&, const Ice::Current&);
@@ -151,6 +169,10 @@ public:
     virtual Ice::Context opContext(const Ice::Current&);
 
     virtual void opDoubleMarshaling(Ice::Double, const Test::DoubleS&, const Ice::Current&);
+
+    virtual void opIdempotent(const Ice::Current&);
+
+    virtual void opNonmutating(const Ice::Current&);
 
     virtual void opDerived(const Ice::Current&);
 };

@@ -1,26 +1,31 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-import Test.*;
+package test.Ice.exceptions;
+
+import test.Ice.exceptions.Test.A;
+import test.Ice.exceptions.Test.B;
+import test.Ice.exceptions.Test.C;
+import test.Ice.exceptions.Test.D;
+import test.Ice.exceptions.Test._ThrowerDisp;
 
 public final class ThrowerI extends _ThrowerDisp
 {
     public
-    ThrowerI(Ice.ObjectAdapter adapter)
+    ThrowerI()
     {
-        _adapter = adapter;
     }
 
     public void
     shutdown(Ice.Current current)
     {
-        _adapter.getCommunicator().shutdown();
+        current.adapter.getCommunicator().shutdown();
     }
 
     public boolean
@@ -144,5 +149,21 @@ public final class ThrowerI extends _ThrowerDisp
         throw new java.lang.AssertionError();
     }
 
-    private Ice.ObjectAdapter _adapter;
+    public void
+    throwAfterResponse(Ice.Current current)
+    {
+        //
+        // Only relevant for AMD.
+        //
+    }
+
+    public void
+    throwAfterException(Ice.Current current)
+        throws A
+    {
+        //
+        // Only relevant for AMD.
+        //
+        throw new A();
+    }
 }

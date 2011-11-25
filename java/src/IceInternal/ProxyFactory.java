@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -38,6 +38,20 @@ public final class ProxyFactory
         String proxy = _instance.initializationData().properties.getProperty(prefix);
         Reference ref = _instance.referenceFactory().create(proxy, prefix);
         return referenceToProxy(ref);
+    }
+
+    public java.util.Map<String, String>
+    proxyToProperty(Ice.ObjectPrx proxy, String prefix)
+    {
+        if(proxy != null)
+        {
+            Ice.ObjectPrxHelperBase h = (Ice.ObjectPrxHelperBase)proxy;
+            return h.__reference().toProperty(prefix);
+        }
+        else
+        {
+            return new java.util.HashMap<String, String>();
+        }
     }
 
     public Ice.ObjectPrx
@@ -85,7 +99,7 @@ public final class ProxyFactory
     }
 
     public int
-    checkRetryAfterException(Ice.LocalException ex, Reference ref, final OutgoingAsync out, int cnt)
+    checkRetryAfterException(Ice.LocalException ex, Reference ref, Ice.IntHolder sleepInterval, int cnt)
     {
         TraceLevels traceLevels = _instance.traceLevels();
         Ice.Logger logger = _instance.initializationData().logger;
@@ -105,16 +119,7 @@ public final class ProxyFactory
         {
             Ice.ObjectNotExistException one = (Ice.ObjectNotExistException)ex;
 
-            LocatorInfo li = ref.getLocatorInfo();
-            if(li != null && ref.isIndirect())
-            {
-                //
-                // We retry ObjectNotExistException if the reference is
-                // indirect.
-                //
-                li.clearObjectCache(ref);
-            }
-            else if(ref.getRouterInfo() != null && one.operation.equals("ice_add_proxy"))
+            if(ref.getRouterInfo() != null && one.operation.equals("ice_add_proxy"))
             {
                 //
                 // If we have a router, an ObjectNotExistException with an
@@ -124,17 +129,36 @@ public final class ProxyFactory
                 // must *always* retry, so that the missing proxy is added
                 // to the router.
                 //
+
+                ref.getRouterInfo().clearCache(ref);
+
                 if(traceLevels.retry >= 1)
                 {
                     String s = "retrying operation call to add proxy to router\n" + ex.toString();
                     logger.trace(traceLevels.retryCat, s);
                 }
 
-                if(out != null)
+                if(sleepInterval != null)
                 {
-                    out.__send(cnt);
+                    sleepInterval.value = 0;
                 }
                 return cnt; // We must always retry, so we don't look at the retry count.
+            }
+            else if(ref.isIndirect())
+            {
+                //
+                // We retry ObjectNotExistException if the reference is
+                // indirect.
+                //
+
+                if(ref.isWellKnown())
+                {
+                    LocatorInfo li = ref.getLocatorInfo();
+                    if(li != null)
+                    {
+                        li.clearCache(ref);
+                    }
+                }
             }
             else
             {
@@ -182,7 +206,16 @@ public final class ProxyFactory
         ++cnt;
         assert(cnt > 0);
 
-        if(cnt > _retryIntervals.length)
+        int interval;
+        if(cnt == (_retryIntervals.length + 1) && ex instanceof Ice.CloseConnectionException)
+        {
+            //
+            // A close connection exception is always retried at least once, even if the retry
+            // limit is reached.
+            //
+            interval = 0;
+        }
+        else if(cnt > _retryIntervals.length)
         {
             if(traceLevels.retry >= 1)
             {
@@ -191,8 +224,10 @@ public final class ProxyFactory
             }
             throw ex;
         }
-
-        int interval = _retryIntervals[cnt - 1];
+        else
+        {
+            interval = _retryIntervals[cnt - 1];
+        }
 
         if(traceLevels.retry >= 1)
         {
@@ -205,42 +240,23 @@ public final class ProxyFactory
             logger.trace(traceLevels.retryCat, s);
         }
 
-        if(interval > 0)
+        if(sleepInterval != null)
         {
-            if(out != null)
+            sleepInterval.value = interval;
+        }
+        else if(interval > 0)
+        {
+            //
+            // Sleep before retrying.
+            //
+            try
             {
-                final int count = cnt;
-                _instance.timer().schedule(new TimerTask()
-                                           {
-                                               public void
-                                               runTimerTask()
-                                               {
-                                                   out.__send(count);
-                                               }
-                                           }, interval);
+                Thread.sleep(interval);
             }
-            else
+            catch(InterruptedException ex1)
             {
-                //
-                // Sleep before retrying.
-                //
-                try
-                {
-                    Thread.currentThread().sleep(interval);
-                }
-                catch(InterruptedException ex1)
-                {
-                }
             }
         }
-        else
-        {
-            if(out != null)
-            {
-                out.__send(cnt);
-            }
-        }
-
         return cnt;
     }
 

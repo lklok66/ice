@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -23,8 +23,9 @@ SRCS		= $(OBJS:.obj=.cpp)
 CPPFLAGS	= -I. $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN
 
 LINKWITH        = $(LIBS)
-!if "$(CPP_COMPILER)" == "VC90" || "$(CPP_COMPILER)" == "VC90_EXPRESS"
-LINKWITH	= /MANIFESTUAC:"level='requireAdministrator' uiAccess='false'" $(LINKWITH)
+!if "$(CPP_COMPILER)" == "VC90" || "$(CPP_COMPILER)" == "VC90_EXPRESS" || \
+    "$(CPP_COMPILER)" == "VC100" || "$(CPP_COMPILER)" == "VC100_EXPRESS"
+LINKWITH	= /MANIFEST /MANIFESTUAC:"level='requireAdministrator' uiAccess='false'" $(LINKWITH)
 !else
 EXTRA_MANIFEST  = security.manifest
 !endif
@@ -33,11 +34,7 @@ EXTRA_MANIFEST  = security.manifest
 PDBFLAGS       = /pdb:$(TOOL:.exe=.pdb)
 !endif
 
-!if "$(CPP_COMPILER)" == "BCC2007"
-RES_FILE        = ,, IceServiceInstall.res
-!else
 RES_FILE        = IceServiceInstall.res
-!endif
 
 $(TOOL): $(OBJS) IceServiceInstall.res
 	$(LINK) $(LD_EXEFLAGS) $(PDBFLAGS) $(OBJS) $(SETARGV) $(PREOUT)$@ $(PRELIBS)$(LINKWITH) $(RES_FILE)
@@ -49,21 +46,15 @@ clean::
 	del /q IceServiceInstall.res
 
 install:: all
-	copy $(TOOL) $(install_bindir)
+	copy $(TOOL) "$(install_bindir)"
 
-
-!if "$(CPP_COMPILER)" == "BCC2007" && "$(OPTIMIZE)" != "yes"
-
-install:: all
-	copy $(TOOL:.exe=.tds) $(install_bindir)
-
-!elseif "$(GENERATE_PDB)" == "yes"
+!if "$(GENERATE_PDB)" == "yes"
 
 install:: all
-	copy $(TOOL:.exe=.pdb) $(install_bindir)
+	copy $(TOOL:.exe=.pdb) "$(install_bindir)"
 
 !endif
 
 
-!include .depend
+!include .depend.mak
 

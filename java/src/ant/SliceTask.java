@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -38,8 +38,8 @@ import java.io.BufferedWriter;
  *
  *   dependencyfile - The file in which dependencies are stored (default: ".depend").
  *   outputdir - The value for the --output-dir translator option.
- *   casesensitive - Enables the --case-sensitive translator option.
  *   ice - Enables the --ice translator option.
+ *   underscore - Enables the --underscore translator option.
  *
  * Nested elements:
  *
@@ -59,7 +59,6 @@ public class SliceTask extends org.apache.tools.ant.Task
         _dependencyFile = null;
         _outputDir = null;
         _outputDirString = null;
-        _caseSensitive = false;
         _ice = false;
         _includePath = null;
     }
@@ -82,21 +81,21 @@ public class SliceTask extends org.apache.tools.ant.Task
     }
 
     public void
-    setCaseSensitive(boolean c)
-    {
-        _caseSensitive = c;
-    }
-
-    public void
     setIce(boolean ice)
     {
         _ice = ice;
     }
 
+    public void
+    setUnderscore(boolean underscore)
+    {
+        _underscore = underscore;
+    }
+
     public Path
     createIncludePath()
     {
-        if(_includePath == null) 
+        if(_includePath == null)
         {
             _includePath = new Path(getProject());
         }
@@ -114,7 +113,7 @@ public class SliceTask extends org.apache.tools.ant.Task
     {
         if(_includePath == null)
         {
-            _includePath = includePath;  
+            _includePath = includePath;
         }
         else
         {
@@ -129,7 +128,7 @@ public class SliceTask extends org.apache.tools.ant.Task
         _fileSets.add(fileset);
 
         return fileset;
-    }    
+    }
 
     public void
     addConfiguredDefine(SliceDefine define)
@@ -155,7 +154,8 @@ public class SliceTask extends org.apache.tools.ant.Task
     //
     // Read the dependency file.
     //
-    protected java.util.HashMap
+    @SuppressWarnings("unchecked")
+    protected java.util.HashMap<String, SliceDependency>
     readDependencies()
     {
         if(_dependencyFile == null)
@@ -173,7 +173,8 @@ public class SliceTask extends org.apache.tools.ant.Task
         try
         {
             java.io.ObjectInputStream in = new java.io.ObjectInputStream(new java.io.FileInputStream(_dependencyFile));
-            java.util.HashMap dependencies = (java.util.HashMap)in.readObject();
+            java.util.HashMap<String, SliceDependency> dependencies =
+                (java.util.HashMap<String, SliceDependency>)in.readObject();
             in.close();
             return dependencies;
         }
@@ -183,12 +184,12 @@ public class SliceTask extends org.apache.tools.ant.Task
         catch(java.lang.ClassNotFoundException ex)
         {
         }
-        
-        return new java.util.HashMap();
+
+        return new java.util.HashMap<String, SliceDependency>();
     }
 
     protected void
-    writeDependencies(java.util.HashMap dependencies)
+    writeDependencies(java.util.HashMap<String, SliceDependency> dependencies)
     {
         try
         {
@@ -206,14 +207,14 @@ public class SliceTask extends org.apache.tools.ant.Task
     // Parse dependencies returned by the slice translator (Makefile
     // dependencies).
     //
-    protected java.util.List
+    protected java.util.List<SliceDependency>
     parseDependencies(String allDependencies)
     {
-        java.util.List dependencies = new java.util.LinkedList();
+        java.util.List<SliceDependency> dependencies = new java.util.LinkedList<SliceDependency>();
         try
         {
             BufferedReader in = new BufferedReader(new StringReader(allDependencies));
-            StringBuffer depline = new StringBuffer();
+            StringBuilder depline = new StringBuilder(1024);
             String line;
 
             while((line = in.readLine()) != null)
@@ -260,20 +261,28 @@ public class SliceTask extends org.apache.tools.ant.Task
                     // spaces are escaped and the initial file may have escaped colons
                     // (e.g., "C\:/Program\ Files/...").
                     //
-                    java.util.ArrayList l = new java.util.ArrayList();
-                    StringBuffer file = new StringBuffer();
+                    java.util.ArrayList<String> l = new java.util.ArrayList<String>();
+                    StringBuilder file = new StringBuilder(128);
                     pos = 0;
                     while(pos < chars.length)
                     {
-                        if(Character.isWhitespace(chars[pos]))
+                        if(chars[pos] == '\\') // Skip backslash of an escaped character.
+                        {
+                            if(pos + 1 >= chars.length)
+                            {
+                                throw new BuildException("dependency parse failure");
+                            }
+                            file.append(chars[++pos]);
+                        }
+                        else if(Character.isWhitespace(chars[pos]))
                         {
                             if(file.length() > 0)
                             {
                                 l.add(file.toString());
-                                file = new StringBuffer();
+                                file = new StringBuilder(128);
                             }
                         }
-                        else if(chars[pos] != '\\') // Skip backslash of an escaped character.
+                        else
                         {
                             file.append(chars[pos]);
                         }
@@ -293,7 +302,10 @@ public class SliceTask extends org.apache.tools.ant.Task
                     l.toArray(depend._dependencies);
                     depend._timeStamp = new java.util.Date().getTime();
                     pos = depend._dependencies[0].lastIndexOf(':');
-                    assert(pos == depend._dependencies[0].length() - 1);
+                    if(pos != depend._dependencies[0].length() - 1)
+                    {
+                        throw new BuildException("dependency parse failure");
+                    }
                     depend._dependencies[0] = depend._dependencies[0].substring(0, pos);
                     for(int i = 0; i < depend._dependencies.length; ++i)
                     {
@@ -301,7 +313,7 @@ public class SliceTask extends org.apache.tools.ant.Task
                     }
                     dependencies.add(depend);
 
-                    depline = new StringBuffer();
+                    depline = new StringBuilder(1024);
                 }
             }
         }
@@ -309,9 +321,8 @@ public class SliceTask extends org.apache.tools.ant.Task
         {
             throw new BuildException("Unable to read dependencies from slice translator: " + ex);
         }
-        
-        return dependencies;
 
+        return dependencies;
     }
 
     protected String
@@ -369,7 +380,7 @@ public class SliceTask extends org.apache.tools.ant.Task
             else if(os.startsWith("Windows"))
             {
                 //
-                // No need to change the PATH environment variable on Windows, the DLLs should be found 
+                // No need to change the PATH environment variable on Windows, the DLLs should be found
                 // in the translator local directory.
                 //
                 //ldLibPathEnv = "PATH";
@@ -461,7 +472,7 @@ public class SliceTask extends org.apache.tools.ant.Task
             {
                 _iceHome = (String)getProject().getProperties().get("ice.home");
             }
-            else 
+            else
             {
                 _iceHome = getEnvironment("ICE_HOME");
             }
@@ -490,7 +501,7 @@ public class SliceTask extends org.apache.tools.ant.Task
             out.writeLong(_timeStamp);
         }
 
-        private void readObject(java.io.ObjectInputStream in) 
+        private void readObject(java.io.ObjectInputStream in)
             throws java.io.IOException, java.lang.ClassNotFoundException
         {
             _dependencies = (String[])in.readObject();
@@ -500,9 +511,9 @@ public class SliceTask extends org.apache.tools.ant.Task
         public boolean
         isUpToDate()
         {
-            for(int i = 0; i < _dependencies.length; ++i)
+            for(String d : _dependencies)
             {
-                File dep = new File(_dependencies[i]);
+                File dep = new File(d);
                 if(!dep.exists() || _timeStamp < dep.lastModified())
                 {
                     return false;
@@ -535,11 +546,11 @@ public class SliceTask extends org.apache.tools.ant.Task
     protected File _dependencyFile;
     protected File _outputDir;
     protected String _outputDirString;
-    protected boolean _caseSensitive;
     protected boolean _ice;
+    protected boolean _underscore;
     protected Path _includePath;
-    protected java.util.List _fileSets = new java.util.LinkedList();
-    protected java.util.List _defines = new java.util.LinkedList();
-    protected java.util.List _meta = new java.util.LinkedList();
+    protected java.util.List<FileSet> _fileSets = new java.util.LinkedList<FileSet>();
+    protected java.util.List<SliceDefine> _defines = new java.util.LinkedList<SliceDefine>();
+    protected java.util.List<SliceMeta> _meta = new java.util.LinkedList<SliceMeta>();
     private String _iceHome;
 }

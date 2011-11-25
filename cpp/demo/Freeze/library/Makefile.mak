@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -68,9 +68,9 @@ $(COLLOCATED): $(OBJS) $(COLOBJS)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
 
-LibraryTypes.h LibraryTypes.cpp: Library.ice $(SLICE2FREEZE) $(SLICEPARSERLIB)
+LibraryTypes.h LibraryTypes.cpp: Library.ice "$(SLICE2FREEZE)" "$(SLICEPARSERLIB)"
 	del /q LibraryTypes.h LibraryTypes.cpp
-	$(SLICE2FREEZE) --ice -I$(slicedir) --dict StringIsbnSeqDict,string,Ice::StringSeq LibraryTypes $(slicedir)/Ice/BuiltinSequences.ice Library.ice
+	"$(SLICE2FREEZE)" --ice -I"$(slicedir)" --dict StringIsbnSeqDict,string,Ice::StringSeq LibraryTypes "$(slicedir)/Ice/BuiltinSequences.ice" Library.ice
 
 Scanner.cpp : Scanner.l
 	flex Scanner.l
@@ -91,8 +91,7 @@ clean::
 
 clean::
 	-del /q LibraryTypes.h LibraryTypes.cpp
-	-del /q Grammar.cpp Grammar.h
-	-del /q Scanner.cpp
+	-if exist db\__Freeze rmdir /q /s db\__Freeze
 	-for %f in (db\*) do if not %f == db\.gitignore del /q %f
 
-!include .depend
+!include .depend.mak

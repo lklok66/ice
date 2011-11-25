@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,9 +12,35 @@
 #include <TestI.h>
 #include <TestCommon.h>
 #include <functional>
-#ifdef __BCPLUSPLUS__
-#  include <iterator>
-#endif
+#include <iterator>
+
+bool
+MyDerivedClassI::ice_isA(const std::string& id, const Ice::Current& current) const
+{
+    test(current.mode == Ice::Nonmutating);
+    return Test::MyDerivedClass::ice_isA(id, current);
+}
+
+void
+MyDerivedClassI::ice_ping(const Ice::Current& current) const
+{
+    test(current.mode == Ice::Nonmutating);
+    Test::MyDerivedClass::ice_ping(current);
+}
+
+std::vector<std::string>
+MyDerivedClassI::ice_ids(const Ice::Current& current) const
+{
+    test(current.mode == Ice::Nonmutating);
+    return Test::MyDerivedClass::ice_ids(current);
+}
+
+const std::string&
+MyDerivedClassI::ice_id(const Ice::Current& current) const
+{
+    test(current.mode == Ice::Nonmutating);
+    return Test::MyDerivedClass::ice_id(current);
+}
 
 void
 MyDerivedClassI::shutdown(const Ice::Current& current)
@@ -23,8 +49,15 @@ MyDerivedClassI::shutdown(const Ice::Current& current)
 }
 
 void
-MyDerivedClassI::opVoid(const Ice::Current&)
+MyDerivedClassI::delay(Ice::Int ms, const Ice::Current& current)
 {
+    IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(ms));
+}
+
+void
+MyDerivedClassI::opVoid(const Ice::Current& current)
+{
+    test(current.mode == Ice::Normal);
 }
 
 Ice::Byte
@@ -336,6 +369,30 @@ MyDerivedClassI::opStringMyEnumD(const Test::StringMyEnumD& p1,
     return r;
 }
 
+Test::MyEnumStringD
+MyDerivedClassI::opMyEnumStringD(const Test::MyEnumStringD& p1,
+                                 const Test::MyEnumStringD& p2,
+                                 Test::MyEnumStringD& p3,
+                                 const Ice::Current&)
+{
+    p3 = p1;
+    Test::MyEnumStringD r = p1;
+    std::set_union(p1.begin(), p1.end(), p2.begin(), p2.end(), std::inserter(r, r.end()));
+    return r;
+}
+
+Test::MyStructMyEnumD
+MyDerivedClassI::opMyStructMyEnumD(const Test::MyStructMyEnumD& p1,
+                                   const Test::MyStructMyEnumD& p2,
+                                   Test::MyStructMyEnumD& p3,
+                                   const Ice::Current&)
+{
+    p3 = p1;
+    Test::MyStructMyEnumD r = p1;
+    std::set_union(p1.begin(), p1.end(), p2.begin(), p2.end(), std::inserter(r, r.end()));
+    return r;
+}
+
 Test::IntS
 MyDerivedClassI::opIntS(const Test::IntS& s, const Ice::Current&)
 {
@@ -364,6 +421,18 @@ MyDerivedClassI::opDoubleMarshaling(Ice::Double p1, const Test::DoubleS& p2, con
     {
         test(p2[i] == d);
     }
+}
+
+void
+MyDerivedClassI::opIdempotent(const Ice::Current& current)
+{
+    test(current.mode == Ice::Idempotent);
+}
+
+void
+MyDerivedClassI::opNonmutating(const Ice::Current& current)
+{
+    test(current.mode == Ice::Nonmutating);
 }
 
 void

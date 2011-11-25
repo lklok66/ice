@@ -19,6 +19,10 @@ Demos in this directory:
   call back into an object provided by the client as part of that
   invocation.
 
+- compact
+
+  A simple graphical client that uses Ice for .NET Compact Framework.
+
 - hello
 
   This demo illustrates how to invoke ordinary (twoway) operations, as
@@ -47,6 +51,15 @@ Demos in this directory:
   A demo to illustrate how nested callbacks work, and how the size of
   the thread pool affects the maximum nesting depth.
 
+- plugin
+
+  A demo to illustrate how to write and use Ice plugins.
+
+- serialize
+
+  This demo illistrates how to transfer serializable .NET objects 
+  with Ice.
+
 - session
 
   This demo shows how to use sessions to clean up client-specific
@@ -63,3 +76,8 @@ Demos in this directory:
 
   This demo shows how to use classes, class factories, and the
   difference between local and remote invocations of class operations.
+
+- wpf
+
+  A Windows Presentation Foundation (WPF) application that shows how
+  to use Asynchronous Method Invocation (AMI) in a graphical client.

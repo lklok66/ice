@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,11 +14,8 @@
 #include <IceUtil/StringUtil.h>
 #include <IceGrid/Exception.h>
 #include <IceUtil/Random.h>
-
 #include <functional>
-#ifdef __BCPLUSPLUS__
-#  include <iterator>
-#endif
+#include <iterator>
 
 namespace IceGrid
 {
@@ -44,7 +41,9 @@ std::string toString(const Ice::Exception&);
 std::string getProperty(const PropertyDescriptorSeq&, const std::string&, const std::string& = std::string());
 bool hasProperty(const PropertyDescriptorSeq&, const std::string&);
 PropertyDescriptor createProperty(const std::string&, const std::string& = std::string());
-std::string escapeProperty(const std::string&);
+std::string escapeProperty(const std::string&, bool = false);
+
+void setupThreadPool(const Ice::PropertiesPtr&, const std::string&, int, int = 0, bool = false);
 
 int getMMVersion(const std::string&);
 

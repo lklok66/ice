@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -10,7 +10,7 @@
 top_srcdir	= ..\..
 
 LIBNAME     	= $(top_srcdir)\lib\freeze$(LIBSUFFIX).lib
-DLLNAME		= $(top_srcdir)\bin\freeze$(SOVERSION)$(LIBSUFFIX).dll
+DLLNAME		= $(top_srcdir)\bin\freeze$(COMPSUFFIX)$(SOVERSION)$(LIBSUFFIX).dll
 
 TARGETS		= $(LIBNAME) $(DLLNAME)
 
@@ -57,7 +57,7 @@ LINKWITH	= $(LIBS) $(DB_LIBS)
 PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
 !endif
 
-!if "$(CPP_COMPILER)" == "BCC2007"
+!if "$(BCPLUSPLUS)" == "yes"
 RES_FILE        = ,, Freeze.res
 !else
 RES_FILE        = Freeze.res
@@ -66,7 +66,7 @@ RES_FILE        = Freeze.res
 $(LIBNAME): $(DLLNAME)
 
 $(DLLNAME): $(OBJS) Freeze.res
-	$(LINK) $(LD_DLLFLAGS) $(PDBFLAGS) $(OBJS) $(PREOUT)$@ $(PRELIBS)$(LINKWITH) $(RES_FILE)
+	$(LINK) $(BASE):0x25000000 $(LD_DLLFLAGS) $(PDBFLAGS) $(OBJS) $(PREOUT)$@ $(PRELIBS)$(LINKWITH) $(RES_FILE)
 	move $(DLLNAME:.dll=.lib) $(LIBNAME)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
@@ -78,9 +78,6 @@ $(HDIR)/Catalog.h Catalog.cpp: $(SDIR)/CatalogData.ice $(SLICE2FREEZE) $(SLICEPA
 	Catalog $(slicedir)/Freeze/CatalogData.ice
 	move Catalog.h $(HDIR)
 
-clean::
-	del /q $(HDIR)\Catalog.h Catalog.cpp
-
 $(HDIR)/CatalogIndexList.h CatalogIndexList.cpp: $(slicedir)/Ice/BuiltinSequences.ice $(SLICE2FREEZE) $(SLICEPARSERLIB)
 	del /q $(HDIR)\CatalogIndexList.h CatalogIndexList.cpp
 	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict Freeze::CatalogIndexList,string,Ice::StringSeq \
@@ -88,39 +85,37 @@ $(HDIR)/CatalogIndexList.h CatalogIndexList.cpp: $(slicedir)/Ice/BuiltinSequence
 	move CatalogIndexList.h $(HDIR)
 
 clean::
-	del /q $(HDIR)\CatalogIndexList.h CatalogIndexList.cpp
-
-clean::
-	del /q $(DLLNAME:.dll=.*)
-	del /q DB.cpp $(HDIR)\DB.h
-	del /q BackgroundSaveEvictor.cpp $(HDIR)\BackgroundSaveEvictor.h
-	del /q CatalogData.cpp $(HDIR)\CatalogData.h
-	del /q Connection.cpp $(HDIR)\Connection.h
-	del /q ConnectionF.cpp $(HDIR)\ConnectionF.h 
-	del /q Exception.cpp $(HDIR)\Exception.h
-	del /q EvictorF.cpp $(HDIR)\EvictorF.h
-	del /q Evictor.cpp $(HDIR)\Evictor.h
-	del /q EvictorStorage.cpp $(HDIR)\EvictorStorage.h
-	del /q Transaction.cpp $(HDIR)\Transaction.h
-	del /q TransactionalEvictor.cpp $(HDIR)\TransactionalEvictor.h
-	del /q PingObject.cpp PingObject.h
-	del /q Freeze.res
+	-del /q Catalog.cpp $(HDIR)\Catalog.h
+	-del /q CatalogIndexList.cpp $(HDIR)\CatalogIndexList.h
+	-del /q DB.cpp $(HDIR)\DB.h
+	-del /q BackgroundSaveEvictor.cpp $(HDIR)\BackgroundSaveEvictor.h
+	-del /q CatalogData.cpp $(HDIR)\CatalogData.h
+	-del /q Connection.cpp $(HDIR)\Connection.h
+	-del /q ConnectionF.cpp $(HDIR)\ConnectionF.h 
+	-del /q Exception.cpp $(HDIR)\Exception.h
+	-del /q EvictorF.cpp $(HDIR)\EvictorF.h
+	-del /q Evictor.cpp $(HDIR)\Evictor.h
+	-del /q EvictorStorage.cpp $(HDIR)\EvictorStorage.h
+	-del /q Transaction.cpp $(HDIR)\Transaction.h
+	-del /q TransactionalEvictor.cpp $(HDIR)\TransactionalEvictor.h
+	-del /q PingObject.cpp PingObject.h
+	-del /q Freeze.res
 
 install:: all
-	copy $(LIBNAME) $(install_libdir)
-	copy $(DLLNAME) $(install_bindir)
+	copy $(LIBNAME) "$(install_libdir)"
+	copy $(DLLNAME) "$(install_bindir)"
 
 
-!if "$(CPP_COMPILER)" == "BCC2007" && "$(OPTIMIZE)" != "yes"
+!if "$(BCPLUSPLUS)" == "yes" && "$(OPTIMIZE)" != "yes"
 
 install:: all
-	copy $(DLLNAME:.dll=.tds) $(install_bindir)
+	copy $(DLLNAME:.dll=.tds) "$(install_bindir)"
 
 !elseif "$(GENERATE_PDB)" == "yes"
 
 install:: all
-	copy $(DLLNAME:.dll=.pdb) $(install_bindir)
+	copy $(DLLNAME:.dll=.pdb) "$(install_bindir)"
 
 !endif
 
-!include .depend
+!include .depend.mak

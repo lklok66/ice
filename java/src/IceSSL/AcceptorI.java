@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -38,8 +38,18 @@ final class AcceptorI implements IceInternal.Acceptor
 
         if(_instance.networkTraceLevel() >= 1)
         {
-            String s = "accepting ssl connections at " + toString();
-            _logger.trace(_instance.networkTraceCategory(), s);
+            StringBuffer s = new StringBuffer("accepting ssl connections at ");
+	    s.append(toString());
+
+            java.util.List<String> interfaces = 
+                IceInternal.Network.getHostsForEndpointExpand(_addr.getAddress().getHostAddress(), 
+                                                              _instance.protocolSupport(), true);
+            if(!interfaces.isEmpty())
+            {
+                s.append("\nlocal interfaces: ");
+                s.append(IceUtilInternal.StringUtil.joinString(interfaces, ", "));
+            }
+            _logger.trace(_instance.networkTraceCategory(), s.toString());
         }
     }
 
@@ -47,12 +57,12 @@ final class AcceptorI implements IceInternal.Acceptor
     accept()
     {
         //
-        // The plugin may not be fully initialized.
+        // The plug-in may not be fully initialized.
         //
         if(!_instance.initialized())
         {
             Ice.PluginInitializationException ex = new Ice.PluginInitializationException();
-            ex.reason = "IceSSL: plugin is not initialized";
+            ex.reason = "IceSSL: plug-in is not initialized";
             throw ex;
         }
 
@@ -64,7 +74,8 @@ final class AcceptorI implements IceInternal.Acceptor
             IceInternal.Network.setBlock(fd, false);
             IceInternal.Network.setTcpBufSize(fd, _instance.communicator().getProperties(), _logger);
 
-            engine = _instance.createSSLEngine(true);
+            java.net.InetSocketAddress peerAddr = (java.net.InetSocketAddress)fd.socket().getRemoteSocketAddress();
+            engine = _instance.createSSLEngine(true, peerAddr);
         }
         catch(RuntimeException ex)
         {
@@ -78,7 +89,7 @@ final class AcceptorI implements IceInternal.Acceptor
                           IceInternal.Network.fdToString(fd));
         }
 
-        return new TransceiverI(_instance, engine, fd, "", true, true, _adapterName);
+        return new TransceiverI(_instance, engine, fd, "", true, true, _adapterName, null);
     }
 
     public String

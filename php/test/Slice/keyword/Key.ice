@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -39,6 +39,7 @@ module and
     };
     class echo
     {
+	int if;
         void else(die* elseif, out int empty);
     };
     class enddeclare extends echo implements die, function
@@ -59,4 +60,5 @@ module and
 
     const int or = 0;
     const int print = 0;
+    const int require_once = 0;
 };

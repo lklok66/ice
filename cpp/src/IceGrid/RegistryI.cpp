@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,12 +9,13 @@
 
 #include <IceUtil/DisableWarnings.h>
 #include <IceUtil/UUID.h>
+#include <IceUtil/FileUtil.h>
 #include <Ice/Ice.h>
 #include <Ice/Network.h>
 #include <Ice/ProtocolPluginFacade.h> // Just to get the hostname
 
 #include <IceStorm/Service.h>
-#include <IceSSL/Plugin.h>
+#include <IceSSL/IceSSL.h>
 #include <Glacier2/PermissionsVerifier.h>
 
 #include <IceGrid/TraceLevels.h>
@@ -42,17 +43,6 @@
 #include <openssl/des.h> // For crypt() passwords
 
 #include <sys/types.h>
-#include <sys/stat.h>
-
-#ifdef _WIN32
-#   include <direct.h>
-#   ifdef _MSC_VER
-#      define S_ISDIR(mode) ((mode) & _S_IFDIR)
-#      define S_ISREG(mode) ((mode) & _S_IFREG)
-#   endif
-#else
-#   include <unistd.h>
-#endif
 
 using namespace std;
 using namespace Ice;
@@ -167,31 +157,27 @@ RegistryI::~RegistryI()
 bool
 RegistryI::start()
 {
-    assert(_communicator);
-    PropertiesPtr properties = _communicator->getProperties();
-
-    //
-    // Initialize the database environment.
-    //
-    string dbPath = properties->getProperty("IceGrid.Registry.Data");
-    if(dbPath.empty())
+    try
     {
-        Error out(_communicator->getLogger());
-        out << "property `IceGrid.Registry.Data' is not set";
-        return false;
-    }
-    else
-    {
-        struct stat filestat;
-        if(stat(dbPath.c_str(), &filestat) != 0 || !S_ISDIR(filestat.st_mode))
+        if(!startImpl())
         {
-            Error out(_communicator->getLogger());
-            SyscallException ex(__FILE__, __LINE__);
-            ex.error = getSystemErrno();
-            out << "property `IceGrid.Registry.Data' is set to an invalid path:\n" << ex;
+            stop();
             return false;
         }
     }
+    catch(...)
+    {
+        stop();
+        throw;
+    }
+    return true;
+}
+
+bool
+RegistryI::startImpl()
+{
+    assert(_communicator);
+    PropertiesPtr properties = _communicator->getProperties();
 
     //
     // Check that required properties are set and valid.
@@ -250,7 +236,6 @@ RegistryI::start()
     properties->setProperty("IceGrid.Registry.SessionManager.AdapterId", "");
     properties->setProperty("IceGrid.Registry.Internal.AdapterId", "");
 
-    setupThreadPool(properties, "Ice.ThreadPool.Client", 1, 100);
     setupThreadPool(properties, "IceGrid.Registry.Client.ThreadPool", 1, 10);
     setupThreadPool(properties, "IceGrid.Registry.Server.ThreadPool", 1, 10, true); // Serialize for admin callbacks
     setupThreadPool(properties, "IceGrid.Registry.SessionManager.ThreadPool", 1, 10);
@@ -259,6 +244,16 @@ RegistryI::start()
     _replicaName = properties->getPropertyWithDefault("IceGrid.Registry.ReplicaName", "Master");
     _master = _replicaName == "Master";
     _sessionTimeout = properties->getPropertyAsIntWithDefault("IceGrid.Registry.SessionTimeout", 30);
+
+    if(!_master && properties->getProperty("Ice.Default.Locator").empty())
+    {
+        if(properties->getProperty("Ice.Default.Locator").empty())
+        {
+            Error out(_communicator->getLogger());
+            out << "property `Ice.Default.Locator' is not set";
+            return false;
+        }
+    }
 
     //
     // Get the instance name
@@ -280,12 +275,6 @@ RegistryI::start()
     }
     else
     {
-        if(properties->getProperty("Ice.Default.Locator").empty())
-        {
-            Error out(_communicator->getLogger());
-            out << "property `Ice.Default.Locator' is not set";
-            return false;
-        }
         _instanceName = _communicator->getDefaultLocator()->ice_getIdentity().category;
     }
 
@@ -309,8 +298,6 @@ RegistryI::start()
     {
     }
     
-    properties->setProperty("Freeze.DbEnv.Registry.DbHome", dbPath);
-
     //
     // Create the reaper thread.
     //
@@ -340,7 +327,22 @@ RegistryI::start()
     //
     // Create the registry database.
     //
-    _database = new Database(registryAdapter, topicManager, _instanceName, _traceLevels, getInfo(), _readonly);
+    DatabasePluginPtr plugin;
+    try
+    {
+        plugin = DatabasePluginPtr::dynamicCast(_communicator->getPluginManager()->getPlugin("DB"));
+    }
+    catch(const NotRegisteredException&)
+    {
+    }
+    if(!plugin)
+    {
+        Error out(_communicator->getLogger());
+        out << "no database plugin configured with `Ice.Plugin.DB' or plugin is not a database plugin";
+        return false;
+    }
+    
+    _database = new Database(registryAdapter, topicManager, _instanceName, _traceLevels, getInfo(), plugin, _readonly);
     _wellKnownObjects = new WellKnownObjectsManager(_database);
 
     //
@@ -687,7 +689,10 @@ RegistryI::stop()
     // ensure that there will be no more invocations on IceStorm once
     // it's shutdown.
     //
-    _database->destroyTopics();
+    if(_database)
+    {
+        _database->destroyTopics();
+    }
 
     try
     {
@@ -977,38 +982,6 @@ RegistryI::createAdminCallbackProxy(const Identity& id) const
     return _serverAdapter->createProxy(id);
 }
 
-void
-RegistryI::setupThreadPool(const PropertiesPtr& properties, const string& name, int size, int sizeMax, bool serialize)
-{
-    if(properties->getPropertyAsIntWithDefault(name + ".Size", 0) < size)
-    {
-        ostringstream os;
-        os << size;
-        properties->setProperty(name + ".Size", os.str());
-    }
-    else
-    {
-        size = properties->getPropertyAsInt(name + ".Size");
-    }
-
-    if(sizeMax > 0 && properties->getPropertyAsIntWithDefault(name + ".SizeMax", 0) < sizeMax)
-    {
-        if(size >= sizeMax)
-        {
-            sizeMax = size * 10;
-        }
-        
-        ostringstream os;
-        os << sizeMax;
-        properties->setProperty(name + ".SizeMax", os.str());
-    }
-
-    if(serialize)
-    {
-        properties->setProperty(name + ".Serialize", "1");
-    }
-}
-
 Glacier2::PermissionsVerifierPrx
 RegistryI::getPermissionsVerifier(const ObjectAdapterPtr& adapter, 
                                   const IceGrid::LocatorPrx& locator,
@@ -1066,7 +1039,11 @@ RegistryI::getPermissionsVerifier(const ObjectAdapterPtr& adapter,
     }
     else if(!passwordsProperty.empty())
     {
-        ifstream passwordFile(passwordsProperty.c_str());
+        //
+        // No nativeToUTF8 conversion necessary here, since no string
+        // converter is installed by IceGrid the string is UTF-8.
+        //
+        IceUtilInternal::ifstream passwordFile(passwordsProperty);
         if(!passwordFile)
         {
             Error out(_communicator->getLogger());
@@ -1226,61 +1203,35 @@ RegistryI::getSSLInfo(const ConnectionPtr& connection, string& userDN)
     Glacier2::SSLInfo sslinfo;
     try
     {
-        IceSSL::ConnectionInfo info = IceSSL::getConnectionInfo(connection);
-
-        if(info.remoteAddr.ss_family == AF_UNSPEC)
+        IceSSL::ConnectionInfoPtr info = IceSSL::ConnectionInfoPtr::dynamicCast(connection->getInfo());
+        if(!info)
         {
-            //
-            // The remote address may not be available on Windows XP SP2 when using IPv6.
-            //
-            sslinfo.remotePort = 0;
-            sslinfo.remoteHost = "";
-        }
-        else
-        {
-            if(info.remoteAddr.ss_family == AF_INET)
-            {
-                sslinfo.remotePort = ntohs(reinterpret_cast<sockaddr_in*>(&info.remoteAddr)->sin_port);
-            }
-            else
-            {
-                sslinfo.remotePort = ntohs(reinterpret_cast<sockaddr_in6*>(&info.remoteAddr)->sin6_port);
-            }
-            sslinfo.remoteHost = IceInternal::inetAddrToString(info.remoteAddr);
+            PermissionDeniedException exc;
+            exc.reason = "not ssl connection";
+            throw exc;
         }
 
-        if(info.localAddr.ss_family == AF_INET)
+        sslinfo.remotePort = info->remotePort;
+        sslinfo.remoteHost = info->remoteAddress;
+        sslinfo.localPort = info->localPort;
+        sslinfo.localHost = info->localAddress;
+        sslinfo.cipher = info->cipher;
+        sslinfo.certs = info->certs;
+        if(info->certs.size() > 0)
         {
-            sslinfo.localPort = ntohs(reinterpret_cast<sockaddr_in*>(&info.localAddr)->sin_port);
+            userDN = IceSSL::Certificate::decode(info->certs[0])->getSubjectDN();
         }
-        else
-        {
-            sslinfo.localPort = ntohs(reinterpret_cast<sockaddr_in6*>(&info.localAddr)->sin6_port);
-        }
-        sslinfo.localHost = IceInternal::inetAddrToString(info.localAddr);
-
-        sslinfo.cipher = info.cipher;
-
-        if(!info.certs.empty())
-        {
-            sslinfo.certs.resize(info.certs.size());
-            for(unsigned int i = 0; i < info.certs.size(); ++i)
-            {
-                sslinfo.certs[i] = info.certs[i]->encode();
-            }
-            userDN = info.certs[0]->getSubjectDN();
-        }
-    }
-    catch(const IceSSL::ConnectionInvalidException&)
-    {
-        PermissionDeniedException exc;
-        exc.reason = "not ssl connection";
-        throw exc;
     }
     catch(const IceSSL::CertificateEncodingException&)
     {
         PermissionDeniedException exc;
         exc.reason = "certificate encoding exception";
+        throw exc;
+    }
+    catch(const Ice::LocalException&)
+    {
+        PermissionDeniedException exc;
+        exc.reason = "connection exception";
         throw exc;
     }
 
@@ -1294,58 +1245,66 @@ RegistryI::registerReplicas(const InternalRegistryPrx& internalRegistry,
 {
     set<NodePrx> nodes;
     nodes.insert(dbNodes.begin(), dbNodes.end());
-
+    vector<Ice::AsyncResultPtr> results;
     for(InternalRegistryPrxSeq::const_iterator r = replicas.begin(); r != replicas.end(); ++r)
     {
         if((*r)->ice_getIdentity() != internalRegistry->ice_getIdentity())
         {
-            string replicaName;
+            results.push_back((*r)->begin_registerWithReplica(internalRegistry));
+        }
+    }
+
+    for(vector<Ice::AsyncResultPtr>::const_iterator p = results.begin(); p != results.end(); ++p)
+    {
+        InternalRegistryPrx replica = InternalRegistryPrx::uncheckedCast((*p)->getProxy());
+
+        string replicaName;
+        if(_traceLevels && _traceLevels->replica > 1)
+        {
+            replicaName = replica->ice_getIdentity().name;
+            const string prefix("InternalRegistry-");
+            string::size_type pos = replicaName.find(prefix);
+            if(pos != string::npos)
+            {
+                replicaName = replicaName.substr(prefix.size());
+            }
+            
+            Ice::Trace out(_traceLevels->logger, _traceLevels->replicaCat);
+            out << "creating replica `" << replicaName << "' session";
+        }
+
+        
+        try
+        {
+            replica->end_registerWithReplica(*p);
+            
+            NodePrxSeq nds = replica->getNodes();
+            nodes.insert(nds.begin(), nds.end());
+
             if(_traceLevels && _traceLevels->replica > 1)
             {
-                replicaName = (*r)->ice_getIdentity().name;
-                const string prefix("InternalRegistry-");
-                string::size_type pos = replicaName.find(prefix);
-                if(pos != string::npos)
-                {
-                    replicaName = replicaName.substr(prefix.size());
-                }
-
                 Ice::Trace out(_traceLevels->logger, _traceLevels->replicaCat);
-                out << "creating replica `" << replicaName << "' session";
+                out << "replica `" << replicaName << "' session created";
             }
-
+        }
+        catch(const Ice::LocalException& ex)
+        {
+            //
+            // Clear the proxy from the database if we can't
+            // contact the replica.
+            //
             try
             {
-                (*r)->registerWithReplica(internalRegistry);
-
-                NodePrxSeq nds = (*r)->getNodes();
-                nodes.insert(nds.begin(), nds.end());
-
-                if(_traceLevels && _traceLevels->replica > 1)
-                {
-                    Ice::Trace out(_traceLevels->logger, _traceLevels->replicaCat);
-                    out << "replica `" << replicaName << "' session created";
-                }
+                _database->removeObject(replica->ice_getIdentity());
             }
-            catch(const Ice::LocalException& ex)
+            catch(const ObjectNotRegisteredException&)
             {
-                //
-                // Clear the proxy from the database if we can't
-                // contact the replica.
-                //
-                try
-                {
-                    _database->removeObject((*r)->ice_getIdentity());
-                }
-                catch(const ObjectNotRegisteredException&)
-                {
-                }
-
-                if(_traceLevels && _traceLevels->replica > 1)
-                {
-                    Ice::Trace out(_traceLevels->logger, _traceLevels->replicaCat);
-                    out << "replica `" << replicaName << "' session creation failed:\n" << ex;
-                }
+            }
+            
+            if(_traceLevels && _traceLevels->replica > 1)
+            {
+                Ice::Trace out(_traceLevels->logger, _traceLevels->replicaCat);
+                out << "replica `" << replicaName << "' session creation failed:\n" << ex;
             }
         }
     }

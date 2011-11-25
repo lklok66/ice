@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -9,13 +9,6 @@
 # **********************************************************************
 
 import os, sys, traceback
-
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "python", "Ice.py")):
-        break
-else:
-    raise "can't find toplevel directory!"
 
 import Ice
 Ice.loadSlice('Test.ice')
@@ -27,7 +20,7 @@ def test(b):
         raise RuntimeError('test assertion failed')
 
 def run(args, communicator, sync):
-    hello = Test.HelloPrx.checkedCast(communicator.stringToProxy("test:default -p 12010 -t 10000"))
+    hello = Test.HelloPrx.checkedCast(communicator.stringToProxy("test:default -p 12010"))
     hello.sayHello(False)
     hello.sayHello(False, { "_fwd":"o" } )
     test(hello.add(10, 20) == 30)

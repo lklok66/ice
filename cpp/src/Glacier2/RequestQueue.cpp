@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -8,54 +8,17 @@
 // **********************************************************************
 
 #include <Glacier2/RequestQueue.h>
+#include <Glacier2/Instance.h>
+#include <Glacier2/SessionRouterI.h>
 #include <set>
 
 using namespace std;
 using namespace Ice;
 using namespace Glacier2;
 
-namespace
-{
-
-//
-// AMI callback class for twoway requests
-//
-class AMI_Array_Object_ice_invokeI : public AMI_Array_Object_ice_invoke
-{
-public:
-    
-    AMI_Array_Object_ice_invokeI(const AMD_Array_Object_ice_invokePtr& amdCB) : _amdCB(amdCB)
-    {
-    }
-    
-    virtual void
-    ice_response(bool ok, const pair<const Byte*, const Byte*>& outParams)
-    {
-        if(_amdCB)
-        {
-            _amdCB->ice_response(ok, outParams);
-        }
-    }
-
-    virtual void
-    ice_exception(const Exception& ex)
-    {
-        if(_amdCB)
-        {
-            _amdCB->ice_exception(ex);
-        }
-    }
-
-private:
-
-    const AMD_Array_Object_ice_invokePtr _amdCB;
-};
-
-}
-
 Glacier2::Request::Request(const ObjectPrx& proxy, const std::pair<const Byte*, const Byte*>& inParams,
                            const Current& current, bool forwardContext, const Ice::Context& sslContext,
-                           const AMD_Array_Object_ice_invokePtr& amdCB) :
+                           const AMD_Object_ice_invokePtr& amdCB) :
     _proxy(proxy),
     _inParams(inParams.first, inParams.second),
     _current(current),
@@ -63,15 +26,6 @@ Glacier2::Request::Request(const ObjectPrx& proxy, const std::pair<const Byte*, 
     _sslContext(sslContext),
     _amdCB(amdCB)
 {
-    //
-    // If this is not a twoway call, we can finish the AMD call right
-    // away.
-    //
-    if(!_proxy->ice_isTwoway())
-    {
-        _amdCB->ice_response(true, pair<const Byte*, const Byte*>(0, 0));
-    }
-
     Context::const_iterator p = current.ctx.find("_ovrd");
     if(p != current.ctx.end())
     {
@@ -80,8 +34,8 @@ Glacier2::Request::Request(const ObjectPrx& proxy, const std::pair<const Byte*, 
 }
 
 
-bool
-Glacier2::Request::invoke()
+Ice::AsyncResultPtr
+Glacier2::Request::invoke(const Callback_Object_ice_invokePtr& cb)
 {
     pair<const Byte*, const Byte*> inPair;
     if(_inParams.size() == 0)
@@ -114,52 +68,44 @@ Glacier2::Request::invoke()
         {
             if(_sslContext.size() > 0)
             {
-                _proxy->ice_invoke(_current.operation, _current.mode, inPair, outParams,  _sslContext);
+                _proxy->ice_invoke(_current.operation, _current.mode, inPair, outParams, _sslContext);
             }
             else
             {
                 _proxy->ice_invoke(_current.operation, _current.mode, inPair, outParams);
             }
         }
-        return true; // Batch invocation.
+        return 0;
     }
     else
     {
-        AMI_Array_Object_ice_invokePtr amiCB;
-        if(_proxy->ice_isTwoway())
-        {
-            amiCB = new AMI_Array_Object_ice_invokeI(_amdCB);
-        }
-        else
-        {
-            amiCB = new AMI_Array_Object_ice_invokeI(0);
-        }
-        
+        Ice::AsyncResultPtr result;
         if(_forwardContext)
         { 
             if(_sslContext.size() > 0)
             {
                 Ice::Context ctx = _current.ctx;
                 ctx.insert(_sslContext.begin(), _sslContext.end());
-                _proxy->ice_invoke_async(amiCB, _current.operation, _current.mode, inPair, ctx);
+                result = _proxy->begin_ice_invoke(_current.operation, _current.mode, inPair, ctx, cb, this);
             }
             else
             {
-                _proxy->ice_invoke_async(amiCB, _current.operation, _current.mode, inPair, _current.ctx);
+                result = _proxy->begin_ice_invoke(_current.operation, _current.mode, inPair, _current.ctx, cb, this);
             }
         }
         else
         {
             if(_sslContext.size() > 0)
             {
-                _proxy->ice_invoke_async(amiCB, _current.operation, _current.mode, inPair, _sslContext);
+                result = _proxy->begin_ice_invoke(_current.operation, _current.mode, inPair, _sslContext, cb, this);
             }
             else
             {
-                _proxy->ice_invoke_async(amiCB, _current.operation, _current.mode, inPair);
+                result = _proxy->begin_ice_invoke(_current.operation, _current.mode, inPair, cb, this);
             }
         }
-        return false; // Not a batch invocation.
+
+        return result;
     }
 }
 
@@ -184,18 +130,62 @@ Glacier2::Request::override(const RequestPtr& other) const
     }
 
     //
-    // We cannot override if the proxies differ.
-    //
-    if(_proxy != other->_proxy)
+    // Don't override if the override isn't the same.
+    // 
+    if(_override != other->_override)
     {
         return false;
     }
 
-    return _override == other->_override;
+    //
+    // We cannot override if the proxies differ.
+    //
+    return _proxy == other->_proxy;
 }
 
-Glacier2::RequestQueue::RequestQueue(const RequestQueueThreadPtr& requestQueueThread) :
-    _requestQueueThread(requestQueueThread)
+void
+Glacier2::Request::response(bool ok, const pair<const Ice::Byte*, const Ice::Byte*>& outParams)
+{
+    assert(_proxy->ice_isTwoway());
+    _amdCB->ice_response(ok, outParams);
+}
+
+void
+Glacier2::Request::exception(const Ice::Exception& ex)
+{
+    //
+    // Only for twoways, oneway or batch oneway dispatches are finished
+    // when queued, see queued().
+    //
+    if(_proxy->ice_isTwoway())
+    {
+        _amdCB->ice_exception(ex);
+    }
+}
+
+void 
+Glacier2::Request::queued()
+{
+    if(!_proxy->ice_isTwoway())
+    {
+#if (defined(_MSC_VER) && (_MSC_VER >= 1600))
+        _amdCB->ice_response(true, pair<const Byte*, const Byte*>(nullptr, nullptr));
+#else
+        _amdCB->ice_response(true, pair<const Byte*, const Byte*>(0, 0));
+#endif
+    }
+}
+
+Glacier2::RequestQueue::RequestQueue(const RequestQueueThreadPtr& requestQueueThread, 
+                                     const InstancePtr& instance, 
+                                     const Ice::ConnectionPtr& connection) :
+    _requestQueueThread(requestQueueThread),
+    _instance(instance),
+    _connection(connection),
+    _callback(newCallback_Object_ice_invoke(this, &RequestQueue::response, &RequestQueue::exception,
+                                            &RequestQueue::sent)),
+    _flushCallback(newCallback_Connection_flushBatchRequests(this, &RequestQueue::exception, &RequestQueue::sent)),
+    _pendingSend(false)
 {
 }
 
@@ -205,7 +195,7 @@ Glacier2::RequestQueue::addRequest(const RequestPtr& request)
     IceUtil::Mutex::Lock lock(*this);
     if(request->hasOverride())
     {
-        for(vector<RequestPtr>::iterator p = _requests.begin(); p != _requests.end(); ++p)
+        for(deque<RequestPtr>::iterator p = _requests.begin(); p != _requests.end(); ++p)
         {
             //
             // If the new request overrides an old one, then abort the old
@@ -213,6 +203,7 @@ Glacier2::RequestQueue::addRequest(const RequestPtr& request)
             //
             if(request->override(*p))
             {
+                request->queued();
                 *p = request;
                 return true;
             }
@@ -222,11 +213,12 @@ Glacier2::RequestQueue::addRequest(const RequestPtr& request)
     //
     // No override, we add the new request.
     //
-    if(_requests.empty())
+    if(_requests.empty() && (!_connection || !_pendingSend))
     {
         _requestQueueThread->flushRequestQueue(this); // This might throw if the thread is destroyed.
     }
     _requests.push_back(request);
+    request->queued();
     return false;
 }
 
@@ -234,14 +226,85 @@ void
 Glacier2::RequestQueue::flushRequests(set<Ice::ObjectPrx>& batchProxies)
 {
     IceUtil::Mutex::Lock lock(*this);
-    for(vector<RequestPtr>::const_iterator p = _requests.begin(); p != _requests.end(); ++p)
+    if(_connection)
+    {
+        if(_pendingSend)
+        {
+            return;
+        }
+        flush();
+    }
+    else
+    {
+        flush(batchProxies);
+    }
+}
+
+void
+Glacier2::RequestQueue::flush()
+{
+    assert(_connection);
+    _pendingSend = false;
+    _pendingSendRequest = 0;
+
+    bool flushBatchRequests = false;
+    deque<RequestPtr>::iterator p;
+    for(p = _requests.begin(); p != _requests.end(); ++p)
     {
         try
         {
-            if((*p)->invoke()) // If batch invocation, add the proxy to the batch proxy set.
+            Ice::AsyncResultPtr result = (*p)->invoke(_callback);
+            if(!result)
+            {
+                flushBatchRequests = true;
+            } 
+            else if(!result->sentSynchronously() && !result->isCompleted())
+            {
+                _pendingSend = true;
+                _pendingSendRequest = *p++;
+                break;
+            }
+        }
+        catch(const Ice::LocalException&)
+        {
+            // Ignore, this can occur for batch requests.
+        }
+    }
+
+    if(p == _requests.end())
+    {
+        _requests.clear();
+    }
+    else
+    {
+        _requests.erase(_requests.begin(), p);
+    }
+
+    if(flushBatchRequests)
+    {
+        Ice::AsyncResultPtr result = _connection->begin_flushBatchRequests(_flushCallback);
+        if(!result->sentSynchronously() && !result->isCompleted())
+        {
+            _pendingSend = true;
+            _pendingSendRequest = 0;
+        }
+    }
+}
+
+void
+Glacier2::RequestQueue::flush(set<Ice::ObjectPrx>& batchProxies)
+{
+    assert(!_connection);
+
+    for(deque<RequestPtr>::const_iterator p = _requests.begin(); p != _requests.end(); ++p)
+    {
+        try
+        {
+            Ice::AsyncResultPtr result = (*p)->invoke(_callback);
+            if(!result)
             {
                 batchProxies.insert((*p)->getProxy());
-            }
+            } 
         }
         catch(const Ice::LocalException&)
         {
@@ -251,7 +314,62 @@ Glacier2::RequestQueue::flushRequests(set<Ice::ObjectPrx>& batchProxies)
     _requests.clear();
 }
 
+void
+Glacier2::RequestQueue::response(bool ok, const pair<const Byte*, const Byte*>& outParams, const RequestPtr& request)
+{
+    assert(request);
+    request->response(ok, outParams);
+}
+
+void
+Glacier2::RequestQueue::exception(const Ice::Exception& ex, const RequestPtr& request)
+{
+    //
+    // If the connection has been lost, destroy the session.
+    //
+    if(_connection)
+    {
+        if(dynamic_cast<const Ice::SocketException*>(&ex) ||
+           dynamic_cast<const Ice::TimeoutException*>(&ex) ||
+           dynamic_cast<const Ice::ProtocolException*>(&ex))
+        {
+            try
+            {
+                _instance->sessionRouter()->destroySession(_connection);
+            }
+            catch(const Exception&)
+            {
+            }
+        }
+
+        IceUtil::Mutex::Lock lock(*this);
+        if(request == _pendingSendRequest)
+        {
+            flush();
+        }
+    }
+
+    if(request)
+    {
+        request->exception(ex);
+    }
+}
+
+void 
+Glacier2::RequestQueue::sent(bool sentSynchronously, const RequestPtr& request)
+{
+    if(_connection && !sentSynchronously)
+    {
+        IceUtil::Mutex::Lock lock(*this);
+        if(request == _pendingSendRequest)
+        {
+            flush();
+        }
+    }
+}
+
 Glacier2::RequestQueueThread::RequestQueueThread(const IceUtil::Time& sleepTime) :
+    IceUtil::Thread("Glacier2 request queue thread"),
     _sleepTime(sleepTime),
     _destroy(false),
     _sleep(false)
@@ -276,7 +394,14 @@ Glacier2::RequestQueueThread::destroy()
         notify();
     }
 
-    getThreadControl().join();
+    try
+    {
+        getThreadControl().join();
+    }
+    catch(const IceUtil::ThreadNotStartedException&)
+    {
+        // Expected if start() failed.
+    }
 }
 
 void
@@ -362,29 +487,10 @@ Glacier2::RequestQueueThread::run()
             (*p)->flushRequests(flushProxySet);
         }
 
-        set<Ice::ConnectionPtr> flushConnectionSet;
         for(set<Ice::ObjectPrx>::const_iterator q = flushProxySet.begin(); q != flushProxySet.end(); ++q)
         {
-            //
-            // As an optimization, we only flush the proxy batch requests if we didn't 
-            // already flush the requests of a proxy which is using the same connection.
-            //
-            Ice::ConnectionPtr connection = (*q)->ice_getCachedConnection();
-            if(!connection || flushConnectionSet.find(connection) == flushConnectionSet.end())
-            {
-                class FlushCB : public AMI_Object_ice_flushBatchRequests
-                {
-                public:
-
-                    virtual void ice_exception(const Ice::Exception&) { } // Ignore.
-                };
-                (*q)->ice_flushBatchRequests_async(new FlushCB());
-
-                if(connection)
-                {
-                    flushConnectionSet.insert(connection);
-                }
-            }
+            (*q)->begin_ice_flushBatchRequests();
         }
     }
 }
+

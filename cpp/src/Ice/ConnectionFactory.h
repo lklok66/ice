@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -60,7 +60,7 @@ public:
                 const CreateConnectionCallbackPtr&);
     void setRouterInfo(const RouterInfoPtr&);
     void removeAdapter(const Ice::ObjectAdapterPtr&);
-    void flushBatchRequests();
+    void flushAsyncBatchRequests(const CommunicatorBatchOutgoingAsyncPtr&);
 
 private:
 
@@ -73,9 +73,9 @@ private:
         ConnectorInfo(const ConnectorPtr& c, const EndpointIPtr& e) : connector(c), endpoint(e)
         {
         }
-
-        bool operator<(const ConnectorInfo& other) const;
-
+    
+        bool operator==(const ConnectorInfo& other) const;
+    
         ConnectorPtr connector;
         EndpointIPtr endpoint;
     };
@@ -99,8 +99,15 @@ private:
         void getConnection();
         void nextConnector();
 
+        void setConnection(const Ice::ConnectionIPtr&, bool);
+        void setException(const Ice::LocalException&);
+
+        bool hasConnector(const ConnectorInfo&);
+        bool removeConnectors(const std::vector<ConnectorInfo>&);
+        void removeFromPending();
+
         bool operator<(const ConnectCallback&) const;
-        
+
     private:
 
         const OutgoingConnectionFactoryPtr _factory;
@@ -120,18 +127,25 @@ private:
     void incPendingConnectCount();
     void decPendingConnectCount();
     Ice::ConnectionIPtr getConnection(const std::vector<ConnectorInfo>&, const ConnectCallbackPtr&, bool&);
-    void finishGetConnection(const std::vector<ConnectorInfo>&, const ConnectCallbackPtr&, const Ice::ConnectionIPtr&);
+    void finishGetConnection(const std::vector<ConnectorInfo>&, const ConnectorInfo&, const Ice::ConnectionIPtr&, 
+                             const ConnectCallbackPtr&);
+    void finishGetConnection(const std::vector<ConnectorInfo>&, const Ice::LocalException&, const ConnectCallbackPtr&);
+    
+    bool addToPending(const ConnectCallbackPtr&, const std::vector<ConnectorInfo>&);
+    void removeFromPending(const ConnectCallbackPtr&, const std::vector<ConnectorInfo>&);
+
     Ice::ConnectionIPtr findConnection(const std::vector<ConnectorInfo>&, bool&);
     Ice::ConnectionIPtr createConnection(const TransceiverPtr&, const ConnectorInfo&);
 
     void handleException(const Ice::LocalException&, bool);
-    void handleException(const Ice::LocalException&, const ConnectorInfo&, const Ice::ConnectionIPtr&, bool);
+    void handleConnectionException(const Ice::LocalException&, bool);
 
     const InstancePtr _instance;
+    const ConnectionReaperPtr _reaper;
     bool _destroyed;
 
-    std::multimap<ConnectorInfo, Ice::ConnectionIPtr> _connections;
-    std::map<ConnectorInfo, std::set<ConnectCallbackPtr> > _pending;
+    std::multimap<ConnectorPtr, Ice::ConnectionIPtr> _connections;
+    std::map<ConnectorPtr, std::set<ConnectCallbackPtr> > _pending;
 
     std::multimap<EndpointIPtr, Ice::ConnectionIPtr> _connectionsByEndpoint;
     int _pendingConnectCount;
@@ -153,18 +167,20 @@ public:
 
     EndpointIPtr endpoint() const;
     std::list<Ice::ConnectionIPtr> connections() const;
-    void flushBatchRequests();
-
+    void flushAsyncBatchRequests(const CommunicatorBatchOutgoingAsyncPtr&);
+    
     //
     // Operations from EventHandler
     //
-    virtual bool datagram() const;
-    virtual bool readable() const;
-    virtual bool read(BasicStream&);
-    virtual void message(BasicStream&, const ThreadPoolPtr&);
-    virtual void finished(const ThreadPoolPtr&);
-    virtual void exception(const Ice::LocalException&);
+
+#ifdef ICE_USE_IOCP
+    virtual bool startAsync(SocketOperation);
+    virtual bool finishAsync(SocketOperation);
+#endif
+    virtual void message(ThreadPoolCurrent&);
+    virtual void finished(ThreadPoolCurrent&);
     virtual std::string toString() const;
+    virtual NativeInfoPtr getNativeInfo();
 
     virtual void connectionStartCompleted(const Ice::ConnectionIPtr&);
     virtual void connectionStartFailed(const Ice::ConnectionIPtr&, const Ice::LocalException&);
@@ -180,12 +196,16 @@ private:
     {
         StateActive,
         StateHolding,
-        StateClosed
+        StateClosed,
+        StateFinished
     };
 
     void setState(State);
 
-    AcceptorPtr _acceptor;
+    const InstancePtr _instance;
+    const ConnectionReaperPtr _reaper;
+
+    const AcceptorPtr _acceptor;
     const TransceiverPtr _transceiver;
     const EndpointIPtr _endpoint;
 
@@ -193,7 +213,7 @@ private:
 
     const bool _warn;
 
-    std::list<Ice::ConnectionIPtr> _connections;
+    std::set<Ice::ConnectionIPtr> _connections;
 
     State _state;
 };

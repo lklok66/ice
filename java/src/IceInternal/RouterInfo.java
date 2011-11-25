@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -55,6 +55,12 @@ public final class RouterInfo
         return false;
     }
 
+    public int
+    hashCode()
+    {
+        return _router.hashCode();
+    }
+
     public Ice.RouterPrx
     getRouter()
     {
@@ -93,7 +99,6 @@ public final class RouterInfo
             return;
         }
         
-        final RouterInfo self = this;
         _router.getClientProxy_async(new Ice.AMI_Router_getClientProxy()
             {
                 public void
@@ -218,6 +223,11 @@ public final class RouterInfo
         return _adapter;
     }
 
+    public synchronized void clearCache(Reference ref)
+    {
+        _identities.remove(ref.getIdentity());
+    }
+
     private synchronized EndpointI[]
     setClientEndpoints(Ice.ObjectPrx clientProxy)
     {
@@ -292,16 +302,16 @@ public final class RouterInfo
         //
         // We also must remove whatever proxies the router evicted.
         //
-        for(int i = 0; i < evictedProxies.length; ++i)
+        for(Ice.ObjectPrx p : evictedProxies)
         {
-            if(!_identities.remove(evictedProxies[i].ice_getIdentity()))
+            if(!_identities.remove(p.ice_getIdentity()))
             {
                 //
                 // It's possible for the proxy to not have been
                 // added yet in the local map if two threads
                 // concurrently call addProxies.
                 //
-                _evictedIdentities.add(evictedProxies[i].ice_getIdentity());
+                _evictedIdentities.add(p.ice_getIdentity());
             }
         }
     }

@@ -1,13 +1,16 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-public class AccountI extends Test.Account
+package test.Freeze.evictor;
+import test.Freeze.evictor.Test.*;
+
+public class AccountI extends Account
 {
     public int
     getBalance(Ice.Current current)
@@ -16,7 +19,8 @@ public class AccountI extends Test.Account
     }
 
     public void
-    deposit(int amount, Ice.Current current) throws Test.InsufficientFundsException
+    deposit(int amount, Ice.Current current)
+        throws InsufficientFundsException
     {
         //
         // No need to synchronize since everything occurs within its own transaction
@@ -24,13 +28,13 @@ public class AccountI extends Test.Account
         int newBalance = balance + amount;
         if(newBalance < 0)
         {
-            throw new Test.InsufficientFundsException();
+            throw new InsufficientFundsException();
         }
         balance = newBalance;
     }
 
     public void
-    transfer(int amount, Test.AccountPrx toAccount, Ice.Current current) throws Test.InsufficientFundsException
+    transfer(int amount, AccountPrx toAccount, Ice.Current current) throws InsufficientFundsException
     {
         test(_evictor.getCurrentTransaction() != null);
 
@@ -39,7 +43,7 @@ public class AccountI extends Test.Account
     }
 
     public void
-    transfer2_async(Test.AMD_Account_transfer2 cb, int amount, Test.AccountPrx toAccount, Ice.Current current)
+    transfer2_async(AMD_Account_transfer2 cb, int amount, AccountPrx toAccount, Ice.Current current)
     {
         //
         // Here the dispatch thread does everything
@@ -51,7 +55,7 @@ public class AccountI extends Test.Account
             toAccount.deposit(amount); // collocated call
             deposit(-amount, current); // direct call
         }
-        catch(Test.InsufficientFundsException ex)
+        catch(InsufficientFundsException ex)
         {
             cb.ice_exception(ex);
             return;
@@ -61,7 +65,7 @@ public class AccountI extends Test.Account
     }
 
     public void
-    transfer3_async(final Test.AMD_Account_transfer3 cb, int amount, Test.AccountPrx toAccount, Ice.Current current)
+    transfer3_async(final AMD_Account_transfer3 cb, int amount, AccountPrx toAccount, Ice.Current current)
     {
         //
         // Here the dispatch thread does the actual work, but a separate thread sends the response
@@ -69,20 +73,22 @@ public class AccountI extends Test.Account
 
         class ResponseThread extends Thread
         {
-            synchronized void response()
+            synchronized void
+            response()
             {
                 _response = true;
                 notify();
             }
 
-            synchronized void exception(Ice.UserException e)
+            synchronized void
+            exception(Ice.UserException e)
             {
                 _exception = e;
                 notify();
             }
 
-
-            public synchronized void run()
+            public synchronized void
+            run()
             {
                 if(_response == false && _exception == null)
                 {
@@ -129,7 +135,6 @@ public class AccountI extends Test.Account
 
         ResponseThread thread = new ResponseThread();
         thread.setDaemon(true);
-        thread.start();
 
         test(_evictor.getCurrentTransaction() != null);
 
@@ -140,6 +145,9 @@ public class AccountI extends Test.Account
         }
         catch(Ice.UserException e)
         {
+            thread.start();
+            Thread.yield();
+
             //
             // Need to rollback here -- "rollback on user exception" does not work
             // when the dispatch commits before it gets any response!
@@ -150,20 +158,25 @@ public class AccountI extends Test.Account
             return;
         }
 
+        thread.start();
+        Thread.yield();
         thread.response();
     }
 
-    public AccountI(int initialBalance, Freeze.TransactionalEvictor evictor)
+    public
+    AccountI(int initialBalance, Freeze.TransactionalEvictor evictor)
     {
         super(initialBalance);
         _evictor = evictor;
     }
 
-    public AccountI()
+    public
+    AccountI()
     {
     }
 
-    public void init(Freeze.TransactionalEvictor evictor)
+    public void
+    init(Freeze.TransactionalEvictor evictor)
     {
         assert _evictor == null;
         _evictor = evictor;

@@ -1,9 +1,14 @@
 Demos in this directory:
 
+- applet
+
+  An unsigned applet that demonstrates how to use Asynchronous Method
+  Invocation (AMI) in a graphical client.
+
 - async
 
-  This demo illustrates the use of Asynchronous Message Invocation
-  (AMI) and Asynchronous Message Dispatch (AMD).
+  This demo illustrates the use of Asynchronous Method Invocation
+  (AMI) and Asynchronous Method Dispatch (AMD).
 
 - bidir
 
@@ -47,10 +52,24 @@ Demos in this directory:
   A demo to illustrate how nested callbacks work, and how the size of
   the thread pool affects the maximum nesting depth.
 
+- plugin
+
+  A demo to illustrate how to write and use Ice plugins.
+
+- serialize
+
+  This demo illustrates how to transfer serializable Java classes
+  with Ice.
+
 - session
 
   This demo shows how to use sessions to clean up client-specific
   resources in a server after the client shuts down or crashes.
+
+- swing
+
+  A swing application that shows how to use Asynchronous Method
+  Invocation (AMI) in a graphical client.
 
 - throughput
 

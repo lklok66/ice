@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -31,10 +31,10 @@ public class Client
             {
                 Console.Out.Write("testing stringToProxy for router... ");
                 Console.Out.Flush();
-                routerBase = communicator().stringToProxy("Glacier2/router:default -p 12347 -t 30000");
+                routerBase = communicator().stringToProxy("Glacier2/router:default -p 12347");
                 Console.Out.WriteLine("ok");
             }
-            
+
             Glacier2.RouterPrx router;
 
             {
@@ -65,10 +65,10 @@ public class Client
             {
                 Console.Out.Write("testing stringToProxy for server object... ");
                 Console.Out.Flush();
-                @base = communicator().stringToProxy("c1/callback:tcp -p 12010 -t 10000");
+                @base = communicator().stringToProxy("c1/callback:tcp -p 12010");
                 Console.Out.WriteLine("ok");
             }
-                
+
             {
                 Console.Out.Write("trying to ping server before session creation... ");
                 Console.Out.Flush();
@@ -197,7 +197,7 @@ public class Client
             Ice.Object callbackReceiver;
             CallbackReceiverPrx twowayR;
             CallbackReceiverPrx fakeTwowayR;
-            
+
             {
                 Console.Out.Write("creating and adding callback receiver object... ");
                 Console.Out.Flush();
@@ -214,7 +214,7 @@ public class Client
                     adapter.add(callbackReceiver, fakeCallbackReceiverIdent));
                 Console.Out.WriteLine("ok");
             }
-            
+
             {
                 Console.Out.Write("testing oneway callback... ");
                 Console.Out.Flush();
@@ -223,7 +223,7 @@ public class Client
                 Dictionary<string, string> context = new Dictionary<string, string>();
                 context["_fwd"] =  "o";
                 oneway.initiateCallback(onewayR, context);
-                test(callbackReceiverImpl.callbackOK());
+                callbackReceiverImpl.callbackOK();
                 Console.Out.WriteLine("ok");
             }
 
@@ -233,7 +233,7 @@ public class Client
                 Dictionary<string, string> context = new Dictionary<string, string>();
                 context["_fwd"] = "t";
                 twoway.initiateCallback(twowayR, context);
-                test(callbackReceiverImpl.callbackOK());
+                callbackReceiverImpl.callbackOK();
                 Console.Out.WriteLine("ok");
             }
 
@@ -252,7 +252,7 @@ public class Client
                     test(ex.someValue == 3.14);
                     test(ex.someString.Equals("3.14"));
                 }
-                test(callbackReceiverImpl.callbackOK());
+                callbackReceiverImpl.callbackOK();
                 Console.Out.WriteLine("ok");
             }
 
@@ -280,10 +280,10 @@ public class Client
                 CallbackPrx otherCategoryTwoway = CallbackPrxHelper.uncheckedCast(
                     twoway.ice_identity(communicator().stringToIdentity("c2/callback")));
                 otherCategoryTwoway.initiateCallback(twowayR, context);
-                test(callbackReceiverImpl.callbackOK());
+                callbackReceiverImpl.callbackOK();
                 Console.Out.WriteLine("ok");
             }
-            
+
             {
                 Console.Out.Write("testing whether disallowed category gets rejected... ");
                 Console.Out.Flush();
@@ -301,7 +301,7 @@ public class Client
                     Console.Out.WriteLine("ok");
                 }
             }
-            
+
             {
                 Console.Out.Write("testing whether user-id as category is accepted... ");
                 Console.Out.Flush();
@@ -310,10 +310,10 @@ public class Client
                 CallbackPrx otherCategoryTwoway = CallbackPrxHelper.uncheckedCast(
                     twoway.ice_identity(communicator().stringToIdentity("_userid/callback")));
                 otherCategoryTwoway.initiateCallback(twowayR, context);
-                test(callbackReceiverImpl.callbackOK());
+                callbackReceiverImpl.callbackOK();
                 Console.Out.WriteLine("ok");
             }
-            
+
             {
                 Console.Out.Write("testing server shutdown... ");
                 Console.Out.Flush();
@@ -335,17 +335,13 @@ public class Client
                   }
                 */
             }
-            
+
             {
                 Console.Out.Write("destroying session... ");
                 Console.Out.Flush();
                 try
                 {
                     router.destroySession();
-                    test(false);
-                }
-                catch(Ice.ConnectionLostException)
-                {
                 }
                 catch(Ice.LocalException)
                 {
@@ -372,7 +368,7 @@ public class Client
                     test(false);
                 }
             }
-            
+
             if(args.Length >= 1 && args[0].Equals("--shutdown"))
             {
                 {
@@ -381,15 +377,15 @@ public class Client
                     communicator().setDefaultRouter(null);
                     Console.Out.WriteLine("ok");
                 }
-                
+
                 Ice.ObjectPrx processBase;
-                
+
                 {
                     Console.Out.Write("testing stringToProxy for admin object... ");
-                    processBase = communicator().stringToProxy("Glacier2/admin -f Process:tcp -h 127.0.0.1 -p 12348 -t 10000");
+                    processBase = communicator().stringToProxy("Glacier2/admin -f Process:tcp -h 127.0.0.1 -p 12348");
                     Console.Out.WriteLine("ok");
                 }
-                
+
     /*
                 {
                     Console.Out.Write("uninstalling router with process object... ");
@@ -397,16 +393,16 @@ public class Client
                     Console.Out.WriteLine("ok");
                 }
     */
-                
+
                 Ice.ProcessPrx process;
-                
+
                 {
                     Console.Out.Write("testing checked cast for process object... ");
                     process = Ice.ProcessPrxHelper.checkedCast(processBase);
                     test(process != null);
                     Console.Out.WriteLine("ok");
                 }
-                
+
                 Console.Out.Write("testing Glacier2 shutdown... ");
                 process.shutdown();
                 try
@@ -419,7 +415,7 @@ public class Client
                     Console.Out.WriteLine("ok");
                 }
             }
-            
+
             return 0;
         }
 
@@ -433,9 +429,11 @@ public class Client
         }
     }
 
-    public static void Main(string[] args)
+    public static int Main(string[] args)
     {
+#if !COMPACT
         Debug.Listeners.Add(new ConsoleTraceListener());
+#endif
 
         //
         // We must disable connection warnings, because we attempt to
@@ -445,15 +443,18 @@ public class Client
         //
         Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(ref args);
-        
+
         initData.properties.setProperty("Ice.Warn.Connections", "0");
 
-        App app = new App();
-        int status = app.main(args, initData);
+#if COMPACT
+        //
+        // When using Ice for .NET Compact Framework, we need to specify
+        // the assembly so that Ice can locate classes and exceptions.
+        //
+        initData.properties.setProperty("Ice.FactoryAssemblies", "client");
+#endif
 
-        if(status != 0)
-        {
-            Environment.Exit(status);
-        }
+        App app = new App();
+        return app.main(args, initData);
     }
 }

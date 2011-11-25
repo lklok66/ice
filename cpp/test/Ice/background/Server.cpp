@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -98,7 +98,7 @@ private:
 int
 run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
 {
-    communicator->getProperties()->setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000");
+    communicator->getProperties()->setProperty("TestAdapter.Endpoints", "default -p 12010");
     communicator->getProperties()->setProperty("ControllerAdapter.Endpoints", "tcp -p 12011");
     communicator->getProperties()->setProperty("ControllerAdapter.ThreadPool.Size", "1");
 
@@ -139,7 +139,7 @@ main(int argc, char* argv[])
         initData.properties->setProperty("Ice.Warn.Connections", "0");
 
         //
-        // Setup the test transport plugin.
+        // Setup the test transport plug-in.
         //
         initData.properties->setProperty("Ice.Plugin.Test", "TestTransport:createTestTransport");
         string defaultProtocol = initData.properties->getPropertyWithDefault("Ice.Default.Protocol", "tcp");

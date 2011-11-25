@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -22,12 +22,8 @@ class CallbackBase:
         self._cond.acquire()
         try:
             while not self._called:
-                self._cond.wait(5.0)
-            if self._called:
-                self._called = False
-                return True
-            else:
-                return False
+                self._cond.wait()
+            self._called = False
         finally:
             self._cond.release()
 
@@ -171,8 +167,8 @@ class AMI_MyClass_opStructI(CallbackBase):
 
     def __init__(self, communicator):
         CallbackBase.__init__(self)
-        self._communicator = communicator                      
-    
+        self._communicator = communicator
+
     def ice_response(self, rso, so):
         test(rso.p == None)
         test(rso.e == Test.MyEnum.enum2)
@@ -472,6 +468,51 @@ class AMI_MyClass_opStringMyEnumDI(CallbackBase):
     def ice_exception(self, ex):
         test(False)
 
+class AMI_MyClass_opMyEnumStringDI(CallbackBase):
+    def __init__(self):
+        CallbackBase.__init__(self)
+
+    def ice_response(self, ro, do):
+        di1 = {Test.MyEnum.enum1: 'abc'}
+        test(do == di1)
+        test(len(ro) == 3)
+        test(ro[Test.MyEnum.enum1] == "abc")
+        test(ro[Test.MyEnum.enum2] == "Hello!!")
+        test(ro[Test.MyEnum.enum3] == "qwerty")
+        self.called()
+
+    def ice_exception(self, ex):
+        test(False)
+
+class AMI_MyClass_opMyStructMyEnumDI(CallbackBase):
+    def __init__(self):
+        CallbackBase.__init__(self)
+
+    def ice_response(self, ro, do):
+        s11 = Test.MyStruct()
+        s11.i = 1
+        s11.j = 1
+        s12 = Test.MyStruct()
+        s12.i = 1
+        s12.j = 2
+        s22 = Test.MyStruct()
+        s22.i = 2
+        s22.j = 2
+        s23 = Test.MyStruct()
+        s23.i = 2
+        s23.j = 3
+        di1 = {s11: Test.MyEnum.enum1, s12: Test.MyEnum.enum2}
+        test(do == di1)
+        test(len(ro) == 4)
+        test(ro[s11] == Test.MyEnum.enum1)
+        test(ro[s12] == Test.MyEnum.enum2)
+        test(ro[s22] == Test.MyEnum.enum3)
+        test(ro[s23] == Test.MyEnum.enum2)
+        self.called()
+
+    def ice_exception(self, ex):
+        test(False)
+
 class AMI_MyClass_opIntSI(CallbackBase):
     def __init__(self, l):
         CallbackBase.__init__(self)
@@ -510,6 +551,26 @@ class AMI_MyClass_opContextNotEqualI(CallbackBase):
     def ice_exception(self, ex):
         test(False)
 
+class AMI_MyClass_opIdempotentI(CallbackBase):
+    def __init__(self):
+        CallbackBase.__init__(self)
+
+    def ice_response(self):
+        self.called()
+
+    def ice_exception(self, ex):
+        test(False)
+
+class AMI_MyClass_opNonmutatingI(CallbackBase):
+    def __init__(self):
+        CallbackBase.__init__(self)
+
+    def ice_response(self):
+        self.called()
+
+    def ice_exception(self, ex):
+        test(False)
+
 class AMI_MyDerivedClass_opDerivedI(CallbackBase):
     def __init__(self):
         CallbackBase.__init__(self)
@@ -529,7 +590,7 @@ def twowaysAMI(communicator, p):
         test(not indirect.opVoid_async(cb))
     except Ice.Exception:
         test(False)
-    test(cb.check())
+    cb.check()
 
     # Check that a call to a twoway operation raises NoEndpointException
     # in the ice_exception() callback instead of at the point of call.
@@ -539,17 +600,17 @@ def twowaysAMI(communicator, p):
         test(not indirect.opByte_async(cb, 0, 0))
     except Ice.Exception:
         test(False)
-    test(cb.check())
+    cb.check()
 
     #
     # opVoid
     #
     cb = AMI_MyClass_opVoidI()
     p.opVoid_async(cb)
-    test(cb.check())
+    cb.check()
     # Let's check if we can reuse the same callback object for another call.
     p.opVoid_async(cb)
-    test(cb.check())
+    cb.check()
 
     # Check that CommunicatorDestroyedException is raised directly.
     initData = Ice.InitializationData()
@@ -572,52 +633,52 @@ def twowaysAMI(communicator, p):
     #
     cb = AMI_MyClass_opByteI()
     p.opByte_async(cb, 0xff, 0x0f)
-    test(cb.check())
+    cb.check()
 
     #
     # opBool
     #
     cb = AMI_MyClass_opBoolI()
     p.opBool_async(cb, True, False)
-    test(cb.check())
+    cb.check()
 
     #
     # opShortIntLong
     #
     cb = AMI_MyClass_opShortIntLongI()
     p.opShortIntLong_async(cb, 10, 11, 12)
-    test(cb.check())
+    cb.check()
 
     #
     # opFloatDouble
     #
     cb = AMI_MyClass_opFloatDoubleI()
     p.opFloatDouble_async(cb, 3.14, 1.1E10)
-    test(cb.check())
+    cb.check()
     # Let's check if we can reuse the same callback object for another call.
     p.opFloatDouble_async(cb, 3.14, 1.1E10)
-    test(cb.check())
+    cb.check()
 
     #
     # opString
     #
     cb = AMI_MyClass_opStringI()
     p.opString_async(cb, "hello", "world")
-    test(cb.check())
+    cb.check()
 
     #
     # opMyEnum
     #
     cb = AMI_MyClass_opMyEnumI()
     p.opMyEnum_async(cb, Test.MyEnum.enum2)
-    test(cb.check())
+    cb.check()
 
     #
     # opMyClass
     #
     cb = AMI_MyClass_opMyClassI(communicator)
     p.opMyClass_async(cb, p)
-    test(cb.check())
+    cb.check()
 
     #
     # opStruct
@@ -635,7 +696,7 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opStructI(communicator)
     p.opStruct_async(cb, si1, si2)
-    test(cb.check())
+    cb.check()
 
     #
     # opByteS
@@ -645,7 +706,7 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opByteSI()
     p.opByteS_async(cb, bsi1, bsi2)
-    test(cb.check())
+    cb.check()
 
     #
     # opBoolS
@@ -655,7 +716,7 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opBoolSI()
     p.opBoolS_async(cb, bsi1, bsi2)
-    test(cb.check())
+    cb.check()
 
     #
     # opShortIntLongS
@@ -666,7 +727,7 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opShortIntLongSI()
     p.opShortIntLongS_async(cb, ssi, isi, lsi)
-    test(cb.check())
+    cb.check()
 
     #
     # opFloatDoubleS
@@ -676,7 +737,7 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opFloatDoubleSI()
     p.opFloatDoubleS_async(cb, fsi, dsi)
-    test(cb.check())
+    cb.check()
 
     #
     # opStringS
@@ -686,7 +747,7 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opStringSI()
     p.opStringS_async(cb, ssi1, ssi2)
-    test(cb.check())
+    cb.check()
 
     #
     # opByteSS
@@ -696,7 +757,7 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opByteSSI()
     p.opByteSS_async(cb, bsi1, bsi2)
-    test(cb.check())
+    cb.check()
 
     #
     # opFloatDoubleSS
@@ -706,7 +767,7 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opFloatDoubleSSI()
     p.opFloatDoubleSS_async(cb, fsi, dsi)
-    test(cb.check())
+    cb.check()
 
     #
     # opStringSS
@@ -716,7 +777,7 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opStringSSI()
     p.opStringSS_async(cb, ssi1, ssi2)
-    test(cb.check())
+    cb.check()
 
     #
     # opByteBoolD
@@ -726,7 +787,7 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opByteBoolDI()
     p.opByteBoolD_async(cb, di1, di2)
-    test(cb.check())
+    cb.check()
 
     #
     # opShortIntD
@@ -736,7 +797,7 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opShortIntDI()
     p.opShortIntD_async(cb, di1, di2)
-    test(cb.check())
+    cb.check()
 
     #
     # opLongFloatD
@@ -746,7 +807,7 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opLongFloatDI()
     p.opLongFloatD_async(cb, di1, di2)
-    test(cb.check())
+    cb.check()
 
     #
     # opStringStringD
@@ -756,7 +817,7 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opStringStringDI()
     p.opStringStringD_async(cb, di1, di2)
-    test(cb.check())
+    cb.check()
 
     #
     # opStringMyEnumD
@@ -766,7 +827,39 @@ def twowaysAMI(communicator, p):
 
     cb = AMI_MyClass_opStringMyEnumDI()
     p.opStringMyEnumD_async(cb, di1, di2)
-    test(cb.check())
+    cb.check()
+
+    #
+    # opMyEnumStringD
+    #
+    di1 = {Test.MyEnum.enum1: 'abc'}
+    di2 = {Test.MyEnum.enum2: 'Hello!!', Test.MyEnum.enum3: 'qwerty'}
+
+    cb = AMI_MyClass_opMyEnumStringDI()
+    p.opMyEnumStringD_async(cb, di1, di2)
+    cb.check()
+
+    #
+    # opMyStructMyEnumD
+    #
+    s11 = Test.MyStruct()
+    s11.i = 1
+    s11.j = 1
+    s12 = Test.MyStruct()
+    s12.i = 1
+    s12.j = 2
+    s22 = Test.MyStruct()
+    s22.i = 2
+    s22.j = 2
+    s23 = Test.MyStruct()
+    s23.i = 2
+    s23.j = 3
+    di1 = {s11: Test.MyEnum.enum1, s12: Test.MyEnum.enum2}
+    di2 = {s11: Test.MyEnum.enum1, s22: Test.MyEnum.enum3, s23: Test.MyEnum.enum2}
+
+    cb = AMI_MyClass_opMyStructMyEnumDI()
+    p.opMyStructMyEnumD_async(cb, di1, di2)
+    cb.check()
 
     #
     # opIntS
@@ -778,7 +871,7 @@ def twowaysAMI(communicator, p):
             s.append(i)
         cb = AMI_MyClass_opIntSI(l)
         p.opIntS_async(cb, s)
-        test(cb.check())
+        cb.check()
 
     #
     # opContext
@@ -788,88 +881,24 @@ def twowaysAMI(communicator, p):
     test(len(p.ice_getContext()) == 0)
     cb = AMI_MyClass_opContextNotEqualI(ctx)
     p.opContext_async(cb)
-    test(cb.check())
+    cb.check()
 
     test(len(p.ice_getContext()) == 0)
     cb = AMI_MyClass_opContextEqualI(ctx)
     p.opContext_async(cb, ctx)
-    test(cb.check())
+    cb.check()
 
     p2 = Test.MyClassPrx.checkedCast(p.ice_context(ctx))
     test(p2.ice_getContext() == ctx)
     cb = AMI_MyClass_opContextEqualI(ctx)
     p2.opContext_async(cb)
-    test(cb.check())
+    cb.check()
 
     p2 = Test.MyClassPrx.checkedCast(p.ice_context(ctx))
     test(p2.ice_getContext() == ctx)
     cb = AMI_MyClass_opContextEqualI(ctx)
     p2.opContext_async(cb, ctx)
-    test(cb.check())
-
-    derived = Test.MyDerivedClassPrx.checkedCast(p)
-    test(derived)
-    cb = AMI_MyDerivedClass_opDerivedI()
-    derived.opDerived_async(cb)
-    test(cb.check())
-
-    #
-    # Test that default context is obtained correctly from communicator.
-    #
-# DEPRECATED
-#    dflt = {'a': 'b'}
-#    communicator.setDefaultContext(dflt)
-#    cb = AMI_MyClass_opContextNotEqualI(dflt)
-#    p.opContext_async(cb)
-#    test(cb.check())
-#
-#    p2 = Test.MyClassPrx.uncheckedCast(p.ice_context({}))
-#    cb = AMI_MyClass_opContextEqualI({})
-#    p2.opContext_async(cb)
-#    test(cb.check())
-#
-#    p2 = Test.MyClassPrx.uncheckedCast(p.ice_defaultContext())
-#    cb = AMI_MyClass_opContextEqualI(dflt)
-#    p2.opContext_async(cb)
-#    test(cb.check())
-#
-#    communicator.setDefaultContext({})
-#    cb = AMI_MyClass_opContextNotEqualI({})
-#    p2.opContext_async(cb)
-#    test(cb.check())
-#
-#    communicator.setDefaultContext(dflt)
-#    c = Test.MyClassPrx.checkedCast(communicator.stringToProxy("test:default -p 12010 -t 10000"))
-#    cb = AMI_MyClass_opContextEqualI({'a': 'b'})
-#    c.opContext_async(cb)
-#    test(cb.check())
-#
-#    dflt['a'] = 'c'
-#    c2 = Test.MyClassPrx.uncheckedCast(c.ice_context(dflt))
-#    cb = AMI_MyClass_opContextEqualI({'a': 'c'})
-#    c2.opContext_async(cb)
-#    test(cb.check())
-#
-#    dflt = {}
-#    c3 = Test.MyClassPrx.uncheckedCast(c2.ice_context(dflt))
-#    cb = AMI_MyClass_opContextEqualI({})
-#    c3.opContext_async(cb)
-#    test(cb.check())
-#
-#    c4 = Test.MyClassPrx.uncheckedCast(c2.ice_defaultContext())
-#    cb = AMI_MyClass_opContextEqualI({'a': 'b'})
-#    c4.opContext_async(cb)
-#    test(cb.check())
-#
-#    dflt['a'] = 'd'
-#    communicator.setDefaultContext(dflt)
-#
-#    c5 = Test.MyClassPrx.uncheckedCast(c.ice_defaultContext())
-#    cb = AMI_MyClass_opContextEqualI({'a': 'd'})
-#    c5.opContext_async(cb)
-#    test(cb.check())
-#
-#    communicator.setDefaultContext({})
+    cb.check()
 
     #
     # Test implicit context propagation
@@ -880,42 +909,62 @@ def twowaysAMI(communicator, p):
         initData.properties = communicator.getProperties().clone()
         initData.properties.setProperty('Ice.ImplicitContext', i)
         ic = Ice.initialize(data=initData)
-        
+
         ctx = {'one': 'ONE', 'two': 'TWO', 'three': 'THREE'}
-        
-        p = Test.MyClassPrx.uncheckedCast(ic.stringToProxy("test:default -p 12010 -t 10000"))
-        
+
+        p3 = Test.MyClassPrx.uncheckedCast(ic.stringToProxy("test:default -p 12010"))
+
         ic.getImplicitContext().setContext(ctx)
         test(ic.getImplicitContext().getContext() == ctx)
 
         cb = AMI_MyClass_opContextEqualI(ctx)
-        p.opContext_async(cb)
-        test(cb.check())
-        
+        p3.opContext_async(cb)
+        cb.check()
+
         ic.getImplicitContext().put('zero', 'ZERO')
         ctx = ic.getImplicitContext().getContext()
 
         cb = AMI_MyClass_opContextEqualI(ctx)
-        p.opContext_async(cb)
-        test(cb.check())
-        
+        p3.opContext_async(cb)
+        cb.check()
+
         prxContext = {'one': 'UN', 'four': 'QUATRE'}
-        
+
         combined = ctx
         combined.update(prxContext)
         test(combined['one'] == 'UN')
-        
-        p = Test.MyClassPrx.uncheckedCast(p.ice_context(prxContext))
+
+        p3 = Test.MyClassPrx.uncheckedCast(p3.ice_context(prxContext))
         ic.getImplicitContext().setContext({})
 
         cb = AMI_MyClass_opContextEqualI(prxContext)
-        p.opContext_async(cb)
-        test(cb.check())
-       
+        p3.opContext_async(cb)
+        cb.check()
+
         ic.getImplicitContext().setContext(ctx)
 
         cb = AMI_MyClass_opContextEqualI(combined)
-        p.opContext_async(cb)
-        test(cb.check())
+        p3.opContext_async(cb)
+        cb.check()
 
         ic.destroy()
+
+    #
+    # opIdempotent
+    #
+    cb = AMI_MyClass_opIdempotentI()
+    p.opIdempotent_async(cb)
+    cb.check()
+
+    #
+    # opNonmutating
+    #
+    cb = AMI_MyClass_opNonmutatingI()
+    p.opNonmutating_async(cb)
+    cb.check()
+
+    derived = Test.MyDerivedClassPrx.checkedCast(p)
+    test(derived)
+    cb = AMI_MyDerivedClass_opDerivedI()
+    derived.opDerived_async(cb)
+    cb.check()

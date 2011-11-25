@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -34,7 +34,7 @@ end
 
 class ObjectFactory
     def create(type)
-        if type == "::Demo::DerivedPrinter"
+        if type == Demo::DerivedPrinter::ice_staticId()
             return DerivedPrinterI.new
         end
 
@@ -56,7 +56,7 @@ class Ice::Application
     end
 
     def run(args)
-        if args.length > 0:
+        if args.length > 0
             puts $0 + ": too many argumnets"
             return 1
         end
@@ -138,7 +138,7 @@ class Ice::Application
             puts $0 + ": Did not get the expected NoMethodError!"
             exit(false)
         rescue NoMethodError => ex
-            puts "==> " + ex
+            print "==> ", ex, "\n"
         end
 
         puts "\n"\
@@ -147,7 +147,7 @@ class Ice::Application
 	STDOUT.flush
         STDIN.readline
 
-        Ice::Application::communicator().addObjectFactory(ObjectFactory.new, "::Demo::DerivedPrinter")
+        Ice::Application::communicator().addObjectFactory(ObjectFactory.new, Demo::DerivedPrinter::ice_staticId())
 
         derived = initial.getDerivedPrinter()
         puts "==> The type ID of the received object is \"" + derived.ice_id() + "\""

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -132,6 +132,21 @@ struct ToInternalServerDescriptor : std::unary_function<CommunicatorDescriptorPt
                 props.push_back(createProperty("# Server descriptor properties"));
             }
             copy(communicatorProps.begin(), communicatorProps.end(), back_inserter(props));
+        }
+
+        //
+        // For Ice servers > 3.3.0 escape the properties.
+        //
+        if(_iceVersion == 0 || _iceVersion >= 30300)
+        {
+            for(PropertyDescriptorSeq::iterator p = props.begin(); p != props.end(); ++p)
+            {
+                if(p->name.find('#') != 0 || !p->value.empty())
+                {
+                    p->name = escapeProperty(p->name, true);
+                    p->value = escapeProperty(p->value);
+                }
+            }
         }
     }
 
@@ -746,8 +761,12 @@ NodeEntry::__decRef()
 void
 NodeEntry::checkSession() const
 { 
-    if(_session && !_session->isDestroyed())
+    if(_session)
     {
+        if(_session->isDestroyed())
+        {
+            throw NodeUnreachableException(_name, "the node is not active");
+        }
         return;
     }
     else if(!_proxy && !_registering)
@@ -781,10 +800,13 @@ NodeEntry::checkSession() const
 
     while(_registering)
     {
-        wait();
+        if(!timedWait(IceUtil::Time::seconds(10)))
+        {
+            break; // Consider the node down if it doesn't respond promptly.
+        }
     }
     
-    if(!_session)
+    if(!_session || _session->isDestroyed())
     {
         throw NodeUnreachableException(_name, "the node is not active");
     }
@@ -932,9 +954,23 @@ NodeEntry::getInternalServerDescriptor(const ServerInfo& info) const
         {
             ServiceDescriptorPtr s = p->descriptor;
             const string path = _session->getInfo()->dataDir + "/servers/" + server->id + "/config/config_" + s->name;
-            props.push_back(createProperty("IceBox.Service." + s->name, s->entry + " --Ice.Config='" +
-                                           escapeProperty(path) + "'"));
-            servicesStr += s->name + " ";
+
+	    //
+	    // We escape the path here because the command-line option --Ice.Config=xxx will be parsed an encoded 
+            // (escaped) property
+	    // For example, \\server\dir\file.cfg needs to become \\\server\dir\file.cfg or \\\\server\\dir\\file.cfg.
+	    //
+            props.push_back(createProperty("IceBox.Service." + s->name, s->entry + " --Ice.Config='" 
+					   + escapeProperty(path) + "'"));
+            
+	    if(servicesStr.empty())
+	    {
+		servicesStr = s->name;
+	    }
+	    else
+	    {
+		servicesStr += " " + s->name;
+	    }
         }
         if(!hasProperty(info.descriptor->propertySet.properties, "IceBox.InstanceName"))
         {
@@ -969,6 +1005,5 @@ NodeEntry::getInternalServerDescriptor(const ServerInfo& info) const
     // descriptor.
     //
     forEachCommunicator(ToInternalServerDescriptor(server, _session->getInfo(), iceVersion))(info.descriptor);
-
     return server;
 }

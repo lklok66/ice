@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -65,7 +65,8 @@ Freeze::TransactionalEvictorDeadlockException::ice_print(ostream& out) const
 
 Freeze::TransactionalEvictorContext::TransactionalEvictorContext(const SharedDbEnvPtr& dbEnv) :
     _tx((new ConnectionI(dbEnv))->beginTransactionI()),
-    _deadlockExceptionDetected(false)
+    _deadlockExceptionDetected(false),
+    _userExceptionDetected(false)
 { 
     _tx->setPostCompletionCallback(this);
 }
@@ -101,8 +102,10 @@ Freeze::TransactionalEvictorContext::rollback()
 }
 
 void 
-Freeze::TransactionalEvictorContext::postCompletion(bool committed, bool deadlock)
+Freeze::TransactionalEvictorContext::postCompletion(bool committed, bool deadlock, const SharedDbEnvPtr& dbEnv)
 {
+    dbEnv->setCurrentTransaction(0);
+
     try
     {
         if(committed)
@@ -272,15 +275,6 @@ Freeze::TransactionalEvictorContext::ServantHolder::ServantHolder() :
 
 Freeze::TransactionalEvictorContext::ServantHolder::~ServantHolder()
 {
-#ifdef __HP_aCC
-//
-// The HP aCC compiler has a tendency to run dtors several times when an exception is raised:
-// a very nasty bug!
-//
-    try
-    {
-#endif
-
     if(_ownBody && _body.ownServant)
     {
         const TransactionalEvictorContextPtr& ctx = *(_body.ctx);
@@ -301,16 +295,6 @@ Freeze::TransactionalEvictorContext::ServantHolder::~ServantHolder()
         }
         ctx->_stack.pop_front();
     }
-#ifdef __HP_aCC
-    _body.rec.servant = 0;
-    }
-    catch(...)
-    {
-	_body.rec.servant = 0;
-	throw;
-    }
-#endif
-
 }
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -9,13 +9,6 @@
 # **********************************************************************
 
 import os, sys, traceback
-
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "python", "Ice.py")):
-        break
-else:
-    raise "can't find toplevel directory!"
 
 import Ice
 Ice.loadSlice('Test.ice')
@@ -25,11 +18,8 @@ def usage(n):
     sys.stderr.write("Usage: " + n + " port\n")
 
 class TestI(Test.TestIntf):
-    def __init__(self, adapter):
-        self._adapter = adapter
-
     def shutdown(self, current=None):
-        self._adapter.getCommunicator().shutdown()
+        current.adapter.getCommunicator().shutdown()
 
     def abort(self, current=None):
         print "aborting..."
@@ -63,7 +53,7 @@ def run(args, communicator):
     endpts = "default -p " + str(port) + ":udp"
     communicator.getProperties().setProperty("TestAdapter.Endpoints", endpts)
     adapter = communicator.createObjectAdapter("TestAdapter")
-    object = TestI(adapter)
+    object = TestI()
     adapter.add(object, communicator.stringToIdentity("test"))
     adapter.activate()
     communicator.waitForShutdown()

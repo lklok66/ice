@@ -20,6 +20,10 @@
 
 -keepattributes *Annotation*
 
+# Parse non-public libraries to prevent undefined symbol errors on some platforms.
+
+-dontskipnonpubliclibraryclasses
+
 # Preserve all native method names and the names of their classes.
 
 -keepclasseswithmembernames class * {
@@ -57,7 +61,6 @@
   public *;
 }
 -keep interface IceGrid.**
--keep class IceInternal.SelectorHandler
 -keep class com.jgoodies.looks.plastic.PlasticXPLookAndFeel
 -keep class com.jgoodies.looks.plastic.PlasticFieldCaret
 -keep class com.jgoodies.looks.windows.WindowsFieldCaret 

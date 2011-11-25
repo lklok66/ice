@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -12,13 +12,13 @@ import os, sys, shutil
 
 for toplevel in [".", "..", "../..", "../../..", "../../../..", "../../../../.."]:
     toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "TestUtil.py")):
+    if os.path.exists(os.path.join(toplevel, "scripts", "TestUtil.py")):
         break
 else:
     raise "can't find toplevel directory!"
 
-sys.path.append(os.path.join(toplevel, "config"))
-import TestUtil
+sys.path.append(toplevel)
+from scripts import *
 
 #
 # Show usage information.
@@ -60,6 +60,8 @@ certs = [\
     "s_rsa_nopass_ca1_exp", \
     "s_rsa_nopass_ca1", \
     "s_rsa_nopass_ca2", \
+    "s_rsa_nopass_ca1_cn1", \
+    "s_rsa_nopass_ca1_cn2", \
 ]
 
 #
@@ -103,7 +105,7 @@ for x in certs:
         ca = os.path.join(cppcerts, cacert) + ".pem"
         os.system("openssl pkcs12 -in " + cert + "_pub.pem -inkey " + cert + "_priv.pem -export -out " + p12 + \
                   " -name cert -passout pass:password -certfile " + ca)
-        os.system("java -classpath ../../../certs ImportKey " + p12  + " cert " + cacert + ".der " + ks + " password")
+        os.system("java -classpath ../../../../certs ImportKey " + p12  + " cert " + cacert + ".der " + ks + " password")
         os.remove(p12)
         print "Created " + ks
 
@@ -120,13 +122,13 @@ if force or not os.path.exists(ks):
     cert = os.path.join(cppcerts, "s_dsa_nopass_ca1")
     os.system("openssl pkcs12 -in " + cert + "_pub.pem -inkey " + cert + "_priv.pem -export -out " + p12 + \
               " -name dsacert -passout pass:password -certfile " + ca)
-    os.system("java -classpath ../../../certs ImportKey " + p12  + " dsacert " + cacert + ".der " + ks + " password")
+    os.system("java -classpath ../../../../certs ImportKey " + p12  + " dsacert " + cacert + ".der " + ks + " password")
     os.remove(p12)
     p12 = "s_rsa_nopass_ca1.p12"
     cert = os.path.join(cppcerts, "s_rsa_nopass_ca1")
     os.system("openssl pkcs12 -in " + cert + "_pub.pem -inkey " + cert + "_priv.pem -export -out " + p12 + \
               " -name rsacert -passout pass:password -certfile " + ca)
-    os.system("java -classpath ../../../certs ImportKey " + p12  + " rsacert " + cacert + ".der " + ks + " password")
+    os.system("java -classpath ../../../../certs ImportKey " + p12  + " rsacert " + cacert + ".der " + ks + " password")
     os.remove(p12)
     print "Created " + ks
 

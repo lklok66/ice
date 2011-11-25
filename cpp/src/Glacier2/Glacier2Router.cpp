@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,13 +10,13 @@
 #include <IceUtil/DisableWarnings.h>
 #include <IceUtil/UUID.h>
 #include <IceUtil/Options.h>
+#include <IceUtil/FileUtil.h>
 #include <Ice/Service.h>
 #include <Glacier2/Instance.h>
 #include <Glacier2/RouterI.h>
 #include <Glacier2/Session.h>
 #include <Glacier2/SessionRouterI.h>
 #include <Glacier2/CryptPermissionsVerifierI.h>
-#include <fstream>
 
 using namespace std;
 using namespace Ice;
@@ -53,7 +53,7 @@ public:
 
 protected:
 
-    virtual bool start(int, char*[]);
+    virtual bool start(int, char*[], int&);
     virtual bool stop();
     virtual CommunicatorPtr initializeCommunicator(int&, char*[], const InitializationData&);
 
@@ -93,7 +93,7 @@ Glacier2::RouterService::RouterService()
 }
 
 bool
-Glacier2::RouterService::start(int argc, char* argv[])
+Glacier2::RouterService::start(int argc, char* argv[], int& status)
 {
     bool nowarn;
 
@@ -117,11 +117,13 @@ Glacier2::RouterService::start(int argc, char* argv[])
     if(opts.isSet("help"))
     {
         usage(argv[0]);
+        status = EXIT_SUCCESS;
         return false;
     }
     if(opts.isSet("version"))
     {
         print(ICE_STRING_VERSION);
+        status = EXIT_SUCCESS;
         return false;
     }
     nowarn = opts.isSet("nowarn");
@@ -144,6 +146,18 @@ Glacier2::RouterService::start(int argc, char* argv[])
         error("property `" + clientEndpointsProperty + "' is not set");
         return false;
     }
+    const string clientACMProperty = "Glacier2.Client.ACM";
+    if(properties->getProperty(clientACMProperty).empty())
+    {
+        //
+        // Set the client object adapter ACM timeout to the session timeout * 2. If no
+        // session timeout is set, ACM is disabled for the client object adapter.
+        //
+        ostringstream os;
+        os << properties->getPropertyAsInt("Glacier2.SessionTimeout") * 2;
+        properties->setProperty(clientACMProperty, os.str());
+    }
+
     ObjectAdapterPtr clientAdapter = communicator()->createObjectAdapter("Glacier2.Client");
 
     //
@@ -255,7 +269,12 @@ Glacier2::RouterService::start(int argc, char* argv[])
     }
     else if(!passwordsProperty.empty())
     {
-        ifstream passwordFile(passwordsProperty.c_str());
+        //
+        // No nativeToUTF8 conversion necessary here, since no string
+        // converter is installed by Glacier2 the string is UTF-8.
+        //
+        IceUtilInternal::ifstream passwordFile(passwordsProperty);
+
         if(!passwordFile)
         {
             string err = strerror(errno);
@@ -467,7 +486,15 @@ Glacier2::RouterService::start(int argc, char* argv[])
     //
     // Create the instance object.
     //
-    _instance = new Instance(communicator(), clientAdapter, serverAdapter);
+    try
+    {
+        _instance = new Instance(communicator(), clientAdapter, serverAdapter);
+    }
+    catch(const Ice::InitializationException& ex)
+    {
+        error("Glacier2 initialization failed:\n" + ex.reason);
+        return false;
+    }
 
     //
     // Create the session router. The session router registers itself
@@ -545,11 +572,13 @@ Glacier2::RouterService::initializeCommunicator(int& argc, char* argv[],
     initData.properties->setProperty("Ice.Default.Router", "");
     
     //
-    // No active connection management is permitted with
-    // Glacier2. Connections must remain established.
+    // Active connection management is permitted with Glacier2. For
+    // the client object adapter, the ACM timeout is set to the
+    // session timeout to ensure client connections are not closed
+    // prematurely,
     //
-    initData.properties->setProperty("Ice.ACM.Client", "0");
-    initData.properties->setProperty("Ice.ACM.Server", "0");
+    //initData.properties->setProperty("Ice.ACM.Client", "0");
+    //initData.properties->setProperty("Ice.ACM.Server", "0");
 
     //
     // We do not need to set Ice.RetryIntervals to -1, i.e., we do
@@ -583,8 +612,18 @@ Glacier2::RouterService::usage(const string& appName)
     print("Usage: " + appName + " [options]\n" + options);
 }
 
+//COMPILERFIX: Borland C++ 2010 doesn't support wmain for console applications.
+#if defined(_WIN32 ) && !defined(__BCPLUSPLUS__)
+
+int
+wmain(int argc, wchar_t* argv[])
+
+#else
+
 int
 main(int argc, char* argv[])
+
+#endif
 {
     Glacier2::RouterService svc;
     return svc.main(argc, argv);

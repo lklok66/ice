@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -68,9 +68,9 @@ IcePy_loadSlice(PyObject* /*self*/, PyObject* args)
     opts.addOpt("I", "", IceUtilInternal::Options::NeedArg, "", IceUtilInternal::Options::Repeat);
     opts.addOpt("d", "debug");
     opts.addOpt("", "ice");
+    opts.addOpt("", "underscore");
     opts.addOpt("", "checksum");
     opts.addOpt("", "all");
-    opts.addOpt("", "case-sensitive");
 
     vector<string> files;
     try
@@ -98,7 +98,7 @@ IcePy_loadSlice(PyObject* /*self*/, PyObject* args)
     Ice::StringSeq includePaths;
     bool debug = false;
     bool ice = true; // This must be true so that we can create Ice::Identity when necessary.
-    bool caseSensitive = false;
+    bool underscore = opts.isSet("underscore");
     bool all = false;
     bool checksum = false;
     if(opts.isSet("D"))
@@ -126,17 +126,17 @@ IcePy_loadSlice(PyObject* /*self*/, PyObject* args)
         }
     }
     debug = opts.isSet("d") || opts.isSet("debug");
-    caseSensitive = opts.isSet("case-sensitive");
     all = opts.isSet("all");
     checksum = opts.isSet("checksum");
 
     bool ignoreRedefs = false;
+    bool keepComments = true;
 
     for(vector<string>::const_iterator p = files.begin(); p != files.end(); ++p)
     {
         string file = *p;
-        Slice::Preprocessor icecpp("icecpp", file, cppArgs);
-        FILE* cppHandle = icecpp.preprocess(false);
+        Slice::PreprocessorPtr icecpp = Slice::Preprocessor::create("icecpp", file, cppArgs);
+        FILE* cppHandle = icecpp->preprocess(keepComments);
 
         if(cppHandle == 0)
         {
@@ -144,10 +144,10 @@ IcePy_loadSlice(PyObject* /*self*/, PyObject* args)
             return 0;
         }
 
-        UnitPtr u = Slice::Unit::createUnit(ignoreRedefs, all, ice, caseSensitive);
+        UnitPtr u = Slice::Unit::createUnit(ignoreRedefs, all, ice, underscore);
         int parseStatus = u->parse(file, cppHandle, debug);
 
-        if(!icecpp.close() || parseStatus == EXIT_FAILURE)
+        if(!icecpp->close() || parseStatus == EXIT_FAILURE)
         {
             PyErr_Format(PyExc_RuntimeError, "Slice parsing failed for `%s'", cmd);
             u->destroy();
@@ -164,6 +164,13 @@ IcePy_loadSlice(PyObject* /*self*/, PyObject* args)
         u->destroy();
 
         string code = codeStream.str();
+
+        //
+        // We need to invoke Ice.updateModules() so that all of the types we've just generated
+        // are made "public".
+        //
+        code += "\nIce.updateModules()\n";
+
         PyObjectHandle src = Py_CompileString(const_cast<char*>(code.c_str()), const_cast<char*>(file.c_str()),
                                               Py_file_input);
         if(!src.get())
