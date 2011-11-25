@@ -41,7 +41,7 @@ QuickFIX
 --------
 
 IceFIX requires an installation of QuickFIX, and has been tested with
-QuickFIX 1.12.4. QuickFIX can be downloaded from
+QuickFIX 1.13.3. QuickFIX can be downloaded from
 
   http://www.quickfixengine.org
 
