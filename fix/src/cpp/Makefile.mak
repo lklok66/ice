@@ -105,19 +105,19 @@ MessageDBKey.h MessageDBKey.cpp:
 	del /q MessageDBKey.h MessageDBKey.cpp
 	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict "FIXBridge::MessageDBKey,int,long"  MessageDBKey
 
-Scanner.cpp: Scanner.l
-	flex Scanner.l
-	del /q $@
-	echo #include "IceUtil/Config.h" > Scanner.cpp
-	type lex.yy.c >> Scanner.cpp
-	del /q lex.yy.c
+#Scanner.cpp: Scanner.l
+#	flex Scanner.l
+#	del /q $@
+#	echo #include "IceUtil/Config.h" > Scanner.cpp
+#	type lex.yy.c >> Scanner.cpp
+#	del /q lex.yy.c
 
-Grammar.cpp Grammar.h: Grammar.y
-	del /q Grammar.h Grammar.cpp
-	bison -dvt Grammar.y
-	move Grammar.tab.c Grammar.cpp
-	move Grammar.tab.h Grammar.h
-	del /q Grammar.output
+#Grammar.cpp Grammar.h: Grammar.y
+#	del /q Grammar.h Grammar.cpp
+#	bison -dvt Grammar.y
+#	move Grammar.tab.c Grammar.cpp
+#	move Grammar.tab.h Grammar.h
+#	del /q Grammar.output
 
 
 clean::
@@ -128,8 +128,8 @@ clean::
 	del /q IceFIXAdmin.res IceFIXMigrate.res IceFIX.res IceFIXService.res
 
 clean::
-	del /q Grammar.cpp Grammar.h
-	del /q Scanner.cpp
+#	del /q Grammar.cpp Grammar.h
+#	del /q Scanner.cpp
 	del /q ClientDB.h ClientDB.cpp
 	del /q BridgeTypes.h BridgeTypes.cpp
 	del /q RoutingRecordDB.h RoutingRecordDB.cpp
