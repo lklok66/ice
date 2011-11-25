@@ -12,19 +12,19 @@ import os, sys, re, getopt
 
 for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
     toplevel = os.path.abspath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "TestUtil.py")):
+    if os.path.exists(os.path.join(toplevel, "scripts", "TestUtil.py")):
         break
 else:
     raise "can't find toplevel directory!"
 
-sys.path.append(os.path.join(toplevel, "config"))
+sys.path.append(os.path.join(toplevel, "scripts"))
 import TestUtil
 
 #
 # List of all basic tests.
 #
 tests = [ 
-    ("order", ["service"])
+    ("cpp/order", ["service"])
     ]
 
 if __name__ == "__main__":

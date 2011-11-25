@@ -426,7 +426,7 @@ srcDistDir = os.path.join(distDir, "IceFIX-" + version)
 #
 print "Creating git archive using " + tag + "...",
 sys.stdout.flush()
-os.system("git archive --prefix=IceFIX-" + version + "/ " + tag + " cpp/config fix config | ( cd " + distDir + " && tar xfm - )")
+os.system("git archive --prefix=IceFIX-" + version + "/ " + tag + " cpp/config fix config scripts | ( cd " + distDir + " && tar xfm - )")
 print "ok"
 
 os.chdir(os.path.join(srcDistDir))
@@ -436,8 +436,8 @@ sys.stdout.flush()
 shutil.move(os.path.join("config", "Make.common.rules"), os.path.join("fix", "config"))
 shutil.move(os.path.join("config", "Make.common.rules.mak"), os.path.join("fix", "config"))
 shutil.move(os.path.join("config", "IceDevKey.snk"), os.path.join("fix", "config"))
-shutil.move(os.path.join("config", "TestUtil.py"), os.path.join("fix", "config"))
-shutil.move(os.path.join("config", "IceGridAdmin.py"), os.path.join("fix", "config"))
+#shutil.move(os.path.join("scripts", "TestUtil.py"), os.path.join("fix", "scripts"))
+#shutil.move(os.path.join("scripts", "IceGridAdmin.py"), os.path.join("fix", "scripts"))
 shutil.move(os.path.join("cpp", "config", "Make.rules.msvc"), os.path.join("fix", "config"))
 shutil.move(os.path.join("cpp", "config", "Make.rules.Darwin"), os.path.join("fix", "config"))
 shutil.move(os.path.join("cpp", "config", "Make.rules.Linux"), os.path.join("fix", "config"))
@@ -464,10 +464,10 @@ for root, dirnames, filesnames in os.walk('.'):
             # Fix version of README/INSTALL files and keep track of bison/flex files for later processing
             if fnmatch.fnmatch(f, "README*") or fnmatch.fnmatch(f, "INSTALL*"):
                 substitute(filepath, [("@ver@", version)])
-            elif fnmatch.fnmatch(f, "*.y"):
-                bisonFiles.append(filepath)
-            elif fnmatch.fnmatch(f, "*.l"):
-                flexFiles.append(filepath)
+#            elif fnmatch.fnmatch(f, "*.y"):
+#                bisonFiles.append(filepath)
+#            elif fnmatch.fnmatch(f, "*.l"):
+#                flexFiles.append(filepath)
 
             fixFilePermission(filepath)
     
@@ -478,13 +478,13 @@ print "ok"
 #
 # Generate bison & flex files.
 #
-print "Generating bison and flex files...",
-sys.stdout.flush()
-for x in bisonFiles:
-    generateBisonFile(x)
-for x in flexFiles:
-    generateFlexFile(x)
-print "ok"
+#print "Generating bison and flex files...",
+#sys.stdout.flush()
+#for x in bisonFiles:
+#    generateBisonFile(x)
+#for x in flexFiles:
+#    generateFlexFile(x)
+#print "ok"
 
 #
 # Everything should be clean now, we can create the source distributions archives

@@ -10,14 +10,14 @@
 
 import os, sys
 
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
+for toplevel in [".", "..", "../..", "../../..", "../../../..", "../../../.."]:
     toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "TestUtil.py")):
+    if os.path.exists(os.path.join(toplevel, "scripts", "TestUtil.py")):
         break
 else:
     raise "can't find toplevel directory!"
 
-sys.path.append(os.path.join(toplevel, "config"))
+sys.path.append(os.path.join(toplevel, "scripts"))
 import TestUtil
 TestUtil.processCmdLine()
 import IceGridAdmin
@@ -41,5 +41,5 @@ for filename in [ os.path.join(storedir, f) for f in os.listdir(storedir) if f !
 # Test client/server with on demand activation.
 #
 #IceGridAdmin.iceGridTest(testdir, name, "application.xml", "", "debug icebox.exe=" + TestUtil.getIceBox(testdir))
-IceGridAdmin.iceGridTest(testdir, name, "application.xml", "", "icebox.exe=" + TestUtil.getIceBox(testdir))
+IceGridAdmin.iceGridTest("application.xml","",  "debug icebox.exe=" + TestUtil.getIceBox())
 sys.exit(0)

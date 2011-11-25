@@ -716,9 +716,9 @@ def getDefaultMapping():
     here = os.getcwd().split(os.sep)
     here.reverse()
     for i in range(0, len(here)):
-        if here[i] in ["cpp", "cs", "java", "php", "py", "rb", "cppe", "javae", "tmp"]:
+        if here[i] in ["cpp", "cs", "java", "php", "py", "rb", "cppe", "javae", "tmp", "fix"]:
             return here[i]
-    raise "cannot determine mapping"
+    return ""
 
 class DriverConfig:
     lang = None
@@ -932,7 +932,7 @@ def getDefaultClientFile(lang = None):
         return "Client.rb"
     if lang == "php":
         return "Client.php"
-    if lang in ["cpp", "cs", "cppe"]:
+    if lang in ["cpp", "cs", "cppe", "fix"]:
         return "client"
     if lang == "py":
         return "Client.py"

@@ -673,6 +673,10 @@ public:
     {
     }
 
+    virtual void backup()
+    {
+    }
+    
     virtual void onIncoming(const string& msg)
     {
         if(_trace)

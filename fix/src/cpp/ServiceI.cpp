@@ -90,6 +90,10 @@ public:
     virtual void clear() 
     {
     }
+    
+    virtual void backup()
+    {
+    }
 
     virtual void onIncoming(const string& msg)
     {

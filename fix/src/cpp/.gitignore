@@ -1,6 +1,3 @@
-Grammar.cpp
-Grammar.h
-Scanner.cpp
 ClientDB.h
 ClientDB.cpp
 BridgeTypes.h
