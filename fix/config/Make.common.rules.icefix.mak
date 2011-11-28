@@ -7,8 +7,8 @@
 #
 # **********************************************************************
 
-ICEFIX_VERSION		= 1.0.0
-ICEFIX_INTVERSION	= 1.0.0
+ICEFIX_VERSION		= 1.0.1
+ICEFIX_INTVERSION	= 1.0.1
 ICEFIX_SHORT_VERSION    = 1.0
 ICEFIX_SOVERSION	= 10
 
