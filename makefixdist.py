@@ -417,16 +417,25 @@ if os.path.exists(distDir):
     rmtree(distDir)
 os.mkdir(distDir)
 
+distFilesDir = os.path.join(distDir, "distfiles-" + version)
+
 print "Creating " + version + " source distributions in " + distDir
 
 srcDistDir = os.path.join(distDir, "IceFIX-" + version)
+demoDir = os.path.join(distDir, "IceFIX-" + version + "-demos")
+
+
+os.mkdir(demoDir)
+
+distFilesDir = os.path.join(distDir, "IceFIX-distfiles-" + version)
+os.mkdir(distFilesDir)
 
 #
 # Extract the sources with git archive using the given tag.
 #
 print "Creating git archive using " + tag + "...",
 sys.stdout.flush()
-os.system("git archive --prefix=IceFIX-" + version + "/ " + tag + " cpp/config fix config scripts | ( cd " + distDir + " && tar xfm - )")
+os.system("git archive --prefix=IceFIX-" + version + "/ " + tag + " cpp/config fix config scripts distribution | ( cd " + distDir + " && tar xfm - )")
 print "ok"
 
 os.chdir(os.path.join(srcDistDir))
@@ -447,6 +456,7 @@ for d in os.listdir("fix"):
     os.rename(os.path.join("fix", d), d)
 os.rmdir("fix")
 print "ok"
+
 
 print "Walking through distribution to fix permissions, versions, etc...",
 sys.stdout.flush()
@@ -486,6 +496,49 @@ print "ok"
 #    generateFlexFile(x)
 #print "ok"
 
+
+os.chdir(os.path.join(demoDir))
+
+print "Relocating demo files...",
+sys.stdout.flush()
+
+copytree(os.path.join(srcDistDir, "demo"), os.path.join(demoDir, "demo"))
+copytree(os.path.join(srcDistDir, "democs"), os.path.join(demoDir, "democs"))
+copytree(os.path.join(srcDistDir, "config"), os.path.join(demoDir, "config"))
+
+copy(os.path.join(srcDistDir, "distribution", "src", "icefix", "demodist", "README.txt"), os.path.join(demoDir, "README.txt"))
+
+copytree(os.path.join(srcDistDir, "distribution"), os.path.join(distFilesDir, "distribution"))
+
+csprojExprs = [ (re.compile(regexpEscape("<HintPath>..\\..\\bin\\IceFIX.dll</HintPath>")), "") ]
+vcxprojExprs = [ (re.compile(regexpEscape("..\\..\\config\\IceFIX.props")), "$(ALLUSERSPROFILE)\\ZeroC\\IceFIX.props") ]
+
+for root, dirnames, filesnames in os.walk('.'):
+
+    for f in filesnames:
+        filepath = os.path.join(root, f)
+        
+        if f == "IceFIX.props":
+            os.remove(filepath)
+        else:
+            # Fix HintPath of *.csproj files.
+            if fnmatch.fnmatch(f, "*.csproj"):
+                substitute(filepath, csprojExprs)
+            # Fix IceFIX.props path in *.vsxproj
+            if fnmatch.fnmatch(f, "*.vcxproj"):
+                substitute(filepath, vcxprojExprs)
+                
+
+#
+# Remove distribution files.
+#
+rmtree(os.path.join(srcDistDir, "distribution"))
+
+#
+# Remove solution user options in source dist.
+#
+os.remove(os.path.join(srcDistDir, "demo", "demo.suo"))
+ 
 #
 # Everything should be clean now, we can create the source distributions archives
 # 
@@ -493,14 +546,16 @@ print "Archiving..."
 sys.stdout.flush()
 os.chdir(distDir)
 
-for d in [srcDistDir]:
+distributions = [srcDistDir, demoDir, distFilesDir]
+
+for d in distributions:
     dist = os.path.basename(d)
     print "   creating " + dist + ".tar.gz ...",
     sys.stdout.flush()
     os.system("tar c" + quiet + "f - " + dist + " | gzip -9 - > " + dist + ".tar.gz")
     print "ok"
 
-for d in [srcDistDir]:
+for d in distributions:
     dist = os.path.basename(d)
     print "   creating " + dist + ".zip ...",
     sys.stdout.flush()
@@ -515,7 +570,9 @@ for d in [srcDistDir]:
 #
 print "Cleaning up...",
 sys.stdout.flush()
-#rmtree(srcDistDir)
+rmtree(srcDistDir)
+rmtree(demoDir);
+rmtree(distFilesDir);
 print "ok"
 
 os.chdir(cwd)

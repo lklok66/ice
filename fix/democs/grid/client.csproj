@@ -37,17 +37,12 @@
     <Reference Include="Glacier2, Version=3.4.2.0, Culture=neutral, PublicKeyToken=cdd571ade22f2f16, processorArchitecture=MSIL" />
     <Reference Include="Ice, Version=3.4.2.0, Culture=neutral, PublicKeyToken=cdd571ade22f2f16, processorArchitecture=MSIL" />
     <Reference Include="IceFIX">
-      <HintPath>..\..\..\..\..\..\..\Program Files\ZeroC\IceFIX-1.0.1\bin\IceFIX.dll</HintPath>
+      <HintPath>..\..\bin\IceFIX.dll</HintPath>
     </Reference>
     <Reference Include="IceGrid, Version=3.4.2.0, Culture=neutral, PublicKeyToken=cdd571ade22f2f16, processorArchitecture=MSIL" />
     <Reference Include="quickfix_net">
-      <HintPath>..\..\..\..\..\..\..\quickfix\lib\quickfix_net.dll</HintPath>
     </Reference>
     <Reference Include="quickfix_net_messages">
-      <HintPath>..\..\..\..\..\..\..\quickfix\lib\quickfix_net_messages.dll</HintPath>
-    </Reference>
-    <Reference Include="quickfix_net_test">
-      <HintPath>..\..\..\..\..\..\..\quickfix\lib\quickfix_net_test.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -64,7 +59,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="README" />
+    <None Include="README.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

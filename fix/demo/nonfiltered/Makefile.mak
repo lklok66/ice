@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice FIX is licensed to you under the terms described in the
 # ICE_FIX_LICENSE file included in this distribution.
@@ -20,7 +20,7 @@ SRCS		= $(OBJS:.obj=.cpp)
 !include $(top_srcdir)/config/Make.rules.mak
 
 CPPFLAGS	= -I. $(ICE_CPPFLAGS) $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN $(QF_FLAGS)
-LIBS		= $(libdir)\icefix$(LIBSUFFIX).lib $(LIBS) $(QF_LIBS)
+LIBS		= "$(libdir)\icefix$(LIBSUFFIX).lib" $(LIBS) $(QF_LIBS)
 
 !if "$(GENERATE_PDB)" == "yes"
 PPDBFLAGS        = /pdb:$(CLIENT:.exe=.pdb)

@@ -1,0 +1,7 @@
+Source Code
+-----------
+
+The source distributions of IceFIX, Ice and QuickFIX used 
+to build this distribution can be downloaded at no cost from
+
+  http://www.zeroc.com/labs/icefix/download.html

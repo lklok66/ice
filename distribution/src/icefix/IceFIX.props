@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <IceFIXHome>@installdir@\</IceFIXHome>
+    <QuickFIXHome>C:\QuickFIX</QuickFIXHome>
+  </PropertyGroup>
+  <ItemGroup>
+    <BuildMacro Include="IceFIXHome">
+      <Value>$(IceFIXHome)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="QuickFIXHome">
+      <Value>$(QuickFIXHome)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

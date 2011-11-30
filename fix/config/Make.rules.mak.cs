@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice FIX is licensed to you under the terms described in the
 # ICE_FIX_LICENSE file included in this distribution.
@@ -70,9 +70,44 @@ KEYFILE                 = $(top_srcdir)\..\config\IceDevKey.snk
 ice_language = cs
 slice_translator = slice2cs.exe
 
+!if "$(QF_HOME)" == ""
+QF_HOME     = C:\QuickFIX
+!endif
+
 !include $(top_srcdir)\config\Make.common.rules.icefix.mak
 
+!if "$(USE_BIN_DIST)" == "yes" || !exist ($(top_srcdir)\src)
+
+!if "$(ICEFIX_HOME)" == ""
+!if "$(PROCESSOR_ARCHITECTURE)" == "AMD64" || "$(PROCESSOR_ARCHITECTUREW6432)" == "AMD64"
+ICEFIX_HOME		= C:\Program Files (x86)\ZeroC\IceFIX-$(ICEFIX_VERSION)
+!else
+ICEFIX_HOME		= C:\Program Files\ZeroC\IceFIX-$(ICEFIX_VERSION)
+!endif
+!endif
+
+!if "$(ICEFIX_HOME)" != ""
+!if !exist ("$(ICEFIX_HOME)\bin\IceFIX.dll")
+!error Unable to find IceFIX-$(ICEFIX_VERSION) distribution, please verify ICEFIX_HOME is properly configured and IceFIX is correctly installed.
+!endif
+!endif
+
+bindir			= $(ICEFIX_HOME)\bin
+libdir			= $(ICEFIX_HOME)\lib
+headerdir		= $(ICEFIX_HOME)\include
+
+includedir		= $(ICEFIX_HOME)\include
+slicedir		= $(ICEFIX_HOME)\slice
+!else
+
 bindir			= $(top_srcdir)\bin
+libdir			= $(top_srcdir)\lib
+headerdir		= $(top_srcdir)\include
+
+includedir		= $(top_srcdir)\include
+slicedir		= $(top_srcdir)\slice
+
+!endif
 
 install_bindir		= $(prefix)\bin
 install_libdir		= $(prefix)\lib

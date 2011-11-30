@@ -3,10 +3,11 @@ Introduction
 ======================================================================
 
 This file describes how to build and install IceFIX from source code.
-Note that this distribution also includes all library and executable
-files for the IceFIX Bridge service, the C++ and C# libraries, and all
-demos and tests, therefore it is not usually necessary to compile the
-source yourself.
+
+If you don't want to build IceFIX your self, use the binary distribution
+instead, you can optain it from:
+
+  http://www.zeroc.com/labs/silverlight/download.html
 
 
 ======================================================================
@@ -23,7 +24,7 @@ IceFIX has been tested on Windows 7
 Compilers
 ---------
 
-IceFIX has been tested with Visual Studio 2010 SP1.
+IceFIX has been tested with Visual Studio 2010.
 
 
 Ice
@@ -45,6 +46,9 @@ QuickFIX 1.13.3. QuickFIX can be downloaded from
 
   http://www.quickfixengine.org
 
+You can use the Visual Studio 2010 binary distribution for releases builds,
+for debug builds you must build QuickFIX in debug mode from sources.
+
 
 ======================================================================
 Building IceFIX
@@ -60,8 +64,8 @@ to IceFIX-@ver@. For example;
 
 Edit config\Make.rules.mak and config\Make.rules.mak.cs to establish
 your build configurations. The comments in these files provide more
-information. In particular, you must set your QF_HOME to the location
-of your QuickFIX installation.
+information. In particular, if you don't installed QuickFIX in C:\quickfix
+you must set your QF_HOME to the location of your QuickFIX installation.
 
 Now you're ready to build IceFIX:
 
@@ -98,10 +102,3 @@ Simply run "nmake /f Makefile.mak install". This will install IceFIX
 in the directory specified by the "prefix" variable in
 config\Make.rules.mak and config\Make.rules.mak.cs. After installation,
 make sure that the <prefix>\bin directory is in your PATH.
-
-To develop an application with IceFIX, you must also configure Visual
-Studio's C++ directories to add the include directory to the "Include
-files" list, the lib directory to the "Library files" list, and the
-bin directory to the "Executable files" list. In Visual Studio, choose
-
-  Tools->Options->Projects and Solutions->VC++ Directories

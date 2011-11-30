@@ -160,13 +160,13 @@ install-common::
 !endif
 
 !if "$(ice_bin_dist)" == ""
-	@if not exist "$(prefix)\ICE_FIX_LICENSE" \
-	    @copy $(top_srcdir)\..\ICE_FIX_LICENSE "$(prefix)"
-	@if not exist "$(prefix)\LICENSE" \
-	    @copy $(top_srcdir)\..\LICENSE "$(prefix)"
+	@if not exist "$(prefix)\ICE_FIX_LICENSE.txt" \
+	    @copy $(top_srcdir)\..\ICE_FIX_LICENSE.txt "$(prefix)"
+	@if not exist "$(prefix)\LICENSE.txt" \
+	    @copy $(top_srcdir)\..\LICENSE.txt "$(prefix)"
 !else
-	@if not exist "$(prefix)\ICE_FIX_LICENSE" \
-	    @copy $(top_srcdir)\ICE_FIX_LICENSE "$(prefix)"
-	@if not exist "$(prefix)\LICENSE" \
-	    @copy $(top_srcdir)\LICENSE "$(prefix)"
+	@if not exist "$(prefix)\ICE_FIX_LICENSE.txt" \
+	    @copy $(top_srcdir)\ICE_FIX_LICENSE.txt "$(prefix)"
+	@if not exist "$(prefix)\LICENSE.txt" \
+	    @copy $(top_srcdir)\LICENSE.txt "$(prefix)"
 !endif

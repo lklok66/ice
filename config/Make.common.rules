@@ -37,7 +37,8 @@ $(error ice_language must be defined)
 endif
 
 ifeq ($(USE_BIN_DIST),yes)
-ice_bin_dist = 1
+ice_bin_dist 	= 1
+icefix_bin_dist	= 1
 endif
 
 ifeq ($(UNAME),SunOS)
@@ -354,12 +355,12 @@ install-common::
 	    done ; \
         fi
 
-	@if test ! -f $(prefix)/ICE_LICENSE ; \
+	@if test ! -f $(prefix)/ICE_FIX_LICENSE.txt ; \
 	then \
-	    $(call installdata,$(top_srcdir)/../ICE_LICENSE,$(prefix)) ; \
+	    $(call installdata,$(top_srcdir)/../ICE_FIX_LICENSE.txt,$(prefix)) ; \
 	fi
 
-	@if test ! -f $(prefix)/LICENSE ; \
+	@if test ! -f $(prefix)/LICENSE.txt ; \
 	then \
-	    $(call installdata,$(top_srcdir)/../LICENSE,$(prefix)) ; \
+	    $(call installdata,$(top_srcdir)/../LICENSE.txt,$(prefix)) ; \
 	fi

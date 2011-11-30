@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice FIX is licensed to you under the terms described in the
 # ICE_FIX_LICENSE file included in this distribution.
@@ -16,7 +16,6 @@ SUBDIRS		= src test include demo democs slice
 INSTALL_SUBDIRS	= $(install_bindir) $(install_libdir) $(install_includedir)
 
 install:: install-common
-        @copy LICENSE $(prefix)
 	@for %i in ( $(INSTALL_SUBDIRS) ) do \
 	    @if not exist %i \
 		@echo "Creating %i..." && \
