@@ -4,8 +4,8 @@ Introduction
 
 This file describes how to build and install IceFIX from source code.
 
-If you don't want to build IceFIX your self, use the binary distribution
-instead, you can optain it from:
+If you do not want to build IceFIX yourself, you can obtain a binary
+distribution at
 
   http://www.zeroc.com/labs/icefix/download.html
 
@@ -18,7 +18,7 @@ Requirements
 Operating systems
 -----------------
 
-IceFIX has been tested on Windows 7
+IceFIX has been tested on Windows 7.
 
 
 Compilers
@@ -30,8 +30,9 @@ IceFIX has been tested with Visual Studio 2010.
 Ice
 ---
 
-IceFIX requires an installation of Ice 3.4.2. You can download a binary
-distribution from the ZeroC web site, or you can build Ice yourself.
+IceFIX requires an installation of Ice 3.4.2. You can download a
+binary distribution from the ZeroC web site, or you can build Ice
+yourself.
 
 Binary distributions for supported platforms are available at
 
@@ -44,14 +45,14 @@ QuickFIX
 IceFIX requires an installation of QuickFIX, and has been tested with
 QuickFIX 1.13.3.
 
-For IceFIX binary distribution you need to download the Visual Studio 2010
-QuickFIX package quickfix-bin-vs10-1.13.3.zip
-
-You can download it from QuickFIX download site at:
+For the IceFIX binary distribution, you need to download the QuickFIX
+Visual Studio 2010 package "quickfix-bin-vs10-1.13.3.zip", which is
+available at
 
   http://www.quickfixengine.org/download.html
 
-for debug builds you must use IceFIX and QuickFIX source distribution.
+For debug builds you must use the IceFIX and QuickFIX source
+distributions.
 
 
 ======================================================================
@@ -68,10 +69,11 @@ to IceFIX-@ver@. For example;
 
 Edit config\Make.rules.mak and config\Make.rules.mak.cs to establish
 your build configurations. The comments in these files provide more
-information. In particular, if you don't installed QuickFIX in C:\quickfix
-you must set your QF_HOME to the location of your QuickFIX installation.
+information. In particular, if you did not install QuickFIX in
+C:\quickfix, you must set your QF_HOME to the location of your
+QuickFIX installation.
 
-Now you're ready to build IceFIX:
+Now you are ready to build IceFIX:
 
 > nmake /f Makefile.mak
 
@@ -84,7 +86,7 @@ Python is required to run the test suite:
   http://www.python.org/download
 
 You can now run the test suite. Open a command prompt and change to
-the top-level Ice directory. At the command prompt, execute:
+the top-level IceFIX directory. At the command prompt, execute:
 
 > set USE_BIN_DIST=yes
 > set ICE_HOME=<Ice installation directory>

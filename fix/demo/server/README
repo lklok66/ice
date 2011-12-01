@@ -34,4 +34,4 @@ When the server is running you can issue various commands:
 
 - notrace (default)
 
-  The server will only not trace FIX messages.
+  The server will not trace FIX messages.

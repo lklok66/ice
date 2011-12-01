@@ -23,7 +23,7 @@ fix\demo\server:
 
 > ..\server\server config.tp1
 
-In a separate window, start the FIX server:
+In a separate window, start another FIX server:
 
 > ..\server\server config.tp2
 
