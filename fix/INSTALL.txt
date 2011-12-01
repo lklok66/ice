@@ -7,7 +7,7 @@ This file describes how to build and install IceFIX from source code.
 If you don't want to build IceFIX your self, use the binary distribution
 instead, you can optain it from:
 
-  http://www.zeroc.com/labs/silverlight/download.html
+  http://www.zeroc.com/labs/icefix/download.html
 
 
 ======================================================================
@@ -42,12 +42,16 @@ QuickFIX
 --------
 
 IceFIX requires an installation of QuickFIX, and has been tested with
-QuickFIX 1.13.3. QuickFIX can be downloaded from
+QuickFIX 1.13.3.
 
-  http://www.quickfixengine.org
+For IceFIX binary distribution you need to download the Visual Studio 2010
+QuickFIX package quickfix-bin-vs10-1.13.3.zip
 
-You can use the Visual Studio 2010 binary distribution for releases builds,
-for debug builds you must build QuickFIX in debug mode from sources.
+You can download it from QuickFIX download site at:
+
+  http://www.quickfixengine.org/download.html
+
+for debug builds you must use IceFIX and QuickFIX source distribution.
 
 
 ======================================================================
@@ -60,7 +64,7 @@ you like.
 Open a Visual Studio command prompt and change the working directory
 to IceFIX-@ver@. For example;
 
-> cd C:\IceFIX-@ver@
+> cd C:\build\IceFIX-@ver@
 
 Edit config\Make.rules.mak and config\Make.rules.mak.cs to establish
 your build configurations. The comments in these files provide more
