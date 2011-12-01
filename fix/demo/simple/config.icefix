@@ -1,7 +1,5 @@
 #
-# The server creates one single object adapter with the name
-# "Hello". The following line sets the endpoints for this
-# adapter.
+# Endpoints for the bridge's object adapter.
 #
 IceFIX.Bridge.Endpoints=tcp -p 12000
 
@@ -34,10 +32,8 @@ Freeze.DbEnv.IceFIX.DbHome=db
 Ice.Warn.Connections=1
 
 #
-# Server-side ACM is disabled by default. For this demo, we want it
-# enabled and set to a short timeout of 10 seconds. By enabling
-# network tracing below, you can see ACM automatically close idle
-# connections.
+# Server-side ACM is disabled by default. By enabling network tracing
+# below, you can see ACM automatically close idle connections.
 #
 #Ice.ACM.Server=10
 
