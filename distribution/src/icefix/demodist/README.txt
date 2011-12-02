@@ -9,9 +9,7 @@ Table of Contents
 -----------------
 
   1. Building and running the C++ IceFIX demos (Visual Studio 2010)
-  2. Building and running the C++ IceFIX demos (Visual C++ 2010 Express)
-  3. Building and running the C# IceFIX demos (Visual Studio 2010)
-  4. Building and running the C# IceFIX demos (Visual C# 2010 Express)
+  2. Building and running the C# IceFIX demos (Visual Studio 2010)
 
 ======================================================================
 1. Building and running the C++ IceFIX demos (Visual Studio 2010)
@@ -34,46 +32,10 @@ Select your target configuration: Debug or Release, Win32 Right click
 on the desired demo in the Solution Explorer window and select "Build".
 
 To run a demo, open a command window and change to the desired demo
-subdirectory. Review the README.txt.txt.txt.txt file.
+subdirectory. Review the README.txt file.
 
 ======================================================================
-2. Building and running the C++ IceFIX demos (Visual C++ 2010 Express)
-======================================================================
-
-The C++ demos are in the demo directory.
-
-Visual C++ Express does not support the Ice Visual Studio Add-in,
-therefore you must use NMAKE to build the C++ demos.
-
-To build the C++ demos, open a "Visual Studio Command Prompt" window.
-If you installed Ice in a non-default location, set ICE_HOME as shown 
-below:
-
-  > set ICE_HOME=<Ice installation root directory>
-
-If you installed IceFIX in a non-default location, set ICEFIX_HOME 
-as shown below:
-
-  > set ICEFIX_HOME=<IceFIX installation root directory>
-
-If you installed QuickFIX non in "C:\QuickFIX", set QF_HOME as shown
-below:
-
-  > set QF_HOME=<QuickFIX installation root directory>
-
-Change to the demo directory and run the following commands to build
-the demos:
-
-  > set CPP_COMPILER=VC100_EXPRESS  # (For Visual C++ 2010)
-  > nmake /f Makefile.mak
-
-not include MFC support.
-
-To run a demo, change to the desired demo subdirectory and review the
-README.txt.txt.txt.txt file.
-
-======================================================================
-3. Building and running the C# IceFIX demos (Visual Studio 2010)
+2. Building and running the C# IceFIX demos (Visual Studio 2010)
 ======================================================================
 
 The C# demos are in the democs directory.
@@ -95,40 +57,4 @@ Select your target configuration: Debug or Release, Right click on the
 desired demo in the Solution Explorer window and select "Build".
 
 To run a demo, open a command window and change to the desired demo
-subdirectory. Review the README.txt.txt.txt.txt file.
-
-======================================================================
-4. Building and running the C# IceFIX demos (Visual C# 2010 Express)
-======================================================================
-
-The C# demos are in the democs directory.
-
-Visual C# Express does not support the Ice Visual Studio Add-in,
-therefore you must use NMAKE to build the C# demos.
-
-To build the C# demos, open a "Visual Studio Command Prompt" window.
-If you installed Ice in a non-default location, set ICE_HOME as shown
-below:
-
-  > set ICE_HOME=<Ice installation root directory>
-
-If you installed IceFIX in a non-default location, set ICEFIX_HOME as shown
-below:
-
-  > set ICEFIX_HOME=<IceFIX installation root directory>
-
-If you installed QuickFIX non in "C:\QuickFIX", set QF_HOME as shown
-below:
-
-  > set QF_HOME=<QuickFIX installation root directory>
-
-Change to the demo directory and run the following commands to build
-the demos:
-
-  > set CPP_COMPILER=VC100_EXPRESS  # (For Visual C++ 2010)
-  > nmake /f Makefile.mak
-
-not include MFC support.
-
-To run a demo, change to the desired demo subdirectory and review the
-README.txt.txt.txt.txt file.
+subdirectory. Review the README.txt file.
