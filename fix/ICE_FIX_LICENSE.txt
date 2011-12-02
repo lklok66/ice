@@ -24,7 +24,7 @@ Public License version 2. This includes the situation where IceFIX is
 only being used through an abstraction layer.
 
 As a special exception to the above, ZeroC grants to the contributors for
-the following projects the permission to license their Ice Touch-based 
+the following projects the permission to license their IceFIX-based 
 software under the terms of the GNU Lesser General Public License (LGPL)
 version 2.1 or of the BSD license:
 
