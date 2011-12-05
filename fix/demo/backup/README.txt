@@ -38,7 +38,7 @@ using the batch file named "backup". This file illustrates how to use
 the Berkeley DB db_hotbackup utility. For a full description of
 db_hotbackup, please refer to:
 
-  http://www.oracle.com/technology/documentation/berkeley-db/db/utility/db_hotbackup.html
+ http://docs.oracle.com/cd/E17076_02/html/api_reference/C/db_hotbackup.html
 
 The following command creates a full backup (both data and log files)
 in the 'hotbackup' directory:

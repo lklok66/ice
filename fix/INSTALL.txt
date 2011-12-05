@@ -5,7 +5,7 @@ Introduction
 This file describes how to build and install IceFIX from source code.
 
 If you do not want to build IceFIX yourself, you can obtain a binary
-distribution at
+distribution from:
 
   http://www.zeroc.com/labs/icefix/download.html
 
@@ -34,7 +34,7 @@ IceFIX requires an installation of Ice 3.4.2. You can download a
 binary distribution from the ZeroC web site, or you can build Ice
 yourself.
 
-Binary distributions for supported platforms are available at
+Binary distributions for supported platforms are available at:
 
   http://www.zeroc.com/download.html
 
@@ -47,7 +47,7 @@ QuickFIX 1.13.3.
 
 For the IceFIX binary distribution, you need to download the QuickFIX
 Visual Studio 2010 package "quickfix-bin-vs10-1.13.3.zip", which is
-available at
+available at:
 
   http://www.quickfixengine.org/download.html
 
@@ -70,8 +70,8 @@ to IceFIX-@ver@. For example;
 Edit config\Make.rules.mak and config\Make.rules.mak.cs to establish
 your build configurations. The comments in these files provide more
 information. In particular, if you did not install QuickFIX in
-C:\quickfix, you must set your QF_HOME to the location of your
-QuickFIX installation.
+C:\QuickFIX, you must set QF_HOME to the location of your QuickFIX 
+installation.
 
 Now you are ready to build IceFIX:
 

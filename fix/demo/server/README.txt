@@ -1,0 +1,37 @@
+This demo is a simple QuickFIX server for use with the various
+IceFIX demos. The server should be run from one of the demo
+directories.
+
+The server supports the following FIX messages
+
+- NewOrderSingle
+- OrderCancelRequest
+- OrderCancelReplaceRequest
+- OrderStatusRequest
+
+When the server is running you can issue various commands:
+
+- list
+
+  This lists the order books for the symbols offered by the server.
+
+- automatch (default)
+
+  The server will automatically match any orders that arrive.
+
+- noautomatch
+
+  The server will only match orders when the "match" command is
+  issued.
+
+- match
+
+  The server will only match any open orders.
+
+- trace
+
+  The server will only trace FIX messages.
+
+- notrace (default)
+
+  The server will not trace FIX messages.
