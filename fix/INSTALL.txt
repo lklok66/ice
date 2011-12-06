@@ -89,6 +89,7 @@ You can now run the test suite. Open a command prompt and change to
 the top-level IceFIX directory. At the command prompt, execute:
 
 > set USE_BIN_DIST=yes
+> set CPP_COMPILER=VC100
 > set ICE_HOME=<Ice installation directory>
 > python allTests.py
 
