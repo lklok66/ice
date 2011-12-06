@@ -97,8 +97,8 @@ If everything worked out, you should see lots of "ok" messages. In
 case of a failure, the tests abort with "failed".
 
 If you want to try out any of the demos, make sure to update your PATH
-environment variable to add the "bin" directory, which contains the
-IceFIX DLLs and executables.
+environment variable to add the "bin" directory containing the IceFIX
+DLLs and executables.
 
 
 ======================================================================
