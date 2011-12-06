@@ -66,10 +66,19 @@ struct ClientInfo
     string id; /** The client id. */
     bool isConnected; /** Is the client active? */
 };
-/** A sequence of ClientInfo structures. */
+
+/** 
+ *
+ * A sequence of ClientInfo structures. 
+ *
+ */
 sequence<ClientInfo> ClientInfoSeq;
 
-/** Requested quality of service. */
+/**
+ *
+ * Requested quality of service.
+ *
+ */
 dictionary<string, string> QoS;
 
 /** The bridge status. */
