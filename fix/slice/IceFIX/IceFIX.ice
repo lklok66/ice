@@ -13,6 +13,11 @@ module IceFIX
 /** Raised if execute fails. */
 exception ExecuteException
 {
+    /**
+     *
+     * The reason for the failure.
+     *
+     **/
     string reason;
 };
 
@@ -57,6 +62,11 @@ interface Reporter
 /** Raised if register/unregister fails. */
 exception RegistrationException
 {
+    /**
+     *
+     * The reason for the failure.
+     *
+     **/
     string reason;
 };
 
