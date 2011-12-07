@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<DOCUMENT Type="Advanced Installer" CreateVersion="7.3" version="8.6" Modules="enterprise" RootPath="." Language="en" Id="{A6A4606D-3A0E-4313-9803-02186A8D45B4}">
+<DOCUMENT Type="Advanced Installer" CreateVersion="7.3" version="8.7" Modules="enterprise" RootPath="." Language="en" Id="{A6A4606D-3A0E-4313-9803-02186A8D45B4}">
   <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
     <ROW Property="AI_UPGRADE" Value="No"/>
     <ROW Property="ALLUSERS" Value="2"/>
     <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
     <ROW Property="ARPCONTACT" Value="info@zeroc.com"/>
     <ROW Property="ARPURLINFOABOUT" Value="http://www.zeroc.com"/>
-    <ROW Property="BannerBitmap" Value="banner" MultiBuildValue="DefaultBuild:installer_header.bmp_1" Type="1" MsiKey="BannerBitmap"/>
+    <ROW Property="BannerBitmap" Value="banner" MultiBuildValue="DefaultBuild:installer_header.bmp" Type="1" MsiKey="BannerBitmap"/>
     <ROW Property="CTRLS" Value="1"/>
     <ROW Property="DEMO_DIR" Value="C:\"/>
-    <ROW Property="DialogBitmap" Value="dialog" MultiBuildValue="DefaultBuild:installer_main.bmp_1" Type="1" MsiKey="DialogBitmap"/>
+    <ROW Property="DialogBitmap" Value="dialog" MultiBuildValue="DefaultBuild:installer_main.bmp" Type="1" MsiKey="DialogBitmap"/>
     <ROW Property="Manufacturer" Value="Zeroc, Inc" ValueLocId="*"/>
     <ROW Property="ProductCode" Value="1033:{FCBCF851-3723-4C79-929F-FE722058018C} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
@@ -35,7 +35,7 @@
     <ROW Directory="backup_Dir" Directory_Parent="demo_Dir" DefaultDir="backup"/>
     <ROW Directory="bin_DIR" Directory_Parent="APPDIR" DefaultDir="bin"/>
     <ROW Directory="config_Dir" Directory_Parent="DEMO_DIR" DefaultDir="config"/>
-    <ROW Directory="data_1_Dir" Directory_Parent="db_tp1_1_Dir" DefaultDir="data"/>
+    <ROW Directory="data_1_Dir" Directory_Parent="db_tp1_2_Dir" DefaultDir="data"/>
     <ROW Directory="data_Dir" Directory_Parent="db_tp1_Dir" DefaultDir="data"/>
     <ROW Directory="db_1_Dir" Directory_Parent="grid_Dir" DefaultDir="db"/>
     <ROW Directory="db_2_Dir" Directory_Parent="nonfiltered_Dir" DefaultDir="db"/>
@@ -45,8 +45,8 @@
     <ROW Directory="db_6_Dir" Directory_Parent="nonfiltered_1_Dir" DefaultDir="db"/>
     <ROW Directory="db_7_Dir" Directory_Parent="simple_1_Dir" DefaultDir="db"/>
     <ROW Directory="db_Dir" Directory_Parent="backup_Dir" DefaultDir="db"/>
-    <ROW Directory="db_tp1_1_Dir" Directory_Parent="backup_1_Dir" DefaultDir="db-tp1"/>
-    <ROW Directory="db_tp1_2_Dir" Directory_Parent="grid_Dir" DefaultDir="db-tp1"/>
+    <ROW Directory="db_tp1_1_Dir" Directory_Parent="grid_Dir" DefaultDir="db-tp1"/>
+    <ROW Directory="db_tp1_2_Dir" Directory_Parent="backup_1_Dir" DefaultDir="db-tp1"/>
     <ROW Directory="db_tp1_3_Dir" Directory_Parent="grid_1_Dir" DefaultDir="db-tp1"/>
     <ROW Directory="db_tp1_Dir" Directory_Parent="backup_Dir" DefaultDir="db-tp1"/>
     <ROW Directory="db_tp2_1_Dir" Directory_Parent="grid_1_Dir" DefaultDir="db-tp2"/>
@@ -58,7 +58,7 @@
     <ROW Directory="grid_Dir" Directory_Parent="demo_Dir" DefaultDir="grid"/>
     <ROW Directory="include_Dir" Directory_Parent="APPDIR" DefaultDir="include"/>
     <ROW Directory="lib_Dir" Directory_Parent="APPDIR" DefaultDir="lib"/>
-    <ROW Directory="logs_1_Dir" Directory_Parent="db_tp1_1_Dir" DefaultDir="logs"/>
+    <ROW Directory="logs_1_Dir" Directory_Parent="db_tp1_2_Dir" DefaultDir="logs"/>
     <ROW Directory="logs_Dir" Directory_Parent="db_tp1_Dir" DefaultDir="logs"/>
     <ROW Directory="node_1_Dir" Directory_Parent="db_1_Dir" DefaultDir="node"/>
     <ROW Directory="node_2_Dir" Directory_Parent="db_4_Dir" DefaultDir="node"/>
@@ -83,10 +83,10 @@
     <ROW Directory="store_Dir" Directory_Parent="backup_Dir" DefaultDir="store"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
-    <ROW Component="DB_CONFIG" ComponentId="{F0DB4759-1773-4135-95E2-50B567F9A05B}" Directory_="db_tp1_Dir" Attributes="0" KeyPath="DB_CONFIG" Type="0"/>
-    <ROW Component="DB_CONFIG_1" ComponentId="{85CCE615-04FC-4F99-A091-37F72CE17190}" Directory_="db_tp1_1_Dir" Attributes="0" KeyPath="DB_CONFIG_1" Type="0"/>
+    <ROW Component="DB_CONFIG" ComponentId="{489E8B3C-6683-4C5B-860C-631A77C65830}" Directory_="db_tp1_Dir" Attributes="0" KeyPath="DB_CONFIG" Type="0"/>
+    <ROW Component="DB_CONFIG_1" ComponentId="{1EE7360D-867F-4729-BD7E-CB797C6768DA}" Directory_="db_tp1_2_Dir" Attributes="0" KeyPath="DB_CONFIG_1" Type="0"/>
     <ROW Component="ICE_FIX_LICENSE.txt" ComponentId="{491FE129-9561-4AED-B938-6A83F9E9E49A}" Directory_="APPDIR" Attributes="0" KeyPath="ICE_FIX_LICENSE.txt" Type="0"/>
-    <ROW Component="IceDevKey.snk" ComponentId="{EFF0BD42-C97F-45E5-93F8-CDD00D6622BB}" Directory_="config_Dir" Attributes="0" KeyPath="IceDevKey.snk" Type="0"/>
+    <ROW Component="IceDevKey.snk" ComponentId="{980A29F3-82E4-4CC7-A36B-33E00613D4D6}" Directory_="config_Dir" Attributes="0" KeyPath="IceDevKey.snk" Type="0"/>
     <ROW Component="IceFIX.dll" ComponentId="{4068F3CB-4A85-4117-8FD8-92099C7BC95C}" Directory_="bin_DIR" Attributes="0" KeyPath="IceFIX.dll"/>
     <ROW Component="IceFIX.h" ComponentId="{99ABE2B1-FA6E-49D5-B2A7-01CB12302FA7}" Directory_="IceFIX_Dir" Attributes="0" KeyPath="IceFIX.h" Type="0"/>
     <ROW Component="IceFIX.ice" ComponentId="{C4A7D864-E7AF-47E0-95EB-761AE1422B14}" Directory_="IceFIX_1_Dir" Attributes="0" KeyPath="IceFIX.ice" Type="0"/>
@@ -96,202 +96,203 @@
     <ROW Component="README.txt" ComponentId="{24A9B446-B77F-4B52-BB69-602C19289D48}" Directory_="APPDIR" Attributes="0" KeyPath="README.txt"/>
     <ROW Component="README.txt_1" ComponentId="{54F07AC7-898F-4778-8D28-B2D89C559AC4}" Directory_="DEMO_DIR" Attributes="0" KeyPath="README.txt_1" Type="0"/>
     <ROW Component="__1" ComponentId="{250C836C-A8A5-425C-8FB8-795A359C5FB0}" Directory_="APPDIR" Attributes="4" KeyPath="__1"/>
-    <ROW Component="backup" ComponentId="{49BA3980-3739-431F-9F4F-D34603134D27}" Directory_="backup_Dir" Attributes="0" KeyPath="backup" Type="0"/>
-    <ROW Component="backup.bat" ComponentId="{55DBADC3-BC1C-4D33-8006-4E8FF1F2D1F6}" Directory_="backup_1_Dir" Attributes="0" KeyPath="backup.bat_1" Type="0"/>
-    <ROW Component="data" ComponentId="{CCF4E0BC-5F82-4557-9361-FA67A8E48B49}" Directory_="data_Dir" Attributes="0"/>
-    <ROW Component="data_1" ComponentId="{EFC560C1-02E5-4B14-9907-667C15297E22}" Directory_="data_1_Dir" Attributes="0"/>
-    <ROW Component="db" ComponentId="{34764402-DCC5-4535-A380-2CAB554BFC51}" Directory_="db_2_Dir" Attributes="0"/>
-    <ROW Component="db_1" ComponentId="{45555F2B-A5F2-416F-86E0-939404EB5E7D}" Directory_="db_3_Dir" Attributes="0"/>
-    <ROW Component="db_2" ComponentId="{C50EBA91-F763-43D7-80A1-CE861B22752E}" Directory_="db_6_Dir" Attributes="0"/>
-    <ROW Component="db_3" ComponentId="{5AE0EC34-F3EB-45C9-88D1-3F264EA37AAF}" Directory_="db_7_Dir" Attributes="0"/>
-    <ROW Component="db_tp1" ComponentId="{79E6DF21-71E8-45A4-9561-489A3F0D8E0A}" Directory_="db_tp1_2_Dir" Attributes="0"/>
-    <ROW Component="db_tp1_1" ComponentId="{595C4F2F-A6AF-42F3-8DAB-7BAA0BF5323B}" Directory_="db_tp1_3_Dir" Attributes="0"/>
-    <ROW Component="db_tp2" ComponentId="{A2F2F12B-3C69-432B-8152-E9232B38BAC7}" Directory_="db_tp2_Dir" Attributes="0"/>
-    <ROW Component="db_tp2_1" ComponentId="{2B0627C1-2F91-4302-85D4-3CBF769C488B}" Directory_="db_tp2_1_Dir" Attributes="0"/>
-    <ROW Component="demo.sln" ComponentId="{9A036D58-786E-456E-B6CD-2559D4DB6EE0}" Directory_="demo_Dir" Attributes="0" KeyPath="demo.sln" Type="0"/>
-    <ROW Component="democs.sln" ComponentId="{0F318F35-A99E-4B9E-BA3D-824FD104B6F7}" Directory_="democs_Dir" Attributes="0" KeyPath="democs.sln" Type="0"/>
-    <ROW Component="depend" ComponentId="{4A032B48-E8A2-44D5-AE69-B36575E99D71}" Directory_="grid_Dir" Attributes="0" KeyPath="depend" Type="0"/>
-    <ROW Component="depend_1" ComponentId="{76CF41C6-5FBB-46D6-B35C-6758DE9AAF50}" Directory_="nonfiltered_Dir" Attributes="0" KeyPath="depend_1" Type="0"/>
-    <ROW Component="depend_2" ComponentId="{4F41C72E-301F-49ED-9780-1FAFC92867AA}" Directory_="server_Dir" Attributes="0" KeyPath="depend_2" Type="0"/>
-    <ROW Component="depend_3" ComponentId="{237E0767-CD80-4062-98A9-81E1DEBF8A3B}" Directory_="simple_Dir" Attributes="0" KeyPath="depend_3" Type="0"/>
-    <ROW Component="depend_4" ComponentId="{70D11DBD-7991-446C-A084-994EEA5AC7A6}" Directory_="grid_1_Dir" Attributes="0" KeyPath="depend_4" Type="0"/>
-    <ROW Component="depend_5" ComponentId="{429E80DF-EAAA-42D7-966B-D33063B0262D}" Directory_="nonfiltered_1_Dir" Attributes="0" KeyPath="depend_5" Type="0"/>
-    <ROW Component="depend_6" ComponentId="{EB20645F-26B2-48F2-A4FF-B6A3CABBD562}" Directory_="simple_1_Dir" Attributes="0" KeyPath="depend_6" Type="0"/>
-    <ROW Component="generated" ComponentId="{0839E042-9B7F-4176-B114-88B499D55FE1}" Directory_="generated_Dir" Attributes="0"/>
+    <ROW Component="application.xml" ComponentId="{9544F8EF-AB10-4C62-BCD1-CB62419DA022}" Directory_="backup_Dir" Attributes="0" KeyPath="application.xml" Type="0"/>
+    <ROW Component="application.xml_1" ComponentId="{B99C6932-1735-4EEE-A96A-DF151248E227}" Directory_="backup_1_Dir" Attributes="0" KeyPath="application.xml_2" Type="0"/>
+    <ROW Component="data" ComponentId="{90B1B3C4-C4D5-4EA4-A58F-976D9AB8C54B}" Directory_="data_Dir" Attributes="0"/>
+    <ROW Component="data_1" ComponentId="{38BA4B0B-495B-4023-B681-7E600EB73610}" Directory_="data_1_Dir" Attributes="0"/>
+    <ROW Component="db" ComponentId="{6C378399-DA6C-4F41-A32F-5CE30CF3E8B0}" Directory_="db_2_Dir" Attributes="0"/>
+    <ROW Component="db_1" ComponentId="{8FA3ED5C-788F-4930-A43F-8C5CA66F3C4A}" Directory_="db_3_Dir" Attributes="0"/>
+    <ROW Component="db_2" ComponentId="{61958643-BAF9-45B8-8A23-229F711E5070}" Directory_="db_6_Dir" Attributes="0"/>
+    <ROW Component="db_3" ComponentId="{7F101333-19B9-4E9D-998C-080E1459F98B}" Directory_="db_7_Dir" Attributes="0"/>
+    <ROW Component="db_tp1" ComponentId="{8496257C-CC1D-456C-8136-B15319056BAC}" Directory_="db_tp1_1_Dir" Attributes="0"/>
+    <ROW Component="db_tp1_1" ComponentId="{1408AB4A-66E4-44EB-8A96-FBAEE66AC091}" Directory_="db_tp1_3_Dir" Attributes="0"/>
+    <ROW Component="db_tp2" ComponentId="{FCAE8C24-D9C6-400B-8C0D-3C576C26457C}" Directory_="db_tp2_Dir" Attributes="0"/>
+    <ROW Component="db_tp2_1" ComponentId="{A2044AD0-63FE-46A2-AFFF-8D000AB2ED2C}" Directory_="db_tp2_1_Dir" Attributes="0"/>
+    <ROW Component="demo.sln" ComponentId="{DBF55172-47E0-4E56-9CF9-6C5FDF9AECBB}" Directory_="demo_Dir" Attributes="0" KeyPath="demo.sln" Type="0"/>
+    <ROW Component="democs.sln" ComponentId="{99F4FC51-9C19-4D59-9EFB-92F55EA14304}" Directory_="democs_Dir" Attributes="0" KeyPath="democs.sln" Type="0"/>
+    <ROW Component="depend" ComponentId="{BF42E9BE-2DCB-4B97-B3E4-41EA690193EC}" Directory_="grid_Dir" Attributes="0" KeyPath="depend" Type="0"/>
+    <ROW Component="depend_1" ComponentId="{7BD0F183-0D32-477B-82C2-381D2F7E1DB3}" Directory_="nonfiltered_Dir" Attributes="0" KeyPath="depend_1" Type="0"/>
+    <ROW Component="depend_2" ComponentId="{08230D3A-C057-4007-BE27-F4BBC002054A}" Directory_="server_Dir" Attributes="0" KeyPath="depend_2" Type="0"/>
+    <ROW Component="depend_3" ComponentId="{E4F4A9C5-592D-45DD-921D-08A50E065B79}" Directory_="simple_Dir" Attributes="0" KeyPath="depend_3" Type="0"/>
+    <ROW Component="depend_4" ComponentId="{6A77B2AD-CB7D-4285-994C-05C7926D045F}" Directory_="grid_1_Dir" Attributes="0" KeyPath="depend_4" Type="0"/>
+    <ROW Component="depend_5" ComponentId="{2809DFEC-EB9C-431B-B813-B5293217404D}" Directory_="nonfiltered_1_Dir" Attributes="0" KeyPath="depend_5" Type="0"/>
+    <ROW Component="depend_6" ComponentId="{5835067E-B459-429B-98BC-976576762592}" Directory_="simple_1_Dir" Attributes="0" KeyPath="depend_6" Type="0"/>
+    <ROW Component="generated" ComponentId="{D3A84CE9-5162-4BFE-B0A8-F9A264439F61}" Directory_="generated_Dir" Attributes="0"/>
     <ROW Component="icefix.lib" ComponentId="{79916694-BA18-441E-B7E0-AA87BC64DDD4}" Directory_="lib_Dir" Attributes="0" KeyPath="icefix.lib" Type="0"/>
     <ROW Component="icefix10.dll" ComponentId="{22018C02-9931-4002-BA4D-6C830D061467}" Directory_="bin_DIR" Attributes="0" KeyPath="icefix10.dll"/>
     <ROW Component="icefixadmin.exe" ComponentId="{DA3354BD-F0CC-43C5-8665-573298EEC3CB}" Directory_="bin_DIR" Attributes="0" KeyPath="icefixadmin.exe"/>
     <ROW Component="icefixservice10.dll" ComponentId="{708E7B30-481F-416A-A3A1-2B9A89927CA7}" Directory_="bin_DIR" Attributes="0" KeyPath="icefixservice10.dll"/>
-    <ROW Component="logs" ComponentId="{BC22B494-8845-4DAD-B19F-64FD9652CABC}" Directory_="logs_Dir" Attributes="0"/>
-    <ROW Component="logs_1" ComponentId="{8D31036C-B872-4908-BA2F-960E19AE3B3E}" Directory_="logs_1_Dir" Attributes="0"/>
-    <ROW Component="node" ComponentId="{D63F2AD8-194E-41B7-88DC-DDBE1B70F80B}" Directory_="node_Dir" Attributes="0"/>
-    <ROW Component="node_1" ComponentId="{6792194F-5B24-466E-8D7F-42A4F958D59A}" Directory_="node_1_Dir" Attributes="0"/>
-    <ROW Component="node_2" ComponentId="{809A60D1-D2C6-499D-B048-C88C7AB235D6}" Directory_="node_2_Dir" Attributes="0"/>
-    <ROW Component="node_3" ComponentId="{79924068-F00E-40E0-87E7-2243BAB16E83}" Directory_="node_3_Dir" Attributes="0"/>
-    <ROW Component="registry" ComponentId="{4B94F5BD-F213-478C-9FF1-05E394289813}" Directory_="registry_Dir" Attributes="0"/>
-    <ROW Component="registry_1" ComponentId="{95EEA275-B7CC-4EAC-B65C-A4D948813AA6}" Directory_="registry_1_Dir" Attributes="0"/>
-    <ROW Component="registry_2" ComponentId="{7E77A689-58F5-403B-BC1C-FEA07F98A2E3}" Directory_="registry_2_Dir" Attributes="0"/>
-    <ROW Component="registry_3" ComponentId="{5BB4D426-ABB8-4854-8044-0288E7238A35}" Directory_="registry_3_Dir" Attributes="0"/>
-    <ROW Component="store" ComponentId="{7650B94C-5A2D-47A5-9367-DF1EA934C9D4}" Directory_="store_Dir" Attributes="0"/>
-    <ROW Component="store_1" ComponentId="{3188A8C5-1D8C-420C-9D7D-182A5527829F}" Directory_="store_1_Dir" Attributes="0"/>
-    <ROW Component="store_2" ComponentId="{C881B431-6AE4-4FD6-8A4B-BDD55A8D1D29}" Directory_="store_2_Dir" Attributes="0"/>
-    <ROW Component="store_3" ComponentId="{DFC01B1F-0A53-42EA-B963-BCC22A361AE1}" Directory_="store_3_Dir" Attributes="0"/>
-    <ROW Component="store_4" ComponentId="{32974414-C549-4992-B4E4-AE2FE934AAAE}" Directory_="store_4_Dir" Attributes="0"/>
-    <ROW Component="store_5" ComponentId="{B03C4762-8EA8-44DC-AA8D-7635DBD21E85}" Directory_="store_5_Dir" Attributes="0"/>
-    <ROW Component="store_6" ComponentId="{AD6ED909-17C3-499F-B91C-3EB4F3A61571}" Directory_="store_6_Dir" Attributes="0"/>
+    <ROW Component="logs" ComponentId="{4FAB93A2-7069-40B6-970E-55408E45AD84}" Directory_="logs_Dir" Attributes="0"/>
+    <ROW Component="logs_1" ComponentId="{E97D7567-7378-4697-B278-211850BDDEB6}" Directory_="logs_1_Dir" Attributes="0"/>
+    <ROW Component="node" ComponentId="{31A0ED05-BFC3-4FCB-9784-C2D66FF4E8C0}" Directory_="node_Dir" Attributes="0"/>
+    <ROW Component="node_1" ComponentId="{C394136B-AF0A-4136-A864-722051DC343A}" Directory_="node_1_Dir" Attributes="0"/>
+    <ROW Component="node_2" ComponentId="{59B474E0-DB55-4B86-8F1F-76807D0A27E4}" Directory_="node_2_Dir" Attributes="0"/>
+    <ROW Component="node_3" ComponentId="{946FE804-6D6D-4262-AA2F-20C6038A920F}" Directory_="node_3_Dir" Attributes="0"/>
+    <ROW Component="registry" ComponentId="{1309906F-92E9-41CD-9735-CA925E30C4B6}" Directory_="registry_Dir" Attributes="0"/>
+    <ROW Component="registry_1" ComponentId="{50CD6D4B-9088-4ADE-AD9E-2BBFEA589E91}" Directory_="registry_1_Dir" Attributes="0"/>
+    <ROW Component="registry_2" ComponentId="{CA469B79-FEFC-4D70-963E-0853ED50BA63}" Directory_="registry_2_Dir" Attributes="0"/>
+    <ROW Component="registry_3" ComponentId="{D0C7B07F-B81A-400B-99C0-C7F92B5B0799}" Directory_="registry_3_Dir" Attributes="0"/>
+    <ROW Component="store" ComponentId="{62E4AD00-476D-4822-BC30-4265ABF6C956}" Directory_="store_Dir" Attributes="0"/>
+    <ROW Component="store_1" ComponentId="{BB0227FD-0B7D-45E9-ADC9-A94D16FE7404}" Directory_="store_1_Dir" Attributes="0"/>
+    <ROW Component="store_2" ComponentId="{938E042E-F471-4D77-B27A-1B228FFDBFDB}" Directory_="store_2_Dir" Attributes="0"/>
+    <ROW Component="store_3" ComponentId="{1D1C272B-8BC9-46C9-8589-F164CF8BE4F4}" Directory_="store_3_Dir" Attributes="0"/>
+    <ROW Component="store_4" ComponentId="{88EC37A0-BB15-48CE-B26C-03523E42B8F9}" Directory_="store_4_Dir" Attributes="0"/>
+    <ROW Component="store_5" ComponentId="{F2FBC560-9972-49F5-8F28-C669A4E2B1FD}" Directory_="store_5_Dir" Attributes="0"/>
+    <ROW Component="store_6" ComponentId="{88EB0072-2E01-48DF-992C-3D3B9F4C0892}" Directory_="store_6_Dir" Attributes="0"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
-    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="3" Level="1" Directory_="APPDIR" Attributes="0" Components="DB_CONFIG DB_CONFIG_1 ICE_FIX_LICENSE.txt IceDevKey.snk IceFIX.dll IceFIX.h IceFIX.ice IceFIX.props Ice_3.4.2 InstallDir README.txt README.txt_1 __1 backup backup.bat data data_1 db db_1 db_2 db_3 db_tp1 db_tp1_1 db_tp2 db_tp2_1 demo.sln democs.sln depend depend_1 depend_2 depend_3 depend_4 depend_5 depend_6 generated icefix.lib icefix10.dll icefixadmin.exe icefixservice10.dll logs logs_1 node node_1 node_2 node_3 registry registry_1 registry_2 registry_3 store store_1 store_2 store_3 store_4 store_5 store_6"/>
+    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="3" Level="1" Directory_="APPDIR" Attributes="0" Components="DB_CONFIG DB_CONFIG_1 ICE_FIX_LICENSE.txt IceDevKey.snk IceFIX.dll IceFIX.h IceFIX.ice IceFIX.props Ice_3.4.2 InstallDir README.txt README.txt_1 __1 application.xml application.xml_1 data data_1 db db_1 db_2 db_3 db_tp1 db_tp1_1 db_tp2 db_tp2_1 demo.sln democs.sln depend depend_1 depend_2 depend_3 depend_4 depend_5 depend_6 generated icefix.lib icefix10.dll icefixadmin.exe icefixservice10.dll logs logs_1 node node_1 node_2 node_3 registry registry_1 registry_2 registry_3 store store_1 store_2 store_3 store_4 store_5 store_6"/>
     <ROW Feature="VS2008PLUGIN" Title="VS 2008 Plugin" Description="Visual Studio 2008 Plugin" Display="4" Level="4" Directory_="APPDIR" Attributes="0" Options="32"/>
     <ROW Feature="VS2010PLUGIN" Title="VS 2010 Plugin" Description="Visual Studio 2008 Plugin" Display="6" Level="4" Directory_="APPDIR" Attributes="0" Options="32"/>
     <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
-    <ROW File="Client.cpp" Component_="depend" FileName="Client.cpp" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\Client.cpp" SelfReg="false" NextFile="client.vcxproj"/>
-    <ROW File="Client.cpp_1" Component_="depend_1" FileName="Client.cpp" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\Client.cpp" SelfReg="false" NextFile="client.vcxproj_1"/>
-    <ROW File="Client.cpp_2" Component_="depend_3" FileName="Client.cpp" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\Client.cpp" SelfReg="false" NextFile="client.vcxproj_2"/>
-    <ROW File="Client.cs" Component_="depend_4" FileName="Client.cs" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\grid\Client.cs" SelfReg="false" NextFile="client.csproj"/>
-    <ROW File="Client.cs_1" Component_="depend_5" FileName="Client.cs" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\nonfiltered\Client.cs" SelfReg="false" NextFile="client.csproj_1"/>
-    <ROW File="Client.cs_2" Component_="depend_6" FileName="Client.cs" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\simple\Client.cs" SelfReg="false" NextFile="client.csproj_2"/>
-    <ROW File="DB_CONFIG" Component_="DB_CONFIG" FileName="DB_CON~1|DB_CONFIG" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\backup\db-tp1\DB_CONFIG" SelfReg="false" NextFile="Makefile"/>
-    <ROW File="DB_CONFIG_1" Component_="DB_CONFIG_1" FileName="DB_CON~1|DB_CONFIG" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\backup\db-tp1\DB_CONFIG" SelfReg="false" NextFile="Makefile.mak_6"/>
-    <ROW File="FIX42.xml" Component_="depend_2" FileName="FIX42.xml" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\server\FIX42.xml" SelfReg="false" NextFile="backup.bat_1"/>
-    <ROW File="ICE_FIX_LICENSE.txt" Component_="ICE_FIX_LICENSE.txt" FileName="ICE_FI~1.txt|ICE_FIX_LICENSE.txt" Attributes="0" SourcePath="ICE_FIX_LICENSE.txt" SelfReg="false" NextFile="LICENSE.txt"/>
-    <ROW File="IceDevKey.snk" Component_="IceDevKey.snk" FileName="IceDev~1.snk|IceDevKey.snk" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\config\IceDevKey.snk" SelfReg="false" NextFile="Make.common.rules"/>
-    <ROW File="IceFIX.dll" Component_="IceFIX.dll" FileName="IceFIX.dll" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\VC100\IceFIX-1.0.1\bin\IceFIX.dll" SelfReg="false" NextFile="IceFIX.pdb"/>
-    <ROW File="IceFIX.h" Component_="IceFIX.h" FileName="IceFIX.h" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\VC100\IceFIX-1.0.1\include\IceFIX\IceFIX.h" SelfReg="false" NextFile="icefix.lib"/>
-    <ROW File="IceFIX.ice" Component_="IceFIX.ice" FileName="IceFIX.ice" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\VC100\IceFIX-1.0.1\slice\IceFIX\IceFIX.ice" SelfReg="false" NextFile="IceDevKey.snk"/>
-    <ROW File="IceFIX.pdb" Component_="IceFIX.dll" FileName="IceFIX.pdb" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\VC100\IceFIX-1.0.1\bin\IceFIX.pdb" SelfReg="false" NextFile="icefix10.dll"/>
-    <ROW File="IceFIX.props" Component_="IceFIX.props" FileName="IceFIX~1.pro|IceFIX.props" Attributes="0" SourcePath="IceFIX.props" SelfReg="false"/>
-    <ROW File="LICENSE.txt" Component_="ICE_FIX_LICENSE.txt" FileName="LICENSE.txt" Attributes="0" SourcePath="LICENSE.txt" SelfReg="false" NextFile="README.txt"/>
-    <ROW File="Make.common.rules" Component_="IceDevKey.snk" FileName="Makeco~1.rul|Make.common.rules" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\config\Make.common.rules" SelfReg="false" NextFile="Make.common.rules.icefix"/>
-    <ROW File="Make.common.rules.icefix" Component_="IceDevKey.snk" FileName="Makeco~1.ice|Make.common.rules.icefix" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\config\Make.common.rules.icefix" SelfReg="false" NextFile="Make.common.rules.icefix.mak"/>
-    <ROW File="Make.common.rules.icefix.mak" Component_="IceDevKey.snk" FileName="Makeco~1.mak|Make.common.rules.icefix.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\config\Make.common.rules.icefix.mak" SelfReg="false" NextFile="Make.common.rules.mak"/>
-    <ROW File="Make.common.rules.mak" Component_="IceDevKey.snk" FileName="Makeco~2.mak|Make.common.rules.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\config\Make.common.rules.mak" SelfReg="false" NextFile="Make.rules"/>
-    <ROW File="Make.rules" Component_="IceDevKey.snk" FileName="Make~1.rul|Make.rules" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\config\Make.rules" SelfReg="false" NextFile="Make.rules.Darwin"/>
-    <ROW File="Make.rules.Darwin" Component_="IceDevKey.snk" FileName="Makeru~1.Dar|Make.rules.Darwin" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\config\Make.rules.Darwin" SelfReg="false" NextFile="Make.rules.Linux"/>
-    <ROW File="Make.rules.Linux" Component_="IceDevKey.snk" FileName="Makeru~1.Lin|Make.rules.Linux" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\config\Make.rules.Linux" SelfReg="false" NextFile="Make.rules.mak"/>
-    <ROW File="Make.rules.mak" Component_="IceDevKey.snk" FileName="Makeru~1.mak|Make.rules.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\config\Make.rules.mak" SelfReg="false" NextFile="Make.rules.mak.cs"/>
-    <ROW File="Make.rules.mak.cs" Component_="IceDevKey.snk" FileName="Makeru~1.cs|Make.rules.mak.cs" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\config\Make.rules.mak.cs" SelfReg="false" NextFile="Make.rules.msvc"/>
-    <ROW File="Make.rules.msvc" Component_="IceDevKey.snk" FileName="Makeru~1.msv|Make.rules.msvc" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\config\Make.rules.msvc" SelfReg="false" NextFile="backup"/>
-    <ROW File="Makefile" Component_="backup" FileName="Makefile" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\backup\Makefile" SelfReg="false" NextFile="Makefile.mak"/>
-    <ROW File="Makefile.mak" Component_="backup" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\backup\Makefile.mak" SelfReg="false" NextFile="README"/>
-    <ROW File="Makefile.mak_1" Component_="depend" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\Makefile.mak" SelfReg="false" NextFile="README_1"/>
-    <ROW File="Makefile.mak_10" Component_="depend_6" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\simple\Makefile.mak" SelfReg="false" NextFile="README_10"/>
-    <ROW File="Makefile.mak_2" Component_="demo.sln" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\Makefile.mak" SelfReg="false" NextFile="depend_1"/>
-    <ROW File="Makefile.mak_3" Component_="depend_1" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\Makefile.mak" SelfReg="false" NextFile="README_2"/>
-    <ROW File="Makefile.mak_4" Component_="depend_2" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\server\Makefile.mak" SelfReg="false" NextFile="README_4"/>
-    <ROW File="Makefile.mak_5" Component_="depend_3" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\Makefile.mak" SelfReg="false" NextFile="README_5"/>
-    <ROW File="Makefile.mak_6" Component_="backup.bat" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\backup\Makefile.mak" SelfReg="false" NextFile="README_6"/>
-    <ROW File="Makefile.mak_7" Component_="depend_4" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\grid\Makefile.mak" SelfReg="false" NextFile="README_7"/>
-    <ROW File="Makefile.mak_8" Component_="democs.sln" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\Makefile.mak" SelfReg="false" NextFile="depend_5"/>
-    <ROW File="Makefile.mak_9" Component_="depend_5" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\nonfiltered\Makefile.mak" SelfReg="false" NextFile="README_8"/>
-    <ROW File="Makefile_1" Component_="depend" FileName="Makefile" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\Makefile" SelfReg="false" NextFile="Makefile.mak_1"/>
-    <ROW File="Makefile_2" Component_="demo.sln" FileName="Makefile" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\Makefile" SelfReg="false" NextFile="Makefile.mak_2"/>
-    <ROW File="Makefile_3" Component_="depend_1" FileName="Makefile" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\Makefile" SelfReg="false" NextFile="Makefile.mak_3"/>
-    <ROW File="Makefile_4" Component_="depend_2" FileName="Makefile" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\server\Makefile" SelfReg="false" NextFile="Makefile.mak_4"/>
-    <ROW File="Makefile_5" Component_="depend_3" FileName="Makefile" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\Makefile" SelfReg="false" NextFile="Makefile.mak_5"/>
-    <ROW File="README" Component_="backup" FileName="README" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\backup\README.txt" SelfReg="false" NextFile="demo.sln"/>
-    <ROW File="README.txt" Component_="README.txt" FileName="README.txt" Attributes="0" SourcePath="README.txt" SelfReg="false" NextFile="RELEASE_NOTES.txt"/>
-    <ROW File="README.txt_1" Component_="README.txt_1" FileName="README.txt" Attributes="0" SourcePath="demodist\README.txt" SelfReg="false" NextFile="IceFIX.dll"/>
-    <ROW File="README_1" Component_="depend" FileName="README" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\README.txt" SelfReg="false" NextFile="Makefile_2"/>
-    <ROW File="README_10" Component_="depend_6" FileName="README" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\simple\README.txt" SelfReg="false" NextFile="application.xml_2"/>
-    <ROW File="README_2" Component_="depend_1" FileName="README" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\README.txt" SelfReg="false" NextFile="README_3"/>
-    <ROW File="README_3" Component_="demo.sln" FileName="README" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\README.txt" SelfReg="false" NextFile="depend_2"/>
-    <ROW File="README_4" Component_="depend_2" FileName="README" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\server\README.txt" SelfReg="false" NextFile="Server.cpp"/>
-    <ROW File="README_5" Component_="depend_3" FileName="README" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\README.txt" SelfReg="false" NextFile="application.xml"/>
-    <ROW File="README_6" Component_="backup.bat" FileName="README" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\backup\README.txt" SelfReg="false" NextFile="democs.sln"/>
-    <ROW File="README_7" Component_="depend_4" FileName="README" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\grid\README.txt" SelfReg="false" NextFile="Makefile.mak_8"/>
-    <ROW File="README_8" Component_="depend_5" FileName="README" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\nonfiltered\README.txt" SelfReg="false" NextFile="README_9"/>
-    <ROW File="README_9" Component_="democs.sln" FileName="README" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\README.txt" SelfReg="false" NextFile="depend_6"/>
-    <ROW File="RELEASE_NOTES.txt" Component_="ICE_FIX_LICENSE.txt" FileName="RELEAS~1.txt|RELEASE_NOTES.txt" Attributes="0" SourcePath="RELEASE_NOTES.txt" SelfReg="false" NextFile="SOURCES.txt"/>
-    <ROW File="SOURCES.txt" Component_="ICE_FIX_LICENSE.txt" FileName="SOURCES.txt" Attributes="0" SourcePath="SOURCES.txt" SelfReg="false" NextFile="THIRD_PARTY_LICENSE.txt"/>
-    <ROW File="Server.cpp" Component_="depend_2" FileName="Server.cpp" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\server\Server.cpp" SelfReg="false" NextFile="server.vcxproj"/>
-    <ROW File="THIRD_PARTY_LICENSE.txt" Component_="ICE_FIX_LICENSE.txt" FileName="THIRD_~1.txt|THIRD_PARTY_LICENSE.txt" Attributes="0" SourcePath="THIRD_PARTY_LICENSE.txt" SelfReg="false" NextFile="IceFIX.props"/>
-    <ROW File="application.xml" Component_="backup" FileName="applic~1.xml|application.xml" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\backup\application.xml" SelfReg="false" NextFile="application.xml_1"/>
-    <ROW File="application.xml_1" Component_="depend" FileName="applic~1.xml|application.xml" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\application.xml" SelfReg="false" NextFile="FIX42.xml"/>
-    <ROW File="application.xml_2" Component_="backup.bat" FileName="applic~1.xml|application.xml" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\backup\application.xml" SelfReg="false" NextFile="application.xml_3"/>
-    <ROW File="application.xml_3" Component_="depend_4" FileName="applic~1.xml|application.xml" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\grid\application.xml" SelfReg="false" NextFile="quickfix.reg"/>
-    <ROW File="backup" Component_="backup" FileName="backup" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\backup\backup" SelfReg="false" NextFile="backup.bat"/>
-    <ROW File="backup.bat" Component_="backup" FileName="backup.bat" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\backup\backup.bat" SelfReg="false" NextFile="config.admin"/>
-    <ROW File="backup.bat_1" Component_="backup.bat" FileName="backup.bat" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\backup\backup.bat" SelfReg="false" NextFile="config.admin_4"/>
-    <ROW File="client.csproj" Component_="depend_4" FileName="client~1.csp|client.csproj" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\grid\client.csproj" SelfReg="false" NextFile="config.admin_5"/>
-    <ROW File="client.csproj_1" Component_="depend_5" FileName="client~1.csp|client.csproj" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\nonfiltered\client.csproj" SelfReg="false" NextFile="config.admin_6"/>
-    <ROW File="client.csproj_2" Component_="depend_6" FileName="client~1.csp|client.csproj" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\simple\client.csproj" SelfReg="false" NextFile="config.admin_7"/>
-    <ROW File="client.vcxproj" Component_="depend" FileName="client~1.vcx|client.vcxproj" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\client.vcxproj" SelfReg="false" NextFile="client.vcxproj.filters"/>
-    <ROW File="client.vcxproj.filters" Component_="depend" FileName="client~1.fil|client.vcxproj.filters" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\client.vcxproj.filters" SelfReg="false" NextFile="config.admin_1"/>
-    <ROW File="client.vcxproj.filters_1" Component_="depend_1" FileName="client~1.fil|client.vcxproj.filters" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\client.vcxproj.filters" SelfReg="false" NextFile="config.admin_2"/>
-    <ROW File="client.vcxproj.filters_2" Component_="depend_3" FileName="client~1.fil|client.vcxproj.filters" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\client.vcxproj.filters" SelfReg="false" NextFile="config.admin_3"/>
-    <ROW File="client.vcxproj_1" Component_="depend_1" FileName="client~1.vcx|client.vcxproj" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\client.vcxproj" SelfReg="false" NextFile="client.vcxproj.filters_1"/>
-    <ROW File="client.vcxproj_2" Component_="depend_3" FileName="client~1.vcx|client.vcxproj" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\client.vcxproj" SelfReg="false" NextFile="client.vcxproj.filters_2"/>
-    <ROW File="config.admin" Component_="backup" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\backup\config.admin" SelfReg="false" NextFile="config.client"/>
-    <ROW File="config.admin_1" Component_="depend" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\config.admin" SelfReg="false" NextFile="config.client_1"/>
-    <ROW File="config.admin_2" Component_="depend_1" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\config.admin" SelfReg="false" NextFile="config.cfg"/>
-    <ROW File="config.admin_3" Component_="depend_3" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\config.admin" SelfReg="false" NextFile="config.cfg_1"/>
-    <ROW File="config.admin_4" Component_="backup.bat" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\backup\config.admin" SelfReg="false" NextFile="config.client_4"/>
-    <ROW File="config.admin_5" Component_="depend_4" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\grid\config.admin" SelfReg="false" NextFile="config.client_5"/>
-    <ROW File="config.admin_6" Component_="depend_5" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\nonfiltered\config.admin" SelfReg="false" NextFile="config.cfg_2"/>
-    <ROW File="config.admin_7" Component_="depend_6" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\simple\config.admin" SelfReg="false" NextFile="config.cfg_3"/>
-    <ROW File="config.cfg" Component_="depend_1" FileName="config.cfg" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\config.cfg" SelfReg="false" NextFile="config.client_2"/>
-    <ROW File="config.cfg_1" Component_="depend_3" FileName="config.cfg" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\config.cfg" SelfReg="false" NextFile="config.client_3"/>
-    <ROW File="config.cfg_2" Component_="depend_5" FileName="config.cfg" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\nonfiltered\config.cfg" SelfReg="false" NextFile="config.client_6"/>
-    <ROW File="config.cfg_3" Component_="depend_6" FileName="config.cfg" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\simple\config.cfg" SelfReg="false" NextFile="config.client_7"/>
-    <ROW File="config.client" Component_="backup" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\backup\config.client" SelfReg="false" NextFile="config.fix"/>
-    <ROW File="config.client_1" Component_="depend" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\config.client" SelfReg="false" NextFile="config.fix_tp1"/>
-    <ROW File="config.client_2" Component_="depend_1" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\config.client" SelfReg="false" NextFile="config.fix_1"/>
-    <ROW File="config.client_3" Component_="depend_3" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\config.client" SelfReg="false" NextFile="config.fix_2"/>
-    <ROW File="config.client_4" Component_="backup.bat" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\backup\config.client" SelfReg="false" NextFile="config.fix_3"/>
-    <ROW File="config.client_5" Component_="depend_4" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\grid\config.client" SelfReg="false" NextFile="config.fix_tp1_1"/>
-    <ROW File="config.client_6" Component_="depend_5" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\nonfiltered\config.client" SelfReg="false" NextFile="config.fix_4"/>
-    <ROW File="config.client_7" Component_="depend_6" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\simple\config.client" SelfReg="false" NextFile="config.fix_5"/>
-    <ROW File="config.fix" Component_="backup" FileName="config.fix" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\backup\config.fix" SelfReg="false" NextFile="config.grid"/>
-    <ROW File="config.fix_1" Component_="depend_1" FileName="config.fix" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\config.fix" SelfReg="false" NextFile="config.icebox"/>
-    <ROW File="config.fix_2" Component_="depend_3" FileName="config.fix" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\config.fix" SelfReg="false" NextFile="config.icebox_1"/>
-    <ROW File="config.fix_3" Component_="backup.bat" FileName="config.fix" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\backup\config.fix" SelfReg="false" NextFile="config.grid_2"/>
-    <ROW File="config.fix_4" Component_="depend_5" FileName="config.fix" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\nonfiltered\config.fix" SelfReg="false" NextFile="config.icebox_2"/>
-    <ROW File="config.fix_5" Component_="depend_6" FileName="config.fix" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\simple\config.fix" SelfReg="false" NextFile="config.icebox_3"/>
-    <ROW File="config.fix_tp1" Component_="depend" FileName="config~1.fix|config.fix-tp1" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\config.fix-tp1" SelfReg="false" NextFile="config.fix_tp2"/>
-    <ROW File="config.fix_tp1_1" Component_="depend_4" FileName="config~1.fix|config.fix-tp1" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\grid\config.fix-tp1" SelfReg="false" NextFile="config.fix_tp2_1"/>
-    <ROW File="config.fix_tp2" Component_="depend" FileName="config~2.fix|config.fix-tp2" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\config.fix-tp2" SelfReg="false" NextFile="config.grid_1"/>
-    <ROW File="config.fix_tp2_1" Component_="depend_4" FileName="config~2.fix|config.fix-tp2" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\grid\config.fix-tp2" SelfReg="false" NextFile="config.grid_3"/>
-    <ROW File="config.grid" Component_="backup" FileName="config~1.gri|config.grid" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\backup\config.grid" SelfReg="false" NextFile="config.tp1"/>
-    <ROW File="config.grid_1" Component_="depend" FileName="config~1.gri|config.grid" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\config.grid" SelfReg="false" NextFile="config.tp1_1"/>
-    <ROW File="config.grid_2" Component_="backup.bat" FileName="config~1.gri|config.grid" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\backup\config.grid" SelfReg="false" NextFile="config.tp1_2"/>
-    <ROW File="config.grid_3" Component_="depend_4" FileName="config~1.gri|config.grid" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\grid\config.grid" SelfReg="false" NextFile="config.tp1_3"/>
-    <ROW File="config.icebox" Component_="depend_1" FileName="config~1.ice|config.icebox" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\config.icebox" SelfReg="false" NextFile="config.icefix"/>
-    <ROW File="config.icebox_1" Component_="depend_3" FileName="config~1.ice|config.icebox" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\config.icebox" SelfReg="false" NextFile="config.icefix_1"/>
-    <ROW File="config.icebox_2" Component_="depend_5" FileName="config~1.ice|config.icebox" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\nonfiltered\config.icebox" SelfReg="false" NextFile="config.icefix_2"/>
-    <ROW File="config.icebox_3" Component_="depend_6" FileName="config~1.ice|config.icebox" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\simple\config.icebox" SelfReg="false" NextFile="config.icefix_3"/>
-    <ROW File="config.icefix" Component_="depend_1" FileName="config~2.ice|config.icefix" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\config.icefix" SelfReg="false" NextFile="Makefile_3"/>
-    <ROW File="config.icefix_1" Component_="depend_3" FileName="config~2.ice|config.icefix" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\config.icefix" SelfReg="false" NextFile="Makefile_5"/>
-    <ROW File="config.icefix_2" Component_="depend_5" FileName="config~2.ice|config.icefix" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\nonfiltered\config.icefix" SelfReg="false" NextFile="Makefile.mak_9"/>
-    <ROW File="config.icefix_3" Component_="depend_6" FileName="config~2.ice|config.icefix" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\simple\config.icefix" SelfReg="false" NextFile="Makefile.mak_10"/>
-    <ROW File="config.tp1" Component_="backup" FileName="config.tp1" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\backup\config.tp1" SelfReg="false" NextFile="DB_CONFIG"/>
-    <ROW File="config.tp1_1" Component_="depend" FileName="config.tp1" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\config.tp1" SelfReg="false" NextFile="config.tp2"/>
-    <ROW File="config.tp1_2" Component_="backup.bat" FileName="config.tp1" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\backup\config.tp1" SelfReg="false" NextFile="DB_CONFIG_1"/>
-    <ROW File="config.tp1_3" Component_="depend_4" FileName="config.tp1" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\grid\config.tp1" SelfReg="false" NextFile="config.tp2_1"/>
-    <ROW File="config.tp2" Component_="depend" FileName="config.tp2" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\config.tp2" SelfReg="false" NextFile="Makefile_1"/>
-    <ROW File="config.tp2_1" Component_="depend_4" FileName="config.tp2" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\grid\config.tp2" SelfReg="false" NextFile="Makefile.mak_7"/>
-    <ROW File="demo.sln" Component_="demo.sln" FileName="demo.sln" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\demo.sln" SelfReg="false" NextFile="depend"/>
-    <ROW File="democs.sln" Component_="democs.sln" FileName="democs.sln" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\democs.sln" SelfReg="false" NextFile="depend_4"/>
-    <ROW File="depend" Component_="depend" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\.depend" SelfReg="false" NextFile="depend.mak"/>
-    <ROW File="depend.mak" Component_="depend" FileName="depend~1.mak|.depend.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\grid\.depend.mak" SelfReg="false" NextFile="Client.cpp"/>
-    <ROW File="depend.mak_1" Component_="depend_1" FileName="depend~1.mak|.depend.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\.depend.mak" SelfReg="false" NextFile="Client.cpp_1"/>
-    <ROW File="depend.mak_2" Component_="depend_2" FileName="depend~1.mak|.depend.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\server\.depend.mak" SelfReg="false" NextFile="Makefile_4"/>
-    <ROW File="depend.mak_3" Component_="depend_3" FileName="depend~1.mak|.depend.mak" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\.depend.mak" SelfReg="false" NextFile="Client.cpp_2"/>
-    <ROW File="depend_1" Component_="depend_1" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\nonfiltered\.depend" SelfReg="false" NextFile="depend.mak_1"/>
-    <ROW File="depend_2" Component_="depend_2" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\server\.depend" SelfReg="false" NextFile="depend.mak_2"/>
-    <ROW File="depend_3" Component_="depend_3" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\simple\.depend" SelfReg="false" NextFile="depend.mak_3"/>
-    <ROW File="depend_4" Component_="depend_4" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\grid\.depend" SelfReg="false" NextFile="Client.cs"/>
-    <ROW File="depend_5" Component_="depend_5" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\nonfiltered\.depend" SelfReg="false" NextFile="Client.cs_1"/>
-    <ROW File="depend_6" Component_="depend_6" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\democs\simple\.depend" SelfReg="false" NextFile="Client.cs_2"/>
-    <ROW File="icefix.lib" Component_="icefix.lib" FileName="icefix.lib" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\VC100\IceFIX-1.0.1\lib\icefix.lib" SelfReg="false" NextFile="icefixservice.lib"/>
-    <ROW File="icefix10.dll" Component_="icefix10.dll" FileName="icefix10.dll" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\VC100\IceFIX-1.0.1\bin\icefix10.dll" SelfReg="false" NextFile="icefixadmin.exe"/>
-    <ROW File="icefixadmin.exe" Component_="icefixadmin.exe" FileName="icefix~1.exe|icefixadmin.exe" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\VC100\IceFIX-1.0.1\bin\icefixadmin.exe" SelfReg="false" NextFile="icefixservice10.dll"/>
-    <ROW File="icefixservice.lib" Component_="icefix.lib" FileName="icefix~1.lib|icefixservice.lib" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\VC100\IceFIX-1.0.1\lib\icefixservice.lib" SelfReg="false" NextFile="IceFIX.ice"/>
-    <ROW File="icefixservice10.dll" Component_="icefixservice10.dll" FileName="icefix~1.dll|icefixservice10.dll" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\VC100\IceFIX-1.0.1\bin\icefixservice10.dll" SelfReg="false" NextFile="IceFIX.h"/>
-    <ROW File="quickfix.reg" Component_="IceDevKey.snk" FileName="quickfix.reg" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\config\quickfix.reg" SelfReg="false" NextFile="ICE_FIX_LICENSE.txt"/>
-    <ROW File="server.vcxproj" Component_="depend_2" FileName="server~1.vcx|server.vcxproj" Attributes="0" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos\demo\server\server.vcxproj" SelfReg="false" NextFile="depend_3"/>
+    <ROW File="Client.cpp" Component_="depend" FileName="Client.cpp" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\Client.cpp" SelfReg="false" NextFile="client.vcxproj"/>
+    <ROW File="Client.cpp_1" Component_="depend_1" FileName="Client.cpp" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\Client.cpp" SelfReg="false" NextFile="client.vcxproj_1"/>
+    <ROW File="Client.cpp_2" Component_="depend_3" FileName="Client.cpp" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\Client.cpp" SelfReg="false" NextFile="client.vcxproj_2"/>
+    <ROW File="Client.cs" Component_="depend_4" FileName="Client.cs" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\grid\Client.cs" SelfReg="false" NextFile="client.csproj"/>
+    <ROW File="Client.cs_1" Component_="depend_5" FileName="Client.cs" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\nonfiltered\Client.cs" SelfReg="false" NextFile="client.csproj_1"/>
+    <ROW File="Client.cs_2" Component_="depend_6" FileName="Client.cs" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\simple\Client.cs" SelfReg="false" NextFile="client.csproj_2"/>
+    <ROW File="DB_CONFIG" Component_="DB_CONFIG" FileName="DB_CON~1|DB_CONFIG" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\backup\db-tp1\DB_CONFIG" SelfReg="false" NextFile="Makefile"/>
+    <ROW File="DB_CONFIG_1" Component_="DB_CONFIG_1" FileName="DB_CON~1|DB_CONFIG" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\backup\db-tp1\DB_CONFIG" SelfReg="false" NextFile="Makefile.mak_6"/>
+    <ROW File="FIX42.xml" Component_="depend_2" FileName="FIX42.xml" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\server\FIX42.xml" SelfReg="false" NextFile="Makefile_4"/>
+    <ROW File="ICE_FIX_LICENSE.txt" Component_="ICE_FIX_LICENSE.txt" FileName="ICE_FI~1.txt|ICE_FIX_LICENSE.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\icefix\ICE_FIX_LICENSE.txt" SelfReg="false" NextFile="LICENSE.txt"/>
+    <ROW File="IceDevKey.snk" Component_="IceDevKey.snk" FileName="IceDev~1.snk|IceDevKey.snk" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\config\IceDevKey.snk" SelfReg="false" NextFile="Make.common.rules"/>
+    <ROW File="IceFIX.dll" Component_="IceFIX.dll" FileName="IceFIX.dll" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;VC10\IceFIX-1.0.1\bin\IceFIX.dll" SelfReg="false" NextFile="IceFIX.pdb" DigSign="true"/>
+    <ROW File="IceFIX.h" Component_="IceFIX.h" FileName="IceFIX.h" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;VC10\IceFIX-1.0.1\include\IceFIX\IceFIX.h" SelfReg="false" NextFile="icefix.lib"/>
+    <ROW File="IceFIX.ice" Component_="IceFIX.ice" FileName="IceFIX.ice" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;VC10\IceFIX-1.0.1\slice\IceFIX\IceFIX.ice" SelfReg="false" NextFile="ICE_FIX_LICENSE.txt"/>
+    <ROW File="IceFIX.pdb" Component_="IceFIX.dll" FileName="IceFIX.pdb" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;VC10\IceFIX-1.0.1\bin\IceFIX.pdb" SelfReg="false" NextFile="icefix10.dll"/>
+    <ROW File="IceFIX.props" Component_="IceFIX.props" FileName="IceFIX~1.pro|IceFIX.props" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\icefix\IceFIX.props" SelfReg="false" NextFile="IceDevKey.snk"/>
+    <ROW File="LICENSE.txt" Component_="ICE_FIX_LICENSE.txt" FileName="LICENSE.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\icefix\LICENSE.txt" SelfReg="false" NextFile="README.txt"/>
+    <ROW File="Make.common.rules" Component_="IceDevKey.snk" FileName="Makeco~1.rul|Make.common.rules" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\config\Make.common.rules" SelfReg="false" NextFile="Make.common.rules.icefix"/>
+    <ROW File="Make.common.rules.icefix" Component_="IceDevKey.snk" FileName="Makeco~1.ice|Make.common.rules.icefix" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\config\Make.common.rules.icefix" SelfReg="false" NextFile="Make.common.rules.icefix.mak"/>
+    <ROW File="Make.common.rules.icefix.mak" Component_="IceDevKey.snk" FileName="Makeco~1.mak|Make.common.rules.icefix.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\config\Make.common.rules.icefix.mak" SelfReg="false" NextFile="Make.common.rules.mak"/>
+    <ROW File="Make.common.rules.mak" Component_="IceDevKey.snk" FileName="Makeco~2.mak|Make.common.rules.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\config\Make.common.rules.mak" SelfReg="false" NextFile="Make.rules"/>
+    <ROW File="Make.rules" Component_="IceDevKey.snk" FileName="Make~1.rul|Make.rules" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\config\Make.rules" SelfReg="false" NextFile="Make.rules.Darwin"/>
+    <ROW File="Make.rules.Darwin" Component_="IceDevKey.snk" FileName="Makeru~1.Dar|Make.rules.Darwin" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\config\Make.rules.Darwin" SelfReg="false" NextFile="Make.rules.Linux"/>
+    <ROW File="Make.rules.Linux" Component_="IceDevKey.snk" FileName="Makeru~1.Lin|Make.rules.Linux" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\config\Make.rules.Linux" SelfReg="false" NextFile="Make.rules.mak"/>
+    <ROW File="Make.rules.mak" Component_="IceDevKey.snk" FileName="Makeru~1.mak|Make.rules.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\config\Make.rules.mak" SelfReg="false" NextFile="Make.rules.mak.cs"/>
+    <ROW File="Make.rules.mak.cs" Component_="IceDevKey.snk" FileName="Makeru~1.cs|Make.rules.mak.cs" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\config\Make.rules.mak.cs" SelfReg="false" NextFile="Make.rules.msvc"/>
+    <ROW File="Make.rules.msvc" Component_="IceDevKey.snk" FileName="Makeru~1.msv|Make.rules.msvc" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\config\Make.rules.msvc" SelfReg="false" NextFile="quickfix.reg"/>
+    <ROW File="Makefile" Component_="application.xml" FileName="Makefile" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\backup\Makefile" SelfReg="false" NextFile="Makefile.mak"/>
+    <ROW File="Makefile.mak" Component_="application.xml" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\backup\Makefile.mak" SelfReg="false" NextFile="README.txt_2"/>
+    <ROW File="Makefile.mak_1" Component_="depend" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\Makefile.mak" SelfReg="false" NextFile="README.txt_3"/>
+    <ROW File="Makefile.mak_10" Component_="depend_6" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\simple\Makefile.mak" SelfReg="false" NextFile="README.txt_12"/>
+    <ROW File="Makefile.mak_2" Component_="demo.sln" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\Makefile.mak" SelfReg="false" NextFile="depend_1"/>
+    <ROW File="Makefile.mak_3" Component_="depend_1" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\Makefile.mak" SelfReg="false" NextFile="README.txt_4"/>
+    <ROW File="Makefile.mak_4" Component_="depend_2" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\server\Makefile.mak" SelfReg="false" NextFile="README.txt_6"/>
+    <ROW File="Makefile.mak_5" Component_="depend_3" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\Makefile.mak" SelfReg="false" NextFile="README.txt_7"/>
+    <ROW File="Makefile.mak_6" Component_="application.xml_1" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\backup\Makefile.mak" SelfReg="false" NextFile="README.txt_8"/>
+    <ROW File="Makefile.mak_7" Component_="depend_4" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\grid\Makefile.mak" SelfReg="false" NextFile="README.txt_9"/>
+    <ROW File="Makefile.mak_8" Component_="democs.sln" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\Makefile.mak" SelfReg="false" NextFile="depend_5"/>
+    <ROW File="Makefile.mak_9" Component_="depend_5" FileName="Makefile.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\nonfiltered\Makefile.mak" SelfReg="false" NextFile="README.txt_10"/>
+    <ROW File="Makefile_1" Component_="depend" FileName="Makefile" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\Makefile" SelfReg="false" NextFile="Makefile.mak_1"/>
+    <ROW File="Makefile_2" Component_="demo.sln" FileName="Makefile" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\Makefile" SelfReg="false" NextFile="Makefile.mak_2"/>
+    <ROW File="Makefile_3" Component_="depend_1" FileName="Makefile" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\Makefile" SelfReg="false" NextFile="Makefile.mak_3"/>
+    <ROW File="Makefile_4" Component_="depend_2" FileName="Makefile" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\server\Makefile" SelfReg="false" NextFile="Makefile.mak_4"/>
+    <ROW File="Makefile_5" Component_="depend_3" FileName="Makefile" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\Makefile" SelfReg="false" NextFile="Makefile.mak_5"/>
+    <ROW File="README.txt" Component_="README.txt" FileName="README.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\icefix\README.txt" SelfReg="false" NextFile="RELEASE_NOTES.txt"/>
+    <ROW File="README.txt_1" Component_="README.txt_1" FileName="README.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\icefix\demodist\README.txt" SelfReg="false" NextFile="IceFIX.dll"/>
+    <ROW File="README.txt_10" Component_="depend_5" FileName="README.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\nonfiltered\README.txt" SelfReg="false" NextFile="README.txt_11"/>
+    <ROW File="README.txt_11" Component_="democs.sln" FileName="README.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\README.txt" SelfReg="false" NextFile="depend_6"/>
+    <ROW File="README.txt_12" Component_="depend_6" FileName="README.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\simple\README.txt" SelfReg="false"/>
+    <ROW File="README.txt_2" Component_="application.xml" FileName="README.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\backup\README.txt" SelfReg="false" NextFile="demo.sln"/>
+    <ROW File="README.txt_3" Component_="depend" FileName="README.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\README.txt" SelfReg="false" NextFile="Makefile_2"/>
+    <ROW File="README.txt_4" Component_="depend_1" FileName="README.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\README.txt" SelfReg="false" NextFile="README.txt_5"/>
+    <ROW File="README.txt_5" Component_="demo.sln" FileName="README.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\README.txt" SelfReg="false" NextFile="depend_2"/>
+    <ROW File="README.txt_6" Component_="depend_2" FileName="README.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\server\README.txt" SelfReg="false" NextFile="Server.cpp"/>
+    <ROW File="README.txt_7" Component_="depend_3" FileName="README.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\README.txt" SelfReg="false" NextFile="application.xml_2"/>
+    <ROW File="README.txt_8" Component_="application.xml_1" FileName="README.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\backup\README.txt" SelfReg="false" NextFile="democs.sln"/>
+    <ROW File="README.txt_9" Component_="depend_4" FileName="README.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\grid\README.txt" SelfReg="false" NextFile="Makefile.mak_8"/>
+    <ROW File="RELEASE_NOTES.txt" Component_="ICE_FIX_LICENSE.txt" FileName="RELEAS~1.txt|RELEASE_NOTES.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\icefix\RELEASE_NOTES.txt" SelfReg="false" NextFile="SOURCES.txt"/>
+    <ROW File="SOURCES.txt" Component_="ICE_FIX_LICENSE.txt" FileName="SOURCES.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\icefix\SOURCES.txt" SelfReg="false" NextFile="THIRD_PARTY_LICENSE.txt"/>
+    <ROW File="Server.cpp" Component_="depend_2" FileName="Server.cpp" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\server\Server.cpp" SelfReg="false" NextFile="server.vcxproj"/>
+    <ROW File="THIRD_PARTY_LICENSE.txt" Component_="ICE_FIX_LICENSE.txt" FileName="THIRD_~1.txt|THIRD_PARTY_LICENSE.txt" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\icefix\THIRD_PARTY_LICENSE.txt" SelfReg="false" NextFile="IceFIX.props"/>
+    <ROW File="application.xml" Component_="application.xml" FileName="applic~1.xml|application.xml" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\backup\application.xml" SelfReg="false" NextFile="backup"/>
+    <ROW File="application.xml_1" Component_="depend" FileName="applic~1.xml|application.xml" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\application.xml" SelfReg="false" NextFile="Client.cpp"/>
+    <ROW File="application.xml_2" Component_="application.xml_1" FileName="applic~1.xml|application.xml" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\backup\application.xml" SelfReg="false" NextFile="backup.bat_1"/>
+    <ROW File="application.xml_3" Component_="depend_4" FileName="applic~1.xml|application.xml" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\grid\application.xml" SelfReg="false" NextFile="Client.cs"/>
+    <ROW File="backup" Component_="application.xml" FileName="backup" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\backup\backup" SelfReg="false" NextFile="backup.bat"/>
+    <ROW File="backup.bat" Component_="application.xml" FileName="backup.bat" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\backup\backup.bat" SelfReg="false" NextFile="config.admin"/>
+    <ROW File="backup.bat_1" Component_="application.xml_1" FileName="backup.bat" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\backup\backup.bat" SelfReg="false" NextFile="config.admin_4"/>
+    <ROW File="client.csproj" Component_="depend_4" FileName="client~1.csp|client.csproj" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\grid\client.csproj" SelfReg="false" NextFile="config.admin_5"/>
+    <ROW File="client.csproj_1" Component_="depend_5" FileName="client~1.csp|client.csproj" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\nonfiltered\client.csproj" SelfReg="false" NextFile="config.admin_6"/>
+    <ROW File="client.csproj_2" Component_="depend_6" FileName="client~1.csp|client.csproj" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\simple\client.csproj" SelfReg="false" NextFile="config.admin_7"/>
+    <ROW File="client.vcxproj" Component_="depend" FileName="client~1.vcx|client.vcxproj" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\client.vcxproj" SelfReg="false" NextFile="client.vcxproj.filters"/>
+    <ROW File="client.vcxproj.filters" Component_="depend" FileName="client~1.fil|client.vcxproj.filters" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\client.vcxproj.filters" SelfReg="false" NextFile="config.admin_1"/>
+    <ROW File="client.vcxproj.filters_1" Component_="depend_1" FileName="client~1.fil|client.vcxproj.filters" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\client.vcxproj.filters" SelfReg="false" NextFile="config.admin_2"/>
+    <ROW File="client.vcxproj.filters_2" Component_="depend_3" FileName="client~1.fil|client.vcxproj.filters" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\client.vcxproj.filters" SelfReg="false" NextFile="config.admin_3"/>
+    <ROW File="client.vcxproj_1" Component_="depend_1" FileName="client~1.vcx|client.vcxproj" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\client.vcxproj" SelfReg="false" NextFile="client.vcxproj.filters_1"/>
+    <ROW File="client.vcxproj_2" Component_="depend_3" FileName="client~1.vcx|client.vcxproj" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\client.vcxproj" SelfReg="false" NextFile="client.vcxproj.filters_2"/>
+    <ROW File="config.admin" Component_="application.xml" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\backup\config.admin" SelfReg="false" NextFile="config.client"/>
+    <ROW File="config.admin_1" Component_="depend" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\config.admin" SelfReg="false" NextFile="config.client_1"/>
+    <ROW File="config.admin_2" Component_="depend_1" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\config.admin" SelfReg="false" NextFile="config.cfg"/>
+    <ROW File="config.admin_3" Component_="depend_3" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\config.admin" SelfReg="false" NextFile="config.cfg_1"/>
+    <ROW File="config.admin_4" Component_="application.xml_1" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\backup\config.admin" SelfReg="false" NextFile="config.client_4"/>
+    <ROW File="config.admin_5" Component_="depend_4" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\grid\config.admin" SelfReg="false" NextFile="config.client_5"/>
+    <ROW File="config.admin_6" Component_="depend_5" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\nonfiltered\config.admin" SelfReg="false" NextFile="config.cfg_2"/>
+    <ROW File="config.admin_7" Component_="depend_6" FileName="config~1.adm|config.admin" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\simple\config.admin" SelfReg="false" NextFile="config.cfg_3"/>
+    <ROW File="config.cfg" Component_="depend_1" FileName="config.cfg" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\config.cfg" SelfReg="false" NextFile="config.client_2"/>
+    <ROW File="config.cfg_1" Component_="depend_3" FileName="config.cfg" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\config.cfg" SelfReg="false" NextFile="config.client_3"/>
+    <ROW File="config.cfg_2" Component_="depend_5" FileName="config.cfg" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\nonfiltered\config.cfg" SelfReg="false" NextFile="config.client_6"/>
+    <ROW File="config.cfg_3" Component_="depend_6" FileName="config.cfg" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\simple\config.cfg" SelfReg="false" NextFile="config.client_7"/>
+    <ROW File="config.client" Component_="application.xml" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\backup\config.client" SelfReg="false" NextFile="config.fix"/>
+    <ROW File="config.client_1" Component_="depend" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\config.client" SelfReg="false" NextFile="config.fix_tp1"/>
+    <ROW File="config.client_2" Component_="depend_1" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\config.client" SelfReg="false" NextFile="config.fix_1"/>
+    <ROW File="config.client_3" Component_="depend_3" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\config.client" SelfReg="false" NextFile="config.fix_2"/>
+    <ROW File="config.client_4" Component_="application.xml_1" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\backup\config.client" SelfReg="false" NextFile="config.fix_3"/>
+    <ROW File="config.client_5" Component_="depend_4" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\grid\config.client" SelfReg="false" NextFile="config.fix_tp1_1"/>
+    <ROW File="config.client_6" Component_="depend_5" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\nonfiltered\config.client" SelfReg="false" NextFile="config.fix_4"/>
+    <ROW File="config.client_7" Component_="depend_6" FileName="config~1.cli|config.client" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\simple\config.client" SelfReg="false" NextFile="config.fix_5"/>
+    <ROW File="config.fix" Component_="application.xml" FileName="config.fix" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\backup\config.fix" SelfReg="false" NextFile="config.grid"/>
+    <ROW File="config.fix_1" Component_="depend_1" FileName="config.fix" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\config.fix" SelfReg="false" NextFile="config.icebox"/>
+    <ROW File="config.fix_2" Component_="depend_3" FileName="config.fix" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\config.fix" SelfReg="false" NextFile="config.icebox_1"/>
+    <ROW File="config.fix_3" Component_="application.xml_1" FileName="config.fix" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\backup\config.fix" SelfReg="false" NextFile="config.grid_2"/>
+    <ROW File="config.fix_4" Component_="depend_5" FileName="config.fix" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\nonfiltered\config.fix" SelfReg="false" NextFile="config.icebox_2"/>
+    <ROW File="config.fix_5" Component_="depend_6" FileName="config.fix" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\simple\config.fix" SelfReg="false" NextFile="config.icebox_3"/>
+    <ROW File="config.fix_tp1" Component_="depend" FileName="config~1.fix|config.fix-tp1" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\config.fix-tp1" SelfReg="false" NextFile="config.fix_tp2"/>
+    <ROW File="config.fix_tp1_1" Component_="depend_4" FileName="config~1.fix|config.fix-tp1" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\grid\config.fix-tp1" SelfReg="false" NextFile="config.fix_tp2_1"/>
+    <ROW File="config.fix_tp2" Component_="depend" FileName="config~2.fix|config.fix-tp2" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\config.fix-tp2" SelfReg="false" NextFile="config.grid_1"/>
+    <ROW File="config.fix_tp2_1" Component_="depend_4" FileName="config~2.fix|config.fix-tp2" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\grid\config.fix-tp2" SelfReg="false" NextFile="config.grid_3"/>
+    <ROW File="config.grid" Component_="application.xml" FileName="config~1.gri|config.grid" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\backup\config.grid" SelfReg="false" NextFile="config.tp1"/>
+    <ROW File="config.grid_1" Component_="depend" FileName="config~1.gri|config.grid" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\config.grid" SelfReg="false" NextFile="config.tp1_1"/>
+    <ROW File="config.grid_2" Component_="application.xml_1" FileName="config~1.gri|config.grid" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\backup\config.grid" SelfReg="false" NextFile="config.tp1_2"/>
+    <ROW File="config.grid_3" Component_="depend_4" FileName="config~1.gri|config.grid" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\grid\config.grid" SelfReg="false" NextFile="config.tp1_3"/>
+    <ROW File="config.icebox" Component_="depend_1" FileName="config~1.ice|config.icebox" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\config.icebox" SelfReg="false" NextFile="config.icefix"/>
+    <ROW File="config.icebox_1" Component_="depend_3" FileName="config~1.ice|config.icebox" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\config.icebox" SelfReg="false" NextFile="config.icefix_1"/>
+    <ROW File="config.icebox_2" Component_="depend_5" FileName="config~1.ice|config.icebox" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\nonfiltered\config.icebox" SelfReg="false" NextFile="config.icefix_2"/>
+    <ROW File="config.icebox_3" Component_="depend_6" FileName="config~1.ice|config.icebox" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\simple\config.icebox" SelfReg="false" NextFile="config.icefix_3"/>
+    <ROW File="config.icefix" Component_="depend_1" FileName="config~2.ice|config.icefix" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\config.icefix" SelfReg="false" NextFile="Makefile_3"/>
+    <ROW File="config.icefix_1" Component_="depend_3" FileName="config~2.ice|config.icefix" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\config.icefix" SelfReg="false" NextFile="Makefile_5"/>
+    <ROW File="config.icefix_2" Component_="depend_5" FileName="config~2.ice|config.icefix" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\nonfiltered\config.icefix" SelfReg="false" NextFile="Makefile.mak_9"/>
+    <ROW File="config.icefix_3" Component_="depend_6" FileName="config~2.ice|config.icefix" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\simple\config.icefix" SelfReg="false" NextFile="Makefile.mak_10"/>
+    <ROW File="config.tp1" Component_="application.xml" FileName="config.tp1" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\backup\config.tp1" SelfReg="false" NextFile="DB_CONFIG"/>
+    <ROW File="config.tp1_1" Component_="depend" FileName="config.tp1" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\config.tp1" SelfReg="false" NextFile="config.tp2"/>
+    <ROW File="config.tp1_2" Component_="application.xml_1" FileName="config.tp1" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\backup\config.tp1" SelfReg="false" NextFile="DB_CONFIG_1"/>
+    <ROW File="config.tp1_3" Component_="depend_4" FileName="config.tp1" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\grid\config.tp1" SelfReg="false" NextFile="config.tp2_1"/>
+    <ROW File="config.tp2" Component_="depend" FileName="config.tp2" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\config.tp2" SelfReg="false" NextFile="Makefile_1"/>
+    <ROW File="config.tp2_1" Component_="depend_4" FileName="config.tp2" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\grid\config.tp2" SelfReg="false" NextFile="Makefile.mak_7"/>
+    <ROW File="demo.sln" Component_="demo.sln" FileName="demo.sln" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\demo.sln" SelfReg="false" NextFile="demo.suo"/>
+    <ROW File="demo.suo" Component_="demo.sln" FileName="demo.suo" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\demo.suo" SelfReg="false" NextFile="depend"/>
+    <ROW File="democs.sln" Component_="democs.sln" FileName="democs.sln" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\democs.sln" SelfReg="false" NextFile="depend_4"/>
+    <ROW File="depend" Component_="depend" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\.depend" SelfReg="false" NextFile="depend.mak"/>
+    <ROW File="depend.mak" Component_="depend" FileName="depend~1.mak|.depend.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\grid\.depend.mak" SelfReg="false" NextFile="application.xml_1"/>
+    <ROW File="depend.mak_1" Component_="depend_1" FileName="depend~1.mak|.depend.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\.depend.mak" SelfReg="false" NextFile="Client.cpp_1"/>
+    <ROW File="depend.mak_2" Component_="depend_2" FileName="depend~1.mak|.depend.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\server\.depend.mak" SelfReg="false" NextFile="FIX42.xml"/>
+    <ROW File="depend.mak_3" Component_="depend_3" FileName="depend~1.mak|.depend.mak" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\.depend.mak" SelfReg="false" NextFile="Client.cpp_2"/>
+    <ROW File="depend_1" Component_="depend_1" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\nonfiltered\.depend" SelfReg="false" NextFile="depend.mak_1"/>
+    <ROW File="depend_2" Component_="depend_2" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\server\.depend" SelfReg="false" NextFile="depend.mak_2"/>
+    <ROW File="depend_3" Component_="depend_3" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\simple\.depend" SelfReg="false" NextFile="depend.mak_3"/>
+    <ROW File="depend_4" Component_="depend_4" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\grid\.depend" SelfReg="false" NextFile="application.xml_3"/>
+    <ROW File="depend_5" Component_="depend_5" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\nonfiltered\.depend" SelfReg="false" NextFile="Client.cs_1"/>
+    <ROW File="depend_6" Component_="depend_6" FileName="depend~1|.depend" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\democs\simple\.depend" SelfReg="false" NextFile="Client.cs_2"/>
+    <ROW File="icefix.lib" Component_="icefix.lib" FileName="icefix.lib" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;VC10\IceFIX-1.0.1\lib\icefix.lib" SelfReg="false" NextFile="icefixservice.lib"/>
+    <ROW File="icefix10.dll" Component_="icefix10.dll" FileName="icefix10.dll" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;VC10\IceFIX-1.0.1\bin\icefix10.dll" SelfReg="false" NextFile="icefixadmin.exe" DigSign="true"/>
+    <ROW File="icefixadmin.exe" Component_="icefixadmin.exe" FileName="icefix~1.exe|icefixadmin.exe" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;VC10\IceFIX-1.0.1\bin\icefixadmin.exe" SelfReg="false" NextFile="icefixservice10.dll"/>
+    <ROW File="icefixservice.lib" Component_="icefix.lib" FileName="icefix~1.lib|icefixservice.lib" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;VC10\IceFIX-1.0.1\lib\icefixservice.lib" SelfReg="false" NextFile="IceFIX.ice"/>
+    <ROW File="icefixservice10.dll" Component_="icefixservice10.dll" FileName="icefix~1.dll|icefixservice10.dll" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;VC10\IceFIX-1.0.1\bin\icefixservice10.dll" SelfReg="false" NextFile="IceFIX.h" DigSign="true"/>
+    <ROW File="quickfix.reg" Component_="IceDevKey.snk" FileName="quickfix.reg" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\config\quickfix.reg" SelfReg="false" NextFile="application.xml"/>
+    <ROW File="server.vcxproj" Component_="depend_2" FileName="server~1.vcx|server.vcxproj" Attributes="0" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos\demo\server\server.vcxproj" SelfReg="false" NextFile="depend_3"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
     <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="1" PackageFolder="." Languages="en" InstallationType="4"/>
@@ -302,7 +303,7 @@
     <ROW Path="&lt;AI_DICTS&gt;ui_en.ail"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.DigCertStoreComponent">
-    <ROW DigitalCertificate="..\..\..\zeroc2011.pfx" TimeStampUrl="http://timestamp.verisign.com/scripts/timstamp.dll" SignerDescription="[|ProductName]" SignOptions="0" SignTool="0"/>
+    <ROW DigitalCertificate="..\..\..\..\zeroc2011.pfx" TimeStampUrl="http://timestamp.verisign.com/scripts/timstamp.dll" SignerDescription="[|ProductName]" SignOptions="7" SignTool="0"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.FragmentComponent">
     <ROW Fragment="CommonUI.aip" Path="&lt;AI_FRAGS&gt;CommonUI.aip"/>
@@ -319,9 +320,9 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiBinaryComponent">
     <ROW Name="aicustact.dll" SourcePath="&lt;AI_CUSTACTS&gt;aicustact.dll"/>
-    <ROW Name="fixinstalldir.vbs_1" SourcePath="actions\fixinstalldir.vbs"/>
-    <ROW Name="installer_header.bmp_1" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\icefix\installer-header.bmp"/>
-    <ROW Name="installer_main.bmp_1" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\icefix\installer-main.bmp"/>
+    <ROW Name="fixinstalldir.vbs_1" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\icefix\actions\fixinstalldir.vbs"/>
+    <ROW Name="installer_header.bmp" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\windows\installer-header.bmp"/>
+    <ROW Name="installer_main.bmp" SourcePath="..\windows\installer-main.bmp"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiConditionComponent">
     <ROW Feature_="VS2010PLUGIN" Level="0" Condition="NOT VS_2010_INSTALL_DIR"/>
@@ -331,7 +332,7 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiControlComponent">
     <ROW Dialog_="LicenseAgreementDlg" Control="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" Attributes="1048577" Text="[BannerBitmap]" Control_Next="AgreementText" MsiKey="LicenseAgreementDlg#BannerBitmap"/>
-    <ROW Dialog_="LicenseAgreementDlg" Control="AgreementText" Type="FileScrollableText" X="20" Y="60" Width="330" Height="120" Attributes="7" Text="&lt;ICE_FIX_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\icefix\LICENSE.rtf" Control_Next="Buttons" TextLocId="Control.Text.LicenseAgreementDlg#AgreementText"/>
+    <ROW Dialog_="LicenseAgreementDlg" Control="AgreementText" Type="FileScrollableText" X="20" Y="60" Width="330" Height="120" Attributes="7" Text="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-distfiles-1.0.1\distribution\src\icefix\LICENSE.rtf" Control_Next="Buttons" TextLocId="Control.Text.LicenseAgreementDlg#AgreementText"/>
     <ROW Dialog_="FolderDlg" Control="BannerLine" Type="Line" X="0" Y="44" Width="372" Height="0" Attributes="1" Control_Next="PathEdit_1" MsiKey="FolderDlg#BannerLine"/>
     <ROW Dialog_="FolderDlg" Control="Browse" Type="PushButton" X="276" Y="126" Width="90" Height="18" Attributes="3" Text="[ButtonText_Browse]" Control_Next="BottomLine" Help="|" TextLocId="-" HelpLocId="Control.Help.FolderDlg#Browse" MsiKey="FolderDlg#Browse"/>
     <ROW Dialog_="FolderDlg" Control="FolderLabel" Type="Text" X="20" Y="164" Width="348" Height="12" Attributes="3" Text="&amp;Demo Folder:" Control_Next="FolderEdit" Help="|" TextLocId="Control.Text.FolderDlg#FolderLabel" HelpLocId="Control.Help.FolderDlg#FolderLabel" MsiKey="FolderDlg#FolderLabel"/>
@@ -363,6 +364,7 @@
     <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="CustomizeDlg" Condition="AI_MAINT" Ordering="201"/>
     <ROW Dialog_="FolderDlg" Control_="PushButton_1" Event="[_BrowseProperty]" Argument="DEMO_DIR" Condition="1" Ordering="100"/>
     <ROW Dialog_="FolderDlg" Control_="PushButton_1" Event="SpawnDialog" Argument="BrowseDlg" Condition="1" Ordering="200"/>
+    <ROW Dialog_="VerifyRepairDlg" Control_="Repair" Event="EndDialog" Argument="Return" Condition="AI_MAINT AND InstallMode = &quot;Repair&quot;" Ordering="300" MsiKey="VerifyRepairDlg#Repair#EndDialog#Return#AI_MAINT AND InstallMode = &quot;Repair&quot;"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCreateFolderComponent">
     <ROW Directory_="Ice_3.4.2_DIR" Component_="Ice_3.4.2"/>
@@ -373,7 +375,7 @@
     <ROW Directory_="store_Dir" Component_="store"/>
     <ROW Directory_="node_1_Dir" Component_="node_1"/>
     <ROW Directory_="registry_1_Dir" Component_="registry_1"/>
-    <ROW Directory_="db_tp1_2_Dir" Component_="db_tp1"/>
+    <ROW Directory_="db_tp1_1_Dir" Component_="db_tp1"/>
     <ROW Directory_="db_tp2_Dir" Component_="db_tp2"/>
     <ROW Directory_="store_1_Dir" Component_="store_1"/>
     <ROW Directory_="db_2_Dir" Component_="db"/>
@@ -452,6 +454,6 @@
     <ROW UpgradeCode="[|UpgradeCode]" VersionMax="[|ProductVersion]" Attributes="1025" ActionProperty="OLDPRODUCTS"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.SynchronizedFolderComponent">
-    <ROW Directory_="DEMO_DIR" SourcePath="&lt;ICE_FIX_BUILD_HOME&gt;\dist\IceFIX-1.0.1-demos" Feature="MainFeature" ExcludePattern="*~|#*#|%*%|._|CVS|.cvsignore|SCCS|vssver.scc|mssccprj.scc|vssver2.scc|.svn|.DS_Store" ExcludeFlags="6"/>
+    <ROW Directory_="DEMO_DIR" SourcePath="&lt;ICE_BUILD_HOME&gt;dist\IceFIX-1.0.1-demos" Feature="MainFeature" ExcludePattern="*~|#*#|%*%|._|CVS|.cvsignore|SCCS|vssver.scc|mssccprj.scc|vssver2.scc|.svn|.DS_Store" ExcludeFlags="6"/>
   </COMPONENT>
 </DOCUMENT>
