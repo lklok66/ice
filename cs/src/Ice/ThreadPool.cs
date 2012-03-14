@@ -199,6 +199,7 @@ namespace IceInternal
             }
             _stackSize = stackSize;
 
+#if !SILVERLIGHT
             _hasPriority = properties.getProperty(_prefix + ".ThreadPriority").Length > 0;
             _priority = IceInternal.Util.stringToThreadPriority(properties.getProperty(_prefix + ".ThreadPriority"));
             if(!_hasPriority)
@@ -206,6 +207,7 @@ namespace IceInternal
                 _hasPriority = properties.getProperty("Ice.ThreadPriority").Length > 0;
                 _priority = IceInternal.Util.stringToThreadPriority(properties.getProperty("Ice.ThreadPriority"));
             }
+#endif
             
             if(_instance.traceLevels().threadPool >= 1)
             {
@@ -223,6 +225,7 @@ namespace IceInternal
                 {
                     WorkerThread thread = new WorkerThread(this, _threadPrefix + "-" + _threadIndex++);
                     _threads.Add(thread);
+#if !SILVERLIGHT
                     if(_hasPriority)
                     {
                         thread.start(_priority);
@@ -231,6 +234,9 @@ namespace IceInternal
                     {
                         thread.start(ThreadPriority.Normal);
                     }
+#else
+                    thread.start();
+#endif
                 }
             }
             catch(System.Exception ex)
@@ -390,6 +396,7 @@ namespace IceInternal
                     try
                     {
                         WorkerThread t = new WorkerThread(this, _threadPrefix + "-" + _threadIndex++);
+#if !SILVERLIGHT
                         if(_hasPriority)
                         {
                             t.start(_priority);
@@ -398,6 +405,9 @@ namespace IceInternal
                         {
                             t.start(ThreadPriority.Normal);
                         }
+#else
+                        t.start();
+#endif
                         _threads.Add(t);
                     }
                     catch(System.Exception ex)
@@ -663,6 +673,72 @@ namespace IceInternal
             }
         }
 
+#if SILVERLIGHT
+    public class IAsyncResult
+    {
+        private bool _completedSynchronously = false;
+        private object _asyncState = null;
+        private System.Net.Sockets.SocketAsyncEventArgs _eventArgs = null;
+
+        public bool CompletedSynchronously
+        {
+            get
+            {
+                return _completedSynchronously;
+            }
+            set
+            {
+                _completedSynchronously = value;
+            }
+        }
+
+        public object AsyncState
+        {
+            get
+            {
+                return _asyncState;
+            }
+            set
+            {
+                _asyncState = value;
+            }
+        }
+
+        public System.Net.Sockets.SocketAsyncEventArgs EventArgs
+        {
+            get
+            {
+                return  _eventArgs;
+            }
+            set
+            {
+                _eventArgs = value;
+            }
+        }
+    }
+
+    public delegate void AsyncCallback(object sender, System.Net.Sockets.SocketAsyncEventArgs eventArgs);
+
+    public void asyncReadCallback(object sender, System.Net.Sockets.SocketAsyncEventArgs eventArgs)
+    {
+        IAsyncResult result = (IAsyncResult)eventArgs.UserToken;
+        if(result.CompletedSynchronously)
+        {
+            return;
+        }
+        messageCallback(new ThreadPoolCurrent(this, (EventHandler)result.AsyncState, SocketOperation.Read));
+    }
+    
+    public void asyncWriteCallback(object sender, System.Net.Sockets.SocketAsyncEventArgs eventArgs)
+    {
+        IAsyncResult result = (IAsyncResult)eventArgs.UserToken;
+        if(result.CompletedSynchronously)
+        {
+            return;
+        }
+        messageCallback(new ThreadPoolCurrent(this, (EventHandler)result.AsyncState, SocketOperation.Write));
+    }
+#else
         public void asyncReadCallback(object state)
         {
             IAsyncResult result = (IAsyncResult)state;
@@ -682,6 +758,7 @@ namespace IceInternal
             }
             messageCallback(new ThreadPoolCurrent(this, (EventHandler)result.AsyncState, SocketOperation.Write));
         }
+#endif
 
         public void messageCallback(ThreadPoolCurrent current)
         {
@@ -736,6 +813,7 @@ namespace IceInternal
                 _thread.Join();
             }
 
+#if !SILVERLIGHT
             public void start(ThreadPriority priority)
             {
                 if(_threadPool._stackSize == 0)
@@ -751,6 +829,15 @@ namespace IceInternal
                 _thread.Priority = priority;
                 _thread.Start();
             }
+#else
+            public void start()
+            {
+                _thread = new Thread(new ThreadStart(Run));
+                _thread.IsBackground = true;
+                _thread.Name = _name;
+                _thread.Start();
+            }
+#endif
 
             public void Run()
             {
@@ -801,8 +888,10 @@ namespace IceInternal
         private readonly int _sizeMax; // Maximum number of threads.
         private readonly int _sizeWarn; // If _inUse reaches _sizeWarn, a "low on threads" warning will be printed.
         private readonly bool _serialize; // True if requests need to be serialized over the connection.
+#if !SILVERLIGHT
         private readonly ThreadPriority _priority;
         private readonly bool _hasPriority = false;
+#endif
         private readonly int _serverIdleTime;
         private readonly int _threadIdleTime;
         private readonly int _stackSize;

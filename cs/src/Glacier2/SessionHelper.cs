@@ -75,7 +75,7 @@ public class SessionHelper
 
                     if(!_done)
                     {
-#if COMPACT
+#if COMPACT || SILVERLIGHT
                         _m.TimedWait(_period);
 #else
                         try
@@ -446,7 +446,7 @@ public class SessionHelper
             sessionRefresh.done();
             while(true)
             {
-#if COMPACT
+#if COMPACT || SILVERLIGHT
                 _refreshThread.Join();
                 break;
 #else
@@ -560,7 +560,7 @@ public class SessionHelper
     {
         if(_initData.dispatcher != null)
         {
-            EventWaitHandle h = new EventWaitHandle(false, EventResetMode.ManualReset);
+            EventWaitHandle h = new ManualResetEvent(false);
             _initData.dispatcher(delegate()
                                  {
                                      callback();

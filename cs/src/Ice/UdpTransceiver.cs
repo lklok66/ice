@@ -31,8 +31,9 @@ namespace IceInternal
             {
                 if(Network.isMulticast(_addr))
                 {
+#if !SILVERLIGHT
                     Network.setMcastGroup(_fd, _addr.Address, _mcastInterface);
-                    
+#endif                    
                     if(_mcastTtl != -1)
                     {
                         Network.setMcastTtl(_fd, _mcastTtl, _addr.AddressFamily);
@@ -77,9 +78,9 @@ namespace IceInternal
 
         public bool write(Buffer buf)
         {
-#if COMPACT
+#if COMPACT || SILVERLIGHT
             //
-            // The Compact Framework does not support the use of synchronous socket
+            // The Silverlight and Compact .NET Frameworks does not support the use of synchronous socket
             // operations on a non-blocking socket. Returning false here forces the
             // caller to schedule an asynchronous operation.
             //
@@ -110,7 +111,7 @@ namespace IceInternal
                     }
                     break;
                 }
-                catch(Win32Exception ex)
+                catch(SocketException ex)
                 {
                     if(Network.interrupted(ex))
                     {
@@ -158,9 +159,9 @@ namespace IceInternal
 
         public bool read(Buffer buf)
         {
-#if COMPACT
+#if COMPACT || SILVERLIGHT
             //
-            // The Compact Framework does not support the use of synchronous socket
+            // The Silverlight and Compact .NET Frameworks does not support the use of synchronous socket
             // operations on a non-blocking socket. Returning false here forces the
             // caller to schedule an asynchronous operation.
             //
@@ -203,7 +204,7 @@ namespace IceInternal
                     }
                     break;
                 }
-                catch(Win32Exception e)
+                catch(SocketException e)
                 {
                     if(Network.recvTruncated(e))
                     {
@@ -280,7 +281,13 @@ namespace IceInternal
 #endif
         }
 
-        public bool startRead(Buffer buf, AsyncCallback callback, object state)
+        public bool startRead(Buffer buf, 
+#if SILVERLIGHT
+                              IceInternal.ThreadPool.AsyncCallback callback, 
+#else
+                              AsyncCallback callback, 
+#endif
+                              object state)
         {
             Debug.Assert(buf.b.position() == 0);
 
@@ -292,8 +299,23 @@ namespace IceInternal
             {                
                 if(_state == StateConnected)
                 {
+#if SILVERLIGHT
+                    if(_readResult == null)
+                    {
+                        _readResult = new IceInternal.ThreadPool.IAsyncResult();
+                    }
+                    _socketReadEventArgs = new SocketAsyncEventArgs();
+                    _socketReadEventArgs.RemoteEndPoint = _addr;
+                    _socketReadEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(callback);
+                    _socketReadEventArgs.UserToken = _readResult;
+                    _readResult.AsyncState = state;
+                    _readResult.EventArgs = _socketReadEventArgs;
+                    _socketReadEventArgs.SetBuffer(buf.b.rawBytes(), buf.b.position(), packetSize);
+                    _readResult.CompletedSynchronously = !_fd.ReceiveAsync(_socketReadEventArgs);
+#else
                     _readResult = _fd.BeginReceive(buf.b.rawBytes(), 0, buf.b.limit(), SocketFlags.None, callback, 
                                                    state);
+#endif
                 }
                 else
                 {
@@ -312,12 +334,22 @@ namespace IceInternal
                             peerAddr = new IPEndPoint(IPAddress.IPv6Any, 0);
                         }
                     }
-
+#if SILVERLIGHT
+                    if(_readResult == null)
+                    {
+                        _readResult = new IceInternal.ThreadPool.IAsyncResult();
+                    }
+                    _socketReadEventArgs.UserToken = _readResult;
+                    _readResult.AsyncState = _socketReadEventArgs;
+                    _socketReadEventArgs.SetBuffer(buf.b.rawBytes(), 0, buf.b.limit());
+                    _readResult.CompletedSynchronously = _fd.ReceiveFromAsync(_socketReadEventArgs);
+#else
                     _readResult = _fd.BeginReceiveFrom(buf.b.rawBytes(), 0, buf.b.limit(), SocketFlags.None, 
                                                        ref peerAddr, callback, state);
+#endif
                 }
             }
-            catch(Win32Exception ex)
+            catch(SocketException ex)
             {
                 if(Network.recvTruncated(ex))
                 {
@@ -349,6 +381,14 @@ namespace IceInternal
             int ret;
             try
             {
+#if SILVERLIGHT
+                SocketAsyncEventArgs eventArgs = (SocketAsyncEventArgs)_readResult.AsyncState;
+                ret = 0;
+                if(eventArgs.SocketError != SocketError.Success)
+                {
+                    ret = eventArgs.BytesTransferred;
+                }
+#else
                 Debug.Assert(_readResult != null);
                 if(_state == StateConnected)
                 {
@@ -369,9 +409,10 @@ namespace IceInternal
                     ret = _fd.EndReceiveFrom(_readResult, ref peerAddr);
                     _peerAddr = (IPEndPoint)peerAddr;
                 }
+#endif
                 _readResult = null;
             }
-            catch(Win32Exception ex)
+            catch(SocketException ex)
             {
                 if(Network.recvTruncated(ex))
                 {
@@ -413,7 +454,11 @@ namespace IceInternal
                 // If we must connect, then we connect to the first peer that
                 // sends us a packet.
                 //
+#if SILVERLIGHT
+                bool connected = Network.doConnect(_fd, _addr, _socketReadEventArgs);
+#else
                 bool connected = Network.doConnect(_fd, _peerAddr);
+#endif
                 Debug.Assert(connected);
                 _state = StateConnected; // We're connected now
 
@@ -439,12 +484,23 @@ namespace IceInternal
             buf.b.position(ret);
         }
 
-        public bool startWrite(Buffer buf, AsyncCallback callback, object state, out bool completed)
+        public bool startWrite(Buffer buf, 
+#if SILVERLIGHT
+                               IceInternal.ThreadPool.AsyncCallback callback, 
+#else
+                               AsyncCallback callback, 
+#endif
+                               object state, out bool completed)
         {
             if(!_incoming && _state < StateConnected)
             {
                 Debug.Assert(_addr != null);
+#if SILVERLIGHT
+                _socketWriteEventArgs = new SocketAsyncEventArgs();
+                _writeResult = Network.doConnectAsync(_fd, _addr, callback, _socketWriteEventArgs, state);
+#else
                 _writeResult = Network.doConnectAsync(_fd, _addr, callback, state);
+#endif
                 completed = false;
                 return _writeResult.CompletedSynchronously;
             }
@@ -460,7 +516,12 @@ namespace IceInternal
             {
                 if(_state == StateConnected)
                 {
+#if SILVERLIGHT
+                    _socketWriteEventArgs.SetBuffer(buf.b.rawBytes(), 0, buf.b.limit());
+                    _writeResult.CompletedSynchronously = _fd.SendAsync(_socketWriteEventArgs);
+#else
                     _writeResult = _fd.BeginSend(buf.b.rawBytes(), 0, buf.b.limit(), SocketFlags.None, callback, state);
+#endif
                 }
                 else
                 {
@@ -468,11 +529,16 @@ namespace IceInternal
                     {
                         throw new Ice.SocketException();
                     }
+#if SILVERLIGHT
+                    _socketWriteEventArgs.SetBuffer(buf.b.rawBytes(), 0, buf.b.limit());
+                    _writeResult.CompletedSynchronously = _fd.SendToAsync(_socketWriteEventArgs);
+#else
                     _writeResult = _fd.BeginSendTo(buf.b.rawBytes(), 0, buf.b.limit(), SocketFlags.None, _peerAddr,
                                                    callback, state);
+#endif
                 }
             }
-            catch(Win32Exception ex)
+            catch(SocketException ex)
             {
                 if(Network.connectionLost(ex))
                 {
@@ -500,7 +566,11 @@ namespace IceInternal
             if(!_incoming && _state < StateConnected)
             {
                 Debug.Assert(_writeResult != null);
+#if SILVERLIGHT
+                Network.doFinishConnectAsync(_fd, _socketWriteEventArgs);
+#else
                 Network.doFinishConnectAsync(_fd, _writeResult);
+#endif
                 _writeResult = null;
                 return;
             }
@@ -508,7 +578,15 @@ namespace IceInternal
             int ret;
             try
             {
-                if(_state == StateConnected)
+#if SILVERLIGHT
+                SocketAsyncEventArgs eventArgs = (SocketAsyncEventArgs)_writeResult.EventArgs;
+                ret = 0;
+                if(eventArgs.SocketError == SocketError.Success)
+                {
+                    ret = eventArgs.BytesTransferred;
+                }
+#else
+                if (_state == StateConnected)
                 {
                     ret = _fd.EndSend(_writeResult);
                 }
@@ -516,9 +594,10 @@ namespace IceInternal
                 {
                     ret = _fd.EndSendTo(_writeResult);
                 }
+#endif
                 _writeResult = null;
             }
-            catch(Win32Exception ex)
+            catch(SocketException ex)
             {
                 if(Network.connectionLost(ex))
                 {
@@ -562,15 +641,15 @@ namespace IceInternal
         {
             Debug.Assert(_fd != null);
             Ice.UDPConnectionInfo info = new Ice.UDPConnectionInfo();
-            IPEndPoint localEndpoint = Network.getLocalAddress(_fd);
-            info.localAddress = localEndpoint.Address.ToString();
-            info.localPort = localEndpoint.Port;
+            EndPoint localEndpoint = Network.getLocalAddress(_fd);
+            info.localAddress = Network.endpointAddressToString(localEndpoint);
+            info.localPort = Network.endpointPort(localEndpoint);
             if(_state == StateNotConnected)
             {
                 if(_peerAddr != null)
                 {
-                    info.remoteAddress = _peerAddr.Address.ToString();
-                    info.remotePort = _peerAddr.Port;
+                    info.remoteAddress = Network.endpointAddressToString(_peerAddr);
+                    info.remotePort = Network.endpointPort(_peerAddr);
                 }
                 else
                 {
@@ -580,11 +659,11 @@ namespace IceInternal
             }
             else
             {
-                IPEndPoint remoteEndpoint = Network.getRemoteAddress(_fd);
+                EndPoint remoteEndpoint = Network.getRemoteAddress(_fd);
                 if(remoteEndpoint != null)
                 {
-                    info.remoteAddress = remoteEndpoint.Address.ToString();
-                    info.remotePort = remoteEndpoint.Port;
+                    info.remoteAddress = Network.endpointAddressToString(remoteEndpoint);
+                    info.remotePort = Network.endpointPort(remoteEndpoint);
                 }
                 else
                 {
@@ -595,8 +674,8 @@ namespace IceInternal
 
             if(_mcastAddr != null)
             {
-                info.mcastAddress = _mcastAddr.Address.ToString();
-                info.mcastPort = _mcastAddr.Port;
+                info.mcastAddress = Network.endpointAddressToString(_mcastAddr);
+                info.mcastPort = Network.endpointPort(_mcastAddr);
             }
             else
             {
@@ -660,12 +739,16 @@ namespace IceInternal
         //
         // Only for use by UdpConnector.
         //
-        internal UdpTransceiver(Instance instance, IPEndPoint addr, string mcastInterface, int mcastTtl)
+        internal UdpTransceiver(Instance instance, EndPoint addr, string mcastInterface, int mcastTtl)
         {
             _traceLevels = instance.traceLevels();
             _logger = instance.initializationData().logger;
             _stats = instance.initializationData().stats;
-            _addr = addr;
+#if SILVERLIGHT
+            _addr = (DnsEndPoint)addr;
+#else
+            _addr = (IPEndPoint)addr;
+#endif
             _mcastInterface = mcastInterface;
             _mcastTtl = mcastTtl;
             _state = StateNeedConnect;
@@ -675,7 +758,9 @@ namespace IceInternal
             {
                 _fd = Network.createSocket(true, _addr.AddressFamily);
                 setBufSize(instance);
+#if !SILVERLIGHT
                 Network.setBlock(_fd, false);
+#endif
             }
             catch(Ice.LocalException)
             {
@@ -697,15 +782,23 @@ namespace IceInternal
             
             try
             {
-                _addr = Network.getAddressForServer(host, port, instance.protocolSupport());
+#if SILVERLIGHT
+                _addr = (DnsEndPoint)Network.getAddressForServer(host, port, instance.protocolSupport());
+#else
+                _addr = (IPEndPoint)Network.getAddressForServer(host, port, instance.protocolSupport());
+#endif
                 _fd = Network.createSocket(true, _addr.AddressFamily);
                 setBufSize(instance);
+#if !SILVERLIGHT
                 Network.setBlock(_fd, false);
+#endif
                 if(_traceLevels.network >= 2)
                 {
                     string s = "attempting to bind to udp socket " + Network.addrToString(_addr);
                     _logger.trace(_traceLevels.networkCat, s);
                 }
+		
+#if !SILVERLIGHT
                 if(Network.isMulticast(_addr))
                 {
                     Network.setReuseAddress(_fd, true);
@@ -756,12 +849,14 @@ namespace IceInternal
                     }
                     _addr = Network.doBind(_fd, _addr);
                 }
-
+#endif
                 if(_traceLevels.network >= 1)
                 {
                     StringBuilder s = new StringBuilder("starting to receive udp packets\n");
-		    s.Append(ToString());
-
+                    s.Append(ToString());
+#if SILVERLIGHT
+                    s.Append("\nlocal interfaces: " + _addr.Host);
+#else
                     List<string> interfaces =
                         Network.getHostsForEndpointExpand(_addr.Address.ToString(), instance.protocolSupport(), true);
                     if(interfaces.Count != 0)
@@ -769,6 +864,7 @@ namespace IceInternal
                         s.Append("\nlocal interfaces: ");
                         s.Append(String.Join(", ", interfaces.ToArray()));
                     }
+#endif
                     _logger.trace(_traceLevels.networkCat, s.ToString());
                 }
             }
@@ -855,14 +951,27 @@ namespace IceInternal
         private int _rcvSize;
         private int _sndSize;
         private Socket _fd;
+#if SILVERLIGHT
+        private DnsEndPoint _addr;
+        private DnsEndPoint _mcastAddr = null;
+        private DnsEndPoint _peerAddr = null;
+#else
         private IPEndPoint _addr;
         private IPEndPoint _mcastAddr = null;
         private IPEndPoint _peerAddr = null;
+#endif
         private string _mcastInterface = null;
         private int _mcastTtl = -1;
 
+#if SILVERLIGHT
+        private SocketAsyncEventArgs	_socketWriteEventArgs;
+        private SocketAsyncEventArgs	_socketReadEventArgs;
+        private IceInternal.ThreadPool.IAsyncResult _writeResult;
+        private IceInternal.ThreadPool.IAsyncResult _readResult;
+#else
         private IAsyncResult _writeResult;
         private IAsyncResult _readResult;
+#endif
 
         private const int StateNeedConnect = 0;
         private const int StateConnectPending = 1;

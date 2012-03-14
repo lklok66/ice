@@ -50,7 +50,13 @@ namespace IceInternal
         // calls beginRead, or when the socket is closed. In this case endRead
         // raises ReadAbortedException.
         //
-        bool startRead(Buffer buf, AsyncCallback callback, object state);
+        bool startRead(Buffer buf, 
+#if SILVERLIGHT
+                       IceInternal.ThreadPool.AsyncCallback callback, 
+#else
+                       AsyncCallback callback, 
+#endif
+                       object state);
         void finishRead(Buffer buf);
 
         //
@@ -60,7 +66,13 @@ namespace IceInternal
         // will be invoked in the same thread as beginWrite. The request
         // will be canceled upon the termination of the thread that calls beginWrite.
         //
-        bool startWrite(Buffer buf, AsyncCallback callback, object state, out bool completed);
+        bool startWrite(Buffer buf, 
+#if SILVERLIGHT
+                        IceInternal.ThreadPool.AsyncCallback callback, 
+#else
+                        AsyncCallback callback, 
+#endif
+                        object state, out bool completed);
         void finishWrite(Buffer buf);
 
         string type();

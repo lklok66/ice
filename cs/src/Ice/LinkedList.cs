@@ -71,7 +71,7 @@ namespace IceUtilInternal
             }
             if(index < 0)
             {
-#if COMPACT
+#if COMPACT || SILVERLIGHT
                 throw new ArgumentOutOfRangeException("index", "index must not be less than zero");
 #else
                 throw new ArgumentOutOfRangeException("index", _count, "index must not be less than zero");

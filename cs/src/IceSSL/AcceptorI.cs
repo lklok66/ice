@@ -155,7 +155,7 @@ namespace IceSSL
 
             try
             {
-                _addr = IceInternal.Network.getAddressForServer(host, port, _instance.protocolSupport());
+                _addr = (IPEndPoint)IceInternal.Network.getAddressForServer(host, port, _instance.protocolSupport());
                 _fd = IceInternal.Network.createSocket(false, _addr.AddressFamily);
                 IceInternal.Network.setBlock(_fd, false);
                 IceInternal.Network.setTcpBufSize(_fd, _instance.communicator().getProperties(), _logger);

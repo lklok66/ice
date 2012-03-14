@@ -12,6 +12,8 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Threading;
 
+#if !SILVERLIGHT
+
 namespace Glacier2
 {
 
@@ -570,3 +572,4 @@ public abstract class Application : Ice.Application
 }
 
 }
+#endif

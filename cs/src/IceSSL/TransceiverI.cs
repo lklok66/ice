@@ -424,10 +424,10 @@ namespace IceSSL
         {
             Debug.Assert(_fd != null && _stream != null);
             IceSSL.NativeConnectionInfo info = new IceSSL.NativeConnectionInfo();
-            IPEndPoint localEndpoint = IceInternal.Network.getLocalAddress(_fd);
+            IPEndPoint localEndpoint = (IPEndPoint)IceInternal.Network.getLocalAddress(_fd);
             info.localAddress = localEndpoint.Address.ToString();
             info.localPort = localEndpoint.Port;
-            IPEndPoint remoteEndpoint = IceInternal.Network.getRemoteAddress(_fd);
+            IPEndPoint remoteEndpoint = (IPEndPoint)IceInternal.Network.getRemoteAddress(_fd);
             if(remoteEndpoint != null)
             {
                 info.remoteAddress = remoteEndpoint.Address.ToString();

@@ -255,7 +255,11 @@ namespace IceInternal
                 {
                     if(waitHandle_ == null)
                     {
+#if SILVERLIGHT
+                        waitHandle_ = new ManualResetEvent(false);
+#else
                         waitHandle_ = new EventWaitHandle(false, EventResetMode.ManualReset);
+#endif
                     }
                     if((state_ & Done) != 0)
                     {

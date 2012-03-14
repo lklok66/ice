@@ -29,7 +29,11 @@ namespace IceInternal
             {
                 try
                 {
+#if SILVERLIGHT
+                    Network.doFinishConnectAsync(_fd, _socketWriteEventArgs);
+#else
                     Network.doFinishConnectAsync(_fd, _writeResult);
+#endif
                     _writeResult = null;
                     _state = StateConnected;
                     _desc = Network.fdToString(_fd);
@@ -88,9 +92,9 @@ namespace IceInternal
 
         public bool write(Buffer buf)
         {
-#if COMPACT
+#if COMPACT || SILVERLIGHT
             //
-            // The Compact Framework does not support the use of synchronous socket
+            // The Silverlight & Compact .NET Frameworks does not support the use of synchronous socket
             // operations on a non-blocking socket. Returning false here forces the
             // caller to schedule an asynchronous operation.
             //
@@ -128,7 +132,7 @@ namespace IceInternal
                     {
                         ret = _fd.Send(buf.b.rawBytes(), buf.b.position(), packetSize, SocketFlags.None);
                     }
-                    catch(Win32Exception e)
+                    catch(SocketException e)
                     {
                         if(Network.wouldBlock(e))
                         {
@@ -173,9 +177,9 @@ namespace IceInternal
 
         public bool read(Buffer buf)
         {
-#if COMPACT
+#if COMPACT || SILVERLIGHT
             //
-            // The .NET Compact Framework does not support the use of synchronous socket
+            // The Silverlight & Compact .NET Frameworks does not support the use of synchronous socket
             // operations on a non-blocking socket.
             //
             return false;
@@ -211,7 +215,7 @@ namespace IceInternal
                             throw new Ice.ConnectionLostException();
                         }
                     }
-                    catch(Win32Exception e)
+                    catch(SocketException e)
                     {
                         if(Network.wouldBlock(e))
                         {
@@ -236,7 +240,7 @@ namespace IceInternal
                     remaining -= ret;
                     buf.b.position(position += ret);
                 }
-                catch(Win32Exception ex)
+                catch(SocketException ex)
                 {
                     //
                     // On Mono, calling shutdownReadWrite() followed by read() causes Socket.Receive() to
@@ -266,10 +270,17 @@ namespace IceInternal
 #endif
         }
 
-        public bool startRead(Buffer buf, AsyncCallback callback, object state)
+        public bool startRead(Buffer buf, 
+#if SILVERLIGHT
+                              IceInternal.ThreadPool.AsyncCallback callback,
+#else
+                              AsyncCallback callback, 
+#endif
+                              object state)
         {
             Debug.Assert(_fd != null && _readResult == null);
 
+#if !COMPACT && !SILVERLIGHT
             // COMPILERFIX: Workaround for Mac OS X broken poll(), see Mono bug #470120
             if(AssemblyUtil.osx_)
             {
@@ -278,6 +289,7 @@ namespace IceInternal
                     Network.setBlock(_fd, true);
                 }
             }
+#endif
 
             int packetSize = buf.b.remaining();
             if(_maxReceivePacketSize > 0 && packetSize > _maxReceivePacketSize)
@@ -287,10 +299,25 @@ namespace IceInternal
 
             try
             {
+#if SILVERLIGHT
+                if(_readResult == null)
+                {
+                    _readResult = new IceInternal.ThreadPool.IAsyncResult();
+                }
+                _socketReadEventArgs = new SocketAsyncEventArgs();
+                _socketReadEventArgs.RemoteEndPoint = _addr;
+                _socketReadEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(callback);
+                _socketReadEventArgs.UserToken = _readResult;
+                _readResult.AsyncState = state;
+                _readResult.EventArgs = _socketReadEventArgs;
+                _socketReadEventArgs.SetBuffer(buf.b.rawBytes(), buf.b.position(), packetSize);
+                _readResult.CompletedSynchronously = !_fd.ReceiveAsync(_socketReadEventArgs);
+#else
                 _readResult = _fd.BeginReceive(buf.b.rawBytes(), buf.b.position(), packetSize, SocketFlags.None, 
                                                callback, state);
+#endif
             }
-            catch(Win32Exception ex)
+            catch(SocketException ex)
             {
                 if(Network.connectionLost(ex))
                 {
@@ -299,6 +326,7 @@ namespace IceInternal
 
                 throw new Ice.SocketException(ex);
             }
+
 
             return _readResult.CompletedSynchronously;
         }
@@ -315,13 +343,23 @@ namespace IceInternal
 
             try
             {
+#if SILVERLIGHT
+                SocketAsyncEventArgs eventArgs = (SocketAsyncEventArgs)_readResult.EventArgs;
+                int ret = 0;
+                if(eventArgs.SocketError == SocketError.Success)
+                {
+                    ret = eventArgs.BytesTransferred;
+                }
+#else
                 int ret = _fd.EndReceive(_readResult);
+#endif
                 _readResult = null;
                 if(ret == 0)
                 {
                     throw new Ice.ConnectionLostException();
                 }
 
+#if !COMPACT && !SILVERLIGHT
                 // COMPILERFIX: Workaround for Mac OS X broken poll(), see Mono bug #470120
                 if(AssemblyUtil.osx_)
                 {
@@ -330,6 +368,7 @@ namespace IceInternal
                         Network.setBlock(_fd, false);
                     }
                 }
+#endif
                 Debug.Assert(ret > 0);
 
                 if(_traceLevels.network >= 3)
@@ -350,7 +389,7 @@ namespace IceInternal
 
                 buf.b.position(buf.b.position() + ret);
             }
-            catch(Win32Exception ex)
+            catch(SocketException ex)
             {
                 if(Network.connectionLost(ex))
                 {
@@ -365,10 +404,17 @@ namespace IceInternal
             }
         }
 
-        public bool startWrite(Buffer buf, AsyncCallback callback, object state, out bool completed)
+        public bool startWrite(Buffer buf, 
+#if SILVERLIGHT
+                               IceInternal.ThreadPool.AsyncCallback callback, 
+#else
+                               AsyncCallback callback, 
+#endif
+                               object state, out bool completed)
         {
             Debug.Assert(_fd != null && _writeResult == null);
 
+#if !COMPACT && !SILVERLIGHT
             // COMPILERFIX: Workaround for Mac OS X broken poll(), see Mono bug #470120
             if(AssemblyUtil.osx_)
             {
@@ -377,10 +423,16 @@ namespace IceInternal
                     Network.setBlock(_fd, true);
                 }
             }
+#endif
 
             if(_state < StateConnected)
             {
+#if SILVERLIGHT
+                _socketWriteEventArgs = new SocketAsyncEventArgs();
+                _writeResult = Network.doConnectAsync(_fd, _addr, callback, _socketWriteEventArgs, state);
+#else
                 _writeResult = Network.doConnectAsync(_fd, _addr, callback, state);
+#endif
                 completed = false;
                 return _writeResult.CompletedSynchronously;
             }
@@ -397,10 +449,19 @@ namespace IceInternal
 
             try
             {
+#if SILVERLIGHT
+                _socketWriteEventArgs.SetBuffer(buf.b.rawBytes(), buf.b.position(), packetSize);
+                _writeResult = new IceInternal.ThreadPool.IAsyncResult();
+                _socketWriteEventArgs.UserToken = _writeResult;
+                _writeResult.AsyncState = state;
+                _writeResult.EventArgs = _socketWriteEventArgs;
+                _writeResult.CompletedSynchronously = !_fd.SendAsync(_socketWriteEventArgs);
+#else
                 _writeResult = _fd.BeginSend(buf.b.rawBytes(), buf.b.position(), packetSize, SocketFlags.None, 
                                              callback, state);
+#endif
             }
-            catch(Win32Exception ex)
+            catch(SocketException ex)
             {
                 if(Network.connectionLost(ex))
                 {
@@ -415,7 +476,7 @@ namespace IceInternal
             }
             
             completed = packetSize == buf.b.remaining();
-            return _writeResult.CompletedSynchronously;
+	        return _writeResult.CompletedSynchronously;
         }
 
         public void finishWrite(Buffer buf)
@@ -439,7 +500,16 @@ namespace IceInternal
 
             try
             {
+#if SILVERLIGHT
+                SocketAsyncEventArgs eventArgs = (SocketAsyncEventArgs)_writeResult.EventArgs;
+                int ret = 0;
+                if(eventArgs.SocketError == SocketError.Success)
+                {
+                    ret = eventArgs.BytesTransferred;
+                }
+#else
                 int ret = _fd.EndSend(_writeResult);
+#endif
                 _writeResult = null;
                 if(ret == 0)
                 {
@@ -447,6 +517,7 @@ namespace IceInternal
                 }
                 Debug.Assert(ret > 0);
 
+#if !COMPACT && !SILVERLIGHT
                 // COMPILERFIX: Workaround for Mac OS X broken poll(), see Mono bug #470120
                 if(AssemblyUtil.osx_)
                 {
@@ -455,6 +526,7 @@ namespace IceInternal
                         Network.setBlock(_fd, false);
                     }
                 }
+#endif
 
                 if(_traceLevels.network >= 3)
                 {
@@ -474,7 +546,7 @@ namespace IceInternal
 
                 buf.b.position(buf.b.position() + ret);
             }
-            catch(Win32Exception ex)
+            catch(SocketException ex)
             {
                 if(Network.connectionLost(ex))
                 {
@@ -499,20 +571,12 @@ namespace IceInternal
         {
             Debug.Assert(_fd != null);
             Ice.TCPConnectionInfo info = new Ice.TCPConnectionInfo();
-            IPEndPoint localEndpoint = Network.getLocalAddress(_fd);
-            info.localAddress = localEndpoint.Address.ToString();
-            info.localPort = localEndpoint.Port;
-            IPEndPoint remoteEndpoint = Network.getRemoteAddress(_fd);
-            if(remoteEndpoint != null)
-            {
-                info.remoteAddress = remoteEndpoint.Address.ToString();
-                info.remotePort = remoteEndpoint.Port;
-            }
-            else
-            {
-                info.remoteAddress = "";
-                info.remotePort = -1;
-            }
+            EndPoint localEndpoint = Network.getLocalAddress(_fd);
+            info.localAddress = Network.endpointAddressToString(localEndpoint);
+            info.localPort = Network.endpointPort(localEndpoint);
+            EndPoint remoteEndpoint = Network.getRemoteAddress(_fd);
+            info.remoteAddress = Network.endpointAddressToString(remoteEndpoint);
+            info.remotePort = Network.endpointPort(remoteEndpoint);
             return info;
         }
 
@@ -532,10 +596,14 @@ namespace IceInternal
         //
         // Only for use by TcpConnector, TcpAcceptor
         //
-        internal TcpTransceiver(Instance instance, Socket fd, IPEndPoint addr, bool connected)
+        internal TcpTransceiver(Instance instance, Socket fd, EndPoint addr, bool connected)
         {
             _fd = fd;
-            _addr = addr;
+#if SILVERLIGHT
+            _addr = (DnsEndPoint)addr;
+#else
+            _addr = (IPEndPoint)addr;
+#endif
             _traceLevels = instance.traceLevels();
             _logger = instance.initializationData().logger;
             _stats = instance.initializationData().stats;
@@ -556,7 +624,11 @@ namespace IceInternal
         }
 
         private Socket _fd;
+#if SILVERLIGHT
+        private DnsEndPoint _addr;
+#else
         private IPEndPoint _addr;
+#endif
         private TraceLevels _traceLevels;
         private Ice.Logger _logger;
         private Ice.Stats _stats;
@@ -565,10 +637,18 @@ namespace IceInternal
         private int _maxSendPacketSize;
         private int _maxReceivePacketSize;
 
+#if !SILVERLIGHT
         private int _blocking = 0;
+#endif	
+#if SILVERLIGHT
+        private SocketAsyncEventArgs	_socketWriteEventArgs;
+        private SocketAsyncEventArgs	_socketReadEventArgs;
+        private IceInternal.ThreadPool.IAsyncResult _writeResult;
+        private IceInternal.ThreadPool.IAsyncResult _readResult;
+#else
         private IAsyncResult _writeResult;
         private IAsyncResult _readResult;
-
+#endif
         private const int StateNeedConnect = 0;
         private const int StateConnectPending = 1;
         private const int StateConnected = 2;

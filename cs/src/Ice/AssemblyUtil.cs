@@ -57,7 +57,7 @@ namespace IceInternal
 
             osx_ = false;
 
-#if COMPACT
+#if COMPACT || SILVERLIGHT
             //
             // Populate the _iceAssemblies list with the fully-qualified names
             // of the standard Ice assemblies. The fully-qualified name looks
@@ -82,7 +82,7 @@ namespace IceInternal
                 _iceAssemblies.Add("IceStorm," + suffix);
             }
 #else
-            if(platform_ == Platform.NonWindows)
+            if (platform_ == Platform.NonWindows)
             {
                 try
                 {
@@ -113,18 +113,18 @@ namespace IceInternal
 
         public static Type findType(Instance instance, string csharpId)
         {
-#if !COMPACT
+#if !COMPACT && !SILVERLIGHT
             loadAssemblies(); // Lazy initialization
 #endif
 
             lock(_mutex)
             {
-                Type t = (Type)_typeTable[csharpId];
-                if(t != null)
+                Type t;
+                if (_typeTable.ContainsKey(csharpId))
                 {
-                    return t;
+                    return _typeTable[csharpId];
                 }
-#if COMPACT
+#if COMPACT || SILVERLIGHT
                 string[] assemblies = instance.factoryAssemblies();
                 for(int i = 0; i < assemblies.Length; ++i)
                 {
@@ -151,7 +151,7 @@ namespace IceInternal
                     }
                 }
 #else
-                foreach(Assembly a in _loadedAssemblies.Values)
+                foreach (Assembly a in _loadedAssemblies.Values)
                 {
                     if((t = a.GetType(csharpId)) != null)
                     {
@@ -164,7 +164,7 @@ namespace IceInternal
             return null;
         }
 
-#if !COMPACT
+#if !COMPACT && !SILVERLIGHT
         public static Type[] findTypesWithPrefix(string prefix)
         {
             IceUtilInternal.LinkedList l = new IceUtilInternal.LinkedList();
@@ -216,7 +216,7 @@ namespace IceInternal
             return t.GetConstructor(constructor).Invoke(new object[]{});
         }
 
-#if !COMPACT
+#if !COMPACT && !SILVERLIGHT
         //
         // Make sure that all assemblies that are referenced by this process
         // are actually loaded. This is necessary so we can use reflection
@@ -251,7 +251,7 @@ namespace IceInternal
             AssemblyName[] names = a.GetReferencedAssemblies();
             foreach(AssemblyName name in names)
             {
-                if(!_loadedAssemblies.Contains(name.FullName))
+                if(!_loadedAssemblies.ContainsKey(name.FullName))
                 {
                     try
                     {
@@ -272,8 +272,8 @@ namespace IceInternal
 #else
         private static List<string> _iceAssemblies = new List<string>();
 #endif
-        private static Hashtable _typeTable = new Hashtable(); // <type name, Type> pairs.
-        private static Mutex _mutex = new Mutex();
+        private static Dictionary<string, Type> _typeTable = new Dictionary<string, Type>(); // <type name, Type> pairs.
+        private static Object _mutex = new Object();
 
         public readonly static Runtime runtime_; // Either DotNET or Mono
         //
