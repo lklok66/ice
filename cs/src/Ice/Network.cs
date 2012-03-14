@@ -29,6 +29,72 @@ namespace IceInternal
         public const int EnableIPv4 = 0;
         public const int EnableIPv6 = 1;
         public const int EnableBoth = 2;
+    
+#if COMPACT
+    public static SocketError socketErrorCode(SocketException ex)
+    {
+        return (SocketError)ex.ErrorCode;
+    }
+#else
+    public static SocketError socketErrorCode(SocketException ex)
+    {
+        return ex.SocketErrorCode;
+    }    
+#endif
+    
+#if COMPACT
+    //
+    // SocketError enumeration isn't available with Silverlight
+    //
+    public enum SocketError 
+    {
+        Interrupted = 10004,                    // A blocking Socket call was canceled.
+        //AccessDenied =10013,                  // An attempt was made to access a Socket in a way that is forbidden by its access permissions.
+        Fault = 10014,                          // An invalid pointer address was detected by the underlying socket provider.
+        InvalidArgument = 10022,                // An invalid argument was supplied to a Socket member.
+        TooManyOpenSockets = 10024,             // There are too many open sockets in the underlying socket provider.
+        WouldBlock = 10035,                     // An operation on a nonblocking socket cannot be completed immediately.
+        InProgress = 10036,                     // A blocking operation is in progress.
+        //AlreadyInProgress = 10037,            // The nonblocking Socket already has an operation in progress.
+        //NotSocket = 10038,                    // A Socket operation was attempted on a non-socket.
+        //DestinationAddressRequired = 10039,   // A required address was omitted from an operation on a Socket.
+        MessageSize = 10040,                    // The datagram is too long.
+        //ProtocolType = 10041,                 // The protocol type is incorrect for this Socket.
+        //ProtocolOption = 10042,               // An unknown, invalid, or unsupported option or level was used with a Socket.
+        //ProtocolNotSupported = 10043,         // The protocol is not implemented or has not been configured.
+        //SocketNotSupported = 10044,           // The support for the specified socket type does not exist in this address family.
+        //OperationNotSupported = 10045,        // The address family is not supported by the protocol family.
+        //ProtocolFamilyNotSupported = 10046,   // The protocol family is not implemented or has not been configured.
+        //AddressFamilyNotSupported = 10047,    // The address family specified is not supported. 
+        //AddressAlreadyInUse = 10048,          // Only one use of an address is normally permitted.
+        //AddressNotAvailable = 10049,          // The selected IP address is not valid in this context.
+        NetworkDown = 10050,                    // The network is not available.
+        NetworkUnreachable = 10051,             // No route to the remote host exists.
+        NetworkReset = 10052,                   // The application tried to set KeepAlive on a connection that has already timed out.
+        ConnectionAborted = 10053,              // The connection was aborted by the .NET Framework or the underlying socket provider.
+        ConnectionReset = 10054,                // The connection was reset by the remote peer.
+        NoBufferSpaceAvailable = 10055,         // No free buffer space is available for a Socket operation.
+        //IsConnected = 10056,                  // The Socket is already connected.
+        NotConnected = 10057,                   // The application tried to send or receive data, and the Socket is not connected.
+        Shutdown = 10058,                       // A request to send or receive data was disallowed because the Socket has already been closed.
+        TimedOut = 10060,                       // The connection attempt timed out, or the connected host has failed to respond.
+        ConnectionRefused = 10061,              // The remote host is actively refusing a connection.
+        //HostDown = 10064,                     // The operation failed because the remote host is down.
+        HostUnreachable = 10065,                // There is no network route to the specified host.
+        //ProcessLimit = 10067,                 // Too many processes are using the underlying socket provider.
+        //SystemNotReady = 10091,               // The network subsystem is unavailable.
+        //VersionNotSupported = 10092,          // The version of the underlying socket provider is out of range.
+        //NotInitialized = 10093,               // The underlying socket provider has not been initialized.
+        //Disconnecting = 10101,                // A graceful shutdown is in progress.
+        //TypeNotFound = 10109,                 // The specified class was not found.
+        //HostNotFound = 11001,                 // No such host is known. The name is not an official host name or alias.
+        TryAgain = 11002,                       // The name of the host could not be resolved. Try again later.
+        //NoRecovery = 11003,                   // The error is unrecoverable or the requested database cannot be located.
+        //NoData = 11004,                       // The requested name or IP address was not found on the name server.
+        //IOPending = 997,                      // The application has initiated an overlapped operation that cannot be completed immediately.
+        OperationAborted =995                   // The overlapped operation was aborted due to the closure of the Socket.
+    }
+#endif
 
         private static EndPoint getAddressImpl(string host, int port, int protocol, bool server)
         {
@@ -122,7 +188,7 @@ namespace IceInternal
             }
             catch(SocketException ex)
             {
-                if(ex.SocketErrorCode == SocketError.TryAgain && --retry >= 0)
+                if(socketErrorCode(ex) == SocketError.TryAgain && --retry >= 0)
                 {
                     goto repeatGetHostByName;
                 }
@@ -148,7 +214,7 @@ namespace IceInternal
 
         public static bool interrupted(SocketException ex)
         {
-            return ex.SocketErrorCode == SocketError.Interrupted;
+            return socketErrorCode(ex) == SocketError.Interrupted;
         }
 
         public static bool acceptInterrupted(SocketException ex)
@@ -157,7 +223,7 @@ namespace IceInternal
             {
                 return true;
             }
-            SocketError error = ex.SocketErrorCode;
+            SocketError error = socketErrorCode(ex);
             return error == SocketError.ConnectionAborted ||
                    error == SocketError.ConnectionReset ||
                    error == SocketError.TimedOut;
@@ -165,19 +231,19 @@ namespace IceInternal
 
         public static bool noBuffers(SocketException ex)
         {
-            SocketError error = ex.SocketErrorCode;
+            SocketError error = socketErrorCode(ex);
             return error == SocketError.NoBufferSpaceAvailable ||
                       error == SocketError.Fault;
         }
 
         public static bool wouldBlock(SocketException ex)
         {
-            return ex.SocketErrorCode == SocketError.WouldBlock;
+            return socketErrorCode(ex) == SocketError.WouldBlock;
         }
 
         public static bool connectFailed(SocketException ex)
         {
-            SocketError error = ex.SocketErrorCode;
+            SocketError error = socketErrorCode(ex);
             return error == SocketError.ConnectionRefused ||
                    error == SocketError.TimedOut ||
                    error == SocketError.NetworkUnreachable ||
@@ -190,14 +256,14 @@ namespace IceInternal
 
         public static bool connectInProgress(SocketException ex)
         {
-            SocketError error = ex.SocketErrorCode;
+            SocketError error = socketErrorCode(ex);
             return error == SocketError.WouldBlock ||
                    error == SocketError.InProgress;
         }
 
         public static bool connectionLost(SocketException ex)
         {
-            SocketError error = ex.SocketErrorCode;
+            SocketError error = socketErrorCode(ex);
             return error == SocketError.ConnectionReset ||
                    error == SocketError.Shutdown ||
                    error == SocketError.ConnectionAborted ||
@@ -240,26 +306,27 @@ namespace IceInternal
 
         public static bool connectionRefused(SocketException ex)
         {
-            return ex.SocketErrorCode == SocketError.ConnectionRefused;
+            return socketErrorCode(ex) == SocketError.ConnectionRefused;
         }
         
         public static bool notConnected(SocketException ex)
         {
             // BUGFIX: SocketError.InvalidArgument because shutdown() under MacOS returns EINVAL if the server side is gone.
             // BUGFIX: shutdown() under Vista might return SocketError.ConnectionReset
-            return ex.SocketErrorCode == SocketError.NotConnected ||
-                   ex.SocketErrorCode == SocketError.InvalidArgument ||
-                   ex.SocketErrorCode == SocketError.ConnectionReset;
+            SocketError error = socketErrorCode(ex);
+            return error == SocketError.NotConnected ||
+                   error == SocketError.InvalidArgument ||
+                   error == SocketError.ConnectionReset;
         }
 
         public static bool recvTruncated(SocketException ex)
         {
-            return ex.SocketErrorCode == SocketError.MessageSize;
+            return socketErrorCode(ex) == SocketError.MessageSize;
         }
 
         public static bool operationAborted(SocketException ex)
         {
-            return ex.SocketErrorCode == SocketError.OperationAborted;
+            return socketErrorCode(ex) == SocketError.OperationAborted;
         }
 
         public static bool timeout(System.IO.IOException ex)
@@ -275,7 +342,7 @@ namespace IceInternal
         {
             try
             {
-                return ex != null && ((SocketException)ex).SocketErrorCode == SocketError.TooManyOpenSockets;
+                return ex != null && socketErrorCode(((SocketException)ex)) == SocketError.TooManyOpenSockets;
             }
             catch(InvalidCastException)
             {
@@ -918,7 +985,7 @@ namespace IceInternal
                 }
                 catch(SocketException ex)
                 {
-                    if(ex.SocketErrorCode == SocketError.TryAgain && --retry >= 0)
+                    if(socketErrorCode(ex) == SocketError.TryAgain && --retry >= 0)
                     {
                         goto repeatGetHostByName;
                     }
@@ -1002,7 +1069,7 @@ namespace IceInternal
             }
             catch(SocketException ex)
             {
-                if(ex.SocketErrorCode == SocketError.TryAgain && --retry >= 0)
+                if(socketErrorCode(ex) == SocketError.TryAgain && --retry >= 0)
                 {
                     goto repeatGetHostByName;
                 }
