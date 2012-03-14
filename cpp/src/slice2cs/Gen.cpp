@@ -236,7 +236,7 @@ Slice::CsVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool stream)
     }
     _out << nl << "public override bool ice_isA(string s)";
     _out << sb;
-    _out << nl << "return _System.Array.BinarySearch(ids__, 0, " << ids.size() <<", s, IceUtilInternal.StringUtil.OrdinalStringComparer) >= 0;";
+    _out << nl << "return _System.Array.BinarySearch(ids__, s, IceUtilInternal.StringUtil.OrdinalStringComparer) >= 0;";
     _out << eb;
 
     _out << sp;
@@ -246,7 +246,7 @@ Slice::CsVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool stream)
     }
     _out << nl << "public override bool ice_isA(string s, Ice.Current current__)";
     _out << sb;
-    _out << nl << "return _System.Array.BinarySearch(ids__, 0, " << ids.size() <<", s, IceUtilInternal.StringUtil.OrdinalStringComparer) >= 0;";
+    _out << nl << "return _System.Array.BinarySearch(ids__, s, IceUtilInternal.StringUtil.OrdinalStringComparer) >= 0;";
     _out << eb;
 
     _out << sp;
@@ -645,7 +645,7 @@ Slice::CsVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool stream)
         _out << sp << nl << "public override Ice.DispatchStatus "
              << "dispatch__(IceInternal.Incoming inS__, Ice.Current current__)";
         _out << sb;
-        _out << nl << "int pos = _System.Array.BinarySearch(all__, 0, " << allOpNames.size() << ",  current__.operation, "
+        _out << nl << "int pos = _System.Array.BinarySearch(all__, current__.operation, "
              << "IceUtilInternal.StringUtil.OrdinalStringComparer);";
         _out << nl << "if(pos < 0)";
         _out << sb;
