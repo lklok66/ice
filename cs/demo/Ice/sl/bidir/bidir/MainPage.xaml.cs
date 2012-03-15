@@ -60,6 +60,11 @@ namespace bidir
                     }
                     catch (System.Exception ex)
                     {
+                        btnRun.Dispatcher.BeginInvoke(delegate()
+                        {
+                            btnRun.IsEnabled = true;
+                            btnStop.IsEnabled = false;
+                        });
                         appendText(ex.ToString());
                     }
                 });

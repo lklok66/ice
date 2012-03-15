@@ -21,3 +21,17 @@ incoming connections to the client.
 
 4) From visual studio start bidir.web project, using 
    "Debug > Start new instance" command.
+
+==========================================================================
+Running the demo with .NET Compact Framework bidir sever
+==========================================================================
+
+1) Start bidir server following instructions, 
+   in demo\compact\bidir\README.txt, before click the Start Server button
+   update the port field to 4502
+
+2) In bidir demo "Properties > Debug" select Out-of-browser application,
+   and in the combo box select bidir.
+
+3) Start the bidir client using "Debug > Start new instance" command, set
+   the host field to the ip address used by the emulator, and click Run.
