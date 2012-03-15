@@ -47,12 +47,10 @@ namespace IceInternal
                     output.print(val.ToString());
                     output.print("\"");
                 }
-//TODO
-#if !SILVERLIGHT
-                else if(val is CollectionBase)
+                else if(val is IList)
                 {
                     int n = 0;
-                    IEnumerator i = ((CollectionBase)val).GetEnumerator();
+                    IEnumerator i = ((IList)val).GetEnumerator();
                     while(i.MoveNext())
                     {
                         string elem = (name != null ? name : "");
@@ -60,7 +58,6 @@ namespace IceInternal
                         writeValue(elem, i.Current, objectTable, output);
                     }
                 }
-#endif
                 else if(val is IDictionary)
                 {
                     foreach(DictionaryEntry entry in (IDictionary)val)
