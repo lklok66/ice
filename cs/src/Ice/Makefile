@@ -50,7 +50,6 @@ SRCS		= Acceptor.cs \
 		  IncomingAsync.cs \
 		  Incoming.cs \
 		  Instance.cs \
-		  LinkedList.cs \
 		  LocalObject.cs \
 		  LocatorInfo.cs \
 		  LoggerI.cs \
@@ -109,8 +108,7 @@ SRCS		= Acceptor.cs \
 		  UdpTransceiver.cs \
 		  UserExceptionFactory.cs \
 		  Util.cs \
-		  ValueWriter.cs \
-		  XMLOutput.cs
+		  ValueWriter.cs
 
 SLICE_SRCS	= $(SDIR)/BuiltinSequences.ice \
 		  $(SDIR)/Communicator.ice \

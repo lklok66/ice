@@ -167,7 +167,7 @@ namespace IceInternal
 #if !COMPACT && !SILVERLIGHT
         public static Type[] findTypesWithPrefix(string prefix)
         {
-            IceUtilInternal.LinkedList l = new IceUtilInternal.LinkedList();
+            LinkedList<Type> l = new LinkedList<Type>();
 
             loadAssemblies(); // Lazy initialization
 
@@ -180,7 +180,7 @@ namespace IceInternal
                     {
                         if(t.AssemblyQualifiedName.IndexOf(prefix, StringComparison.Ordinal) == 0)
                         {
-                            l.Add(t);
+                            l.AddLast(t);
                         }
                     }
                 }
