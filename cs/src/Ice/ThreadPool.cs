@@ -16,6 +16,7 @@ namespace IceInternal
     using System.Threading;
 
     public delegate void ThreadPoolWorkItem();
+    public delegate void AsyncCallback(object state);
 
     internal struct ThreadPoolMessage
     {
@@ -673,92 +674,15 @@ namespace IceInternal
             }
         }
 
-#if SILVERLIGHT
-    public class IAsyncResult
-    {
-        private bool _completedSynchronously = false;
-        private object _asyncState = null;
-        private System.Net.Sockets.SocketAsyncEventArgs _eventArgs = null;
-
-        public bool CompletedSynchronously
-        {
-            get
-            {
-                return _completedSynchronously;
-            }
-            set
-            {
-                _completedSynchronously = value;
-            }
-        }
-
-        public object AsyncState
-        {
-            get
-            {
-                return _asyncState;
-            }
-            set
-            {
-                _asyncState = value;
-            }
-        }
-
-        public System.Net.Sockets.SocketAsyncEventArgs EventArgs
-        {
-            get
-            {
-                return  _eventArgs;
-            }
-            set
-            {
-                _eventArgs = value;
-            }
-        }
-    }
-
-    public delegate void AsyncCallback(object sender, System.Net.Sockets.SocketAsyncEventArgs eventArgs);
-
-    public void asyncReadCallback(object sender, System.Net.Sockets.SocketAsyncEventArgs eventArgs)
-    {
-        IAsyncResult result = (IAsyncResult)eventArgs.UserToken;
-        if(result.CompletedSynchronously)
-        {
-            return;
-        }
-        messageCallback(new ThreadPoolCurrent(this, (EventHandler)result.AsyncState, SocketOperation.Read));
-    }
-    
-    public void asyncWriteCallback(object sender, System.Net.Sockets.SocketAsyncEventArgs eventArgs)
-    {
-        IAsyncResult result = (IAsyncResult)eventArgs.UserToken;
-        if(result.CompletedSynchronously)
-        {
-            return;
-        }
-        messageCallback(new ThreadPoolCurrent(this, (EventHandler)result.AsyncState, SocketOperation.Write));
-    }
-#else
         public void asyncReadCallback(object state)
         {
-            IAsyncResult result = (IAsyncResult)state;
-            if(result.CompletedSynchronously)
-            {
-                return;
-            }
-            messageCallback(new ThreadPoolCurrent(this, (EventHandler)result.AsyncState, SocketOperation.Read));
+            messageCallback(new ThreadPoolCurrent(this, (EventHandler)state, SocketOperation.Read));
         }
         
         public void asyncWriteCallback(object state)
         {
-            IAsyncResult result = (IAsyncResult)state;
-            if(result.CompletedSynchronously)
-            {
-                return;
-            }
-            messageCallback(new ThreadPoolCurrent(this, (EventHandler)result.AsyncState, SocketOperation.Write));
+            messageCallback(new ThreadPoolCurrent(this, (EventHandler)state, SocketOperation.Write));
         }
-#endif
 
         public void messageCallback(ThreadPoolCurrent current)
         {

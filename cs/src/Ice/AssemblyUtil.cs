@@ -120,9 +120,9 @@ namespace IceInternal
             lock(_mutex)
             {
                 Type t;
-                if (_typeTable.ContainsKey(csharpId))
+                if (_typeTable.TryGetValue(csharpId, out t))
                 {
-                    return _typeTable[csharpId];
+                    return t;
                 }
 #if COMPACT || SILVERLIGHT
                 string[] assemblies = instance.factoryAssemblies();

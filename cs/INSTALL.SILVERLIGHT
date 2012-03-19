@@ -3,7 +3,7 @@ Build instructions
 
 Ice for Silverlight has been built and tested with:
 
-- Microsoft Visual Studio 2010 SP1 and .NET Framework Version 5.0
+- Microsoft Visual Studio 2010 SP1 and Silverlight 5.0
 
 
 Unpack the archive. The .NET sources will be contained in the

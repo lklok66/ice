@@ -172,7 +172,7 @@ namespace Ice
                 Dictionary<string, string> ctx = null;
                 lock(this)
                 {
-                    ctx = _context.Count == 0 ? prxContext :combine(prxContext); 
+                    ctx = _context.Count == 0 ? prxContext : combine(prxContext); 
                 }
                 ContextHelper.write(os, ctx);
             }
@@ -250,18 +250,12 @@ namespace Ice
             }
 
             Dictionary<string, string> threadContext = null;
-            Thread currentThread = Thread.CurrentThread;
             lock(this)
             {
-                if(_map.ContainsKey(currentThread))
+                if(!_map.TryGetValue(Thread.CurrentThread, out threadContext))
                 {
-                    threadContext = (Dictionary<string, string>)_map[currentThread];
+                    return false;
                 }
-            }
-
-            if(threadContext == null)
-            {
-                return false;
             }
 
             return threadContext.ContainsKey(key);
@@ -275,19 +269,14 @@ namespace Ice
             }
 
             Dictionary<string, string> threadContext = null;
-            Thread currentThread = Thread.CurrentThread;
             lock(this)
             {
-                if(_map.ContainsKey(currentThread))
+                if(!_map.TryGetValue(Thread.CurrentThread, out threadContext))
                 {
-                    threadContext = (Dictionary<string, string>)_map[currentThread];
+                    return "";
                 }
             }
 
-            if(threadContext == null)
-            {
-                return "";
-            }
             string val = threadContext[key];
             if(val == null)
             {
@@ -308,27 +297,17 @@ namespace Ice
             }
 
             Dictionary<string, string> threadContext = null;
-            Thread currentThread = Thread.CurrentThread;
             lock(this)
             {
-                if(_map.ContainsKey(currentThread))
+                if(!_map.TryGetValue(Thread.CurrentThread, out threadContext))
                 {
-                    threadContext = (Dictionary<string, string>)_map[currentThread];
+                    threadContext = new Dictionary<string, string>();
+                    _map.Add(Thread.CurrentThread, threadContext);
                 }
             }
            
-            if(threadContext == null)
-            {
-                threadContext = new Dictionary<string, string>();
-                lock(this)
-                {
-                    _map.Add(currentThread, threadContext);
-                }
-            }
-            
             string oldVal;
-            threadContext.TryGetValue(key, out oldVal);
-            if(oldVal == null)
+            if(!threadContext.TryGetValue(key, out oldVal))
             {
                 oldVal = "";
             }
@@ -345,23 +324,17 @@ namespace Ice
             }
 
             Dictionary<string, string> threadContext = null;
-            Thread currentThread = Thread.CurrentThread;
             lock(this)
             {
-                if(_map.ContainsKey(currentThread))
+                if(!_map.TryGetValue(Thread.CurrentThread, out threadContext))
                 {
-                    threadContext = (Dictionary<string, string>)_map[currentThread];
+                    return "";
                 }
             }
 
-            if(threadContext == null)
-            {
-                return "";
-            }
 
-            string val = threadContext[key];
-
-            if(val == null)
+            string val = null;
+            if(!threadContext.TryGetValue(key, out val))
             {
                 val = "";
             }
@@ -372,17 +345,12 @@ namespace Ice
             return val;
         }
 
-        public override void write(Dictionary<string, string> prxContext,
-                                   IceInternal.BasicStream os)
+        public override void write(Dictionary<string, string> prxContext, IceInternal.BasicStream os)
         {
             Dictionary<string, string> threadContext = null;
-            Thread currentThread = Thread.CurrentThread;
             lock(this)
             {
-                if(_map.ContainsKey(currentThread))
-                {
-                    threadContext = (Dictionary<string, string>)_map[currentThread];
-                }
+                _map.TryGetValue(Thread.CurrentThread, out threadContext);
             }
             
             if(threadContext == null || threadContext.Count == 0)
@@ -414,12 +382,11 @@ namespace Ice
         internal override Dictionary<string, string> combine(Dictionary<string, string> prxContext)
         {
             Dictionary<string, string> threadContext = null;
-            Thread currentThread = Thread.CurrentThread;
             lock(this)
             {
-                if(_map.ContainsKey(currentThread))
+                if(!_map.TryGetValue(Thread.CurrentThread, out threadContext))
                 {
-                    threadContext = (Dictionary<string, string>)_map[currentThread];
+                    return new Dictionary<string, string>(prxContext);
                 }
             }
 

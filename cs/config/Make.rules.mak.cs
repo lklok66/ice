@@ -37,32 +37,27 @@ prefix			= C:\Ice-$(VERSION)
 # - ICE_CONFIG environment variable
 # - Dynamic loading of Slice checksums
 # - Ice.TCP.SndSize and Ice.TCP.RcvSize
-# - ICE_CONFIG Enviroment variable
 #
 
 #COMPACT			= yes
 
 #
-# Enable support for the .NET Silverlight Framework.This setting disables the
-# following features:
+# Enable support for Silverlight.This setting disables the following
+# features:
 #
 # - Protocol compression
-# - Signal processing in the Ice.Application class
+# - Ice.Application and Glacier2.Application classes
 # - Dynamic loading of Slice-generated class and exception factories
 # - IceSSL
 # - ICE_CONFIG environment variable
 # - Dynamic loading of Slice checksums
-# - Ice.TCP.SndSize and Ice.TCP.RcvSize
 # - Thread priorities
 # - Ice.StdOut and Ice.StdErr
 # - Ice.PrintProcessId
 # - Ice.LogFile
 # - Load properties for Windows registry
-# - ICE_CONFIG Enviroment variable
 #
 #SILVERLIGHT		= yes
-
-#SILVERLIGHT_VERSION	= 5.0.61118.0
 
 #
 # Define DEBUG as yes if you want to build with debug information and

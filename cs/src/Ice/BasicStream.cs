@@ -597,16 +597,15 @@ namespace IceInternal
                 throw new Ice.MarshalException("type ids require an encapsulation");
             }
 
-            object o;
-            if(_writeEncapsStack.typeIdMap.ContainsKey(id))
+            int index;
+            if(_writeEncapsStack.typeIdMap.TryGetValue(id, out index))
             {
-                o = _writeEncapsStack.typeIdMap[id];
                 writeBool(true);
-                writeSize((int)o);
+                writeSize(index);
             }
             else
             {
-                int index = ++_writeEncapsStack.typeIdIndex;
+                index = ++_writeEncapsStack.typeIdIndex;
                 _writeEncapsStack.typeIdMap[id] = index;
                 writeBool(false);
                 writeString(id);
@@ -626,11 +625,7 @@ namespace IceInternal
             if(isIndex)
             {
                 index = readSize();
-                if(_readEncapsStack.typeIdMap.ContainsKey(index))
-                {
-                    id = (string)_readEncapsStack.typeIdMap[index];
-                }
-                else
+                if(!_readEncapsStack.typeIdMap.TryGetValue(index, out id))
                 {
                     throw new Ice.UnmarshalOutOfBoundsException("Missing type ID");
                 }
@@ -2063,21 +2058,13 @@ namespace IceInternal
 		// Look for this instance in the to-be-marshaled map.
 		//
 		int p;
-		try
-		{
-		    p = _writeEncapsStack.toBeMarshaledMap[v];
-		}
-		catch(KeyNotFoundException)
-		{
+                if(!_writeEncapsStack.toBeMarshaledMap.TryGetValue(v, out p))
+                {
 		    //
 		    // Didn't find it, try the marshaled map next.
 		    //
-		    try
-		    {
-			p = _writeEncapsStack.marshaledMap[v];
-		    }
-		    catch(KeyNotFoundException)
-		    {
+                    if(!_writeEncapsStack.marshaledMap.TryGetValue(v, out p))
+                    {
 			//
 			// We haven't seen this instance previously,
 			// create a new index, and insert it into the
@@ -2087,7 +2074,7 @@ namespace IceInternal
 			_writeEncapsStack.toBeMarshaledMap[v] = p;
 		    }
 		}
-		writeInt(-((int)p));
+		writeInt(-p);
             }
             else
             {
@@ -2133,11 +2120,7 @@ namespace IceInternal
                 {
                     int i = -index;
                     List<IceInternal.IPatcher> patchlist;
-                    if(_readEncapsStack.patchMap.ContainsKey(i))
-                    {
-                        patchlist =_readEncapsStack.patchMap[i];
-                    }
-                    else
+                    if(!_readEncapsStack.patchMap.TryGetValue(i, out patchlist))
                     {
                         //
                         // We have no outstanding instances to be patched
@@ -2467,44 +2450,36 @@ namespace IceInternal
             // must be null.) Patch any pointers in the patch map with
             // the new address.
             //
-            Debug.Assert(   ((object)instanceIndex != null && (object)patchIndex == null)
-                         || ((object)instanceIndex == null && (object)patchIndex != null));
-
+            Debug.Assert(((object)instanceIndex != null && (object)patchIndex == null) ||
+                         ((object)instanceIndex == null && (object)patchIndex != null));
+            
             List<IceInternal.IPatcher> patchlist;
-        Ice.Object v;
-        if((object)instanceIndex != null)
-        {
-            //
-            // We have just unmarshaled an instance -- check if
-            // something needs patching for that instance.
-            //
-            if(_readEncapsStack.patchMap.ContainsKey((int)instanceIndex))
+            Ice.Object v;
+            if((object)instanceIndex != null)
             {
-                patchlist = _readEncapsStack.patchMap[(int)instanceIndex];
+                //
+                // We have just unmarshaled an instance -- check if
+                // something needs patching for that instance.
+                //
+                if(!_readEncapsStack.patchMap.TryGetValue((int)instanceIndex, out patchlist))
+                {
+                    return; // We don't have anything to patch for the instance just unmarshaled.
+                }
                 v = _readEncapsStack.unmarshaledMap[(int)instanceIndex];
                 patchIndex = instanceIndex;
             }
             else
             {
-                return; // We don't have anything to patch for the instance just unmarshaled.
-            }
-        }
-        else
-        {
-            //
-            // We have just unmarshaled an index -- check if we
-            // have unmarshaled the instance for that index yet.
-            //
-            if( _readEncapsStack.unmarshaledMap.ContainsKey((int)patchIndex))
-            {
-                v = _readEncapsStack.unmarshaledMap[(int)patchIndex];
+                //
+                // We have just unmarshaled an index -- check if we
+                // have unmarshaled the instance for that index yet.
+                //
+                if(!_readEncapsStack.unmarshaledMap.TryGetValue((int)patchIndex, out v))
+                {
+                    return; // We haven't unmarshaled the instance for this index yet.
+                }
                 patchlist = _readEncapsStack.patchMap[(int)patchIndex];
             }
-            else
-            {
-                return; // We haven't unmarshaled the instance for this index yet.
-            }
-        }
             Debug.Assert(patchlist != null && patchlist.Count > 0);
             Debug.Assert(v != null);
 
@@ -2858,11 +2833,7 @@ namespace IceInternal
 
             lock(_exceptionFactories)
             {
-                if(_exceptionFactories.ContainsKey(id))
-                {
-                    factory = _exceptionFactories[id];
-                }
-                else
+                if(!_exceptionFactories.TryGetValue(id, out factory))
                 {
                     try
                     {

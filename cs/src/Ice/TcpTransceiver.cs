@@ -30,11 +30,22 @@ namespace IceInternal
                 try
                 {
 #if SILVERLIGHT
-                    Network.doFinishConnectAsync(_fd, _socketWriteEventArgs);
+                    if(_writeEventArgs.SocketError != SocketError.Success)
+                    {
+                        SocketException ex = new SocketException((int)_writeEventArgs.SocketError);
+                        if(Network.connectionRefused(ex))
+                        {
+                            throw new Ice.ConnectionRefusedException(ex);
+                        }
+                        else
+                        {
+                            throw new Ice.ConnectFailedException(ex);
+                        }
+                    }
 #else
                     Network.doFinishConnectAsync(_fd, _writeResult);
-#endif
                     _writeResult = null;
+#endif
                     _state = StateConnected;
                     _desc = Network.fdToString(_fd);
                 }
@@ -270,15 +281,13 @@ namespace IceInternal
 #endif
         }
 
-        public bool startRead(Buffer buf, 
-#if SILVERLIGHT
-                              IceInternal.ThreadPool.AsyncCallback callback,
-#else
-                              AsyncCallback callback, 
-#endif
-                              object state)
+        public bool startRead(Buffer buf, AsyncCallback callback, object state)
         {
+#if SILVERLIGHT
+            Debug.Assert(_fd != null && _readEventArgs != null);
+#else
             Debug.Assert(_fd != null && _readResult == null);
+#endif
 
 #if !COMPACT && !SILVERLIGHT
             // COMPILERFIX: Workaround for Mac OS X broken poll(), see Mono bug #470120
@@ -299,22 +308,15 @@ namespace IceInternal
 
             try
             {
+                _readCallback = callback;
 #if SILVERLIGHT
-                if(_readResult == null)
-                {
-                    _readResult = new IceInternal.ThreadPool.IAsyncResult();
-                }
-                _socketReadEventArgs = new SocketAsyncEventArgs();
-                _socketReadEventArgs.RemoteEndPoint = _addr;
-                _socketReadEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(callback);
-                _socketReadEventArgs.UserToken = _readResult;
-                _readResult.AsyncState = state;
-                _readResult.EventArgs = _socketReadEventArgs;
-                _socketReadEventArgs.SetBuffer(buf.b.rawBytes(), buf.b.position(), packetSize);
-                _readResult.CompletedSynchronously = !_fd.ReceiveAsync(_socketReadEventArgs);
+                _readEventArgs.UserToken = state;
+                _readEventArgs.SetBuffer(buf.b.rawBytes(), buf.b.position(), packetSize);
+                return !_fd.ReceiveAsync(_readEventArgs);
 #else
-                _readResult = _fd.BeginReceive(buf.b.rawBytes(), buf.b.position(), packetSize, SocketFlags.None, 
-                                               callback, state);
+                _readResult = _fd.BeginReceive(buf.b.rawBytes(), buf.b.position(), packetSize, SocketFlags.None,
+                                               readCompleted, state);
+                return _readResult.CompletedSynchronously;
 #endif
             }
             catch(SocketException ex)
@@ -326,34 +328,37 @@ namespace IceInternal
 
                 throw new Ice.SocketException(ex);
             }
-
-
-            return _readResult.CompletedSynchronously;
         }
 
         public void finishRead(Buffer buf)
         {
             if(_fd == null) // Transceiver was closed
+#if SILVERLIGHT
+            {
+                _readEventArgs = null;
+                return;
+            }
+            Debug.Assert(_fd != null && _readEventArgs != null);
+#else
             {
                 _readResult = null;
                 return;
             }
-
             Debug.Assert(_fd != null && _readResult != null);
+#endif
 
             try
             {
 #if SILVERLIGHT
-                SocketAsyncEventArgs eventArgs = (SocketAsyncEventArgs)_readResult.EventArgs;
-                int ret = 0;
-                if(eventArgs.SocketError == SocketError.Success)
+                if(_readEventArgs.SocketError != SocketError.Success)
                 {
-                    ret = eventArgs.BytesTransferred;
+                    throw new SocketException((int)_readEventArgs.SocketError);
                 }
+                int ret = _readEventArgs.BytesTransferred;
 #else
                 int ret = _fd.EndReceive(_readResult);
-#endif
                 _readResult = null;
+#endif
                 if(ret == 0)
                 {
                     throw new Ice.ConnectionLostException();
@@ -404,15 +409,13 @@ namespace IceInternal
             }
         }
 
-        public bool startWrite(Buffer buf, 
-#if SILVERLIGHT
-                               IceInternal.ThreadPool.AsyncCallback callback, 
-#else
-                               AsyncCallback callback, 
-#endif
-                               object state, out bool completed)
+        public bool startWrite(Buffer buf, AsyncCallback callback, object state, out bool completed)
         {
+#if SILVERLIGHT
+            Debug.Assert(_fd != null && _writeEventArgs != null);
+#else
             Debug.Assert(_fd != null && _writeResult == null);
+#endif
 
 #if !COMPACT && !SILVERLIGHT
             // COMPILERFIX: Workaround for Mac OS X broken poll(), see Mono bug #470120
@@ -427,14 +430,15 @@ namespace IceInternal
 
             if(_state < StateConnected)
             {
+                completed = false;
+                _writeCallback = callback;
 #if SILVERLIGHT
-                _socketWriteEventArgs = new SocketAsyncEventArgs();
-                _writeResult = Network.doConnectAsync(_fd, _addr, callback, _socketWriteEventArgs, state);
+                _writeEventArgs.UserToken = state;
+                return !_fd.ConnectAsync(_writeEventArgs);
 #else
                 _writeResult = Network.doConnectAsync(_fd, _addr, callback, state);
-#endif
-                completed = false;
                 return _writeResult.CompletedSynchronously;
+#endif
             }
 
             //
@@ -449,17 +453,18 @@ namespace IceInternal
 
             try
             {
+                _writeCallback = callback;
 #if SILVERLIGHT
-                _socketWriteEventArgs.SetBuffer(buf.b.rawBytes(), buf.b.position(), packetSize);
-                _writeResult = new IceInternal.ThreadPool.IAsyncResult();
-                _socketWriteEventArgs.UserToken = _writeResult;
-                _writeResult.AsyncState = state;
-                _writeResult.EventArgs = _socketWriteEventArgs;
-                _writeResult.CompletedSynchronously = !_fd.SendAsync(_socketWriteEventArgs);
+                _writeEventArgs.UserToken = state;
+                _writeEventArgs.SetBuffer(buf.b.rawBytes(), buf.b.position(), packetSize);
+                bool completedSynchronously = !_fd.SendAsync(_writeEventArgs);
 #else
                 _writeResult = _fd.BeginSend(buf.b.rawBytes(), buf.b.position(), packetSize, SocketFlags.None, 
-                                             callback, state);
+                                             writeCompleted, state);
+                bool completedSynchronously = _writeResult.CompletedSynchronously;
 #endif
+                completed = packetSize == buf.b.remaining();
+                return completedSynchronously;
             }
             catch(SocketException ex)
             {
@@ -474,9 +479,6 @@ namespace IceInternal
             {
                 throw new Ice.ConnectionLostException(ex);
             }
-            
-            completed = packetSize == buf.b.remaining();
-	        return _writeResult.CompletedSynchronously;
         }
 
         public void finishWrite(Buffer buf)
@@ -487,11 +489,19 @@ namespace IceInternal
                 {
                     buf.b.position(buf.size()); // Assume all the data was sent for at-most-once semantics.
                 }
+#if SILVERLIGHT
+                _writeEventArgs = null;
+#else
                 _writeResult = null;
+#endif
                 return;
             }
 
+#if SILVERLIGHT
+            Debug.Assert(_fd != null && _writeEventArgs != null);
+#else
             Debug.Assert(_fd != null && _writeResult != null);
+#endif
 
             if(_state < StateConnected)
             {
@@ -501,16 +511,15 @@ namespace IceInternal
             try
             {
 #if SILVERLIGHT
-                SocketAsyncEventArgs eventArgs = (SocketAsyncEventArgs)_writeResult.EventArgs;
-                int ret = 0;
-                if(eventArgs.SocketError == SocketError.Success)
+                if(_writeEventArgs.SocketError != SocketError.Success)
                 {
-                    ret = eventArgs.BytesTransferred;
+                    throw new SocketException((int)_writeEventArgs.SocketError);
                 }
+                int ret = _writeEventArgs.BytesTransferred;
 #else
                 int ret = _fd.EndSend(_writeResult);
-#endif
                 _writeResult = null;
+#endif
                 if(ret == 0)
                 {
                     throw new Ice.ConnectionLostException();
@@ -599,11 +608,18 @@ namespace IceInternal
         internal TcpTransceiver(Instance instance, Socket fd, EndPoint addr, bool connected)
         {
             _fd = fd;
+            _addr = addr;
+
 #if SILVERLIGHT
-            _addr = (DnsEndPoint)addr;
-#else
-            _addr = (IPEndPoint)addr;
+            _readEventArgs = new SocketAsyncEventArgs();
+            _readEventArgs.RemoteEndPoint = _addr;
+            _readEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(ioCompleted);
+
+            _writeEventArgs = new SocketAsyncEventArgs();
+            _writeEventArgs.RemoteEndPoint = _addr;
+            _writeEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(ioCompleted);
 #endif
+
             _traceLevels = instance.traceLevels();
             _logger = instance.initializationData().logger;
             _stats = instance.initializationData().stats;
@@ -623,12 +639,42 @@ namespace IceInternal
             }
         }
 
-        private Socket _fd;
 #if SILVERLIGHT
-        private DnsEndPoint _addr;
+        internal void ioCompleted(object sender, SocketAsyncEventArgs e)
+        {
+            switch (e.LastOperation)
+            {
+            case SocketAsyncOperation.Receive:
+                _readCallback(e.UserToken);
+                break;
+            case SocketAsyncOperation.Send:
+            case SocketAsyncOperation.Connect:
+                _writeCallback(e.UserToken);
+                break;
+            default:
+                throw new ArgumentException("The last operation completed on the socket was not a receive or send");
+            }
+        }
 #else
-        private IPEndPoint _addr;
+        internal void readCompleted(IAsyncResult result)
+        {
+            if(!result.CompletedSynchronously)
+            {
+                _readCallback(result.AsyncState);
+            }
+        }
+
+        internal void writeCompleted(IAsyncResult result)
+        {
+            if(!result.CompletedSynchronously)
+            {
+                _writeCallback(result.AsyncState);
+            }
+        }
 #endif
+
+        private Socket _fd;
+        private EndPoint _addr;
         private TraceLevels _traceLevels;
         private Ice.Logger _logger;
         private Ice.Stats _stats;
@@ -637,18 +683,21 @@ namespace IceInternal
         private int _maxSendPacketSize;
         private int _maxReceivePacketSize;
 
-#if !SILVERLIGHT
+#if !COMPACT && !SILVERLIGHT
         private int _blocking = 0;
 #endif	
+
 #if SILVERLIGHT
-        private SocketAsyncEventArgs	_socketWriteEventArgs;
-        private SocketAsyncEventArgs	_socketReadEventArgs;
-        private IceInternal.ThreadPool.IAsyncResult _writeResult;
-        private IceInternal.ThreadPool.IAsyncResult _readResult;
+        private SocketAsyncEventArgs _writeEventArgs;
+        private SocketAsyncEventArgs _readEventArgs;
 #else
         private IAsyncResult _writeResult;
         private IAsyncResult _readResult;
 #endif
+
+        AsyncCallback _writeCallback;
+        AsyncCallback _readCallback;
+
         private const int StateNeedConnect = 0;
         private const int StateConnectPending = 1;
         private const int StateConnected = 2;

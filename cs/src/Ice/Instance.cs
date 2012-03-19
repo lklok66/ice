@@ -703,7 +703,6 @@ namespace IceInternal
                  char[] separators = { ' ', '\t', '\n', '\r' };
                 _factoryAssemblies = _initData.properties.getProperty("Ice.FactoryAssemblies").Split(separators);
 #endif
-
                 {
                     const int defaultMessageSizeMax = 1024;
                     int num = 

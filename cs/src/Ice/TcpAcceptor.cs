@@ -59,7 +59,13 @@ namespace IceInternal
         {
             try
             {
-                _result = _fd.BeginAccept(callback, state);
+                _result = _fd.BeginAccept(delegate(IAsyncResult result)
+                                          {
+                                              if(!result.CompletedSynchronously)
+                                              {
+                                                  callback(result.AsyncState);
+                                              }
+                                          }, state);
             }
             catch(SocketException ex)
             {

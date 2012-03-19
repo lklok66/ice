@@ -412,7 +412,7 @@ namespace IceInternal
         public override Acceptor acceptor(ref EndpointI endpoint, string adapterName)
         {
 #if SILVERLIGHT
-            return null;
+            throw new Ice.FeatureNotSupportedException("server endpoint not supported for `" + ToString() + "'");
 #else
             TcpAcceptor p = new TcpAcceptor(_instance, _host, _port);
             endpoint = new TcpEndpointI(_instance, _host, p.effectivePort(), _timeout, _connectionId, _compress);

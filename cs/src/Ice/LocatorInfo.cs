@@ -866,11 +866,7 @@ namespace IceInternal
             lock(this)
             {
                 LocatorInfo info = null;
-                if(_table.ContainsKey(locator))
-                {
-                    info = _table[locator];
-                }
-                else
+                if(!_table.TryGetValue(locator, out info))
                 {
                     //
                     // Rely on locator identity for the adapter table. We want to
@@ -878,11 +874,7 @@ namespace IceInternal
                     // proxy).
                     //
                     LocatorTable table = null;
-                    if(_locatorTables.ContainsKey(locator.ice_getIdentity()))
-                    {
-                        table = _locatorTables[locator.ice_getIdentity()];
-                    }
-                    else
+                    if(!_locatorTables.TryGetValue(locator.ice_getIdentity(), out table))
                     {
                         table = new LocatorTable();
                         _locatorTables[locator.ice_getIdentity()] = table;
@@ -929,11 +921,10 @@ namespace IceInternal
             lock(this)
             {
                 EndpointTableEntry entry = null;
-                if(_adapterEndpointsTable.ContainsKey(adapter))
+                if(_adapterEndpointsTable.TryGetValue(adapter, out entry))
                 {
-                    entry = _adapterEndpointsTable[adapter];
                     cached = checkTTL(entry.time, ttl);
-                            return entry.endpoints;
+                    return entry.endpoints;
 
                 }
                 cached = false;
@@ -955,12 +946,12 @@ namespace IceInternal
             lock(this)
             {
                 EndpointTableEntry entry = null;
-                if(_adapterEndpointsTable.ContainsKey(adapter))
+                if(_adapterEndpointsTable.TryGetValue(adapter, out entry))
                 {
-                    entry = _adapterEndpointsTable[adapter];
-                            _adapterEndpointsTable.Remove(adapter);
+                    _adapterEndpointsTable.Remove(adapter);
+                    return entry.endpoints;
                 }
-                return entry != null ? entry.endpoints : null;
+                return null;
             }
         }
         
@@ -975,9 +966,8 @@ namespace IceInternal
             lock(this)
             {
                 ReferenceTableEntry entry = null;
-                if(_objectTable.ContainsKey(id))
+                if(_objectTable.TryGetValue(id, out entry))
                 {
-                    entry = _objectTable[id];
                     cached = checkTTL(entry.time, ttl);
                     return entry.reference;
                 }
@@ -999,12 +989,12 @@ namespace IceInternal
             lock(this)
             {
                 ReferenceTableEntry entry = null;
-                if(_objectTable.ContainsKey(id))
+                if(_objectTable.TryGetValue(id, out entry))
                 {
-                    entry = _objectTable[id];
                     _objectTable.Remove(id);
+                    return entry.reference;
                 }
-                return entry != null ? entry.reference : null;
+                return null;
             }
         }
         

@@ -98,9 +98,9 @@ namespace IceInternal
 
         private static EndPoint getAddressImpl(string host, int port, int protocol, bool server)
         {
-#if SILVERLIGHT
             if(host.Length == 0)
             {
+#if SILVERLIGHT
                 if(server)
                 {
                     if(protocol != EnableIPv4)
@@ -123,10 +123,7 @@ namespace IceInternal
                         return new DnsEndPoint(IPAddress.Loopback.ToString(), port);
                     }
                 }
-            }
 #else
-            if(host.Length == 0)
-            {
                 if(server)
                 {
                     if(protocol != EnableIPv4)
@@ -149,15 +146,15 @@ namespace IceInternal
                         return new IPEndPoint(IPAddress.Loopback, port);
                     }
                 }
-            }
 #endif
+            }
+
 #if SILVERLIGHT
-    return new DnsEndPoint(host, port);
+            return new DnsEndPoint(host, port);
 #else
+            int retry = 5;
 
-    int retry = 5;
-
-        repeatGetHostByName:
+            repeatGetHostByName:
             try
             {
                 try
@@ -350,18 +347,12 @@ namespace IceInternal
             }
         }
 
-        public static bool isMulticast(EndPoint endpoint)
+        public static bool isMulticast(IPEndPoint addr)
         {
-#if SILVERLIGHT
-            DnsEndPoint addr = (DnsEndPoint)endpoint;
-            string ip = ((DnsEndPoint)addr).Host.ToUpperInvariant();
+#if COMPACT
+            string ip = addr.Address.ToString().ToUpper();
 #else
-            IPEndPoint addr = (IPEndPoint)endpoint;
-#  if COMPACT
-            string ip = ((IPEndPoint)addr).Address.ToString().ToUpper();
-#  else
-            string ip = ((IPEndPoint)addr).Address.ToString().ToUpperInvariant();
-#  endif
+            string ip = addr.Address.ToString().ToUpperInvariant();
 #endif
             if(addr.AddressFamily == AddressFamily.InterNetwork)
             {
@@ -705,11 +696,8 @@ namespace IceInternal
         }
 #endif
 
-#if SILVERLIGHT
-        public static bool doConnect(Socket fd, EndPoint addr, SocketAsyncEventArgs args)
-#else
+#if !SILVERLIGHT
         public static bool doConnect(Socket fd, EndPoint addr)
-#endif
         {
         repeatConnect:
             try
@@ -720,13 +708,6 @@ namespace IceInternal
                 // connected non-blocking, the LocalEndPoint and RemoteEndPoint
                 // properties are null. The call to Bind() fixes this.
                 //
-#if SILVERLIGHT
-                args.RemoteEndPoint = addr;
-                if(!fd.ConnectAsync(args))
-                {
-                    return false;
-                }
-#else
                 IPAddress any = fd.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any;
                 fd.Bind(new IPEndPoint(any, 0));
                 IAsyncResult result = fd.BeginConnect(addr, null, null);
@@ -735,7 +716,6 @@ namespace IceInternal
                     return false;
                 }
                 fd.EndConnect(result);
-#endif
             }
             catch(SocketException ex)
             {
@@ -755,7 +735,7 @@ namespace IceInternal
                     throw new Ice.ConnectFailedException(ex);
                 }
             }
-#if !SILVERLIGHT
+
             //
             // On Windows, we need to set the socket's blocking status again
             // after the asynchronous connect. Seems like a bug in .NET.
@@ -774,17 +754,10 @@ namespace IceInternal
                     throw new Ice.ConnectionRefusedException();
                 }
             }
-#endif
             return true;
         }
 
-#if SILVERLIGHT
-        public static IceInternal.ThreadPool.IAsyncResult 
-        doConnectAsync(Socket fd, EndPoint addr, IceInternal.ThreadPool.AsyncCallback callback, 
-                       SocketAsyncEventArgs eventArgs, object state)
-#else
         public static IAsyncResult doConnectAsync(Socket fd, EndPoint addr, AsyncCallback callback, object state)
-#endif
         {
             //
             // NOTE: It's the caller's responsability to close the socket upon
@@ -800,20 +773,16 @@ namespace IceInternal
                 // connected non-blocking, the LocalEndPoint and RemoteEndPoint
                 // properties are null. The call to Bind() fixes this.
                 //
-#if SILVERLIGHT
-                eventArgs.RemoteEndPoint = addr;
-                eventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(callback);
-                IceInternal.ThreadPool.IAsyncResult result = new IceInternal.ThreadPool.IAsyncResult();
-                eventArgs.UserToken = result;
-                result.AsyncState = state;
-                result.EventArgs = eventArgs;
-                result.CompletedSynchronously = !fd.ConnectAsync(eventArgs);
-                return result;
-#else
                 IPAddress any = fd.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any;
                 fd.Bind(new IPEndPoint(any, 0));
-                return fd.BeginConnect(addr, callback, state);
-#endif
+                return fd.BeginConnect(addr, 
+                                       delegate(IAsyncResult result)
+                                       {
+                                           if(!result.CompletedSynchronously)
+                                           {
+                                               callback(result.AsyncState);
+                                           }
+                                       }, state);
             }
             catch(SocketException ex)
             {
@@ -833,30 +802,12 @@ namespace IceInternal
             }
         }
 
-#if SILVERLIGHT
-        public static void doFinishConnectAsync(Socket fd, SocketAsyncEventArgs eventArgs)
-#else
         public static void doFinishConnectAsync(Socket fd, IAsyncResult result)
-#endif
         {
             //
             // NOTE: It's the caller's responsability to close the socket upon
             // failure to connect. The socket isn't closed by this method.
             //
-#if SILVERLIGHT
-            if(eventArgs.SocketError != SocketError.Success)
-            {
-                SocketException ex = new SocketException((int)eventArgs.SocketError);
-                if(connectionRefused(ex))
-                {
-                    throw new Ice.ConnectionRefusedException(ex);
-                }
-                else
-                {
-                    throw new Ice.ConnectFailedException(ex);
-                }
-            }
-#else
             try
             {
                 fd.EndConnect(result);
@@ -892,8 +843,8 @@ namespace IceInternal
                     throw new Ice.ConnectionRefusedException();
                 }
             }
-#endif
         }
+#endif
 
         public static EndPoint getAddress(string host, int port, int protocol)
         {

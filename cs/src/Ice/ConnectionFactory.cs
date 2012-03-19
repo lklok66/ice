@@ -1459,20 +1459,8 @@ namespace IceInternal
         //
         // Operations from EventHandler.
         //
-        public override bool startAsync(int operation, 
-#if SILVERLIGHT
-						                IceInternal.ThreadPool.AsyncCallback callback, 
-#else
-						                System.AsyncCallback callback,
-#endif
-						                ref bool completedSynchronously)
+        public override bool startAsync(int operation, AsyncCallback callback, ref bool completedSynchronously)
         {
-#if SILVERLIGHT
-	        //
-	        // Silverlight .NET Framework doesn't support server sockets.
-	        //
-	        return false;
-#else
             if(_state >= StateClosed)
             {
                 return false;
@@ -1492,24 +1480,17 @@ namespace IceInternal
                 }
                 finally
                 {
-#  if !COMPACT
+#if !COMPACT && !SILVERLIGHT
                     System.Environment.FailFast(s);
-#  endif
+#endif
                 }
                 return false;
             }
             return true;
-#endif
         }
 
         public override bool finishAsync(int unused)
         {
-#if SILVERLIGHT
-	        //
-	        // Silverlight .NET Framework doesn't support server sockets.
-	        //
-	        return false;
-#else
             Debug.Assert(_acceptor != null);
             try
             {
@@ -1526,9 +1507,9 @@ namespace IceInternal
                     }
                     finally
                     {
-#  if !COMPACT
+#if !COMPACT && !SILVERLIGHT
                         System.Environment.FailFast(s);
-#  endif
+#endif
                     }
                     return false;
                 }
@@ -1540,7 +1521,6 @@ namespace IceInternal
                 }
             }
             return _state < StateClosed;
-#endif
         }
 
         public override void message(ref ThreadPoolCurrent current)
@@ -1736,12 +1716,6 @@ namespace IceInternal
             _warn = _instance.initializationData().properties.getPropertyAsInt("Ice.Warn.Connections") > 0;
             _connections = new HashSet<Ice.ConnectionI>();
             _state = StateHolding;
-            //
-            // Make the compiler happy, otherwise unused field.
-            //
-#if SILVERLIGHT
-            _acceptor = null;
-#endif
 
             DefaultsAndOverrides defaultsAndOverrides = _instance.defaultsAndOverrides();
             if(defaultsAndOverrides.overrideTimeout)
@@ -1766,15 +1740,10 @@ namespace IceInternal
                 }
                 else
                 {
-#if SILVERLIGHT
-                    throw new Ice.FeatureNotSupportedException("server endpoint not supported for `" + 
-                                                               _endpoint.ToString() + "'");
-#else
                     _acceptor = _endpoint.acceptor(ref _endpoint, adapterName);
                     Debug.Assert(_acceptor != null);
                     _acceptor.listen();
                     ((Ice.ObjectAdapterI)_adapter).getThreadPool().initialize(this);
-#endif
                 }
             }
             catch(System.Exception ex)
