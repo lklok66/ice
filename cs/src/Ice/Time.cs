@@ -36,7 +36,7 @@ namespace IceInternal
 
         public static long currentMonotonicTimeMillis()
         {
-            return (long)new System.TimeSpan(System.DateTime.Now.Ticks - _begin).TotalMilliseconds;
+            return (System.DateTime.Now.Ticks - _begin) / 10000;
         }
 
         private static long _begin;

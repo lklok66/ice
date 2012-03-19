@@ -50,14 +50,9 @@ namespace IceInternal
         {
             lock(this)
             {
-                if(_factoryMap.ContainsKey(id))
-                {
-                    return _factoryMap[id];
-                }
-                else
-                {
-                    return null;
-                }
+                Ice.ObjectFactory factory = null;
+                _factoryMap.TryGetValue(id, out factory);
+                return factory;
             }
         }
         

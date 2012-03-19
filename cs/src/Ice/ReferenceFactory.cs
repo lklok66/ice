@@ -629,9 +629,10 @@ namespace IceInternal
                 // set.
                 //
                 WeakReference w = new WeakReference(@ref);
-                if(_references.ContainsKey(w))
+                object v;
+                if(_references.TryGetValue(w, out v))
                 {
-                    WeakReference val = (WeakReference)_references[w];
+                    WeakReference val = (WeakReference)v;
                     if(val != null)
                     {
                         Reference r = (Reference)val.Target;

@@ -42,14 +42,11 @@ namespace Ice
             lock(this)
             {
                 string result = "";
-                if(_properties.ContainsKey(key))
+                PropertyValue pv;
+                if(_properties.TryGetValue(key, out pv))
                 {
-                    PropertyValue pv = (PropertyValue)_properties[key];
-                    if(pv != null)
-                    {
-                        pv.used = true;
-                        result = pv.val;
-                    }
+                    pv.used = true;
+                    result = pv.val;
                 }
                 return result;
             }
@@ -60,14 +57,11 @@ namespace Ice
             lock(this)
             {
                 string result = val;
-                if(_properties.ContainsKey(key))
+                PropertyValue pv;
+                if(_properties.TryGetValue(key, out pv))
                 {
-                    PropertyValue pv = (PropertyValue)_properties[key];
-                    if(pv != null)
-                    {
-                        pv.used = true;
-                        result = pv.val;
-                    }
+                    pv.used = true;
+                    result = pv.val;
                 }
                 return result;
             }
@@ -82,11 +76,11 @@ namespace Ice
         {
             lock(this)
             {
-                if(!_properties.ContainsKey(key))
+                PropertyValue pv;
+                if(!_properties.TryGetValue(key, out pv))
                 {
                     return val;	
                 }
-                PropertyValue pv = (PropertyValue)_properties[key];
                 pv.used = true;
                 try
                 {
@@ -95,7 +89,7 @@ namespace Ice
                 catch(System.FormatException)
                 {
                     Ice.Util.getProcessLogger().warning("numeric property " + key + 
-                                                                            " set to non-numeric value, defaulting to " + val);
+                                                        " set to non-numeric value, defaulting to " + val);
                     return val;
                 }
             }
@@ -115,11 +109,12 @@ namespace Ice
 
             lock(this)
             {
-                if(!_properties.ContainsKey(key))
+                PropertyValue pv;
+                if(!_properties.TryGetValue(key, out pv))
                 {
                     return val;
                 }
-                PropertyValue pv = (PropertyValue)_properties[key];
+
                 pv.used = true;
 
                 string[] result = IceUtilInternal.StringUtil.splitString(pv.val, ", \t\r\n");
@@ -220,9 +215,8 @@ namespace Ice
                 if(val != null && val.Length > 0)
                 {
                     PropertyValue pv;
-                    if(_properties.ContainsKey(key))
+                    if(_properties.TryGetValue(key, out pv))
                     {
-                        pv = (PropertyValue)_properties[key];
                         pv.val = val;
                     }
                     else
@@ -385,9 +379,9 @@ namespace Ice
                 _properties = ((PropertiesI)defaults)._properties;
             }
             
-	    if(_properties.ContainsKey("Ice.ProgramName"))
+            PropertyValue pv;
+	    if(_properties.TryGetValue("Ice.ProgramName", out pv))
             {
-                PropertyValue pv = _properties["Ice.ProgramName"];
                 pv.used = true;
             }
             else

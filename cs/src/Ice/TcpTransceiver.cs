@@ -105,7 +105,7 @@ namespace IceInternal
         {
 #if COMPACT || SILVERLIGHT
             //
-            // The Silverlight & Compact .NET Frameworks does not support the use of synchronous socket
+            // Silverlight and the Compact .NET Frameworks don't support the use of synchronous socket
             // operations on a non-blocking socket. Returning false here forces the
             // caller to schedule an asynchronous operation.
             //
@@ -190,7 +190,7 @@ namespace IceInternal
         {
 #if COMPACT || SILVERLIGHT
             //
-            // The Silverlight & Compact .NET Frameworks does not support the use of synchronous socket
+            // Silverlight and the Compact .NET Framework don't support the use of synchronous socket
             // operations on a non-blocking socket.
             //
             return false;
