@@ -1,6 +1,5 @@
 This demo shows how to use bidirectional connections for callbacks.
 This is typically used if the server cannot open a connection to the
-<<<<<<< HEAD
 client to send callbacks, for example, because firewalls block
 incoming connections to the client.
 
@@ -21,16 +20,16 @@ incoming connections to the client.
    > cd <Ice installation directory>\bin
    > policyserver 127.0.0.1 ..\config\PolicyResponse.xml
 
-4) From Visual Studio open the `bidir.Web.csproj' project from the
-   bidir.Web directory and start the bidir Silverlight application
-   using the "Debug > Start new instance" command.
+4) From Visual Studio open the `bidir.Web' and start the bidir
+   Silverlight application using the "Debug > Start new instance"
+   command.
 
 ==========================================================================
 Running the demo with .NET Compact Framework bidir server
 ==========================================================================
 
 1) Start the bidir server following the instructions in the
-   demo\compact\bidir\README.txt file, before clicking the `Start
+   demo\Ice\compact\bidir\README.txt file, before clicking the `Start
    Server' button update the port field to 4502
 
 2) In the bidir demo "Properties > Debug" select Out-of-browser

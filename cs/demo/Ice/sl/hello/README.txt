@@ -18,6 +18,6 @@ as well as how to make oneway, and batched invocations.
    > cd <Ice installation directory>\bin
    > policyserver 127.0.0.1 ..\config\PolicyResponse.xml
 
-4) From Visual Studio open the `hello.Web.csproj' project from the
-   hello.Web directory and start the hello Silverlight application
-   using the "Debug > Start new instance" command.
+4) From Visual Studio open the `hello.Web' project and start the hello
+   Silverlight application using the "Debug > Start new instance"
+   command.

@@ -21,6 +21,6 @@ to start the server and the Glacier2 router.
    > cd <Ice installation directory>\bin
    > policyserver 127.0.0.1 ..\config\PolicyResponse.xml
 
-4) From Visual Studio open the `chat.Web.csproj' project from the
-   chat.Web directory and start the chat Silverlight application
-   using the "Debug > Start new instance" command.
+4) From Visual Studio open the `chat.Web' project and start the chat
+   Silverlight application using the "Debug > Start new instance"
+   command.

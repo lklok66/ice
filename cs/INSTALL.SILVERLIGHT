@@ -33,7 +33,8 @@ Follow these steps to build the source:
    the settings you can modify. For example, you may wish to enable
    optimization.
    
-   You must define SILVERLIGHT=yes to build with Silverlight .NET Framework
+   You must define SILVERLIGHT=yes to build the Silverlight Ice
+   assembly.
 
 4) Run nmake:
 
@@ -50,23 +51,23 @@ Installation
 
 Simply run "nmake /f Makefile.mak install". This will install Ice for
 .NET in the directory specified by the "prefix" variable in
-config\Make.rules.mak.cs. The Ice Silverlight assembleys will be
+config\Make.rules.mak.cs. The Ice Silverlight assemblies will be
 located in <prefix>\bin\sl
 
 Running the tests
 -----------------
 
-Silverlight has not server side support, you must use server from other
-language mappings:
+Silverlight has no server side support, you must use a server from
+another language mapping:
 
-To run the tests, open a command window and change to the test
+To run a test, open a command window and change to the test
 directory. At the command prompt, execute:
 
   > server
 
-Open test\testsl.sln in Visual Studio and start the correspoding test,
-using "Debug > Start new instance" command, in the test application
-click "Run"
+Open test\testsl.sln in Visual Studio and start the corresponding
+test, using the "Debug > Start new instance" command. In the test
+application, click "Run"
 
 If everything worked out, you should see lots of "ok" messages. In
 case of a failure, the tests abort with "failed".
@@ -75,6 +76,6 @@ case of a failure, the tests abort with "failed".
 Running the demos
 -----------------
 
-To run the demos, open demo\demosl.sln Solution and follow instructions
-in REAME.txt.
+To run the demos, open demo\demosl.sln Solution and follow the
+instructions in the REAME.txt files of each demo.
 

@@ -36,45 +36,63 @@ namespace bidir
             btnRun.IsEnabled = false;
             btnStop.IsEnabled = true;
 
-            System.Threading.Thread t = new System.Threading.Thread(() =>
+            Ice.InitializationData initData = new Ice.InitializationData();
+            initData.dispatcher = delegate(System.Action action, Ice.Connection connection)
+            {
+                Dispatcher.BeginInvoke(action);
+            };
+            _communicator = Ice.Util.initialize(initData);
+
+            CallbackSenderPrx server = CallbackSenderPrxHelper.uncheckedCast(
+                _communicator.stringToProxy("sender:tcp -h " + host + " -p 4502"));
+            if(server == null)
+            {
+                throw new ArgumentException("invalid proxy");
+            }
+            
+            Ice.ObjectAdapter adapter = _communicator.createObjectAdapter("");
+            Ice.Identity ident = new Ice.Identity();
+            ident.name = Guid.NewGuid().ToString();
+            ident.category = "";
+            adapter.add(new CallbackReceiverI(this), ident);
+            adapter.activate();
+
+            //
+            // Establish the connection to the server by sending a ping request with AMI.
+            //
+            server.begin_ice_ping().whenCompleted(
+                () => 
                 {
-                    try
-                    {
-                        _communicator = Ice.Util.initialize();
+                    //
+                    // Associate the object adapter to the connection to receive requests
+                    // over the bi-directional connection.
+                    //
+                    server.ice_getCachedConnection().setAdapter(adapter);
 
-                        CallbackSenderPrx server = CallbackSenderPrxHelper.checkedCast(
-                            _communicator.stringToProxy("sender:tcp -h " + host + " -p 4502"));
-                        if(server == null)
+                    //
+                    // Notify the server that we are ready to receive callbacks.
+                    //
+                    server.begin_addClient(ident).whenCompleted(
+                        () => 
+                        { 
+                            // Nothing to do. 
+                        }, 
+                        (Ice.Exception ex) =>
                         {
-                            throw new ArgumentException("invalid proxy");
-                        }
-
-                        Ice.ObjectAdapter adapter = _communicator.createObjectAdapter("");
-                        Ice.Identity ident = new Ice.Identity();
-                        ident.name = Guid.NewGuid().ToString();
-                        ident.category = "";
-                        adapter.add(new CallbackReceiverI(this), ident);
-                        adapter.activate();
-                        server.ice_getConnection().setAdapter(adapter);
-                        server.addClient(ident);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        btnRun.Dispatcher.BeginInvoke(delegate()
-                        {
-                            btnRun.IsEnabled = true;
-                            btnStop.IsEnabled = false;
+                            appendText(ex.ToString());
                         });
-                        appendText(ex.ToString());
-                    }
+                }, 
+                (Ice.Exception ex) =>
+                {
+                    appendText(ex.ToString());
                 });
-            t.Start();
         }
 
         private void btnStopClick(object sender, RoutedEventArgs e)
         {
             btnRun.IsEnabled = false;
             btnStop.IsEnabled = false;
+
             System.Threading.Thread t = new System.Threading.Thread(() =>
             {
                 try
@@ -90,12 +108,15 @@ namespace bidir
                 }
                 catch (System.Exception ex)
                 {
-                    appendText(ex.ToString());
+                    Dispatcher.BeginInvoke(() => 
+                    {
+                        appendText(ex.ToString());
+                    });
                 }
                 finally
                 {
                     _communicator = null;
-                    btnRun.Dispatcher.BeginInvoke(delegate()
+                    Dispatcher.BeginInvoke(() =>
                     {
                         btnRun.IsEnabled = true;
                         btnStop.IsEnabled = false;
@@ -107,12 +128,9 @@ namespace bidir
 
         public void appendText(string text)
         {
-            txtOutput.Dispatcher.BeginInvoke(delegate()
-            {
-                txtOutput.Text += text;
-                txtOutput.SelectionLength = 0;
-                txtOutput.SelectionStart = txtOutput.Text.Length;
-            });
+            txtOutput.Text += text;
+            txtOutput.SelectionLength = 0;
+            txtOutput.SelectionStart = txtOutput.Text.Length;
         }
 
         private Ice.Communicator _communicator;
