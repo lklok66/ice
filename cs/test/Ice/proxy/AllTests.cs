@@ -11,20 +11,26 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-public class AllTests
+#if SILVERLIGHT
+using System.Windows.Controls;
+#endif
+
+public class AllTests : TestCommon.TestApp
 {
-    private static void test(bool b)
+#if SILVERLIGHT
+    public AllTests(TextBox output, Button btnRun)
+        : base(output, btnRun)
     {
-        if (!b)
-        {
-            throw new Exception();
-        }
     }
 
+    override
+    public void run(Ice.Communicator communicator)
+#else
     public static Test.MyClassPrx allTests(Ice.Communicator communicator)
+#endif
     {
-        Console.Out.Write("testing stringToProxy... ");
-        Console.Out.Flush();
+        Write("testing stringToProxy... ");
+        Flush();
         string rf = "test:default -p 12010";
         Ice.ObjectPrx baseProxy = communicator.stringToProxy(rf);
         test(baseProxy != null);
@@ -244,10 +250,10 @@ public class AllTests
         catch(Ice.EndpointParseException)
         {
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing propertyToProxy... ");
-        Console.Out.Flush();
+        Write("testing propertyToProxy... ");
+        Flush();
         Ice.Properties prop = communicator.getProperties();
         String propertyPrefix = "Foo.Proxy";
         prop.setProperty(propertyPrefix, "test:default -p 12010");
@@ -342,10 +348,10 @@ public class AllTests
 
         prop.setProperty(property, "");
 
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing proxyToProperty... ");
-        Console.Out.Flush();
+        Write("testing proxyToProperty... ");
+        Flush();
 
         b1 = communicator.stringToProxy("test");
         b1 = b1.ice_collocationOptimized(true);
@@ -395,14 +401,14 @@ public class AllTests
         test(proxyProps["Test.Locator.Router.EndpointSelection"].Equals("Random"));
         test(proxyProps["Test.Locator.Router.LocatorCacheTimeout"].Equals("200"));
                                                           
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing ice_getCommunicator... ");
-        Console.Out.Flush();
+        Write("testing ice_getCommunicator... ");
+        Flush();
         test(baseProxy.ice_getCommunicator() == communicator);
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing proxy methods... ");
+        Write("testing proxy methods... ");
         test(communicator.identityToString(
                  baseProxy.ice_identity(communicator.stringToIdentity("other")).ice_getIdentity()).Equals("other"));
         test(baseProxy.ice_facet("facet").ice_getFacet().Equals("facet"));
@@ -418,10 +424,10 @@ public class AllTests
         test(!baseProxy.ice_collocationOptimized(false).ice_isCollocationOptimized());
         test(baseProxy.ice_preferSecure(true).ice_isPreferSecure());
         test(!baseProxy.ice_preferSecure(false).ice_isPreferSecure());
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing proxy comparison... ");
-        Console.Out.Flush();
+        Write("testing proxy comparison... ");
+        Flush();
 
         test(communicator.stringToProxy("foo").Equals(communicator.stringToProxy("foo")));
         test(!communicator.stringToProxy("foo").Equals(communicator.stringToProxy("foo2")));
@@ -511,10 +517,10 @@ public class AllTests
         //
         // TODO: Ideally we should also test comparison of fixed proxies.
         //
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing checked cast... ");
-        Console.Out.Flush();
+        Write("testing checked cast... ");
+        Flush();
         Test.MyClassPrx cl = Test.MyClassPrxHelper.checkedCast(baseProxy);
         test(cl != null);
         Test.MyDerivedClassPrx derived = Test.MyDerivedClassPrxHelper.checkedCast(cl);
@@ -522,10 +528,10 @@ public class AllTests
         test(cl.Equals(baseProxy));
         test(derived.Equals(baseProxy));
         test(cl.Equals(derived));
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing checked cast with context... ");
-        Console.Out.Flush();
+        Write("testing checked cast with context... ");
+        Flush();
 
         Dictionary<string, string> c = cl.getContext();
         test(c == null || c.Count == 0);
@@ -536,10 +542,10 @@ public class AllTests
         cl = Test.MyClassPrxHelper.checkedCast(baseProxy, c);
         Dictionary<string, string> c2 = cl.getContext();
         test(Ice.CollectionComparer.Equals(c, c2));
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing opaque endpoints... ");
-        Console.Out.Flush();
+        Write("testing opaque endpoints... ");
+        Flush();
 
         try
         {
@@ -715,8 +721,11 @@ public class AllTests
             }
         }
 
-        Console.Out.WriteLine("ok");
-
+        WriteLine("ok");
+#if SILVERLIGHT
+        cl.shutdown();
+#else
         return cl;
+#endif
     }
 }

@@ -9,21 +9,34 @@
 
 using System;
 
-public class AllTests
+#if SILVERLIGHT
+using System.Net;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Ink;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Shapes;
+#endif
+
+public class AllTests : TestCommon.TestApp
 {
-    private static void test(bool b)
+#if SILVERLIGHT
+    public AllTests(TextBox output, Button btnRun)
+        : base(output, btnRun)
     {
-        if(!b)
-        {
-            throw new System.Exception();
-        }
     }
 
-    public static void
-    allTests()
+    override
+    public void run(Ice.Communicator communicator)
+#else
+    public static void allTests()
+#endif
     {
-        Console.Out.Write("testing default values... ");
-        Console.Out.Flush();
+        Write("testing default values... ");
+        Flush();
 
         {
             Test.Struct1 v = new Test.Struct1();
@@ -192,6 +205,6 @@ public class AllTests
             test(v.noDefault == null);
         }
 
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
     }
 }

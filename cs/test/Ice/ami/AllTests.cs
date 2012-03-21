@@ -14,16 +14,20 @@ using System.Diagnostics;
 using System.Threading;
 using Test;
 
-public class AllTests
-{
-    private static void test(bool b)
-    {
-        if(!b)
-        {
-            throw new System.Exception();
-        }
-    }
+#if SILVERLIGHT
+using System.Net;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Ink;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Shapes;
+#endif
 
+public class AllTests : TestCommon.TestApp
+{
     private class Cookie
     {
         public Cookie(int i)
@@ -616,7 +620,25 @@ public class AllTests
         ThrowType _t;
     }
 
+#if SILVERLIGHT
+    public AllTests(TextBox output, Button btnRun)
+        : base(output, btnRun)
+    {
+    }
+
+    public override Ice.InitializationData initData()
+    {
+        Ice.InitializationData id = new Ice.InitializationData();
+        id.properties = Ice.Util.createProperties();
+        id.properties.setProperty("Ice.FactoryAssemblies", "ami,version=1.0.0.0");
+        return id;
+    }
+
+    override
+    public void run(Ice.Communicator communicator)
+#else
     public static void allTests(Ice.Communicator communicator)
+#endif
     {
         string sref = "test:default -p 12010";
         Ice.ObjectPrx obj = communicator.stringToProxy(sref);
@@ -630,8 +652,8 @@ public class AllTests
 
         Test.TestIntfControllerPrx testController = Test.TestIntfControllerPrxHelper.uncheckedCast(obj);
 
-        Console.Out.Write("testing begin/end invocation... ");
-        Console.Out.Flush();
+        Write("testing begin/end invocation... ");
+        Flush();
         {
             Ice.AsyncResult result;
             Dictionary<string, string> ctx = new Dictionary<string, string>();
@@ -685,10 +707,10 @@ public class AllTests
             {
             }
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing async callback... ");
-        Console.Out.Flush();
+        Write("testing async callback... ");
+        Flush();
         {
             AsyncCallback cb = new AsyncCallback();
             Dictionary<string, string> ctx = new Dictionary<string, string>();
@@ -758,10 +780,10 @@ public class AllTests
             p.begin_opWithUE(ctx, cbWC.opWithUE, cookie);
             cbWC.check();
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing response callback... ");
-        Console.Out.Flush();
+        Write("testing response callback... ");
+        Flush();
         {
             ResponseCallback cb = new ResponseCallback();
             Dictionary<string, string> ctx = new Dictionary<string, string>();
@@ -801,10 +823,10 @@ public class AllTests
             p.begin_opWithUE(ctx).whenCompleted(cb.op, cb.opWithUE);
             cb.check();
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing local exceptions... ");
-        Console.Out.Flush();
+        Write("testing local exceptions... ");
+        Flush();
         {
             Test.TestIntfPrx indirect = Test.TestIntfPrxHelper.uncheckedCast(p.ice_adapterId("dummy"));
             Ice.AsyncResult r;
@@ -849,10 +871,10 @@ public class AllTests
                 // Expected.
             }
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing local exceptions with async callback... ");
-        Console.Out.Flush();
+        Write("testing local exceptions with async callback... ");
+        Flush();
         {
             Test.TestIntfPrx i = Test.TestIntfPrxHelper.uncheckedCast(p.ice_adapterId("dummy"));
             AsyncCallback cb = new AsyncCallback();
@@ -884,10 +906,10 @@ public class AllTests
             i.begin_op(cbWC.opEx, cookie);
             cbWC.check();
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing local exceptions with response callback... ");
-        Console.Out.Flush();
+        Write("testing local exceptions with response callback... ");
+        Flush();
         {
             Test.TestIntfPrx i = Test.TestIntfPrxHelper.uncheckedCast(p.ice_adapterId("dummy"));
             ExceptionCallback cb = new ExceptionCallback();
@@ -907,10 +929,10 @@ public class AllTests
             i.begin_op().whenCompleted(cb.op, cb.ex);
             cb.check();
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing exception callback... ");
-        Console.Out.Flush();
+        Write("testing exception callback... ");
+        Flush();
         {
             Test.TestIntfPrx i = Test.TestIntfPrxHelper.uncheckedCast(p.ice_adapterId("dummy"));
             ExceptionCallback cb = new ExceptionCallback();
@@ -936,10 +958,10 @@ public class AllTests
             p.begin_opWithUE().whenCompleted(cb.opWithUE);
             cb.check();
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing sent callback... ");
-        Console.Out.Flush();
+        Write("testing sent callback... ");
+        Flush();
         {
             SentCallback cb = new SentCallback();
 
@@ -988,10 +1010,10 @@ public class AllTests
                 cb3.check();
             }
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing illegal arguments... ");
-        Console.Out.Flush();
+        Write("testing illegal arguments... ");
+        Flush();
         {
             Ice.AsyncResult result;
 
@@ -1025,10 +1047,10 @@ public class AllTests
             {
             }
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing unexpected exceptions from callback... ");
-        Console.Out.Flush();
+        Write("testing unexpected exceptions from callback... ");
+        Flush();
         {
             Test.TestIntfPrx q = Test.TestIntfPrxHelper.uncheckedCast(p.ice_adapterId("dummy"));
             ThrowType[] throwEx = new ThrowType[]{ ThrowType.LocalException, ThrowType.UserException,
@@ -1054,10 +1076,10 @@ public class AllTests
                 cb.check();
             }
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing batch requests with proxy... ");
-        Console.Out.Flush();
+        Write("testing batch requests with proxy... ");
+        Flush();
         {
             Cookie cookie = new Cookie(5);
 
@@ -1131,10 +1153,10 @@ public class AllTests
                 test(p.opBatchCount() == 0);
             }
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing batch requests with connection... ");
-        Console.Out.Flush();
+        Write("testing batch requests with connection... ");
+        Flush();
         {
             Cookie cookie = new Cookie(5);
 
@@ -1208,10 +1230,10 @@ public class AllTests
                 test(p.opBatchCount() == 0);
             }
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing batch requests with communicator... ");
-        Console.Out.Flush();
+        Write("testing batch requests with communicator... ");
+        Flush();
         {
             Cookie cookie = new Cookie(5);
 
@@ -1422,10 +1444,10 @@ public class AllTests
                 test(p.opBatchCount() == 0);
             }
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
-        Console.Out.Write("testing AsyncResult operations... ");
-        Console.Out.Flush();
+        Write("testing AsyncResult operations... ");
+        Flush();
         {
             testController.holdAdapter();
             Ice.AsyncResult r1;
@@ -1470,7 +1492,7 @@ public class AllTests
             test(r1.getOperation().Equals("op"));
             test(r2.getOperation().Equals("opWithPayload"));
         }
-        Console.Out.WriteLine("ok");
+        WriteLine("ok");
 
         p.shutdown();
     }

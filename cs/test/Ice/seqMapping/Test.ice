@@ -133,9 +133,11 @@ sequence<En> AEnS;
 ["clr:generic:Custom"] sequence<CustomIntS> CustomIntSS;
 ["clr:generic:Custom"] sequence<CustomCVS> CustomCVSS;
 
+#ifndef SILVERLIGHT
 ["clr:serializable:Serialize.Small"] sequence<byte> SerialSmall;
 ["clr:serializable:Serialize.Large"] sequence<byte> SerialLarge;
 ["clr:serializable:Serialize.Struct"] sequence<byte> SerialStruct;
+#endif
 
 ["ami"] class MyClass
 {
@@ -242,15 +244,17 @@ sequence<En> AEnS;
 
     CustomIntSS opCustomIntSS(CustomIntSS i, out CustomIntSS o);
     CustomCVSS opCustomCVSS(CustomCVSS i, out CustomCVSS o);
-
+#ifndef SILVERLIGHT
     SerialSmall opSerialSmallCSharp(SerialSmall i, out SerialSmall o);
     SerialLarge opSerialLargeCSharp(SerialLarge i, out SerialLarge o);
     SerialStruct opSerialStructCSharp(SerialStruct i, out SerialStruct o);
+#endif
 };
 
 // Remaining type definitions are there to verify that the generated
 // code compiles correctly.
 
+#ifndef SILVERLIGHT
 sequence<SerialLarge> SLS;
 sequence<SLS> SLSS;
 dictionary<int, SerialLarge> SLD;
@@ -272,7 +276,7 @@ class Baz
     SerialLarge SLmem;
     SLS SLSmem;
 };
-
+#endif
 };
 
 #endif
