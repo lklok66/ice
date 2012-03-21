@@ -24,11 +24,11 @@ from scripts import *
 # List of all basic tests.
 #
 tests = [
-    ("Slice/keyword", ["once"]),
-    ("Slice/structure", ["once"]),
-    ("IceUtil/inputUtil", ["once"]),
+    ("Slice/keyword", ["once", "nosilverlight"]),
+    ("Slice/structure", ["once", "nosilverlight"]),
+    ("IceUtil/inputUtil", ["once", "nosilverlight"]),
     ("Ice/proxy", ["core"]),
-    ("Ice/properties", ["once"]),
+    ("Ice/properties", ["once", "nosilverlight"]),
     ("Ice/operations", ["core"]),
     ("Ice/exceptions", ["core"]),
     ("Ice/ami", ["core"]),
@@ -62,7 +62,7 @@ tests = [
     ("Glacier2/router", ["service"]),
     ("Glacier2/sessionHelper", ["service"]),
     ("IceGrid/simple", ["service"]),
-    ("IceSSL/configuration", ["once", "novista", "nomono", "nocompact"]),
+    ("IceSSL/configuration", ["once", "novista", "nomono", "nocompact", "nosilverlight"]),
     ]
 
 if __name__ == "__main__":

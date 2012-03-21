@@ -1,6 +1,7 @@
 ﻿using System;
 
 #if SILVERLIGHT
+using System.Collections.Generic;
 using System.Net;
 using System.Windows;
 using System.Windows.Controls;
@@ -80,14 +81,48 @@ namespace TestCommon
         {
             _output.Text = "";
             _btnRun.IsEnabled = false;
+
+            int args = Application.Current.Host.Source.OriginalString.IndexOf("?");
+            Dictionary<string, string> properties = new Dictionary<string, string>();
+            if(args > 0 && args + 1 < Application.Current.Host.Source.OriginalString.Length)
+            {
+                string[] props = Application.Current.Host.Source.OriginalString.Substring(args + 1).Split(';');
+                foreach (string prop in props)
+                {
+                    int pos = prop.IndexOf('=');
+                    if(pos > 0)
+                    {
+                        properties[prop.Substring(0, pos)] = prop.Substring(pos + 1);
+                    }
+                }
+            }
+           
             System.Threading.Thread t = new System.Threading.Thread(() =>
                 {
                     Ice.Communicator communicator = null;
                     try
                     {
-                        communicator = Ice.Util.initialize(initData());
+                        Ice.InitializationData initializationData = initData();
+                        if (initializationData.properties == null)
+                        {
+                            initializationData.properties = Ice.Util.createProperties();
+                            
+                        }
+                        
+                        foreach(KeyValuePair<String,String> entry in properties)
+                        {
+                            initializationData.properties.setProperty(entry.Key, entry.Value);
+                        }
+
+                        communicator = Ice.Util.initialize(initializationData);
                         run(communicator);
                         completed();
+
+                        // Exit the application if success
+                        _btnRun.Dispatcher.BeginInvoke(delegate()
+                                                       {
+                                                           Application.Current.MainWindow.Close();
+                                                       });
                     }
                     catch(System.Exception ex)
                     {
