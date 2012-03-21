@@ -14,11 +14,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("slicingObjects")]
+[assembly: AssemblyTitle("objects")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ZeroC")]
-[assembly: AssemblyProduct("slicingObjects")]
+[assembly: AssemblyProduct("objects")]
 [assembly: AssemblyCopyright("Copyright © ZeroC 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -75,9 +75,6 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="BatchOneways.cs" />
-    <Compile Include="MainPage.xaml.cs">
-      <DependentUpon>MainPage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Oneways.cs" />
     <Compile Include="OnewaysAMI.cs" />
     <Compile Include="OnewaysNewAMI.cs" />
@@ -92,10 +89,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
-    <Page Include="MainPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AppManifest.xml" />

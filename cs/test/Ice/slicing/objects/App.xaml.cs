@@ -23,19 +23,23 @@ namespace slicingObjects
 {
     public partial class App : Application
     {
-
         public App()
         {
+            Deployment.Current.Dispatcher.BeginInvoke(delegate()
+            {
+                Current.MainWindow.WindowState = WindowState.Minimized;
+                Current.MainWindow.Visibility = Visibility.Collapsed;
+            });
             this.Startup += this.Application_Startup;
             this.Exit += this.Application_Exit;
             this.UnhandledException += this.Application_UnhandledException;
-
             InitializeComponent();
         }
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            this.RootVisual = new MainPage();
+            TestCommon.TestApp app = new AllTests();
+            app.main();
         }
 
         private void Application_Exit(object sender, EventArgs e)

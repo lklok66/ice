@@ -114,11 +114,6 @@ public class AllTests : TestCommon.TestApp
     }
 
 #if SILVERLIGHT
-    public AllTests(TextBox output, Button btnRun)
-        : base(output, btnRun)
-    {
-    }
-
     override
     public void run(Ice.Communicator communicator)
 #else

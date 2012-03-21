@@ -883,7 +883,10 @@ def getCommandLine(exe, config, options = ""):
     elif config.silverlight and config.lang == "cs" and config.type == "client":
         name = os.path.basename(os.getcwd());
         xapPath = os.path.join("Bin", "Debug", "%s.xap" % name)
-        print >>output, "C:\Program Files (x86)\Microsoft Silverlight\sllauncher.exe /emulate:%s" % xapPath,
+        if os.environ["PROCESSOR_ARCHITECTURE"] =="AMD64" and os.environ["PROCESSOR_ARCHITECTUREW6432"] == "":	
+            print >>output, "%s (x86)\Microsoft Silverlight\sllauncher.exe /emulate:%s" % ( os.environ["PROGRAMFILES"], xapPath),
+        else:
+            print >>output, "%s\Microsoft Silverlight\sllauncher.exe /emulate:%s" % ( os.environ["PROGRAMFILES"], xapPath),
     elif config.lang == "java" or config.lang == "javae":
         print >>output, "%s -ea" % javaCmd,
         if isSolaris() and config.x64:

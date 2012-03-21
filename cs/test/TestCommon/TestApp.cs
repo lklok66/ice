@@ -31,10 +31,7 @@ namespace TestCommon
         public void Write(string msg)
         {
 #if SILVERLIGHT
-            _output.Dispatcher.BeginInvoke(delegate()
-            {
-                _output.Text += msg;
-            });
+            Console.Out.Write(msg);
 #else
             Console.Out.Write(msg);
 #endif
@@ -46,7 +43,7 @@ namespace TestCommon
         public void WriteLine(string msg)
         {
 #if SILVERLIGHT
-            Write(msg + Environment.NewLine);
+            Console.Out.WriteLine(msg);
 #else
             Console.Out.WriteLine(msg);
 #endif
@@ -57,17 +54,10 @@ namespace TestCommon
 #endif
         public void Flush()
         { 
-#if !SILVERLIGHT
             Console.Out.Flush();
-#endif
         }
 
 #if SILVERLIGHT
-        public TestApp(TextBox output, Button btnRun)
-        {
-            _output = output;
-            _btnRun = btnRun;
-        }
         
         public abstract void run(Ice.Communicator communicator);
 
@@ -79,9 +69,6 @@ namespace TestCommon
 
         public void main()
         {
-            _output.Text = "";
-            _btnRun.IsEnabled = false;
-
             int args = Application.Current.Host.Source.OriginalString.IndexOf("?");
             Dictionary<string, string> properties = new Dictionary<string, string>();
             if(args > 0 && args + 1 < Application.Current.Host.Source.OriginalString.Length)
@@ -103,26 +90,22 @@ namespace TestCommon
                     try
                     {
                         Ice.InitializationData initializationData = initData();
-                        if (initializationData.properties == null)
+                        if(initializationData.properties == null)
                         {
-                            initializationData.properties = Ice.Util.createProperties();
-                            
+                            initializationData.properties = Ice.Util.createProperties();                            
                         }
                         
                         foreach(KeyValuePair<String,String> entry in properties)
                         {
-                            initializationData.properties.setProperty(entry.Key, entry.Value);
+                            if(initializationData.properties.getProperty(entry.Key).Equals(""))
+                            {
+                                initializationData.properties.setProperty(entry.Key, entry.Value);
+                            }
                         }
 
                         communicator = Ice.Util.initialize(initializationData);
                         run(communicator);
                         completed();
-
-                        // Exit the application if success
-                        _btnRun.Dispatcher.BeginInvoke(delegate()
-                                                       {
-                                                           Application.Current.MainWindow.Close();
-                                                       });
                     }
                     catch(System.Exception ex)
                     {
@@ -141,21 +124,19 @@ namespace TestCommon
 
         public void completed()
         {
-            _btnRun.Dispatcher.BeginInvoke(delegate()
+            Deployment.Current.Dispatcher.BeginInvoke(delegate()
             {
-                _btnRun.IsEnabled = true;
+                Application.Current.MainWindow.Close();
             });
         }
 
         public void failed(System.Exception ex)
         {
+            System.Environment.ExitCode = 1;
             WriteLine(Environment.NewLine + "Test Failed:");
             WriteLine("Exception: " + ex.ToString());
             completed();
         }
-
-        private TextBox _output;
-        private Button _btnRun;
 #endif
     }
 }

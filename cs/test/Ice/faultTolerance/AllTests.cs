@@ -132,11 +132,13 @@ public class AllTests : TestCommon.TestApp
     }
     
 #if SILVERLIGHT
-    public AllTests(TextBox output, Button btnRun)
-        : base(output, btnRun)
+    public override Ice.InitializationData initData()
     {
+        Ice.InitializationData initData = new Ice.InitializationData();
+        initData.properties = Ice.Util.createProperties();
+        initData.properties.setProperty("Ice.Warn.Connections", "0");
+        return initData;
     }
-
     override
     public void run(Ice.Communicator communicator)
 #else

@@ -187,11 +187,6 @@ public class AllTests : TestCommon.TestApp
         private CallbackBase callback = new CallbackBase();
     }
 #if SILVERLIGHT
-    public AllTests(TextBox output, Button btnRun)
-        : base(output, btnRun)
-    {
-    }
-
     public override Ice.InitializationData initData()
     {
         Ice.InitializationData initData = new Ice.InitializationData();

@@ -621,18 +621,16 @@ public class AllTests : TestCommon.TestApp
     }
 
 #if SILVERLIGHT
-    public AllTests(TextBox output, Button btnRun)
-        : base(output, btnRun)
-    {
-    }
-
     public override Ice.InitializationData initData()
     {
         Ice.InitializationData id = new Ice.InitializationData();
         id.properties = Ice.Util.createProperties();
+        id.properties.setProperty("Ice.Warn.AMICallback", "0");
         id.properties.setProperty("Ice.FactoryAssemblies", "ami,version=1.0.0.0");
         return id;
     }
+
+
 
     override
     public void run(Ice.Communicator communicator)

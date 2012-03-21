@@ -954,15 +954,11 @@ public class AllTests : TestCommon.TestApp
     }
 
 #if SILVERLIGHT
-    public AllTests(TextBox output, Button btnRun)
-        : base(output, btnRun)
-    {
-    }
-
     public override Ice.InitializationData initData()
     {
         Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties();
+        WriteLine("setting Ice.FactoryAssemblies");
         initData.properties.setProperty("Ice.FactoryAssemblies", "exceptions,version=1.0.0.0");
         return initData;
     }
@@ -975,6 +971,7 @@ public class AllTests : TestCommon.TestApp
     {
 #if SILVERLIGHT
         bool collocated = false;
+        WriteLine("Ice.FactoryAssemblies: " + communicator.getProperties().getProperty("Ice.FactoryAssemblies"));
 #endif
 
 #if !SILVERLIGHT
