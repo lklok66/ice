@@ -23,6 +23,11 @@ subdirectory of each language mapping (e.g., cpp/CHANGES).
 Changes since version 3.4.2
 ======================================================================
 
+General Changes
+===============
+
+- Fixed minor performance issue with bi-directional proxies.
+
 
 Visual Studio Add-in Changes
 ============================
@@ -38,6 +43,15 @@ Visual Studio Add-in Changes
 
 - Fixed a bug with solutions that contain unloaded projects. 
 
+
+C# Changes
+==========
+
+- Added missing throwLocalException method to Ice.AsyncResult
+  interface.
+
+- Minor marshalling/un-marhsalling performance improvement (removed
+  virtual specifier from streaming class).
 
 ======================================================================
 Changes since version 3.4.1
