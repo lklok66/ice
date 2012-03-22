@@ -10,7 +10,7 @@ from DistUtils import *
 # other files are all removed by reversing the below list.
 #
 filesToRemove = [
-    "./cs/config/Make.rules.cs"
+    "./cs/config/Make.rules.cs",
     "./cs/config/Make.rules.mak.cs"
 ]
 
