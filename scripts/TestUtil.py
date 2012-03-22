@@ -881,11 +881,10 @@ def getCommandLine(exe, config, options = ""):
     elif config.lang == "rb" and config.type == "client":
         print >>output, "ruby '" + exe + "'",
     elif config.silverlight and config.lang == "cs" and config.type == "client":
-        name = os.path.basename(os.getcwd());
-        xapPath = os.path.join("Bin", "Debug", "%s.xap" % name)
+        xap = "%s.xap" % os.path.basename(os.getcwd())
         if (os.environ.has_key("PROCESSOR_ARCHITECTURE") and os.environ["PROCESSOR_ARCHITECTURE"] == "AMD64") or \
            (os.environ.has_key("PROCESSOR_ARCHITEW6432") and os.environ["PROCESSOR_ARCHITEW6432"] == ""):	
-            print >>output, "%s (x86)\Microsoft Silverlight\sllauncher.exe /emulate:%s" % ( os.environ["PROGRAMFILES"], xapPath),
+            print >>output, "%s (x86)\Microsoft Silverlight\sllauncher.exe /emulate:%s" % ( os.environ["PROGRAMFILES"], xap),
         else:
             print >>output, "%s\Microsoft Silverlight\sllauncher.exe /emulate:%s" % ( os.environ["PROGRAMFILES"], xapPath),
     elif config.lang == "java" or config.lang == "javae":
