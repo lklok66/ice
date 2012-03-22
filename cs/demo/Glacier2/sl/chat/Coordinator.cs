@@ -65,6 +65,11 @@ namespace chat
                     _mainPage.setError(ex.ToString());
                 }
             };
+            //
+            // Uncomment the following line if you want to use the web server
+            // as a policy server.
+            //
+            //initData.properties.setProperty("Ice.PolicyProtocol", "Http");
             _factory = new SessionFactoryHelper(initData, this);
         }
 

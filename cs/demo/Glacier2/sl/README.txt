@@ -24,3 +24,23 @@ to start the server and the Glacier2 router.
 4) From Visual Studio open the `chat.Web' project and start the chat
    Silverlight application using the "Debug > Start new instance"
    command.
+
+==========================================================================
+Using a web server as a policy server
+==========================================================================
+
+If you don't want to deploy a policy server you can use the web server
+as a policy server.
+
+1) copy PolicyResponse.xml to your web server document root directory
+   and name it clientaccesspolicy.xml.
+
+   > cd <Ice installation directory>\cs
+   > copy config\PolicyResponse.xml C:\inetpub\wwwroot\clientaccesspolicy.xml
+
+2) in Coordinator.cs ucomment the line that set the policy protocol
+   //initData.properties.setProperty("Ice.PolicyProtocol", "Http");
+
+3) Rebuild the demo and deploy it in the webserver.
+
+* Note that the web server should serve the policy file in standard port 80

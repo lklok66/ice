@@ -38,3 +38,23 @@ Running the demo with .NET Compact Framework bidir server
 3) Start the bidir client using the "Debug > Start new instance"
    command, set the host field to the ip address used by the emulator,
    and click Run.
+
+==========================================================================
+Using a web server as a policy server
+==========================================================================
+
+If you don't want to deploy a policy server you can use the web server
+as a policy server.
+
+1) copy PolicyResponse.xml to your web server document root directory
+   and name it clientaccesspolicy.xml.
+
+   > cd <Ice installation directory>\cs
+   > copy config\PolicyResponse.xml C:\inetpub\wwwroot\clientaccesspolicy.xml
+
+2) in MainPage.xaml.cs ucomment the line that set the policy protocol
+   //initData.properties.setProperty("Ice.PolicyProtocol", "Http");
+
+3) Rebuild the demo and deploy it in the webserver.
+
+* Note that the web server should serve the policy file in standard port 80

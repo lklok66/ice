@@ -758,10 +758,18 @@ namespace IceInternal
 
 #if SILVERLIGHT
             _readEventArgs = new SocketAsyncEventArgs();
+            if(instance.initializationData().properties.getProperty("Ice.PolicyProtocol").Equals("Http"))
+            {
+                _readEventArgs.SocketClientAccessPolicyProtocol = SocketClientAccessPolicyProtocol.Http;
+            }
             _readEventArgs.RemoteEndPoint = _addr;
             _readEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(ioCompleted);
 
             _writeEventArgs = new SocketAsyncEventArgs();
+            if(instance.initializationData().properties.getProperty("Ice.PolicyProtocol").Equals("Http"))
+            {
+                _writeEventArgs.SocketClientAccessPolicyProtocol = SocketClientAccessPolicyProtocol.Http;
+            }
             _writeEventArgs.RemoteEndPoint = _addr;
             _writeEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(ioCompleted);
 #endif
@@ -803,10 +811,18 @@ namespace IceInternal
 
 #if SILVERLIGHT
                 _readEventArgs = new SocketAsyncEventArgs();
+                if(instance.initializationData().properties.getProperty("Ice.PolicyProtocol").Equals("Http"))
+                {
+                    _readEventArgs.SocketClientAccessPolicyProtocol = SocketClientAccessPolicyProtocol.Http;
+                }
                 _readEventArgs.RemoteEndPoint = _addr;
                 _readEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(ioCompleted);
                 
                 _writeEventArgs = new SocketAsyncEventArgs();
+                if(instance.initializationData().properties.getProperty("Ice.PolicyProtocol").Equals("Http"))
+                {
+                    _writeEventArgs.SocketClientAccessPolicyProtocol = SocketClientAccessPolicyProtocol.Http;
+                }
                 _writeEventArgs.RemoteEndPoint = _addr;
                 _writeEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(ioCompleted);
 #endif
