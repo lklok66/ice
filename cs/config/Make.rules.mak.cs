@@ -11,8 +11,7 @@
 # Select an installation base directory. The directory will be created
 # if it does not exist.
 #
-
-prefix			= C:\Ice-$(VERSION)
+prefix                  = C:\Ice-$(VERSION)
 
 #
 # Ice invokes unmanaged code to implement the following features:

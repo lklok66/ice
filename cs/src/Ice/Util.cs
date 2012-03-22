@@ -544,6 +544,10 @@ namespace IceInternal
 }
 
 #if SILVERLIGHT
+//
+// TODO: Remove for the next Ice release. Workaround to not have to
+// provide a patched slice2cs to compile the Slice for Silverlight.
+//
 namespace System
 {
     public interface ICloneable

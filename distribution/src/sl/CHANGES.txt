@@ -1,0 +1,61 @@
+Changes since version 0.3.2
+---------------------------
+
+- Added support to run test suite using either Glacier2 or IceBridge.
+
+- Fixed the generateUUID() function to work properly in all
+  installations.
+
+- Fixed a bug that could cause messages to be lost if multiple
+  messages were available to be read from the socket in a single
+  read.
+
+- Fixed a bug that could cause an ArgumentException when a message
+  is read using the socket transport.
+
+- Fixed oneway operations to work properly with socket transport.
+
+Changes since version 0.3.1
+---------------------------
+
+- Ice for Silverlight now supports Silverlight 2.0 and no 
+  longer supports Silverlight 2.0 Beta 2.
+
+Changes since version 0.3.0
+---------------------------
+
+- Fixed a bug that would generate bad code when "amd" keyword was used
+  with a slice operation or interface. As AMD is not supported in Ice
+  for Silverlight this keyword no longer has any effect.
+
+- Fixed a bug that could cause operation dispatch to fail with
+  OperationNotExistException, even if the operation actually existed.
+
+Changes since version 0.2.0
+---------------------------
+
+- Ice for Silverlight now supports using sockets as well as HTTP
+  for communications. Socket support requires the use of a Glacier2
+  router and also provides limited server-side capabilities. 
+
+- Fixed a bug in the Slice translator that caused incorrect code to be
+  generated for asynchronous operations when a derived interface was
+  in a different module than its base interface.
+
+Changes since version 0.1.0
+---------------------------
+
+- Ice for Silverlight now supports Silverlight 2.0 Beta 2 and no 
+  longer supports Silverlight 1.1 alpha.
+
+- It is no longer possible to make synchronous calls from the UI
+  thread. However, it is now possible to make both synchronous and
+  asynchronous calls from non-UI threads.
+
+- A new property, Ice.FactoryAssemblies, has been added that allows
+  you to specify assemblies that contain types required for user
+  exceptions and objects-by-value.
+
+- Due to changes in classes supported by Silverlight, it is no longer
+  possible to use LinkedList<T>, Stack<T>, and Queue<T> as alternate
+  sequence mappings in your Slice definitions.

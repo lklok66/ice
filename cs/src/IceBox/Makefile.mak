@@ -34,10 +34,10 @@ LIB_MCSFLAGS	= $(LIB_MCSFLAGS) /doc:$(bindir)\$(PKG).xml /nowarn:1591
 SLICE2CSFLAGS	= $(SLICE2CSFLAGS) --checksum --ice -I. -I$(slicedir)
 
 $(ICEBOXNET): $(I_SRCS) $(LIBNAME)
-	$(MCS) $(EXE_MCSFLAGS) -out:$@ -r:$(LIBNAME) -r:$(refdir)\Ice.dll $(I_SRCS)
+	$(MCS) $(EXE_MCSFLAGS) -out:$@ -r:$(LIBNAME) -r:$(bindir)\Ice.dll $(I_SRCS)
 
 $(LIBNAME): $(L_SRCS) $(GEN_SRCS)
-	$(MCS) /baseaddress:0x25000000 $(LIB_MCSFLAGS) -r:$(refdir)\Ice.dll $(L_SRCS) $(GEN_SRCS)
+	$(MCS) /baseaddress:0x25000000 $(LIB_MCSFLAGS) -r:$(bindir)\Ice.dll $(L_SRCS) $(GEN_SRCS)
 
 !if "$(DEBUG)" == "yes"
 clean::
