@@ -107,7 +107,7 @@ Building the tests and demos
 ----------------------------
 
 To build the tests and demos, you must first install the Ice for
-Silverlight assemblies and the Ice for Visual Add-in plugin. See the
+Silverlight assemblies and the Ice for Visual Add-in. See the
 installation instructions below before opening the Visual Studio
 solutions for the demos or tests.
 
