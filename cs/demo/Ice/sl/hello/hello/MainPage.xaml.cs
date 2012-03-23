@@ -44,7 +44,7 @@ namespace hello
             // Uncomment the following line if you want to use the web server
             // as a policy server.
             //
-            //initData.properties.setProperty("Ice.PolicyProtocol", "Http");
+            //initData.properties.setProperty("Ice.ClientAccessPolicyProtocol", "Http");
             _communicator = Ice.Util.initialize(initData);
         }
 

@@ -612,7 +612,7 @@ namespace IceInternal
 
 #if SILVERLIGHT
             _readEventArgs = new SocketAsyncEventArgs();
-            if(instance.initializationData().properties.getProperty("Ice.PolicyProtocol").Equals("Http"))
+            if(instance.initializationData().properties.getProperty("Ice.ClientAccessPolicyProtocol").Equals("Http"))
             {
                 _readEventArgs.SocketClientAccessPolicyProtocol = SocketClientAccessPolicyProtocol.Http;
             }
@@ -620,7 +620,7 @@ namespace IceInternal
             _readEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(ioCompleted);
 
             _writeEventArgs = new SocketAsyncEventArgs();
-            if(instance.initializationData().properties.getProperty("Ice.PolicyProtocol").Equals("Http"))
+            if(instance.initializationData().properties.getProperty("Ice.ClientAccessPolicyProtocol").Equals("Http"))
             {
                 _writeEventArgs.SocketClientAccessPolicyProtocol = SocketClientAccessPolicyProtocol.Http;
             }

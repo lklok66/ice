@@ -53,7 +53,7 @@ as a policy server.
    > copy config\PolicyResponse.xml C:\inetpub\wwwroot\clientaccesspolicy.xml
 
 2) in MainPage.xaml.cs ucomment the line that set the policy protocol
-   //initData.properties.setProperty("Ice.PolicyProtocol", "Http");
+   //initData.properties.setProperty("Ice.ClientAccessPolicyProtocol", "Http");
 
 3) Rebuild the demo and deploy it in the webserver.
 
