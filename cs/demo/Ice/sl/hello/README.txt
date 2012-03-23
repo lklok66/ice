@@ -22,6 +22,8 @@ as well as how to make oneway, and batched invocations.
    Silverlight application using the "Debug > Start new instance"
    command.
 
+5) In the browser window click helloTestPage.html
+
 ==========================================================================
 Using a web server as a policy server
 ==========================================================================

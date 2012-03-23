@@ -24,6 +24,8 @@ incoming connections to the client.
    Silverlight application using the "Debug > Start new instance"
    command.
 
+5) In the browser window click bidirTestPage.html
+
 ==========================================================================
 Running the demo with .NET Compact Framework bidir server
 ==========================================================================

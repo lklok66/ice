@@ -25,6 +25,9 @@ to start the server and the Glacier2 router.
    Silverlight application using the "Debug > Start new instance"
    command.
 
+5) In the browser window click chatTestPage.html
+
+
 ==========================================================================
 Using a web server as a policy server
 ==========================================================================
