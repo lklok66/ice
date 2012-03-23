@@ -22,7 +22,11 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("Copyright (c) 2003-2011 ZeroC, Inc.")]
 [assembly: AssemblyTrademark("Ice")]
 [assembly: AssemblyCulture("")]         
+#if SILVERLIGHT
+[assembly: AssemblyVersion("0.4.0")]
+#else
 [assembly: AssemblyVersion("3.4.2")]
+#endif
 [assembly: AssemblyDelaySign(false)]
 
 [assembly: ComVisible(false)]

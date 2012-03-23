@@ -10,7 +10,11 @@ from DistUtils import *
 # other files are all removed by reversing the below list.
 #
 filesToRemove = [
-    "./cs/test/Ice/Makefile.mak"
+    "./cs/test/Ice/Makefile.mak",
+    "./vsaddin/addin-vs2008.sln",
+    "./vsaddin/README.txt",
+    "./vsaddin/INSTALL.txt",
+    
 ]
 
 # List of files & subdirectories to keep, all others are removed.
@@ -211,7 +215,7 @@ move(os.path.join("distribution", "src", "sl", "Makefile.mak"), os.path.join("Ma
 move(os.path.join("distribution", "src", "sl", "Make.rules.mak.cs"), os.path.join("cs", "config", "Make.rules.mak.cs"))
 move(os.path.join("distribution", "src", "sl", "Makefile.mak.test"), os.path.join("cs", "test", "Makefile.mak"))
 move(os.path.join("distribution", "src", "sl", "Makefile.mak.test.Ice"), os.path.join("cs", "test", "Ice", "Makefile.mak"))
-move(os.path.join("distribution", "src", "sl", "allTests.py"), os.path.join("cs"))
+move(os.path.join("distribution", "src", "sl", "allTests.py"), os.path.join("cs", "allTests.py"))
 
 remove("distribution")
 
