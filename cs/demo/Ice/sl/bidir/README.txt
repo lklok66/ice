@@ -1,4 +1,5 @@
 This demo shows how to use bidirectional connections for callbacks.
+
 This feature is typically used if the server cannot open a connection
 to the client to send callbacks, for example, because firewalls block
 incoming connections to the client.
@@ -50,11 +51,10 @@ Using a web server as a policy server
 If you do not want to deploy a policy server, you can use a web server
 instead.
 
-1) Copy PolicyResponse.xml to your web server document root directory
-   and name it clientaccesspolicy.xml.
+1) Copy clientaccesspolicy.xml to your web server document root directory.
 
    > cd <Ice installation directory>\cs
-   > copy config\PolicyResponse.xml C:\inetpub\wwwroot\clientaccesspolicy.xml
+   > copy config\clientaccesspolicy.xml C:\inetpub\wwwroot\
 
 2) In MainPage.xaml.cs, uncomment the line that sets the policy
    protocol:

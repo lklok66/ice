@@ -49,6 +49,14 @@ For Each fileName in dllFiles
 Next
 
 '
+' Install policy server
+'
+out.WriteLine "copy: bin\policyserver.exe" & " to: " & installDir & "bin\policyserver.exe"
+fso.CopyFile "bin\policyserver.exe", installDir & "bin\policyserver.exe"
+out.WriteLine "copy: bin\cf\policyserver.exe" & " to: " & installDir & "bin\cf\policyserver.exe"
+fso.CopyFile "bin\cf\policyserver.exe", installDir & "bin\cf\policyserver.exe"
+
+'
 ' Install Visual Studio Add-in
 '
 WScript.StdOut.WriteLine "copy: vsaddin\IceVisualStudioAddin-VS2010.dll " & " to: " & installDir & "bin\sl\" & fileName

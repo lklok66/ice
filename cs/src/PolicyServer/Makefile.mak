@@ -17,17 +17,7 @@ SRCS		= PolicyServer.cs \
 
 !include $(top_srcdir)\config\Make.rules.mak.cs
 
-MCS			= csc -nologo
-
-MCSFLAGS = -warnaserror -d:MAKEFILE_BUILD
-!if "$(DEBUG)" == "yes"
-MCSFLAGS 		= $(MCSFLAGS) -debug -define:DEBUG
-!endif
-
-!if "$(OPTIMIZE)" == "yes"
-MCSFLAGS 		= $(MCSFLAGS) -optimize+
-!endif
-
+MCSFLAGS	= $(MCSFLAGS) -keyfile:$(KEYFILE)
 MCSFLAGS	= $(MCSFLAGS) -target:exe
 
 $(bindir)\policyserver.exe: $(SRCS)
@@ -38,5 +28,11 @@ clean::
 	del /q $(bindir)\policyserver.pdb
 !endif
 
+!if "$(COMPACT)" != "yes"
 install::$(TARGETS)
 	copy $(bindir)\policyserver.exe "$(install_bindir)"
+!else
+install::$(TARGETS)
+	mkdir "$(install_bindir)\cf"
+	copy $(bindir)\policyserver.exe "$(install_bindir)\cf"
+!endif

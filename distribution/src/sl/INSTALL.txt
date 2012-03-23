@@ -16,9 +16,9 @@ Browser
 
 Ice for Silverlight has been tested with:
 
-- Internet Explorer 8.0
-- Firefox ? // TODO
-- Google Chrome ?
+- Internet Explorer 8.0 and 9.0
+- Firefox 11
+- Google Chrome 17
 
 
 Compiler
@@ -65,7 +65,7 @@ Unpack the archive. The sources are contained in the IceSL-@ver@\cs
 subdirectory.
 
 
-Building the Ice for Silverlight assemblies and policy server
+Building the Ice for Silverlight assemblies
 -------------------------------------------------------------
 
 Follow these steps to build the Ice for Silverlight sources:
@@ -84,6 +84,23 @@ Follow these steps to build the Ice for Silverlight sources:
 
    > nmake /f Makefile.mak
 
+Building the Ice for Silverlight policy server
+-------------------------------------------------------------
+
+1) Change to the cs\src\PolicyServer subdirectory of the Ice for 
+   Silverlight source distribution.
+
+2) Open config\Make.rules.mak.cs and review the comments that describe
+   the settings you can modify. For example, you may wish to enable
+   optimization.
+
+3) Run nmake:
+
+   > nmake /f Makefile.mak SILVERLIGHT=no
+
+   Or if you want to build the policy server for .NET Compact Framework
+
+   > nmake /f Makefile.mak SILVERLIGHT=no COMPACT=yes
 
 Building the Ice Visual Studio Add-in plugin
 --------------------------------------------

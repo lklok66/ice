@@ -1,0 +1,35 @@
+======================================================================
+Requirements
+======================================================================
+
+Windows Version
+---------------
+
+Ice for Silverlight has been extensively tested on:
+
+- Windows 7 x86 and x64
+
+
+Browser
+-------
+
+Ice for Silverlight has been tested with:
+
+- Internet Explorer 8.0 and 9.0
+- Firefox 11
+- Google Chrome 17
+
+Ice 3.4.2
+---------
+
+Ice for Silverlight requires an Ice 3.4.2 installation available for
+download from:
+
+    http://www.zeroc.com/download.html
+
+======================================================================
+Installation
+======================================================================
+
+To install the Ice for Silverlight assemblies and the Visual Studio
+Add-in, click install.bat in this directory.

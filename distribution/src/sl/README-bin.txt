@@ -1,5 +1,4 @@
-TODO: XXX: Explain how to install the binary distribution
-
+Please see the file INSTALL.txt for installation instructions.
 
 Ice for Silverlight is a port of Ice for C# to Silverlight with some
 limitations:
@@ -39,7 +38,7 @@ connect to any Ice servers.
 Features specific to Ice for Silverlight are described in more details
 below.
 
-TCP Socket transport
+TCP socket transport
 ====================
 
 To use the socket transport in Ice for Silverlight, you must run a
@@ -55,16 +54,22 @@ servers:
 
     http://msdn.microsoft.com/en-us/library/cc645032(VS.95).aspx
 
-If you don't want to deploy a policy server you can also use the web
+If you do not want to deploy a policy server you can also use the web
 server as a policy server by adding a clientaccesspolicy.xml file at
-the document root directory of your web server. Refer to the link
-above for moer information on this.
+the document root directory of your web server, you must also set
+Ice.ClientAccessPolicyProtocol to Http for that to work. Refer to 
+the link above for more information.
 
-Silverlight limits the range of ports to which a client can
-connect. As a result, you must configure your Ice server to listen on
-a TCP port within the range 4502 to 4534.
+Silverlight limits the range of ports to which a client can connect.
+As a result, you must configure your Ice server to listen on a TCP
+port within the range 4502 to 4534.
 
-TODO: talk about OOB silverlight applications
+Out of browser applications are not subject of this limitations, and
+so for this kind of applications you don't need a policy server. For
+more info about out of browser applications see:
+
+    http://msdn.microsoft.com/en-us/library/dd550721(v=vs.95).aspx
+
 
 Callbacks
 =========
@@ -76,7 +81,7 @@ mappings: you create an object adapter and associate it to an Ice
 connection, which causes callback requests from the server to your
 Silverlight client to traverse the outgoing connection from the client
 to the server. In other words, the Silverlight client establishes a
-bi-directional connection with the server in which requests can flow
+bi-directional connection with the server over which requests can flow
 in either direction.
 
 
@@ -93,6 +98,7 @@ list of qualified assembly names separated by whitespace. For example:
 
   Ice.FactoryAssemblies=UserAssembly1,version=1.0.0 UserAssembly2,version=1.0.0.0
 
-If you do not set this property, your client will throw
+If you do not set this property, your client may throw
 Ice.UnmarshalOutOfBoundsException or Ice.NoObjectFactoryException if
-it receives an unknown user exception or object by value respectively.
+Ice receives an unknown user exception or object by value,
+respectively.

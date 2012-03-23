@@ -58,14 +58,19 @@ servers:
 
 If you do not want to deploy a policy server you can also use the web
 server as a policy server by adding a clientaccesspolicy.xml file at
-the document root directory of your web server. Refer to the link
-above for more information.
+the document root directory of your web server, you must also set
+Ice.ClientAccessPolicyProtocol to Http for that to work. Refer to 
+the link above for more information.
 
 Silverlight limits the range of ports to which a client can connect.
 As a result, you must configure your Ice server to listen on a TCP
 port within the range 4502 to 4534.
 
-TODO: talk about OOB silverlight applications
+Out of browser applications are not subject of this limitations, and
+so for this kind of applications you don't need a policy server. For
+more info about out of browser applications see:
+
+    http://msdn.microsoft.com/en-us/library/dd550721(v=vs.95).aspx
 
 
 Callbacks

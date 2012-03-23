@@ -21,13 +21,14 @@ filesToRemove = toPaths([
     "./vsaddin/README.txt",
     "./vsaddin/INSTALL.txt",
     "./cs/src/IceSSL",
+    "./cs/src/IceBox",
 ])
 
 # List of files & subdirectories to keep, all others are removed.
 filesToKeep = toPaths([
     "./config/Make.common.rules.mak",
     "./config/IceDevKey.snk",
-    "./cs/config/PolicyResponse.xml",
+    "./cs/config/clientaccesspolicy.xml",
     "./cs/src",
     "./cs/bin",
     "./cs/Makefile.mak",
@@ -214,10 +215,11 @@ move(os.path.join("distribution", "src", "sl", "CHANGES.txt"), os.path.join("CHA
 move(os.path.join("distribution", "src", "sl", "Makefile.mak"), os.path.join("Makefile.mak"))
 move(os.path.join("distribution", "src", "sl", "Make.rules.mak.cs"), os.path.join("cs", "config", "Make.rules.mak.cs"))
 move(os.path.join("distribution", "src", "sl", "Makefile.mak.test"), os.path.join("cs", "test", "Makefile.mak"))
-move(os.path.join("distribution", "src","sl", "Makefile.mak.test.Ice"), os.path.join("cs", "test", "Ice", "Makefile.mak"))
+move(os.path.join("distribution", "src", "sl", "Makefile.mak.test.Ice"), os.path.join("cs", "test", "Ice", "Makefile.mak"))
 move(os.path.join("distribution", "src", "sl", "allTests.py"), os.path.join("cs", "allTests.py"))
 
 move(os.path.join("distribution", "src", "sl", "README-bin.txt"), os.path.join(binDir, "README.txt"))
+move(os.path.join("distribution", "src", "sl", "INSTALL-bin.txt"), os.path.join(binDir, "INSTALL.txt"))
 move(os.path.join("distribution", "src", "sl", "install.bat"), os.path.join(binDir, "install.bat"))
 move(os.path.join("distribution", "src", "sl", "install.vbs"), os.path.join(binDir, "install.vbs"))
 
@@ -251,6 +253,8 @@ os.system("nmake /f Makefile.mak install")
 
 os.chdir(os.path.join("cs", "src", "PolicyServer"))
 os.system("nmake /f Makefile.mak SILVERLIGHT=no install")
+os.system("nmake /f Makefile.mak SILVERLIGHT=no clean")
+os.system("nmake /f Makefile.mak SILVERLIGHT=no COMPACT=yes install")
 os.chdir(srcDir)
 
 #

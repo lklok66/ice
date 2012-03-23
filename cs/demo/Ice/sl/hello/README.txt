@@ -16,7 +16,7 @@ as well as how to make oneway, and batched invocations.
 3) In a command window, start the policy server:
 
    > cd <Ice installation directory>\bin
-   > policyserver 127.0.0.1 ..\config\PolicyResponse.xml
+   > policyserver 127.0.0.1 ..\config\clientaccesspolicy.xml
 
 4) In Visual Studio, open the `hello.Web' project and start the
    Silverlight client using the "Debug > Start new instance"
@@ -32,11 +32,10 @@ Using a web server as a policy server
 If you do not want to deploy a policy server, you can use a web server
 instead.
 
-1) Copy PolicyResponse.xml to your web server document root directory
-   and name it clientaccesspolicy.xml.
+1) Copy clientaccesspolicy.xml to your web server document root directory.
 
    > cd <Ice installation directory>\cs
-   > copy config\PolicyResponse.xml C:\inetpub\wwwroot\clientaccesspolicy.xml
+   > copy config\clientaccesspolicy.xml C:\inetpub\wwwroot\
 
 2) In MainPage.xaml.cs, uncomment the line that sets the policy
    protocol:

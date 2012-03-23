@@ -45,9 +45,9 @@ public sealed class PolicyServer : IDisposable
         // Read policy file
         try
         {
-	    using(FileStream fs = File.OpenRead(_policyFile))
-	    {
-	        _policyBytes = new byte[fs.Length];
+            using(FileStream fs = File.OpenRead(_policyFile))
+            {
+                _policyBytes = new byte[fs.Length];
                 int numBytesToRead = (int)fs.Length;
                 int numBytesRead = 0;
                 while (numBytesToRead > 0)
@@ -57,13 +57,13 @@ public sealed class PolicyServer : IDisposable
 
                     // Break when the end of the file is reached.
                     if (n == 0)
-		    {
-                        break;
-		    }
-		    numBytesRead += n;
-		    numBytesToRead -= n;
+                    {
+                                break;
+                    }
+                    numBytesRead += n;
+                    numBytesToRead -= n;
                 }
-	    }
+            }
         }
         catch(System.IO.IOException ex)
         {
@@ -85,7 +85,7 @@ public sealed class PolicyServer : IDisposable
         Console.WriteLine("Policy Server started...");
         // Start policy response thread
         Thread policyThread = new Thread(ServePolicy);
-	policyThread.IsBackground = true;
+        policyThread.IsBackground = true;
         policyThread.Start();
         policyThread.Join();
     }
@@ -127,10 +127,21 @@ class Program
 {
     static void Main(string[] args)
     {
-        if(args.Length == 2)
+        if(args.Length <= 2)
         {
+            string ipAddress = "0.0.0.0";
+            string policyFile = "clientaccesspolicy.xml";
+            if(args.Length > 0)
+            {
+                ipAddress = args[0];
+            }
+            if(args.Length > 1)
+            {
+                policyFile = args[1];
+            }
+
             // Start our Policy Service
-            using (PolicyServer server = new PolicyServer(args[0], args[1]))
+            using(PolicyServer server = new PolicyServer(ipAddress, policyFile))
             {
                 server.Start();
             }
