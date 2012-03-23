@@ -258,6 +258,10 @@ substitute(os.path.join("cs", "config", "Make.rules.mak.cs"), [('prefix.*=\s\$\(
 substitute(os.path.join("vsaddin", "config", "Make.rules.mak"), [('prefix.*=.*', 'prefix=' + binDir)])
 os.system("nmake /f Makefile.mak install")
 
+os.chdir(os.path.join("cs", "src", "PolicyServer"))
+os.system("nmake /f Makefile.mak SILVERLIGHT=no install")
+os.chdir(srcDir)
+
 #
 # Move files from the soure distribution to the binary distribution
 #
@@ -274,8 +278,8 @@ zipArchive(binDir, verbose)
 #
 print "Cleaning up...",
 sys.stdout.flush()
-#remove(srcDir)
-#remove(binDir)
+remove(srcDir)
+remove(binDir)
 print "ok"
 
 os.chdir(cwd)

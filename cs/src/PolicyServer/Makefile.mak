@@ -37,3 +37,6 @@ $(bindir)\policyserver.exe: $(SRCS)
 clean::
 	del /q $(bindir)\policyserver.pdb
 !endif
+
+install::$(TARGETS)
+	copy $(bindir)\policyserver.exe "$(install_bindir)"
