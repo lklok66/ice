@@ -34,8 +34,6 @@ SRCS		= IceDialog.cs \
 		   IceCppConfigurationDialog.Designer.cs \
 		   IceCsharpConfigurationDialog.cs \
 		   IceCsharpConfigurationDialog.Designer.cs \
-		   IceSilverlightConfigurationDialog.cs \
-		   IceSilverlightConfigurationDialog.Designer.cs \
 		   IceVBConfigurationDialog.cs \
 		   IceVBConfigurationDialog.Designer.cs \
 		   OutputDirView.cs \
@@ -45,7 +43,6 @@ SRCS		= IceDialog.cs \
 
 RESOURCES 	= /resource:IceCppConfigurationDialog.resx \
 	   	  /resource:IceCsharpConfigurationDialog.resx \
-	   	  /resource:IceSilverlightConfigurationDialog.resx \
 	   	  /resource:IceVBConfigurationDialog.resx \
 		  /resource:ExtraCompilerOptionsView.resx \
 		  /resource:IncludePathView.resx \
