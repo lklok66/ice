@@ -3,42 +3,44 @@ Please see the file INSTALL.txt for installation instructions.
 Ice for Silverlight is a port of Ice for C# to Silverlight with some
 limitations:
 
-- it only supports the TCP socket transport. SSL or UDP transports are
-  not supported.
+- It only supports the TCP socket transport. SSL and UDP transports
+  are not supported.
 
-- there's no support for server side connections: an Ice for
-  Silverlight application can't accept connections. However, it does
-  support bi-directional connections and can therefore dispatch
-  requests received over a connection to a server.
+- Server-side connections are not supported, therefore an Ice for
+  Silverlight application cannot accept connections. However,
+  bi-directional connections are supported, which means a Silverlight
+  client can dispatch requests received over a connection to a server.
 
-- it doesn't support protocol compression.
+- Protocol compression is not supported.
 
 - Ice.Application and Glacier2.Application classes are not supported.
 
 - Dynamic loading of Slice-generated class and exception factories are
-  not supported, the Ice.FactoryAssemblies property must be used
+  not supported. The Ice.FactoryAssemblies property must be used
   instead.
 
-- the ICE_CONFIG environment variable is not supported.
+- The ICE_CONFIG environment variable is not supported.
 
-- Dynamic loading of Slice checksums.
+- Dynamic loading of Slice checksums is not supported.
 
 - Thread priorities are not supported.
 
-- the Ice.StdOut, Ice.StdErr, Ice.PrintProcessId and Ice.LogFile
+- The Ice.StdOut, Ice.StdErr, Ice.PrintProcessId and Ice.LogFile
   properties are not supported.
 
 - Loading properties from the Windows registry is not supported.
 
 This Ice for Silverlight release also no longer supports the HTTP
-transport supported in previous Ice for Silverlight versions and
-doesn't restrict anymore Ice connections to Glacier2 routers, it can
-connect to any Ice servers.
+transport that was available in previous Ice for Silverlight versions.
+Furthermore, a Glacier2 router is no longer required when using the
+TCP transport; a Silverlight client is now able to connect directly to
+any Ice server.
 
-Features specific to Ice for Silverlight are described in more details
+Features specific to Ice for Silverlight are described in more detail
 below.
 
-TCP Socket transport
+
+TCP socket transport
 ====================
 
 To use the socket transport in Ice for Silverlight, you must run a
@@ -54,16 +56,17 @@ servers:
 
     http://msdn.microsoft.com/en-us/library/cc645032(VS.95).aspx
 
-If you don't want to deploy a policy server you can also use the web
+If you do not want to deploy a policy server you can also use the web
 server as a policy server by adding a clientaccesspolicy.xml file at
 the document root directory of your web server. Refer to the link
-above for moer information on this.
+above for more information.
 
-Silverlight limits the range of ports to which a client can
-connect. As a result, you must configure your Ice server to listen on
-a TCP port within the range 4502 to 4534.
+Silverlight limits the range of ports to which a client can connect.
+As a result, you must configure your Ice server to listen on a TCP
+port within the range 4502 to 4534.
 
 TODO: talk about OOB silverlight applications
+
 
 Callbacks
 =========
@@ -75,7 +78,7 @@ mappings: you create an object adapter and associate it to an Ice
 connection, which causes callback requests from the server to your
 Silverlight client to traverse the outgoing connection from the client
 to the server. In other words, the Silverlight client establishes a
-bi-directional connection with the server in which requests can flow
+bi-directional connection with the server over which requests can flow
 in either direction.
 
 
@@ -92,6 +95,7 @@ list of qualified assembly names separated by whitespace. For example:
 
   Ice.FactoryAssemblies=UserAssembly1,version=1.0.0 UserAssembly2,version=1.0.0.0
 
-If you do not set this property, your client will throw
+If you do not set this property, your client may throw
 Ice.UnmarshalOutOfBoundsException or Ice.NoObjectFactoryException if
-it receives an unknown user exception or object by value respectively.
+Ice receives an unknown user exception or object by value,
+respectively.

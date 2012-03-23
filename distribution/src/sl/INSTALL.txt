@@ -19,6 +19,7 @@ Ice for Silverlight has been tested with:
 - Internet Explorer 8.0
 - Firefox ? // TODO
 
+
 Compiler
 --------
 
@@ -26,10 +27,11 @@ Ice for Silverlight requires:
 
 - Microsoft Visual Studio 2010 SP1 
 
-- The Visual Studio 2010 SP1 SDK to compile the Ice for Visual Studio
-  Add-in plugin available for download from:
+- The Visual Studio 2010 SP1 SDK available for download from:
 
     http://www.microsoft.com/download/en/details.aspx?id=21835
+
+  This SDK is necessary for compiling the Ice Visual Studio Add-in.
 
 
 Silverlight
@@ -74,7 +76,7 @@ Follow these steps to build the Ice for Silverlight sources:
    the settings you can modify. For example, you may wish to enable
    optimization.
 
-3) If your Ice distribution is not installed at the default location
+3) If your Ice distribution is not installed at the default location,
    set the ICE_HOME variable in config\Make.rules.mak.cs
 
 4) Run nmake:
@@ -100,6 +102,7 @@ The library name is
 
    IceVisualStudioAddin-VS2010.dll
 
+
 Building the tests and demos
 ----------------------------
 
@@ -119,8 +122,8 @@ located in cs\test\testsl.sln and cs\demo\demosl.sln.
 
 Since Ice for Silverlight provides client-side functionality only, you
 must use Ice servers from another Ice language mapping in order to run
-the tests. This source distribution includes tests for Ice for
-.NET, to build the tests:
+the tests. This source distribution includes tests for Ice for .NET.
+To build the .NET tests:
 
 1) In a Visual Studio command prompt, change to the cs\test
    subdirectory of the Ice for Silverlight source distribution.
@@ -154,8 +157,8 @@ Installation
 ======================================================================
 
 To install the Ice for Silverlight assemblies and the Visual Studio
-Add-in plugin, in a Visual Studio command prompt, run nmake install at
-the root of the Ice for Silverlight source distribution:
+Add-in, open a Visual Studio command prompt and run the following
+command at the root of the Ice for Silverlight source distribution:
 
    > nmake /f Makefile.mak install
 
@@ -163,8 +166,8 @@ Note that you must run the Visual Studio command prompt as
 Administrator if Ice is installed at a location that requires
 administrative access.
 
-The Ice for Silverlight assemblies and the Visual Studio Add-in plugin
-will be installed in the directories specified by the "prefix" variable 
-in cs\config\Make.rules.mak.cs and vsaddin\config\Make.rules.mak
+The Ice for Silverlight assemblies and the Visual Studio Add-in will
+be installed in the directories specified by the "prefix" variable 
+in cs\config\Make.rules.mak.cs and vsaddin\config\Make.rules.mak.
 
-The Ice Silverlight assemblies will be located in <prefix>\bin\sl.
+The Ice for Silverlight assemblies will be located in <prefix>\bin\sl.

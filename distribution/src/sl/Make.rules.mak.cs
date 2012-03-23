@@ -15,10 +15,10 @@
 prefix                  = $(ICE_HOME)
 
 #
-# Specify where Ice 3.4.2 is installed. It not specified, it defaults to: 
+# Specify where Ice 3.4.2 is installed. If not specified, it defaults to: 
 #
-#   - C:\Program Files\ZeroC\Ice-3.4.2 on 32 bits platforms
-#   - C:\Program Files (x86)\ZeroC\Ice-3.4.2 on 64 bits platforms
+#   - C:\Program Files\ZeroC\Ice-3.4.2 on 32-bit platforms
+#   - C:\Program Files (x86)\ZeroC\Ice-3.4.2 on 64-bit platforms
 #
 # NOTE: If Ice is installed in a directory with spaces, you need to use
 # the 8.3 alias (nmake doesn't support spaces in paths of make rules).  
