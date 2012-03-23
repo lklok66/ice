@@ -1,0 +1,2 @@
+cscript install.vbs
+pause
