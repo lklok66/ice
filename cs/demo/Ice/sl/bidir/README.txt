@@ -1,62 +1,67 @@
 This demo shows how to use bidirectional connections for callbacks.
-This is typically used if the server cannot open a connection to the
-client to send callbacks, for example, because firewalls block
+This feature is typically used if the server cannot open a connection
+to the client to send callbacks, for example, because firewalls block
 incoming connections to the client.
 
-1) You can use a server from any Ice language mapping, befofe starting
-   the server, you must edit the server endpoints to use a port in the
-   range allowed by Silverlight.
+1) You can use a bidir server from any Ice language mapping. Before
+   starting the server, you must edit the server's endpoints to use a
+   port in the range allowed by Silverlight.
 
-   Edit the config.server file in the server bidir demo directory and
-   update the property Callback.Server.Endpoints as follow:
+   Edit the config.server file in the server's demo directory and
+   update the property Callback.Server.Endpoints as follows:
 
-       Callback.Server.Endpoints=tcp -p 4502
-   
-2) Start the bidir server following the instructions in the demo
+     Callback.Server.Endpoints=tcp -p 4502
+
+2) Start the bidir server according to the instructions in the demo
    README file.
 
-3) In a command window, start the policy server.
+3) In a command window, start the policy server:
 
    > cd <Ice installation directory>\bin
    > policyserver 127.0.0.1 ..\config\PolicyResponse.xml
 
-4) From Visual Studio open the `bidir.Web' and start the bidir
-   Silverlight application using the "Debug > Start new instance"
+4) In Visual Studio, open the `bidir.Web' project and start the
+   Silverlight client using the "Debug > Start new instance"
    command.
 
-5) In the browser window click bidirTestPage.html
+5) In the browser window, open bidirTestPage.html
+
 
 ==========================================================================
 Running the demo with .NET Compact Framework bidir server
 ==========================================================================
 
-1) Start the bidir server following the instructions in the
-   demo\Ice\compact\bidir\README.txt file, before clicking the `Start
-   Server' button update the port field to 4502
+1) Start the bidir server according to the instructions in the
+   demo\Ice\compact\bidir\README.txt file. Before clicking the `Start
+   Server' button, update the port field to 4502.
 
-2) In the bidir demo "Properties > Debug" select Out-of-browser
-   application, and in the combo box select bidir.
+2) In the Silverlight project, choose "Properties > Debug", select
+   Out-of-browser application, and select "bidir" in the combo box.
 
-3) Start the bidir client using the "Debug > Start new instance"
-   command, set the host field to the ip address used by the emulator,
-   and click Run.
+3) Start the Silverlight client using the "Debug > Start new instance"
+   command. Set the host field to the IP address used by the .NET CF
+   server, and click Run.
+
 
 ==========================================================================
 Using a web server as a policy server
 ==========================================================================
 
-If you don't want to deploy a policy server you can use the web server
-as a policy server.
+If you do not want to deploy a policy server, you can use a web server
+instead.
 
-1) copy PolicyResponse.xml to your web server document root directory
+1) Copy PolicyResponse.xml to your web server document root directory
    and name it clientaccesspolicy.xml.
 
    > cd <Ice installation directory>\cs
    > copy config\PolicyResponse.xml C:\inetpub\wwwroot\clientaccesspolicy.xml
 
-2) in MainPage.xaml.cs ucomment the line that set the policy protocol
+2) In MainPage.xaml.cs, uncomment the line that sets the policy
+   protocol:
+
    //initData.properties.setProperty("Ice.ClientAccessPolicyProtocol", "Http");
 
-3) Rebuild the demo and deploy it in the webserver.
+3) Rebuild the demo and deploy it in the web server.
 
-* Note that the web server should serve the policy file in standard port 80
+Note that the web server should serve the policy file on standard
+port 80.

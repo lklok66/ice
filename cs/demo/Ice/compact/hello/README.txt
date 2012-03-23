@@ -2,7 +2,8 @@ This demo shows how to write a simple C# client application using Ice
 for .NET Compact Framework (CF).
 
 This demo requires a hello server. You can use the C# server located
-in ..\..\hello, or you can use a server from any other language mapping.
+in ..\..\hello, or you can use a server from any other language
+mapping.
 
 You must use Visual Studio 2008 to build this client (Visual Studio
 2010 does not support Compact Framework development). Follow these

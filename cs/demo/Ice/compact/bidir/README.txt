@@ -2,7 +2,8 @@ This demo shows how to write a simple C# server application using Ice
 for .NET Compact Framework (CF).
 
 This demo requires a bidir client. You can use the C# client located
-in ..\..\bidir, or you can use a client from any other language mapping.
+in ..\..\bidir, or you can use a client from any other language
+mapping.
 
 You must use Visual Studio 2008 to build this client (Visual Studio
 2010 does not support Compact Framework development). Follow these
