@@ -20,6 +20,7 @@ filesToRemove = toPaths([
     "./vsaddin/addin-vs2008.sln",
     "./vsaddin/README.txt",
     "./vsaddin/INSTALL.txt",
+    "./cs/src/IceSSL",
 ])
 
 # List of files & subdirectories to keep, all others are removed.
