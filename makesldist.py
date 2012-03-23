@@ -5,20 +5,26 @@ import os, sys, fnmatch, re, getopt
 sys.path.append(os.path.join(os.path.dirname(__file__), "distribution", "lib"))
 from DistUtils import *
 
+def toPaths(paths):
+    newPaths = []
+    for p in paths:
+        newPaths.append(os.path.join(*p.split('/')))
+    return newPaths
+
 #
 # This is an explicit list of some SL specific files to remove. The
 # other files are all removed by reversing the below list.
 #
-filesToRemove = [
+filesToRemove = toPaths([
     "./cs/test/Ice/Makefile.mak",
     "./vsaddin/addin-vs2008.sln",
     "./vsaddin/README.txt",
     "./vsaddin/INSTALL.txt",
     
-]
+])
 
 # List of files & subdirectories to keep, all others are removed.
-filesToKeep = [
+filesToKeep = toPaths([
     "./config/Make.common.rules.mak",
     "./config/IceDevKey.snk",
     "./cs/config/PolicyResponse.xml",
@@ -34,7 +40,7 @@ filesToKeep = [
     "./scripts",
     "./vsaddin",
     "./distribution",
-]
+])
 
 def pathInList(p, l):
     for f in l:
@@ -129,9 +135,12 @@ if os.path.exists(distDir):
     remove(distDir)
 os.mkdir(distDir)
 
-print "Creating " + version + " source distributions in " + distDir
+print "Creating " + version + " source and binary distributions in " + distDir
 
 srcDir = os.path.join(distDir, "IceSL-" + version)
+
+binDir = srcDir + "-bin"
+os.mkdir(binDir)
 
 #
 # Extract the sources with git archive using the given tag.
@@ -214,8 +223,12 @@ move(os.path.join("distribution", "src", "sl", "CHANGES.txt"), os.path.join("CHA
 move(os.path.join("distribution", "src", "sl", "Makefile.mak"), os.path.join("Makefile.mak"))
 move(os.path.join("distribution", "src", "sl", "Make.rules.mak.cs"), os.path.join("cs", "config", "Make.rules.mak.cs"))
 move(os.path.join("distribution", "src", "sl", "Makefile.mak.test"), os.path.join("cs", "test", "Makefile.mak"))
-move(os.path.join("distribution", "src", "sl", "Makefile.mak.test.Ice"), os.path.join("cs", "test", "Ice", "Makefile.mak"))
+move(os.path.join("distribution", "src","sl", "Makefile.mak.test.Ice"), os.path.join("cs", "test", "Ice", "Makefile.mak"))
 move(os.path.join("distribution", "src", "sl", "allTests.py"), os.path.join("cs", "allTests.py"))
+
+move(os.path.join("distribution", "src", "sl", "README-bin.txt"), os.path.join(binDir, "README.txt"))
+move(os.path.join("distribution", "src", "sl", "install.bat"), os.path.join(binDir, "install.bat"))
+move(os.path.join("distribution", "src", "sl", "install.vbs"), os.path.join(binDir, "install.vbs"))
 
 remove("distribution")
 
@@ -237,11 +250,32 @@ for d in [srcDir]:
 #writeSrcDistReport("IceSL", version, compareToDir, [srcDir])
 
 #
+# Unzip the source distribution and build the IceSL binary distribution.
+#
+
+os.chdir(srcDir)
+substitute(os.path.join("cs", "config", "Make.rules.mak.cs"), [('prefix.*=\s\$\(ICE_HOME\)', 'prefix=' + binDir)])
+substitute(os.path.join("vsaddin", "config", "Make.rules.mak"), [('prefix.*=.*', 'prefix=' + binDir)])
+os.system("nmake /f Makefile.mak install")
+
+#
+# Move files from the soure distribution to the binary distribution
+#
+move(os.path.join("ICESL_LICENSE.txt"), os.path.join(binDir, "ICESL_LICENSE.txt"))
+move(os.path.join("LICENSE.txt"), os.path.join(binDir, "LICENSE.txt"))
+move(os.path.join("cs", "demo"), os.path.join(binDir, "demo"))
+
+os.chdir(distDir)
+
+zipArchive(binDir, verbose)
+
+#
 # Done.
 #
 print "Cleaning up...",
 sys.stdout.flush()
-remove(srcDir)
+#remove(srcDir)
+#remove(binDir)
 print "ok"
 
 os.chdir(cwd)

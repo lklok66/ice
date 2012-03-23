@@ -7,12 +7,17 @@
 #
 # **********************************************************************
 
-SUBDIRS			= cs
+SUBDIRS			= cs vsaddin
 
 all::
 	@for %i in ( $(SUBDIRS) ) do \
 	    @echo "making all in %i" && \
 	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) all" || exit 1
+
+install::
+	@for %i in ( $(SUBDIRS) ) do \
+	    @echo "making install in %i" && \
+	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) install" || exit 1
 
 clean::
 	@for %i in ( $(SUBDIRS) ) do \

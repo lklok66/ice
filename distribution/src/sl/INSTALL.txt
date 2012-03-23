@@ -18,6 +18,7 @@ Ice for Silverlight has been tested with:
 
 - Internet Explorer 8.0
 - Firefox ? // TODO
+- Google Chrome ?
 
 
 Compiler

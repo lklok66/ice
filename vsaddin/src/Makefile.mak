@@ -16,7 +16,7 @@ PKG		= $(PRODUCT)-$(PKG_PREFIX)
 
 install_addindir = $(prefix)\vsaddin
 
-INSTALL_SUBDIRS	= $(install_addindir) $(install_configdir)
+INSTALL_SUBDIRS	= "$(install_addindir)" "$(install_configdir)"
 
 TARGETS		= $(top_srcdir)\bin\$(PKG).dll
 PDBS		= $(top_srcdir)\bin\$(PKG).pdb
@@ -54,17 +54,17 @@ $(TARGETS):: $(SRCS)
 	$(MCS) $(MCSFLAGS) $(RESOURCES) $(SRCS)
 
 install::$(TARGETS)
-	@if not exist $(prefix) \
+	@if not exist "$(prefix)" \
 	    @echo "Creating $(prefix) ..." && \
-	    mkdir $(prefix)
+	    mkdir "$(prefix)"
 	@for %i in ( $(INSTALL_SUBDIRS) ) do \
 	    @if not exist %i \
 		@echo "Creating %i ..." && \
 		mkdir %i
 
-	copy $(TARGETS) $(install_addindir)\$(PKG).dll
-	copy ..\config\Ice-$(PKG_PREFIX).AddIn $(install_configdir)\Ice-$(PKG_PREFIX).AddIn
-	copy ..\config\$(PROPERTY_SHEET) $(install_configdir)\$(PROPERTY_SHEET)
+	copy $(TARGETS) "$(install_addindir)\$(PKG).dll"
+	copy ..\config\Ice-$(PKG_PREFIX).AddIn "$(install_configdir)\Ice-$(PKG_PREFIX).AddIn"
+	copy ..\config\$(PROPERTY_SHEET) "$(install_configdir)\$(PROPERTY_SHEET)"
 
 clean::
 	-del /q $(TARGETS) $(PDBS)
