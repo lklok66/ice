@@ -20,7 +20,6 @@ filesToRemove = toPaths([
     "./vsaddin/addin-vs2008.sln",
     "./vsaddin/README.txt",
     "./vsaddin/INSTALL.txt",
-    
 ])
 
 # List of files & subdirectories to keep, all others are removed.
@@ -33,6 +32,7 @@ filesToKeep = toPaths([
     "./cs/Makefile.mak",
     "./cs/demo/demosl.sln",
     "./cs/demo/Ice/sl",
+    "./cs/demo/Ice/compact/bidir",
     "./cs/demo/Glacier2/sl",
     "./cs/test/testsl.sln",
     "./cs/test/Ice",
@@ -198,16 +198,6 @@ for root, dirnames, filesnames in os.walk('.'):
 print "ok"
 
 #
-# Change the public key token in web.config files
-#
-print "Changing the PublicKeyToken in web.config files to " + publickey + "...",
-for root, dirnames, filesnames in os.walk('.'):
-    for f in filesnames:
-        if f == "Web.config" or f == "web.config":
-            substitute(os.path.join(root, f), [('PublicKeyToken=1f998c50fec78381', 'PublicKeyToken=%s' % publickey)])
-print "ok"
-
-#
 # Copy IceSL specific install files.
 #
 print "Copying icesl install files...",
@@ -268,6 +258,18 @@ os.chdir(srcDir)
 move(os.path.join("ICESL_LICENSE.txt"), os.path.join(binDir, "ICESL_LICENSE.txt"))
 move(os.path.join("LICENSE.txt"), os.path.join(binDir, "LICENSE.txt"))
 move(os.path.join("cs", "demo"), os.path.join(binDir, "demo"))
+
+#
+# Change the public key token in web.config files
+#
+os.chdir(os.path.join(binDir, "demo"))
+print "Changing the PublicKeyToken in demo project files to " + publickey + "...",
+for root, dirnames, filesnames in os.walk('.'):
+    for f in filesnames:
+        if fnmatch.fnmatch(f, "*.csproj"):
+            print "Fixing " + f
+            substitute(os.path.join(root, f), [('PublicKeyToken=1f998c50fec78381', 'PublicKeyToken=%s' % publickey)])
+print "ok"
 
 os.chdir(distDir)
 
