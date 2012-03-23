@@ -15,12 +15,20 @@ SUBDIRS		= src
 
 !if "$(SILVERLIGHT)" != "yes"
 SUBDIRS		= $(SUBDIRS) test demo
-!endif
 
 install:: install-common
 	@if not exist "$(install_bindir)" \
 	    @echo "Creating $(install_bindir)..." && \
 	    mkdir "$(install_bindir)"
+!else
+
+install::
+	@if not exist "$(install_bindir)" \
+	    @echo "Creating $(install_bindir)..." && \
+	    mkdir "$(install_bindir)"
+
+!endif
+
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \

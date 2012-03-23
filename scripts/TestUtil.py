@@ -79,7 +79,7 @@ def getCppCompiler():
     compiler = ""
     if os.environ.get("CPP_COMPILER", "") != "":
         compiler = os.environ["CPP_COMPILER"]
-    else:
+    elif os.path.exists(os.path.join(toplevel, "cpp", "config", "Make.rules.mak")):
         config = open(os.path.join(toplevel, "cpp", "config", "Make.rules.mak"), "r")
         compiler = re.search("CPP_COMPILER[\t\s]*= ([A-Z0-9]*)", config.read()).group(1)
     return compiler
@@ -583,7 +583,11 @@ def getIceVersion():
     return re.search("VERSION[\t\s]*= ([0-9]+\.[0-9]+(\.[0-9]+|b[0-9]*))", config.read()).group(1)
 
 def getIceSoVersion():
-    config = open(os.path.join(toplevel, "cpp", "include", "IceUtil", "Config.h"), "r")
+    configPath = os.path.join(toplevel, "cpp", "include", "IceUtil", "Config.h")
+    if not os.path.exists(configPath):
+        return ""
+
+    config = open(configPath, "r")
     intVersion = int(re.search("ICE_INT_VERSION ([0-9]*)", config.read()).group(1))
     majorVersion = intVersion / 10000
     minorVersion = intVersion / 100 - 100 * majorVersion    

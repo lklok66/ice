@@ -1,3 +1,11 @@
+Changes since version 0.3.3
+---------------------------
+
+- Ice for Silverlight is now a port of Ice for C# to Silverlight. The
+  HTTP transport and bridge are no longer supported, only the TCP socket
+  transport is supported.
+
+
 Changes since version 0.3.2
 ---------------------------
 

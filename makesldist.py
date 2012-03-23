@@ -10,15 +10,24 @@ from DistUtils import *
 # other files are all removed by reversing the below list.
 #
 filesToRemove = [
-    "./cs/config/Make.rules.cs",
-    "./cs/config/Make.rules.mak.cs"
+    "./cs/test/Ice/Makefile.mak"
 ]
 
 # List of files & subdirectories to keep, all others are removed.
 filesToKeep = [
     "./config/Make.common.rules.mak",
     "./config/IceDevKey.snk",
-    "./cs",
+    "./cs/config/PolicyResponse.xml",
+    "./cs/src",
+    "./cs/bin",
+    "./cs/Makefile.mak",
+    "./cs/demo/demosl.sln",
+    "./cs/demo/Ice/sl",
+    "./cs/demo/Glacier2/sl",
+    "./cs/test/testsl.sln",
+    "./cs/test/Ice",
+    "./cs/test/TestCommon",
+    "./scripts",
     "./vsaddin",
     "./distribution",
 ]
@@ -200,6 +209,10 @@ move(os.path.join("distribution", "src", "sl", "CHANGES.txt"), os.path.join("CHA
 #
 move(os.path.join("distribution", "src", "sl", "Makefile.mak"), os.path.join("Makefile.mak"))
 move(os.path.join("distribution", "src", "sl", "Make.rules.mak.cs"), os.path.join("cs", "config", "Make.rules.mak.cs"))
+move(os.path.join("distribution", "src", "sl", "Makefile.mak.test"), os.path.join("cs", "test", "Makefile.mak"))
+move(os.path.join("distribution", "src", "sl", "Makefile.mak.test.Ice"), os.path.join("cs", "test", "Ice", "Makefile.mak"))
+move(os.path.join("distribution", "src", "sl", "allTests.py"), os.path.join("cs"))
+
 remove("distribution")
 
 print "ok"

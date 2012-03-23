@@ -14,7 +14,9 @@ top_srcdir	= ..
 PRODUCT    	= IceVisualStudioAddin
 PKG		= $(PRODUCT)-$(PKG_PREFIX)
 
-INSTALL_SUBDIRS	= $(install_bindir) $(install_configdir)
+install_addindir = $(prefix)\vsaddin
+
+INSTALL_SUBDIRS	= $(install_addindir) $(install_configdir)
 
 TARGETS		= $(top_srcdir)\bin\$(PKG).dll
 PDBS		= $(top_srcdir)\bin\$(PKG).pdb
@@ -27,7 +29,7 @@ SRCS		= IceDialog.cs \
 		   AssemblyInfo.cs \
 		   Builder.cs \
 		   Connect.cs \
- 		   FileTracker.cs \
+		   FileTracker.cs \
 		   IceCppConfigurationDialog.cs \
 		   IceCppConfigurationDialog.Designer.cs \
 		   IceCsharpConfigurationDialog.cs \
@@ -63,10 +65,10 @@ install::$(TARGETS)
 		@echo "Creating %i ..." && \
 		mkdir %i
 
-	copy $(TARGETS) $(install_bindir)\$(PKG).dll
+	copy $(TARGETS) $(install_addindir)\$(PKG).dll
 	copy ..\config\Ice-$(PKG_PREFIX).AddIn $(install_configdir)\Ice-$(PKG_PREFIX).AddIn
 	copy ..\config\$(PROPERTY_SHEET) $(install_configdir)\$(PROPERTY_SHEET)
-	
+
 clean::
 	-del /q $(TARGETS) $(PDBS)
 

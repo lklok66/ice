@@ -8,8 +8,7 @@ Windows Version
 
 Ice for Silverlight has been extensively tested on:
 
-- Windows XP x86 and x64
-- Windows Vista x86 and x64
+- Windows 7 x86 and x64
 
 
 Browser
@@ -17,107 +16,76 @@ Browser
 
 Ice for Silverlight has been tested with:
 
-- Internet Explorer 7.0
-- Firefox 3.0
-
+- Internet Explorer 8.0
+- Firefox ? // TODO
 
 Compiler
 --------
 
 Ice for Silverlight requires:
 
-- Microsoft Visual Studio 2008 SP1
+- Microsoft Visual Studio 2010 SP1 
 
-  Service Pack 1 is available for download from:
+- The Visual Studio 2010 SP1 SDK to compile the Ice for Visual Studio
+  Add-in plugin available for download from:
 
-  http://www.microsoft.com/downloads/details.aspx?FamilyId=FBEE1648-7106-44A7-9649-6D9F6D58056E&displaylang=en
-
-- Microsoft Silverlight Tools for Visual Studio 2008 SP1
-
-  http://www.microsoft.com/downloads/details.aspx?FamilyId=c22d6a7b-546f-4407-8ef6-d60c8ee221ed&displaylang=en
+    http://www.microsoft.com/download/en/details.aspx?id=21835
 
 
-Silverlight Runtime
--------------------
+Silverlight
+-----------
 
-- Silverlight 2.0
+- Microsoft Silverlight 5.0 SDK, available for download from:
 
-  Downloaded as part of the Visual Studio Tools above.
+    http://www.microsoft.com/download/en/details.aspx?id=28359
+
+- Microsoft Silverlight 5 Tools for Visual Studio 2010 SP1, available
+  for download from:
+
+    http://www.microsoft.com/download/en/details.aspx?id=28358
 
 
-Ice 3.3.0
+Ice 3.4.2
 ---------
 
-To use the Ice for Silverlight bridge, you must also install Ice for
-.NET version 3.3 (Ice.dll).
+Ice for Silverlight requires an Ice 3.4.2 installation available for
+download from:
 
-The Ice distribution can be downloaded here:
-
-  http://www.zeroc.com/download.html
-
-Once downloaded or compiled, the DLL must be installed in the GAC:
-
-  gacutil -i Ice.dll
-
-To use the socket support for communications it is necessary to
-use Glacier2, which is a part of Ice for C++.
-
-
-Slice-to-Silverlight translator
--------------------------------
-
-You will need the Slice-to-Silverlight translator (slice2sl). You can
-download a binary distribution from the ZeroC web site, or you can
-build the Slice-to-Silverlight translator yourself using this source
-distribution.
-
-Binary distributions are available at
-
-  http://www.zeroc.com/labs/download.html
-
-
-Third-party libraries
----------------------
-
-The Ice for Silverlight compiler (slice2sl) has a dependency on the
-following third-party library:
-
-- mcpp 2.7.1
-
-If you want to build the slice2sl translator yourself, you can avoid
-building mcpp from source code by downloading ZeroC's Third-Party
-Windows installer for Visual Studio 2008 that contains release and
-debug libraries for all of the third-party dependencies.
-
-If you intend to build the third-party dependencies from source, we
-recommend downloading the Ice third-party source archive from
-
-  http://www.zeroc.com/download.html
-
-This archive contains the source distributions for each of the
-third-party dependencies, as well as required source patches and
-configuration instructions.
-
-For more information about mcpp, please refer to the link below:
-
-  http://mcpp.sourceforge.net
+    http://www.zeroc.com/download.html
 
 
 ======================================================================
 Compilation
 ======================================================================
 
-Unpack the archive. The sources are contained in the IceSL-@ver@
+Unpack the archive. The sources are contained in the IceSL-@ver@\cs
 subdirectory.
 
 
-Building the slice2sl translator
---------------------------------
+Building the Ice for Silverlight assemblies and policy server
+-------------------------------------------------------------
 
-If you have not already downloaded the binary distribution as mentioned
-above, follow these steps to build the translator yourself:
+Follow these steps to build the Ice for Silverlight sources:
 
-1) In a Visual Studio 2008 command prompt, change to the cpp
+1) Change to the cs subdirectory of the Ice for Silverlight source
+   distribution.
+
+2) Open config\Make.rules.mak.cs and review the comments that describe
+   the settings you can modify. For example, you may wish to enable
+   optimization.
+
+3) If your Ice distribution is not installed at the default location
+   set the ICE_HOME variable in config\Make.rules.mak.cs
+
+4) Run nmake:
+
+   > nmake /f Makefile.mak
+
+
+Building the Ice Visual Studio Add-in plugin
+--------------------------------------------
+
+1) In a Visual Studio command prompt, change to the vsaddin
    subdirectory of the Ice for Silverlight source distribution.
 
 2) Open config\Make.rules.mak and review the comments that describe
@@ -127,234 +95,76 @@ above, follow these steps to build the translator yourself:
 
    > nmake /f Makefile.mak
 
+The add-in DLL is placed into the IceSL-@ver@\vsaddin\bin directory.
+The library name is
 
-Building the core DLL and policy server
----------------------------------------
-
-Follow these steps to build the Ice for Silverlight source:
-
-1) Change to the sl subdirectory of the Ice for Silverlight source
-   distribution.
-
-2) Open config\Make.rules.mak.cs and review the comments that describe
-   the settings you can modify. For example, you may wish to enable
-   optimization.
-
-3) If you did not build the translator yourself, the directory
-   containing the translator executables must be added to your PATH.
-   For example, if the translator distribution is installed in
-   C:\IceSL-@ver@, you must add C:\IceSL-@ver@\bin to your PATH.
-
-4) Run nmake:
-
-   > nmake /f Makefile.mak
-
+   IceVisualStudioAddin-VS2010.dll
 
 Building the tests and demos
 ----------------------------
 
-Each test and demo is contained in its own solution. To build the
-tests and demos do the following:
+To build the tests and demos, you must first install the Ice for
+Silverlight assemblies and the Ice for Visual Add-in plugin. See the
+installation instructions below before opening the Visual Studio
+solutions for the demos or tests.
 
-1) The directory containing the translator executables must be added
-   to your PATH. For example, if the translator distribution is
-   installed in C:\IceSL-@ver@, you must add C:\IceSL-@ver@\bin to
-   your PATH.
+To build the tests and demos you must use the Visual Studio solutions 
+located in cs\test\testsl.sln and cs\demo\demosl.sln.
 
-2) Start the Visual Studio 2008 IDE and open the desired
-   solution file (demo\Ice\hello\hello.sln for example).
+1) Start the Visual Studio 2010 IDE and open the desired solution file
+   (cs\demo\demosl.sln or cs\test\testsl.sln).
 
-3) Select Build->Build Solution to build both projects in the
+2) Select Build->Build Solution to build the projects from the
    solution.
-
-4) Repeat for each test or demo.
-
-
-======================================================================
-Running the tests and demos
-======================================================================
 
 Since Ice for Silverlight provides client-side functionality only, you
 must use Ice servers from another Ice language mapping in order to run
-the tests and demos. Any of the Ice 3.3 mappings that provide server-
-side functionality (C++, Java, .NET, Python) can be used, although the
-dictMapping and seqMapping tests are only found in .NET.
+the tests. This source distribution includes tests for Ice for
+.NET, to build the tests:
 
-Note that the Windows binary installer for Ice only contains the Ice
-demos, but not the Ice tests. Therefore, to run the tests, you will
-need to download and compile the tests from the source distribution.
-It can be downloaded here:
+1) In a Visual Studio command prompt, change to the cs\test
+   subdirectory of the Ice for Silverlight source distribution.
 
-  http://www.zeroc.com/download.html
+2) Run nmake:
 
-To compile the Ice tests from a source distribution against a binary
-installation:
+   > nmake /f Makefile.mak SILVERLIGHT=no
 
-1) Unpack the Ice 3.3.0 source distribution.
 
-2) In a Visual Studio 2008 command prompt, change to the test/Ice
-   subdirectory of the mapping you want to use. For example, to use
-   Ice for .NET do the following:
+======================================================================
+Running the tests
+======================================================================
 
-   > cd Ice-3.3.0\cs\test\Ice
+To run the tests, open a command window and change to the cs
+subdirectory. At the command prompt, execute:
 
-3) Set ICE_HOME to the location of the binary installation:
+  > set DEVPATH=<Ice 3.4.2 installation directory>\bin
+  > python allTests.py --silverlight
 
-   > set ICE_HOME=C:\Ice-3.3.0-VC90
 
-4) Indicate you are building against a binary distribution by setting
-   USE_BIN_DIST:
+======================================================================
+Running the demos
+======================================================================
 
-   > set USE_BIN_DIST=yes
+To run the demos, open the demo\demosl.sln solution and follow the
+instructions in the REAME.txt files of each demo.
 
-5) Run nmake to build the tests:
-
-   > nmake /f Makefile.mak
-
-Most of the Ice for Silverlight tests and demos can be run using the
-instructions below, but some demos or tests may have more complex
-requirements that will be described in a README in the relevant test
-or demo subdirectory.
-
-1) Start the corresponding server from the Ice 3.3 distribution that
-   you compiled. See the instructions in the Ice 3.3 distribution for
-   information on how to start the server.
-
-2) Start the Visual Studio 2008 IDE and open the selected test or demo
-   solution file.
-
-3) Right-click on TestPage.html and choose "Set As Start Page".
-
-4) Right-click on the Web project and select Debug->Start new instance.
-   This causes a browser window to be spawned.
-
-5) If you choose option "Run using Glacier2"
-
-5.1) Start the Glacier2 router from the Ice 3.3.0 distribution, making
-     sure to use the Glacier2 configuration file in sl\bin directory:
-
-   > glacier2router --Ice.Config=config.glacier2
-
-5.2) Start the policy server from the sl\bin directory:
-
-   > policyserver.exe 127.0.0.1 PolicyResponse.xml
-
-5.3) Click on the button in the browser to run the test or demo.
-
-6) If you choose option "Run using IceBridge"
-
-6.1) Click on the button in the browser to run the test or demo.
 
 ======================================================================
 Installation
 ======================================================================
 
-Ice for Silverlight does not support automatic installation.
+To install the Ice for Silverlight assemblies and the Visual Studio
+Add-in plugin, in a Visual Studio command prompt, run nmake install at
+the root of the Ice for Silverlight source distribution:
 
+   > nmake /f Makefile.mak install
 
-======================================================================
-Creating a new project
-======================================================================
+Note that you must run the Visual Studio command prompt as
+Administrator if Ice is installed at a location that requires
+administrative access.
 
-In this section we describe how to create a new Ice for Silverlight
-project. We also recommend reviewing the test and demo projects
-included in this distribution.
+The Ice for Silverlight assemblies and the Visual Studio Add-in plugin
+will be installed in the directories specified by the "prefix" variable 
+in cs\config\Make.rules.mak.cs and vsaddin\config\Make.rules.mak
 
-
-Getting started
----------------
-
-The following steps explain how to create a new project in Visual
-Studio 2008 that uses Ice for Silverlight:
-
-1) In the IDE select "File->New->Project".
-
-2) In the "New Project" dialog, select "Silverlight Application" under
-   "Other Languages->Visual C#->Silverlight" and click OK.
-
-3) In the "Add Silverlight Application" choose "Add a new Web to the 
-   solution for hosting the control" and "Web Application Project"
-   as the project type and click OK. This will create two projects,
-   the Silverlight project plus a Web project.
-
-4) Right click on the <project name>TestPage.html and choose "Set As
-   Start Page".
-
-
-HTTP bridge
------------
-
-If your application uses the HTTP transport, follow these additional
-steps to incorporate the Ice bridge into your project:
-
-1) Add the Ice HTTP bridge to the Web project by right-clicking on the
-   project, choosing "Add->Existing Item" and then browsing to the 
-   location of the IceBridge.ashx file in the Ice for Silverlight
-   distribution.
-
-2) Edit Web.config, find the compilation section, and add a reference
-   for the Ice for .NET 3.3 assembly:
-
-   <compilation debug="true">
-     <assemblies>
-        <add assembly="System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089"/>
-        ...
-        <add assembly="Ice, Version=3.3.0.0, Culture=neutral, PublicKeyToken=cdd571ade22f2f16, processorArchitecture=MSIL"/>
-      </assemblies>
-    </compilation>
-
-3) Add a "Global Application Class" to the Web project by right-
-   clicking on the Web project and selecting "Add->New Item" and
-   choosing "Global Application Class" in the "Add New Item" dialog.
-
-4) Edit the Global.ashx.cs file and add code to initialize and destroy
-   the Ice communicator in the Application_Start and Application_End
-   functions:
-
-   protected void Application_Start(object sender, EventArgs e)
-   {
-       Application["com"] = Ice.Util.initialize();
-   }
-
-   protected void Application_End(object sender, EventArgs e)
-   {
-       Ice.Communicator com = (Ice.Communicator) Application["com"];
-       try
-       {
-           com.destroy();
-       }
-       catch (Exception)
-       {
-       }
-   }
-
-5) Add a reference to the Ice for .NET 3.3 assembly to the Web
-   projects by right-clicking on References, selecting "Add Reference"
-   and in the "Browse" tab locate Ice.dll and select it.
-
-
-Slice compilation
------------------
-
-Your project can include automatic Slice generation by adding
-directives similar to those below at the end of your project file:
-
-    ...
-    <Target Name="CompileSlice" Inputs="Test.ice" Outputs="generated\Test.cs">
-      <Exec Command="slice2sl.exe --output-dir generated Test.ice"/>
-    </Target>
-    <Target Name="AfterClean">
-      <Delete Files="generated\Test.cs"/>
-    </Target>
-    <PropertyGroup>
-      <CompileDependsOn>
-        CompileSlice;$(CompileDependsOn)
-      </CompileDependsOn>
-    </PropertyGroup>
-  </Project>
-
-Change "Test.ice" and "Test.cs" to match the name of your Slice
-file. You will also need to create a directory named "generated" in
-the project directory and then build the project to run the slice2sl
-task. Now add the generated C# file to the project by right-clicking
-on the project and choosing "Add->Existing Item".
+The Ice Silverlight assemblies will be located in <prefix>\bin\sl.

@@ -9,16 +9,19 @@
 
 #
 # Select an installation base directory. The directory will be created
-# if it does not exist.
+# if it does not exist. By default, Ice for Silverlight is installed in 
+# the Ice installation directory.
 #
-prefix                  = C:\IceSL-0.4.0
+prefix                  = $(ICE_HOME)
 
 #
-# Specify where Ice 3.4.2 is installed. Defaults to C:\Program Files\ZeroC\Ice-3.4.2 on 
-# 32 bits platforms or C:\Program Files (x86)\ZeroC\Ice-3.4.2 on 64 bits platforms.
+# Specify where Ice 3.4.2 is installed. It not specified, it defaults to: 
 #
-# NOTE: If Ice is installed in a directory with spaces, you need to use the 8.3 alias 
-# as nmake doesn't support spaces in paths of make rules.  
+#   - C:\Program Files\ZeroC\Ice-3.4.2 on 32 bits platforms
+#   - C:\Program Files (x86)\ZeroC\Ice-3.4.2 on 64 bits platforms
+#
+# NOTE: If Ice is installed in a directory with spaces, you need to use
+# the 8.3 alias (nmake doesn't support spaces in paths of make rules).  
 #
 !if "$(ICE_HOME)" == ""
 !if "$(PROCESSOR_ARCHITECTURE)" == "AMD64" || "$(PROCESSOR_ARCHITEW6432)" == "AMD64"
@@ -56,7 +59,9 @@ KEYFILE                 = $(top_srcdir)\..\config\IceDevKey.snk
 # Compile Ice for Silverlight against Ice distribution
 # specified by ICE_HOME.
 #
+!if "$(SILVERLIGHT)" == ""
 SILVERLIGHT 	= yes
+!endif
 USE_BIN_DIST 	= yes
 
 #
@@ -76,7 +81,11 @@ bindir			= $(top_srcdir)\bin
 install_bindir		= $(prefix)\bin
 install_libdir		= $(prefix)\lib
 
+!if "$(SILVERLIGHT)" == "yes"
 refdir = $(bindir)
+!else
+refdir = $(ice_dir)\bin
+!endif
 
 !if "$(VERSION_PATCH)" != "0" && "$(VERSION_PATCH)" != "51"
 generate_policies   = yes
