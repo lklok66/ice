@@ -45,7 +45,25 @@ public sealed class PolicyServer : IDisposable
         // Read policy file
         try
         {
-            _policyBytes = File.ReadAllBytes(_policyFile);
+	    using(FileStream fs = File.OpenRead(_policyFile))
+	    {
+	        _policyBytes = new byte[fs.Length];
+                int numBytesToRead = (int)fs.Length;
+                int numBytesRead = 0;
+                while (numBytesToRead > 0)
+                {
+                    // Read may return anything from 0 to numBytesToRead.
+                    int n = fs.Read(_policyBytes, numBytesRead, numBytesToRead);
+
+                    // Break when the end of the file is reached.
+                    if (n == 0)
+		    {
+                        break;
+		    }
+		    numBytesRead += n;
+		    numBytesToRead -= n;
+                }
+	    }
         }
         catch(System.IO.IOException ex)
         {
