@@ -40,5 +40,8 @@ The installation of Ice for Silverlight will:
 - Copy the assemblies from the bin\sl sub-directory to your Ice 3.4.2
   installation bin\sl directory.
 
+- Copy the policy server executable from bin and bin\cf sub-directories
+  to your Ice 3.4.2 installation bin and bin\cf directories.
+
 - Copy the Ice for Visual Studio Add-in to the vsaddin sub-directory
   of your Ice 3.4.2 installation.

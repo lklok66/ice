@@ -10,6 +10,10 @@ distribution:
   assemblies for Ice services (bin\sl\IceGrid.dll,
   bin\sl\IcePatch2.dll, bin\sl\IceStorm.dll and bin\sl\Glacier2.dll).
 
+* The Ice for Silverlight policy server build for .NET 3.5 in 
+  (bin\policyserver.exe) and build for .NET CF in 
+  (bin\cf\policyserver.exe)
+
 * The Ice for Visual Studio Add-in plugin with Ice for Silverlight
   support (vsaddin\IceVisualStudioAddin-VS2010.dll).
 
