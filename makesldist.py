@@ -264,9 +264,8 @@ os.chdir(srcDir)
 #
 # Move files from the soure distribution to the binary distribution
 #
-#move(os.path.join("ICESL_LICENSE.txt"), os.path.join(binDir, "ICESL_LICENSE.txt"))
+move(os.path.join("ICESL_LICENSE.txt"), os.path.join(binDir, "ICESL_LICENSE.txt"))
 #move(os.path.join("LICENSE.txt"), os.path.join(binDir, "LICENSE.txt"))
-move(os.path.join("ICESL_LICENSE-HAGER.txt"), os.path.join(binDir, "ICESL_LICENSE.txt"))
 move(os.path.join("cs", "demo"), os.path.join(binDir, "demo"))
 
 #
