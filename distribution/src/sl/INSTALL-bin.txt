@@ -27,9 +27,18 @@ download from:
 
     http://www.zeroc.com/download.html
 
+
 ======================================================================
 Installation
 ======================================================================
 
-To install the Ice for Silverlight assemblies and the Visual Studio
-Add-in, click install.bat in this directory.
+To install the Ice for Silverlight, execute or click on the
+`install.bat' batch file from this directory. 
+
+The installation of Ice for Silverlight will:
+
+- Copy the assemblies from the bin\sl sub-directory to your Ice 3.4.2
+  installation bin\sl directory.
+
+- Copy the Ice for Visual Studio Add-in to the vsaddin sub-directory
+  of your Ice 3.4.2 installation.

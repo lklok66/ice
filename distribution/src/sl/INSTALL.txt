@@ -182,7 +182,7 @@ command at the root of the Ice for Silverlight source distribution:
 
 Note that you must run the Visual Studio command prompt as
 Administrator if Ice is installed at a location that requires
-administrative access.
+administrative privileges.
 
 The Ice for Silverlight assemblies and the Visual Studio Add-in will
 be installed in the directories specified by the "prefix" variable 

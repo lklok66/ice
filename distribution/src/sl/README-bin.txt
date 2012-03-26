@@ -1,104 +1,69 @@
-Please see the file INSTALL.txt for installation instructions.
+======================================================================
+Introduction
+======================================================================
 
-Ice for Silverlight is a port of Ice for C# to Silverlight with some
-limitations:
+This binary distribution contains the binaries of Ice for
+Silverlight. The following components are included in this
+distribution:
 
-- it only supports the TCP socket transport. SSL or UDP transports are
-  not supported.
+* The Ice for Silverlight core runtime assembly (bin\sl\Ice.dll) and
+  assemblies for Ice services (bin\sl\IceGrid.dll,
+  bin\sl\IcePatch2.dll, bin\sl\IceStorm.dll and bin\sl\Glacier2.dll).
 
-- there's no support for server side connections: an Ice for
-  Silverlight application can't accept connections. However, it does
-  support bi-directional connections and can therefore dispatch
-  requests received over a connection to a server.
+* The Ice for Visual Studio Add-in plugin with Ice for Silverlight
+  support (vsaddin\IceVisualStudioAddin-VS2010.dll).
 
-- it doesn't support protocol compression.
-
-- Ice.Application and Glacier2.Application classes are not supported.
-
-- Dynamic loading of Slice-generated class and exception factories are
-  not supported, the Ice.FactoryAssemblies property must be used
-  instead.
-
-- the ICE_CONFIG environment variable is not supported.
-
-- Dynamic loading of Slice checksums.
-
-- Thread priorities are not supported.
-
-- the Ice.StdOut, Ice.StdErr, Ice.PrintProcessId and Ice.LogFile
-  properties are not supported.
-
-- Loading properties from the Windows registry is not supported.
-
-This Ice for Silverlight release also no longer supports the HTTP
-transport supported in previous Ice for Silverlight versions and
-doesn't restrict anymore Ice connections to Glacier2 routers, it can
-connect to any Ice servers.
-
-Features specific to Ice for Silverlight are described in more details
-below.
-
-TCP socket transport
-====================
-
-To use the socket transport in Ice for Silverlight, you must run a
-Silverlight policy server or use a web server as a policy server to
-control the IP addresses to which a Silverlight client is allowed to
-connect.
-
-The policy server must run on the host from which the Silverlight
-client is downloaded. Ice for Silverlight includes a simple
-implementation of a policy server that you can use in your own
-applications. Refer to the link below for more information on policy
-servers:
-
-    http://msdn.microsoft.com/en-us/library/cc645032(VS.95).aspx
-
-If you do not want to deploy a policy server you can also use the web
-server as a policy server by adding a clientaccesspolicy.xml file at
-the document root directory of your web server, you must also set
-Ice.ClientAccessPolicyProtocol to Http for that to work. Refer to 
-the link above for more information.
-
-Silverlight limits the range of ports to which a client can connect.
-As a result, you must configure your Ice server to listen on a TCP
-port within the range 4502 to 4534.
-
-Out of browser applications are not subject of this limitations, and
-so for this kind of applications you don't need a policy server. For
-more info about out of browser applications see:
-
-    http://msdn.microsoft.com/en-us/library/dd550721(v=vs.95).aspx
+* Sample programs (see below).
 
 
-Callbacks
-=========
+======================================================================
+Installation
+======================================================================
 
-Although Ice for Silverlight does not offer a complete server-side run
-time, it does provide support for callback requests when using the
-socket transport. The process is consistent with other Ice language
-mappings: you create an object adapter and associate it to an Ice
-connection, which causes callback requests from the server to your
-Silverlight client to traverse the outgoing connection from the client
-to the server. In other words, the Silverlight client establishes a
-bi-directional connection with the server over which requests can flow
-in either direction.
+See the INSTALL.txt file for installation instructions.
 
 
-User Exceptions and Object-by-Value
-===================================
+======================================================================
+Building the sample programs
+======================================================================
 
-Ice for .NET uses reflection during the unmarshaling of user
-exceptions and objects by value. Since Silverlight does not support
-retrieving the list of assemblies loaded with the application, it is
-necessary to explicitly configure the list of assemblies where the
-user exception or object by value types are located. This is done
-using the Ice.FactoryAssemblies property, whose value represents a
-list of qualified assembly names separated by whitespace. For example:
+NOTE: You must first install Ice for Silverlight before trying to open
+the Visual Studio solution for the sample programs.
 
-  Ice.FactoryAssemblies=UserAssembly1,version=1.0.0 UserAssembly2,version=1.0.0.0
+To build the demos:
 
-If you do not set this property, your client may throw
-Ice.UnmarshalOutOfBoundsException or Ice.NoObjectFactoryException if
-Ice receives an unknown user exception or object by value,
-respectively.
+1) Start the Visual Studio 2010 IDE and open demo\demosl.sln
+
+2) Select Build->Build Solution to build the projects from the
+   solution.
+
+
+======================================================================
+Overview of the sample programs
+======================================================================
+
+A brief description of each project is provided below.
+
+* demo\Ice\sl\hello
+
+  Demonstrates the various ways of invoking on Ice proxies using a
+  simple Hello World application.
+
+* demo\Ice\sl\bidir
+* demo\Ice\compact\bidir
+
+  Demonstrates the use of bidirectional connections. This Ice feature
+  allows you to receive callbacks without requiring the server to
+  establish a separate connection back to the client.
+
+  The demo include a Silverlight client and a server designed to run
+  on a Ice for .NET compact framework device.
+
+* demo\Glacier\sl
+
+  A very simple chat client that illustrates the Glacier2 session API.
+  
+
+
+
+
