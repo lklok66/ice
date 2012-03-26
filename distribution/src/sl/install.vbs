@@ -41,11 +41,13 @@ End If
 '
 ' Install Silverlight Assemblies
 '
-dllFiles = Array("Glacier2.dll", "Ice.dll", "IceGrid.dll", "IcePatch2.dll", "IceStorm.dll")
-
+dllFiles = Array("Glacier2", "Ice", "IceGrid", "IcePatch2", "IceStorm")
+extensions = Array(".dll", ".pdb", ".xml")
 For Each fileName in dllFiles
-    out.WriteLine "copy: bin\sl\" & fileName & " to: " & installDir & "bin\sl\" & fileName
-    fso.CopyFile "bin\sl\" & fileName, installDir & "bin\sl\" & fileName
+    For Each ext in extensions
+        out.WriteLine "copy: bin\sl\" & fileName & ext & " to: " & installDir & "bin\sl\"
+        fso.CopyFile "bin\sl\" & fileName & ext, installDir & "bin\sl\"
+    Next
 Next
 
 '
