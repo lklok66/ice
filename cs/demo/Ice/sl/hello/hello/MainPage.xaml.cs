@@ -138,6 +138,7 @@ namespace hello
                 }
                 else
                 {
+                    hello.sayHello(_delay);
                     txtOutput.Text = "Queued hello request";
                 }
             }
