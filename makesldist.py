@@ -203,8 +203,10 @@ print "ok"
 # Copy IceSL specific install files.
 #
 print "Copying icesl install files...",
-move(os.path.join("distribution", "src", "sl", "ICESL_LICENSE.txt"), os.path.join("ICESL_LICENSE.txt"))
-move(os.path.join("distribution", "src", "sl", "LICENSE.txt"), os.path.join("LICENSE.txt"))
+#move(os.path.join("distribution", "src", "sl", "ICESL_LICENSE.txt"), os.path.join("ICESL_LICENSE.txt"))
+#move(os.path.join("distribution", "src", "sl", "LICENSE.txt"), os.path.join("LICENSE.txt"))
+move(os.path.join("distribution", "src", "sl", "ICESL_LICENSE-HAGER.txt"), os.path.join("ICESL_LICENSE.txt"))
+copy(os.path.join("distribution", "src", "sl", "RELEASE_NOTES.txt"), os.path.join("RELEASE_NOTES.txt"))
 move(os.path.join("distribution", "src", "sl", "README.txt"), os.path.join("README.txt"))
 move(os.path.join("distribution", "src", "sl", "INSTALL.txt"), os.path.join("INSTALL.txt"))
 move(os.path.join("distribution", "src", "sl", "CHANGES.txt"), os.path.join("CHANGES.txt"))
@@ -219,6 +221,7 @@ move(os.path.join("distribution", "src", "sl", "Makefile.mak.test.Ice"), os.path
 move(os.path.join("distribution", "src", "sl", "allTests.py"), os.path.join("cs", "allTests.py"))
 
 move(os.path.join("distribution", "src", "sl", "README-bin.txt"), os.path.join(binDir, "README.txt"))
+move(os.path.join("distribution", "src", "sl", "RELEASE_NOTES.txt"), os.path.join(binDir, "RELEASE_NOTES.txt"))
 move(os.path.join("distribution", "src", "sl", "INSTALL-bin.txt"), os.path.join(binDir, "INSTALL.txt"))
 move(os.path.join("distribution", "src", "sl", "install.bat"), os.path.join(binDir, "install.bat"))
 move(os.path.join("distribution", "src", "sl", "install.vbs"), os.path.join(binDir, "install.vbs"))
@@ -247,7 +250,8 @@ for d in [srcDir]:
 #
 
 os.chdir(srcDir)
-substitute(os.path.join("cs", "config", "Make.rules.mak.cs"), [('prefix.*=\s\$\(ICE_HOME\)', 'prefix=' + binDir)])
+substitute(os.path.join("cs", "config", "Make.rules.mak.cs"), [('prefix.*=\s\$\(ICE_HOME\)', 'prefix=' + binDir),
+                                                               ('#OPTIMIZE.*=\syes', 'OPTIMIZE=yes')])
 substitute(os.path.join("vsaddin", "config", "Make.rules.mak"), [('prefix.*=.*', 'prefix=' + binDir)])
 os.system("nmake /f Makefile.mak install")
 
@@ -260,8 +264,9 @@ os.chdir(srcDir)
 #
 # Move files from the soure distribution to the binary distribution
 #
-move(os.path.join("ICESL_LICENSE.txt"), os.path.join(binDir, "ICESL_LICENSE.txt"))
-move(os.path.join("LICENSE.txt"), os.path.join(binDir, "LICENSE.txt"))
+#move(os.path.join("ICESL_LICENSE.txt"), os.path.join(binDir, "ICESL_LICENSE.txt"))
+#move(os.path.join("LICENSE.txt"), os.path.join(binDir, "LICENSE.txt"))
+move(os.path.join("ICESL_LICENSE-HAGER.txt"), os.path.join(binDir, "ICESL_LICENSE.txt"))
 move(os.path.join("cs", "demo"), os.path.join(binDir, "demo"))
 
 #
