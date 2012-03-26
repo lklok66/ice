@@ -13,10 +13,10 @@ as well as how to make oneway, and batched invocations.
 2) Start the hello server according to the instructions in the demo
    README file.
 
-3) In a command window, start the policy server:
+3) In a command window, change to this demo directory and start the
+   policy server:
 
-   > cd <Ice installation directory>\bin
-   > policyserver 127.0.0.1 ..\config\clientaccesspolicy.xml
+   > <Ice installation directory>\bin\policyserver 127.0.0.1 clientaccesspolicy.xml
 
 4) In Visual Studio, open the `hello.Web' project and start the
    Silverlight client using the "Debug > Start new instance"
@@ -34,8 +34,7 @@ instead.
 
 1) Copy clientaccesspolicy.xml to your web server document root directory.
 
-   > cd <Ice installation directory>\cs
-   > copy config\clientaccesspolicy.xml C:\inetpub\wwwroot\
+   > copy clientaccesspolicy.xml C:\inetpub\wwwroot\
 
 2) In MainPage.xaml.cs, uncomment the line that sets the policy
    protocol:
