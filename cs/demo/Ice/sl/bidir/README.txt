@@ -68,11 +68,7 @@ IIS instructions:
 
 4) Rebuild the demo.
 
-5) Start IIS Manager:
-
-   Control Panel > Administrative Tools > Internet Information Services (IIS) Manager
-
-6) Copy required files, from a commmand window execute the following
+5) Copy required files, from a commmand window execute the following
    commands:
 
    > mkdir C:\inetpub\wwwroot\bidir
@@ -82,7 +78,7 @@ IIS instructions:
    > xcopy bidir.Web\ClientBin C:\inetpub\wwwroot\bidir\ClientBin /s /i
 
    
-7) The bidir client should now be accessible at the url
+6) The bidir client should now be accessible at the url
 
    http://localhost/bidir/bidirTestPage.html
 
