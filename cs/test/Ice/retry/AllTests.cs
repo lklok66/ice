@@ -106,7 +106,7 @@ public class AllTests : TestCommon.TestApp
     public override Ice.InitializationData initData()
     {
         Ice.InitializationData id = new Ice.InitializationData();
-
+        id.properties = Ice.Util.createProperties();
         //
         // For this test, we want to disable retries.
         //
