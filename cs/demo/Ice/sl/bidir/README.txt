@@ -51,16 +51,47 @@ Using a web server as a policy server
 If you do not want to deploy a policy server, you can use a web server
 instead.
 
+IIS instructions:
+
 1) Copy clientaccesspolicy.xml to your web server document root directory.
 
-   > copy clientaccesspolicy.xml C:\inetpub\wwwroot\
+   > xcopy clientaccesspolicy.xml C:\inetpub\wwwroot\
 
-2) In MainPage.xaml.cs, uncomment the line that sets the policy
+2) Check that the policy file is accessible at the following url:
+
+   http://localhost/clientaccesspolicy.xml
+
+3) In MainPage.xaml.cs, uncomment the line that sets the policy
    protocol:
 
    //initData.properties.setProperty("Ice.ClientAccessPolicyProtocol", "Http");
 
-3) Rebuild the demo and deploy it in the web server.
+4) Rebuild the demo.
 
-Note that the web server should serve the policy file on standard
-port 80.
+5) Start IIS Manager:
+
+   Control Panel > Administrative Tools > Internet Information Services (IIS) Manager
+
+6) Copy required files, from a commmand window execute the following
+   commands:
+
+   > mkdir C:\inetpub\wwwroot\bidir
+   > cd <Ice Silverlight directory>\demo\Ice\sl\bidir\bidir.Web
+   > xcopy bidir.web\bidirTestPage.html C:\inetpub\wwwroot\bidir
+   > xcopy bidir.web\Silverlight.js C:\inetpub\wwwroot\bidir
+   > xcopy bidir.Web\ClientBin C:\inetpub\wwwroot\bidir\ClientBin /s /i
+
+   
+7) The bidir client should now be accessible at the url
+
+   http://localhost/bidir/bidirTestPage.html
+
+
+Notes:
+
+* The web server should serve the policy file on standard port 80.
+
+* If you don't have IIS installed on Windows 7, follow the instructions
+  in the next page.
+
+  http://technet.microsoft.com/en-us/library/cc731911.aspx
