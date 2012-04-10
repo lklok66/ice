@@ -203,9 +203,9 @@ print "ok"
 # Copy IceSL specific install files.
 #
 print "Copying icesl install files...",
-#move(os.path.join("distribution", "src", "sl", "ICESL_LICENSE.txt"), os.path.join("ICESL_LICENSE.txt"))
-#move(os.path.join("distribution", "src", "sl", "LICENSE.txt"), os.path.join("LICENSE.txt"))
-move(os.path.join("distribution", "src", "sl", "ICESL_LICENSE-HAGER.txt"), os.path.join("ICESL_LICENSE.txt"))
+move(os.path.join("distribution", "src", "sl", "ICESL_LICENSE.txt"), os.path.join("ICESL_LICENSE.txt"))
+move(os.path.join("distribution", "src", "sl", "LICENSE.txt"), os.path.join("LICENSE.txt"))
+#move(os.path.join("distribution", "src", "sl", "ICESL_LICENSE-HAGER.txt"), os.path.join("ICESL_LICENSE.txt"))
 copy(os.path.join("distribution", "src", "sl", "RELEASE_NOTES.txt"), os.path.join("RELEASE_NOTES.txt"))
 move(os.path.join("distribution", "src", "sl", "README.txt"), os.path.join("README.txt"))
 move(os.path.join("distribution", "src", "sl", "INSTALL.txt"), os.path.join("INSTALL.txt"))
