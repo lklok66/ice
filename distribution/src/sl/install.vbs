@@ -75,5 +75,17 @@ assembliesKeyValue = installDir & "\bin\sl"
 registryObj.CreateKey HKEY_LOCAL_MACHINE,assembliesKeyPath
 registryObj.SetStringValue HKEY_LOCAL_MACHINE,assembliesKeyPath,"",assembliesKeyValue
 
+'
+' Install ICESL_LICENSE, README and RELEASE_NOTES
+'
+If Not fso.FolderExists(installDir & "silverlight") Then
+    fso.CreateFolder(installDir & "silverlight")
+End If
+out.WriteLine "copy: ICE_LICENSE.txt" & " to: " & installDir & "silverlight\ICE_LICENSE.txt"
+fso.CopyFile "ICE_LICENSE.txt", installDir & "silverlight\ICE_LICENSE.txt"
+out.WriteLine "copy: README.txt" & " to: " & installDir & "silverlight\README.txt"
+fso.CopyFile "README.txt", installDir & "silverlight\README.txt"
+out.WriteLine "copy: RELEASE_NOTES.txt" & " to: " & installDir & "silverlight\RELEASE_NOTES.txt"
+fso.CopyFile "RELEASE_NOTES.txt", installDir & "silverlight\RELEASE_NOTES.txt"
 
 WScript.StdOut.WriteLine "Ice for Silverlight installation terminated ok"

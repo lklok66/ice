@@ -1,1 +1,1 @@
-See http://doc.zeroc.com/display/Rel/Ice+for+Silverlight+0.4.0+Release+Notes
+See http://doc.zeroc.com/display/Rel/Ice+for+Silverlight+0.4.1+Release+Notes
