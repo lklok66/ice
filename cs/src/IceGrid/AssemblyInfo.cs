@@ -23,7 +23,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("Ice")]
 [assembly: AssemblyCulture("")]         
 #if SILVERLIGHT
-[assembly: AssemblyVersion("0.4.0")]
+[assembly: AssemblyVersion("0.4.1")]
 #else
 [assembly: AssemblyVersion("3.4.2")]
 #endif
