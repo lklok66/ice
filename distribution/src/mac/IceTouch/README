@@ -17,33 +17,33 @@ Compiler
 
 To build iPhone applications, you need:
 
-- Xcode 4.2 with iOS 5.0 SDK
+- Xcode 4.3 with iOS 5.0 SDK
 
 To build Cocoa applications, you need:
 
-- Xcode 4.2
+- Xcode 4.3
 
 
 ======================================================================
 Compiling the Demos
 ======================================================================
 
-All the demos can be found under /Developer/Examples/IceTouch-1.2.0.
+All the demos can be found under /opt/IceTouch-1.2.0/Examples.
 
 To build the command-line demos:
 
-$ cd /Developer/Examples/IceTouch-1.2.0
+$ cd /opt/IceTouch-1.2.0/Examples
 $ make
 
 If you are building for Cocoa, you can use Xcode to build the demos
-located in /Developer/Examples/IceTouch-1.2.0/Cocoa:
+located in /opt/IceTouch-1.2.0/Examples/Cocoa:
 
  - chat         (Objective-C)
  - library      (Objective-C)
 
 If you are building for iPhone or the iPhone simulator, you can
 use Xcode to build the demos located in
-/Developer/Examples/IceTouch-1.2.0/iPhone:
+/opt/IceTouch-1.2.0/Examples/iPhone:
 
   - chat        (Objective-C)
   - cpp/hello   (C++)

@@ -15,10 +15,10 @@ prefix			 ?= /opt/IceTouch-$(VERSION)
 
 #
 # Xcode root directory. If you have several Xcode versions installed,
-# choose the version you want to use to build the SDKs and Xcode
-# plug-in. The default is the one installed in "/Developer".
+# choose the version you want to use to build the SDKs
+# plug-in. The default is the one installed in "/Applications/Xcode.app".
 #
-#DEVELOPER_PATH          = /Developer
+#XCODE_PATH          = /Applications/Xcode.app
 
 #
 # The "root directory" for runpath embedded in executables. Can be
@@ -83,7 +83,7 @@ endif
 
 ifeq ($(IPHONESDK_VERSION),)
 
-IPHONE_SDK_VERSION = 5.0
+IPHONE_SDK_VERSION = 5.1
 
 endif
 
@@ -93,11 +93,13 @@ IPHONE_TARGET_MIN_SDK_VERSION = 4.2
 
 endif
 
-ifeq ($(DEVELOPER_PATH),)
+ifeq ($(XCODE_PATH),)
 
-DEVELOPER_PATH = /Developer
+XCODE_PATH = /Applications/Xcode.app
 
 endif
+
+DEVELOPER_PATH = $(XCODE_PATH)/Contents/Developer/
 
 #
 # Set the platform name according to the build type.

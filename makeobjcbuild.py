@@ -50,17 +50,17 @@ def usage():
     print "Options:"
     print "-h                   Show this message."
     print "-v                   Be verbose."
-    print "--xcode-path         Xcode install path. Default is '/Developer'"
-    print "--ios-min-version    The minimum iOS SDK version supported by targets, Default is '4.2', supported versions are 4.2, 4.3 and 5.0"
+    print "--xcode-path         Xcode install path. Default is '/Applications/Xcode.app'"
+    print "--ios-min-version    The minimum iOS SDK version supported by targets, Default is '4.2', supported versions are 4.2, 4.3, 5.0 and 5.1"
 
 #
 # Check arguments
 #
 verbose = 0
 tag = "HEAD"
-xcodeVersion = "42";
-xcodePath = "/Developer"
-iOSVersion = "5.0"
+xcodeVersion = "43";
+xcodePath = "/Applications/Xcode.app"
+iOSVersion = "5.1"
 iOSMinSDKVersion = "4.2"
 
 try:
@@ -80,7 +80,7 @@ for o, a in opts:
     elif o == "--ios-min-version":
         iOSMinSDKVersion = a;
 
-if iOSMinSDKVersion != "5.0" and iOSMinSDKVersion != "4.3" and iOSMinSDKVersion != "4.2":
+if iOSMinSDKVersion != "5.1" and iOSMinSDKVersion != "5.0" and iOSMinSDKVersion != "4.3" and iOSMinSDKVersion != "4.2":
     usage()
     sys.exit(1)
 
@@ -160,25 +160,24 @@ os.chdir(buildDir)
 print "Building distributions...",
 sys.stdout.flush()
 
-os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes make" % xcodePath))
-os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes COMPILE_FOR_COCOA=yes make" % xcodePath))
-os.system(("DEVELOPER_PATH=%s OPTIMIZE_SIZE=yes IPHONE_TARGET_MIN_SDK_VERSION=%s COMPILE_FOR_IPHONE=yes make" % (xcodePath, iOSMinSDKVersion)))
-os.system(("DEVELOPER_PATH=%s OPTIMIZE_SIZE=yes IPHONE_TARGET_MIN_SDK_VERSION=%s COMPILE_FOR_IPHONE_SIMULATOR=yes make" % (xcodePath, iOSMinSDKVersion)))
+os.system(("XCODE_PATH=%s OPTIMIZE_SPEED=yes make" % (xcodePath)))
+os.system(("XCODE_PATH=%s OPTIMIZE_SPEED=yes COMPILE_FOR_COCOA=yes make" % (xcodePath)))
+os.system(("XCODE_PATH=%s OPTIMIZE_SIZE=yes IPHONE_TARGET_MIN_SDK_VERSION=%s COMPILE_FOR_IPHONE=yes make" % (xcodePath, iOSMinSDKVersion)))
+os.system(("XCODE_PATH=%s OPTIMIZE_SIZE=yes IPHONE_TARGET_MIN_SDK_VERSION=%s COMPILE_FOR_IPHONE_SIMULATOR=yes make" % (xcodePath, iOSMinSDKVersion)))
 
 os.chdir(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin"))
 
-os.system(("DEVELOPER_PATH=%s XCODE_VERSION=%s make" % (xcodePath, xcodeVersion)))
+os.system(("XCODE_PATH=%s XCODE_VERSION=%s make" % (xcodePath, xcodeVersion)))
 
 print "ok"
 
 name = "IceTouch-" + version
 installerDir = os.path.join(baseDir, "installer")
-developerDir = os.path.join(baseDir, "Developer")
+developerDir = os.path.join(baseDir, "Applications/Xcode.app/Contents/Developer")
 sdkDir = os.path.join(developerDir, "SDKs", name)
 cppSdkDir = os.path.join(developerDir, "SDKs", "IceTouchCpp-" + version)
-examplesDir = os.path.join(developerDir, "Examples", name)
-docDir = os.path.join(developerDir, "Documentation", name)
 optDir = os.path.join(baseDir, "opt", name)
+docDir = os.path.join(optDir, "Documentation")
 
 os.system("rm -rfv " + developerDir)
 os.system("rm -rfv " + installerDir)
@@ -214,32 +213,12 @@ copy(os.path.join(buildDir, "objc", "SDK", "IceTouchCpp-" + version), cppSdkDir)
 copy(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin", "build", "Release", "slice2objcplugin.pbplugin"),
      os.path.join(baseDir, "slice2objcplugin.pbplugin"))
 
-os.makedirs(os.path.join(developerDir, "Examples"))
-os.chdir(os.path.join(developerDir, "Examples"))
-os.system("tar xfz %s" % os.path.join(distDir, "IceTouch-" + version + "-demos.tar.gz"))
-os.rename("IceTouch-" + version + "-demos", name)
-os.system("chmod -R g+wX %s" % examplesDir)
-os.remove(os.path.join(examplesDir, "ICE_TOUCH_LICENSE"))
-os.remove(os.path.join(examplesDir, "ICE_LICENSE"))
-
 # SDK symlinks
 os.chdir(os.path.join(developerDir, "SDKs"));
 os.system("ln -s IceTouch-%s IceTouch-%s" % (version, mmversion))
 os.system("ln -s IceTouchCpp-%s IceTouchCpp-%s" % (version, mmversion))
 
 os.chdir(baseDir)
-
-# Fix iPhone demos iOS SDK and deployment version.
-
-xcodeSDKRootExprs = [ (re.compile("SDKROOT = iphoneos.*;"), "SDKROOT = \"iphoneos%s\";" % iOSVersion) ]
-xcodeIPhoneOSDeplyomentExprs = [ (re.compile("IPHONEOS_DEPLOYMENT_TARGET = .*;"), "IPHONEOS_DEPLOYMENT_TARGET = %s;" % iOSMinSDKVersion) ]
-
-for root, dirnames, filesnames in os.walk(os.path.join(examplesDir, "iPhone")):
-    for f in filesnames:
-        if fnmatch.fnmatch(f, "project.pbxproj"):
-            substitute(os.path.join(root, f), xcodeSDKRootExprs)
-            substitute(os.path.join(root, f), xcodeIPhoneOSDeplyomentExprs)
-print "ok"
 
 print "Fix file permissions",
 os.system("chown -R root:admin " + baseDir);
@@ -250,7 +229,7 @@ print "Creating installer...",
 sys.stdout.flush()
 
 pmdoc = os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", installerProject)
-os.system(xcodePath + "/usr/bin/packagemaker --doc " + pmdoc + " --out " + latestBuildDir + "/installer/" + basePackageName + ".pkg")
+os.system(xcodePath + "/Contents/Applications/PackageMaker.app/Contents/MacOS/PackageMaker --doc " + pmdoc + " --out " + latestBuildDir + "/installer/" + basePackageName + ".pkg")
 
 print "ok"
 

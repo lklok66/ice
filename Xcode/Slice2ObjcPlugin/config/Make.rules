@@ -9,15 +9,15 @@
 
 #
 # Xcode root directory. If you have several Xcode versions installed,
-# choose the version you want to use to build the SDKs and Xcode
-# plug-in. The default is the one installed in "/Developer".
+# choose the version you want to use to build the Xcode The default 
+# is the one installed in "/Applications/Xcode.app".
 #
-#DEVELOPER_PATH          = /Developer
+#XCODE_PATH          = /Applications/Xcode.app
 
 #
-# The default is 42 for Xcode 4.2.x.
+# The default is 43 for Xcode 4.3.x.
 #
-#XCODE_VERSION		?= 42
+#XCODE_VERSION		?= 43
 
 #
 # Install the Xcode plug-in for all users. Default is to install
@@ -31,24 +31,22 @@
 
 ifeq ($(XCODE_VERSION),)
 
-XCODE_VERSION = 42
+XCODE_VERSION = 43
 
 endif
 
 XCODE_VERSION_MAJOR := $(shell v="$(XCODE_VERSION)"; echo "$${v:0:1}")
 XCODE_VERSION_MINOR := $(shell v="$(XCODE_VERSION)"; echo "$${v:1:1}")
 
-ifeq ($(DEVELOPER_PATH),)
+ifeq ($(XCODE_PATH),)
 
-DEVELOPER_PATH = /Developer
+XCODE_PATH = /Applications/Xcode.app
 
 endif
 
-ifeq ($(XCODE_VERSION),32)
-    XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/PrivateFrameworks
-else ## Xcode 4.x
-    XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks
-endif
+DEVELOPER_PATH = $(XCODE_PATH)/Contents/Developer/
+XCODE_SDK_PATH = $(XCODE_PATH)/Contents/PlugIns/Xcode3Core.ideplugin/Contents/Frameworks/
+
 
 ifeq ($(XCODE_PLUGIN_ALL_USERS),yes)
     XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/$(XCODE_VERSION_MAJOR).$(XCODE_VERSION_MINOR)/Xcode/Plug-ins

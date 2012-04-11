@@ -24,6 +24,8 @@ ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
      COMPILE_FOR_IPHONE = yes
      SDK_NAME = iPhoneSimulator
      ARCH= -arch i386
+	 CC = llvm-gcc
+     CXX = llvm-g++
 endif
 
 # For the simulator build we must support weak linking.

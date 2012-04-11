@@ -11,6 +11,7 @@ top_srcdir	= .
 
 include $(top_srcdir)/config/Make.rules
 
+export XCODE_PATH
 export DEVELOPER_PATH
 export XCODE_VERSION
 export XCODE_SDK_PATH
