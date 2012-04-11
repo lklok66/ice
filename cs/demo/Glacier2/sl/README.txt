@@ -37,6 +37,7 @@ IIS instructions:
 1) Copy clientaccesspolicy.xml to your web server document root
    directory:
 
+   > cd <Ice Silverlight directory>\demo\Ice\sl\chat
    > xcopy clientaccesspolicy.xml C:\inetpub\wwwroot\
 
 2) Verify that the policy file is accessible at the following URL:
@@ -48,13 +49,13 @@ IIS instructions:
 
    //initData.properties.setProperty("Ice.ClientAccessPolicyProtocol", "Http");
 
-4) Rebuild the demo.
+4) Rebuild the demo. You must rebuild both chat and chat.web projects.
 
 5) Copy required files. In a commmand window, execute the following
    commands:
 
    > mkdir C:\inetpub\wwwroot\chat
-   > cd <Ice Silverlight directory>\demo\Ice\sl\chat\chat.Web
+   > cd <Ice Silverlight directory>\demo\Ice\sl\chat
    > xcopy chat.web\chatTestPage.html C:\inetpub\wwwroot\chat
    > xcopy chat.web\Silverlight.js C:\inetpub\wwwroot\chat
    > xcopy chat.Web\ClientBin C:\inetpub\wwwroot\chat\ClientBin /s /i

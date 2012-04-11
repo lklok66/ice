@@ -21,12 +21,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("Ice for .NET")]
 [assembly: AssemblyCopyright("Copyright (c) 2003-2012 ZeroC, Inc.")]
 [assembly: AssemblyTrademark("Ice")]
-[assembly: AssemblyCulture("")]         
-#if SILVERLIGHT
+[assembly: AssemblyCulture("")]
 [assembly: AssemblyVersion("0.4.1")]
-#else
-[assembly: AssemblyVersion("3.4.2")]
-#endif
 [assembly: AssemblyDelaySign(false)]
 
 [assembly: ComVisible(false)]

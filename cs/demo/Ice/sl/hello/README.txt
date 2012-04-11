@@ -37,6 +37,7 @@ IIS instructions:
 1) Copy clientaccesspolicy.xml to your web server document root
    directory:
 
+   > cd <Ice Silverlight directory>\demo\Ice\sl\hello\
    > xcopy clientaccesspolicy.xml C:\inetpub\wwwroot\
 
 2) Verify that the policy file is accessible at the following URL:
@@ -48,13 +49,13 @@ IIS instructions:
 
    //initData.properties.setProperty("Ice.ClientAccessPolicyProtocol", "Http");
 
-4) Rebuild the demo.
+4) Rebuild the demo. You must rebuild both hello and hello.web projects.
 
 5) Copy required files. In a commmand window, execute the following
    commands:
 
    > mkdir C:\inetpub\wwwroot\hello
-   > cd <Ice Silverlight directory>\demo\Ice\sl\hello\hello.Web
+   > cd <Ice Silverlight directory>\demo\Ice\sl\hello\
    > xcopy hello.web\helloTestPage.html C:\inetpub\wwwroot\hello
    > xcopy hello.web\Silverlight.js C:\inetpub\wwwroot\hello
    > xcopy hello.Web\ClientBin C:\inetpub\wwwroot\hello\ClientBin /s /i
