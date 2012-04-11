@@ -53,11 +53,12 @@ instead.
 
 IIS instructions:
 
-1) Copy clientaccesspolicy.xml to your web server document root directory.
+1) Copy clientaccesspolicy.xml to your web server document root
+   directory:
 
    > xcopy clientaccesspolicy.xml C:\inetpub\wwwroot\
 
-2) Check that the policy file is accessible at the following url:
+2) Verify that the policy file is accessible at the following URL:
 
    http://localhost/clientaccesspolicy.xml
 
@@ -68,7 +69,7 @@ IIS instructions:
 
 4) Rebuild the demo.
 
-5) Copy required files, from a commmand window execute the following
+5) Copy required files. In a commmand window, execute the following
    commands:
 
    > mkdir C:\inetpub\wwwroot\bidir
@@ -77,8 +78,7 @@ IIS instructions:
    > xcopy bidir.web\Silverlight.js C:\inetpub\wwwroot\bidir
    > xcopy bidir.Web\ClientBin C:\inetpub\wwwroot\bidir\ClientBin /s /i
 
-   
-6) The bidir client should now be accessible at the url
+6) The bidir client should now be accessible at the following URL:
 
    http://localhost/bidir/bidirTestPage.html
 
@@ -87,7 +87,7 @@ Notes:
 
 * The web server should serve the policy file on standard port 80.
 
-* If you don't have IIS installed on Windows 7, follow the instructions
-  in the next page.
+* If you do not have IIS installed on Windows 7, follow the
+  instructions on this page:
 
   http://technet.microsoft.com/en-us/library/cc731911.aspx

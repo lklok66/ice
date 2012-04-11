@@ -3,8 +3,8 @@ Requirements
 ======================================================================
 
 
-Windows Version
----------------
+Windows
+-------
 
 Ice for Silverlight has been extensively tested on:
 
@@ -14,7 +14,7 @@ Ice for Silverlight has been extensively tested on:
 Browser
 -------
 
-Ice for Silverlight has been tested with:
+Ice for Silverlight has been tested with the following browsers:
 
 - Internet Explorer 8.0 and 9.0
 - Firefox 11
@@ -26,7 +26,7 @@ Compiler
 
 Ice for Silverlight requires:
 
-- Microsoft Visual Studio 2010 SP1 
+- Microsoft Visual Studio 2010 SP1
 
 - The Visual Studio 2010 SP1 SDK available for download from:
 
@@ -66,7 +66,7 @@ subdirectory.
 
 
 Building the Ice for Silverlight assemblies
--------------------------------------------------------------
+-------------------------------------------
 
 Follow these steps to build the Ice for Silverlight sources:
 
@@ -84,10 +84,11 @@ Follow these steps to build the Ice for Silverlight sources:
 
    > nmake /f Makefile.mak
 
-Building the Ice for Silverlight policy server
--------------------------------------------------------------
 
-1) Change to the cs\src\PolicyServer subdirectory of the Ice for 
+Building the Ice for Silverlight policy server
+----------------------------------------------
+
+1) Change to the cs\src\PolicyServer subdirectory of the Ice for
    Silverlight source distribution.
 
 2) Open config\Make.rules.mak.cs and review the comments that describe
@@ -98,12 +99,13 @@ Building the Ice for Silverlight policy server
 
    > nmake /f Makefile.mak SILVERLIGHT=no
 
-   Or if you want to build the policy server for .NET Compact Framework
+   If you want to build the policy server for .NET Compact Framework:
 
    > nmake /f Makefile.mak SILVERLIGHT=no COMPACT=yes
 
-Building the Ice Visual Studio Add-in plugin
---------------------------------------------
+
+Building the Ice Visual Studio Add-in
+-------------------------------------
 
 1) In a Visual Studio command prompt, change to the vsaddin
    subdirectory of the Ice for Silverlight source distribution.
@@ -125,11 +127,11 @@ Building the tests and demos
 ----------------------------
 
 To build the tests and demos, you must first install the Ice for
-Silverlight assemblies and the Ice for Visual Add-in. See the
+Silverlight assemblies and the Ice for Visual Studio Add-in. See the
 installation instructions below before opening the Visual Studio
 solutions for the demos or tests.
 
-To build the tests and demos you must use the Visual Studio solutions 
+To build the tests and demos you must use the Visual Studio solutions
 located in cs\test\testsl.sln and cs\demo\demosl.sln.
 
 1) Start the Visual Studio 2010 IDE and open the desired solution file
@@ -167,7 +169,7 @@ Running the demos
 ======================================================================
 
 To run the demos, open the demo\demosl.sln solution and follow the
-instructions in the REAME.txt files of each demo.
+instructions in the README.txt file for each demo.
 
 
 ======================================================================
@@ -185,7 +187,7 @@ Administrator if Ice is installed at a location that requires
 administrative privileges.
 
 The Ice for Silverlight assemblies and the Visual Studio Add-in will
-be installed in the directories specified by the "prefix" variable 
+be installed in the directories specified by the "prefix" variable
 in cs\config\Make.rules.mak.cs and vsaddin\config\Make.rules.mak.
 
 The Ice for Silverlight assemblies will be located in <prefix>\bin\sl.

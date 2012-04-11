@@ -2,8 +2,9 @@
 Requirements
 ======================================================================
 
-Windows Version
----------------
+
+Windows
+-------
 
 Ice for Silverlight has been extensively tested on:
 
@@ -13,11 +14,12 @@ Ice for Silverlight has been extensively tested on:
 Browser
 -------
 
-Ice for Silverlight has been tested with:
+Ice for Silverlight has been tested with the following browsers:
 
 - Internet Explorer 8.0 and 9.0
 - Firefox 11
 - Google Chrome 17
+
 
 Ice 3.4.2
 ---------
@@ -33,16 +35,17 @@ Installation
 ======================================================================
 
 To install the Ice for Silverlight, execute or click on the
-`install.bat' batch file from this directory. 
+`install.bat' batch file in this directory.
 
-The installation of Ice for Silverlight will:
+The installation of Ice for Silverlight will perform the following
+tasks:
 
-- Copy the assemblies from the bin\sl sub-directory to your Ice 3.4.2
-  installation bin\sl directory.
+- Copy the assemblies from the bin\sl subdirectory to the bin\sl
+  subdirectory of your Ice 3.4.2 installation.
 
 - Copy the policy server executables from the bin and bin\cf
-  sub-directories to your Ice 3.4.2 installation bin and bin\cf
-  directories.
+  subdirectories to the same directories in your Ice 3.4.2
+  installation.
 
-- Copy the Ice for Visual Studio Add-in to the vsaddin sub-directory
+- Copy the Ice for Visual Studio Add-in to the vsaddin subdirectory
   of your Ice 3.4.2 installation.

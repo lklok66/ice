@@ -2,20 +2,20 @@
 Introduction
 ======================================================================
 
-This binary distribution contains the binaries of Ice for
-Silverlight. The following components are included in this
-distribution:
+This binary distribution contains the binaries of Ice for Silverlight.
+The following components are included in this distribution:
 
-* The Ice for Silverlight core runtime assembly (bin\sl\Ice.dll) and
+* The Ice for Silverlight core run-time assembly (bin\sl\Ice.dll) and
   assemblies for Ice services (bin\sl\IceGrid.dll,
   bin\sl\IcePatch2.dll, bin\sl\IceStorm.dll and bin\sl\Glacier2.dll).
 
 * The Ice for Silverlight policy server:
-  - for .NET 3.5 (bin\policyserver.exe) 
+
+  - for .NET 3.5 (bin\policyserver.exe)
   - for .NET Compact Framework (bin\cf\policyserver.exe)
 
-* The Ice for Visual Studio Add-in plugin with Ice for Silverlight
-  support (vsaddin\IceVisualStudioAddin-VS2010.dll).
+* The Ice for Visual Studio Add-in with Ice for Silverlight support
+  (vsaddin\IceVisualStudioAddin-VS2010.dll).
 
 * Sample programs (see below).
 
@@ -61,13 +61,8 @@ A brief description of each project is provided below.
   establish a separate connection back to the client.
 
   The demo include a Silverlight client and a server designed to run
-  on a Ice for .NET compact framework device.
+  on a Ice for .NET Compact Framework device.
 
 * demo\Glacier\sl
 
   A very simple chat client that illustrates the Glacier2 session API.
-  
-
-
-
-
