@@ -246,6 +246,9 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = hello_Prefix.pch;
+				GCC_THUMB_SUPPORT = NO;
+                                "GCC_THUMB_SUPPORT[arch=armv6]" = NO;
+                                "GCC_THUMB_SUPPORT[arch=armv7]" = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
@@ -273,6 +276,9 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = hello_Prefix.pch;
+				GCC_THUMB_SUPPORT = NO;
+                                "GCC_THUMB_SUPPORT[arch=armv6]" = NO;
+                                "GCC_THUMB_SUPPORT[arch=armv7]" = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;

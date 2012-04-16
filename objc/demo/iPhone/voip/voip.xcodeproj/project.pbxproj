@@ -234,6 +234,9 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = voip_Prefix.pch;
+				GCC_THUMB_SUPPORT = NO;
+                                "GCC_THUMB_SUPPORT[arch=armv6]" = NO;
+                                "GCC_THUMB_SUPPORT[arch=armv7]" = YES;
 				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = "voip-Info.plist";
@@ -256,6 +259,9 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = voip_Prefix.pch;
+				GCC_THUMB_SUPPORT = NO;
+                                "GCC_THUMB_SUPPORT[arch=armv6]" = NO;
+                                "GCC_THUMB_SUPPORT[arch=armv7]" = YES;
 				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = "voip-Info.plist";
