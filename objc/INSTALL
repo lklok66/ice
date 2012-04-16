@@ -17,11 +17,11 @@ Compiler
 
 To build iPhone applications, you need:
 
-- Xcode 4.2 with iOS 5.0 SDK
+- Xcode 4.3 with iOS 5.1 SDK
 
 To build Cocoa applications, you need:
 
-- Xcode 4.2
+- Xcode 4.3
 
 
 Xcode plug-in
