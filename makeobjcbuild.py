@@ -106,7 +106,7 @@ xcodeVersionMajor = xcodeVersion[0:1]
 xcodeVersionMinor = xcodeVersion[1:2]
 xcodeVersionString = xcodeVersionMajor + "." + xcodeVersionMinor
 
-installerProject = "IceTouch-" + version + "-xcode-" + xcodeVersionString +".pmdoc"
+installerProject = "IceTouch-xcode-" + xcodeVersionString +".pmdoc"
 installerReadme = "installer-xcode-" + xcodeVersionString + "-readme.rtf"
 
 volname = "IceTouch " + version + " Xcode " + xcodeVersionString
@@ -173,16 +173,14 @@ print "ok"
 
 name = "IceTouch-" + version
 installerDir = os.path.join(baseDir, "installer")
-developerDir = os.path.join(baseDir, "Applications/Xcode.app/Contents/Developer")
+developerDir = os.path.join(baseDir, "Library/Developer/IceTouch-" + version)
 sdkDir = os.path.join(developerDir, "SDKs", name)
 cppSdkDir = os.path.join(developerDir, "SDKs", "IceTouchCpp-" + version)
-optDir = os.path.join(baseDir, "opt", name)
-docDir = os.path.join(optDir, "Documentation")
 
 os.system("rm -rfv " + developerDir)
 os.system("rm -rfv " + installerDir)
 os.system("rm -rfv " + os.path.join(baseDir, "slice2objcplugin.pbplugin"))
-os.system("rm -rfv " + optDir)
+#os.system("rm -rfv " + optDir)
 
 print "Preparing installer...",
 sys.stdout.flush()
@@ -194,31 +192,18 @@ copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", installerRe
 copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "uninstall.sh"),
      os.path.join(installerDir, "uninstall.sh"))
 
-os.makedirs(optDir)
+os.makedirs(developerDir)
 os.chdir(buildDir)
-os.system("prefix=%s create_runpath_symlink=no make install" % optDir)
+os.system("prefix=%s create_runpath_symlink=no make install" % developerDir)
 
-os.makedirs(docDir)
-
-move(os.path.join(optDir, "ICE_TOUCH_LICENSE"), os.path.join(docDir, "ICE_TOUCH_LICENSE"))
-move(os.path.join(optDir, "LICENSE"), os.path.join(docDir, "LICENSE"))
 for f in [ "CHANGES", "RELEASE_NOTES"]:
-    copy(os.path.join(rootDir, "objc", f), os.path.join(docDir, f))
-copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "README"),
-     os.path.join(docDir, "README"))
+    copy(os.path.join(rootDir, "objc", f), os.path.join(developerDir, f))
+copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "README"), os.path.join(developerDir, "README"))
 
-copy(os.path.join(buildDir, "objc", "SDK", "IceTouch-" + version), sdkDir)
-copy(os.path.join(buildDir, "objc", "SDK", "IceTouchCpp-" + version), cppSdkDir)
+copy(os.path.join(buildDir, "objc", "SDKs"), os.path.join(developerDir, "SDKs"))
 
 copy(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin", "build", "Release", "slice2objcplugin.pbplugin"),
      os.path.join(baseDir, "slice2objcplugin.pbplugin"))
-
-# SDK symlinks
-os.chdir(os.path.join(developerDir, "SDKs"));
-os.system("ln -s IceTouch-%s IceTouch-%s" % (version, mmversion))
-os.system("ln -s IceTouchCpp-%s IceTouchCpp-%s" % (version, mmversion))
-
-os.chdir(baseDir)
 
 print "Fix file permissions",
 os.system("chown -R root:admin " + baseDir);
@@ -229,7 +214,7 @@ print "Creating installer...",
 sys.stdout.flush()
 
 pmdoc = os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", installerProject)
-os.system(xcodePath + "/Contents/Applications/PackageMaker.app/Contents/MacOS/PackageMaker --doc " + pmdoc + " --out " + latestBuildDir + "/installer/" + basePackageName + ".pkg")
+os.system("/Applications/PackageMaker.app/Contents/MacOS/PackageMaker --doc " + pmdoc + " --out " + latestBuildDir + "/installer/" + basePackageName + ".pkg")
 
 print "ok"
 

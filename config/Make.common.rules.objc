@@ -12,10 +12,10 @@
 # ----------------------------------------------------------------------
 
 SHELL			= /bin/sh
-VERSION			= 1.2.0
+VERSION			= 1.2.1
 VERSION_MAJOR           = 1
 VERSION_MINOR           = 2
-VERSION_PATCH           = 0
+VERSION_PATCH           = 1
 SOVERSION		= 12
 SHORT_VERSION	= 1.2
 
@@ -113,8 +113,8 @@ $(error Unable to find $(slice_translator) in $(ICE_TOUCH_HOME)/$(binsubdir), pl
         ifeq ($(shell test -f $(top_srcdir)/bin/$(slice_translator) && echo 0), 0)
             ice_dir = $(top_srcdir)
         else 
-            ifeq ($(shell test -f /opt/IceTouch-$(VERSION)/$(binsubdir)/$(slice_translator) && echo 0), 0)
-	        ice_dir = /opt/IceTouch-$(VERSION)
+            ifeq ($(shell test -f /Library/Developer/IceTouch-$(VERSION)/$(binsubdir)/$(slice_translator) && echo 0), 0)
+	        ice_dir = /Library/Developer/IceTouch-$(VERSION)
 	    endif
         endif
     endif

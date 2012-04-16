@@ -11,7 +11,7 @@
 # Select an installation base directory for a command line build. The
 # directory will be created if it does not exist.
 #
-prefix			 ?= /opt/IceTouch-$(VERSION)
+prefix			 ?= /Library/Developer/IceTouch-$(VERSION)
 
 #
 # Xcode root directory. If you have several Xcode versions installed,
@@ -25,7 +25,7 @@ prefix			 ?= /opt/IceTouch-$(VERSION)
 # unset to avoid adding a runpath to Ice executables. This setting
 # only applies for Mac OS X command line builds.
 #
-embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
+embedded_runpath_prefix  ?= /Library/Developer/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 
 #
 # Define OPTIMIZE_SIZE as yes if you want to build with minimal size.
@@ -145,8 +145,8 @@ ifeq ($(COMPILE_WITH_GC),)
     endif
 endif
 
-SDK_DIR                 = $(top_srcdir)/SDK/IceTouch-$(VERSION)/$(PLATFORM_NAME).sdk
-CPP_SDK_DIR             = $(top_srcdir)/SDK/IceTouchCpp-$(VERSION)/$(PLATFORM_NAME).sdk
+SDK_DIR                 = $(top_srcdir)/SDKs/ObjC/$(PLATFORM_NAME).sdk
+CPP_SDK_DIR             = $(top_srcdir)/SDKs/Cpp/$(PLATFORM_NAME).sdk
 
 bindir			= $(top_srcdir)/bin
 includedir		= $(top_srcdir)/include

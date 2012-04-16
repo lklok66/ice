@@ -1,15 +1,15 @@
 #!/bin/sh
 
 #
-# This script uninstalls all Ice Touch 1.2.0 packages currently installed on this system.
+# This script uninstalls all Ice Touch 1.2.1 packages currently installed on this system.
 #
 
 showHelp ()
 {
-    echo "Ice Touch 1.2.0 uninstall script"
+    echo "Ice Touch 1.2.1 uninstall script"
     echo "Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved."
     echo "usage: "
-    echo "  \"sudo $0\" -- uninstall all Ice Touch 1.2.0 packages installed on this system."
+    echo "  \"sudo $0\" -- uninstall all Ice Touch 1.2.1 packages installed on this system."
 }
 
 #
@@ -44,7 +44,7 @@ uninstallPackage ()
             fi
         done
 
-        BASE_PATH=$VOLUME$LOCATION
+        BASE_PATH=$(dirname "$VOLUME$LOCATION")
         
         VERSION_MAJOR=${VERSION:0:1}
         VERSION_MINOR=${VERSION:2:1}
@@ -56,37 +56,19 @@ uninstallPackage ()
         fi
 
         #
-        # Remove IceTouch contents from Xcode Developer dir.
+        # Remove Ice Touch contents installation directory
         #
         if [[ "$XCODE_DEV_PACKAGE" == "YES" ]]; then
-            if [[ -d "$BASE_PATH/Contents/Developer/SDKs/IceTouch-$VERSION" ]]; then
-                rm -rf "$BASE_PATH/Contents/Developer/SDKs/IceTouch-$VERSION"
+            if [[ -d "$BASE_PATH/IceTouch-$VERSION" ]]; then
+                rm -rf "$BASE_PATH/IceTouch-$VERSION"
             fi
 
-            if [[ "$BASE_PATH/Contents/Developer/SDKs/IceTouch-$VERSION_MM" ]]; then
-                rm -f "$BASE_PATH/Contents/Developer/SDKs/IceTouch-$VERSION_MM"
-            fi
-
-			if [[ -d "$BASE_PATH/Contents/Developer/SDKs/IceTouchCpp-$VERSION" ]]; then
-                rm -rf "$BASE_PATH/Contents/Developer/SDKs/IceTouchCpp-$VERSION"
-            fi
-
-            if [[ "$BASE_PATH/Contents/Developer/SDKs/IceTouchCpp-$VERSION_MM" ]]; then
-                rm -f "$BASE_PATH/Contents/Developer/SDKs/IceTouchCpp-$VERSION_MM"
+            if [[ "$BASE_PATH/IceTouch-$VERSION_MM" ]]; then
+                rm -f "$BASE_PATH/IceTouch-$VERSION_MM"
             fi
         fi
 
-        if [[ "$PACKAGE" == "com.zeroc.icetouch-command-line-developer.pkg" ]]; then
-            if [[ -d "/opt/IceTouch-$VERSION" ]]; then
-                rm -rf "/opt/IceTouch-$VERSION"
-            fi
-
-            if [[ "/opt/IceTouch-$VERSION_MM" ]]; then
-                rm -rf "/opt/IceTouch-$VERSION_MM"
-            fi
-        fi
-
-		if [[ "$PACKAGE" == "com.zeroc.icetouch-xcode43-plugin.pkg" ]]; then
+	if [[ "$PACKAGE" == "com.zeroc.icetouch-xcode43-plugin.pkg" ]]; then
             if [[ -d "/Library/Application Support/Developer/4.3/Xcode/Plug-ins/slice2objcplugin.pbplugin" ]]; then
                 rm -rf "/Library/Application Support/Developer/4.3/Xcode/Plug-ins/slice2objcplugin.pbplugin"
             fi
@@ -137,7 +119,7 @@ answer=""
 
 while [[ $ok -eq 0 ]]
 do
-    echo "Uninstall all Ice Touch 1.2.0 packages installed on this sytem? Yes/No"
+    echo "Uninstall all Ice Touch 1.2.1 packages installed on this sytem? Yes/No"
     read -p "$*" answer
     if [[ ! "$answer" ]]; then
         answer="no"
@@ -165,9 +147,7 @@ if [[ "$confirmed" == "no" ]]; then
     exit 0
 fi
 
-uninstallPackage "com.zeroc.icetouch-command-line-developer.pkg"
 uninstallPackage "com.zeroc.icetouch-xcode43-developer.pkg"
 uninstallPackage "com.zeroc.icetouch-xcode43-plugin.pkg"
 
-echo "Ice Touch 1.2.0 uninstallation completed successfully"
-
+echo "Ice Touch 1.2.1 uninstallation completed successfully"

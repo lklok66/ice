@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# Uninstall IceTouch-1.1.0 Xcode plug-in
+# Uninstall IceTouch-1.2.1 Xcode plug-in
 #
 
 if [ -d /Developer/Library/Xcode/Plug-ins/slice2objcplugin.pbplugin ]; then

@@ -102,32 +102,44 @@
         BOOL found = NO;
         for(NSString* sdkDir in sdks)
         {
-            if([sdkDir rangeOfString:@"IceTouch"].location != NSNotFound)
+            if([sdkDir rangeOfString:@"SDKs"].location == NSNotFound)
             {
-                sdk = YES;
-                cpp = [sdkDir rangeOfString:@"IceTouchCpp"].location != NSNotFound;
-                found = YES;
-                sdkDir = [sdkDir stringByDeletingLastPathComponent];
-                // The bin and slice directories exist at the root of the SDK.
-                slicedir = [sdkDir stringByAppendingPathComponent:@"slice"];
-
-
-                NSString* translatorExe = (cpp ? @"slice2cpp" : @"slice2objc");
-                translator = [[sdkDir stringByAppendingPathComponent:@"bin"] stringByAppendingPathComponent:translatorExe];
-                break;
+                continue;
             }
+            
+            sdkDir = [sdkDir stringByDeletingLastPathComponent];
+            if([sdkDir rangeOfString:@"Cpp"].location != NSNotFound)
+            {
+                translator = [sdkDir stringByAppendingPathComponent:@"bin/slice2cpp"];
+                if(![fileManager isExecutableFileAtPath:translator])
+                {
+                    continue;
+                }
+                cpp = YES;
+            }
+            else if([sdkDir rangeOfString:@"ObjC"].location != NSNotFound)
+            {
+                translator = [sdkDir stringByAppendingPathComponent:@"bin/slice2objc"];
+                if(![fileManager isExecutableFileAtPath:translator])
+                {
+                    continue;
+                }
+                cpp = NO;
+            }
+
+            sdk = YES;
+            found = YES;
+
+            // The bin and slice directories exist at the root of the SDK.
+            slicedir = [sdkDir stringByAppendingPathComponent:@"slice"];
+            break;
         }
+
         if(!found)
         {
-            error = [NSString stringWithFormat:@"IceTouch SDK cannot be found: \"%@\"", sdksRaw];
+            error = [NSString stringWithFormat:@"Ice Touch SDK cannot be found: \"%@\"", sdksRaw];
             return self;
         }
-    }
-
-    if(![fileManager isExecutableFileAtPath:translator])
-    {
-        error = [NSString stringWithFormat:@"Slice translator is not executable: \"%@\"", translator];
-        return self;
     }
 
     BOOL dir = NO;

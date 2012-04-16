@@ -28,7 +28,7 @@ filesToKeep = [
     "./ICE_LICENSE",
     "./ICE_TOUCH_LICENSE",
     "./Makefile.objc",
-	"./config/makedepend.py",
+    "./config/makedepend.py",
     "./config/Make.common.rules.objc",
     "./config/TestUtil.py",
     "./cpp/Makefile",
@@ -53,7 +53,8 @@ filesToKeep = [
     "./Xcode",
     "./slice",
     "./certs",
-    "./scripts"
+    "./scripts",
+    "./distribution/src/mac/IceTouch"
 ]
 
 def pathInList(p, l):
@@ -308,8 +309,7 @@ certsFiles = [ \
 # Demo distribution
 copy("ICE_LICENSE", demoDir)
 copy("ICE_TOUCH_LICENSE", demoDir)
-# TODO: README file.
-#copy(os.path.join(distFilesDir, "src", "common", "README.DEMOS"), demoDir)
+copy(os.path.join("distribution", "src", "mac", "IceTouch", "README.DEMOS"), os.path.join(demoDir, "README"))
 
 copyMatchingFiles(os.path.join("certs"), os.path.join(demoDir, "certs"), certsFiles)
 for d in ["", "objc"]:
@@ -326,8 +326,8 @@ configSubstituteExprs = [(re.compile(regexpEscape("../../../certs")), "../certs"
 makeSubstituteExprs = [ (re.compile("= \.\.$"), " = ."),
                         (re.compile(regexpEscape("../..")), ".."),
                         (re.compile(regexpEscape("../../..")), "../..")]
-xcodeCppSubstituteExprs = [ (re.compile("ADDITIONAL_SDKS = .*;"), "ADDITIONAL_SDKS = \"$(DEVELOPER_DIR)/SDKs/IceTouchCpp-%s/$(PLATFORM_NAME).sdk\";" % mmversion) ]
-xcodeSubstituteExprs = [ (re.compile("ADDITIONAL_SDKS = .*;"), "ADDITIONAL_SDKS = \"$(DEVELOPER_DIR)/SDKs/IceTouch-%s/$(PLATFORM_NAME).sdk\";" % mmversion) ]
+xcodeCppSubstituteExprs = [ (re.compile("ADDITIONAL_SDKS = .*;"), "ADDITIONAL_SDKS = \"/Library/Developer/IceTouch-%s/SDKs/Cpp/$(PLATFORM_NAME).sdk\";" % mmversion) ]
+xcodeSubstituteExprs = [ (re.compile("ADDITIONAL_SDKS = .*;"), "ADDITIONAL_SDKS = \"/Library/Developer/IceTouch-%s/SDKs/ObjC/$(PLATFORM_NAME).sdk\";" % mmversion) ]
 
 for root, dirnames, filesnames in os.walk(demoDir):
     for f in filesnames:
@@ -355,6 +355,8 @@ os.chdir("..")
 move(os.path.join("cpp-translators", "bin", "slice2objc"), os.path.join("cpp", "bin", "slice2objc"))
 move(os.path.join("cpp-translators", "bin", "slice2cpp"), os.path.join("cpp", "bin", "slice2cpp"))
 remove("cpp-translators")
+
+remove("distribution")
 
 #
 # Everything should be clean now, we can create the source distributions archives

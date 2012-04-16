@@ -33,7 +33,7 @@ replace the following property definitions:
 # SSL Configuration
 #
 Ice.Plugin.IceSSL=IceSSL:createIceSSL
-IceSSL.DefaultDir=/opt/IceTouch-1.2.0/certs
+IceSSL.DefaultDir=<Ice Touch demo directory>/certs
 IceSSL.CertAuthFile=cacert.pem
 IceSSL.CertFile=s_rsa1024_pub.pem
 IceSSL.KeyFile=s_rsa1024_priv.pem

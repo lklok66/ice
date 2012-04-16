@@ -147,8 +147,5 @@ For the Mac OS X build, simply run "make install" to install Ice
 Touch in the directory specified by the "prefix" variable in
 objc/config/Make.rules.
 
-For the Cocoa/iPhone and iPhone Simulator builds, copy the contents
-of objc/SDK to either /Developer/SDKs, or ~/Library/SDKs.
-
 For Mac OS X builds of Ice Touch, the install name of the shared
-library is prefixed with the path /opt/IceTouch-@ver@/lib.
+library is prefixed with the path /Library/Developer/IceTouch-@ver@/lib.

@@ -15,8 +15,8 @@
 //
 // The Ice Touch version.
 //
-#define ICE_TOUCH_STRING_VERSION "1.2.0" // "A.B.C", with A=major, B=minor, C=patch
-#define ICE_TOUCH_INT_VERSION 10200      // AABBCC, with AA=major, BB=minor, CC=patch
+#define ICE_TOUCH_STRING_VERSION "1.2.1" // "A.B.C", with A=major, B=minor, C=patch
+#define ICE_TOUCH_INT_VERSION 10201      // AABBCC, with AA=major, BB=minor, CC=patch
 
 namespace Slice
 {

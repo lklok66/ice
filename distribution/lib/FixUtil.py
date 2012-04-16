@@ -153,7 +153,8 @@ def fileMatchAndReplace(filename, matchAndReplaceExps, verbose=True):
                 line = oldLine.replace(match.group(1), replace)
                 #print oldLine + line
                 updated = True
-                break
+                # Don't break, the line might match several expressions.
+                #break
         newConfigFile.write(line)
 
     newConfigFile.close()

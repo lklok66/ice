@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CanonicalName</key>
-	<string>IceTouch 1.2.0</string>
+	<string>IceTouch 1.2.1</string>
 	<key>DefaultProperties</key>
 	<dict>
 		<key>MACOSX_DEPLOYMENT_TARGET</key>

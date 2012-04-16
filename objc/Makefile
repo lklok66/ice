@@ -43,12 +43,7 @@ else
 
 endif
 
-# TODO: Anyway to get around the call to "make sdk"?
-all::
-	if [ ! -d SDK ]; \
-	then \
-		make sdk ;\
-	fi
+all:: sdks
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
@@ -57,42 +52,39 @@ $(EVERYTHING)::
 	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
 	done
 
-sdk: build-sdk
-
-SDKS = "" "Cpp"
-
-build-cpp-sdk: build-sdk
-
-build-sdk:
-	$(call mkdir,SDK)
-	for sdk in $(SDKS); \
-	do \
-	    $(call mkdir,SDK/IceTouch$$sdk-$(VERSION)) ;\
-		ln -s IceTouch$$sdk-$(VERSION) SDK/IceTouch$$sdk-$(SHORT_VERSION) ;\
-	    $(call mkdir,SDK/IceTouch$$sdk-$(VERSION)/bin) ;\
-	    $(call mkdir,SDK/IceTouch$$sdk-$(VERSION)/slice) ;\
-	    for platform in macosx iphoneos iphonesimulator ; \
+sdks:
+	if [ ! -d SDKs ]; \
+	then \
+	    $(call mkdir,SDKs) ; \
+	    for sdk in SDKs/Cpp SDKs/ObjC; \
 	    do \
-	        platform_sdk=SDK/IceTouch$$sdk-$(VERSION)/$$platform.sdk ;\
-	        $(call mkdir,$$platform_sdk) ;\
-	        $(call mkdir,$$platform_sdk/usr) ;\
-	        $(call mkdir,$$platform_sdk/usr/local) ;\
-	        $(call mkdir,$$platform_sdk/usr/local/include) ;\
-	        $(call mkdir,$$platform_sdk/usr/local/lib) ;\
-	        $(INSTALL_DATA) $(top_srcdir)/config/$$platform-SDKSettings.plist $$platform_sdk/SDKSettings.plist ;\
-	        chmod a+r $$platform_sdk/SDKSettings.plist ;\
-	    done ;\
-	    for subdir in $(top_srcdir)/../slice/* ; \
-	    do \
-	        echo "Copying slice/$$subdir to SDK/IceTouch$$sdk-$(VERSION)/slice..." ; \
-	        cp -fpr $(top_srcdir)/../slice/$$subdir SDK/IceTouch$$sdk-$(VERSION)/slice ; \
-	    done ;\
-	done
-	$(call installprogram,$(ice_cpp_dir)/bin/slice2objc,SDK/IceTouch-$(VERSION)/bin)
-	$(call installprogram,$(ice_cpp_dir)/bin/slice2cpp,SDK/IceTouchCpp-$(VERSION)/bin)
+	        $(call mkdir,$$sdk) ;\
+	        $(call mkdir,$$sdk/bin) ;\
+	        $(call mkdir,$$sdk/slice) ;\
+	        for platform in macosx iphoneos iphonesimulator ; \
+	        do \
+	            platform_sdk=$$sdk/$$platform.sdk ;\
+	            $(call mkdir,$$platform_sdk) ;\
+	            $(call mkdir,$$platform_sdk/usr) ;\
+	            $(call mkdir,$$platform_sdk/usr/local) ;\
+	            $(call mkdir,$$platform_sdk/usr/local/include) ;\
+	            $(call mkdir,$$platform_sdk/usr/local/lib) ;\
+	            $(INSTALL_DATA) $(top_srcdir)/config/$$platform-SDKSettings.plist \
+                                    $$platform_sdk/SDKSettings.plist ;\
+	            chmod a+r $$platform_sdk/SDKSettings.plist ;\
+	        done ;\
+	        for subdir in $(top_srcdir)/../slice/* ; \
+	        do \
+	            echo "Copying slice/$$subdir to $$sdk/slice..." ; \
+	            cp -fpr $(top_srcdir)/../slice/$$subdir $$sdk/slice ; \
+	        done ;\
+	    done; \
+	    $(call installprogram,$(ice_cpp_dir)/bin/slice2objc,SDKs/ObjC/bin); \
+	    $(call installprogram,$(ice_cpp_dir)/bin/slice2cpp,SDKs/Cpp/bin); \
+        fi
 
 clean::
-	-rm -rf SDK
+	-rm -rf SDKs
 
 test::
 	@python $(top_srcdir)/allTests.py

@@ -116,7 +116,7 @@ $(OBJS): include/IceUtil/ArgVector.h \
 		include/Ice/SliceChecksums.h \
 		include/Ice/Stream.h \
 		include/Ice/StreamF.h \
-        include/Ice/StringConverter.h \
+		include/Ice/StringConverter.h \
 		include/Ice/LocalObject.h \
 		include/Ice/LocalObjectF.h \
 		include/Ice/UndefSysMacros.h \
@@ -195,7 +195,7 @@ depend:: include/IceUtil/ArgVector.h \
 		include/Ice/SliceChecksums.h \
 		include/Ice/Stream.h \
 		include/Ice/StreamF.h \
-        include/Ice/StringConverter.h \
+		include/Ice/StringConverter.h \
 		include/Ice/LocalObject.h \
 		include/Ice/LocalObjectF.h \
 		include/Ice/UndefSysMacros.h \

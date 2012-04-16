@@ -137,12 +137,12 @@ SDIR		=  $(slicedir)/Ice
 
 SRCS_DIR	=  $(ice_dir)/cpp/src/Ice
 
-SRCS_CPP_OBJS	:= $(CPP_OBJS)
-SRCS_LOCAL_OBJS	:= $(LOCAL_OBJS)
-SRCS_SLICE_OBJS	:= $(SLICE_OBJS)
-SRCS		=  $(addprefix $(SRCS_DIR)/, $(SRCS_OBJS:.o=.cpp)) \
-		   $(SRCS_LOCAL_OBJS:.o=.cpp) \
-		   $(SRCS_SLICE_OBJS:.o=.cpp)
+SRCS_CPP_OBJS	:= $(CPP_OBJS:.o=.cpp)
+SRCS_LOCAL_OBJS	:= $(LOCAL_OBJS:.o=.cpp)
+SRCS_SLICE_OBJS	:= $(SLICE_OBJS:.o=.cpp)
+SRCS		=  $(addprefix $(SRCS_DIR)/, $(SRCS_CPP_OBJS)) \
+		   $(SRCS_LOCAL_OBJS) \
+		   $(SRCS_SLICE_OBJS)
 DEPENDFLAGS	= --platform-name
 
 include $(top_srcdir)/config/Make.rules
