@@ -24,8 +24,6 @@ ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
      COMPILE_FOR_IPHONE = yes
      SDK_NAME = iPhoneSimulator
      ARCH= -arch i386
-     CC = llvm-gcc
-     CXX = llvm-g++
 endif
 
 # For the simulator build we must support weak linking.
@@ -59,8 +57,17 @@ endif
 ifeq ($(COMPILE_FOR_IPHONE),yes)
     PLATFORM_HOME=$(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform
     SDK_HOME=$(PLATFORM_HOME)/Developer/SDKs/$(SDK_NAME)$(IPHONE_SDK_VERSION).sdk
-    CC                  := $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(CC)
-    CXX                 := $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(CXX)
+    ifeq ($(CC),clang)
+        CC                  := $(DEVELOPER_PATH)/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
+    else
+        CC                  := $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(CC)
+    endif
+    ifeq ($(CXX),clang++)
+        CXX                 := $(DEVELOPER_PATH)/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
+    else
+        CXX                 := $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(CXX)
+    endif
+    
     CPPPLATFORMFLAGS    = $(ARCH) -isysroot $(SDK_HOME) -miphoneos-version-min=$(IPHONE_TARGET_MIN_SDK_VERSION)
     LDPLATFORMFLAGS     = $(ARCH) -isysroot $(SDK_HOME)
     CODESIGN = CODESIGN_ALLOCATE=$(PLATFORM_HOME)/Developer/usr/bin/codesign_allocate codesign

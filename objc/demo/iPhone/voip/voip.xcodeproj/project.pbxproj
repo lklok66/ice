@@ -234,7 +234,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = voip_Prefix.pch;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = "voip-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
@@ -256,7 +256,7 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = voip_Prefix.pch;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = "voip-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;

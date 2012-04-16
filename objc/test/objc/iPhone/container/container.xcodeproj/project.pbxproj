@@ -860,7 +860,7 @@
 				GCC_PREFIX_HEADER = container_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = ICE_OBJC_NOGC;
 				GCC_THUMB_SUPPORT = NO;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					../../include,
 					../../Ice,
@@ -893,7 +893,7 @@
 				GCC_PREFIX_HEADER = container_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = ICE_OBJC_NOGC;
 				GCC_THUMB_SUPPORT = NO;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					../../include,
 					../../Ice,

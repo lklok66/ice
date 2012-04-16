@@ -933,7 +933,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = ICE_OBJC_NOGC;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_THUMB_SUPPORT = NO;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					../../Common,
 					../../Ice,
@@ -970,7 +970,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = ICE_OBJC_NOGC;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_THUMB_SUPPORT = NO;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					../../Common,
 					../../Ice,

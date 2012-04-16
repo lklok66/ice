@@ -99,7 +99,7 @@ XCODE_PATH = /Applications/Xcode.app
 
 endif
 
-DEVELOPER_PATH = $(XCODE_PATH)/Contents/Developer/
+DEVELOPER_PATH = $(XCODE_PATH)/Contents/Developer
 
 #
 # Set the platform name according to the build type.
