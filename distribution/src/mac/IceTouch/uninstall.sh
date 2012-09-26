@@ -51,7 +51,7 @@ uninstallPackage ()
         VERSION_MM=$VERSION_MAJOR"."$VERSION_MINOR
 
         XCODE_DEV_PACKAGE="NO"
-        if [[ "$PACKAGE" == "com.zeroc.icetouch-xcode43-developer.pkg" ]]; then
+        if [[ "$PACKAGE" == "com.zeroc.icetouch-xcode45-developer.pkg" ]]; then
             XCODE_DEV_PACKAGE="YES"
         fi
 
@@ -68,9 +68,9 @@ uninstallPackage ()
             fi
         fi
 
-	if [[ "$PACKAGE" == "com.zeroc.icetouch-xcode43-plugin.pkg" ]]; then
-            if [[ -d "/Library/Application Support/Developer/4.3/Xcode/Plug-ins/slice2objcplugin.pbplugin" ]]; then
-                rm -rf "/Library/Application Support/Developer/4.3/Xcode/Plug-ins/slice2objcplugin.pbplugin"
+	if [[ "$PACKAGE" == "com.zeroc.icetouch-xcode45-plugin.pkg" ]]; then
+            if [[ -d "/Library/Application Support/Developer/4.5/Xcode/Plug-ins/slice2objcplugin.pbplugin" ]]; then
+                rm -rf "/Library/Application Support/Developer/4.5/Xcode/Plug-ins/slice2objcplugin.pbplugin"
             fi
         fi
 
@@ -147,8 +147,8 @@ if [[ "$confirmed" == "no" ]]; then
     exit 0
 fi
 
-uninstallPackage "com.zeroc.icetouch-xcode43-developer.pkg"
-uninstallPackage "com.zeroc.icetouch-xcode43-plugin.pkg"
+uninstallPackage "com.zeroc.icetouch-xcode45-developer.pkg"
+uninstallPackage "com.zeroc.icetouch-xcode45-plugin.pkg"
 
 if [[ -f "/var/db/receipts/com.zeroc.icetouch121.preflight.pkg.bom" ]]; then
     rm "/var/db/receipts/com.zeroc.icetouch121.preflight.pkg.bom"

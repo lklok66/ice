@@ -10,5 +10,8 @@ fi
 
 
 if [[ -d "/Library/Developer/IceTouch-1.2.1" ]]; then
+    if [[ -f "/Library/Developer/IceTouch-1.2" ]]; then
+        rm -f /Library/Developer/IceTouch-1.2
+    fi
     ln -s "/Library/Developer/IceTouch-1.2.1" "/Library/Developer/IceTouch-1.2"
 fi
