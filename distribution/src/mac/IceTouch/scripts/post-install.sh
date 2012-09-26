@@ -1,11 +1,11 @@
 #!/bin/sh
 #
-# Xcode 4.3
+# Xcode 4.5
 #
 
-if [[ -d "/Library/Application Support/Developer/4.3/Xcode/Plug-ins" ]]; then
-    chown root:admin "/Library/Application Support/Developer/4.3/Xcode/Plug-ins"
-    chmod 775 "/Library/Application Support/Developer/4.3/Xcode/Plug-ins" 
+if [[ -d "/Library/Application Support/Developer/4.5/Xcode/Plug-ins" ]]; then
+    chown root:admin "/Library/Application Support/Developer/4.5/Xcode/Plug-ins"
+    chmod 775 "/Library/Application Support/Developer/4.5/Xcode/Plug-ins" 
 fi
 
 
