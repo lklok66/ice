@@ -333,7 +333,7 @@ private:
         NSMutableDictionary* servants = [[[NSMutableDictionary alloc] initWithCapacity:wrappers.size()] autorelease];
         for(Ice::FacetMap::const_iterator p = wrappers.begin(); p != wrappers.end(); ++p)
         {
-            NSObject* key = toObjC(p->first);
+            NSObject<NSCopying>* key = toObjC(p->first);
             [servants setObject:IceObjC::ObjectWrapperPtr::dynamicCast(p->second)->getObject() forKey:key];
             [key release];
         }
@@ -388,7 +388,7 @@ private:
         NSMutableDictionary* servants = [[[NSMutableDictionary alloc] initWithCapacity:wrappers.size()] autorelease];
         for(Ice::FacetMap::const_iterator p = wrappers.begin(); p != wrappers.end(); ++p)
         {
-            NSObject* key = toObjC(p->first);
+            NSObject<NSCopying>* key = toObjC(p->first);
             [servants setObject:IceObjC::ObjectWrapperPtr::dynamicCast(p->second)->getObject() forKey:key];
             [key release];
         }

@@ -49,13 +49,13 @@ void rethrowCxxException(NSException*, bool = false);
 // must assume ownership of the returned object.
 //
 
-inline id toObjC(bool v)      { return [[NSNumber alloc] initWithBool:v]; }
-inline id toObjC(ICEByte v)   { return [[NSNumber alloc] initWithUnsignedChar:v]; }
-inline id toObjC(ICEShort v)  { return [[NSNumber alloc] initWithShort:v]; }
-inline id toObjC(ICEInt v)    { return [[NSNumber alloc] initWithInt:v]; }
-inline id toObjC(ICELong v)   { return [[NSNumber alloc] initWithLongLong:v]; }
-inline id toObjC(ICEFloat v)  { return [[NSNumber alloc] initWithFloat:v]; }
-inline id toObjC(ICEDouble v) { return [[NSNumber alloc] initWithDouble:v]; }
+inline NSObject<NSCopying>* toObjC(bool v)      { return [[NSNumber alloc] initWithBool:v]; }
+inline NSObject<NSCopying>* toObjC(ICEByte v)   { return [[NSNumber alloc] initWithUnsignedChar:v]; }
+inline NSObject<NSCopying>* toObjC(ICEShort v)  { return [[NSNumber alloc] initWithShort:v]; }
+inline NSObject<NSCopying>* toObjC(ICEInt v)    { return [[NSNumber alloc] initWithInt:v]; }
+inline NSObject<NSCopying>* toObjC(ICELong v)   { return [[NSNumber alloc] initWithLongLong:v]; }
+inline NSObject<NSCopying>* toObjC(ICEFloat v)  { return [[NSNumber alloc] initWithFloat:v]; }
+inline NSObject<NSCopying>* toObjC(ICEDouble v) { return [[NSNumber alloc] initWithDouble:v]; }
 
 inline void fromObjC(id object, bool& v)      { v = [object boolValue]; }
 inline void fromObjC(id object, ICEByte& v)   { v = [object unsignedCharValue]; }
@@ -65,7 +65,7 @@ inline void fromObjC(id object, ICELong& v)   { v = [object longLongValue]; }
 inline void fromObjC(id object, ICEFloat& v)  { v = [object floatValue]; }
 inline void fromObjC(id object, ICEDouble& v) { v = [object doubleValue]; }
 
-inline id
+inline NSObject<NSCopying>*
 toObjC(const std::string& s)
 {
     return [[NSString alloc] initWithUTF8String:s.c_str()];
@@ -155,7 +155,7 @@ toNSDictionary(const std::map<K, V>& dict)
     NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] initWithCapacity:dict.size()];
     for(typename std::map<K, V>::const_iterator p = dict.begin(); p != dict.end(); ++p)
     {
-        NSObject* key = toObjC(p->first);
+        NSObject<NSCopying>* key = toObjC(p->first);
         NSObject* value = toObjC(p->second);
         [dictionary setObject:value forKey:key];
         [key release];

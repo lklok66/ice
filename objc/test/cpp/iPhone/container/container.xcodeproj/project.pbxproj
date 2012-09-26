@@ -942,7 +942,7 @@
 					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "-DTARGET_OS_IPHONE";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = container;
@@ -981,7 +981,7 @@
 					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "-DTARGET_OS_IPHONE";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = container;

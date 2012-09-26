@@ -293,7 +293,7 @@
 				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_LDFLAGS = "-lGlacier2ObjC";
 				PRODUCT_NAME = library;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -321,7 +321,7 @@
 				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_LDFLAGS = "-lGlacier2ObjC";
 				PRODUCT_NAME = library;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";

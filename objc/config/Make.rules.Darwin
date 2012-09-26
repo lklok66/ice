@@ -18,7 +18,7 @@ CXX    = clang++
 
 ifeq ($(COMPILE_FOR_IPHONE),yes)
      SDK_NAME = iPhoneOS
-     ARCH= -arch armv6 -arch armv7
+     ARCH= -arch armv7 -arch armv7s
 endif
 ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
      COMPILE_FOR_IPHONE = yes
