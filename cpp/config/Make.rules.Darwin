@@ -11,8 +11,8 @@
 # This file is included by Make.rules when uname is Darwin.
 #
 
-CXX                     = c++
-#CXX	                = clang++
+#CXX                     = c++
+CXX	                = clang++
 
 CXXFLAGS		= -Wall -D_REENTRANT
 

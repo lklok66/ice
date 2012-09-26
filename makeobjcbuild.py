@@ -58,10 +58,10 @@ def usage():
 #
 verbose = 0
 tag = "HEAD"
-xcodeVersion = "43";
+xcodeVersion = "45";
 xcodePath = "/Applications/Xcode.app"
-iOSVersion = "5.1"
-iOSMinSDKVersion = "4.2"
+iOSVersion = "6.0"
+iOSMinSDKVersion = "4.3"
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "hv", ["xcode-version=", "xcode-path=", "ios-version="])
