@@ -59,6 +59,13 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
+#ifdef ICE_USE_CFSTREAM
+extern "C" 
+{
+void registerEndpointFactories(const IceInternal::EndpointFactoryManagerPtr&, const IceInternal::InstancePtr&);
+}
+#endif
+
 namespace IceUtilInternal
 {
 
@@ -980,7 +987,9 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
 #ifndef ICE_USE_CFSTREAM
         EndpointFactoryPtr tcpEndpointFactory = new TcpEndpointFactory(this);
         _endpointFactoryManager->add(tcpEndpointFactory);
-#endif
+#else
+        registerEndpointFactories(_endpointFactoryManager, this);
+ #endif
         EndpointFactoryPtr udpEndpointFactory = new UdpEndpointFactory(this);
         _endpointFactoryManager->add(udpEndpointFactory);
 

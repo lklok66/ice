@@ -25,21 +25,12 @@
 #include <Ice/StreamI.h>
 #include <Ice/LoggerI.h>
 #include <Ice/Instance.h>
-#include <Ice/Network.h>                // Required for ICE_USE_CFSTREAM
 #include <IceUtil/Mutex.h>
 #include <IceUtil/MutexPtrLock.h>
 
 using namespace std;
 using namespace Ice;
 using namespace IceInternal;
-
-extern "C" 
-{
-#ifdef ICE_USE_CFSTREAM
-    Ice::Plugin* createIceTcp(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
-#endif
-    Ice::Plugin* createIceSSL(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
-}
 
 namespace IceInternal
 {
@@ -226,17 +217,6 @@ Ice::initialize(int& argc, char* argv[], const InitializationData& initializatio
     InitializationData initData = initializationData;
     initData.properties = createProperties(argc, argv, initData.properties, initData.stringConverter);
 
-#ifdef ICE_USE_CFSTREAM
-    initData.properties->setProperty("Ice.Plugin.IceTcp", "createIceTcp");
-    //
-    // Fake calls to the create transport plugin C methods. This is to ensure that these methods
-    // will get linked into exe when using static libraries.
-    //
-    createIceTcp(0, "", Ice::StringSeq());
-#endif
-    initData.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
-    createIceSSL(0, "", Ice::StringSeq());
-
     CommunicatorI* communicatorI = new CommunicatorI(initData);
     CommunicatorPtr result = communicatorI; // For exception safety.
     communicatorI->finishSetup(argc, argv);
@@ -254,7 +234,7 @@ Ice::initialize(StringSeq& args, const InitializationData& initializationData, I
 }
 
 CommunicatorPtr
-Ice::initialize(const InitializationData& initializationData, Int version)
+Ice::initialize(const InitializationData& initData, Int version)
 {
     //
     // We can't simply call the other initialize() because this one does NOT read
@@ -262,23 +242,10 @@ Ice::initialize(const InitializationData& initializationData, Int version)
     //
     checkIceVersion(version);
 
-    InitializationData initData = initializationData;
-    int argc = 0;
-    char* argv[] = { 0 };
-    initData.properties = createProperties(argc, argv, initData.properties, initData.stringConverter);
-#ifdef ICE_USE_CFSTREAM
-    initData.properties->setProperty("Ice.Plugin.IceTcp", "createIceTcp");
-    //
-    // Fake calls to the create transport plugin C methods. This is to ensure that these methods
-    // will get linked into exe when using static libraries.
-    //
-    createIceTcp(0, "", Ice::StringSeq());
-#endif
-    initData.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
-    createIceSSL(0, "", Ice::StringSeq());
-	
     CommunicatorI* communicatorI = new CommunicatorI(initData);
     CommunicatorPtr result = communicatorI; // For exception safety.
+    int argc = 0;
+    char* argv[] = { 0 };
     communicatorI->finishSetup(argc, argv);
     return result;
 }

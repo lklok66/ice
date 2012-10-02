@@ -136,56 +136,6 @@ readCert(const string& defaultDir, const string& certFile)
 
 }
 
-namespace IceObjC
-{
-
-class TransportPlugin : public Ice::Plugin
-{
-public:
-    
-    TransportPlugin(const Ice::CommunicatorPtr& communicator, bool secure)
-    {
-        IceInternal::InstancePtr instance = IceInternal::getInstance(communicator);
-        instance->endpointFactoryManager()->add(new EndpointFactory(instance, secure));
-    }
-
-    virtual void initialize()
-    {
-    }
-
-    virtual void destroy()
-    {
-    }
-};
-
-};
-
-extern "C"
-{
-
-using namespace Ice;
-
-Plugin*
-createIceTcp(const CommunicatorPtr& communicator, const string& name, const StringSeq& args)
-{
-    if(!communicator)
-    {
-        return 0;
-    }
-    return new IceObjC::TransportPlugin(communicator, false);
-}
-
-Plugin*
-createIceSSL(const CommunicatorPtr& communicator, const string& name, const StringSeq& args)
-{
-    if(!communicator)
-    {
-        return 0;
-    }
-    return new IceObjC::TransportPlugin(communicator, true);
-}
-
-}
 
 IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secure) :
     _instance(instance),

@@ -45,7 +45,7 @@ run(id<ICECommunicator> communicator, ICEInitializationData* initData)
         [ICELocatorRegistryPrx uncheckedCast:[adapter add:registry 
                                                       identity:[communicator stringToIdentity:@"registry"]]];
 
-    ICELocator* locator = [[[ServerLocator alloc] init:registry proxy:registryPrx] autorelease];
+    ServerLocator* locator = [[[ServerLocator alloc] init:registry proxy:registryPrx] autorelease];
     [adapter add:locator identity:[communicator stringToIdentity:@"locator"]];
 
     [adapter activate];

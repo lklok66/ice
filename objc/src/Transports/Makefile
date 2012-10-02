@@ -13,6 +13,7 @@ CF_OBJS		= Acceptor.o \
 		  Connector.o \
 		  Transceiver.o \
 		  EndpointI.o \
+		  Initialization.o
 
 OBJC_OBJS	= AccessoryConnector.o \
 		  AccessoryEndpointI.o \

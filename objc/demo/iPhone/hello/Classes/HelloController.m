@@ -58,10 +58,7 @@ static NSString* hostnameKey = @"hostnameKey";
     [initData.properties setProperty:@"IceSSL.CertFile" value:@"c_rsa1024.pfx"];
     [initData.properties setProperty:@"IceSSL.Password" value:@"password"];
 	
-    // Configure the accessory transport.
-    ICEConfigureAccessoryTransport(initData.properties);
-	
-	// Dispatch AMI callbacks on the main thread
+    // Dispatch AMI callbacks on the main thread
     initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con)
     {
         dispatch_sync(dispatch_get_main_queue(), ^ { [call run]; });
@@ -175,17 +172,18 @@ static NSString* hostnameKey = @"hostnameKey";
 -(id<DemoHelloPrx>)createProxy
 {
     NSString* s;
-	int deliveryMode = [modePicker selectedRowInComponent:0];
-	if(deliveryMode == DeliveryModeTwowayAccessory || deliveryMode == DeliveryModeOnewayAccessory || deliveryMode == DeliveryModeOnewayAccessoryBatch)
-	{
-		s = @"hello:accessory -p com.zeroc.helloWorld";
-	}
-	else
-	{
-		s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:ssl -h %@ -p 10001:udp -h %@ -p 10000",
-			 hostnameTextField.text, hostnameTextField.text, hostnameTextField.text];
-	}
-
+    int deliveryMode = [modePicker selectedRowInComponent:0];
+    if(deliveryMode == DeliveryModeTwowayAccessory ||
+       deliveryMode == DeliveryModeOnewayAccessory || 
+       deliveryMode == DeliveryModeOnewayAccessoryBatch)
+    {
+        s = @"hello:accessory -p com.zeroc.helloWorld";
+    }
+    else
+    {
+        s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:ssl -h %@ -p 10001:udp -h %@ -p 10000",
+                      hostnameTextField.text, hostnameTextField.text, hostnameTextField.text];
+    }
     
     [[NSUserDefaults standardUserDefaults] setObject:hostnameTextField.text forKey:hostnameKey];
 
@@ -237,56 +235,56 @@ static NSString* hostnameKey = @"hostnameKey";
     {
         id<DemoHelloPrx> hello = [self createProxy];
         int delay = (int)(delaySlider.value * 1000.0f); // Convert to ms.
-
+        
         int deliveryMode = [modePicker selectedRowInComponent:0];
         if(deliveryMode != DeliveryModeOnewayBatch &&
            deliveryMode != DeliveryModeOnewaySecureBatch &&
-		   deliveryMode != DeliveryModeOnewayAccessoryBatch &&
+           deliveryMode != DeliveryModeOnewayAccessoryBatch &&
            deliveryMode != DeliveryModeDatagramBatch)
         {
-			__block BOOL response = NO;
-			id<ICEAsyncResult> result = [hello begin_sayHello:delay 
-												  response:^ {
-													  response = YES;
-													  [activity stopAnimating];
-													  statusLabel.text = @"Ready";
-												  }
-												 exception:^(ICEException* ex) {
-													 response = YES;
-													 [self exception:ex];
-												 }
-													  sent:^(BOOL sentSynchronously) {
-														  if(response)
-														  {
-															  return; // Response was received already.
-														  }
-														  
-														  int deliveryMode = [modePicker selectedRowInComponent:0];
-														  if(deliveryMode == DeliveryModeTwoway || deliveryMode == DeliveryModeTwowaySecure)
-														  {
-															  statusLabel.text = @"Waiting for response";
-														  }
-														  else if(!sentSynchronously)
-														  {
-															  statusLabel.text = @"Ready";
-															  [activity stopAnimating];       
-														  }
-														  
-													  }];
-			if(![result sentSynchronously])
-			{
-				
-				[activity startAnimating];
-				statusLabel.text = @"Sending request";
-			}
-			else 
-			{
-				int deliveryMode = [modePicker selectedRowInComponent:0];
-				if(deliveryMode != DeliveryModeTwoway && deliveryMode != DeliveryModeTwowaySecure)
-				{
-					statusLabel.text = @"Ready";
-				}
-			}
+            __block BOOL response = NO;
+            id<ICEAsyncResult> result = [hello begin_sayHello:delay 
+                                                     response:^ {
+                    response = YES;
+                    [activity stopAnimating];
+                    statusLabel.text = @"Ready";
+                }
+            exception:^(ICEException* ex) {
+                    response = YES;
+                    [self exception:ex];
+                }
+            sent:^(BOOL sentSynchronously) {
+                    if(response)
+                    {
+                        return; // Response was received already.
+                    }
+                    
+                    int deliveryMode = [modePicker selectedRowInComponent:0];
+                    if(deliveryMode == DeliveryModeTwoway || deliveryMode == DeliveryModeTwowaySecure)
+                    {
+                        statusLabel.text = @"Waiting for response";
+                    }
+                    else if(!sentSynchronously)
+                    {
+                        statusLabel.text = @"Ready";
+                        [activity stopAnimating];       
+                    }
+                    
+                }];
+            if(![result sentSynchronously])
+            {
+                
+                [activity startAnimating];
+                statusLabel.text = @"Sending request";
+            }
+            else 
+            {
+                int deliveryMode = [modePicker selectedRowInComponent:0];
+                if(deliveryMode != DeliveryModeTwoway && deliveryMode != DeliveryModeTwowaySecure)
+                {
+                    statusLabel.text = @"Ready";
+                }
+            }
         }
         else
         {

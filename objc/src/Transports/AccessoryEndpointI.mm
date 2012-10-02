@@ -28,45 +28,6 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-namespace IceObjC
-{
-
-class AccessoryTransportPlugin : public Ice::Plugin
-{
-public:
-    
-    AccessoryTransportPlugin(const Ice::CommunicatorPtr& communicator)
-    {
-        IceInternal::InstancePtr instance = IceInternal::getInstance(communicator);
-        instance->endpointFactoryManager()->add(new AccessoryEndpointFactory(instance));
-    }
-
-    virtual void initialize()
-    {
-    }
-
-    virtual void destroy()
-    {
-    }
-};
-
-};
-
-extern "C"
-{
-
-Plugin*
-createIceAccessory(const CommunicatorPtr& communicator, const string& name, const StringSeq& args)
-{
-    if(!communicator)
-    {
-        return 0;
-    }
-    return new IceObjC::AccessoryTransportPlugin(communicator);
-}
-
-}
-
 IceObjC::AccessoryEndpointI::AccessoryEndpointI(const IceInternal::InstancePtr& instance, const string& m,
                                                 const string& o, const string& n, const string& p, Int ti, 
                                                 const string& conId, bool co) :
