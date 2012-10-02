@@ -832,7 +832,10 @@ Selector::select(std::vector<std::pair<EventHandler*, SocketOperation> >& handle
         vector<pair<EventHandlerWrapperPtr, SocketOperation> >::const_iterator p;
         for(p = _selectedHandlers.begin(); p != _selectedHandlers.end(); ++p)
         {
-            _changes.insert(p->first);
+            if(!p->first->_finish)
+            {
+                _changes.insert(p->first);
+            }
         }
         _selectedHandlers.clear();
     }

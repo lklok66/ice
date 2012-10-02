@@ -488,10 +488,17 @@ IceObjC::Transceiver::initialize()
     {
         try
         {
-            if(CFWriteStreamGetStatus(_writeStream) == kCFStreamStatusError ||
-               CFReadStreamGetStatus(_readStream) == kCFStreamStatusError)
+            CFErrorRef err = NULL;
+            if(CFWriteStreamGetStatus(_writeStream) == kCFStreamStatusError)
             {
-                CFErrorRef err = CFWriteStreamCopyError(_writeStream);
+                err = CFWriteStreamCopyError(_writeStream);
+            }
+            if(CFReadStreamGetStatus(_readStream) == kCFStreamStatusError)
+            {
+                err = CFReadStreamCopyError(_readStream);
+            }
+            if(err != NULL)
+            {
                 CFStringRef domain = CFErrorGetDomain(err);
                 if(CFStringCompare(domain, kCFErrorDomainPOSIX, 0) == kCFCompareEqualTo)
                 {
