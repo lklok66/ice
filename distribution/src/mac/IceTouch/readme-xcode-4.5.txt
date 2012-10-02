@@ -1,4 +1,4 @@
-This installer installs the following components in /Library/Developer/IceTouch-1.2.1:
+This installer installs the following components in /Library/Developer/IceTouch-1.2.2:
 
  - Command line Objective-C SDK for Mac OS X
  - Xcode 4.5 Objective-C SDKs for Mac OS X, iPhone iOS, iPhone Simulator

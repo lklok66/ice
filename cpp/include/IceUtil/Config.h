@@ -222,8 +222,8 @@ typedef long long Int64;
 //
 // The Ice version.
 //
-#define ICE_STRING_VERSION "1.2.1" // "A.B.C", with A=major, B=minor, C=patch
-#define ICE_INT_VERSION 10201      // AABBCC, with AA=major, BB=minor, CC=patch
+#define ICE_STRING_VERSION "1.2.2" // "A.B.C", with A=major, B=minor, C=patch
+#define ICE_INT_VERSION 10202      // AABBCC, with AA=major, BB=minor, CC=patch
 
 #if defined(__BCPLUSPLUS__) && (__BCPLUSPLUS__ >= 0x0600)
 //

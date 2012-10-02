@@ -493,7 +493,7 @@ IceObjC::Transceiver::initialize()
             {
                 err = CFWriteStreamCopyError(_writeStream);
             }
-            if(CFReadStreamGetStatus(_readStream) == kCFStreamStatusError)
+            else if(CFReadStreamGetStatus(_readStream) == kCFStreamStatusError)
             {
                 err = CFReadStreamCopyError(_readStream);
             }

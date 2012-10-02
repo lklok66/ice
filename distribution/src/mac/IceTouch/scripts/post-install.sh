@@ -9,9 +9,9 @@ if [[ -d "/Library/Application Support/Developer/4.5/Xcode/Plug-ins" ]]; then
 fi
 
 
-if [[ -d "/Library/Developer/IceTouch-1.2.1" ]]; then
+if [[ -d "/Library/Developer/IceTouch-1.2.2" ]]; then
     if [[ -f "/Library/Developer/IceTouch-1.2" ]]; then
         rm -f /Library/Developer/IceTouch-1.2
     fi
-    ln -s "/Library/Developer/IceTouch-1.2.1" "/Library/Developer/IceTouch-1.2"
+    ln -s "/Library/Developer/IceTouch-1.2.2" "/Library/Developer/IceTouch-1.2"
 fi
