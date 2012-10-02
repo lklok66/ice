@@ -98,4 +98,5 @@ for pattern in ["distribution/src/mac/IceTouch/*.txt",
                                         ("IceTouchCpp-" + FixUtil.vpatMatch, version),
                                         ("IceTouchCpp-([0-9]*\.[0-9]*)", FixUtil.shortVersion(version)),
                                         ("IceTouch " + FixUtil.vpatMatch, version),
+                                        ("Ice Touch " + FixUtil.vpatMatch, version),
                                         ("IceTouch ([0-9]*\.[0-9]*)", FixUtil.shortVersion(version))])

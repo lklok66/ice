@@ -1,15 +1,15 @@
 #!/bin/sh
 
 #
-# This script uninstalls all Ice Touch 1.2.1 packages currently installed on this system.
+# This script uninstalls all Ice Touch 1.2.2 packages currently installed on this system.
 #
 
 showHelp ()
 {
-    echo "Ice Touch 1.2.1 uninstall script"
+    echo "Ice Touch 1.2.2 uninstall script"
     echo "Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved."
     echo "usage: "
-    echo "  \"sudo $0\" -- uninstall all Ice Touch 1.2.1 packages installed on this system."
+    echo "  \"sudo $0\" -- uninstall all Ice Touch 1.2.2 packages installed on this system."
 }
 
 #
@@ -119,7 +119,7 @@ answer=""
 
 while [[ $ok -eq 0 ]]
 do
-    echo "Uninstall all Ice Touch 1.2.1 packages installed on this sytem? Yes/No"
+    echo "Uninstall all Ice Touch 1.2.2 packages installed on this sytem? Yes/No"
     read -p "$*" answer
     if [[ ! "$answer" ]]; then
         answer="no"
@@ -155,4 +155,4 @@ if [[ -f "/var/db/receipts/com.zeroc.icetouch121.preflight.pkg.bom" ]]; then
     rm "/var/db/receipts/com.zeroc.icetouch121.preflight.pkg.plist"
 fi
 
-echo "Ice Touch 1.2.1 uninstallation completed successfully"
+echo "Ice Touch 1.2.2 uninstallation completed successfully"

@@ -6,4 +6,4 @@ This installer installs the following components in /Library/Developer/IceTouch-
  - Xcode 4.5 Plug-in for use with Ice Touch
  - Documentation
 
-To uninstall Ice Touch 1.2.1, please use the uninstall script that accompanies the distribution.
+To uninstall Ice Touch 1.2.2, please use the uninstall script that accompanies the distribution.
