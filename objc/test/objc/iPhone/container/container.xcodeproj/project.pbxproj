@@ -29,7 +29,7 @@
 		146B34070FE8BC61009C6199 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B34010FE8BC61009C6199 /* Server.m */; };
 		146B34090FE8BC61009C6199 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B34040FE8BC61009C6199 /* TestI.m */; };
 		146B340B0FE8BD58009C6199 /* HoldTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 146B340A0FE8BD58009C6199 /* HoldTest.ice */; };
-		14934E62161AE25000348FC2 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 14934E61161AE25000348FC2 /* Default-568h@2x.png */; };
+		14934E65161AFC8C00348FC2 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 14934E64161AFC8C00348FC2 /* Default-568h@2x.png */; };
 		14D5BF981240C61900A19716 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 14D5BF951240C61900A19716 /* AllTests.m */; };
 		14D5BF991240C61900A19716 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 14D5BF961240C61900A19716 /* Client.m */; };
 		14D5BF9A1240C61900A19716 /* DefaultValueTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 14D5BF971240C61900A19716 /* DefaultValueTest.ice */; };
@@ -156,7 +156,7 @@
 		146B34030FE8BC61009C6199 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/hold/TestI.h; sourceTree = SOURCE_ROOT; };
 		146B34040FE8BC61009C6199 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/hold/TestI.m; sourceTree = SOURCE_ROOT; };
 		146B340A0FE8BD58009C6199 /* HoldTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = HoldTest.ice; path = ../../Ice/hold/HoldTest.ice; sourceTree = SOURCE_ROOT; };
-		14934E61161AE25000348FC2 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		14934E64161AFC8C00348FC2 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		14D5BF951240C61900A19716 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/defaultValue/AllTests.m; sourceTree = SOURCE_ROOT; };
 		14D5BF961240C61900A19716 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/defaultValue/Client.m; sourceTree = SOURCE_ROOT; };
 		14D5BF971240C61900A19716 /* DefaultValueTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = DefaultValueTest.ice; path = ../../Ice/defaultValue/DefaultValueTest.ice; sourceTree = SOURCE_ROOT; };
@@ -384,7 +384,6 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				14934E61161AE25000348FC2 /* Default-568h@2x.png */,
 				14D5BF941240C5EB00A19716 /* defaultValue */,
 				140157B6123645B3007C165E /* dispatcher */,
 				140064111234DFBF00249AA4 /* invoke */,
@@ -463,6 +462,7 @@
 		34730A09122BF68100D293CC /* Resources-iPad */ = {
 			isa = PBXGroup;
 			children = (
+				14934E64161AFC8C00348FC2 /* Default-568h@2x.png */,
 				34C618AE122C035000F60A28 /* MainWindow-iPad.xib */,
 				34730A14122BF6ED00D293CC /* TestView-iPad.xib */,
 				34730A10122BF6C300D293CC /* TestSelect-iPad.xib */,
@@ -725,7 +725,7 @@
 				34730A11122BF6C300D293CC /* TestSelect-iPad.xib in Resources */,
 				34730A15122BF6ED00D293CC /* TestView-iPad.xib in Resources */,
 				34C618AF122C035000F60A28 /* MainWindow-iPad.xib in Resources */,
-				14934E62161AE25000348FC2 /* Default-568h@2x.png in Resources */,
+				14934E65161AFC8C00348FC2 /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

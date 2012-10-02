@@ -13,10 +13,10 @@
 
 using namespace Test::Location;
 
-ServerManagerI::ServerManagerI(const ServerLocatorRegistryPtr& registry,
-                               const Ice::InitializationData& initData) :
-_registry(registry), _initData(initData), _nextPort(12011)
+ServerManagerI::ServerManagerI(const ServerLocatorRegistryPtr& registry, const Ice::InitializationData& initData) :
+    _registry(registry), _initData(initData), _nextPort(12011)
 {
+    _initData.properties = _initData.properties->clone();
     _initData.properties->setProperty("TestAdapter.AdapterId", "TestAdapter");
     _initData.properties->setProperty("TestAdapter.ReplicaGroupId", "ReplicatedAdapter");    
     _initData.properties->setProperty("TestAdapter2.AdapterId", "TestAdapter2");
