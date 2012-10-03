@@ -7,7 +7,7 @@
 showHelp ()
 {
     echo "Ice Touch 1.2.2 uninstall script"
-    echo "Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved."
+    echo "Copyright (c) 2003-2012 ZeroC, Inc. All rights reserved."
     echo "usage: "
     echo "  \"sudo $0\" -- uninstall all Ice Touch 1.2.2 packages installed on this system."
 }

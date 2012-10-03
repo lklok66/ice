@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2012 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -737,7 +737,7 @@ Slice::Gen::printHeader(Output& o)
     static const char* header =
 "// **********************************************************************\n"
 "//\n"
-"// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.\n"
+"// Copyright (c) 2003-2012 ZeroC, Inc. All rights reserved.\n"
 "//\n"
 "// This copy of Ice Touch is licensed to you under the terms described in\n"
 "// the ICE_TOUCH_LICENSE file included in this distribution.\n"
