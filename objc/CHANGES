@@ -1,6 +1,12 @@
 Changes since version 1.2.1
 ---------------------------
 
+- Fixed issue where TCP and SSL transport entry points wouldn't be
+  found when compiling in release mode with symbol stripping enabled.
+
+- Use #pragma once in generated header files instead of
+  #ifndef/#define/#endif guard.
+
 - Updated Ice Touch to support Xcode 4.5
 
 

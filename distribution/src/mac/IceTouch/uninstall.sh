@@ -150,9 +150,9 @@ fi
 uninstallPackage "com.zeroc.icetouch-xcode45-developer.pkg"
 uninstallPackage "com.zeroc.icetouch-xcode45-plugin.pkg"
 
-if [[ -f "/var/db/receipts/com.zeroc.icetouch121.preflight.pkg.bom" ]]; then
-    rm "/var/db/receipts/com.zeroc.icetouch121.preflight.pkg.bom"
-    rm "/var/db/receipts/com.zeroc.icetouch121.preflight.pkg.plist"
+if [[ -f "/var/db/receipts/com.zeroc.icetouch122.preflight.pkg.bom" ]]; then
+    rm "/var/db/receipts/com.zeroc.icetouch122.preflight.pkg.bom"
+    rm "/var/db/receipts/com.zeroc.icetouch122.preflight.pkg.plist"
 fi
 
 echo "Ice Touch 1.2.2 uninstallation completed successfully"
