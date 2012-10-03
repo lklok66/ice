@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2012 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -25,6 +25,7 @@
 #include <Ice/StreamI.h>
 #include <Ice/LoggerI.h>
 #include <Ice/Instance.h>
+#include <Ice/Network.h>                // Required for ICE_USE_CFSTREAM
 #include <IceUtil/Mutex.h>
 #include <IceUtil/MutexPtrLock.h>
 
