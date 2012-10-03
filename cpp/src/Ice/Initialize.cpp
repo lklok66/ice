@@ -32,6 +32,13 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
+extern "C" 
+{
+#ifndef ICE_USE_CFSTREAM
+    Ice::Plugin* createIceSSL(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
+#endif
+}
+
 namespace IceInternal
 {
 
@@ -217,6 +224,11 @@ Ice::initialize(int& argc, char* argv[], const InitializationData& initializatio
     InitializationData initData = initializationData;
     initData.properties = createProperties(argc, argv, initData.properties, initData.stringConverter);
 
+#ifndef ICE_USE_CFSTREAM
+    initData.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
+    createIceSSL(0, "", Ice::StringSeq());
+#endif
+
     CommunicatorI* communicatorI = new CommunicatorI(initData);
     CommunicatorPtr result = communicatorI; // For exception safety.
     communicatorI->finishSetup(argc, argv);
@@ -234,7 +246,7 @@ Ice::initialize(StringSeq& args, const InitializationData& initializationData, I
 }
 
 CommunicatorPtr
-Ice::initialize(const InitializationData& initData, Int version)
+Ice::initialize(const InitializationData& initializationData, Int version)
 {
     //
     // We can't simply call the other initialize() because this one does NOT read
@@ -242,10 +254,17 @@ Ice::initialize(const InitializationData& initData, Int version)
     //
     checkIceVersion(version);
 
-    CommunicatorI* communicatorI = new CommunicatorI(initData);
-    CommunicatorPtr result = communicatorI; // For exception safety.
+    InitializationData initData = initializationData;
     int argc = 0;
     char* argv[] = { 0 };
+#ifndef ICE_USE_CFSTREAM
+    initData.properties = createProperties(argc, argv, initData.properties, initData.stringConverter);
+    initData.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
+    createIceSSL(0, "", Ice::StringSeq());
+#endif
+	
+    CommunicatorI* communicatorI = new CommunicatorI(initData);
+    CommunicatorPtr result = communicatorI; // For exception safety.
     communicatorI->finishSetup(argc, argv);
     return result;
 }

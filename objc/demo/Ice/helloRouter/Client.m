@@ -13,7 +13,6 @@
 
 #import <stdio.h>
 
-#import <objc/objc-auto.h>
 
 void
 menu()
@@ -98,8 +97,6 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
 int
 main(int argc, char* argv[])
 {
-    objc_startCollectorThread();
-
     int status = EXIT_SUCCESS;
     id<ICECommunicator> communicator = nil;
     @try

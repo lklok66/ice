@@ -13,7 +13,6 @@
 #import <Foundation/NSAutoreleasePool.h>
 #import <stdio.h>
 
-#import <objc/objc-auto.h>
 
 static void
 printIndent(int depth)
@@ -52,8 +51,6 @@ listRecursive(id<FSDirectoryPrx> dir, int depth)
 int
 main(int argc, char* argv[])
 {
-    objc_startCollectorThread();
-
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     int status = 1;
     id<ICECommunicator> communicator = nil;

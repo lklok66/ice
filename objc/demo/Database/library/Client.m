@@ -11,15 +11,12 @@
 
 #import <stdio.h>
 
-#import <objc/objc-auto.h>
 
 int runParser(int, char**, id<ICECommunicator>);
 
 int
 main(int argc, char* argv[])
 {
-    objc_startCollectorThread();
-
     int status = 0;
     id<ICECommunicator> communicator = nil;
     @try

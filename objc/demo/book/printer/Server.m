@@ -13,7 +13,6 @@
 #import <Foundation/NSAutoreleasePool.h>
 #import <stdio.h>
 
-#import <objc/objc-auto.h>
 
 @interface PrinterI : DemoPrinter <DemoPrinter>
 @end
@@ -28,8 +27,6 @@
 int
 main(int argc, char* argv[])
 {
-    objc_startCollectorThread();
-
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     
     int status = 1;

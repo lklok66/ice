@@ -13,13 +13,10 @@
 
 #import <Foundation/NSAutoreleasePool.h>
 
-#import <objc/objc-auto.h>
 
 int
 main(int argc, char* argv[])
 {
-    objc_startCollectorThread();
-
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     
     int status = 1;

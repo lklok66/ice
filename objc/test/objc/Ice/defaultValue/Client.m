@@ -13,7 +13,6 @@
 
 #import <Foundation/NSAutoreleasePool.h>
 #ifdef ICE_OBJC_GC
-  #import <objc/objc-auto.h>
   #import <Foundation/NSGarbageCollector.h>
 #endif
 
@@ -32,9 +31,6 @@ run()
 int
 main(int argc, char* argv[])
 {
-#ifdef ICE_OBJC_GC
-    objc_startCollectorThread();
-#endif
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     int status;
     @try

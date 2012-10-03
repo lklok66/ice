@@ -10,13 +10,9 @@
 #import <Ice/Ice.h>
 #import <Hello.h>
 
-#import <objc/objc-auto.h>
-
 int
 main(int argc, char* argv[])
 {
-    objc_startCollectorThread();
-
     int status = EXIT_SUCCESS;
     id<ICECommunicator> communicator = nil;
     @try

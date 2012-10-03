@@ -10,7 +10,6 @@
 #import <Ice/Ice.h>
 #import <HelloI.h>
 
-#import <objc/objc-auto.h>
 
 int
 run(int argc, char* argv[], id<ICECommunicator> communicator)
@@ -32,8 +31,6 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
 int
 main(int argc, char* argv[])
 {
-    objc_startCollectorThread();
-
     int status = EXIT_SUCCESS;
     id<ICECommunicator> communicator = nil;
     @try
