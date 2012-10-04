@@ -421,7 +421,7 @@ static EditController* editViewController_ = nil;
             cell = [tableView dequeueReusableCellWithIdentifier:@"TitleCell"];
             if (cell == nil)
             {
-                // Create a new cell. CGRectZero allows the cell to determine the appropriate size.
+                // Create a new cell.
                 cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"TitleCell"] autorelease];
                 // Add a label to the frame,
                 UILabel *textView = [[UILabel alloc] initWithFrame:CGRectZero];
@@ -458,7 +458,7 @@ static EditController* editViewController_ = nil;
                 cell = [tableView dequeueReusableCellWithIdentifier:@"RemoveBook"];
                 if (cell == nil)
                 {
-                    // Create a new cell. CGRectZero allows the cell to determine the appropriate size.
+                    // Create a new cell.
                     cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                                    reuseIdentifier:@"RemoveBook"] autorelease];
                     // Add a label to the frame,
