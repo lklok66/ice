@@ -216,7 +216,6 @@ NSString* const routerServerKey = @"routerServerKey";
 			
             if(glacier2Field.state == NSOnState)
             {
-                int port = 4063;
                 // The proxy to the Glacier2 router.
                 proxy = [communicator stringToProxy:
                          [NSString stringWithFormat:@"DemoGlacier2/router:tcp -p 4063 -h %@ -t 10000",
