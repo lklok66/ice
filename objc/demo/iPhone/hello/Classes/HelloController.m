@@ -37,8 +37,7 @@ static NSString* hostnameKey = @"hostnameKey";
 
 +(void)initialize
 {
-    NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
-                                 @"127.0.0.1", hostnameKey, nil];
+    NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"127.0.0.1", hostnameKey, nil];
 	
     [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
 }

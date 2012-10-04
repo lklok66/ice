@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		14060BEB161D63830077BEE0 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 14060BEA161D63830077BEE0 /* Default-568h@2x.png */; };
 		14A268EB0E83FD0A00E562FE /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A268E90E83FD0A00E562FE /* CFNetwork.framework */; };
 		14A268EC0E83FD0A00E562FE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A268EA0E83FD0A00E562FE /* Security.framework */; };
 		14EA66D41118D9EF0080A47C /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14EA66D31118D9EF0080A47C /* ExternalAccessory.framework */; };
@@ -27,6 +28,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		14060BEA161D63830077BEE0 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		14A268E90E83FD0A00E562FE /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		14A268EA0E83FD0A00E562FE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		14EA66D31118D9EF0080A47C /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
@@ -138,6 +140,7 @@
 		347309311228297700D293CC /* Resources-iPad */ = {
 			isa = PBXGroup;
 			children = (
+				14060BEA161D63830077BEE0 /* Default-568h@2x.png */,
 				34C618C7122C039900F60A28 /* MainWindow-iPad.xib */,
 				34730989122BE5BE00D293CC /* HelloView-iPad.xib */,
 			);
@@ -209,6 +212,7 @@
 				34F173000FE75375002B0E95 /* c_rsa1024.pfx in Resources */,
 				3473098A122BE5BE00D293CC /* HelloView-iPad.xib in Resources */,
 				34C618C8122C039900F60A28 /* MainWindow-iPad.xib in Resources */,
+				14060BEB161D63830077BEE0 /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

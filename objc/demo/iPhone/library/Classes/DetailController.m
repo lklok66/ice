@@ -422,7 +422,7 @@ static EditController* editViewController_ = nil;
             if (cell == nil)
             {
                 // Create a new cell. CGRectZero allows the cell to determine the appropriate size.
-                cell = [[[UITableViewCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"TitleCell"] autorelease];
+                cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"TitleCell"] autorelease];
                 // Add a label to the frame,
                 UILabel *textView = [[UILabel alloc] initWithFrame:CGRectZero];
                 [cell.contentView addSubview:textView];
@@ -459,7 +459,7 @@ static EditController* editViewController_ = nil;
                 if (cell == nil)
                 {
                     // Create a new cell. CGRectZero allows the cell to determine the appropriate size.
-                    cell = [[[UITableViewCell alloc] initWithFrame:CGRectZero 
+                    cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                                    reuseIdentifier:@"RemoveBook"] autorelease];
                     // Add a label to the frame,
                     
@@ -488,7 +488,7 @@ static EditController* editViewController_ = nil;
             cell = [tableView dequeueReusableCellWithIdentifier:@"MyIdentifier"];
             if (cell == nil)
             {
-                cell = [[[UITableViewCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"MyIdentifier"] autorelease];
+                cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"MyIdentifier"] autorelease];
             }
             
             if(indexPath.section == 0)

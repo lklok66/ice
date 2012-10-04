@@ -558,7 +558,7 @@ sessionTimeout:(int)t
     if(cell == nil)
     {
         // Create a new cell. CGRectZero allows the cell to determine the appropriate size.
-        cell = [[[MessageCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"MessageCell"] autorelease];
+        cell = [[[MessageCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"MessageCell"] autorelease];
     }
     cell.message = [messages objectAtIndex:indexPath.row];
     return cell;

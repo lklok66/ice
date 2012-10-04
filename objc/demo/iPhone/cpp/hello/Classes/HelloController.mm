@@ -109,11 +109,12 @@ public:
             {
                 Ice::AsyncResultPtr result = 
                     hello->begin_sayHello(delay, newCallback_Hello_sayHello(this, &HelloClient::response,
-                                                                           &HelloClient::exception,
+                                                                            &HelloClient::exception,
                                                                             &HelloClient::sent));
                 
                 if(!result->sentSynchronously())
                 {
+                    [_controller startAnimating];
                     [_controller sendingRequest];
                 }
                 else 
@@ -149,6 +150,7 @@ public:
         
         if(_deliveryMode == DeliveryModeTwoway || _deliveryMode == DeliveryModeTwowaySecure)
         {
+            [_controller startAnimating];
             [_controller waitingForResponse];
         }
         else if(!sentSynchronously)
@@ -253,8 +255,7 @@ static NSString* hostnameKey = @"hostnameKey";
 
 +(void)initialize
 {
-    NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
-                                 @"127.0.0.1", hostnameKey, nil];
+    NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"127.0.0.1", hostnameKey, nil];
 	
     [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
 }

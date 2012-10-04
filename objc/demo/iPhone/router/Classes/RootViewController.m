@@ -39,8 +39,11 @@
     LogViewController* controller = self.logViewController;
     controller = nil; // Get rid of warning.
 
+    
     [self.view insertSubview:mainViewController.view belowSubview:infoButton];
     //[self.view insertSubview:mainViewController.view belowSubview:logButton];
+    
+    mainViewController.view.frame = CGRectMake(0, 20, 320, self.view.frame.size.height - 20);
 }
 
 - (IBAction)toggleView
@@ -51,7 +54,7 @@
      */
     UIView *mainView = mainViewController.view;
     UIView *flipsideView = self.flipsideViewController.view;
-    
+
     [UIView beginAnimations:nil context:NULL];
     [UIView setAnimationDuration:1];
     [UIView setAnimationTransition:([mainView superview] ? UIViewAnimationTransitionFlipFromRight : UIViewAnimationTransitionFlipFromLeft) forView:self.view cache:YES];
@@ -63,6 +66,7 @@
         [infoButton removeFromSuperview];
         [logButton removeFromSuperview];
         [self.view addSubview:flipsideView];
+
         [self.view insertSubview:flipsideNavigationBar aboveSubview:flipsideView];
         [mainViewController viewDidDisappear:YES];
         [flipsideViewController viewDidAppear:YES];
@@ -157,9 +161,10 @@
         FlipsideViewController *viewController = [[FlipsideViewController alloc] initWithNibName:@"FlipsideView" bundle:nil];
         self.flipsideViewController = viewController;
         [viewController release];
+        flipsideViewController.view.frame = CGRectMake(0, 20, 320, self.view.frame.size.height - 20);
         
         // Set up the navigation bar
-        UINavigationBar *aNavigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 320.0, 44.0)];
+        UINavigationBar *aNavigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0.0, 20.0, 320.0, 44.0)];
         aNavigationBar.barStyle = UIBarStyleBlackOpaque;
         self.flipsideNavigationBar = aNavigationBar;
         [aNavigationBar release];
@@ -181,9 +186,10 @@
         LogViewController* viewController = [[LogViewController alloc] initWithNibName:@"LogView" bundle:nil];        
         self.logViewController = viewController;
         [viewController release];
+        logViewController.view.frame = CGRectMake(0, 20, 320, self.view.frame.size.height - 20);
         
         // Set up the navigation bar
-        UINavigationBar *aNavigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 320.0, 44.0)];
+        UINavigationBar *aNavigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0.0, 20.0, 320.0, 44.0)];
         aNavigationBar.barStyle = UIBarStyleBlackOpaque;
         self.logNavigationBar = aNavigationBar;
         [aNavigationBar release];
@@ -205,10 +211,11 @@
     {
         LogZoomViewController* viewController = [[LogZoomViewController alloc] initWithNibName:@"LogZoomView" bundle:nil];
         self.logZoomViewController = viewController;
+        logZoomViewController.view.frame = CGRectMake(0, 20, 320, self.view.frame.size.height - 20);
         [viewController release];
         
         // Set up the navigation bar
-        UINavigationBar *aNavigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 320.0, 44.0)];
+        UINavigationBar *aNavigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0.0, 20.0, 320.0, 44.0)];
         aNavigationBar.barStyle = UIBarStyleBlackOpaque;
         self.logZoomNavigationBar = aNavigationBar;
         [aNavigationBar release];

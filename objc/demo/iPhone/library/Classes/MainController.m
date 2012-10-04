@@ -420,7 +420,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     if (cell == nil)
     {
         // Create a new cell. CGRectZero allows the cell to determine the appropriate size.
-        cell = [[[UITableViewCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"MyIdentifier"] autorelease];
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"MyIdentifier"] autorelease];
     }
 
     if(indexPath.row > books.count-1)
