@@ -89,6 +89,11 @@ public:
     //
     EndpointFactoryPtr getEndpointFactory(Ice::Short) const;
 
+    //
+    // Get the maximum message size.
+    //
+    size_t getMessageSizeMax() const;
+
 private:
 
     ProtocolPluginFacade(const Ice::CommunicatorPtr&);

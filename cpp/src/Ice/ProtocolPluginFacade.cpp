@@ -92,6 +92,12 @@ IceInternal::ProtocolPluginFacade::getEndpointFactory(Ice::Short type) const
     return _instance->endpointFactoryManager()->get(type);
 }
 
+size_t
+IceInternal::ProtocolPluginFacade::getMessageSizeMax() const
+{
+    return _instance->messageSizeMax();
+}
+
 IceInternal::ProtocolPluginFacade::ProtocolPluginFacade(const CommunicatorPtr& communicator) :
     _instance(getInstance(communicator)),
     _communicator(communicator)

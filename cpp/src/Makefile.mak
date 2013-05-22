@@ -26,6 +26,7 @@ SUBDIRS		= IceUtil \
 		  slice2php \
 		  Ice \
 		  IceSSL \
+		  IceWS \
 !else
 SUBDIRS		= IceUtil \
 		  Slice \
@@ -40,6 +41,7 @@ SUBDIRS		= IceUtil \
 		  slice2rb \
 		  Ice \
 		  IceSSL \
+		  IceWS \
 		  ca \
 		  IceXML \
 		  Freeze \

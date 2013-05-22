@@ -10,7 +10,7 @@
 import sys, os, re, getopt, time, string, threading, atexit, platform
 
 # Global flags and their default values.
-protocol = ""                   # If unset, default to TCP. Valid values are "tcp" or "ssl".
+protocol = ""                   # If unset, default to TCP. Valid values are "tcp", "ssl" or "ws".
 compress = False                # Set to True to enable bzip2 compression.
 serialize = False               # Set to True to have tests use connection serialization
 host = None                     # Will default to loopback.
@@ -260,7 +260,7 @@ def run(tests, root = False):
           --filter=<regex>        Run all the tests that match the given regex.
           --rfilter=<regex>       Run all the tests that do not match the given regex.
           --debug                 Display debugging information on each test.
-          --protocol=tcp|ssl      Run with the given protocol.
+          --protocol=tcp|ssl|ws   Run with the given protocol.
           --compress              Run the tests with protocol compression.
           --host=host             Set --Ice.Default.Host=<host>.
           --valgrind              Run the test with valgrind.
@@ -350,7 +350,7 @@ def run(tests, root = False):
         elif o == "--script":
             script = True
         elif o == "--protocol":
-            if a not in ( "ssl", "tcp"):
+            if a not in ( "ws", "ssl", "tcp"):
                 usage()
             if not root and getDefaultMapping() == "cs" and a == "ssl":
                 if mono:
@@ -386,6 +386,9 @@ def run(tests, root = False):
         a = '--protocol=ssl %s'  % arg
         expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
+        a = '--protocol=ws %s'  % arg
+        expanded.append([ (test, a, config) for test,config in tests if "core" in config])
+
         a = '--protocol=tcp --compress %s'  % arg
         expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
@@ -397,6 +400,9 @@ def run(tests, root = False):
             expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
             a = "--ipv6 --protocol=ssl %s" % arg
+            expanded.append([ (test, a, config) for test,config in tests if "core" in config])
+
+            a = "--ipv6 --protocol=ws %s" % arg
             expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
         a = "--protocol=tcp %s" % arg
@@ -714,6 +720,18 @@ sslConfigTree["py"] = sslConfigTree["cpp"]
 sslConfigTree["rb"] = sslConfigTree["cpp"]
 sslConfigTree["php"] = sslConfigTree["cpp"]
 
+wsConfigTree = {
+        "cpp" : {
+            "plugin" : " --Ice.Plugin.IceWS=IceWS:createIceWS --Ice.Default.Protocol=ws",
+            "client" : " ",
+            "server" : " ",
+            "colloc" : " ",
+            },
+        }
+wsConfigTree["py"] = wsConfigTree["cpp"]
+wsConfigTree["rb"] = wsConfigTree["cpp"]
+wsConfigTree["php"] = wsConfigTree["cpp"]
+
 def getDefaultMapping():
     """Try and guess the language mapping out of the current path"""
     here = os.getcwd().split(os.sep)
@@ -851,6 +869,12 @@ def getCommandLineProperties(exe, config):
             sslenv["verifyPeer"] = "2"
         components.append(sslConfigTree[config.lang]["plugin"] % sslenv)
         components.append(sslConfigTree[config.lang][config.type] % sslenv)
+
+    if config.protocol == "ws":
+        wsenv = {}
+        wsenv["icewscs"] = quoteArgument("\\\"" + os.path.join(getIceDir("cs"), "Assemblies", "IceWS.dll") + "\\\"")
+        components.append(wsConfigTree[config.lang]["plugin"] % wsenv)
+        components.append(wsConfigTree[config.lang][config.type] % wsenv)
 
     if config.compress:
         components.append("--Ice.Override.Compress=1")
@@ -1620,7 +1644,7 @@ def processCmdLine():
         print("usage: " + sys.argv[0] + """
           --debug                 Display debugging information on each test.
           --trace=<file>          Display tracing.
-          --protocol=tcp|ssl      Run with the given protocol.
+          --protocol=tcp|ssl|ws   Run with the given protocol.
           --compress              Run the tests with protocol compression.
           --valgrind              Run the tests with valgrind.
           --appverifier           Run the tests with appverifier.
@@ -1722,7 +1746,7 @@ def processCmdLine():
             global printenv
             printenv = True
         elif o == "--protocol":
-            if a not in ( "ssl", "tcp"):
+            if a not in ( "ws", "ssl", "tcp"):
                 usage()
             # ssl protocol isn't directly supported with mono.
             if mono and getDefaultMapping() == "cs" and a == "ssl":
@@ -1894,6 +1918,10 @@ def runTests(start, expanded, num = 0, script = False):
 
             if args.find("ssl") != -1 and ("nossl" in config):
                 print("%s*** test not supported with IceSSL%s" % (prefix, suffix))
+                continue
+
+            if args.find("ws") != -1 and ("nows" in config):
+                print("%s*** test not supported with IceWS%s" % (prefix, suffix))
                 continue
 
             # If this is java and we're running ipv6 under windows then skip.
