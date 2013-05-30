@@ -18,16 +18,18 @@
 namespace IceInternal
 {
 
-class UdpEndpointI : public EndpointI
+class UdpEndpointI : public IPEndpointI
 {
 public:
 
-    UdpEndpointI(const InstancePtr&, const std::string&, Ice::Int, const std::string&, Ice::Int, bool, 
+    UdpEndpointI(const InstancePtr&, const std::string&, Ice::Int, const std::string&, Ice::Int, bool,
                  const std::string&, bool);
-    UdpEndpointI(const InstancePtr&, const std::string&, bool);
+    UdpEndpointI(const InstancePtr&, std::vector<std::string>&, bool);
     UdpEndpointI(BasicStream*);
 
+    virtual void startStreamWrite(BasicStream*) const;
     virtual void streamWrite(BasicStream*) const;
+    virtual void endStreamWrite(BasicStream*) const;
     virtual std::string toString() const;
     virtual Ice::EndpointInfoPtr getInfo() const;
     virtual Ice::Short type() const;
@@ -50,13 +52,19 @@ public:
     virtual bool operator==(const Ice::LocalObject&) const;
     virtual bool operator<(const Ice::LocalObject&) const;
 
+    virtual void hashInit(Ice::Int&) const;
+    virtual std::string options() const;
+
+    virtual Ice::Int port() const;
+    virtual IPEndpointIPtr port(Ice::Int) const;
+    virtual std::string host() const;
+    virtual IPEndpointIPtr host(const std::string&) const;
+
 #ifdef __SUNPRO_CC
     using EndpointI::connectionId;
 #endif
-    
-private:
 
-    virtual ::Ice::Int hashInit() const;
+private:
 
     //
     // All members are const, because endpoints are immutable.
@@ -78,7 +86,7 @@ public:
 
     virtual Ice::Short type() const;
     virtual std::string protocol() const;
-    virtual EndpointIPtr create(const std::string&, bool) const;
+    virtual EndpointIPtr create(std::vector<std::string>&, bool) const;
     virtual EndpointIPtr read(BasicStream*) const;
     virtual void destroy();
 

@@ -26,7 +26,7 @@ namespace IceWS
 class ConnectorI;
 class AcceptorI;
 
-class TransceiverI : public IceInternal::Transceiver, public IceInternal::NativeInfo
+class TransceiverI : public IceInternal::Transceiver
 {
 public:
 
@@ -52,9 +52,9 @@ public:
 
 private:
 
-    TransceiverI(const InstancePtr&, SOCKET, const IceInternal::NetworkProxyPtr&, const std::string&,
-                 const IceInternal::Address&, const std::string&);
-    TransceiverI(const InstancePtr&, SOCKET, const std::string&);
+    TransceiverI(const InstancePtr&, Ice::Short, const IceInternal::TransceiverPtr&, const std::string&, int,
+                 const std::string&);
+    TransceiverI(const InstancePtr&, Ice::Short, const IceInternal::TransceiverPtr&);
     virtual ~TransceiverI();
 
     void handleRequest(IceInternal::Buffer&);
@@ -76,24 +76,19 @@ private:
     friend class AcceptorI;
 
     const InstancePtr _instance;
-    const Ice::LoggerPtr _logger;
-    const Ice::StatsPtr _stats;
-
-    const IceInternal::NetworkProxyPtr _proxy;
+    const Ice::Short _type;
+    const IceInternal::TransceiverPtr _delegate;
     const std::string _host;
-    const IceInternal::Address _addr;
-
-    const std::string _adapterName;
-    const bool _incoming;
-
+    const int _port;
     const std::string _resource;
+
+    const Ice::LoggerPtr _logger;
+
+    const bool _incoming;
 
     enum State
     {
-        StateNeedConnect,
-        StateConnectPending,
-        StateProxyConnectRequest,
-        StateProxyConnectRequestPending,
+        StateInitializeDelegate,
         StateConnected,
         StateRequestPending,
         StateResponsePending,
@@ -102,7 +97,6 @@ private:
     };
 
     State _state;
-    std::string _desc;
 
     HttpParserPtr _parser;
     std::string _key;
@@ -138,13 +132,6 @@ private:
     IceInternal::Buffer _writeBuffer;
     IceInternal::Buffer::Container::iterator _writeI;
     size_t _writeHeaderLength;
-
-#ifdef ICE_USE_IOCP
-    int _maxSendPacketSize;
-    int _maxReceivePacketSize;
-    IceInternal::AsyncInfo _read;
-    IceInternal::AsyncInfo _write;
-#endif
 };
 typedef IceUtil::Handle<TransceiverI> TransceiverIPtr;
 

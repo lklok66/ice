@@ -50,9 +50,19 @@ class ICE_API EndpointI : public Ice::Endpoint
 public:
 
     //
+    // Prepare to marshal the endpoint.
+    //
+    virtual void startStreamWrite(BasicStream*) const = 0;
+
+    //
     // Marshal the endpoint.
     //
     virtual void streamWrite(BasicStream*) const = 0;
+
+    //
+    // Finish marshaling the endpoint.
+    //
+    virtual void endStreamWrite(BasicStream*) const = 0;
 
     //
     // Return the endpoint type.
@@ -63,7 +73,7 @@ public:
     // Return the protocol name
     //
     virtual std::string protocol() const = 0;
-    
+
     //
     // Return the timeout for the endpoint in milliseconds. 0 means
     // non-blocking, -1 means no timeout.
@@ -142,7 +152,7 @@ public:
     // Check whether the endpoint is equivalent to another one.
     //
     virtual bool equivalent(const EndpointIPtr&) const = 0;
-    
+
     virtual std::vector<ConnectorPtr> connectors(const std::vector<Address>&, const NetworkProxyPtr&) const;
 
     //
@@ -152,17 +162,18 @@ public:
     virtual bool operator<(const Ice::LocalObject&) const = 0;
 
     const std::string& connectionId() const;
-    
+
+    virtual void hashInit(Ice::Int&) const = 0;
+    virtual std::string options() const = 0;
+
 protected:
-    
+
     virtual ::Ice::Int internal_getHash() const;
 
     friend class EndpointHostResolver;
 
     EndpointI(const std::string&);
     EndpointI();
-
-    virtual ::Ice::Int hashInit() const = 0;
 
     const std::string _connectionId;
 
@@ -182,6 +193,38 @@ inline bool operator<(const EndpointI& l, const EndpointI& r)
     return static_cast<const ::Ice::LocalObject&>(l) < static_cast<const ::Ice::LocalObject&>(r);
 }
 
+class ICE_API IPEndpointI : public EndpointI
+{
+public:
+
+#if 0
+    //
+    // Return the port for the endpoint.
+    //
+    virtual Ice::Int port() const = 0;
+
+    //
+    // Return a new endpoint with a different port.
+    //
+    virtual IPEndpointIPtr port(Ice::Int) const = 0;
+
+    //
+    // Return the host for the endpoint.
+    //
+    virtual std::string host() const = 0;
+
+    //
+    // Return a new endpoint with a different host.
+    //
+    virtual IPEndpointIPtr host(const std::string&) const = 0;
+#endif
+
+protected:
+
+    IPEndpointI(const std::string&);
+    IPEndpointI();
+};
+
 #ifndef ICE_OS_WINRT
 class ICE_API EndpointHostResolver : public IceUtil::Thread, public IceUtil::Monitor<IceUtil::Mutex>
 #else
@@ -193,7 +236,7 @@ public:
     EndpointHostResolver(const InstancePtr&);
 
     std::vector<ConnectorPtr> resolve(const std::string&, int, Ice::EndpointSelectionType, const EndpointIPtr&);
-    void resolve(const std::string&, int, Ice::EndpointSelectionType, const EndpointIPtr&, 
+    void resolve(const std::string&, int, Ice::EndpointSelectionType, const EndpointIPtr&,
                  const EndpointI_connectorsPtr&);
     void destroy();
 

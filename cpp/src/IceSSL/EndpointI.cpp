@@ -24,7 +24,7 @@ using namespace IceSSL;
 
 IceSSL::EndpointI::EndpointI(const InstancePtr& instance, const string& ho, Int po, Int ti, const string& conId, 
                              bool co) :
-    IceInternal::EndpointI(conId),
+    IceInternal::IPEndpointI(conId),
     _instance(instance),
     _host(ho),
     _port(po),
@@ -33,55 +33,42 @@ IceSSL::EndpointI::EndpointI(const InstancePtr& instance, const string& ho, Int 
 {
 }
 
-IceSSL::EndpointI::EndpointI(const InstancePtr& instance, const string& str, bool oaEndpoint) :
-    IceInternal::EndpointI(""),
+IceSSL::EndpointI::EndpointI(const InstancePtr& instance, vector<string>& args, bool oaEndpoint) :
+    IceInternal::IPEndpointI(""),
     _instance(instance),
     _port(0),
     _timeout(-1),
     _compress(false)
 {
-    const string delim = " \t\n\r";
+    vector<string> unknown;
 
-    string::size_type beg;
-    string::size_type end = 0;
-
-    while(true)
+    ostringstream ostr;
+    for(vector<string>::iterator p = args.begin(); p != args.end(); ++p)
     {
-        beg = str.find_first_not_of(delim, end);
-        if(beg == string::npos)
+        if(p->find_first_of(" \t\n\r") != string::npos)
         {
-            break;
+            ostr << " \"" << *p << "\"";
         }
-        
-        end = str.find_first_of(delim, beg);
-        if(end == string::npos)
+        else
         {
-            end = str.length();
+            ostr << " " << *p;
         }
+    }
+    const string str = ostr.str();
 
-        string option = str.substr(beg, end - beg);
+    for(vector<string>::size_type n = 0; n < args.size(); ++n)
+    {
+        string option = args[n];
         if(option.length() != 2 || option[0] != '-')
         {
-            EndpointParseException ex(__FILE__, __LINE__);
-            ex.str = "expected an endpoint option but found `" + option + "' in endpoint `ssl " + str + "'";
-            throw ex;
+            unknown.push_back(option);
+            continue;
         }
 
         string argument;
-        string::size_type argumentBeg = str.find_first_not_of(delim, end);
-        if(argumentBeg != string::npos && str[argumentBeg] != '-')
+        if(n + 1 < args.size() && args[n + 1][0] != '-')
         {
-            beg = argumentBeg;
-            end = str.find_first_of(delim, beg);
-            if(end == string::npos)
-            {
-                end = str.length();
-            }
-            argument = str.substr(beg, end - beg);
-            if(argument[0] == '\"' && argument[argument.size() - 1] == '\"')
-            {
-                argument = argument.substr(1, argument.size() - 2);
-            }
+            argument = args[++n];
         }
 
         switch(option[1])
@@ -91,7 +78,7 @@ IceSSL::EndpointI::EndpointI(const InstancePtr& instance, const string& str, boo
                 if(argument.empty())
                 {
                     EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "no argument provided for -h option in endpoint `ssl " + str + "'";
+                    ex.str = "no argument provided for -h option in endpoint `ssl" + str + "'";
                     throw ex;
                 }
                 const_cast<string&>(_host) = argument;
@@ -103,20 +90,20 @@ IceSSL::EndpointI::EndpointI(const InstancePtr& instance, const string& str, boo
                 if(argument.empty())
                 {
                     EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "no argument provided for -p option in endpoint `ssl " + str + "'";
+                    ex.str = "no argument provided for -p option in endpoint `ssl" + str + "'";
                     throw ex;
                 }
                 istringstream p(argument);
                 if(!(p >> const_cast<Int&>(_port)) || !p.eof())
                 {
                     EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "invalid port value `" + argument + "' in endpoint `ssl " + str + "'";
+                    ex.str = "invalid port value `" + argument + "' in endpoint `ssl" + str + "'";
                     throw ex;
                 }
                 else if(_port < 0 || _port > 65535)
                 {
                     EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "port value `" + argument + "' out of range in endpoint `ssl " + str + "'";
+                    ex.str = "port value `" + argument + "' out of range in endpoint `ssl" + str + "'";
                     throw ex;
                 }
                 break;
@@ -127,14 +114,14 @@ IceSSL::EndpointI::EndpointI(const InstancePtr& instance, const string& str, boo
                 if(argument.empty())
                 {
                     EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "no argument provided for -t option in endpoint `ssl " + str + "'";
+                    ex.str = "no argument provided for -t option in endpoint `ssl" + str + "'";
                     throw ex;
                 }
                 istringstream t(argument);
                 if(!(t >> const_cast<Int&>(_timeout)) || !t.eof())
                 {
                     EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "invalid timeout value `" + argument + "' in endpoint `ssl " + str + "'";
+                    ex.str = "invalid timeout value `" + argument + "' in endpoint `ssl" + str + "'";
                     throw ex;
                 }
                 break;
@@ -145,7 +132,7 @@ IceSSL::EndpointI::EndpointI(const InstancePtr& instance, const string& str, boo
                 if(!argument.empty())
                 {
                     EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "unexpected argument `" + argument + "' provided for -z option in `ssl " + str + "'";
+                    ex.str = "unexpected argument `" + argument + "' provided for -z option in `ssl" + str + "'";
                     throw ex;
                 }
                 const_cast<bool&>(_compress) = true;
@@ -154,9 +141,8 @@ IceSSL::EndpointI::EndpointI(const InstancePtr& instance, const string& str, boo
 
             default:
             {
-                Ice::EndpointParseException ex(__FILE__, __LINE__);
-                ex.str = "unknown option `" + option + "' in endpoint `ssl " + str + "'";
-                throw ex;
+                unknown.push_back(option);
+                break;
             }
         }
     }
@@ -174,10 +160,15 @@ IceSSL::EndpointI::EndpointI(const InstancePtr& instance, const string& str, boo
         else
         {
             EndpointParseException ex(__FILE__, __LINE__);
-            ex.str = "`-h *' not valid for proxy endpoint `ssl " + str + "'";
+            ex.str = "`-h *' not valid for proxy endpoint `ssl" + str + "'";
             throw ex;
         }
     }
+
+    //
+    // Replace argument vector with only those we didn't recognize.
+    //
+    args = unknown;
 }
 
 IceSSL::EndpointI::EndpointI(const InstancePtr& instance, IceInternal::BasicStream* s) :
@@ -186,23 +177,30 @@ IceSSL::EndpointI::EndpointI(const InstancePtr& instance, IceInternal::BasicStre
     _timeout(-1),
     _compress(false)
 {
-    s->startReadEncaps();
     s->read(const_cast<string&>(_host), false);
     s->read(const_cast<Int&>(_port));
     s->read(const_cast<Int&>(_timeout));
     s->read(const_cast<bool&>(_compress));
-    s->endReadEncaps();
+}
+
+void
+IceSSL::EndpointI::startStreamWrite(IceInternal::BasicStream* s) const
+{
+    s->startWriteEncaps();
 }
 
 void
 IceSSL::EndpointI::streamWrite(IceInternal::BasicStream* s) const
 {
-    s->write(EndpointType);
-    s->startWriteEncaps();
     s->write(_host, false);
     s->write(_port);
     s->write(_timeout);
     s->write(_compress);
+}
+
+void
+IceSSL::EndpointI::endStreamWrite(IceInternal::BasicStream* s) const
+{
     s->endWriteEncaps();
 }
 
@@ -216,34 +214,7 @@ IceSSL::EndpointI::toString() const
     // these features. Please review for all features that depend on the
     // format of proxyToString() before changing this and related code.
     //
-    ostringstream s;
-    s << "ssl";
-
-    if(!_host.empty())
-    {
-        s << " -h ";
-        bool addQuote = _host.find(':') != string::npos;
-        if(addQuote)
-        {
-            s << "\"";
-        }
-        s << _host;
-        if(addQuote)
-        {
-            s << "\"";
-        }
-    }
-
-    s << " -p " << _port;
-    if(_timeout != -1)
-    {
-        s << " -t " << _timeout;
-    }
-    if(_compress)
-    {
-        s << " -z";
-    }
-    return s.str();
+    return protocol() + options();
 }
 
 Ice::EndpointInfoPtr
@@ -532,17 +503,94 @@ IceSSL::EndpointI::operator<(const Ice::LocalObject& r) const
     return false;
 }
 
-Ice::Int
-IceSSL::EndpointI::hashInit() const
+void
+IceSSL::EndpointI::hashInit(Ice::Int& h) const
 {
-    Int h = 5381;
-    IceInternal::hashAdd(h, EndpointType);
     IceInternal::hashAdd(h, _host);
     IceInternal::hashAdd(h, _port);
     IceInternal::hashAdd(h, _timeout);
     IceInternal::hashAdd(h, _connectionId);
     IceInternal::hashAdd(h, _compress);
-    return h;
+}
+
+string
+IceSSL::EndpointI::options() const
+{
+    //
+    // WARNING: Certain features, such as proxy validation in Glacier2,
+    // depend on the format of proxy strings. Changes to toString() and
+    // methods called to generate parts of the reference string could break
+    // these features. Please review for all features that depend on the
+    // format of proxyToString() before changing this and related code.
+    //
+    ostringstream s;
+
+    if(!_host.empty())
+    {
+        s << " -h ";
+        bool addQuote = _host.find(':') != string::npos;
+        if(addQuote)
+        {
+            s << "\"";
+        }
+        s << _host;
+        if(addQuote)
+        {
+            s << "\"";
+        }
+    }
+
+    s << " -p " << _port;
+
+    if(_timeout != -1)
+    {
+        s << " -t " << _timeout;
+    }
+
+    if(_compress)
+    {
+        s << " -z";
+    }
+
+    return s.str();
+}
+
+Int
+IceSSL::EndpointI::port() const
+{
+    return _port;
+}
+
+IceInternal::IPEndpointIPtr
+IceSSL::EndpointI::port(Int port) const
+{
+    if(port == _port)
+    {
+        return const_cast<EndpointI*>(this);
+    }
+    else
+    {
+        return new EndpointI(_instance, _host, port, _timeout, _connectionId, _compress);
+    }
+}
+
+string
+IceSSL::EndpointI::host() const
+{
+    return _host;
+}
+
+IceInternal::IPEndpointIPtr
+IceSSL::EndpointI::host(const string& host) const
+{
+    if(host == _host)
+    {
+        return const_cast<EndpointI*>(this);
+    }
+    else
+    {
+        return new EndpointI(_instance, host, _port, _timeout, _connectionId, _compress);
+    }
 }
 
 IceSSL::EndpointFactoryI::EndpointFactoryI(const InstancePtr& instance)
@@ -567,9 +615,9 @@ IceSSL::EndpointFactoryI::protocol() const
 }
 
 IceInternal::EndpointIPtr
-IceSSL::EndpointFactoryI::create(const string& str, bool oaEndpoint) const
+IceSSL::EndpointFactoryI::create(vector<string>& args, bool oaEndpoint) const
 {
-    return new EndpointI(_instance, str, oaEndpoint);
+    return new EndpointI(_instance, args, oaEndpoint);
 }
 
 IceInternal::EndpointIPtr

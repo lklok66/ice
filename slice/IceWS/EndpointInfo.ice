@@ -23,10 +23,17 @@ module IceWS
 
 /**
  *
- * Uniquely identifies WebSocket endpoints.
+ * Uniquely identifies TCP-based WebSocket endpoints.
  *
  **/
-const short EndpointType = 4;
+const short WSEndpointType = 4;
+
+/**
+ *
+ * Uniquely identifies SSL-based WebSocket endpoints.
+ *
+ **/
+const short WSSEndpointType = 5;
 
 /**
  *

@@ -27,19 +27,20 @@ IceWS::ConnectorI::connect()
     if(_instance->networkTraceLevel() >= 2)
     {
         Trace out(_logger, _instance->networkTraceCategory());
-        out << "trying to establish ws connection to " << toString();
+        out << "trying to establish " << _protocol << " connection to " << toString();
     }
 
     try
     {
-        return new TransceiverI(_instance, createSocket(false, _addr), _proxy, _host, _addr, _resource);
+        TransceiverPtr del = _delegate->connect();
+        return new TransceiverI(_instance, _type, del, _host, _port, _resource);
     }
     catch(const Ice::LocalException& ex)
     {
         if(_instance->networkTraceLevel() >= 2)
         {
             Trace out(_logger, _instance->networkTraceCategory());
-            out << "failed to establish ws connection to " << toString() << "\n" << ex;
+            out << "failed to establish " << _protocol << " connection to " << toString() << "\n" << ex;
         }
         throw;
     }
@@ -48,13 +49,13 @@ IceWS::ConnectorI::connect()
 Short
 IceWS::ConnectorI::type() const
 {
-    return IceWS::EndpointType;
+    return _type;
 }
 
 string
 IceWS::ConnectorI::toString() const
 {
-    return addrToString(!_proxy ? _addr : _proxy->getAddress());
+    return _delegate->toString();
 }
 
 bool
@@ -66,17 +67,7 @@ IceWS::ConnectorI::operator==(const Connector& r) const
         return false;
     }
 
-    if(compareAddress(_addr, p->_addr) != 0)
-    {
-        return false;
-    }
-
-    if(_timeout != p->_timeout)
-    {
-        return false;
-    }
-
-    if(_connectionId != p->_connectionId)
+    if(_delegate != p->_delegate)
     {
         return false;
     }
@@ -104,20 +95,11 @@ IceWS::ConnectorI::operator<(const Connector& r) const
         return type() < r.type();
     }
 
-    if(_timeout < p->_timeout)
+    if(_delegate < p->_delegate)
     {
         return true;
     }
-    else if(p->_timeout < _timeout)
-    {
-        return false;
-    }
-
-    if(_connectionId < p->_connectionId)
-    {
-        return true;
-    }
-    else if(p->_connectionId < _connectionId)
+    else if(p->_delegate < _delegate)
     {
         return false;
     }
@@ -131,20 +113,19 @@ IceWS::ConnectorI::operator<(const Connector& r) const
         return false;
     }
 
-    return compareAddress(_addr, p->_addr) == -1;
+    return false;
 }
 
-IceWS::ConnectorI::ConnectorI(const InstancePtr& instance, const string& host, const Address& addr,
-                              const NetworkProxyPtr& proxy, Ice::Int timeout, const string& connectionId,
-                              const string& resource) :
+IceWS::ConnectorI::ConnectorI(const InstancePtr& instance, Short type, const IceInternal::ConnectorPtr& del,
+                              const string& host, int port, const string& resource) :
     _instance(instance),
-    _logger(instance->communicator()->getLogger()),
+    _type(type),
+    _delegate(del),
     _host(host),
-    _addr(addr),
-    _proxy(proxy),
-    _timeout(timeout),
-    _connectionId(connectionId),
-    _resource(resource)
+    _port(port),
+    _resource(resource),
+    _protocol(type == WSEndpointType ? "ws" : "wss"),
+    _logger(instance->communicator()->getLogger())
 {
 }
 

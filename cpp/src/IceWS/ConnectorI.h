@@ -37,19 +37,19 @@ public:
 
 private:
 
-    ConnectorI(const InstancePtr&, const std::string&, const IceInternal::Address&,
-               const IceInternal::NetworkProxyPtr&, Ice::Int, const std::string&, const std::string&);
+    ConnectorI(const InstancePtr&, Ice::Short, const IceInternal::ConnectorPtr&, const std::string&, int,
+               const std::string&);
     virtual ~ConnectorI();
     friend class EndpointI;
 
     const InstancePtr _instance;
-    const Ice::LoggerPtr _logger;
+    const Ice::Short _type;
+    const IceInternal::ConnectorPtr _delegate;
     const std::string _host;
-    const IceInternal::Address _addr;
-    const IceInternal::NetworkProxyPtr _proxy;
-    const Ice::Int _timeout;
-    const std::string _connectionId;
+    const int _port;
     const std::string _resource;
+    const std::string _protocol;
+    const Ice::LoggerPtr _logger;
 };
 
 }

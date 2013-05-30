@@ -20,10 +20,12 @@ class OpaqueEndpointI : public EndpointI
 {
 public:
 
-    OpaqueEndpointI(const ::std::string&);
+    OpaqueEndpointI(std::vector<std::string>&);
     OpaqueEndpointI(Ice::Short, BasicStream*);
 
+    virtual void startStreamWrite(BasicStream*) const;
     virtual void streamWrite(BasicStream*) const;
+    virtual void endStreamWrite(BasicStream*) const;
     virtual std::string toString() const;
     virtual Ice::EndpointInfoPtr getInfo() const;
     virtual Ice::Short type() const;
@@ -45,13 +47,15 @@ public:
     virtual bool operator==(const Ice::LocalObject&) const;
     virtual bool operator<(const Ice::LocalObject&) const;
 
+    virtual void hashInit(Ice::Int&) const;
+    virtual std::string options() const;
+
 #ifdef __SUNPRO_CC
     using EndpointI::connectionId;
 #endif
 
 protected:
 
-    virtual ::Ice::Int hashInit() const;
     using EndpointI::connectors;
 
 private:

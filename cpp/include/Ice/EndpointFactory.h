@@ -28,7 +28,7 @@ public:
 
     virtual ::Ice::Short type() const = 0;
     virtual ::std::string protocol() const = 0;
-    virtual EndpointIPtr create(const std::string&, bool) const = 0;
+    virtual EndpointIPtr create(std::vector<std::string>&, bool) const = 0;
     virtual EndpointIPtr read(BasicStream*) const = 0;
     virtual void destroy() = 0;
 

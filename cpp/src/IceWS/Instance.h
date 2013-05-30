@@ -42,8 +42,6 @@ public:
     std::string networkTraceCategory() const;
     size_t messageSizeMax() const;
 
-    IceInternal::EndpointFactoryPtr factoryDelegate() const;
-
     void destroy();
 
 private:
@@ -51,7 +49,6 @@ private:
     Ice::LoggerPtr _logger;
     IceInternal::ProtocolPluginFacadePtr _facade;
     bool _initialized;
-    IceInternal::EndpointFactoryPtr _factoryDelegate;
 };
 
 }

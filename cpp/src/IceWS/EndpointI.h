@@ -19,15 +19,17 @@
 namespace IceWS
 {
 
-class EndpointI : public IceInternal::EndpointI
+class EndpointI : public IceInternal::IPEndpointI
 {
 public:
 
-    EndpointI(const InstancePtr&, const std::string&, Ice::Int, Ice::Int, const std::string&, bool, const std::string&);
-    EndpointI(const InstancePtr&, const std::string&, bool);
-    EndpointI(const InstancePtr&, IceInternal::BasicStream*);
+    EndpointI(const InstancePtr&, Ice::Short, const IceInternal::IPEndpointIPtr&, const std::string&);
+    EndpointI(const InstancePtr&, Ice::Short, const IceInternal::IPEndpointIPtr&, std::vector<std::string>&, bool);
+    EndpointI(const InstancePtr&, Ice::Short, const IceInternal::IPEndpointIPtr&, IceInternal::BasicStream*);
 
+    virtual void startStreamWrite(IceInternal::BasicStream*) const;
     virtual void streamWrite(IceInternal::BasicStream*) const;
+    virtual void endStreamWrite(IceInternal::BasicStream*) const;
     virtual std::string toString() const;
     virtual Ice::EndpointInfoPtr getInfo() const;
     virtual Ice::Short type() const;
@@ -51,22 +53,26 @@ public:
     virtual bool operator==(const Ice::LocalObject&) const;
     virtual bool operator<(const Ice::LocalObject&) const;
 
+    virtual void hashInit(Ice::Int&) const;
+    virtual std::string options() const;
+
+    virtual Ice::Int port() const;
+    virtual IceInternal::IPEndpointIPtr port(Ice::Int) const;
+    virtual std::string host() const;
+    virtual IceInternal::IPEndpointIPtr host(const std::string&) const;
+
 #ifdef __SUNPRO_CC
     using IceInternal::EndpointI::connectionId;
 #endif
 
 private:
 
-    virtual ::Ice::Int hashInit() const;
-
     //
     // All members are const, because endpoints are immutable.
     //
     const InstancePtr _instance;
-    const std::string _host;
-    const Ice::Int _port;
-    const Ice::Int _timeout;
-    const bool _compress;
+    const Ice::Short _type;
+    const IceInternal::IPEndpointIPtr _delegate;
     const std::string _resource;
 };
 
@@ -78,17 +84,19 @@ public:
 
     virtual Ice::Short type() const;
     virtual std::string protocol() const;
-    virtual IceInternal::EndpointIPtr create(const std::string&, bool) const;
+    virtual IceInternal::EndpointIPtr create(std::vector<std::string>&, bool) const;
     virtual IceInternal::EndpointIPtr read(IceInternal::BasicStream*) const;
     virtual void destroy();
 
 private:
 
-    EndpointFactoryI(const InstancePtr&);
+    EndpointFactoryI(const InstancePtr&, const IceInternal::EndpointFactoryPtr&, int, const std::string&);
     friend class Instance;
 
-    InstancePtr _instance;
-    IceInternal::EndpointFactoryPtr _delegate;
+    const InstancePtr _instance;
+    const IceInternal::EndpointFactoryPtr _delegate;
+    const int _type;
+    const std::string _protocol;
 };
 
 }

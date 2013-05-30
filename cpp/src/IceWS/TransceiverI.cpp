@@ -8,6 +8,7 @@
 // **********************************************************************
 
 #include <IceWS/TransceiverI.h>
+#include <IceWS/EndpointInfo.h>
 #include <IceWS/ConnectionInfo.h>
 #include <IceWS/Instance.h>
 #include <IceWS/Util.h>
@@ -123,23 +124,14 @@ Long nlltoh(const Byte* src)
 NativeInfoPtr
 IceWS::TransceiverI::getNativeInfo()
 {
-    return this;
+    return _delegate->getNativeInfo();
 }
 
 #ifdef ICE_USE_IOCP
 AsyncInfo*
 IceWS::TransceiverI::getAsyncInfo(SocketOperation status)
 {
-    switch(status)
-    {
-    case SocketOperationRead:
-        return &_read;
-    case SocketOperationWrite:
-        return &_write;
-    default:
-        assert(false);
-        return 0;
-    }
+    return _delegate->getAsyncInfo(status);
 }
 #endif
 
@@ -148,93 +140,13 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer)
 {
     try
     {
-        if(_state == StateNeedConnect)
+        if(_state == StateInitializeDelegate)
         {
-            _state = StateConnectPending;
-            return SocketOperationConnect;
-        }
-        else if(_state <= StateConnectPending)
-        {
-#ifdef ICE_USE_IOCP
-            doFinishConnectAsync(_fd, _write);
-#else
-            doFinishConnect(_fd);
-#endif
-
-            _desc = fdToString(_fd, _proxy, _addr, true);
-
-            if(_proxy)
+            SocketOperation op = _delegate->initialize(readBuffer, writeBuffer);
+            if(op != SocketOperationNone)
             {
-                //
-                // Prepare the read & write buffers in advance.
-                //
-                _proxy->beginWriteConnectRequest(_addr, writeBuffer);
-                _proxy->beginReadConnectRequestResponse(readBuffer);
-
-#ifdef ICE_USE_IOCP
-                //
-                // Return SocketOperationWrite to indicate we need to start a write.
-                //
-                _state = StateProxyConnectRequest; // Send proxy connect request
-                return SocketOperationWrite;
-#else
-                //
-                // Write the proxy connection message using TCP.
-                //
-                if(write(writeBuffer))
-                {
-                    //
-                    // Write completed without blocking.
-                    //
-                    _proxy->endWriteConnectRequest(writeBuffer);
-
-                    //
-                    // Try to read the response using TCP.
-                    //
-                    if(read(readBuffer))
-                    {
-                        //
-                        // Read completed without blocking - fall through.
-                        //
-                        _proxy->endReadConnectRequestResponse(readBuffer);
-                    }
-                    else
-                    {
-                        //
-                        // Return SocketOperationRead to indicate we need to complete the read.
-                        //
-                        _state = StateProxyConnectRequestPending; // Wait for proxy response
-                        return SocketOperationRead;
-                    }
-                }
-                else
-                {
-                    //
-                    // Return SocketOperationWrite to indicate we need to complete the write.
-                    //
-                    _state = StateProxyConnectRequest; // Send proxy connect request
-                    return SocketOperationWrite;
-                }
-#endif
+                return op;
             }
-
-            _state = StateConnected;
-        }
-        else if(_state == StateProxyConnectRequest)
-        {
-            //
-            // Write completed.
-            //
-            _proxy->endWriteConnectRequest(writeBuffer);
-            _state = StateProxyConnectRequestPending; // Wait for proxy response
-            return SocketOperationRead;
-        }
-        else if(_state == StateProxyConnectRequestPending)
-        {
-            //
-            // Read completed.
-            //
-            _proxy->endReadConnectRequestResponse(readBuffer);
             _state = StateConnected;
         }
 
@@ -264,13 +176,10 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer)
                 //
                 // Compose the upgrade request.
                 //
-                string a;
-                int port;
-                addrToAddressAndPort(_addr, a, port);
                 ostringstream out;
                 out << "GET " << _resource << " HTTP/1.1\r\n"
                     << "Host: " << _host << "\r\n"
-                    << "Port: " << port << "\r\n"
+                    << "Port: " << _port << "\r\n"
                     << "Upgrade: websocket\r\n"
                     << "Connection: Upgrade\r\n"
                     << "Sec-WebSocket-Protocol: " << _iceProtocol << "\r\n"
@@ -436,14 +345,7 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer)
         {
             Trace out(_logger, _instance->networkTraceCategory());
             out << "failed to establish ws connection\n";
-            if(_incoming)
-            {
-                out << fdToString(_fd) << "\n" << ex;
-            }
-            else
-            {
-                out << fdToString(_fd, _proxy, _addr, false) << "\n" << ex;
-            }
+            out << toString() << "\n" << ex;
         }
         throw;
     }
@@ -453,11 +355,11 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer)
         Trace out(_logger, _instance->networkTraceCategory());
         if(_incoming)
         {
-            out << "accepted ws connection\n" << _desc;
+            out << "accepted ws connection\n" << toString();
         }
         else
         {
-            out << "ws connection established\n" << _desc;
+            out << "ws connection established\n" << toString();
         }
     }
 
@@ -475,17 +377,7 @@ IceWS::TransceiverI::close()
         out << "closing ws connection\n" << toString();
     }
 
-    assert(_fd != INVALID_SOCKET);
-    try
-    {
-        closeSocket(_fd);
-        _fd = INVALID_SOCKET;
-    }
-    catch(const SocketException&)
-    {
-        _fd = INVALID_SOCKET;
-        throw;
-    }
+    _delegate->close();
 }
 
 bool
@@ -493,81 +385,7 @@ IceWS::TransceiverI::write(Buffer& buf)
 {
     Buffer& wb = preWrite(buf);
 
-    //
-    // It's impossible for packetSize to be more than an Int.
-    //
-    int packetSize = static_cast<int>(wb.b.end() - wb.i);
-#ifdef ICE_USE_IOCP
-    //
-    // Limit packet size to avoid performance problems on WIN32
-    //
-    if(_maxSendPacketSize > 0 && packetSize > _maxSendPacketSize)
-    {
-        packetSize = _maxSendPacketSize;
-    }
-#endif
-    while(wb.i != wb.b.end())
-    {
-        assert(_fd != INVALID_SOCKET);
-
-        ssize_t ret = ::send(_fd, reinterpret_cast<const char*>(&*wb.i), packetSize, 0);
-        if(ret == 0)
-        {
-            ConnectionLostException ex(__FILE__, __LINE__);
-            ex.error = 0;
-            throw ex;
-        }
-
-        if(ret == SOCKET_ERROR)
-        {
-            if(interrupted())
-            {
-                continue;
-            }
-
-            if(noBuffers() && packetSize > 1024)
-            {
-                packetSize /= 2;
-                continue;
-            }
-
-            if(wouldBlock())
-            {
-                break;
-            }
-
-            if(connectionLost())
-            {
-                ConnectionLostException ex(__FILE__, __LINE__);
-                ex.error = getSocketErrno();
-                throw ex;
-            }
-            else
-            {
-                SocketException ex(__FILE__, __LINE__);
-                ex.error = getSocketErrno();
-                throw ex;
-            }
-        }
-
-        if(_instance->networkTraceLevel() >= 3)
-        {
-            Trace out(_logger, _instance->networkTraceCategory());
-            out << "sent " << ret << " of " << packetSize << " bytes via ws\n" << toString();
-        }
-
-        if(_stats)
-        {
-            _stats->bytesSent(type(), static_cast<Int>(ret));
-        }
-
-        wb.i += ret;
-
-        if(packetSize > wb.b.end() - wb.i)
-        {
-            packetSize = static_cast<int>(wb.b.end() - wb.i);
-        }
-    }
+    _delegate->write(wb);
 
     postWrite(buf);
 
@@ -579,74 +397,7 @@ IceWS::TransceiverI::read(Buffer& buf)
 {
     Buffer& rb = preRead(buf);
 
-    //
-    // It's impossible for packetSize to be more than an Int.
-    //
-    int packetSize = static_cast<int>(rb.b.end() - rb.i);
-    while(rb.i != rb.b.end())
-    {
-        assert(_fd != INVALID_SOCKET);
-        ssize_t ret = ::recv(_fd, reinterpret_cast<char*>(&*rb.i), packetSize, 0);
-
-        if(ret == 0)
-        {
-            ConnectionLostException ex(__FILE__, __LINE__);
-            ex.error = 0;
-            throw ex;
-        }
-
-        if(ret == SOCKET_ERROR)
-        {
-            if(interrupted())
-            {
-                continue;
-            }
-
-            if(noBuffers() && packetSize > 1024)
-            {
-                packetSize /= 2;
-                continue;
-            }
-
-            if(wouldBlock())
-            {
-                break;
-            }
-
-            if(connectionLost())
-            {
-                ConnectionLostException ex(__FILE__, __LINE__);
-                ex.error = getSocketErrno();
-                throw ex;
-            }
-            else
-            {
-                SocketException ex(__FILE__, __LINE__);
-                ex.error = getSocketErrno();
-                throw ex;
-            }
-        }
-
-        if(_instance->networkTraceLevel() >= 3)
-        {
-            Trace out(_logger, _instance->networkTraceCategory());
-            out << "received " << ret;
-            if(_readState == ReadStateFramePayload)
-            {
-                out << " of " << packetSize;
-            }
-            out << " bytes via ws\n" << toString();
-        }
-
-        if(_stats)
-        {
-            _stats->bytesReceived(type(), static_cast<Int>(ret));
-        }
-
-        rb.i += ret;
-
-        packetSize = static_cast<int>(rb.b.end() - rb.i);
-    }
+    _delegate->read(rb);
 
     postRead(buf);
 
@@ -657,187 +408,52 @@ IceWS::TransceiverI::read(Buffer& buf)
 bool
 IceWS::TransceiverI::startWrite(Buffer& buf)
 {
-    if(_state == StateConnectPending)
-    {
-        Address addr = _proxy ? _proxy->getAddress() : _addr;
-        doConnectAsync(_fd, addr, _write);
-        return false;
-    }
-
-    assert(!buf.b.empty());
-    assert(buf.i != buf.b.end());
-
-    int packetSize = static_cast<int>(buf.b.end() - buf.i);
-    if(_maxSendPacketSize > 0 && packetSize > _maxSendPacketSize)
-    {
-        packetSize = _maxSendPacketSize;
-    }
-    assert(packetSize > 0);
-    _write.buf.len = packetSize;
-    _write.buf.buf = reinterpret_cast<char*>(&*buf.i);
-    int err = WSASend(_fd, &_write.buf, 1, &_write.count, 0, &_write, NULL);
-    if(err == SOCKET_ERROR)
-    {
-        if(!wouldBlock())
-        {
-            if(connectionLost())
-            {
-                ConnectionLostException ex(__FILE__, __LINE__);
-                ex.error = getSocketErrno();
-                throw ex;
-            }
-            else
-            {
-                SocketException ex(__FILE__, __LINE__);
-                ex.error = getSocketErrno();
-                throw ex;
-            }
-        }
-    }
-    return packetSize == static_cast<int>(buf.b.end() - buf.i);
+    // TODO
+    return _delegate->startWrite(buf);
 }
 
 void
 IceWS::TransceiverI::finishWrite(Buffer& buf)
 {
-    if(_state < StateConnected && _state != StateProxyConnectRequest)
-    {
-        return;
-    }
-
-    if(static_cast<int>(_write.count) == SOCKET_ERROR)
-    {
-        WSASetLastError(_write.error);
-        if(connectionLost())
-        {
-            ConnectionLostException ex(__FILE__, __LINE__);
-            ex.error = getSocketErrno();
-            throw ex;
-        }
-        else
-        {
-            SocketException ex(__FILE__, __LINE__);
-            ex.error = getSocketErrno();
-            throw ex;
-        }
-    }
-
-    if(_traceLevels->network >= 3)
-    {
-        int packetSize = static_cast<int>(buf.b.end() - buf.i);
-        if(_maxSendPacketSize > 0 && packetSize > _maxSendPacketSize)
-        {
-            packetSize = _maxSendPacketSize;
-        }
-        Trace out(_logger, _traceLevels->networkCat);
-
-        out << "sent " << _write.count << " of " << packetSize << " bytes via ws\n" << toString();
-    }
-
-    if(_stats)
-    {
-        _stats->bytesSent(type(), _write.count);
-    }
-
-    buf.i += _write.count;
+    // TODO
+    _delegate->finishWrite(buf);
 }
 
 void
 IceWS::TransceiverI::startRead(Buffer& buf)
 {
-    int packetSize = static_cast<int>(buf.b.end() - buf.i);
-    if(_maxReceivePacketSize > 0 && packetSize > _maxReceivePacketSize)
-    {
-        packetSize = _maxReceivePacketSize;
-    }
-    assert(!buf.b.empty() && buf.i != buf.b.end());
-
-    _read.buf.len = packetSize;
-    _read.buf.buf = reinterpret_cast<char*>(&*buf.i);
-    int err = WSARecv(_fd, &_read.buf, 1, &_read.count, &_read.flags, &_read, NULL);
-    if(err == SOCKET_ERROR)
-    {
-        if(!wouldBlock())
-        {
-            if(connectionLost())
-            {
-                ConnectionLostException ex(__FILE__, __LINE__);
-                ex.error = getSocketErrno();
-                throw ex;
-            }
-            else
-            {
-                SocketException ex(__FILE__, __LINE__);
-                ex.error = getSocketErrno();
-                throw ex;
-            }
-        }
-    }
+    _delegate->startRead(buf);
 }
 
 void
 IceWS::TransceiverI::finishRead(Buffer& buf)
 {
-    if(static_cast<int>(_read.count) == SOCKET_ERROR)
-    {
-        WSASetLastError(_read.error);
-        if(connectionLost())
-        {
-            ConnectionLostException ex(__FILE__, __LINE__);
-            ex.error = getSocketErrno();
-            throw ex;
-        }
-        else
-        {
-            SocketException ex(__FILE__, __LINE__);
-            ex.error = getSocketErrno();
-            throw ex;
-        }
-    }
-    else if(_read.count == 0)
-    {
-        ConnectionLostException ex(__FILE__, __LINE__);
-        ex.error = 0;
-        throw ex;
-    }
-
-    if(_traceLevels->network >= 3)
-    {
-        int packetSize = static_cast<int>(buf.b.end() - buf.i);
-        if(_maxReceivePacketSize > 0 && packetSize > _maxReceivePacketSize)
-        {
-            packetSize = _maxReceivePacketSize;
-        }
-        Trace out(_logger, _traceLevels->networkCat);
-        out << "received " << _read.count << " of " << packetSize << " bytes via ws\n" << toString();
-    }
-
-    if(_stats)
-    {
-        _stats->bytesReceived(type(), static_cast<Int>(_read.count));
-    }
-
-    buf.i += _read.count;
+    _delegate->finishRead(buf);
 }
 #endif
 
 string
 IceWS::TransceiverI::type() const
 {
-    return "ws";
+    return _type == WSEndpointType ? "ws" : "wss"; // TODO
 }
 
 string
 IceWS::TransceiverI::toString() const
 {
-    return _desc;
+    return _delegate->toString();
 }
 
 Ice::ConnectionInfoPtr
 IceWS::TransceiverI::getInfo() const
 {
+    IPConnectionInfoPtr di = IPConnectionInfoPtr::dynamicCast(_delegate->getInfo());
+    assert(di);
     IceWS::ConnectionInfoPtr info = new IceWS::ConnectionInfo();
-    fdToAddressAndPort(_fd, info->localAddress, info->localPort, info->remoteAddress, info->remotePort);
+    info->localAddress = di->localAddress;
+    info->localPort = di->localPort;
+    info->remoteAddress = di->remoteAddress;
+    info->remotePort = di->remotePort;
     info->resource = _resource;
     return info;
 }
@@ -845,24 +461,20 @@ IceWS::TransceiverI::getInfo() const
 void
 IceWS::TransceiverI::checkSendSize(const Buffer& buf, size_t messageSizeMax)
 {
-    if(buf.b.size() > messageSizeMax)
-    {
-        Ex::throwMemoryLimitException(__FILE__, __LINE__, buf.b.size(), messageSizeMax);
-    }
+    _delegate->checkSendSize(buf, messageSizeMax);
 }
 
-IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const NetworkProxyPtr& proxy,
-                                  const string& host, const Address& addr, const string& resource) :
-    NativeInfo(fd),
+IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, Short type, const TransceiverPtr& del,
+                                  const string& host, int port, const string& resource) :
     _instance(instance),
-    _logger(instance->communicator()->getLogger()),
-    _stats(instance->communicator()->getStats()),
-    _proxy(proxy),
+    _type(type),
+    _delegate(del),
     _host(host),
-    _addr(addr),
-    _incoming(false),
+    _port(port),
     _resource(resource),
-    _state(StateNeedConnect),
+    _logger(instance->communicator()->getLogger()),
+    _incoming(false),
+    _state(StateInitializeDelegate),
     _parser(new HttpParser),
     _readState(ReadStateInitializing),
     _readBuffer(0),
@@ -873,51 +485,17 @@ IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const 
     _writeState(WriteStateInitializing),
     _writeBuffer(0),
     _writeHeaderLength(0)
-#ifdef ICE_USE_IOCP
-    , _read(SocketOperationRead),
-    _write(SocketOperationWrite)
-#endif
 {
-    setBlock(fd, false);
-    setTcpBufSize(fd, _instance->communicator()->getProperties(), _logger);
-
-#ifdef ICE_USE_IOCP
-    //
-    // On Windows, limiting the buffer size is important to prevent
-    // poor throughput performances when transfering large amount of
-    // data. See Microsoft KB article KB823764.
-    //
-    _maxSendPacketSize = getSendBufferSize(_fd) / 2;
-    if(_maxSendPacketSize < 512)
-    {
-        _maxSendPacketSize = 0;
-    }
-
-    _maxReceivePacketSize = getRecvBufferSize(_fd);
-    if(_maxReceivePacketSize < 512)
-    {
-        _maxReceivePacketSize = 0;
-    }
-#else
-    Address connectAddr = proxy ? proxy->getAddress() : addr;
-    if(doConnect(_fd, connectAddr))
-    {
-        _state = StateConnected;
-    }
-    _desc = fdToString(_fd, _proxy, _addr, true);
-#endif
 }
 
-IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const string& adapterName) :
-    NativeInfo(fd),
+IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, Short type, const TransceiverPtr& del) :
     _instance(instance),
+    _type(type),
+    _delegate(del),
+    _port(-1),
     _logger(instance->communicator()->getLogger()),
-    _stats(instance->communicator()->getStats()),
-    _addr(Address()),
-    _adapterName(adapterName),
     _incoming(true),
     _state(StateConnected),
-    _desc(fdToString(fd)),
     _parser(new HttpParser),
     _readState(ReadStateInitializing),
     _readBuffer(0),
@@ -928,37 +506,11 @@ IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const 
     _writeState(WriteStateInitializing),
     _writeBuffer(0),
     _writeHeaderLength(0)
-#ifdef ICE_USE_IOCP
-    , _read(SocketOperationRead),
-    _write(SocketOperationWrite)
-#endif
 {
-    setBlock(fd, false);
-    setTcpBufSize(fd, _instance->communicator()->getProperties(), _logger);
-
-#ifdef ICE_USE_IOCP
-    //
-    // On Windows, limiting the buffer size is important to prevent
-    // poor throughput performances when transfering large amount of
-    // data. See Microsoft KB article KB823764.
-    //
-    _maxSendPacketSize = getSendBufferSize(_fd) / 2;
-    if(_maxSendPacketSize < 512)
-    {
-        _maxSendPacketSize = 0;
-    }
-
-    _maxReceivePacketSize = getRecvBufferSize(_fd);
-    if(_maxReceivePacketSize < 512)
-    {
-        _maxReceivePacketSize = 0;
-    }
-#endif
 }
 
 IceWS::TransceiverI::~TransceiverI()
 {
-    assert(_fd == INVALID_SOCKET);
 }
 
 void

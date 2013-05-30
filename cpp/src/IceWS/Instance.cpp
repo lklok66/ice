@@ -27,6 +27,7 @@
 
 using namespace std;
 using namespace Ice;
+using namespace IceInternal;
 using namespace IceWS;
 
 IceUtil::Shared* IceWS::upCast(IceWS::Instance* p) { return p; }
@@ -35,15 +36,24 @@ IceWS::Instance::Instance(const CommunicatorPtr& communicator) :
     _logger(communicator->getLogger()),
     _initialized(false)
 {
-    _facade = IceInternal::getProtocolPluginFacade(communicator);
-    _factoryDelegate = _facade->getEndpointFactory(TCPEndpointType);
+    _facade = getProtocolPluginFacade(communicator);
 
     //
     // Register the endpoint factory. We have to do this now, rather than
     // in initialize, because the communicator may need to interpret
     // proxies before the plug-in is fully initialized.
     //
-    _facade->addEndpointFactory(new EndpointFactoryI(this));
+    EndpointFactoryPtr tcpFactory = _facade->getEndpointFactory(TCPEndpointType);
+    assert(tcpFactory);
+    _facade->addEndpointFactory(new EndpointFactoryI(this, tcpFactory, WSEndpointType, "ws"));
+
+    EndpointFactoryPtr sslFactory;
+    if(communicator->getPluginManager()->getPlugin("IceSSL"))
+    {
+        sslFactory = _facade->getEndpointFactory(2); // IceSSL::EndpointType = 2
+        assert(sslFactory);
+        _facade->addEndpointFactory(new EndpointFactoryI(this, sslFactory, WSSEndpointType, "wss"));
+    }
 }
 
 IceWS::Instance::~Instance()
@@ -75,13 +85,13 @@ IceWS::Instance::communicator() const
     return _facade->getCommunicator();
 }
 
-IceInternal::EndpointHostResolverPtr
+EndpointHostResolverPtr
 IceWS::Instance::endpointHostResolver() const
 {
     return _facade->getEndpointHostResolver();
 }
 
-IceInternal::ProtocolSupport
+ProtocolSupport
 IceWS::Instance::protocolSupport() const
 {
     return _facade->getProtocolSupport();
@@ -93,7 +103,7 @@ IceWS::Instance::preferIPv6() const
     return _facade->preferIPv6();
 }
 
-IceInternal::NetworkProxyPtr
+NetworkProxyPtr
 IceWS::Instance::networkProxy() const
 {
     return _facade->getNetworkProxy();
@@ -127,12 +137,6 @@ size_t
 IceWS::Instance::messageSizeMax() const
 {
     return _facade->getMessageSizeMax();
-}
-
-IceInternal::EndpointFactoryPtr
-IceWS::Instance::factoryDelegate() const
-{
-    return _factoryDelegate;
 }
 
 void

@@ -12,6 +12,7 @@
 #include <Ice/LocalException.h>
 #include <Ice/PropertiesI.h>
 #include <Ice/LoggerUtil.h>
+#include <Ice/HashUtil.h>
 #include <IceUtil/MutexPtrLock.h>
 
 using namespace std;
@@ -69,19 +70,31 @@ IceInternal::EndpointI::internal_getHash() const
     IceUtilInternal::MutexPtrLock<IceUtil::Mutex> lock(hashMutex);
     if(!_hashInitialized)
     {
-        _hashValue = hashInit();
+        _hashValue = 5381;
+        IceInternal::hashAdd(_hashValue, type());
+        hashInit(_hashValue);
     }
     return _hashValue;
 }
 
-IceInternal::EndpointI::EndpointI(const std::string& connectionId) : 
+IceInternal::EndpointI::EndpointI(const std::string& connectionId) :
     _connectionId(connectionId),
     _hashInitialized(false)
 {
 }
 
-IceInternal::EndpointI::EndpointI() : 
-    _hashInitialized(false) 
+IceInternal::EndpointI::EndpointI() :
+    _hashInitialized(false)
+{
+}
+
+IceInternal::IPEndpointI::IPEndpointI(const std::string& connectionId) :
+    EndpointI(connectionId)
+{
+}
+
+IceInternal::IPEndpointI::IPEndpointI() :
+    EndpointI()
 {
 }
 
@@ -121,7 +134,7 @@ IceInternal::EndpointHostResolver::EndpointHostResolver(const InstancePtr& insta
 }
 
 vector<ConnectorPtr>
-IceInternal::EndpointHostResolver::resolve(const string& host, int port, Ice::EndpointSelectionType selType, 
+IceInternal::EndpointHostResolver::resolve(const string& host, int port, Ice::EndpointSelectionType selType,
                                            const EndpointIPtr& endpoint)
 {
     //
@@ -144,9 +157,9 @@ IceInternal::EndpointHostResolver::resolve(const string& host, int port, Ice::En
     {
         observer.attach(obsv->getEndpointLookupObserver(endpoint));
     }
-    
+
     vector<ConnectorPtr> connectors;
-    try 
+    try
     {
         if(networkProxy)
         {
@@ -165,7 +178,7 @@ IceInternal::EndpointHostResolver::resolve(const string& host, int port, Ice::En
 }
 
 void
-IceInternal::EndpointHostResolver::resolve(const string& host, int port, Ice::EndpointSelectionType selType, 
+IceInternal::EndpointHostResolver::resolve(const string& host, int port, Ice::EndpointSelectionType selType,
                                            const EndpointIPtr& endpoint, const EndpointI_connectorsPtr& callback)
 {
     //
@@ -261,10 +274,10 @@ IceInternal::EndpointHostResolver::run()
                 networkProxy = networkProxy->resolveHost();
             }
 
-            r.callback->connectors(r.endpoint->connectors(getAddresses(r.host, 
-                                                                       r.port, 
+            r.callback->connectors(r.endpoint->connectors(getAddresses(r.host,
+                                                                       r.port,
                                                                        _protocol,
-                                                                       r.selType, 
+                                                                       r.selType,
                                                                        _preferIPv6, true),
                                                           networkProxy));
 
@@ -325,17 +338,17 @@ IceInternal::EndpointHostResolver::EndpointHostResolver(const InstancePtr& insta
 }
 
 vector<ConnectorPtr>
-IceInternal::EndpointHostResolver::resolve(const string& host, int port, Ice::EndpointSelectionType selType, 
+IceInternal::EndpointHostResolver::resolve(const string& host, int port, Ice::EndpointSelectionType selType,
                                            const EndpointIPtr& endpoint)
 {
-    return endpoint->connectors(getAddresses(host, port, _instance->protocolSupport(), selType, 
+    return endpoint->connectors(getAddresses(host, port, _instance->protocolSupport(), selType,
                                              _instance->preferIPv6(), false));
 }
 
 void
 IceInternal::EndpointHostResolver::resolve(const string&, int,
-                                           Ice::EndpointSelectionType selType, 
-                                           const EndpointIPtr& endpoint, 
+                                           Ice::EndpointSelectionType selType,
+                                           const EndpointIPtr& endpoint,
                                            const EndpointI_connectorsPtr& callback)
 {
     //

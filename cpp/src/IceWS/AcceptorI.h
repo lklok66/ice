@@ -42,25 +42,19 @@ public:
     virtual IceInternal::TransceiverPtr accept();
     virtual std::string toString() const;
 
-    int effectivePort() const;
-
 private:
 
-    AcceptorI(const InstancePtr&, const std::string&, const std::string&, int);
+    AcceptorI(const InstancePtr&, Ice::Short, const IceInternal::AcceptorPtr&, const std::string&, const std::string&,
+              int);
     virtual ~AcceptorI();
     friend class EndpointI;
 
     const InstancePtr _instance;
+    const Ice::Short _type;
+    const IceInternal::AcceptorPtr _delegate;
     const std::string _adapterName;
     const Ice::LoggerPtr _logger;
     const IceInternal::Address _addr;
-    int _backlog;
-#ifdef ICE_USE_IOCP
-    SOCKET _acceptFd;
-    int _acceptError;
-    std::vector<char> _acceptBuf;
-    IceInternal::AsyncInfo _info;
-#endif
 };
 
 }

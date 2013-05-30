@@ -65,7 +65,9 @@ typedef ::IceInternal::Handle< ::IceWS::EndpointInfo> EndpointInfoPtr;
 namespace IceWS
 {
 
-const ::Ice::Short EndpointType = 4;
+const ::Ice::Short WSEndpointType = 4;
+
+const ::Ice::Short WSSEndpointType = 5;
 
 }
 

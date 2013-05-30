@@ -22,143 +22,63 @@ using namespace std;
 using namespace Ice;
 using namespace IceWS;
 
-IceWS::EndpointI::EndpointI(const InstancePtr& instance, const string& ho, Int po, Int ti, const string& conId,
-                            bool co, const string& res) :
-    IceInternal::EndpointI(conId),
+IceWS::EndpointI::EndpointI(const InstancePtr& instance, Short type, const IceInternal::IPEndpointIPtr& del,
+                            const string& res) :
+    IceInternal::IPEndpointI(del->connectionId()),
     _instance(instance),
-    _host(ho),
-    _port(po),
-    _timeout(ti),
-    _compress(co),
+    _type(type),
+    _delegate(del),
     _resource(res)
 {
 }
 
-IceWS::EndpointI::EndpointI(const InstancePtr& instance, const string& str, bool oaEndpoint) :
-    IceInternal::EndpointI(""),
+IceWS::EndpointI::EndpointI(const InstancePtr& instance, Short type, const IceInternal::IPEndpointIPtr& del,
+                            vector<string>& args, bool oaEndpoint) :
+    IceInternal::IPEndpointI(""),
     _instance(instance),
-    _port(0),
-    _timeout(-1),
-    _compress(false)
+    _type(type),
+    _delegate(del)
 {
-    const string delim = " \t\n\r";
+    vector<string> unknown;
 
-    string::size_type beg;
-    string::size_type end = 0;
-
-    while(true)
+    ostringstream ostr;
+    for(vector<string>::iterator p = args.begin(); p != args.end(); ++p)
     {
-        beg = str.find_first_not_of(delim, end);
-        if(beg == string::npos)
+        if(p->find_first_of(" \t\n\r") != string::npos)
         {
-            break;
+            ostr << " \"" << *p << "\"";
         }
-
-        end = str.find_first_of(delim, beg);
-        if(end == string::npos)
+        else
         {
-            end = str.length();
+            ostr << " " << *p;
         }
+    }
+    const string str = ostr.str();
 
-        string option = str.substr(beg, end - beg);
+    for(vector<string>::size_type n = 0; n < args.size(); ++n)
+    {
+        string option = args[n];
         if(option.length() != 2 || option[0] != '-')
         {
-            EndpointParseException ex(__FILE__, __LINE__);
-            ex.str = "expected an endpoint option but found `" + option + "' in endpoint `ws " + str + "'";
-            throw ex;
+            unknown.push_back(option);
+            continue;
         }
 
         string argument;
-        string::size_type argumentBeg = str.find_first_not_of(delim, end);
-        if(argumentBeg != string::npos && str[argumentBeg] != '-')
+        if(n + 1 < args.size() && args[n + 1][0] != '-')
         {
-            beg = argumentBeg;
-            end = str.find_first_of(delim, beg);
-            if(end == string::npos)
-            {
-                end = str.length();
-            }
-            argument = str.substr(beg, end - beg);
-            if(argument[0] == '\"' && argument[argument.size() - 1] == '\"')
-            {
-                argument = argument.substr(1, argument.size() - 2);
-            }
+            argument = args[++n];
         }
 
         switch(option[1])
         {
-            case 'h':
-            {
-                if(argument.empty())
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "no argument provided for -h option in endpoint `ws " + str + "'";
-                    throw ex;
-                }
-                const_cast<string&>(_host) = argument;
-                break;
-            }
-
-            case 'p':
-            {
-                if(argument.empty())
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "no argument provided for -p option in endpoint `ws " + str + "'";
-                    throw ex;
-                }
-                istringstream p(argument);
-                if(!(p >> const_cast<Int&>(_port)) || !p.eof())
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "invalid port value `" + argument + "' in endpoint `ws " + str + "'";
-                    throw ex;
-                }
-                else if(_port < 0 || _port > 65535)
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "port value `" + argument + "' out of range in endpoint `ws " + str + "'";
-                    throw ex;
-                }
-                break;
-            }
-
-            case 't':
-            {
-                if(argument.empty())
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "no argument provided for -t option in endpoint `ws " + str + "'";
-                    throw ex;
-                }
-                istringstream t(argument);
-                if(!(t >> const_cast<Int&>(_timeout)) || !t.eof())
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "invalid timeout value `" + argument + "' in endpoint `ws " + str + "'";
-                    throw ex;
-                }
-                break;
-            }
-
-            case 'z':
-            {
-                if(!argument.empty())
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "unexpected argument `" + argument + "' provided for -z option in `ws " + str + "'";
-                    throw ex;
-                }
-                const_cast<bool&>(_compress) = true;
-                break;
-            }
-
             case 'r':
             {
                 if(argument.empty())
                 {
                     EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "no argument provided for -r option in endpoint `ws " + str + "'";
+                    ex.str = "no argument provided for -r option in endpoint `" + protocol() + str +
+                        _delegate->options() + "'";
                     throw ex;
                 }
                 const_cast<string&>(_resource) = argument;
@@ -167,28 +87,9 @@ IceWS::EndpointI::EndpointI(const InstancePtr& instance, const string& str, bool
 
             default:
             {
-                Ice::EndpointParseException ex(__FILE__, __LINE__);
-                ex.str = "unknown option `" + option + "' in endpoint `ws " + str + "'";
-                throw ex;
+                unknown.push_back(option);
+                break;
             }
-        }
-    }
-
-    if(_host.empty())
-    {
-        const_cast<string&>(_host) = _instance->defaultHost();
-    }
-    else if(_host == "*")
-    {
-        if(oaEndpoint)
-        {
-            const_cast<string&>(_host) = string();
-        }
-        else
-        {
-            EndpointParseException ex(__FILE__, __LINE__);
-            ex.str = "`-h *' not valid for proxy endpoint `ws " + str + "'";
-            throw ex;
         }
     }
 
@@ -197,33 +98,38 @@ IceWS::EndpointI::EndpointI(const InstancePtr& instance, const string& str, bool
     {
         const_cast<string&>(_resource) = "/";
     }
+
+    //
+    // Replace argument vector with only those we didn't recognize.
+    //
+    args = unknown;
 }
 
-IceWS::EndpointI::EndpointI(const InstancePtr& instance, IceInternal::BasicStream* s) :
+IceWS::EndpointI::EndpointI(const InstancePtr& instance, Short type, const IceInternal::IPEndpointIPtr& del,
+                            IceInternal::BasicStream* s) :
     _instance(instance),
-    _port(0),
-    _timeout(-1),
-    _compress(false)
+    _type(type),
+    _delegate(del)
 {
-    s->startReadEncaps();
-    s->read(const_cast<string&>(_host), false);
-    s->read(const_cast<Int&>(_port));
-    s->read(const_cast<Int&>(_timeout));
-    s->read(const_cast<bool&>(_compress));
     s->read(const_cast<string&>(_resource), false);
-    s->endReadEncaps();
+}
+
+void
+IceWS::EndpointI::startStreamWrite(IceInternal::BasicStream* s) const
+{
+    s->startWriteEncaps();
 }
 
 void
 IceWS::EndpointI::streamWrite(IceInternal::BasicStream* s) const
 {
-    s->write(EndpointType);
-    s->startWriteEncaps();
-    s->write(_host, false);
-    s->write(_port);
-    s->write(_timeout);
-    s->write(_compress);
+    _delegate->streamWrite(s);
     s->write(_resource, false);
+}
+
+void
+IceWS::EndpointI::endStreamWrite(IceInternal::BasicStream* s) const
+{
     s->endWriteEncaps();
 }
 
@@ -237,52 +143,7 @@ IceWS::EndpointI::toString() const
     // these features. Please review for all features that depend on the
     // format of proxyToString() before changing this and related code.
     //
-    ostringstream s;
-    s << "ws";
-
-    if(!_host.empty())
-    {
-        s << " -h ";
-        bool addQuote = _host.find(':') != string::npos;
-        if(addQuote)
-        {
-            s << "\"";
-        }
-        s << _host;
-        if(addQuote)
-        {
-            s << "\"";
-        }
-    }
-
-    s << " -p " << _port;
-
-    if(_timeout != -1)
-    {
-        s << " -t " << _timeout;
-    }
-
-    if(_compress)
-    {
-        s << " -z";
-    }
-
-    if(!_resource.empty())
-    {
-        s << " -r ";
-        bool addQuote = _resource.find(':') != string::npos;
-        if(addQuote)
-        {
-            s << "\"";
-        }
-        s << _resource;
-        if(addQuote)
-        {
-            s << "\"";
-        }
-    }
-
-    return s.str();
+    return protocol() + options();
 }
 
 Ice::EndpointInfoPtr
@@ -292,15 +153,16 @@ IceWS::EndpointI::getInfo() const
     {
     public:
 
-        InfoI(Int to, bool comp, const string& host, Int port, const string& resource) :
-            IceWS::EndpointInfo(to, comp, host, port, resource)
+        InfoI(Short ty, Int to, bool comp, const string& host, Int port, const string& resource) :
+            IceWS::EndpointInfo(to, comp, host, port, resource),
+            _type(ty)
         {
         }
 
         virtual Short
         type() const
         {
-            return EndpointType;
+            return _type;
         }
 
         virtual bool
@@ -312,72 +174,80 @@ IceWS::EndpointI::getInfo() const
         virtual bool
         secure() const
         {
-            return false; // TODO
+            return _type == WSSEndpointType;
         }
+
+    private:
+
+        Short _type;
     };
-    return new InfoI(_timeout, _compress, _host, _port, _resource);
+    return new InfoI(_type, _delegate->timeout(), _delegate->compress(), _delegate->host(), _delegate->port(),
+                     _resource);
 }
 
 Short
 IceWS::EndpointI::type() const
 {
-    return EndpointType;
+    return _type;
 }
 
 std::string
 IceWS::EndpointI::protocol() const
 {
-    return "ws";
+    return _type == WSEndpointType ? "ws" : "wss";
 }
 
 Int
 IceWS::EndpointI::timeout() const
 {
-    return _timeout;
+    return _delegate->timeout();
 }
 
 IceInternal::EndpointIPtr
 IceWS::EndpointI::timeout(Int timeout) const
 {
-    if(timeout == _timeout)
+    IceInternal::IPEndpointIPtr del = IceInternal::IPEndpointIPtr::dynamicCast(_delegate->timeout(timeout));
+    if(del == _delegate)
     {
         return const_cast<EndpointI*>(this);
     }
     else
     {
-        return new EndpointI(_instance, _host, _port, timeout, _connectionId, _compress, _resource);
+        return new EndpointI(_instance, _type, del, _resource);
     }
 }
 
 IceInternal::EndpointIPtr
 IceWS::EndpointI::connectionId(const string& connectionId) const
 {
-    if(connectionId == _connectionId)
+    IceInternal::IPEndpointIPtr del = IceInternal::IPEndpointIPtr::dynamicCast(_delegate->connectionId(connectionId));
+    if(del == _delegate)
     {
         return const_cast<EndpointI*>(this);
     }
     else
     {
-        return new EndpointI(_instance, _host, _port, _timeout, connectionId, _compress, _resource);
+        return new EndpointI(_instance, _type, del, _resource);
     }
 }
 
 bool
 IceWS::EndpointI::compress() const
 {
-    return _compress;
+    return _delegate->compress();
 }
 
 IceInternal::EndpointIPtr
 IceWS::EndpointI::compress(bool compress) const
 {
-    if(compress == _compress)
+    IceInternal::IPEndpointIPtr del = IceInternal::IPEndpointIPtr::dynamicCast(_delegate->compress(compress));
+    if(del == _delegate)
     {
         return const_cast<EndpointI*>(this);
     }
     else
     {
-        return new EndpointI(_instance, _host, _port, _timeout, _connectionId, compress, _resource);
+        return new EndpointI(_instance, _type, del, _resource);
     }
 }
 
@@ -390,7 +260,7 @@ IceWS::EndpointI::datagram() const
 bool
 IceWS::EndpointI::secure() const
 {
-    return true;
+    return _type == WSSEndpointType;
 }
 
 IceInternal::TransceiverPtr
@@ -403,40 +273,51 @@ IceWS::EndpointI::transceiver(IceInternal::EndpointIPtr& endp) const
 vector<IceInternal::ConnectorPtr>
 IceWS::EndpointI::connectors(Ice::EndpointSelectionType selType) const
 {
-    return _instance->endpointHostResolver()->resolve(_host, _port, selType, const_cast<EndpointI*>(this));
+    return _instance->endpointHostResolver()->resolve(_delegate->host(), _delegate->port(), selType,
+                                                      const_cast<EndpointI*>(this));
 }
 
 void
 IceWS::EndpointI::connectors_async(Ice::EndpointSelectionType selType,
-                                    const IceInternal::EndpointI_connectorsPtr& callback) const
+                                   const IceInternal::EndpointI_connectorsPtr& callback) const
 {
-    _instance->endpointHostResolver()->resolve(_host, _port, selType, const_cast<EndpointI*>(this), callback);
+    _instance->endpointHostResolver()->resolve(_delegate->host(), _delegate->port(), selType,
+                                               const_cast<EndpointI*>(this), callback);
 }
 
 IceInternal::AcceptorPtr
 IceWS::EndpointI::acceptor(IceInternal::EndpointIPtr& endp, const string& adapterName) const
 {
-    AcceptorI* p = new AcceptorI(_instance, adapterName, _host, _port);
-    endp = new EndpointI(_instance, _host, p->effectivePort(), _timeout, _connectionId, _compress, _resource);
-    return p;
+    IceInternal::EndpointIPtr delEndp;
+    IceInternal::AcceptorPtr delAcc = _delegate->acceptor(delEndp, adapterName);
+
+    IceInternal::IPEndpointIPtr e = IceInternal::IPEndpointIPtr::dynamicCast(delEndp);
+    assert(e);
+    endp = new EndpointI(_instance, _type, e, _resource);
+
+    return new AcceptorI(_instance, _type, delAcc, adapterName, e->host(), e->port());
 }
 
 vector<IceInternal::EndpointIPtr>
 IceWS::EndpointI::expand() const
 {
+    vector<IceInternal::EndpointIPtr> v = _delegate->expand();
+
     vector<IceInternal::EndpointIPtr> endps;
-    vector<string> hosts = IceInternal::getHostsForEndpointExpand(_host, _instance->protocolSupport(), false);
-    if(hosts.empty())
+    if(v.empty())
     {
         endps.push_back(const_cast<EndpointI*>(this));
     }
     else
     {
-        for(vector<string>::const_iterator p = hosts.begin(); p != hosts.end(); ++p)
+        for(vector<IceInternal::EndpointIPtr>::const_iterator p = v.begin(); p != v.end(); ++p)
         {
-            endps.push_back(new EndpointI(_instance, *p, _port, _timeout, _connectionId, _compress, _resource));
+            IceInternal::IPEndpointIPtr e = IceInternal::IPEndpointIPtr::dynamicCast(*p);
+            assert(e);
+            endps.push_back(new EndpointI(_instance, _type, e, _resource));
         }
     }
+
     return endps;
 }
 
@@ -448,17 +329,19 @@ IceWS::EndpointI::equivalent(const IceInternal::EndpointIPtr& endpoint) const
     {
         return false;
     }
-    return wsEndpointI->_host == _host && wsEndpointI->_port == _port;
+    return _delegate->equivalent(endpoint);
 }
 
 vector<IceInternal::ConnectorPtr>
 IceWS::EndpointI::connectors(const vector<IceInternal::Address>& addresses,
                              const IceInternal::NetworkProxyPtr& proxy) const
 {
+    vector<IceInternal::ConnectorPtr> v = _delegate->connectors(addresses, proxy);
+
     vector<IceInternal::ConnectorPtr> connectors;
-    for(unsigned int i = 0; i < addresses.size(); ++i)
+    for(vector<IceInternal::ConnectorPtr>::iterator p = v.begin(); p != v.end(); ++p)
     {
-        connectors.push_back(new ConnectorI(_instance, _host, addresses[i], proxy, _timeout, _connectionId, _resource));
+        connectors.push_back(new ConnectorI(_instance, _type, *p, _delegate->host(), _delegate->port(), _resource));
     }
     return connectors;
 }
@@ -477,27 +360,12 @@ IceWS::EndpointI::operator==(const Ice::LocalObject& r) const
         return true;
     }
 
-    if(_host != p->_host)
+    if(_type != p->_type)
     {
         return false;
     }
 
-    if(_port != p->_port)
-    {
-        return false;
-    }
-
-    if(_timeout != p->_timeout)
-    {
-        return false;
-    }
-
-    if(_connectionId != p->_connectionId)
-    {
-        return false;
-    }
-
-    if(_compress != p->_compress)
+    if(_delegate != p->_delegate)
     {
         return false;
     }
@@ -529,47 +397,20 @@ IceWS::EndpointI::operator<(const Ice::LocalObject& r) const
         return false;
     }
 
-    if(_host < p->_host)
+    if(_type < p->_type)
     {
         return true;
     }
-    else if (p->_host < _host)
+    else if (p->_type < _type)
     {
         return false;
     }
 
-    if(_port < p->_port)
+    if(_delegate < p->_delegate)
     {
         return true;
     }
-    else if(p->_port < _port)
-    {
-        return false;
-    }
-
-    if(_timeout < p->_timeout)
-    {
-        return true;
-    }
-    else if(p->_timeout < _timeout)
-    {
-        return false;
-    }
-
-    if(_connectionId < p->_connectionId)
-    {
-        return true;
-    }
-    else if(p->_connectionId < _connectionId)
-    {
-        return false;
-    }
-
-    if(!_compress && p->_compress)
-    {
-        return true;
-    }
-    else if(p->_compress < _compress)
+    else if (p->_delegate < _delegate)
     {
         return false;
     }
@@ -586,22 +427,92 @@ IceWS::EndpointI::operator<(const Ice::LocalObject& r) const
     return false;
 }
 
-Ice::Int
-IceWS::EndpointI::hashInit() const
+void
+IceWS::EndpointI::hashInit(Ice::Int& h) const
 {
-    Int h = 5381;
-    IceInternal::hashAdd(h, EndpointType);
-    IceInternal::hashAdd(h, _host);
-    IceInternal::hashAdd(h, _port);
-    IceInternal::hashAdd(h, _timeout);
-    IceInternal::hashAdd(h, _connectionId);
-    IceInternal::hashAdd(h, _compress);
+    _delegate->hashInit(h);
     IceInternal::hashAdd(h, _resource);
-    return h;
 }
 
-IceWS::EndpointFactoryI::EndpointFactoryI(const InstancePtr& instance) :
-    _instance(instance)
+string
+IceWS::EndpointI::options() const
+{
+    //
+    // WARNING: Certain features, such as proxy validation in Glacier2,
+    // depend on the format of proxy strings. Changes to toString() and
+    // methods called to generate parts of the reference string could break
+    // these features. Please review for all features that depend on the
+    // format of proxyToString() before changing this and related code.
+    //
+    ostringstream s;
+
+    s << _delegate->options();
+
+    if(!_resource.empty())
+    {
+        s << " -r ";
+        bool addQuote = _resource.find(':') != string::npos;
+        if(addQuote)
+        {
+            s << "\"";
+        }
+        s << _resource;
+        if(addQuote)
+        {
+            s << "\"";
+        }
+    }
+
+    return s.str();
+}
+
+Int
+IceWS::EndpointI::port() const
+{
+    return _delegate->port();
+}
+
+IceInternal::IPEndpointIPtr
+IceWS::EndpointI::port(Int port) const
+{
+    // TODO: Necessary?
+    IceInternal::IPEndpointIPtr del = IceInternal::IPEndpointIPtr::dynamicCast(_delegate->port(port));
+    if(del == _delegate)
+    {
+        return const_cast<EndpointI*>(this);
+    }
+    else
+    {
+        return new EndpointI(_instance, _type, del, _resource);
+    }
+}
+
+string
+IceWS::EndpointI::host() const
+{
+    return _delegate->host();
+}
+
+IceInternal::IPEndpointIPtr
+IceWS::EndpointI::host(const string& host) const
+{
+    IceInternal::IPEndpointIPtr del = IceInternal::IPEndpointIPtr::dynamicCast(_delegate->host(host));
+    if(del == _delegate)
+    {
+        return const_cast<EndpointI*>(this);
+    }
+    else
+    {
+        return new EndpointI(_instance, _type, del, _resource);
+    }
+}
+
+IceWS::EndpointFactoryI::EndpointFactoryI(const InstancePtr& instance, const IceInternal::EndpointFactoryPtr& del,
+                                          int type, const string& prot) :
+    _instance(instance),
+    _delegate(del),
+    _type(type),
+    _protocol(prot)
 {
 }
 
@@ -612,29 +523,34 @@ IceWS::EndpointFactoryI::~EndpointFactoryI()
 Short
 IceWS::EndpointFactoryI::type() const
 {
-    return EndpointType;
+    return _type;
 }
 
 string
 IceWS::EndpointFactoryI::protocol() const
 {
-    return "ws";
+    return _protocol;
 }
 
 IceInternal::EndpointIPtr
-IceWS::EndpointFactoryI::create(const string& str, bool oaEndpoint) const
+IceWS::EndpointFactoryI::create(vector<string>& args, bool oaEndpoint) const
 {
-    return new EndpointI(_instance, str, oaEndpoint);
+    IceInternal::IPEndpointIPtr del = IceInternal::IPEndpointIPtr::dynamicCast(_delegate->create(args, oaEndpoint));
+    assert(del);
+    return new EndpointI(_instance, _type, del, args, oaEndpoint);
 }
 
 IceInternal::EndpointIPtr
 IceWS::EndpointFactoryI::read(IceInternal::BasicStream* s) const
 {
-    return new EndpointI(_instance, s);
+    IceInternal::EndpointIPtr e = _delegate->read(s);
+    IceInternal::IPEndpointIPtr ipe = IceInternal::IPEndpointIPtr::dynamicCast(e);
+    assert(ipe);
+    return new EndpointI(_instance, _type, ipe, s);
 }
 
 void
 IceWS::EndpointFactoryI::destroy()
 {
-    _instance = 0;
+    const_cast<InstancePtr&>(_instance) = 0;
 }
