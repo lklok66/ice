@@ -25,7 +25,7 @@ using namespace IceInternal;
 
 IceInternal::UdpEndpointI::UdpEndpointI(const InstancePtr& instance, const string& ho, Int po, const string& mif,
                                         Int mttl, bool conn, const string& conId, bool co) :
-    IPEndpointI(conId),
+    EndpointI(conId),
     _instance(instance),
     _host(ho),
     _port(po),
@@ -37,7 +37,7 @@ IceInternal::UdpEndpointI::UdpEndpointI(const InstancePtr& instance, const strin
 }
 
 IceInternal::UdpEndpointI::UdpEndpointI(const InstancePtr& instance, vector<string>& args, bool oaEndpoint) :
-    IPEndpointI(""),
+    EndpointI(""),
     _instance(instance),
     _port(0),
     _mcastTtl(-1),
@@ -180,6 +180,10 @@ IceInternal::UdpEndpointI::UdpEndpointI(const InstancePtr& instance, vector<stri
         else
         {
             unknown.push_back(option);
+            if(!argument.empty())
+            {
+                unknown.push_back(argument);
+            }
         }
     }
 
@@ -640,44 +644,6 @@ IceInternal::UdpEndpointI::options() const
     }
 
     return s.str();
-}
-
-Int
-IceInternal::UdpEndpointI::port() const
-{
-    return _port;
-}
-
-IPEndpointIPtr
-IceInternal::UdpEndpointI::port(Int port) const
-{
-    if(port == _port)
-    {
-        return const_cast<UdpEndpointI*>(this);
-    }
-    else
-    {
-        return new UdpEndpointI(_instance, _host, port, _mcastInterface, _mcastTtl, _connect, _connectionId, _compress);
-    }
-}
-
-string
-IceInternal::UdpEndpointI::host() const
-{
-    return _host;
-}
-
-IPEndpointIPtr
-IceInternal::UdpEndpointI::host(const string& host) const
-{
-    if(host == _host)
-    {
-        return const_cast<UdpEndpointI*>(this);
-    }
-    else
-    {
-        return new UdpEndpointI(_instance, host, _port, _mcastInterface, _mcastTtl, _connect, _connectionId, _compress);
-    }
 }
 
 IceInternal::UdpEndpointFactory::UdpEndpointFactory(const InstancePtr& instance)

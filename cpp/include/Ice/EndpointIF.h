@@ -20,10 +20,6 @@ class EndpointI;
 ICE_API Ice::LocalObject* upCast(EndpointI*);
 typedef Handle<EndpointI> EndpointIPtr;
 
-class IPEndpointI;
-ICE_API Ice::LocalObject* upCast(IPEndpointI*);
-typedef Handle<IPEndpointI> IPEndpointIPtr;
-
 class EndpointHostResolver;
 ICE_API IceUtil::Shared* upCast(EndpointHostResolver*);
 typedef Handle<EndpointHostResolver> EndpointHostResolverPtr;

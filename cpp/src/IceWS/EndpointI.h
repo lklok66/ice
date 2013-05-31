@@ -19,13 +19,13 @@
 namespace IceWS
 {
 
-class EndpointI : public IceInternal::IPEndpointI
+class EndpointI : public IceInternal::EndpointI
 {
 public:
 
-    EndpointI(const InstancePtr&, Ice::Short, const IceInternal::IPEndpointIPtr&, const std::string&);
-    EndpointI(const InstancePtr&, Ice::Short, const IceInternal::IPEndpointIPtr&, std::vector<std::string>&, bool);
-    EndpointI(const InstancePtr&, Ice::Short, const IceInternal::IPEndpointIPtr&, IceInternal::BasicStream*);
+    EndpointI(const InstancePtr&, Ice::Short, const IceInternal::EndpointIPtr&, const std::string&);
+    EndpointI(const InstancePtr&, Ice::Short, const IceInternal::EndpointIPtr&, std::vector<std::string>&, bool);
+    EndpointI(const InstancePtr&, Ice::Short, const IceInternal::EndpointIPtr&, IceInternal::BasicStream*);
 
     virtual void startStreamWrite(IceInternal::BasicStream*) const;
     virtual void streamWrite(IceInternal::BasicStream*) const;
@@ -56,11 +56,6 @@ public:
     virtual void hashInit(Ice::Int&) const;
     virtual std::string options() const;
 
-    virtual Ice::Int port() const;
-    virtual IceInternal::IPEndpointIPtr port(Ice::Int) const;
-    virtual std::string host() const;
-    virtual IceInternal::IPEndpointIPtr host(const std::string&) const;
-
 #ifdef __SUNPRO_CC
     using IceInternal::EndpointI::connectionId;
 #endif
@@ -72,8 +67,9 @@ private:
     //
     const InstancePtr _instance;
     const Ice::Short _type;
-    const IceInternal::IPEndpointIPtr _delegate;
+    const IceInternal::EndpointIPtr _delegate;
     const std::string _resource;
+    const Ice::IPEndpointInfoPtr _info;
 };
 
 class EndpointFactoryI : public IceInternal::EndpointFactory

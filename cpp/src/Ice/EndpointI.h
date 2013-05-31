@@ -193,38 +193,6 @@ inline bool operator<(const EndpointI& l, const EndpointI& r)
     return static_cast<const ::Ice::LocalObject&>(l) < static_cast<const ::Ice::LocalObject&>(r);
 }
 
-class ICE_API IPEndpointI : public EndpointI
-{
-public:
-
-#if 0
-    //
-    // Return the port for the endpoint.
-    //
-    virtual Ice::Int port() const = 0;
-
-    //
-    // Return a new endpoint with a different port.
-    //
-    virtual IPEndpointIPtr port(Ice::Int) const = 0;
-
-    //
-    // Return the host for the endpoint.
-    //
-    virtual std::string host() const = 0;
-
-    //
-    // Return a new endpoint with a different host.
-    //
-    virtual IPEndpointIPtr host(const std::string&) const = 0;
-#endif
-
-protected:
-
-    IPEndpointI(const std::string&);
-    IPEndpointI();
-};
-
 #ifndef ICE_OS_WINRT
 class ICE_API EndpointHostResolver : public IceUtil::Thread, public IceUtil::Monitor<IceUtil::Mutex>
 #else

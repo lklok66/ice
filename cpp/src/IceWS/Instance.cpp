@@ -47,12 +47,15 @@ IceWS::Instance::Instance(const CommunicatorPtr& communicator) :
     assert(tcpFactory);
     _facade->addEndpointFactory(new EndpointFactoryI(this, tcpFactory, WSEndpointType, "ws"));
 
-    EndpointFactoryPtr sslFactory;
-    if(communicator->getPluginManager()->getPlugin("IceSSL"))
+    try
     {
-        sslFactory = _facade->getEndpointFactory(2); // IceSSL::EndpointType = 2
+        communicator->getPluginManager()->getPlugin("IceSSL"); // throws NotRegisteredException
+        EndpointFactoryPtr sslFactory = _facade->getEndpointFactory(2); // IceSSL::EndpointType = 2
         assert(sslFactory);
         _facade->addEndpointFactory(new EndpointFactoryI(this, sslFactory, WSSEndpointType, "wss"));
+    }
+    catch(const Ice::NotRegisteredException&)
+    {
     }
 }
 

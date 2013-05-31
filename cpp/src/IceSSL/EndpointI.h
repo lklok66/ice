@@ -19,7 +19,7 @@
 namespace IceSSL
 {
 
-class EndpointI : public IceInternal::IPEndpointI
+class EndpointI : public IceInternal::EndpointI
 {
 public:
 
@@ -55,11 +55,6 @@ public:
 
     virtual void hashInit(Ice::Int&) const;
     virtual std::string options() const;
-
-    virtual Ice::Int port() const;
-    virtual IceInternal::IPEndpointIPtr port(Ice::Int) const;
-    virtual std::string host() const;
-    virtual IceInternal::IPEndpointIPtr host(const std::string&) const;
 
 #ifdef __SUNPRO_CC
     using IceInternal::EndpointI::connectionId;

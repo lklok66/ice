@@ -88,16 +88,6 @@ IceInternal::EndpointI::EndpointI() :
 {
 }
 
-IceInternal::IPEndpointI::IPEndpointI(const std::string& connectionId) :
-    EndpointI(connectionId)
-{
-}
-
-IceInternal::IPEndpointI::IPEndpointI() :
-    EndpointI()
-{
-}
-
 #ifndef ICE_OS_WINRT
 
 IceInternal::EndpointHostResolver::EndpointHostResolver(const InstancePtr& instance) :

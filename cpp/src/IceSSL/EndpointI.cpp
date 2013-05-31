@@ -24,7 +24,7 @@ using namespace IceSSL;
 
 IceSSL::EndpointI::EndpointI(const InstancePtr& instance, const string& ho, Int po, Int ti, const string& conId, 
                              bool co) :
-    IceInternal::IPEndpointI(conId),
+    IceInternal::EndpointI(conId),
     _instance(instance),
     _host(ho),
     _port(po),
@@ -34,7 +34,7 @@ IceSSL::EndpointI::EndpointI(const InstancePtr& instance, const string& ho, Int 
 }
 
 IceSSL::EndpointI::EndpointI(const InstancePtr& instance, vector<string>& args, bool oaEndpoint) :
-    IceInternal::IPEndpointI(""),
+    IceInternal::EndpointI(""),
     _instance(instance),
     _port(0),
     _timeout(-1),
@@ -142,6 +142,10 @@ IceSSL::EndpointI::EndpointI(const InstancePtr& instance, vector<string>& args, 
             default:
             {
                 unknown.push_back(option);
+                if(!argument.empty())
+                {
+                    unknown.push_back(argument);
+                }
                 break;
             }
         }
@@ -553,44 +557,6 @@ IceSSL::EndpointI::options() const
     }
 
     return s.str();
-}
-
-Int
-IceSSL::EndpointI::port() const
-{
-    return _port;
-}
-
-IceInternal::IPEndpointIPtr
-IceSSL::EndpointI::port(Int port) const
-{
-    if(port == _port)
-    {
-        return const_cast<EndpointI*>(this);
-    }
-    else
-    {
-        return new EndpointI(_instance, _host, port, _timeout, _connectionId, _compress);
-    }
-}
-
-string
-IceSSL::EndpointI::host() const
-{
-    return _host;
-}
-
-IceInternal::IPEndpointIPtr
-IceSSL::EndpointI::host(const string& host) const
-{
-    if(host == _host)
-    {
-        return const_cast<EndpointI*>(this);
-    }
-    else
-    {
-        return new EndpointI(_instance, host, _port, _timeout, _connectionId, _compress);
-    }
 }
 
 IceSSL::EndpointFactoryI::EndpointFactoryI(const InstancePtr& instance)

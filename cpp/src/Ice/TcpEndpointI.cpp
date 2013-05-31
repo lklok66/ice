@@ -24,7 +24,7 @@ using namespace IceInternal;
 
 IceInternal::TcpEndpointI::TcpEndpointI(const InstancePtr& instance, const string& ho, Int po, Int ti,
                                         const string& conId, bool co) :
-    IPEndpointI(conId),
+    EndpointI(conId),
     _instance(instance),
     _host(ho),
     _port(po),
@@ -34,7 +34,7 @@ IceInternal::TcpEndpointI::TcpEndpointI(const InstancePtr& instance, const strin
 }
 
 IceInternal::TcpEndpointI::TcpEndpointI(const InstancePtr& instance, vector<string>& args, bool oaEndpoint) :
-    IPEndpointI(""),
+    EndpointI(""),
     _instance(instance),
     _port(0),
     _timeout(-1),
@@ -142,6 +142,10 @@ IceInternal::TcpEndpointI::TcpEndpointI(const InstancePtr& instance, vector<stri
             default:
             {
                 unknown.push_back(option);
+                if(!argument.empty())
+                {
+                    unknown.push_back(argument);
+                }
                 break;
             }
         }
@@ -554,44 +558,6 @@ IceInternal::TcpEndpointI::options() const
     }
 
     return s.str();
-}
-
-Int
-IceInternal::TcpEndpointI::port() const
-{
-    return _port;
-}
-
-IPEndpointIPtr
-IceInternal::TcpEndpointI::port(Int port) const
-{
-    if(port == _port)
-    {
-        return const_cast<TcpEndpointI*>(this);
-    }
-    else
-    {
-        return new TcpEndpointI(_instance, _host, port, _timeout, _connectionId, _compress);
-    }
-}
-
-string
-IceInternal::TcpEndpointI::host() const
-{
-    return _host;
-}
-
-IPEndpointIPtr
-IceInternal::TcpEndpointI::host(const string& host) const
-{
-    if(host == _host)
-    {
-        return const_cast<TcpEndpointI*>(this);
-    }
-    else
-    {
-        return new TcpEndpointI(_instance, host, _port, _timeout, _connectionId, _compress);
-    }
 }
 
 IceInternal::TcpEndpointFactory::TcpEndpointFactory(const InstancePtr& instance)

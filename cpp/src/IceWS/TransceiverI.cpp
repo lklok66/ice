@@ -495,7 +495,7 @@ IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, Short type, const
     _port(-1),
     _logger(instance->communicator()->getLogger()),
     _incoming(true),
-    _state(StateConnected),
+    _state(StateInitializeDelegate),
     _parser(new HttpParser),
     _readState(ReadStateInitializing),
     _readBuffer(0),
