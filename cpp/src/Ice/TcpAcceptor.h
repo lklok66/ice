@@ -39,6 +39,7 @@ public:
 #endif
 
     virtual TransceiverPtr accept();
+    virtual std::string type() const;
     virtual std::string toString() const;
 
     int effectivePort() const;

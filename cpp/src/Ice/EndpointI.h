@@ -49,10 +49,12 @@ class ICE_API EndpointI : public Ice::Endpoint
 {
 public:
 
+    virtual std::string toString() const;
+
     //
     // Prepare to marshal the endpoint.
     //
-    virtual void startStreamWrite(BasicStream*) const = 0;
+    virtual void startStreamWrite(BasicStream*) const;
 
     //
     // Marshal the endpoint.
@@ -62,7 +64,7 @@ public:
     //
     // Finish marshaling the endpoint.
     //
-    virtual void endStreamWrite(BasicStream*) const = 0;
+    virtual void endStreamWrite(BasicStream*) const;
 
     //
     // Return the endpoint type.

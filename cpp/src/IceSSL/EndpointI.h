@@ -27,10 +27,7 @@ public:
     EndpointI(const InstancePtr&, std::vector<std::string>&, bool);
     EndpointI(const InstancePtr&, IceInternal::BasicStream*);
 
-    virtual void startStreamWrite(IceInternal::BasicStream*) const;
     virtual void streamWrite(IceInternal::BasicStream*) const;
-    virtual void endStreamWrite(IceInternal::BasicStream*) const;
-    virtual std::string toString() const;
     virtual Ice::EndpointInfoPtr getInfo() const;
     virtual Ice::Short type() const;
     virtual std::string protocol() const;

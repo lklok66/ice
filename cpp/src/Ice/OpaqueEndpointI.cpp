@@ -44,7 +44,7 @@ IceInternal::OpaqueEndpointI::OpaqueEndpointI(vector<string>& args) :
     for(vector<string>::size_type n = 0; n < args.size(); ++n)
     {
         string option = args[n];
-        if(option.length() != 2 || option[0] != '-')
+        if(option.length() < 2 || option[0] != '-')
         {
             unknown.push_back(option);
             continue;
@@ -180,6 +180,12 @@ IceInternal::OpaqueEndpointI::OpaqueEndpointI(Short type, BasicStream* s) :
     s->readBlob(const_cast<vector<Byte>&>(_rawBytes), sz);
 }
 
+string
+IceInternal::OpaqueEndpointI::toString() const
+{
+    return "opaque" + options();
+}
+
 void
 IceInternal::OpaqueEndpointI::startStreamWrite(BasicStream* s) const
 {
@@ -190,18 +196,6 @@ void
 IceInternal::OpaqueEndpointI::streamWrite(BasicStream* s) const
 {
     s->writeBlob(_rawBytes);
-}
-
-void
-IceInternal::OpaqueEndpointI::endStreamWrite(BasicStream* s) const
-{
-    s->endWriteEncaps();
-}
-
-string
-IceInternal::OpaqueEndpointI::toString() const
-{
-    return "opaque" + options();
 }
 
 namespace

@@ -26,10 +26,7 @@ public:
     TcpEndpointI(const InstancePtr&, std::vector<std::string>&, bool);
     TcpEndpointI(BasicStream*);
 
-    virtual void startStreamWrite(BasicStream*) const;
     virtual void streamWrite(BasicStream*) const;
-    virtual void endStreamWrite(BasicStream*) const;
-    virtual std::string toString() const;
     virtual Ice::EndpointInfoPtr getInfo() const;
     virtual Ice::Short type() const;
     virtual std::string protocol() const;

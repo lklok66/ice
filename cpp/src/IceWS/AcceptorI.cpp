@@ -8,6 +8,7 @@
 // **********************************************************************
 
 #include <IceWS/AcceptorI.h>
+#include <IceWS/EndpointInfo.h>
 #include <IceWS/Instance.h>
 #include <IceWS/TransceiverI.h>
 #include <IceWS/Util.h>
@@ -47,7 +48,7 @@ IceWS::AcceptorI::close()
     if(_instance->networkTraceLevel() >= 1)
     {
         Trace out(_logger, _instance->networkTraceCategory());
-        out << "stopping to accept ws connections at " << toString();
+        out << "stopping to accept " << type() << " connections at " << toString();
     }
 
     _delegate->close();
@@ -61,7 +62,7 @@ IceWS::AcceptorI::listen()
     if(_instance->networkTraceLevel() >= 1)
     {
         Trace out(_logger, _instance->networkTraceCategory());
-        out << "listening for ws connections at " << toString();
+        out << "listening for " << type() << " connections at " << toString();
 
         vector<string> interfaces =
             IceInternal::getHostsForEndpointExpand(IceInternal::inetAddrToString(_addr), _instance->protocolSupport(),
@@ -96,7 +97,8 @@ IceWS::AcceptorI::accept()
     if(_instance->networkTraceLevel() >= 1)
     {
         Trace out(_logger, _instance->networkTraceCategory());
-        out << "attempting to accept ws connection\n" << IceInternal::fdToString(del->getNativeInfo()->fd());
+        out << "attempting to accept " << type() << " connection\n"
+            << IceInternal::fdToString(del->getNativeInfo()->fd());
     }
 
     //
@@ -107,15 +109,21 @@ IceWS::AcceptorI::accept()
 }
 
 string
+IceWS::AcceptorI::type() const
+{
+    return _type == WSEndpointType ? "ws" : "wss"; // TODO
+}
+
+string
 IceWS::AcceptorI::toString() const
 {
     return _delegate->toString();
 }
 
-IceWS::AcceptorI::AcceptorI(const InstancePtr& instance, Short type, const IceInternal::AcceptorPtr& del,
+IceWS::AcceptorI::AcceptorI(const InstancePtr& instance, Short ty, const IceInternal::AcceptorPtr& del,
                             const string& adapterName, const string& host, int port) :
     _instance(instance),
-    _type(type),
+    _type(ty),
     _delegate(del),
     _adapterName(adapterName), // TODO: Necessary?
     _logger(instance->communicator()->getLogger()),
@@ -125,7 +133,7 @@ IceWS::AcceptorI::AcceptorI(const InstancePtr& instance, Short type, const IceIn
     if(_instance->networkTraceLevel() >= 2)
     {
         Trace out(_logger, _instance->networkTraceCategory());
-        out << "attempting to bind to ws socket " << toString();
+        out << "attempting to bind to " << type() << " socket " << toString();
     }
 }
 

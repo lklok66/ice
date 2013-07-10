@@ -59,7 +59,7 @@ IceInternal::TcpEndpointI::TcpEndpointI(const InstancePtr& instance, vector<stri
     for(vector<string>::size_type n = 0; n < args.size(); ++n)
     {
         string option = args[n];
-        if(option.length() != 2 || option[0] != '-')
+        if(option.length() < 2 || option[0] != '-')
         {
             unknown.push_back(option);
             continue;
@@ -188,37 +188,12 @@ IceInternal::TcpEndpointI::TcpEndpointI(BasicStream* s) :
 }
 
 void
-IceInternal::TcpEndpointI::startStreamWrite(BasicStream* s) const
-{
-    s->startWriteEncaps();
-}
-
-void
 IceInternal::TcpEndpointI::streamWrite(BasicStream* s) const
 {
     s->write(_host, false);
     s->write(_port);
     s->write(_timeout);
     s->write(_compress);
-}
-
-void
-IceInternal::TcpEndpointI::endStreamWrite(BasicStream* s) const
-{
-    s->endWriteEncaps();
-}
-
-string
-IceInternal::TcpEndpointI::toString() const
-{
-    //
-    // WARNING: Certain features, such as proxy validation in Glacier2,
-    // depend on the format of proxy strings. Changes to toString() and
-    // methods called to generate parts of the reference string could break
-    // these features. Please review for all features that depend on the
-    // format of proxyToString() before changing this and related code.
-    //
-    return protocol() + options();
 }
 
 EndpointInfoPtr

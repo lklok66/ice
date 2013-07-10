@@ -40,6 +40,7 @@ public:
     virtual void finishAccept();
 #endif
     virtual IceInternal::TransceiverPtr accept();
+    virtual std::string type() const;
     virtual std::string toString() const;
 
 private:

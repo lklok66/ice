@@ -178,8 +178,7 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer)
                 //
                 ostringstream out;
                 out << "GET " << _resource << " HTTP/1.1\r\n"
-                    << "Host: " << _host << "\r\n"
-                    << "Port: " << _port << "\r\n"
+                    << "Host: " << _host << ":" << _port << "\r\n"
                     << "Upgrade: websocket\r\n"
                     << "Connection: Upgrade\r\n"
                     << "Sec-WebSocket-Protocol: " << _iceProtocol << "\r\n"
@@ -315,7 +314,7 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer)
             }
         }
 
-        assert(_state = StateHandshakeComplete);
+        assert(_state == StateHandshakeComplete);
 
         readBuffer.b.reset();
         writeBuffer.b.reset();

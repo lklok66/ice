@@ -47,6 +47,31 @@ Init init;
 Ice::LocalObject* IceInternal::upCast(EndpointI* p) { return p; }
 IceUtil::Shared* IceInternal::upCast(EndpointHostResolver* p) { return p; }
 
+string
+IceInternal::EndpointI::toString() const
+{
+    //
+    // WARNING: Certain features, such as proxy validation in Glacier2,
+    // depend on the format of proxy strings. Changes to toString() and
+    // methods called to generate parts of the reference string could break
+    // these features. Please review for all features that depend on the
+    // format of proxyToString() before changing this and related code.
+    //
+    return protocol() + options();
+}
+
+void
+IceInternal::EndpointI::startStreamWrite(BasicStream* s) const
+{
+    s->startWriteEncaps();
+}
+
+void
+IceInternal::EndpointI::endStreamWrite(BasicStream* s) const
+{
+    s->endWriteEncaps();
+}
+
 vector<ConnectorPtr>
 IceInternal::EndpointI::connectors(const vector<Address>& /*addrs*/, const NetworkProxyPtr& /*proxy*/) const
 {

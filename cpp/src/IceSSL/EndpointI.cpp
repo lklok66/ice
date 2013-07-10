@@ -59,7 +59,7 @@ IceSSL::EndpointI::EndpointI(const InstancePtr& instance, vector<string>& args, 
     for(vector<string>::size_type n = 0; n < args.size(); ++n)
     {
         string option = args[n];
-        if(option.length() != 2 || option[0] != '-')
+        if(option.length() < 2 || option[0] != '-')
         {
             unknown.push_back(option);
             continue;
@@ -188,37 +188,12 @@ IceSSL::EndpointI::EndpointI(const InstancePtr& instance, IceInternal::BasicStre
 }
 
 void
-IceSSL::EndpointI::startStreamWrite(IceInternal::BasicStream* s) const
-{
-    s->startWriteEncaps();
-}
-
-void
 IceSSL::EndpointI::streamWrite(IceInternal::BasicStream* s) const
 {
     s->write(_host, false);
     s->write(_port);
     s->write(_timeout);
     s->write(_compress);
-}
-
-void
-IceSSL::EndpointI::endStreamWrite(IceInternal::BasicStream* s) const
-{
-    s->endWriteEncaps();
-}
-
-string
-IceSSL::EndpointI::toString() const
-{
-    //
-    // WARNING: Certain features, such as proxy validation in Glacier2,
-    // depend on the format of proxy strings. Changes to toString() and
-    // methods called to generate parts of the reference string could break
-    // these features. Please review for all features that depend on the
-    // format of proxyToString() before changing this and related code.
-    //
-    return protocol() + options();
 }
 
 Ice::EndpointInfoPtr

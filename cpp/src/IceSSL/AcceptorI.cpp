@@ -189,6 +189,12 @@ IceSSL::AcceptorI::accept()
 }
 
 string
+IceSSL::AcceptorI::type() const
+{
+    return "ssl";
+}
+
+string
 IceSSL::AcceptorI::toString() const
 {
     return IceInternal::addrToString(_addr);

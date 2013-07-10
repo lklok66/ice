@@ -36,10 +36,12 @@ allTests(const Ice::CommunicatorPtr& communicator)
         test(!ipEndpoint->datagram());
         test((ipEndpoint->type() == Ice::TCPEndpointType && !ipEndpoint->secure()) ||
              (ipEndpoint->type() == IceSSL::EndpointType && ipEndpoint->secure()) ||
-             (ipEndpoint->type() == IceWS::EndpointType && !ipEndpoint->secure()));
+             (ipEndpoint->type() == IceWS::WSEndpointType && !ipEndpoint->secure()) ||
+             (ipEndpoint->type() == IceWS::WSSEndpointType && ipEndpoint->secure()));
         test((ipEndpoint->type() == Ice::TCPEndpointType && Ice::TCPEndpointInfoPtr::dynamicCast(ipEndpoint)) ||
              (ipEndpoint->type() == IceSSL::EndpointType && IceSSL::EndpointInfoPtr::dynamicCast(ipEndpoint)) ||
-             (ipEndpoint->type() == IceWS::EndpointType && IceWS::EndpointInfoPtr::dynamicCast(ipEndpoint)));
+             (ipEndpoint->type() == IceWS::WSEndpointType && IceWS::EndpointInfoPtr::dynamicCast(ipEndpoint)) ||
+             (ipEndpoint->type() == IceWS::WSSEndpointType && IceWS::EndpointInfoPtr::dynamicCast(ipEndpoint)));
 
         Ice::UDPEndpointInfoPtr udpEndpoint = Ice::UDPEndpointInfoPtr::dynamicCast(endps[1]->getInfo());
         test(udpEndpoint);
@@ -76,7 +78,7 @@ allTests(const Ice::CommunicatorPtr& communicator)
         Ice::IPEndpointInfoPtr ipEndpoint = Ice::IPEndpointInfoPtr::dynamicCast(endpoints[0]->getInfo());
         test(ipEndpoint);
         test(ipEndpoint->type() == Ice::TCPEndpointType || ipEndpoint->type() == IceSSL::EndpointType ||
-             ipEndpoint->type() == IceWS::EndpointType);
+             ipEndpoint->type() == IceWS::WSEndpointType || ipEndpoint->type() == IceWS::WSSEndpointType);
         test(ipEndpoint->host == defaultHost);
         test(ipEndpoint->port > 0);
         test(ipEndpoint->timeout == 15000);

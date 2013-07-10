@@ -33,9 +33,9 @@ EndpointFactory::protocol() const
 }
 
 IceInternal::EndpointIPtr
-EndpointFactory::create(const string& str, bool server) const
+EndpointFactory::create(vector<string>& args, bool oaEndpoint) const
 {
-    return new EndpointI(_factory->create(str, server));
+    return new EndpointI(_factory->create(args, oaEndpoint));
 }
 
 IceInternal::EndpointIPtr

@@ -35,7 +35,7 @@ EndpointI::EndpointI(const IceInternal::EndpointIPtr& endpoint) :
 void
 EndpointI::streamWrite(IceInternal::BasicStream* s) const
 {
-    s->write(type());
+    s->write(_endpoint->type());
     _endpoint->streamWrite(s);
 }
 
@@ -279,8 +279,14 @@ EndpointI::operator<(const Ice::LocalObject& r) const
     return *p->_endpoint < *_endpoint;
 }
 
-Ice::Int
-EndpointI::hashInit() const
+void
+EndpointI::hashInit(Ice::Int& h) const
 {
-    return _endpoint->ice_getHash();
+    _endpoint->hashInit(h);
+}
+
+string
+EndpointI::options() const
+{
+    return _endpoint->options();
 }

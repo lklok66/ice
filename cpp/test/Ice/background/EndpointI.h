@@ -45,13 +45,15 @@ public:
     virtual bool operator==(const Ice::LocalObject&) const;
     virtual bool operator<(const Ice::LocalObject&) const;
 
+    virtual void hashInit(Ice::Int&) const;
+    virtual std::string options() const;
+
 #ifdef __SUNPRO_CC
     using IceInternal::EndpointI::connectionId;
 #endif
 
 protected:
 
-    virtual Ice::Int hashInit() const;
     using IceInternal::EndpointI::connectors;
     
 private:

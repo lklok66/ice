@@ -20,7 +20,7 @@ public:
 
     virtual ::Ice::Short type() const;
     virtual ::std::string protocol() const;
-    virtual IceInternal::EndpointIPtr create(const std::string&, bool) const;
+    virtual IceInternal::EndpointIPtr create(std::vector<std::string>&, bool) const;
     virtual IceInternal::EndpointIPtr read(IceInternal::BasicStream*) const;
     virtual void destroy();
 

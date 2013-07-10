@@ -60,12 +60,10 @@ IceWS::EndpointI::EndpointI(const InstancePtr& instance, Short type, const IceIn
     }
     const string str = ostr.str();
 
-cout << "WS Endpoint arg size = " << args.size() << endl;
     for(vector<string>::size_type n = 0; n < args.size(); ++n)
     {
         string option = args[n];
-cout << "WS Endpoint arg " << n << " = `" << option << "'" << endl;
-        if(option.length() != 2 || option[0] != '-')
+        if(option.length() < 2 || option[0] != '-')
         {
             unknown.push_back(option);
             continue;
@@ -145,19 +143,6 @@ void
 IceWS::EndpointI::endStreamWrite(IceInternal::BasicStream* s) const
 {
     s->endWriteEncaps();
-}
-
-string
-IceWS::EndpointI::toString() const
-{
-    //
-    // WARNING: Certain features, such as proxy validation in Glacier2,
-    // depend on the format of proxy strings. Changes to toString() and
-    // methods called to generate parts of the reference string could break
-    // these features. Please review for all features that depend on the
-    // format of proxyToString() before changing this and related code.
-    //
-    return protocol() + options();
 }
 
 Ice::EndpointInfoPtr
@@ -337,7 +322,7 @@ IceWS::EndpointI::equivalent(const IceInternal::EndpointIPtr& endpoint) const
     {
         return false;
     }
-    return _delegate->equivalent(endpoint);
+    return _delegate->equivalent(wsEndpointI->_delegate);
 }
 
 vector<IceInternal::ConnectorPtr>

@@ -169,6 +169,12 @@ IceInternal::TcpAcceptor::accept()
 }
 
 string
+IceInternal::TcpAcceptor::type() const
+{
+    return "tcp";
+}
+
+string
 IceInternal::TcpAcceptor::toString() const
 {
     return addrToString(_addr);
