@@ -136,13 +136,13 @@ IceWS::TransceiverI::getAsyncInfo(SocketOperation status)
 #endif
 
 SocketOperation
-IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer)
+IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& hasMoreData)
 {
     try
     {
         if(_state == StateInitializeDelegate)
         {
-            SocketOperation op = _delegate->initialize(readBuffer, writeBuffer);
+            SocketOperation op = _delegate->initialize(readBuffer, writeBuffer, hasMoreData);
             if(op != SocketOperationNone)
             {
                 return op;
@@ -165,7 +165,7 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer)
 #ifdef ICE_USE_IOCP
                 return SocketOperationRead;
 #else
-                if(!read(readBuffer))
+                if(!read(readBuffer, hasMoreData))
                 {
                     return SocketOperationRead;
                 }
@@ -209,7 +209,7 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer)
                     // Try reading the response.
                     //
                     _state = StateResponsePending;
-                    if(!read(readBuffer))
+                    if(!read(readBuffer, hasMoreData))
                     {
                         return SocketOperationRead;
                     }
@@ -274,7 +274,7 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer)
                 //
                 _state = StateResponsePending;
 
-                if(!read(readBuffer))
+                if(!read(readBuffer, hasMoreData))
                 {
                     return SocketOperationRead;
                 }
@@ -392,11 +392,11 @@ IceWS::TransceiverI::write(Buffer& buf)
 }
 
 bool
-IceWS::TransceiverI::read(Buffer& buf)
+IceWS::TransceiverI::read(Buffer& buf, bool& hasMoreData)
 {
     Buffer& rb = preRead(buf);
 
-    _delegate->read(rb);
+    _delegate->read(rb, hasMoreData);
 
     postRead(buf);
 

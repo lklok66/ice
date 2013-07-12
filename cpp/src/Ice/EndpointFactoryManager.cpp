@@ -156,6 +156,7 @@ IceInternal::EndpointFactoryManager::create(const string& str, bool oaEndpoint) 
             // the actual endpoint.
             //
             BasicStream bs(_instance.get(), Ice::currentProtocolEncoding);
+            bs.write(ue->type());
             ue->startStreamWrite(&bs);
             ue->streamWrite(&bs);
             ue->endStreamWrite(&bs);

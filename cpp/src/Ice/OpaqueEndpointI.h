@@ -23,7 +23,6 @@ public:
     OpaqueEndpointI(std::vector<std::string>&);
     OpaqueEndpointI(Ice::Short, BasicStream*);
 
-    virtual std::string toString() const;
     virtual void startStreamWrite(BasicStream*) const;
     virtual void streamWrite(BasicStream*) const;
     virtual Ice::EndpointInfoPtr getInfo() const;

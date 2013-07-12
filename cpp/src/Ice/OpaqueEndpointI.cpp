@@ -180,12 +180,6 @@ IceInternal::OpaqueEndpointI::OpaqueEndpointI(Short type, BasicStream* s) :
     s->readBlob(const_cast<vector<Byte>&>(_rawBytes), sz);
 }
 
-string
-IceInternal::OpaqueEndpointI::toString() const
-{
-    return "opaque" + options();
-}
-
 void
 IceInternal::OpaqueEndpointI::startStreamWrite(BasicStream* s) const
 {
