@@ -11,7 +11,7 @@ top_srcdir	= ..\..
 
 !include $(top_srcdir)\config\Make.rules.mak.php
 
-SUBDIRS		= hello value
+SUBDIRS		= hello value optional
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \

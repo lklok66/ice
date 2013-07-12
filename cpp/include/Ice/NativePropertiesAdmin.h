@@ -10,7 +10,7 @@
 #ifndef ICE_PROPERTIES_ADMIN_H
 #define ICE_PROPERTIES_ADMIN_H
 
-#include <Ice/Properties.h>
+#include <Ice/PropertiesAdmin.h>
 
 namespace Ice
 {

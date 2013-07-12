@@ -136,6 +136,7 @@ GEN_SRCS	= $(GDIR)\BuiltinSequences.cs \
 		  $(GDIR)\Instrumentation.cs \
 		  $(GDIR)\Plugin.cs \
 		  $(GDIR)\Process.cs \
+		  $(GDIR)\PropertiesAdmin.cs \
 		  $(GDIR)\Properties.cs \
 		  $(GDIR)\Router.cs \
 		  $(GDIR)\ServantLocator.cs \
@@ -179,7 +180,6 @@ install:: all
 	copy $(assembliesdir)\$(LIBNAME) "$(install_assembliesdir)"
 	copy $(assembliesdir)\$(PKG).xml "$(install_assembliesdir)"
 !if "$(generate_policies)" == "yes"
-	copy $(assembliesdir)\$(POLICY) "$(install_assembliesdir)"
 	copy $(assembliesdir)\$(POLICY_TARGET) "$(install_assembliesdir)"
 !endif
 !if "$(DEBUG)" == "yes"

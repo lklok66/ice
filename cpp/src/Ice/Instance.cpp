@@ -56,6 +56,10 @@
 #   include <sys/types.h>
 #endif
 
+#ifdef __linux
+#   include <grp.h> // for initgroups
+#endif
+
 #include <Ice/UdpEndpointI.h>
 
 #ifndef ICE_OS_WINRT
@@ -114,6 +118,11 @@ public:
 
 Init init;
 
+}
+
+namespace IceInternal
+{
+
 class ObserverUpdaterI : public Ice::Instrumentation::ObserverUpdater
 {
 public:
@@ -124,33 +133,12 @@ public:
 
     void updateConnectionObservers()
     {
-        try
-        {
-            _instance->outgoingConnectionFactory()->updateConnectionObservers();
-            _instance->objectAdapterFactory()->updateObservers(&ObjectAdapterI::updateConnectionObservers);
-        }
-        catch(const Ice::CommunicatorDestroyedException&)
-        {
-        }
+        _instance->updateConnectionObservers();
     }
 
     void updateThreadObservers()
     {
-        try
-        {
-            _instance->clientThreadPool()->updateObservers();
-            ThreadPoolPtr serverThreadPool = _instance->serverThreadPool(false);
-            if(serverThreadPool)
-            {
-                serverThreadPool->updateObservers();
-            }
-            _instance->objectAdapterFactory()->updateObservers(&ObjectAdapterI::updateThreadObservers);
-            _instance->endpointHostResolver()->updateObserver();
-            theCollector->updateObserver(_instance->initializationData().observer);
-        }
-        catch(const Ice::CommunicatorDestroyedException&)
-        {
-        }
+        _instance->updateThreadObservers();
     }
 
 private:
@@ -924,15 +912,30 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
                 string newUser = _initData.properties->getProperty("Ice.ChangeUser");
                 if(!newUser.empty())
                 {
+                    errno = 0;
                     struct passwd* pw = getpwnam(newUser.c_str());
                     if(!pw)
+                    {
+                        if(errno)
+                        {
+                            SyscallException ex(__FILE__, __LINE__);
+                            ex.error = getSystemErrno();
+                            throw ex;
+                        }
+                        else
+                        {
+                            throw "Unknown user account `" + newUser + "'";
+                        }
+                    }
+                    
+                    if(setgid(pw->pw_gid) == -1)
                     {
                         SyscallException ex(__FILE__, __LINE__);
                         ex.error = getSystemErrno();
                         throw ex;
                     }
-                    
-                    if(setgid(pw->pw_gid) == -1)
+
+                    if(initgroups(pw->pw_name, pw->pw_gid) == -1)
                     {
                         SyscallException ex(__FILE__, __LINE__);
                         ex.error = getSystemErrno();
@@ -1388,7 +1391,7 @@ IceInternal::Instance::destroy()
         _retryQueue->destroy();
     }
 
-    if(_initData.observer)
+    if(_initData.observer && theCollector)
     {
         theCollector->clearObserver(_initData.observer);
     }
@@ -1520,6 +1523,48 @@ IceInternal::Instance::destroy()
         }
     }
     return true;
+}
+
+void
+IceInternal::Instance::updateConnectionObservers()
+{
+    try
+    {
+        assert(_outgoingConnectionFactory);
+        _outgoingConnectionFactory->updateConnectionObservers();
+        assert(_objectAdapterFactory);
+        _objectAdapterFactory->updateObservers(&ObjectAdapterI::updateConnectionObservers);
+    }
+    catch(const Ice::CommunicatorDestroyedException&)
+    {
+    }
+}
+
+void
+IceInternal::Instance::updateThreadObservers()
+{
+    try
+    {
+        if(_clientThreadPool)
+        {
+            _clientThreadPool->updateObservers();
+        }
+        if(_serverThreadPool)
+        {
+            _serverThreadPool->updateObservers();
+        }
+        assert(_objectAdapterFactory);
+        _objectAdapterFactory->updateObservers(&ObjectAdapterI::updateThreadObservers);
+        if(_endpointHostResolver)
+        {
+            _endpointHostResolver->updateObserver();
+        }
+        assert(theCollector);
+        theCollector->updateObserver(_initData.observer);
+    }
+    catch(const Ice::CommunicatorDestroyedException&)
+    {
+    }
 }
 
 IceInternal::ProcessI::ProcessI(const CommunicatorPtr& communicator) :
