@@ -9,13 +9,12 @@
 
 top_srcdir	= ..\..
 
-LIBNAME     	= $(top_srcdir)\lib\icessl$(LIBSUFFIX).lib
-DLLNAME		= $(top_srcdir)\bin\icessl$(SOVERSION)$(LIBSUFFIX)$(COMPSUFFIX).dll
+LIBNAME     	= $(top_srcdir)\lib\icews$(LIBSUFFIX).lib
+DLLNAME		= $(top_srcdir)\bin\icews$(SOVERSION)$(LIBSUFFIX)$(COMPSUFFIX).dll
 
 TARGETS		= $(LIBNAME) $(DLLNAME)
 
 OBJS		= AcceptorI.obj \
-		  Certificate.obj \
                   ConnectorI.obj \
                   ConnectionInfo.obj \
                   EndpointInfo.obj \
@@ -23,19 +22,17 @@ OBJS		= AcceptorI.obj \
                   Instance.obj \
                   PluginI.obj \
                   TransceiverI.obj \
-                  Util.obj \
-		  RFC2253.obj \
-		  TrustManager.obj
+                  Util.obj
 
 SRCS		= $(OBJS:.obj=.cpp)
 
-HDIR		= $(headerdir)\IceSSL
-SDIR		= $(slicedir)\IceSSL
+HDIR		= $(headerdir)\IceWS
+SDIR		= $(slicedir)\IceWS
 
 !include $(top_srcdir)/config/Make.rules.mak
 
-CPPFLAGS	= -I.. $(CPPFLAGS) -DICE_SSL_API_EXPORTS -DWIN32_LEAN_AND_MEAN
-SLICE2CPPFLAGS	= --ice --include-dir IceSSL --dll-export ICE_SSL_API $(SLICE2CPPFLAGS)
+CPPFLAGS	= -I.. $(CPPFLAGS) -DICE_WS_API_EXPORTS -DWIN32_LEAN_AND_MEAN
+SLICE2CPPFLAGS	= --ice --include-dir IceWS --dll-export ICE_WS_API $(SLICE2CPPFLAGS)
 
 LINKWITH        = $(OPENSSL_LIBS) $(LIBS) ws2_32.lib
 
@@ -43,11 +40,11 @@ LINKWITH        = $(OPENSSL_LIBS) $(LIBS) ws2_32.lib
 PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
 !endif
 
-RES_FILE        = IceSSL.res
+RES_FILE        = IceWS.res
 
 $(LIBNAME): $(DLLNAME)
 
-$(DLLNAME): $(OBJS) IceSSL.res
+$(DLLNAME): $(OBJS) IceWS.res
 	$(LINK) $(BASE):0x24000000 $(LD_DLLFLAGS) $(PDBFLAGS) $(OBJS) $(PREOUT)$@ $(PRELIBS)$(LINKWITH) $(RES_FILE)
 	move $(DLLNAME:.dll=.lib) $(LIBNAME)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
@@ -57,7 +54,7 @@ $(DLLNAME): $(OBJS) IceSSL.res
 clean::
 	-del /q ConnectionInfo.cpp $(HDIR)\ConnectionInfo.h
 	-del /q EndpointInfo.cpp $(HDIR)\EndpointInfo.h
-	-del /q IceSSL.res
+	-del /q IceWS.res
 
 install:: all
 	copy $(LIBNAME) "$(install_libdir)"

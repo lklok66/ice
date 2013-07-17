@@ -586,7 +586,7 @@ IceInternal::ThreadPool::update(const EventHandlerPtr& handler, SocketOperation 
     assert(!_destroyed);
     _selector.update(handler.get(), remove, add);
 #if !defined(ICE_USE_IOCP) && !defined(ICE_OS_WINRT)
-    if(add & SocketOperationRead && handler->_hasMoreData)
+    if(add & SocketOperationRead && handler->_hasMoreData && !(handler->_disabled & SocketOperationRead))
     {
         if(_pendingHandlers.empty())
         {

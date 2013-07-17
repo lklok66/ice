@@ -38,7 +38,7 @@ IceWS::AcceptorI::getNativeInfo()
 IceInternal::AsyncInfo*
 IceWS::AcceptorI::getAsyncInfo(IceInternal::SocketOperation status)
 {
-    return _delegate->getAsyncInfo(status);
+    return _delegate->getNativeInfo()->getAsyncInfo(status);
 }
 #endif
 

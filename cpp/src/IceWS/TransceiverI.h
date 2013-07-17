@@ -59,18 +59,14 @@ private:
 
     void handleRequest(IceInternal::Buffer&);
     void handleResponse();
-    IceInternal::Buffer& preRead(IceInternal::Buffer&);
-    void postRead(IceInternal::Buffer&);
 
-    IceInternal::Buffer& preWrite(IceInternal::Buffer&);
+    void preRead(IceInternal::Buffer&);
+    bool postRead(IceInternal::Buffer&);
+
+    void preWrite(IceInternal::Buffer&);
     void postWrite(IceInternal::Buffer&);
 
-#ifdef ICE_USE_IOCP
-    bool receive();
-    bool send();
-    int writeAsync(char*, int);
-    int readAsync(char*, int);
-#endif
+    bool readBuffered(IceInternal::Buffer::Container::size_type);
 
     friend class ConnectorI;
     friend class AcceptorI;
@@ -103,35 +99,34 @@ private:
 
     enum ReadState
     {
-        ReadStateInitializing,
-        ReadStateStartFrame,
-        ReadStateFrameOpcode,
-        ReadStateFrameHeader,
-        ReadStateHandleOpcode,
-        ReadStateFramePayload
+        ReadStateOpcode,
+        ReadStateHeader,
+        ReadStatePayload
     };
 
     ReadState _readState;
     IceInternal::Buffer _readBuffer;
     IceInternal::Buffer::Container::iterator _readI;
-    bool _lastFrame;
-    int _opCode;
+    const IceInternal::Buffer::Container::size_type _readBufferSize;
+
+    bool _readLastFrame;
+    int _readOpCode;
     size_t _readHeaderLength;
-    size_t _payloadLength;
-    unsigned char _mask[4];
+    size_t _readPayloadLength;
+    IceInternal::Buffer::Container::iterator _readStart;
+    unsigned char _readMask[4];
 
     enum WriteState
     {
-        WriteStateInitializing,
-        WriteStateStartFrame,
         WriteStateHeader,
         WriteStatePayload
     };
 
     WriteState _writeState;
     IceInternal::Buffer _writeBuffer;
-    IceInternal::Buffer::Container::iterator _writeI;
-    size_t _writeHeaderLength;
+    const IceInternal::Buffer::Container::size_type _writeBufferSize;
+    unsigned char _writeMask[4];
+    size_t _writePayloadLength;
 };
 typedef IceUtil::Handle<TransceiverI> TransceiverIPtr;
 

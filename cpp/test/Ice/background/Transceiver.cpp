@@ -184,18 +184,19 @@ Transceiver::finishRead(IceInternal::Buffer& buf)
         {
             _transceiver->finishRead(_readBuffer);
 
-            assert(_readBuffer.i > _readBufferPos);
             size_t requested = buf.b.end() - buf.i;
             size_t available = _readBuffer.i - _readBufferPos;
-            assert(available > 0);
-            if(available >= requested)
+            if(available > 0)
             {
-                available = requested;
-            }
+                if(available >= requested)
+                {
+                    available = requested;
+                }
             
-            memcpy(buf.i, _readBufferPos, available);
-            _readBufferPos += available;
-            buf.i += available;
+                memcpy(buf.i, _readBufferPos, available);
+                _readBufferPos += available;
+                buf.i += available;
+            }
         }
     }
     else
