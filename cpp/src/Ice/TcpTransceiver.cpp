@@ -46,7 +46,7 @@ IceInternal::TcpTransceiver::getAsyncInfo(SocketOperation status)
 #endif
 
 SocketOperation
-IceInternal::TcpTransceiver::initialize(Buffer& readBuffer, Buffer& writeBuffer)
+IceInternal::TcpTransceiver::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& hasMoreData)
 {
     try
     {
@@ -93,7 +93,7 @@ IceInternal::TcpTransceiver::initialize(Buffer& readBuffer, Buffer& writeBuffer)
                     //
                     // Try to read the response.
                     //
-                    if(read(readBuffer))
+                    if(read(readBuffer, hasMoreData))
                     {
                         //
                         // Read completed without blocking - fall through.
@@ -159,6 +159,14 @@ IceInternal::TcpTransceiver::initialize(Buffer& readBuffer, Buffer& writeBuffer)
     return SocketOperationNone;
 }
 
+SocketOperation
+IceInternal::TcpTransceiver::closing(bool initiator, const Ice::LocalException&)
+{
+    // If we are initiating the connection closure, wait for the peer
+    // to close the TCP/IP connection. Otherwise, close immediately.
+    return initiator ? SocketOperationRead : SocketOperationNone;
+}
+
 void
 IceInternal::TcpTransceiver::close()
 {
@@ -185,9 +193,14 @@ IceInternal::TcpTransceiver::close()
     }
 }
 
-bool
+SocketOperation
 IceInternal::TcpTransceiver::write(Buffer& buf)
 {
+    if(buf.i == buf.b.end())
+    {
+        return SocketOperationNone;
+    }
+
     //
     // It's impossible for packetSize to be more than an Int.
     //
@@ -228,7 +241,7 @@ IceInternal::TcpTransceiver::write(Buffer& buf)
 
             if(wouldBlock())
             {
-                return false;
+                return SocketOperationWrite;
             }
 
             if(connectionLost())
@@ -264,12 +277,17 @@ IceInternal::TcpTransceiver::write(Buffer& buf)
         }
     }
 
-    return true;
+    return SocketOperationNone;
 }
 
-bool
-IceInternal::TcpTransceiver::read(Buffer& buf)
+SocketOperation
+IceInternal::TcpTransceiver::read(Buffer& buf, bool&)
 {
+    if(buf.i == buf.b.end())
+    {
+        return SocketOperationNone;
+    }
+
     //
     // It's impossible for packetSize to be more than an Int.
     //
@@ -301,7 +319,7 @@ IceInternal::TcpTransceiver::read(Buffer& buf)
 
             if(wouldBlock())
             {
-                return false;
+                return SocketOperationRead;
             }
 
             if(connectionLost())
@@ -333,7 +351,7 @@ IceInternal::TcpTransceiver::read(Buffer& buf)
 
         packetSize = static_cast<int>(buf.b.end() - buf.i);
     }
-    return true;
+    return SocketOperationNone;
 }
 
 #ifdef ICE_USE_IOCP

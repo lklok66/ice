@@ -174,7 +174,7 @@ HelloClient::run(int argc, char* argv[])
             }
             else if(c == 'b')
             {
-                ByteSeq seq(70000);
+                ByteSeq seq(140000);
                 for(ByteSeq::iterator i = seq.begin(); i < seq.end(); ++i)
                 {
                     *i = (i - seq.begin()) % 10;

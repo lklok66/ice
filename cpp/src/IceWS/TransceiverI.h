@@ -36,9 +36,10 @@ public:
 #endif
 
     virtual IceInternal::SocketOperation initialize(IceInternal::Buffer&, IceInternal::Buffer&, bool&);
+    virtual IceInternal::SocketOperation closing(bool, const Ice::LocalException&);
     virtual void close();
-    virtual bool write(IceInternal::Buffer&);
-    virtual bool read(IceInternal::Buffer&, bool&);
+    virtual IceInternal::SocketOperation write(IceInternal::Buffer&);
+    virtual IceInternal::SocketOperation read(IceInternal::Buffer&, bool&);
 #ifdef ICE_USE_IOCP
     virtual bool startWrite(IceInternal::Buffer&);
     virtual void finishWrite(IceInternal::Buffer&);
@@ -60,11 +61,11 @@ private:
     void handleRequest(IceInternal::Buffer&);
     void handleResponse();
 
-    void preRead(IceInternal::Buffer&);
+    IceInternal::SocketOperation preRead(IceInternal::Buffer&);
     bool postRead(IceInternal::Buffer&);
 
     void preWrite(IceInternal::Buffer&);
-    void postWrite(IceInternal::Buffer&);
+    IceInternal::SocketOperation postWrite(IceInternal::Buffer&);
 
     bool readBuffered(IceInternal::Buffer::Container::size_type);
 
@@ -89,7 +90,9 @@ private:
         StateRequestPending,
         StateResponsePending,
         StateHandshakeComplete,
-        StateClosing
+        StateClosingRequestPending,
+        StateClosingResponsePending,
+        StateClosed
     };
 
     State _state;
@@ -119,7 +122,8 @@ private:
     enum WriteState
     {
         WriteStateHeader,
-        WriteStatePayload
+        WriteStatePayload,
+        WriteStateCloseFrame
     };
 
     WriteState _writeState;
@@ -127,6 +131,9 @@ private:
     const IceInternal::Buffer::Container::size_type _writeBufferSize;
     unsigned char _writeMask[4];
     size_t _writePayloadLength;
+
+    bool _closingInitiator;
+    int _closingReason;
 };
 typedef IceUtil::Handle<TransceiverI> TransceiverIPtr;
 

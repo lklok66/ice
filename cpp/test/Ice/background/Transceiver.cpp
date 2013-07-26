@@ -58,30 +58,36 @@ Transceiver::initialize(IceInternal::Buffer& readBuffer, IceInternal::Buffer& wr
     return IceInternal::SocketOperationNone;
 }
 
+IceInternal::SocketOperation 
+Transceiver::closing(bool initiator, const Ice::LocalException& ex)
+{
+    return _transceiver->closing(initiator, ex);
+}
+
 void
 Transceiver::close()
 {
     _transceiver->close();
 }
 
-bool
+IceInternal::SocketOperation
 Transceiver::write(IceInternal::Buffer& buf)
 {
-    if(!_configuration->writeReady())
+    if(!_configuration->writeReady() && (!buf.b.empty() && buf.i < buf.b.end()))
     {
-        return false;
+        return IceInternal::SocketOperationWrite;
     }
 
     _configuration->checkWriteException();
     return _transceiver->write(buf);
 }
 
-bool
+IceInternal::SocketOperation
 Transceiver::read(IceInternal::Buffer& buf, bool& moreData)
 {
-    if(!_configuration->readReady())
+    if(!_configuration->readReady() && (!buf.b.empty() && buf.i < buf.b.end()))
     {
-        return false;
+        return IceInternal::SocketOperationRead;
     }
 
     _configuration->checkReadException();
@@ -97,7 +103,7 @@ Transceiver::read(IceInternal::Buffer& buf, bool& moreData)
                 if(_readBufferPos == _readBuffer.i)
                 {
                     moreData = false;
-                    return false;
+                    return IceInternal::SocketOperationRead;
                 }
             }
             assert(_readBuffer.i > _readBufferPos);
@@ -114,7 +120,7 @@ Transceiver::read(IceInternal::Buffer& buf, bool& moreData)
             buf.i += available;
         }
         moreData = _readBufferPos < _readBuffer.i;
-        return true;
+        return IceInternal::SocketOperationNone;
     }
     else
     {

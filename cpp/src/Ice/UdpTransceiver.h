@@ -46,11 +46,12 @@ public:
 #elif defined(ICE_OS_WINRT)
     virtual void setCompletedHandler(SocketOperationCompletedHandler^);
 #endif
-
-    virtual SocketOperation initialize(Buffer&, Buffer&);
+    
+    virtual SocketOperation initialize(Buffer&, Buffer&, bool&);
+    virtual SocketOperation closing(bool, const Ice::LocalException&);
     virtual void close();
-    virtual bool write(Buffer&);
-    virtual bool read(Buffer&);
+    virtual SocketOperation write(Buffer&);
+    virtual SocketOperation read(Buffer&, bool&);
 #if defined(ICE_USE_IOCP) || defined(ICE_OS_WINRT)
     virtual bool startWrite(Buffer&);
     virtual void finishWrite(Buffer&);

@@ -50,7 +50,7 @@ IceSSL::TransceiverI::getAsyncInfo(IceInternal::SocketOperation status)
 #endif
 
 IceInternal::SocketOperation
-IceSSL::TransceiverI::initialize(IceInternal::Buffer& readBuffer, IceInternal::Buffer& writeBuffer)
+IceSSL::TransceiverI::initialize(IceInternal::Buffer& readBuffer, IceInternal::Buffer& writeBuffer, bool&)
 {
     try
     {
@@ -359,6 +359,14 @@ IceSSL::TransceiverI::initialize(IceInternal::Buffer& readBuffer, IceInternal::B
     return IceInternal::SocketOperationNone;
 }
 
+IceInternal::SocketOperation
+IceSSL::TransceiverI::closing(bool initiator, const Ice::LocalException&)
+{
+    // If we are initiating the connection closure, wait for the peer
+    // to close the TCP/IP connection. Otherwise, close immediately.
+    return initiator ? IceInternal::SocketOperationRead : IceInternal::SocketOperationNone;
+}
+
 void
 IceSSL::TransceiverI::close()
 {
@@ -405,7 +413,7 @@ IceSSL::TransceiverI::close()
     }
 }
 
-bool
+IceInternal::SocketOperation
 IceSSL::TransceiverI::write(IceInternal::Buffer& buf)
 {
     if(_state == StateProxyConnectRequest)
@@ -413,7 +421,7 @@ IceSSL::TransceiverI::write(IceInternal::Buffer& buf)
         //
         // We need to write the proxy message, but we have to use TCP and not SSL.
         //
-        return writeRaw(buf);
+        return writeRaw(buf) ? IceInternal::SocketOperationNone : IceInternal::SocketOperationWrite;
     }
 
 #ifdef ICE_USE_IOCP
@@ -421,10 +429,15 @@ IceSSL::TransceiverI::write(IceInternal::Buffer& buf)
     {
         if(!send())
         {
-            return false;
+            return IceInternal::SocketOperationWrite;
         }
     }
 #endif
+
+    if(buf.i == buf.b.end())
+    {
+        return IceInternal::SocketOperationNone;
+    }
 
     //
     // It's impossible for packetSize to be more than an Int.
@@ -449,7 +462,7 @@ IceSSL::TransceiverI::write(IceInternal::Buffer& buf)
                 if(!send())
                 {
                     _sentBytes = ret;
-                    return false;
+                    return IceInternal::SocketOperationWrite;
                 }
             }
         }
@@ -482,7 +495,7 @@ IceSSL::TransceiverI::write(IceInternal::Buffer& buf)
                     continue;
                 }
 #endif
-                return false;
+                return IceInternal::SocketOperationWrite;
             }
             case SSL_ERROR_SYSCALL:
             {
@@ -503,7 +516,7 @@ IceSSL::TransceiverI::write(IceInternal::Buffer& buf)
                     if(IceInternal::wouldBlock())
                     {
                         assert(SSL_want_write(_ssl));
-                        return false;
+                        return IceInternal::SocketOperationWrite;
                     }
 
                     if(IceInternal::connectionLost())
@@ -553,18 +566,18 @@ IceSSL::TransceiverI::write(IceInternal::Buffer& buf)
         }
     }
 
-    return true;
+    return IceInternal::SocketOperationNone;
 }
 
-bool
-IceSSL::TransceiverI::read(IceInternal::Buffer& buf)
+IceInternal::SocketOperation
+IceSSL::TransceiverI::read(IceInternal::Buffer& buf, bool&)
 {
     if(_state == StateProxyConnectRequestPending)
     {
         //
         // We need to read the proxy reply, but we have to use TCP and not SSL.
         //
-        return readRaw(buf);
+        return readRaw(buf) ? IceInternal::SocketOperationNone : IceInternal::SocketOperationRead;
     }
 
 #ifdef ICE_USE_IOCP
@@ -572,10 +585,15 @@ IceSSL::TransceiverI::read(IceInternal::Buffer& buf)
     {
         if(!receive())
         {
-            return false;
+            return IceInternal::SocketOperationRead;
         }
     }
 #endif
+
+    if(buf.i == buf.b.end())
+    {
+        return IceInternal::SocketOperationNone;
+    }
 
     //
     // It's impossible for packetSize to be more than an Int.
@@ -618,7 +636,7 @@ IceSSL::TransceiverI::read(IceInternal::Buffer& buf)
                     continue;
                 }
 #endif
-                return false;
+                return IceInternal::SocketOperationRead;
             }
             case SSL_ERROR_WANT_WRITE:
             {
@@ -644,7 +662,7 @@ IceSSL::TransceiverI::read(IceInternal::Buffer& buf)
                     if(IceInternal::wouldBlock())
                     {
                         assert(SSL_want_read(_ssl));
-                        return false;
+                        return IceInternal::SocketOperationRead;
                     }
 
                     if(IceInternal::connectionLost())
@@ -727,7 +745,7 @@ IceSSL::TransceiverI::read(IceInternal::Buffer& buf)
         }
     }
 
-    return true;
+    return IceInternal::SocketOperationNone;
 }
 
 #ifdef ICE_USE_IOCP

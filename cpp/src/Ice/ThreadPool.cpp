@@ -582,6 +582,11 @@ IceInternal::ThreadPool::initialize(const EventHandlerPtr& handler)
 void
 IceInternal::ThreadPool::update(const EventHandlerPtr& handler, SocketOperation remove, SocketOperation add)
 {
+    if(remove == add)
+    {
+        return;
+    }
+
     Lock sync(*this);
     assert(!_destroyed);
     _selector.update(handler.get(), remove, add);

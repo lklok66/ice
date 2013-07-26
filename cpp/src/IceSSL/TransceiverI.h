@@ -46,10 +46,11 @@ public:
     virtual IceInternal::AsyncInfo* getAsyncInfo(IceInternal::SocketOperation);
 #endif
 
-    virtual IceInternal::SocketOperation initialize(IceInternal::Buffer&, IceInternal::Buffer&);
+    virtual IceInternal::SocketOperation initialize(IceInternal::Buffer&, IceInternal::Buffer&, bool&);
+    virtual IceInternal::SocketOperation closing(bool, const Ice::LocalException&);
     virtual void close();
-    virtual bool write(IceInternal::Buffer&);
-    virtual bool read(IceInternal::Buffer&);
+    virtual IceInternal::SocketOperation write(IceInternal::Buffer&);
+    virtual IceInternal::SocketOperation read(IceInternal::Buffer&, bool&);
 #ifdef ICE_USE_IOCP
     virtual bool startWrite(IceInternal::Buffer&);
     virtual void finishWrite(IceInternal::Buffer&);

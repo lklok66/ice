@@ -80,7 +80,7 @@ IceInternal::UdpTransceiver::setCompletedHandler(SocketOperationCompletedHandler
 #endif
 
 SocketOperation
-IceInternal::UdpTransceiver::initialize(Buffer& /*readBuffer*/, Buffer& /*writeBuffer*/)
+IceInternal::UdpTransceiver::initialize(Buffer& /*readBuffer*/, Buffer& /*writeBuffer*/, bool& /*hasMoreData*/)
 {
     if(_state == StateNeedConnect)
     {
@@ -126,6 +126,13 @@ IceInternal::UdpTransceiver::initialize(Buffer& /*readBuffer*/, Buffer& /*writeB
     return SocketOperationNone;
 }
 
+SocketOperation
+IceInternal::UdpTransceiver::closing(bool, const Ice::LocalException&)
+{
+    // Nothing to do.
+    return SocketOperationNone;
+}
+
 void
 IceInternal::UdpTransceiver::close()
 {
@@ -153,15 +160,19 @@ IceInternal::UdpTransceiver::close()
 
 
 #ifdef ICE_OS_WINRT
-bool
+SocketOperation
 IceInternal::UdpTransceiver::write(Buffer&)
 {
-    return false;
+    return SocketOperationWrite;
 }
 #else
-bool
+SocketOperation
 IceInternal::UdpTransceiver::write(Buffer& buf)
 {
+    if(buf.i == buf.b.end())
+    {
+        return SocketOperationNone;
+    }
     assert(buf.i == buf.b.begin());
     assert(_fd != INVALID_SOCKET && _state >= StateConnected);
 
@@ -216,7 +227,7 @@ repeat:
 
         if(wouldBlock())
         {
-            return false;
+            return SocketOperationWrite;
         }
 
         SocketException ex(__FILE__, __LINE__);
@@ -237,20 +248,25 @@ repeat:
 
     assert(ret == static_cast<ssize_t>(buf.b.size()));
     buf.i = buf.b.end();
-    return true;
+    return SocketOperationNone;
 }
 #endif
 
 #ifdef ICE_OS_WINRT
-bool
-IceInternal::UdpTransceiver::read(Buffer&)
+SocketOperation
+IceInternal::UdpTransceiver::read(Buffer&, bool&)
 {
-    return false;
+    return SocketOperationRead;
 }
 #else
-bool
-IceInternal::UdpTransceiver::read(Buffer& buf)
+SocketOperation
+IceInternal::UdpTransceiver::read(Buffer& buf, bool&)
 {
+    if(buf.i == buf.b.end())
+    {
+        return SocketOperationNone;
+    }
+
     assert(buf.i == buf.b.begin());
     assert(_fd != INVALID_SOCKET);
 
@@ -300,7 +316,7 @@ repeat:
             
             if(wouldBlock())
             {
-                return false;
+                return SocketOperationRead;
             }
             
             if(connectionLost())
@@ -353,7 +369,7 @@ repeat:
 
     buf.b.resize(ret);
     buf.i = buf.b.end();
-    return true;
+    return SocketOperationNone;
 }
 #endif
 

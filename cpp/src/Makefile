@@ -62,7 +62,7 @@ slice2cpp slice2cs slice2freeze slice2freezej slice2java slice2php slice2py slic
 
 Ice: slice2cpp
 
-IceXML IceSSL Freeze FreezeScript IceBox Glacier2Lib IcePatch2Lib IceStormLib IceGridLib: Ice
+IceXML IceSSL IceWS Freeze FreezeScript IceBox Glacier2Lib IcePatch2Lib IceStormLib IceGridLib: Ice
 
 Freeze: slice2freeze
 

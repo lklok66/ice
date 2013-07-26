@@ -19,9 +19,10 @@ public:
     
     virtual IceInternal::NativeInfoPtr getNativeInfo();
 
+    virtual IceInternal::SocketOperation closing(bool, const Ice::LocalException&);
     virtual void close();
-    virtual bool write(IceInternal::Buffer&);
-    virtual bool read(IceInternal::Buffer&);
+    virtual IceInternal::SocketOperation write(IceInternal::Buffer&);
+    virtual IceInternal::SocketOperation read(IceInternal::Buffer&, bool&);
 #ifdef ICE_USE_IOCP
     virtual bool startWrite(IceInternal::Buffer&);
     virtual void finishWrite(IceInternal::Buffer&);
@@ -31,7 +32,7 @@ public:
     virtual std::string type() const;
     virtual std::string toString() const;
     virtual Ice::ConnectionInfoPtr getInfo() const;
-    virtual IceInternal::SocketOperation initialize(IceInternal::Buffer&, IceInternal::Buffer&);
+    virtual IceInternal::SocketOperation initialize(IceInternal::Buffer&, IceInternal::Buffer&, bool&);
     virtual void checkSendSize(const IceInternal::Buffer&, size_t);
 
 private:
@@ -44,6 +45,9 @@ private:
     const IceInternal::TransceiverPtr _transceiver;
     const ConfigurationPtr _configuration;
     bool _initialized;
+
+    IceInternal::Buffer _readBuffer;
+    IceInternal::Buffer::Container::const_iterator _readBufferPos;
 };
 
 #endif
