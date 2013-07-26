@@ -178,8 +178,6 @@ public:
     //
 #if defined(ICE_USE_IOCP)
     virtual AsyncInfo* getAsyncInfo(SocketOperation) = 0;
-    void initialize(HANDLE, ULONG_PTR);
-    void completed(SocketOperation operation);
 #elif defined(ICE_OS_WINRT)
     virtual void setCompletedHandler(SocketOperationCompletedHandler^) = 0;
 #endif
@@ -187,11 +185,6 @@ public:
 protected:
 
     SOCKET _fd;
-
-#if defined(ICE_USE_IOCP)
-    HANDLE _handle;
-    ULONG_PTR _key;
-#endif
 };
 typedef IceUtil::Handle<NativeInfo> NativeInfoPtr;
 
@@ -257,10 +250,8 @@ private:
     std::string _host;
     int _port;
     Address _address;
-#ifndef NDEBUG
-    bool _haveAddress;
-#endif
 };
+typedef IceUtil::Handle<SOCKSNetworkProxy> SOCKSNetworkProxyPtr;
 
 ICE_API bool noMoreFds(int);
 ICE_API std::string errorToStringDNS(int);
