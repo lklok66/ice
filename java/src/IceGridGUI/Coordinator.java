@@ -3131,11 +3131,23 @@ public class Coordinator
 
     public IGraphView createGraphView()
     {
-        Class<?> c1 = IceInternal.Util.findClass("IceGridGUI.LiveDeployment.GraphView", null);
-        Class<?> c2 = IceInternal.Util.findClass("javafx.embed.swing.JFXPanel", null);
-
         IGraphView view = null;
-        if(c1 != null && c2 != null)
+        Class<?> c1 = IceInternal.Util.findClass("IceGridGUI.LiveDeployment.GraphView", null);
+        if(c1 == null)
+        {
+            JOptionPane.showMessageDialog(_mainFrame, 
+                                          "IceGrid Admin was build without Metrics Graph Support",
+                                          "IceGrid Admin Info", 
+                                          JOptionPane.INFORMATION_MESSAGE);
+        }
+        else if(IceInternal.Util.findClass("javafx.embed.swing.JFXPanel", null) == null)
+        {
+            JOptionPane.showMessageDialog(_mainFrame, 
+                                          "The Metrics Graph view requires JavaFX 2",
+                                          "IceGrid Admin Info", 
+                                          JOptionPane.INFORMATION_MESSAGE);
+        }
+        else
         {
             StringBuilder title = new StringBuilder();
             title.append("Metrics Graph");
@@ -3163,14 +3175,6 @@ public class Coordinator
             catch(java.lang.reflect.InvocationTargetException ex)
             {
             }
-        }
-
-        if(view == null)
-        {
-            JOptionPane.showMessageDialog(_mainFrame, 
-                                          "The Metrics Graph view requires JavaFX 2",
-                                          "IceGrid Admin Info", 
-                                          JOptionPane.INFORMATION_MESSAGE);
         }
         return view;
     }
