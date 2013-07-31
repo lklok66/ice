@@ -35,8 +35,10 @@ EndpointI::EndpointI(const IceInternal::EndpointIPtr& endpoint) :
 void
 EndpointI::streamWrite(IceInternal::BasicStream* s) const
 {
+    s->startWriteEncaps();
     s->write(_endpoint->type());
     _endpoint->streamWrite(s);
+    s->endWriteEncaps();
 }
 
 Ice::Short
@@ -45,7 +47,7 @@ EndpointI::type() const
     return (Ice::Short)(TYPE_BASE + _endpoint->type());
 }
 
-std::string
+const std::string&
 EndpointI::protocol() const
 {
     return _endpoint->protocol();
@@ -55,6 +57,12 @@ int
 EndpointI::timeout() const
 {
     return _endpoint->timeout();
+}
+
+const std::string&
+EndpointI::connectionId() const
+{
+    return _endpoint->connectionId();
 }
 
 IceInternal::EndpointIPtr
@@ -279,10 +287,10 @@ EndpointI::operator<(const Ice::LocalObject& r) const
     return *p->_endpoint < *_endpoint;
 }
 
-void
-EndpointI::hashInit(Ice::Int& h) const
+int
+EndpointI::hash() const
 {
-    _endpoint->hashInit(h);
+    return  _endpoint->hash();
 }
 
 string

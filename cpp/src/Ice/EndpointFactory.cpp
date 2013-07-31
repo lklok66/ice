@@ -22,3 +22,4 @@ IceInternal::EndpointFactory::EndpointFactory()
 IceInternal::EndpointFactory::~EndpointFactory()
 {
 }
+

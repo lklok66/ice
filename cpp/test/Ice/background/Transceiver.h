@@ -29,7 +29,7 @@ public:
     virtual void startRead(IceInternal::Buffer&);
     virtual void finishRead(IceInternal::Buffer&);
 #endif
-    virtual std::string type() const;
+    virtual std::string protocol() const;
     virtual std::string toString() const;
     virtual Ice::ConnectionInfoPtr getInfo() const;
     virtual IceInternal::SocketOperation initialize(IceInternal::Buffer&, IceInternal::Buffer&, bool&);

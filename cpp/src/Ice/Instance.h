@@ -31,6 +31,7 @@
 #include <Ice/ObjectFactoryManagerF.h>
 #include <Ice/ObjectAdapterFactoryF.h>
 #include <Ice/EndpointFactoryManagerF.h>
+#include <Ice/IPEndpointIF.h>
 #include <Ice/RetryQueueF.h>
 #include <Ice/DynamicLibraryF.h>
 #include <Ice/PluginF.h>

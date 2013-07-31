@@ -51,9 +51,9 @@ Acceptor::accept()
 }
 
 string
-Acceptor::type() const
+Acceptor::protocol() const
 {
-    return _acceptor->type();
+    return _acceptor->protocol();
 }
 
 string

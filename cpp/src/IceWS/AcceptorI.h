@@ -13,11 +13,8 @@
 #include <Ice/LoggerF.h>
 #include <Ice/TransceiverF.h>
 #include <Ice/Acceptor.h>
-#include <Ice/Protocol.h>
 #include <Ice/Network.h>
 #include <IceWS/InstanceF.h>
-
-#include <vector>
 
 namespace IceWS
 {
@@ -40,22 +37,17 @@ public:
     virtual void finishAccept();
 #endif
     virtual IceInternal::TransceiverPtr accept();
-    virtual std::string type() const;
+    virtual std::string protocol() const;
     virtual std::string toString() const;
 
 private:
 
-    AcceptorI(const InstancePtr&, Ice::Short, const IceInternal::AcceptorPtr&, const std::string&, const std::string&,
-              int);
+    AcceptorI(const InstancePtr&, const IceInternal::AcceptorPtr&);
     virtual ~AcceptorI();
     friend class EndpointI;
 
     const InstancePtr _instance;
-    const Ice::Short _type;
     const IceInternal::AcceptorPtr _delegate;
-    const std::string _adapterName;
-    const Ice::LoggerPtr _logger;
-    const IceInternal::Address _addr;
 };
 
 }

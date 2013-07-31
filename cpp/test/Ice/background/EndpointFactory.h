@@ -24,6 +24,8 @@ public:
     virtual IceInternal::EndpointIPtr read(IceInternal::BasicStream*) const;
     virtual void destroy();
 
+    virtual IceInternal::EndpointFactoryPtr clone(const IceInternal::ProtocolInstancePtr&) const;
+
 protected:
 
     EndpointFactory(const IceInternal::EndpointFactoryPtr&);

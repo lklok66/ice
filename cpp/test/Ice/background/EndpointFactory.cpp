@@ -44,10 +44,20 @@ EndpointFactory::read(IceInternal::BasicStream* s) const
     short type;
     s->read(type);
     assert(type == _factory->type());
-    return new EndpointI(_factory->read(s));
+
+    s->startReadEncaps();
+    IceInternal::EndpointIPtr endpoint = new EndpointI(_factory->read(s));
+    s->endReadEncaps();
+    return endpoint;
 }
 
 void
 EndpointFactory::destroy()
 {
+}
+
+IceInternal::EndpointFactoryPtr
+EndpointFactory::clone(const IceInternal::ProtocolInstancePtr&) const
+{
+    return const_cast<EndpointFactory*>(this);
 }

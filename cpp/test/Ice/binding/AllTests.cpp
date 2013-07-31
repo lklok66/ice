@@ -882,7 +882,21 @@ allTests(const Ice::CommunicatorPtr& communicator)
                 continue; // IP version not supported.
             }
 
-            string strPrx = oa->createProxy(serverCommunicator->stringToIdentity("dummy"))->ice_toString();
+            // Ensure the published endpoints are actually valid. On
+            // Fedora, binding to "localhost" with IPv6 only works but
+            // resolving localhost don't return the IPv6 adress.
+            Ice::ObjectPrx prx = oa->createProxy(serverCommunicator->stringToIdentity("dummy"));
+            try
+            {
+                prx->ice_collocationOptimized(false)->ice_ping();
+            }
+            catch(const Ice::LocalException&)
+            {
+                serverCommunicator->destroy();
+                continue; // IP version not supported.
+            }
+
+            string strPrx = prx->ice_toString();
             for(vector<Ice::PropertiesPtr>::const_iterator q = clientProps.begin(); q != clientProps.end(); ++q)
             {
                 Ice::InitializationData clientInitData;
@@ -913,7 +927,8 @@ allTests(const Ice::CommunicatorPtr& communicator)
                          (*p == bothPreferIPv6 && *q == ipv6 && ipv6NotSupported) ||
                          (*p == anyipv4 && *q == ipv6) || (*p == anyipv6 && *q == ipv4) ||
                          (*p == anyboth && *q == ipv4 && !dualStack) ||
-                         (*p == localipv4 && *q == ipv6) || (*p == localipv6 && *q == ipv4));
+                         (*p == localipv4 && *q == ipv6) || (*p == localipv6 && *q == ipv4) ||
+                         (*p == localipv6 && *q == bothPreferIPv4));
                 }
                 clientCommunicator->destroy();
             }

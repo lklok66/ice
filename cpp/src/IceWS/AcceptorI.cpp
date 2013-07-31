@@ -8,21 +8,8 @@
 // **********************************************************************
 
 #include <IceWS/AcceptorI.h>
-#include <IceWS/EndpointInfo.h>
 #include <IceWS/Instance.h>
 #include <IceWS/TransceiverI.h>
-#include <IceWS/Util.h>
-
-#include <Ice/Communicator.h>
-#include <Ice/Exception.h>
-#include <Ice/LocalException.h>
-#include <Ice/LoggerUtil.h>
-#include <Ice/Properties.h>
-#include <IceUtil/StringUtil.h>
-
-#ifdef ICE_USE_IOCP
-#  include <Mswsock.h>
-#endif
 
 using namespace std;
 using namespace Ice;
@@ -45,12 +32,6 @@ IceWS::AcceptorI::getAsyncInfo(IceInternal::SocketOperation status)
 void
 IceWS::AcceptorI::close()
 {
-    if(_instance->networkTraceLevel() >= 1)
-    {
-        Trace out(_logger, _instance->networkTraceCategory());
-        out << "stopping to accept " << type() << " connections at " << toString();
-    }
-
     _delegate->close();
 }
 
@@ -58,21 +39,6 @@ void
 IceWS::AcceptorI::listen()
 {
     _delegate->listen();
-
-    if(_instance->networkTraceLevel() >= 1)
-    {
-        Trace out(_logger, _instance->networkTraceCategory());
-        out << "listening for " << type() << " connections at " << toString();
-
-        vector<string> interfaces =
-            IceInternal::getHostsForEndpointExpand(IceInternal::inetAddrToString(_addr), _instance->protocolSupport(),
-                                                   true);
-        if(!interfaces.empty())
-        {
-            out << "\nlocal interfaces: ";
-            out << IceUtilInternal::joinString(interfaces, ", ");
-        }
-    }
 }
 
 #ifdef ICE_USE_IOCP
@@ -92,26 +58,17 @@ IceWS::AcceptorI::finishAccept()
 IceInternal::TransceiverPtr
 IceWS::AcceptorI::accept()
 {
-    IceInternal::TransceiverPtr del = _delegate->accept();
-
-    if(_instance->networkTraceLevel() >= 1)
-    {
-        Trace out(_logger, _instance->networkTraceCategory());
-        out << "attempting to accept " << type() << " connection\n"
-            << IceInternal::fdToString(del->getNativeInfo()->fd());
-    }
-
     //
     // WebSocket handshaking is performed in TransceiverI::initialize, since
     // accept must not block.
     //
-    return new TransceiverI(_instance, _type, del);
+    return new TransceiverI(_instance, _delegate->accept());
 }
 
 string
-IceWS::AcceptorI::type() const
+IceWS::AcceptorI::protocol() const
 {
-    return _type == WSEndpointType ? "ws" : "wss"; // TODO
+    return _delegate->protocol();
 }
 
 string
@@ -120,21 +77,9 @@ IceWS::AcceptorI::toString() const
     return _delegate->toString();
 }
 
-IceWS::AcceptorI::AcceptorI(const InstancePtr& instance, Short ty, const IceInternal::AcceptorPtr& del,
-                            const string& adapterName, const string& host, int port) :
-    _instance(instance),
-    _type(ty),
-    _delegate(del),
-    _adapterName(adapterName), // TODO: Necessary?
-    _logger(instance->communicator()->getLogger()),
-    _addr(getAddressForServer(host, port, instance->protocolSupport(), instance->preferIPv6()))
+IceWS::AcceptorI::AcceptorI(const InstancePtr& instance, const IceInternal::AcceptorPtr& del) :
+    _instance(instance), _delegate(del)
 {
-    // TODO: The delegate has already performed the bind at this point
-    if(_instance->networkTraceLevel() >= 2)
-    {
-        Trace out(_logger, _instance->networkTraceCategory());
-        out << "attempting to bind to " << type() << " socket " << toString();
-    }
 }
 
 IceWS::AcceptorI::~AcceptorI()

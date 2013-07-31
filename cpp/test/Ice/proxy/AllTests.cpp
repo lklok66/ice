@@ -867,8 +867,8 @@ allTests(const Ice::CommunicatorPtr& communicator)
 #else
         const bool ssl = true;
 #endif
-        const bool ws = communicator->getProperties()->getProperty("Ice.Default.Protocol") == "ws";
-        if(!ssl && !ws)
+        const bool tcp = communicator->getProperties()->getProperty("Ice.Default.Protocol") == "tcp";
+        if(tcp)
         {
             p1->ice_encodingVersion(Ice::Encoding_1_0)->ice_ping();
         }
@@ -889,7 +889,7 @@ allTests(const Ice::CommunicatorPtr& communicator)
         {
             test(pstr == "test -t -e 1.0:ssl -h 127.0.0.1 -p 10001:opaque -t 99 -e 1.0 -v abch");
         }
-        else if(!ws)
+        else if(tcp)
         {
             test(pstr ==
                  "test -t -e 1.0:opaque -t 2 -e 1.0 -v CTEyNy4wLjAuMREnAAD/////AA==:opaque -t 99 -e 1.0 -v abch");
@@ -911,7 +911,7 @@ allTests(const Ice::CommunicatorPtr& communicator)
         }
         catch(const Ice::ConnectFailedException&)
         {
-            test(ssl);
+            test(!tcp);
         }
 
         //
@@ -926,7 +926,7 @@ allTests(const Ice::CommunicatorPtr& communicator)
         {
             test(pstr == "test -t -e 1.0:ssl -h 127.0.0.1 -p 10001:opaque -t 99 -e 1.0 -v abch");
         }
-        else if(!ws)
+        else if(tcp)
         {
             test(pstr ==
                  "test -t -e 1.0:opaque -t 2 -e 1.0 -v CTEyNy4wLjAuMREnAAD/////AA==:opaque -t 99 -e 1.0 -v abch");

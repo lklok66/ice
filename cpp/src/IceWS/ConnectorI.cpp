@@ -12,44 +12,21 @@
 #include <IceWS/TransceiverI.h>
 #include <IceWS/EndpointI.h>
 #include <IceWS/Util.h>
-#include <Ice/Communicator.h>
-#include <Ice/LocalException.h>
-#include <Ice/LoggerUtil.h>
 
 using namespace std;
 using namespace Ice;
 using namespace IceWS;
-using namespace IceInternal;
 
-TransceiverPtr
+IceInternal::TransceiverPtr
 IceWS::ConnectorI::connect()
 {
-    if(_instance->networkTraceLevel() >= 2)
-    {
-        Trace out(_logger, _instance->networkTraceCategory());
-        out << "trying to establish " << _protocol << " connection to " << toString();
-    }
-
-    try
-    {
-        TransceiverPtr del = _delegate->connect();
-        return new TransceiverI(_instance, _type, del, _host, _port, _resource);
-    }
-    catch(const Ice::LocalException& ex)
-    {
-        if(_instance->networkTraceLevel() >= 2)
-        {
-            Trace out(_logger, _instance->networkTraceCategory());
-            out << "failed to establish " << _protocol << " connection to " << toString() << "\n" << ex;
-        }
-        throw;
-    }
+    return new TransceiverI(_instance, _delegate->connect(), _host, _port, _resource);
 }
 
 Short
 IceWS::ConnectorI::type() const
 {
-    return _type;
+    return _delegate->type();
 }
 
 string
@@ -65,6 +42,11 @@ IceWS::ConnectorI::operator==(const Connector& r) const
     if(!p)
     {
         return false;
+    }
+
+    if(this == p)
+    {
+        return true;
     }
 
     if(_delegate != p->_delegate)
@@ -95,6 +77,11 @@ IceWS::ConnectorI::operator<(const Connector& r) const
         return type() < r.type();
     }
 
+    if(this == p)
+    {
+        return false;
+    }
+
     if(_delegate < p->_delegate)
     {
         return true;
@@ -116,16 +103,9 @@ IceWS::ConnectorI::operator<(const Connector& r) const
     return false;
 }
 
-IceWS::ConnectorI::ConnectorI(const InstancePtr& instance, Short type, const IceInternal::ConnectorPtr& del,
+IceWS::ConnectorI::ConnectorI(const InstancePtr& instance, const IceInternal::ConnectorPtr& del,
                               const string& host, int port, const string& resource) :
-    _instance(instance),
-    _type(type),
-    _delegate(del),
-    _host(host),
-    _port(port),
-    _resource(resource),
-    _protocol(type == WSEndpointType ? "ws" : "wss"),
-    _logger(instance->communicator()->getLogger())
+    _instance(instance), _delegate(del), _host(host), _port(port), _resource(resource)
 {
 }
 

@@ -9,8 +9,7 @@
 
 #include <Ice/UdpTransceiver.h>
 #include <Ice/Connection.h>
-#include <Ice/Instance.h>
-#include <Ice/TraceLevels.h>
+#include <Ice/ProtocolInstance.h>
 #include <Ice/LoggerUtil.h>
 #include <Ice/Buffer.h>
 #include <Ice/LocalException.h>
@@ -105,10 +104,10 @@ IceInternal::UdpTransceiver::initialize(Buffer& /*readBuffer*/, Buffer& /*writeB
         }
         catch(const Ice::LocalException& ex)
         {
-            if(_traceLevels->network >= 2)
+            if(_instance->traceLevel() >= 2)
             {
-                Trace out(_logger, _traceLevels->networkCat);
-                out << "failed to connect udp socket\n" << toString() << "\n" << ex;
+                Trace out(_instance->logger(), _instance->traceCategory());
+                out << "failed to connect " << _instance->protocol() << " socket\n" << toString() << "\n" << ex;
             }
             throw;
         }
@@ -116,10 +115,10 @@ IceInternal::UdpTransceiver::initialize(Buffer& /*readBuffer*/, Buffer& /*writeB
 
     if(_state == StateConnected)
     {
-        if(_traceLevels->network >= 1)
+        if(_instance->traceLevel() >= 1)
         {
-            Trace out(_logger, _traceLevels->networkCat);
-            out << "starting to send udp packets\n" << toString();
+            Trace out(_instance->logger(), _instance->traceCategory());
+            out << "starting to send " << _instance->protocol() << " packets\n" << toString();
         }
     }
     assert(_state >= StateConnected);
@@ -136,10 +135,10 @@ IceInternal::UdpTransceiver::closing(bool, const Ice::LocalException&)
 void
 IceInternal::UdpTransceiver::close()
 {
-    if(_state >= StateConnected && _traceLevels->network >= 1)
+    if(_state >= StateConnected && _instance->traceLevel() >= 1)
     {
-        Trace out(_logger, _traceLevels->networkCat);
-        out << "closing udp connection\n" << toString();
+        Trace out(_instance->logger(), _instance->traceCategory());
+        out << "closing " << _instance->protocol() << " connection\n" << toString();
     }
 
 #ifdef ICE_OS_WINRT
@@ -235,15 +234,15 @@ repeat:
         throw ex;
     }
 
-    if(_traceLevels->network >= 3)
+    if(_instance->traceLevel() >= 3)
     {
-        Trace out(_logger, _traceLevels->networkCat);
-        out << "sent " << ret << " bytes via udp\n" << toString();
+        Trace out(_instance->logger(), _instance->traceCategory());
+        out << "sent " << ret << " bytes via " << _instance->protocol() << '\n' << toString();
     }
 
-    if(_stats)
+    if(_instance->stats())
     {
-        _stats->bytesSent(type(), static_cast<Int>(ret));
+        _instance->stats()->bytesSent(protocol(), static_cast<Int>(ret));
     }
 
     assert(ret == static_cast<ssize_t>(buf.b.size()));
@@ -349,22 +348,22 @@ repeat:
 #   endif
         _state = StateConnected;
 
-        if(_traceLevels->network >= 1)
+        if(_instance->traceLevel() >= 1)
         {
-            Trace out(_logger, _traceLevels->networkCat);
-            out << "connected udp socket\n" << toString();
+            Trace out(_instance->logger(), _instance->traceCategory());
+            out << "connected " << _instance->protocol() << " socket\n" << toString();
         }
     }
 
-    if(_traceLevels->network >= 3)
+    if(_instance->traceLevel() >= 3)
     {
-        Trace out(_logger, _traceLevels->networkCat);
-        out << "received " << ret << " bytes via udp\n" << toString();
+        Trace out(_instance->logger(), _instance->traceCategory());
+        out << "received " << ret << " bytes via " << _instance->protocol() << '\n' << toString();
     }
 
-    if(_stats)
+    if(_instance->stats())
     {
-        _stats->bytesReceived(type(), static_cast<Int>(ret));
+        _instance->stats()->bytesReceived(protocol(), static_cast<Int>(ret));
     }
 
     buf.b.resize(ret);
@@ -617,15 +616,15 @@ IceInternal::UdpTransceiver::finishWrite(Buffer& buf)
 #endif
     }
 
-    if(_traceLevels->network >= 3)
+    if(_instance->traceLevel() >= 3)
     {
-        Trace out(_logger, _traceLevels->networkCat);
-        out << "sent " << _write.count << " bytes via udp\n" << toString();
+        Trace out(_instance->logger(), _instance->traceCategory());
+        out << "sent " << _write.count << " bytes via " << _instance->protocol() << '\n' << toString();
     }
 
-    if(_stats)
+    if(_instance->stats())
     {
-        _stats->bytesSent(type(), static_cast<Int>(_write.count));
+        _instance->stats()->bytesSent(protocol(), static_cast<Int>(_write.count));
     }
 
     assert(_write.count == buf.b.size());
@@ -762,15 +761,15 @@ IceInternal::UdpTransceiver::finishRead(Buffer& buf)
     int ret = _read.count;
 #endif
 
-    if(_traceLevels->network >= 3)
+    if(_instance->traceLevel() >= 3)
     {
-        Trace out(_logger, _traceLevels->networkCat);
-        out << "received " << ret << " bytes via udp\n" << toString();
+        Trace out(_instance->logger(), _instance->traceCategory());
+        out << "received " << ret << " bytes via " << _instance->protocol() << '\n' << toString();
     }
 
-    if(_stats)
+    if(_instance->stats())
     {
-        _stats->bytesReceived(type(), static_cast<Int>(ret));
+        _instance->stats()->bytesReceived(protocol(), static_cast<Int>(ret));
     }
 
     buf.b.resize(ret);
@@ -779,9 +778,9 @@ IceInternal::UdpTransceiver::finishRead(Buffer& buf)
 #endif
 
 string
-IceInternal::UdpTransceiver::type() const
+IceInternal::UdpTransceiver::protocol() const
 {
-    return "udp";
+    return _instance->protocol();
 }
 
 string
@@ -896,7 +895,7 @@ IceInternal::UdpTransceiver::effectivePort() const
 }
 
 
-IceInternal::UdpTransceiver::UdpTransceiver(const InstancePtr& instance, 
+IceInternal::UdpTransceiver::UdpTransceiver(const ProtocolInstancePtr& instance, 
                                             const Address& addr,
 #ifdef ICE_OS_WINRT
                                             const string&,
@@ -906,9 +905,7 @@ IceInternal::UdpTransceiver::UdpTransceiver(const InstancePtr& instance,
                                             int mcastTtl
 #endif
                                             ) :
-    _traceLevels(instance->traceLevels()),
-    _logger(instance->initializationData().logger),
-    _stats(instance->initializationData().stats),
+    _instance(instance),
     _incoming(false),
     _addr(addr),
     _state(StateNeedConnect)
@@ -920,7 +917,7 @@ IceInternal::UdpTransceiver::UdpTransceiver(const InstancePtr& instance,
 #endif
 {
     _fd = createSocket(true, _addr);
-    setBufSize(instance);
+    setBufSize(_instance->properties());
     setBlock(_fd, false);
 
 #ifndef ICE_OS_WINRT
@@ -975,11 +972,9 @@ IceInternal::UdpTransceiver::UdpTransceiver(const InstancePtr& instance,
 #endif
 }
 
-IceInternal::UdpTransceiver::UdpTransceiver(const InstancePtr& instance, const string& host, int port,
+IceInternal::UdpTransceiver::UdpTransceiver(const ProtocolInstancePtr& instance, const string& host, int port,
                                             const string& mcastInterface, bool connect) :
-    _traceLevels(instance->traceLevels()),
-    _logger(instance->initializationData().logger),
-    _stats(instance->initializationData().stats),
+    _instance(instance),
     _incoming(true),
     _addr(getAddressForServer(host, port, instance->protocolSupport(), instance->preferIPv6())),
     _state(connect ? StateNeedConnect : StateNotConnected)
@@ -991,7 +986,7 @@ IceInternal::UdpTransceiver::UdpTransceiver(const InstancePtr& instance, const s
 #endif
 {
     _fd = createServerSocket(true, _addr, instance->protocolSupport());
-    setBufSize(instance);
+    setBufSize(instance->properties());
     setBlock(_fd, false);
 
 #ifndef ICE_OS_WINRT
@@ -1008,10 +1003,10 @@ IceInternal::UdpTransceiver::UdpTransceiver(const InstancePtr& instance, const s
         });
 #endif
 
-    if(_traceLevels->network >= 2)
+    if(_instance->traceLevel() >= 2)
     {
-        Trace out(_logger, _traceLevels->networkCat);
-        out << "attempting to bind to udp socket " << addrToString(_addr);
+        Trace out(_instance->logger(), _instance->traceCategory());
+        out << "attempting to bind to " << _instance->protocol() << " socket " << addrToString(_addr);
     }
 
     if(isMulticast(_addr))
@@ -1057,13 +1052,13 @@ IceInternal::UdpTransceiver::UdpTransceiver(const InstancePtr& instance, const s
         const_cast<Address&>(_addr) = doBind(_fd, _addr);
     }
 
-    if(_traceLevels->network >= 1)
+    if(_instance->traceLevel() >= 1)
     {
-        Trace out(_logger, _traceLevels->networkCat);
-        out << "starting to receive udp packets\n" << toString();
+        Trace out(_instance->logger(), _instance->traceCategory());
+        out << "starting to receive " << _instance->protocol() << " packets\n" << toString();
 
         vector<string> interfaces = 
-            getHostsForEndpointExpand(inetAddrToString(_addr), instance->protocolSupport(), true);
+            getHostsForEndpointExpand(inetAddrToString(_addr), _instance->protocolSupport(), true);
         if(!interfaces.empty())
         {
             out << "\nlocal interfaces: ";
@@ -1081,7 +1076,7 @@ IceInternal::UdpTransceiver::~UdpTransceiver()
 // Set UDP receive and send buffer sizes.
 //
 void
-IceInternal::UdpTransceiver::setBufSize(const InstancePtr& instance)
+IceInternal::UdpTransceiver::setBufSize(const Ice::PropertiesPtr& properties)
 {
     assert(_fd != INVALID_SOCKET);
 
@@ -1115,10 +1110,10 @@ IceInternal::UdpTransceiver::setBufSize(const InstancePtr& instance)
         //
         // Get property for buffer size and check for sanity.
         //
-        Int sizeRequested = instance->initializationData().properties->getPropertyAsIntWithDefault(prop, dfltSize);
+        Int sizeRequested = properties->getPropertyAsIntWithDefault(prop, dfltSize);
         if(sizeRequested < (_udpOverhead + headerSize))
         {
-            Warning out(_logger);
+            Warning out(_instance->logger());
             out << "Invalid " << prop << " value of " << sizeRequested << " adjusted to " << dfltSize;
             sizeRequested = dfltSize;
         }
@@ -1150,7 +1145,7 @@ IceInternal::UdpTransceiver::setBufSize(const InstancePtr& instance)
             }
             else if(*addr < sizeRequested)
             {
-                Warning out(_logger);
+                Warning out(_instance->logger());
                 out << "UDP " << direction << " buffer size: requested size of "
                     << sizeRequested << " adjusted to " << *addr;
             }

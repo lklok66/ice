@@ -13,8 +13,6 @@
 #include <IceSSL/InstanceF.h>
 #include <IceSSL/Plugin.h>
 
-#include <Ice/LoggerF.h>
-#include <Ice/StatsF.h>
 #include <Ice/Transceiver.h>
 #include <Ice/Network.h>
 
@@ -57,7 +55,7 @@ public:
     virtual void startRead(IceInternal::Buffer&);
     virtual void finishRead(IceInternal::Buffer&);
 #endif
-    virtual std::string type() const;
+    virtual std::string protocol() const;
     virtual std::string toString() const;
     virtual Ice::ConnectionInfoPtr getInfo() const;
     virtual void checkSendSize(const IceInternal::Buffer&, size_t);
@@ -85,8 +83,6 @@ private:
     friend class AcceptorI;
 
     const InstancePtr _instance;
-    const Ice::LoggerPtr _logger;
-    const Ice::StatsPtr _stats;
 
     const IceInternal::NetworkProxyPtr _proxy;
     const std::string _host;

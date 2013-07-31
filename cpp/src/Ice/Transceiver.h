@@ -39,7 +39,7 @@ public:
     virtual void finishRead(Buffer&) = 0;
 #endif
 
-    virtual std::string type() const = 0;
+    virtual std::string protocol() const = 0;
     virtual std::string toString() const = 0;
     virtual Ice::ConnectionInfoPtr getInfo() const = 0;
     virtual void checkSendSize(const Buffer&, size_t) = 0;

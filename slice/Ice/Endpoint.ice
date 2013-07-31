@@ -82,7 +82,7 @@ local class EndpointInfo
  * The user-level interface to an endpoint.
  *
  **/
-local interface Endpoint
+["cpp:virtual"] local interface Endpoint
 {
     /**
      *
@@ -110,7 +110,7 @@ local interface Endpoint
  * @see Endpoint
  *
  **/
-local class IPEndpointInfo extends EndpointInfo
+["cpp:virtual"] local class IPEndpointInfo extends EndpointInfo
 {
     /**
      * 
@@ -134,7 +134,7 @@ local class IPEndpointInfo extends EndpointInfo
  * @see Endpoint
  *
  **/
-local class TCPEndpointInfo extends IPEndpointInfo
+["cpp:virtual"] local class TCPEndpointInfo extends IPEndpointInfo
 {
 };
 
@@ -145,7 +145,7 @@ local class TCPEndpointInfo extends IPEndpointInfo
  * @see Endpoint
  *
  **/
-local class UDPEndpointInfo extends IPEndpointInfo
+["cpp:virtual"] local class UDPEndpointInfo extends IPEndpointInfo
 {
     /**
      * 

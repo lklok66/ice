@@ -325,18 +325,18 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& h
     }
     catch(const Ice::LocalException& ex)
     {
-        if(_instance->networkTraceLevel() >= 2)
+        if(_instance->traceLevel() >= 2)
         {
-            Trace out(_logger, _instance->networkTraceCategory());
+            Trace out(_instance->logger(), _instance->traceCategory());
             out << "failed to establish ws connection\n";
             out << toString() << "\n" << ex;
         }
         throw;
     }
 
-    if(_instance->networkTraceLevel() >= 1)
+    if(_instance->traceLevel() >= 1)
     {
-        Trace out(_logger, _instance->networkTraceCategory());
+        Trace out(_instance->logger(), _instance->traceCategory());
         if(_incoming)
         {
             out << "accepted ws connection\n" << toString();
@@ -353,9 +353,9 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& h
 SocketOperation
 IceWS::TransceiverI::closing(bool initiator, const Ice::LocalException& reason)
 {
-    if(_instance->networkTraceLevel() >= 1)
+    if(_instance->traceLevel() >= 1)
     {
-        Trace out(_logger, _instance->networkTraceCategory());
+        Trace out(_instance->logger(), _instance->traceCategory());
         out << "gracefully closing ws connection\n" << toString();
     }
 
@@ -390,9 +390,9 @@ IceWS::TransceiverI::closing(bool initiator, const Ice::LocalException& reason)
 void
 IceWS::TransceiverI::close()
 {
-    if(_state == StateHandshakeComplete && _instance->networkTraceLevel() >= 1)
+    if(_state == StateHandshakeComplete && _instance->traceLevel() >= 1)
     {
-        Trace out(_logger, _instance->networkTraceCategory());
+        Trace out(_instance->logger(), _instance->traceCategory());
         out << "closing ws connection\n" << toString();
     }
 
@@ -644,9 +644,9 @@ IceWS::TransceiverI::finishRead(Buffer& buf)
 #endif
 
 string
-IceWS::TransceiverI::type() const
+IceWS::TransceiverI::protocol() const
 {
-    return _type == WSEndpointType ? "ws" : "wss"; // TODO
+    return _instance->protocol();
 }
 
 string
@@ -675,15 +675,13 @@ IceWS::TransceiverI::checkSendSize(const Buffer& buf, size_t messageSizeMax)
     _delegate->checkSendSize(buf, messageSizeMax);
 }
 
-IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, Short type, const TransceiverPtr& del,
+IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, const TransceiverPtr& del, 
                                   const string& host, int port, const string& resource) :
     _instance(instance),
-    _type(type),
     _delegate(del),
     _host(host),
     _port(port),
     _resource(resource),
-    _logger(instance->communicator()->getLogger()),
     _incoming(false),
     _state(StateInitializeDelegate),
     _parser(new HttpParser),
@@ -710,12 +708,10 @@ IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, Short type, const
     assert(_readBufferSize > 256);
 }
 
-IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, Short type, const TransceiverPtr& del) :
+IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, const TransceiverPtr& del) :
     _instance(instance),
-    _type(type),
     _delegate(del),
     _port(-1),
-    _logger(instance->communicator()->getLogger()),
     _incoming(true),
     _state(StateInitializeDelegate),
     _parser(new HttpParser),
@@ -1089,9 +1085,9 @@ IceWS::TransceiverI::preRead(Buffer& buf)
         }
         case OP_CLOSE: // Connection close
         {
-            if(_instance->networkTraceLevel() >= 2)
+            if(_instance->traceLevel() >= 2)
             {
-                Trace out(_logger, _instance->networkTraceCategory());
+                Trace out(_instance->logger(), _instance->traceCategory());
                 out << "received ws connection close frame\n" << toString();
             }
 
@@ -1330,9 +1326,9 @@ IceWS::TransceiverI::postWrite(Buffer& buf)
             assert(_state == StateClosingRequestPending && !_closingInitiator || 
                    _state == StateClosingResponsePending && _closingInitiator);
 
-            if(_instance->networkTraceLevel() >= 2)
+            if(_instance->traceLevel() >= 2)
             {
-                Trace out(_logger, _instance->networkTraceCategory());
+                Trace out(_instance->logger(), _instance->traceCategory());
                 out << "sent ws connection close frame\n" << toString();
             }
             

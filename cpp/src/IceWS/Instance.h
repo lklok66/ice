@@ -11,44 +11,18 @@
 #define ICE_WS_INSTANCE_H
 
 #include <IceWS/InstanceF.h>
+#include <Ice/ProtocolInstance.h>
 #include <Ice/CommunicatorF.h>
-#include <Ice/LoggerF.h>
-#include <Ice/Network.h>
-#include <Ice/ProtocolPluginFacadeF.h>
-#include <Ice/EndpointIF.h>
-#include <Ice/EndpointFactoryF.h>
-#include <IceWS/Plugin.h>
 
 namespace IceWS
 {
 
-class Instance : public IceUtil::Shared
+class Instance : public IceInternal::ProtocolInstance
 {
 public:
 
-    Instance(const Ice::CommunicatorPtr&);
-    ~Instance();
-
-    void initialize();
-
-    Ice::CommunicatorPtr communicator() const;
-    IceInternal::EndpointHostResolverPtr endpointHostResolver() const;
-    IceInternal::ProtocolSupport protocolSupport() const;
-    bool preferIPv6() const;
-    IceInternal::NetworkProxyPtr networkProxy() const;
-    std::string defaultHost() const;
-    Ice::EncodingVersion defaultEncoding() const;
-    int networkTraceLevel() const;
-    std::string networkTraceCategory() const;
-    size_t messageSizeMax() const;
-
-    void destroy();
-
-private:
-
-    Ice::LoggerPtr _logger;
-    IceInternal::ProtocolPluginFacadePtr _facade;
-    bool _initialized;
+    Instance(const Ice::CommunicatorPtr&, Ice::Short, const std::string&);
+    virtual ~Instance();
 };
 
 }

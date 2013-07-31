@@ -13,8 +13,6 @@
 #include <Ice/LoggerF.h>
 #include <Ice/TransceiverF.h>
 #include <Ice/Connector.h>
-//#include <Ice/Protocol.h>
-#include <Ice/Network.h>
 #include <IceWS/InstanceF.h>
 
 namespace IceWS
@@ -37,19 +35,15 @@ public:
 
 private:
 
-    ConnectorI(const InstancePtr&, Ice::Short, const IceInternal::ConnectorPtr&, const std::string&, int,
-               const std::string&);
+    ConnectorI(const InstancePtr&, const IceInternal::ConnectorPtr&, const std::string&, int, const std::string&);
     virtual ~ConnectorI();
     friend class EndpointI;
 
     const InstancePtr _instance;
-    const Ice::Short _type;
     const IceInternal::ConnectorPtr _delegate;
     const std::string _host;
     const int _port;
     const std::string _resource;
-    const std::string _protocol;
-    const Ice::LoggerPtr _logger;
 };
 
 }

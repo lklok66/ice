@@ -18,7 +18,6 @@
 #include <Ice/InstanceF.h>
 #include <Ice/EndpointIF.h>
 #include <Ice/NetworkF.h>
-#include <Ice/Protocol.h>
 
 namespace IceInternal
 {
@@ -44,42 +43,6 @@ public:
     Ice::CommunicatorPtr getCommunicator() const;
 
     //
-    // Get the default hostname to be used in endpoints.
-    //
-    std::string getDefaultHost() const;
-
-    //
-    // Get the default encoding to be used in endpoints.
-    //
-    Ice::EncodingVersion getDefaultEncoding() const;
-
-    //
-    // Get the network trace level and category name.
-    //
-    int getNetworkTraceLevel() const;
-    const char* getNetworkTraceCategory() const;
-
-    //
-    // Get the endpoint host resolver.
-    //
-    EndpointHostResolverPtr getEndpointHostResolver() const;
-
-    //
-    // Get the protocol support.
-    //
-    ProtocolSupport getProtocolSupport() const;
-
-    //
-    // Get the IP address preference
-    //
-    bool preferIPv6() const;
-
-    //
-    // Get the network proxy.
-    //
-    NetworkProxyPtr getNetworkProxy() const;
-
-    //
     // Register an EndpointFactory.
     //
     void addEndpointFactory(const EndpointFactoryPtr&) const;
@@ -88,11 +51,6 @@ public:
     // Get an EndpointFactory.
     //
     EndpointFactoryPtr getEndpointFactory(Ice::Short) const;
-
-    //
-    // Get the maximum message size.
-    //
-    size_t getMessageSizeMax() const;
 
 private:
 

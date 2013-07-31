@@ -11,58 +11,54 @@
 #define ICE_TCP_ENDPOINT_I_H
 
 #include <IceUtil/Config.h>
-#include <Ice/EndpointI.h>
+#include <Ice/IPEndpointI.h>
 #include <Ice/EndpointFactory.h>
 #include <Ice/Network.h> // for IceIternal::Address
 
 namespace IceInternal
 {
 
-class TcpEndpointI : public EndpointI
+class TcpEndpointI : public IPEndpointI
 {
 public:
 
-    TcpEndpointI(const InstancePtr&, const std::string&, Ice::Int, Ice::Int, const std::string&, bool);
-    TcpEndpointI(const InstancePtr&, std::vector<std::string>&, bool);
-    TcpEndpointI(BasicStream*);
+    TcpEndpointI(const ProtocolInstancePtr&, const std::string&, Ice::Int, Ice::Int, const std::string&, bool);
+    TcpEndpointI(const ProtocolInstancePtr&);
+    TcpEndpointI(const ProtocolInstancePtr&, BasicStream*);
 
-    virtual void streamWrite(BasicStream*) const;
     virtual Ice::EndpointInfoPtr getInfo() const;
-    virtual Ice::Short type() const;
-    virtual std::string protocol() const;
+
     virtual Ice::Int timeout() const;
     virtual EndpointIPtr timeout(Ice::Int) const;
-    virtual EndpointIPtr connectionId(const ::std::string&) const;
     virtual bool compress() const;
     virtual EndpointIPtr compress(bool) const;
     virtual bool datagram() const;
     virtual bool secure() const;
+
     virtual TransceiverPtr transceiver(EndpointIPtr&) const;
-    virtual std::vector<ConnectorPtr> connectors(Ice::EndpointSelectionType) const;
-    virtual void connectors_async(Ice::EndpointSelectionType, const EndpointI_connectorsPtr&) const;
     virtual AcceptorPtr acceptor(EndpointIPtr&, const std::string&) const;
-    virtual std::vector<EndpointIPtr> expand() const;
-    virtual bool equivalent(const EndpointIPtr&) const;
-    virtual std::vector<ConnectorPtr> connectors(const std::vector<Address>&, const NetworkProxyPtr&) const;
+    virtual std::string options() const;
 
     virtual bool operator==(const Ice::LocalObject&) const;
     virtual bool operator<(const Ice::LocalObject&) const;
 
-    virtual void hashInit(Ice::Int&) const;
-    virtual std::string options() const;
+    using IPEndpointI::connectionId;
 
-#ifdef __SUNPRO_CC
-    using EndpointI::connectionId;
-#endif
+protected:
+
+    virtual void streamWriteImpl(BasicStream*) const;
+    virtual void hashInit(Ice::Int&) const;
+    virtual void fillEndpointInfo(Ice::IPEndpointInfo*) const;
+    virtual bool checkOption(const std::string&, const std::string&, const std::string&);
+
+    virtual ConnectorPtr createConnector(const Address&, const NetworkProxyPtr&) const;
+    virtual IPEndpointIPtr createEndpoint(const std::string&, int, const std::string&) const;
 
 private:
 
     //
     // All members are const, because endpoints are immutable.
     //
-    const InstancePtr _instance;
-    const std::string _host;
-    const Ice::Int _port;
     const Ice::Int _timeout;
     const bool _compress;
 };
@@ -79,14 +75,16 @@ public:
     virtual EndpointIPtr read(BasicStream*) const;
     virtual void destroy();
 
+    virtual EndpointFactoryPtr clone(const ProtocolInstancePtr&) const;
+
 private:
 
-    TcpEndpointFactory(const InstancePtr&);
+    TcpEndpointFactory(const ProtocolInstancePtr&);
     friend class Instance;
 
-    InstancePtr _instance;
+    ProtocolInstancePtr _instance;
 };
-
+    
 }
 
 #endif

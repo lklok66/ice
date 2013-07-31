@@ -52,6 +52,7 @@ OBJS		= Acceptor.o \
 		  Incoming.o \
 		  Initialize.o \
 		  Instance.o \
+		  IPEndpointI.o \
 		  LocalException.o \
 		  LocalObject.o \
 		  LocatorInfo.o \
@@ -84,6 +85,7 @@ OBJS		= Acceptor.o \
 		  Properties.o \
 		  PropertyNames.o \
 		  Protocol.o \
+		  ProtocolInstance.o \
 		  ProtocolPluginFacade.o \
 		  ProxyFactory.o \
 		  Proxy.o \

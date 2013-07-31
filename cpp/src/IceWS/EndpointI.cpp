@@ -14,135 +14,34 @@
 #include <IceWS/Instance.h>
 #include <Ice/BasicStream.h>
 #include <Ice/LocalException.h>
-#include <Ice/DefaultsAndOverrides.h>
-#include <Ice/Object.h>
+#include <Ice/IPEndpointI.h>
 #include <Ice/HashUtil.h>
 
 using namespace std;
 using namespace Ice;
 using namespace IceWS;
 
-IceWS::EndpointI::EndpointI(const InstancePtr& instance, Short type, const IceInternal::EndpointIPtr& del,
-                            const string& res) :
-    IceInternal::EndpointI(del->connectionId()),
-    _instance(instance),
-    _type(type),
-    _delegate(del),
-    _resource(res)
+IceWS::EndpointI::EndpointI(const InstancePtr& instance, const IceInternal::EndpointIPtr& del, const string& res) :
+    _instance(instance), _delegate(IceInternal::IPEndpointIPtr::dynamicCast(del)), _resource(res)
 {
-    const_cast<IPEndpointInfoPtr&>(_info) = IPEndpointInfoPtr::dynamicCast(_delegate->getInfo());
-    assert(_info);
 }
 
-IceWS::EndpointI::EndpointI(const InstancePtr& instance, Short type, const IceInternal::EndpointIPtr& del,
-                            vector<string>& args, bool oaEndpoint) :
-    IceInternal::EndpointI(""),
-    _instance(instance),
-    _type(type),
-    _delegate(del)
+IceWS::EndpointI::EndpointI(const InstancePtr& instance, const IceInternal::EndpointIPtr& del, vector<string>& args) :
+    _instance(instance), _delegate(IceInternal::IPEndpointIPtr::dynamicCast(del))
 {
-    const_cast<IPEndpointInfoPtr&>(_info) = IPEndpointInfoPtr::dynamicCast(_delegate->getInfo());
-    assert(_info);
+    initWithOptions(args);
 
-    vector<string> unknown;
-
-    ostringstream ostr;
-    for(vector<string>::iterator p = args.begin(); p != args.end(); ++p)
-    {
-        if(p->find_first_of(" \t\n\r") != string::npos)
-        {
-            ostr << " \"" << *p << "\"";
-        }
-        else
-        {
-            ostr << " " << *p;
-        }
-    }
-    const string str = ostr.str();
-
-    for(vector<string>::size_type n = 0; n < args.size(); ++n)
-    {
-        string option = args[n];
-        if(option.length() < 2 || option[0] != '-')
-        {
-            unknown.push_back(option);
-            continue;
-        }
-
-        string argument;
-        if(n + 1 < args.size() && args[n + 1][0] != '-')
-        {
-            argument = args[++n];
-        }
-
-        switch(option[1])
-        {
-            case 'r':
-            {
-                if(argument.empty())
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "no argument provided for -r option in endpoint `" + protocol() + str +
-                        _delegate->options() + "'";
-                    throw ex;
-                }
-                const_cast<string&>(_resource) = argument;
-                break;
-            }
-
-            default:
-            {
-                unknown.push_back(option);
-                if(!argument.empty())
-                {
-                    unknown.push_back(argument);
-                }
-                break;
-            }
-        }
-    }
-
-    // TODO: Require a resource value?
     if(_resource.empty())
     {
         const_cast<string&>(_resource) = "/";
     }
-
-    //
-    // Replace argument vector with only those we didn't recognize.
-    //
-    args = unknown;
 }
 
-IceWS::EndpointI::EndpointI(const InstancePtr& instance, Short type, const IceInternal::EndpointIPtr& del,
+IceWS::EndpointI::EndpointI(const InstancePtr& instance, const IceInternal::EndpointIPtr& del, 
                             IceInternal::BasicStream* s) :
-    _instance(instance),
-    _type(type),
-    _delegate(del)
+    _instance(instance), _delegate(IceInternal::IPEndpointIPtr::dynamicCast(del))
 {
-    const_cast<IPEndpointInfoPtr&>(_info) = IPEndpointInfoPtr::dynamicCast(_delegate->getInfo());
-    assert(_info);
-
     s->read(const_cast<string&>(_resource), false);
-}
-
-void
-IceWS::EndpointI::startStreamWrite(IceInternal::BasicStream* s) const
-{
-    s->startWriteEncaps();
-}
-
-void
-IceWS::EndpointI::streamWrite(IceInternal::BasicStream* s) const
-{
-    _delegate->streamWrite(s);
-    s->write(_resource, false);
-}
-
-void
-IceWS::EndpointI::endStreamWrite(IceInternal::BasicStream* s) const
-{
-    s->endWriteEncaps();
 }
 
 Ice::EndpointInfoPtr
@@ -152,47 +51,60 @@ IceWS::EndpointI::getInfo() const
     {
     public:
 
-        InfoI(Short ty, Int to, bool comp, const string& host, Int port, const string& resource) :
-            IceWS::EndpointInfo(to, comp, host, port, resource),
-            _type(ty)
+        InfoI(const IceInternal::EndpointIPtr& e) : _endpoint(e)
         {
         }
 
         virtual Short
         type() const
         {
-            return _type;
+            return _endpoint->type();
         }
 
         virtual bool
         datagram() const
         {
-            return false;
+            return _endpoint->datagram();
         }
 
         virtual bool
         secure() const
         {
-            return _type == WSSEndpointType;
+            return _endpoint->secure();
         }
-
+        
     private:
-
-        Short _type;
+        
+        const IceInternal::EndpointIPtr _endpoint;
     };
-    return new InfoI(_type, _delegate->timeout(), _delegate->compress(), _info->host, _info->port, _resource);
+
+    EndpointInfoPtr info = new InfoI(const_cast<EndpointI*>(this));
+    info->timeout = _delegate->timeout();
+    info->compress = _delegate->compress();
+    _delegate->fillEndpointInfo(info.get());
+    info->resource = _resource;
+    return info;
 }
 
-Short
+Ice::Short
 IceWS::EndpointI::type() const
 {
-    return _type;
+    return _delegate->type();
 }
 
-std::string
+const string&
 IceWS::EndpointI::protocol() const
 {
-    return _type == WSEndpointType ? "ws" : "wss";
+    return _delegate->protocol();
+}
+
+void
+IceWS::EndpointI::streamWrite(IceInternal::BasicStream* s) const
+{
+    s->startWriteEncaps();
+    _delegate->streamWriteImpl(s);
+    s->write(_resource, false);
+    s->endWriteEncaps();
 }
 
 Int
@@ -204,28 +116,32 @@ IceWS::EndpointI::timeout() const
 IceInternal::EndpointIPtr
 IceWS::EndpointI::timeout(Int timeout) const
 {
-    IceInternal::EndpointIPtr del = _delegate->timeout(timeout);
-    if(del == _delegate)
+    if(timeout == _delegate->timeout())
     {
         return const_cast<EndpointI*>(this);
     }
     else
     {
-        return new EndpointI(_instance, _type, del, _resource);
+        return new EndpointI(_instance, _delegate->timeout(timeout), _resource);
     }
+}
+
+const string&
+IceWS::EndpointI::connectionId() const
+{
+    return _delegate->connectionId();
 }
 
 IceInternal::EndpointIPtr
 IceWS::EndpointI::connectionId(const string& connectionId) const
 {
-    IceInternal::EndpointIPtr del = _delegate->connectionId(connectionId);
-    if(del == _delegate)
+    if(connectionId == _delegate->connectionId())
     {
         return const_cast<EndpointI*>(this);
     }
     else
     {
-        return new EndpointI(_instance, _type, del, _resource);
+        return new EndpointI(_instance, _delegate->connectionId(connectionId), _resource);
     }
 }
 
@@ -238,27 +154,26 @@ IceWS::EndpointI::compress() const
 IceInternal::EndpointIPtr
 IceWS::EndpointI::compress(bool compress) const
 {
-    IceInternal::EndpointIPtr del = _delegate->compress(compress);
-    if(del == _delegate)
+    if(compress == _delegate->compress())
     {
         return const_cast<EndpointI*>(this);
     }
     else
     {
-        return new EndpointI(_instance, _type, del, _resource);
+        return new EndpointI(_instance, _delegate->compress(compress), _resource);
     }
 }
 
 bool
 IceWS::EndpointI::datagram() const
 {
-    return false;
+    return _delegate->datagram();
 }
 
 bool
 IceWS::EndpointI::secure() const
 {
-    return _type == WSSEndpointType;
+    return _delegate->secure();
 }
 
 IceInternal::TransceiverPtr
@@ -271,15 +186,53 @@ IceWS::EndpointI::transceiver(IceInternal::EndpointIPtr& endp) const
 vector<IceInternal::ConnectorPtr>
 IceWS::EndpointI::connectors(Ice::EndpointSelectionType selType) const
 {
-    return _instance->endpointHostResolver()->resolve(_info->host, _info->port, selType, const_cast<EndpointI*>(this));
+    vector<IceInternal::ConnectorPtr> connectors = _delegate->connectors(selType);
+    for(vector<IceInternal::ConnectorPtr>::iterator p = connectors.begin(); p != connectors.end(); ++p)
+    {
+        *p = new ConnectorI(_instance, *p, _delegate->host(), _delegate->port(), _resource);
+    }
+    return connectors;
 }
 
 void
 IceWS::EndpointI::connectors_async(Ice::EndpointSelectionType selType,
                                    const IceInternal::EndpointI_connectorsPtr& callback) const
 {
-    _instance->endpointHostResolver()->resolve(_info->host, _info->port, selType, const_cast<EndpointI*>(this),
-                                               callback);
+    class CallbackI : public IceInternal::EndpointI_connectors
+    {
+    public:
+
+        CallbackI(const IceInternal::EndpointI_connectorsPtr& callback, const InstancePtr& instance, 
+                  const string& host, int port, const string& resource) : 
+            _callback(callback), _instance(instance), _host(host), _port(port), _resource(resource)
+        {
+        }
+
+        virtual void connectors(const vector<IceInternal::ConnectorPtr>& c)
+        {
+            vector<IceInternal::ConnectorPtr> connectors = c;
+            for(vector<IceInternal::ConnectorPtr>::iterator p = connectors.begin(); p != connectors.end(); ++p)
+            {
+                *p = new ConnectorI(_instance, *p, _host, _port, _resource);
+            }
+            _callback->connectors(connectors);
+        }
+
+        virtual void exception(const Ice::LocalException& ex)
+        {
+            _callback->exception(ex);
+        }
+
+    private:
+        
+        const IceInternal::EndpointI_connectorsPtr _callback;
+        const InstancePtr _instance;
+        const std::string _host;
+        const int _port;
+        const std::string _resource;
+    };
+    _delegate->connectors_async(selType, new CallbackI(callback, _instance, _delegate->host(), _delegate->port(), 
+                                                       _resource));
 }
 
 IceInternal::AcceptorPtr
@@ -287,30 +240,21 @@ IceWS::EndpointI::acceptor(IceInternal::EndpointIPtr& endp, const string& adapte
 {
     IceInternal::EndpointIPtr delEndp;
     IceInternal::AcceptorPtr delAcc = _delegate->acceptor(delEndp, adapterName);
-
-    endp = new EndpointI(_instance, _type, delEndp, _resource);
-
-    return new AcceptorI(_instance, _type, delAcc, adapterName, _info->host, _info->port);
+    if(delEndp)
+    {
+        endp = new EndpointI(_instance, delEndp, _resource);
+    }
+    return new AcceptorI(_instance, delAcc);
 }
 
 vector<IceInternal::EndpointIPtr>
 IceWS::EndpointI::expand() const
 {
-    vector<IceInternal::EndpointIPtr> v = _delegate->expand();
-
-    vector<IceInternal::EndpointIPtr> endps;
-    if(v.empty())
+    vector<IceInternal::EndpointIPtr> endps = _delegate->expand();
+    for(vector<IceInternal::EndpointIPtr>::iterator p = endps.begin(); p != endps.end(); ++p)
     {
-        endps.push_back(const_cast<EndpointI*>(this));
+        *p = p->get() == _delegate.get() ? const_cast<EndpointI*>(this) : new EndpointI(_instance, *p, _resource);
     }
-    else
-    {
-        for(vector<IceInternal::EndpointIPtr>::const_iterator p = v.begin(); p != v.end(); ++p)
-        {
-            endps.push_back(new EndpointI(_instance, _type, *p, _resource));
-        }
-    }
-
     return endps;
 }
 
@@ -325,18 +269,43 @@ IceWS::EndpointI::equivalent(const IceInternal::EndpointIPtr& endpoint) const
     return _delegate->equivalent(wsEndpointI->_delegate);
 }
 
-vector<IceInternal::ConnectorPtr>
-IceWS::EndpointI::connectors(const vector<IceInternal::Address>& addresses,
-                             const IceInternal::NetworkProxyPtr& proxy) const
+Ice::Int
+IceWS::EndpointI::hash() const
 {
-    vector<IceInternal::ConnectorPtr> v = _delegate->connectors(addresses, proxy);
+    int h = _delegate->hash();
+    IceInternal::hashAdd(h, _resource);
+    return h;
+}
 
-    vector<IceInternal::ConnectorPtr> connectors;
-    for(vector<IceInternal::ConnectorPtr>::iterator p = v.begin(); p != v.end(); ++p)
+string
+IceWS::EndpointI::options() const
+{
+    //
+    // WARNING: Certain features, such as proxy validation in Glacier2,
+    // depend on the format of proxy strings. Changes to toString() and
+    // methods called to generate parts of the reference string could break
+    // these features. Please review for all features that depend on the
+    // format of proxyToString() before changing this and related code.
+    //
+    ostringstream s;
+    s << _delegate->options();
+
+    if(!_resource.empty())
     {
-        connectors.push_back(new ConnectorI(_instance, _type, *p, _info->host, _info->port, _resource));
+        s << " -r ";
+        bool addQuote = _resource.find(':') != string::npos;
+        if(addQuote)
+        {
+            s << "\"";
+        }
+        s << _resource;
+        if(addQuote)
+        {
+            s << "\"";
+        }
     }
-    return connectors;
+
+    return s.str();
 }
 
 bool
@@ -351,11 +320,6 @@ IceWS::EndpointI::operator==(const Ice::LocalObject& r) const
     if(this == p)
     {
         return true;
-    }
-
-    if(_type != p->_type)
-    {
-        return false;
     }
 
     if(_delegate != p->_delegate)
@@ -390,15 +354,6 @@ IceWS::EndpointI::operator<(const Ice::LocalObject& r) const
         return false;
     }
 
-    if(_type < p->_type)
-    {
-        return true;
-    }
-    else if (p->_type < _type)
-    {
-        return false;
-    }
-
     if(_delegate < p->_delegate)
     {
         return true;
@@ -418,53 +373,36 @@ IceWS::EndpointI::operator<(const Ice::LocalObject& r) const
     }
 
     return false;
-}
 
-void
-IceWS::EndpointI::hashInit(Ice::Int& h) const
+}    
+
+bool
+IceWS::EndpointI::checkOption(const string& option, const string& argument, const string& endpoint)
 {
-    _delegate->hashInit(h);
-    IceInternal::hashAdd(h, _resource);
-}
-
-string
-IceWS::EndpointI::options() const
-{
-    //
-    // WARNING: Certain features, such as proxy validation in Glacier2,
-    // depend on the format of proxy strings. Changes to toString() and
-    // methods called to generate parts of the reference string could break
-    // these features. Please review for all features that depend on the
-    // format of proxyToString() before changing this and related code.
-    //
-    ostringstream s;
-
-    s << _delegate->options();
-
-    if(!_resource.empty())
+    switch(option[1])
     {
-        s << " -r ";
-        bool addQuote = _resource.find(':') != string::npos;
-        if(addQuote)
+    case 'r':
+    {
+        if(argument.empty())
         {
-            s << "\"";
+            EndpointParseException ex(__FILE__, __LINE__);
+            ex.str = "no argument provided for -r option in endpoint " + endpoint + _delegate->options();
+            throw ex;
         }
-        s << _resource;
-        if(addQuote)
-        {
-            s << "\"";
-        }
+        const_cast<string&>(_resource) = argument;
+        return true;
     }
 
-    return s.str();
+    default:
+    {
+        return false;
+    }
+    }
 }
 
-IceWS::EndpointFactoryI::EndpointFactoryI(const InstancePtr& instance, const IceInternal::EndpointFactoryPtr& del,
-                                          int type, const string& prot) :
+IceWS::EndpointFactoryI::EndpointFactoryI(const InstancePtr& instance, const IceInternal::EndpointFactoryPtr& del) :
     _instance(instance),
-    _delegate(del),
-    _type(type),
-    _protocol(prot)
+    _delegate(del)
 {
 }
 
@@ -475,31 +413,37 @@ IceWS::EndpointFactoryI::~EndpointFactoryI()
 Short
 IceWS::EndpointFactoryI::type() const
 {
-    return _type;
+    return _instance->type();
 }
 
 string
 IceWS::EndpointFactoryI::protocol() const
 {
-    return _protocol;
+    return _instance->protocol();
 }
 
 IceInternal::EndpointIPtr
 IceWS::EndpointFactoryI::create(vector<string>& args, bool oaEndpoint) const
 {
-    IceInternal::EndpointIPtr del = _delegate->create(args, oaEndpoint);
-    return new EndpointI(_instance, _type, del, args, oaEndpoint);
+    return new EndpointI(_instance, _delegate->create(args, oaEndpoint), args);
 }
 
 IceInternal::EndpointIPtr
 IceWS::EndpointFactoryI::read(IceInternal::BasicStream* s) const
 {
-    IceInternal::EndpointIPtr e = _delegate->read(s);
-    return new EndpointI(_instance, _type, e, s);
+    return new EndpointI(_instance, _delegate->read(s), s);
 }
 
 void
 IceWS::EndpointFactoryI::destroy()
 {
-    const_cast<InstancePtr&>(_instance) = 0;
+    _delegate->destroy();
+    _instance = 0;
+}
+
+IceInternal::EndpointFactoryPtr
+IceWS::EndpointFactoryI::clone(const IceInternal::ProtocolInstancePtr&) const
+{
+    assert(false); // We don't support cloning this transport.
+    return 0;
 }

@@ -213,9 +213,9 @@ Transceiver::finishRead(IceInternal::Buffer& buf)
 #endif
 
 string
-Transceiver::type() const
+Transceiver::protocol() const
 {
-    return "test-" + _transceiver->type();
+    return "test-" + _transceiver->protocol();
 }
 
 string

@@ -9,8 +9,7 @@
 
 #include <Ice/TcpTransceiver.h>
 #include <Ice/Connection.h>
-#include <Ice/Instance.h>
-#include <Ice/TraceLevels.h>
+#include <Ice/ProtocolInstance.h>
 #include <Ice/LoggerUtil.h>
 #include <Ice/Buffer.h>
 #include <Ice/LocalException.h>
@@ -142,19 +141,20 @@ IceInternal::TcpTransceiver::initialize(Buffer& readBuffer, Buffer& writeBuffer,
     }
     catch(const Ice::LocalException& ex)
     {
-        if(_traceLevels->network >= 2)
+        if(_instance->traceLevel() >= 2)
         {
-            Trace out(_logger, _traceLevels->networkCat);
-            out << "failed to establish tcp connection\n" << fdToString(_fd, _proxy, _addr, false) << "\n" << ex;
+            Trace out(_instance->logger(), _instance->traceCategory());
+            out << "failed to establish " << _instance->protocol() << " connection\n"
+                << fdToString(_fd, _proxy, _addr, false) << "\n" << ex;
         }
         throw;
     }
 
     assert(_state == StateConnected);
-    if(_traceLevels->network >= 1)
+    if(_instance->traceLevel() >= 1)
     {
-        Trace out(_logger, _traceLevels->networkCat);
-        out << "tcp connection established\n" << _desc;
+        Trace out(_instance->logger(), _instance->traceCategory());
+        out << _instance->protocol() << " connection established\n" << _desc;
     }
     return SocketOperationNone;
 }
@@ -174,10 +174,10 @@ IceInternal::TcpTransceiver::close()
     // If the transceiver is not connected, its description is simply "not connected",
     // which isn't very helpful.
     //
-    if(_state == StateConnected && _traceLevels->network >= 1)
+    if(_state == StateConnected && _instance->traceLevel() >= 1)
     {
-        Trace out(_logger, _traceLevels->networkCat);
-        out << "closing tcp connection\n" << toString();
+        Trace out(_instance->logger(), _instance->traceCategory());
+        out << "closing " << _instance->protocol() << " connection\n" << toString();
     }
 
     assert(_fd != INVALID_SOCKET);
@@ -258,15 +258,16 @@ IceInternal::TcpTransceiver::write(Buffer& buf)
             }
         }
 
-        if(_traceLevels->network >= 3)
+        if(_instance->traceLevel() >= 3)
         {
-            Trace out(_logger, _traceLevels->networkCat);
-            out << "sent " << ret << " of " << packetSize << " bytes via tcp\n" << toString();
+            Trace out(_instance->logger(), _instance->traceCategory());
+            out << "sent " << ret << " of " << packetSize << " bytes via " << _instance->protocol() << '\n'
+                << toString();
         }
 
-        if(_stats)
+        if(_instance->stats())
         {
-            _stats->bytesSent(type(), static_cast<Int>(ret));
+            _instance->stats()->bytesSent(_instance->protocol(), static_cast<Int>(ret));
         }
 
         buf.i += ret;
@@ -336,15 +337,16 @@ IceInternal::TcpTransceiver::read(Buffer& buf, bool&)
             }
         }
 
-        if(_traceLevels->network >= 3)
+        if(_instance->traceLevel() >= 3)
         {
-            Trace out(_logger, _traceLevels->networkCat);
-            out << "received " << ret << " of " << packetSize << " bytes via tcp\n" << toString();
+            Trace out(_instance->logger(), _instance->traceCategory());
+            out << "received " << ret << " of " << packetSize << " bytes via " << _instance->protocol() << '\n' 
+                << toString();
         }
 
-        if(_stats)
+        if(_instance->stats())
         {
-            _stats->bytesReceived(type(), static_cast<Int>(ret));
+            _instance->stats()->bytesReceived(_instance->protocol(), static_cast<Int>(ret));
         }
 
         buf.i += ret;
@@ -423,21 +425,22 @@ IceInternal::TcpTransceiver::finishWrite(Buffer& buf)
         }
     }
 
-    if(_traceLevels->network >= 3)
+    if(_instance->traceLevel() >= 3)
     {
         int packetSize = static_cast<int>(buf.b.end() - buf.i);
         if(_maxSendPacketSize > 0 && packetSize > _maxSendPacketSize)
         {
             packetSize = _maxSendPacketSize;
         }
-        Trace out(_logger, _traceLevels->networkCat);
+        Trace out(_instance->logger(), _instance->traceCategory());
 
-        out << "sent " << _write.count << " of " << packetSize << " bytes via tcp\n" << toString();
+        out << "sent " << _write.count << " of " << packetSize << " bytes via " << _instance->protocol() << '\n' 
+            << toString();
     }
 
-    if(_stats)
+    if(_instance->stats())
     {
-        _stats->bytesSent(type(), _write.count);
+        _instance->stats()->bytesSent(_instance->protocol(), _write.count);
     }
 
     buf.i += _write.count;
@@ -502,20 +505,21 @@ IceInternal::TcpTransceiver::finishRead(Buffer& buf)
         throw ex;
     }
 
-    if(_traceLevels->network >= 3)
+    if(_instance->traceLevel() >= 3)
     {
         int packetSize = static_cast<int>(buf.b.end() - buf.i);
         if(_maxReceivePacketSize > 0 && packetSize > _maxReceivePacketSize)
         {
             packetSize = _maxReceivePacketSize;
         }
-        Trace out(_logger, _traceLevels->networkCat);
-        out << "received " << _read.count << " of " << packetSize << " bytes via tcp\n" << toString();
+        Trace out(_instance->logger(), _instance->traceCategory());
+        out << "received " << _read.count << " of " << packetSize << " bytes via " << _instance->protocol() << '\n' 
+            << toString();
     }
 
-    if(_stats)
+    if(_instance->stats())
     {
-        _stats->bytesReceived(type(), static_cast<Int>(_read.count));
+        _instance->stats()->bytesReceived(_instance->protocol(), static_cast<Int>(_read.count));
     }
 
     buf.i += _read.count;
@@ -523,9 +527,9 @@ IceInternal::TcpTransceiver::finishRead(Buffer& buf)
 #endif
 
 string
-IceInternal::TcpTransceiver::type() const
+IceInternal::TcpTransceiver::protocol() const
 {
-    return "tcp";
+    return _instance->protocol();
 }
 
 string
@@ -551,14 +555,12 @@ IceInternal::TcpTransceiver::checkSendSize(const Buffer& buf, size_t messageSize
     }
 }
 
-IceInternal::TcpTransceiver::TcpTransceiver(const InstancePtr& instance, SOCKET fd, const NetworkProxyPtr& proxy,
-                                            const Address& addr) :
+IceInternal::TcpTransceiver::TcpTransceiver(const ProtocolInstancePtr& instance, SOCKET fd, 
+                                            const NetworkProxyPtr& proxy, const Address& addr) :
     NativeInfo(fd),
+    _instance(instance),
     _proxy(proxy),
     _addr(addr),
-    _traceLevels(instance->traceLevels()),
-    _logger(instance->initializationData().logger),
-    _stats(instance->initializationData().stats),
     _state(StateNeedConnect)
 #ifdef ICE_USE_IOCP
     , _read(SocketOperationRead),
@@ -567,7 +569,7 @@ IceInternal::TcpTransceiver::TcpTransceiver(const InstancePtr& instance, SOCKET 
 {
     setBlock(_fd, false);
 
-    setTcpBufSize(_fd, instance->initializationData().properties, _logger);
+    setTcpBufSize(_fd, _instance->properties(), _instance->logger());
 
 #ifdef ICE_USE_IOCP
     //
@@ -589,12 +591,10 @@ IceInternal::TcpTransceiver::TcpTransceiver(const InstancePtr& instance, SOCKET 
 #endif
 }
 
-IceInternal::TcpTransceiver::TcpTransceiver(const InstancePtr& instance, SOCKET fd) :
+IceInternal::TcpTransceiver::TcpTransceiver(const ProtocolInstancePtr& instance, SOCKET fd) :
     NativeInfo(fd),
+    _instance(instance),
     _addr(Address()),
-    _traceLevels(instance->traceLevels()),
-    _logger(instance->initializationData().logger),
-    _stats(instance->initializationData().stats),
     _state(StateConnected),
     _desc(fdToString(_fd))
 #ifdef ICE_USE_IOCP
@@ -604,7 +604,7 @@ IceInternal::TcpTransceiver::TcpTransceiver(const InstancePtr& instance, SOCKET 
 {
     setBlock(_fd, false);
 
-    setTcpBufSize(_fd, instance->initializationData().properties, _logger);
+    setTcpBufSize(_fd, _instance->properties(), _instance->logger());
 
 #ifdef ICE_USE_IOCP
     //
@@ -642,10 +642,10 @@ IceInternal::TcpTransceiver::connect()
         {
             _state = StateConnected;
             _desc = fdToString(_fd, _proxy, _addr, true);
-            if(_traceLevels->network >= 1)
+            if(_instance->traceLevel() >= 1)
             {
-                Trace out(_logger, _traceLevels->networkCat);
-                out << "tcp connection established\n" << _desc;
+                Trace out(_instance->logger(), _instance->traceCategory());
+                out << _instance->protocol() << " connection established\n" << _desc;
             }
         }
         else

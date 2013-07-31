@@ -7,23 +7,22 @@
 //
 // **********************************************************************
 
-#ifndef ICE_SSL_INSTANCE_F_H
-#define ICE_SSL_INSTANCE_F_H
+#ifndef ICE_ENDPOINT_I_F_H
+#define ICE_ENDPOINT_I_F_H
 
 #include <IceUtil/Shared.h>
-
 #include <Ice/Handle.h>
 
-namespace IceSSL
+namespace IceInternal
 {
 
-class Instance;
-IceUtil::Shared* upCast(IceSSL::Instance*);
-typedef IceInternal::Handle<Instance> InstancePtr;
+class EndpointI;
+ICE_API IceUtil::Shared* upCast(EndpointI*);
+typedef Handle<EndpointI> EndpointIPtr;
 
-class SharedInstance;
-IceUtil::Shared* upCast(IceSSL::SharedInstance*);
-typedef IceInternal::Handle<SharedInstance> SharedInstancePtr;
+class EndpointI_connectors;
+ICE_API IceUtil::Shared* upCast(EndpointI_connectors*);
+typedef Handle<EndpointI_connectors> EndpointI_connectorsPtr;
 
 }
 

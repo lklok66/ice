@@ -9,10 +9,9 @@
 
 #include <IceWS/PluginI.h>
 #include <IceWS/Instance.h>
-#include <IceWS/TransceiverI.h>
-
-#include <Ice/LocalException.h>
-#include <Ice/Object.h>
+#include <IceWS/EndpointI.h>
+#include <IceWS/EndpointInfo.h>
+#include <Ice/ProtocolPluginFacade.h>
 
 using namespace std;
 using namespace Ice;
@@ -27,8 +26,7 @@ extern "C"
 ICE_DECLSPEC_EXPORT Ice::Plugin*
 createIceWS(const CommunicatorPtr& communicator, const string& /*name*/, const StringSeq& /*args*/)
 {
-    PluginI* plugin = new PluginI(communicator);
-    return plugin;
+    return new PluginI(communicator);
 }
 
 }
@@ -38,18 +36,27 @@ createIceWS(const CommunicatorPtr& communicator, const string& /*name*/, const S
 //
 IceWS::PluginI::PluginI(const Ice::CommunicatorPtr& communicator)
 {
-    _instance = new Instance(communicator);
+    IceInternal::ProtocolPluginFacadePtr facade = getProtocolPluginFacade(communicator);
+    IceInternal::EndpointFactoryPtr tcpFactory = facade->getEndpointFactory(TCPEndpointType);
+    if(tcpFactory)
+    {
+        InstancePtr tcpInstance = new Instance(communicator, WSEndpointType, "ws");
+        facade->addEndpointFactory(new EndpointFactoryI(tcpInstance, tcpFactory->clone(tcpInstance)));
+    }
+    IceInternal::EndpointFactoryPtr sslFactory = facade->getEndpointFactory(2); // 2 = SSLEndpointType
+    if(sslFactory)
+    {
+        InstancePtr sslInstance = new Instance(communicator, WSSEndpointType, "wss");
+        facade->addEndpointFactory(new EndpointFactoryI(sslInstance, sslFactory->clone(sslInstance)));
+    }
 }
 
 void
 IceWS::PluginI::initialize()
 {
-    _instance->initialize();
 }
 
 void
 IceWS::PluginI::destroy()
 {
-    _instance->destroy();
-    _instance = 0;
 }

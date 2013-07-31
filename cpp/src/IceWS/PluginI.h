@@ -28,10 +28,6 @@ public:
     //
     virtual void initialize();
     virtual void destroy();
-
-private:
-
-    InstancePtr _instance;
 };
 
 }

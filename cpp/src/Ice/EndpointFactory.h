@@ -13,7 +13,7 @@
 #include <IceUtil/Shared.h>
 #include <Ice/EndpointIF.h>
 #include <Ice/EndpointFactoryF.h>
-#include <Ice/Protocol.h>
+#include <Ice/ProtocolInstanceF.h>
 
 namespace IceInternal
 {
@@ -31,6 +31,8 @@ public:
     virtual EndpointIPtr create(std::vector<std::string>&, bool) const = 0;
     virtual EndpointIPtr read(BasicStream*) const = 0;
     virtual void destroy() = 0;
+
+    virtual EndpointFactoryPtr clone(const ProtocolInstancePtr&) const = 0;
 
 protected:
 

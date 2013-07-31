@@ -10,10 +10,7 @@
 #ifndef ICE_TCP_TRANSCEIVER_H
 #define ICE_TCP_TRANSCEIVER_H
 
-#include <Ice/InstanceF.h>
-#include <Ice/TraceLevelsF.h>
-#include <Ice/LoggerF.h>
-#include <Ice/StatsF.h>
+#include <Ice/ProtocolInstanceF.h>
 #include <Ice/Transceiver.h>
 #include <Ice/Network.h>
 
@@ -52,15 +49,15 @@ public:
     virtual void startRead(Buffer&);
     virtual void finishRead(Buffer&);
 #endif
-    virtual std::string type() const;
+    virtual std::string protocol() const;
     virtual std::string toString() const;
     virtual Ice::ConnectionInfoPtr getInfo() const;
     virtual void checkSendSize(const Buffer&, size_t);
 
 private:
 
-    TcpTransceiver(const InstancePtr&, SOCKET, const NetworkProxyPtr&, const Address&);
-    TcpTransceiver(const InstancePtr&, SOCKET);
+    TcpTransceiver(const ProtocolInstancePtr&, SOCKET, const NetworkProxyPtr&, const Address&);
+    TcpTransceiver(const ProtocolInstancePtr&, SOCKET);
     virtual ~TcpTransceiver();
 
     void connect();
@@ -68,11 +65,9 @@ private:
     friend class TcpConnector;
     friend class TcpAcceptor;
 
+    const ProtocolInstancePtr _instance;
     const NetworkProxyPtr _proxy;
     const Address _addr;
-    const TraceLevelsPtr _traceLevels;
-    const Ice::LoggerPtr _logger;
-    const Ice::StatsPtr _stats;
     
     State _state;
     std::string _desc;

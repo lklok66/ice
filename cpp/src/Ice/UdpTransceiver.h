@@ -10,14 +10,11 @@
 #ifndef ICE_UDP_TRANSCEIVER_H
 #define ICE_UDP_TRANSCEIVER_H
 
-#include <Ice/InstanceF.h>
-#include <Ice/TraceLevelsF.h>
-#include <Ice/LoggerF.h>
-#include <Ice/StatsF.h>
-#include <Ice/Transceiver.h>
-#include <Ice/Protocol.h>
-#include <Ice/Network.h>
 #include <IceUtil/Mutex.h>
+
+#include <Ice/ProtocolInstanceF.h>
+#include <Ice/Transceiver.h>
+#include <Ice/Network.h>
 
 #ifdef ICE_OS_WINRT
 #   include <deque>
@@ -58,7 +55,7 @@ public:
     virtual void startRead(Buffer&);
     virtual void finishRead(Buffer&);
 #endif
-    virtual std::string type() const;
+    virtual std::string protocol() const;
     virtual std::string toString() const;
     virtual Ice::ConnectionInfoPtr getInfo() const;
     virtual void checkSendSize(const Buffer&, size_t);
@@ -67,12 +64,12 @@ public:
 
 private:
 
-    UdpTransceiver(const InstancePtr&, const Address&, const std::string&, int);
-    UdpTransceiver(const InstancePtr&, const std::string&, int, const std::string&, bool);
+    UdpTransceiver(const ProtocolInstancePtr&, const Address&, const std::string&, int);
+    UdpTransceiver(const ProtocolInstancePtr&, const std::string&, int, const std::string&, bool);
 
     virtual ~UdpTransceiver();
 
-    void setBufSize(const InstancePtr&);
+    void setBufSize(const Ice::PropertiesPtr&);
 
 #ifdef ICE_OS_WINRT
     bool checkIfErrorOrCompleted(SocketOperation, Windows::Foundation::IAsyncInfo^);
@@ -83,9 +80,7 @@ private:
     friend class UdpEndpointI;
     friend class UdpConnector;
 
-    const TraceLevelsPtr _traceLevels;
-    const Ice::LoggerPtr _logger;
-    const Ice::StatsPtr _stats;
+    const ProtocolInstancePtr _instance;
     const bool _incoming;
 
     const Address _addr;

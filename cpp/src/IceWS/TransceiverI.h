@@ -46,16 +46,15 @@ public:
     virtual void startRead(IceInternal::Buffer&);
     virtual void finishRead(IceInternal::Buffer&);
 #endif
-    virtual std::string type() const;
+    virtual std::string protocol() const;
     virtual std::string toString() const;
     virtual Ice::ConnectionInfoPtr getInfo() const;
     virtual void checkSendSize(const IceInternal::Buffer&, size_t);
 
 private:
 
-    TransceiverI(const InstancePtr&, Ice::Short, const IceInternal::TransceiverPtr&, const std::string&, int,
-                 const std::string&);
-    TransceiverI(const InstancePtr&, Ice::Short, const IceInternal::TransceiverPtr&);
+    TransceiverI(const InstancePtr&, const IceInternal::TransceiverPtr&, const std::string&, int, const std::string&);
+    TransceiverI(const InstancePtr&, const IceInternal::TransceiverPtr&);
     virtual ~TransceiverI();
 
     void handleRequest(IceInternal::Buffer&);
@@ -73,14 +72,10 @@ private:
     friend class AcceptorI;
 
     const InstancePtr _instance;
-    const Ice::Short _type;
     const IceInternal::TransceiverPtr _delegate;
     const std::string _host;
     const int _port;
     const std::string _resource;
-
-    const Ice::LoggerPtr _logger;
-
     const bool _incoming;
 
     enum State
