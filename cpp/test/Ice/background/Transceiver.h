@@ -48,6 +48,7 @@ private:
 
     IceInternal::Buffer _readBuffer;
     IceInternal::Buffer::Container::const_iterator _readBufferPos;
+    bool _buffered;
 };
 
 #endif

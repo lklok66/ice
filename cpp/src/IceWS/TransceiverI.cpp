@@ -1359,7 +1359,10 @@ IceWS::TransceiverI::postWrite(Buffer& buf)
 
     if(!_incoming && _writePayloadLength > 0)
     {
-        buf.i = buf.b.begin() + _writePayloadLength;
+        if(_writeBuffer.i == _writeBuffer.b.end())
+        {
+            buf.i = buf.b.begin() + _writePayloadLength;
+        }
     }
 
     if(buf.i == buf.b.end())

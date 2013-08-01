@@ -53,6 +53,7 @@ OBJS		= Acceptor.obj \
 		  Incoming.obj \
 		  Initialize.obj \
 		  Instance.obj \
+		  IPEndpointI.obj \
 		  LocalException.obj \
 		  LocalObject.obj \
 		  LocatorInfo.obj \
@@ -85,6 +86,7 @@ OBJS		= Acceptor.obj \
 		  Properties.obj \
 		  PropertyNames.obj \
 		  Protocol.obj \
+		  ProtocolInstance.obj \
 		  ProtocolPluginFacade.obj \
 		  ProxyFactory.obj \
 		  Proxy.obj \

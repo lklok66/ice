@@ -92,7 +92,7 @@ Transceiver::read(IceInternal::Buffer& buf, bool& moreData)
 
     _configuration->checkReadException();
 
-    if(_configuration->buffered())
+    if(_buffered)
     {
         while(buf.i != buf.b.end())
         {
@@ -147,7 +147,7 @@ void
 Transceiver::startRead(IceInternal::Buffer& buf)
 {
     _configuration->checkReadException();
-    if(_configuration->buffered())
+    if(_buffered)
     {
         size_t available = _readBuffer.i - _readBufferPos;
         if(available > 0)
@@ -171,6 +171,7 @@ Transceiver::startRead(IceInternal::Buffer& buf)
         }
         else
         {
+            assert(buf.i == buf.b.end());
             _transceiver->getNativeInfo()->completed(IceInternal::SocketOperationRead);
         }
     }
@@ -184,7 +185,7 @@ void
 Transceiver::finishRead(IceInternal::Buffer& buf)
 {
     _configuration->checkReadException();
-    if(_configuration->buffered())
+    if(_buffered)
     {
         if(buf.i != buf.b.end())
         {
@@ -243,7 +244,8 @@ Transceiver::Transceiver(const IceInternal::TransceiverPtr& transceiver) :
     _transceiver(transceiver),
     _configuration(Configuration::getInstance()),
     _initialized(false),
-    _readBuffer(0)
+    _readBuffer(0),
+    _buffered(_configuration->buffered())
 {
     _readBuffer.b.resize(1024 * 8); // 8KB buffer
     _readBufferPos = _readBuffer.b.begin();

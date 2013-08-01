@@ -68,6 +68,11 @@ public:
         _response.called();
     }
 
+    void 
+    responseNoOp()
+    {
+    }
+
     void noResponse()
     {
         test(false);
@@ -313,14 +318,26 @@ allTests(const Ice::CommunicatorPtr& communicator)
     }
     cout << "ok" << endl;
 
-    cout << "testing buffered transport... " << flush;
+    const bool ws = communicator->getProperties()->getProperty("Ice.Default.Protocol") == "test-ws";
+    const bool wss = communicator->getProperties()->getProperty("Ice.Default.Protocol") == "test-wss";
+    if(!ws && !wss)
     {
+        cout << "testing buffered transport... " << flush;
+
         configuration->buffered(true);
         backgroundController->buffered(true);
+        background->begin_op();
+        background->ice_getCachedConnection()->close(true);
+        background->begin_op();
+        
         Ice::AsyncResultPtr r;
+        OpAMICallbackPtr cb = new OpAMICallback();
+        Callback_Background_opPtr callback = newCallback_Background_op(cb, 
+                                                                       &OpAMICallback::responseNoOp, 
+                                                                       &OpAMICallback::noException);
         for(int i = 0; i < 10000; ++i)
         {
-            r = background->begin_op();
+            r = background->begin_op(callback);
             if(i % 50 == 0)
             {
                 backgroundController->holdAdapter();
@@ -332,8 +349,9 @@ allTests(const Ice::CommunicatorPtr& communicator)
             }
         }
         r->waitForCompleted();
+
+        cout << "ok" << endl;
     }
-    cout << "ok" << endl;
 
     return background;
 }

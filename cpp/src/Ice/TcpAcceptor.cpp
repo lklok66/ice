@@ -11,7 +11,7 @@
 #include <Ice/TcpTransceiver.h>
 #include <Ice/ProtocolInstance.h>
 #include <Ice/LoggerUtil.h>
-#include <Ice/Exception.h>
+#include <Ice/LocalException.h>
 #include <Ice/Properties.h>
 #include <IceUtil/StringUtil.h>
 

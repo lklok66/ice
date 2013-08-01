@@ -1920,7 +1920,7 @@ def runTests(start, expanded, num = 0, script = False):
                 print("%s*** test not supported with mono%s" % (prefix, suffix))
                 continue
 
-            if (args.find("ssl") != -1 and args.find("wss") != -1) and ("nossl" in config):
+            if (args.find("ssl") != -1 or args.find("wss") != -1) and ("nossl" in config):
                 print("%s*** test not supported with IceSSL%s" % (prefix, suffix))
                 continue
 

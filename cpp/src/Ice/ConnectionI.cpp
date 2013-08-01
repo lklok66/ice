@@ -1359,6 +1359,7 @@ Ice::ConnectionI::message(ThreadPoolCurrent& current)
                 }
                 else if(_observer)
                 {
+                    assert(_writeStream.i == _writeStream.b.end());
                     _observer.finishWrite(_writeStream);
                 }
             }
@@ -1378,6 +1379,7 @@ Ice::ConnectionI::message(ThreadPoolCurrent& current)
                 }
                 else if(_observer)
                 {
+                    assert(_readStream.i == _readStream.b.end());
                     _observer.finishRead(_readStream);
                 }
 
@@ -2474,13 +2476,13 @@ Ice::ConnectionI::sendNextMessage(vector<SentCallback>& callbacks)
             }
 
             //
-            // If we are in the closed state, don't continue sending.
+            // If we are in the closed state or if the close is
+            // pending, don't continue sending.
             //
-            // The connection can be in the closed state if parseMessage
-            // (called before sendNextMessage by message()) closes the
-            // connection.
+            // This can occur if parseMessage (called before
+            // sendNextMessage by message()) closes the connection.
             // 
-            if(_state >= StateClosed)
+            if(_state >= StateClosingPending)
             {
                 return SocketOperationNone;
             }

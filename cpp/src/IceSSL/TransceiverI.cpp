@@ -424,6 +424,11 @@ IceSSL::TransceiverI::write(IceInternal::Buffer& buf)
         return writeRaw(buf) ? IceInternal::SocketOperationNone : IceInternal::SocketOperationWrite;
     }
 
+    if(buf.i == buf.b.end())
+    {
+        return IceInternal::SocketOperationNone;
+    }
+
 #ifdef ICE_USE_IOCP
     if(_writeI != _writeBuffer.end())
     {
@@ -433,11 +438,6 @@ IceSSL::TransceiverI::write(IceInternal::Buffer& buf)
         }
     }
 #endif
-
-    if(buf.i == buf.b.end())
-    {
-        return IceInternal::SocketOperationNone;
-    }
 
     //
     // It's impossible for packetSize to be more than an Int.
@@ -580,6 +580,11 @@ IceSSL::TransceiverI::read(IceInternal::Buffer& buf, bool&)
         return readRaw(buf) ? IceInternal::SocketOperationNone : IceInternal::SocketOperationRead;
     }
 
+    if(buf.i == buf.b.end())
+    {
+        return IceInternal::SocketOperationNone;
+    }
+
 #ifdef ICE_USE_IOCP
     if(_readI != _readBuffer.end())
     {
@@ -589,11 +594,6 @@ IceSSL::TransceiverI::read(IceInternal::Buffer& buf, bool&)
         }
     }
 #endif
-
-    if(buf.i == buf.b.end())
-    {
-        return IceInternal::SocketOperationNone;
-    }
 
     //
     // It's impossible for packetSize to be more than an Int.
@@ -771,6 +771,23 @@ IceSSL::TransceiverI::startWrite(IceInternal::Buffer& buf)
         return packetSize == actualSize;
     }
 
+    if(_writeBuffer.empty() || _writeI == _writeBuffer.end())
+    {
+        assert(!buf.b.empty() && buf.i != buf.b.end());
+
+        ERR_clear_error(); // Clear any spurious errors.
+        _sentBytes = SSL_write(_ssl, reinterpret_cast<void*>(&*buf.i), static_cast<int>(buf.b.end() - buf.i));
+        assert(_sentBytes > 0);
+        assert(BIO_ctrl_pending(_iocpBio));
+        _writeBuffer.resize(BIO_ctrl_pending(_iocpBio));
+#ifndef NDEBUG
+        int n =
+#endif
+            BIO_read(_iocpBio, &_writeBuffer[0], static_cast<int>(_writeBuffer.size()));
+        assert(n == static_cast<int>(_writeBuffer.size()));
+        _writeI = _writeBuffer.begin();
+    }
+
     assert(!_writeBuffer.empty() && _writeI != _writeBuffer.end());
 
     const int packetSize = static_cast<int>(_writeBuffer.end() - _writeI);
@@ -834,12 +851,29 @@ IceSSL::TransceiverI::startRead(IceInternal::Buffer& buf)
         assert(!BIO_ctrl_get_read_request(_iocpBio));
 
         ERR_clear_error(); // Clear any spurious errors.
-#ifndef NDEBUG
-        int ret =
-#endif
-            SSL_read(_ssl, reinterpret_cast<void*>(&*buf.i), static_cast<int>(buf.b.end() - buf.i));
-        assert(ret <= 0 && SSL_get_error(_ssl, ret) == SSL_ERROR_WANT_READ);
+        int packetSize = static_cast<int>(buf.b.end() - buf.i);
+        int ret = SSL_read(_ssl, reinterpret_cast<void*>(&*buf.i), packetSize);
+        if(ret > 0)
+        {
+            if(_instance->traceLevel() >= 3)
+            {
+                Trace out(_instance->logger(), _instance->traceCategory());
+                out << "received " << ret << " of " << packetSize << " bytes via " << protocol() << "\n" << toString();
+            }
 
+            if(_instance->stats())
+            {
+                _instance->stats()->bytesReceived(_instance->protocol(), static_cast<Int>(ret));
+            }
+
+            buf.i += ret;
+
+            _read.count = 0;
+            completed(IceInternal::SocketOperationRead);
+            return;
+        }
+
+        assert(ret <= 0 && SSL_get_error(_ssl, ret) == SSL_ERROR_WANT_READ);
         assert(BIO_ctrl_get_read_request(_iocpBio));
         _readBuffer.resize(BIO_ctrl_get_read_request(_iocpBio));
         _readI = _readBuffer.begin();
@@ -870,7 +904,7 @@ IceSSL::TransceiverI::finishRead(IceInternal::Buffer& buf)
             throw ex;
         }
     }
-    else if(_read.count == 0)
+    else if(_read.count == 0 && _readI < _readBuffer.end())
     {
         ConnectionLostException ex(__FILE__, __LINE__);
         ex.error = 0;
@@ -881,7 +915,7 @@ IceSSL::TransceiverI::finishRead(IceInternal::Buffer& buf)
     {
         buf.i += _read.count;
     }
-    else
+    else if(_read.count > 0)
     {
         _readI += _read.count;
 
