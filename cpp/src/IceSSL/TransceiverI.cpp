@@ -1360,7 +1360,7 @@ IceSSL::TransceiverI::writeRaw(IceInternal::Buffer& buf)
 
         if(_instance->stats())
         {
-            _instance->stats()->bytesSent("tcp", static_cast<Int>(ret));
+            _instance->stats()->bytesSent(protocol(), static_cast<Int>(ret));
         }
 
         buf.i += ret;
@@ -1428,12 +1428,12 @@ IceSSL::TransceiverI::readRaw(IceInternal::Buffer& buf)
         if(_instance->traceLevel() >= 3)
         {
             Trace out(_instance->logger(), _instance->traceCategory());
-            out << "received " << ret << " of " << packetSize << " bytes via tcp\n" << toString();
+            out << "received " << ret << " of " << packetSize << " bytes via " << protocol() << "\n" << toString();
         }
 
         if(_instance->stats())
         {
-            _instance->stats()->bytesReceived("tcp", static_cast<Int>(ret));
+            _instance->stats()->bytesReceived(protocol(), static_cast<Int>(ret));
         }
 
         buf.i += ret;
