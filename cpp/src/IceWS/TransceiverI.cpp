@@ -331,8 +331,7 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& h
         if(_instance->traceLevel() >= 2)
         {
             Trace out(_instance->logger(), _instance->traceCategory());
-            out << "failed to establish " << protocol() << " connection\n";
-            out << toString() << "\n" << ex;
+            out << protocol() << " connection HTTP upgrade request failed\n" << toString() << "\n" << ex;
         }
         throw;
     }
@@ -342,11 +341,11 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& h
         Trace out(_instance->logger(), _instance->traceCategory());
         if(_incoming)
         {
-            out << "accepted " << protocol() << " connection\n" << toString();
+            out << "accepted " << protocol() << " connection HTTP upgrade request\n" << toString();
         }
         else
         {
-            out << protocol() << " connection established\n" << toString();
+            out << protocol() << " connection HTTP upgrade request accepted\n" << toString();
         }
     }
 
@@ -676,7 +675,6 @@ IceWS::TransceiverI::getInfo() const
     info->localPort = di->localPort;
     info->remoteAddress = di->remoteAddress;
     info->remotePort = di->remotePort;
-    info->resource = _resource;
     return info;
 }
 

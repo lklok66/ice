@@ -23,8 +23,6 @@ module IceWS
  **/
 local class ConnectionInfo extends Ice::IPConnectionInfo
 {
-    /** The Uniform Resource Identifier. */
-    string resource = "";
 };
 
 };
