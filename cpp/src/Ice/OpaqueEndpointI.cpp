@@ -115,7 +115,7 @@ IceInternal::OpaqueEndpointI::type() const
     return _type;
 }
 
-const std::string&
+const string&
 IceInternal::OpaqueEndpointI::protocol() const
 {
     return opaqueEndpointProtocol;

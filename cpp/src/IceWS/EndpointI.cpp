@@ -227,9 +227,9 @@ IceWS::EndpointI::connectors_async(Ice::EndpointSelectionType selType,
         
         const IceInternal::EndpointI_connectorsPtr _callback;
         const InstancePtr _instance;
-        const std::string _host;
+        const string _host;
         const int _port;
-        const std::string _resource;
+        const string _resource;
     };
     _delegate->connectors_async(selType, new CallbackI(callback, _instance, _delegate->host(), _delegate->port(), 
                                                        _resource));

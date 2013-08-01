@@ -26,4 +26,3 @@ IceWS::Instance::Instance(const CommunicatorPtr& communicator, Short type, const
 IceWS::Instance::~Instance()
 {
 }
-

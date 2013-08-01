@@ -347,7 +347,7 @@ IceSSL::TransceiverI::initialize(IceInternal::Buffer& readBuffer, IceInternal::B
         }
         else
         {
-            out << "ssl connection established\n" << _desc;
+            out << _instance->protocol() << " connection established\n" << _desc;
         }
     }
 
@@ -957,7 +957,7 @@ IceSSL::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const
         if(_instance->traceLevel() >= 1)
         {
             Trace out(_instance->logger(), _instance->traceCategory());
-            out << "ssl connection established\n" << _desc;
+            out << _instance->protocol() << " connection established\n" << _desc;
         }
     }
     else

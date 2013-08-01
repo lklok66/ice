@@ -80,7 +80,7 @@ IceInternal::EndpointI::initWithOptions(vector<string>& args)
 }
 
 bool
-IceInternal::EndpointI::checkOption(const std::string&, const std::string&, const std::string&)
+IceInternal::EndpointI::checkOption(const string&, const string&, const string&)
 {
     // Must be overriden to check for options.
     return false;
