@@ -362,7 +362,21 @@ IceWS::TransceiverI::closing(bool initiator, const Ice::LocalException& reason)
         out << "gracefully closing " << protocol() << " connection\n" << toString();
     }
 
-    if(_state >= StateClosingRequestPending)
+    if(_state == StateClosingRequestPending && _closingInitiator)
+    {
+        //
+        // If we initiated a close connection but also received a
+        // close connection, we assume we didn't initiated the
+        // connection and we send the close frame now. This is to
+        // ensure that if both peers close the connection at the same
+        // time we don't hang having both peer waiting for the close
+        // frame of the other.
+        //
+        assert(!initiator);
+        _closingInitiator = false;
+        return SocketOperationWrite;
+    }
+    else if(_state >= StateClosingRequestPending)
     {
         return SocketOperationNone;
     }
@@ -1096,8 +1110,17 @@ IceWS::TransceiverI::preRead(Buffer& buf)
                 out << "received " << protocol() << " connection close frame\n" << toString();
             }
 
-            if(_closingInitiator && _state == StateClosingRequestPending)
+            if(_state == StateClosingRequestPending)
             {
+                //
+                // If we receive a close frame while we were actually
+                // waiting to send one, change the role and send a
+                // close frame response.
+                //
+                if(!_closingInitiator)
+                {
+                    _closingInitiator = true;
+                }
                 _state = StateClosingResponsePending;
                 return SocketOperationWrite;
             }
