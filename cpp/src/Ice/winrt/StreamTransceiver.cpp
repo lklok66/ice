@@ -86,7 +86,7 @@ IceInternal::StreamTransceiver::setCompletedHandler(SocketOperationCompletedHand
 }
 
 SocketOperation
-IceInternal::StreamTransceiver::initialize(Buffer&, Buffer&)
+IceInternal::StreamTransceiver::initialize(Buffer&, Buffer&,bool&)
 {
     if(_state == StateNeedConnect)
     {

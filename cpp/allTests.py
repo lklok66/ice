@@ -100,7 +100,7 @@ tests = [
     ("IceGrid/replication", ["service", "novc90", "nomingw", "nomx"]),
     ("IceGrid/allocation", ["service", "novc90", "nomingw"]),
     ("IceGrid/distribution", ["service", "novc90", "nomingw"]),
-    ("IceGrid/admin", ["service", "novc90", "nomingw"]),
+    ("IceGrid/admin", ["service", "novc90", "nomingw","nows"]),
     ("Glacier2/router", ["service", "novc90", "nomingw"]),
     ("Glacier2/attack", ["service", "novc90", "nomingw", "nomx"]),
     ("Glacier2/override", ["service", "novc90", "nomingw"]),

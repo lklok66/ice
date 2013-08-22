@@ -431,7 +431,12 @@ IceWS::TransceiverI::write(Buffer& buf)
         }
     }
 
-    if(!buf.b.empty() && buf.i == buf.b.end())
+    //
+    // Nothing to do if the buffer was sent and unless we are closing
+    // the connection in which case we might need to send the close
+    // frame.
+    //
+    if(!buf.b.empty() && buf.i == buf.b.end() && _state == StateHandshakeComplete)
     {
         return SocketOperationNone;
     }
@@ -1389,6 +1394,11 @@ IceWS::TransceiverI::postWrite(Buffer& buf)
     if(buf.i == buf.b.end())
     {
         _writeState = WriteStateHeader;
+        if((_state == StateClosingRequestPending && !_closingInitiator) ||
+           (_state == StateClosingResponsePending && _closingInitiator)) 
+        {
+            return SocketOperationWrite;
+        }
         return SocketOperationNone;
     }
     return SocketOperationWrite;
