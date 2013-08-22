@@ -237,6 +237,8 @@ public:
     virtual std::string getName() const = 0;
 };
 
+#ifndef ICE_OS_WINRT
+
 class ICE_API SOCKSNetworkProxy : virtual public NetworkProxy
 {
 public:
@@ -259,6 +261,8 @@ private:
     Address _address;
 };
 typedef IceUtil::Handle<SOCKSNetworkProxy> SOCKSNetworkProxyPtr;
+
+#endif // ICE_OS_WINRT
 
 ICE_API bool noMoreFds(int);
 ICE_API std::string errorToStringDNS(int);
