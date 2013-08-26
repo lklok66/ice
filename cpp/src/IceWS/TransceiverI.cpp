@@ -495,6 +495,13 @@ IceWS::TransceiverI::read(Buffer& buf, bool& hasMoreData)
             }
         }
     }
+    else if(_state > StateHandshakeComplete)
+    {
+        if(_closingInitiator && _state == StateClosingResponsePending)
+        {
+            return SocketOperationWrite;
+        }
+    }
 
     if(!buf.b.empty() && buf.i == buf.b.end())
     {
@@ -610,9 +617,9 @@ IceWS::TransceiverI::startRead(Buffer& buf)
         return;
     }
 
-    preRead(buf);
+    SocketOperation op = preRead(buf);
 
-    if(buf.i == buf.b.end())
+    if(buf.i == buf.b.end() || op != SocketOperationRead)
     {
         _delegate->getNativeInfo()->completed(IceInternal::SocketOperationRead);
     }

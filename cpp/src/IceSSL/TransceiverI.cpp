@@ -449,12 +449,12 @@ IceSSL::TransceiverI::write(IceInternal::Buffer& buf)
         assert(_fd != INVALID_SOCKET);
 #ifdef ICE_USE_IOCP
         int ret;
-        if(_sentBytes)
+        if(_sentBytes > 0)
         {
             ret = _sentBytes;
             _sentBytes = 0;
         }
-        else
+        else 
         {
             ret = SSL_write(_ssl, reinterpret_cast<const void*>(&*buf.i), packetSize);
             if(ret > 0)
@@ -774,10 +774,15 @@ IceSSL::TransceiverI::startWrite(IceInternal::Buffer& buf)
     if(_writeBuffer.empty() || _writeI == _writeBuffer.end())
     {
         assert(!buf.b.empty() && buf.i != buf.b.end());
+        assert(!BIO_ctrl_pending(_iocpBio));
 
         ERR_clear_error(); // Clear any spurious errors.
-        _sentBytes = SSL_write(_ssl, reinterpret_cast<void*>(&*buf.i), static_cast<int>(buf.b.end() - buf.i));
-        assert(_sentBytes > 0);
+        int ret = SSL_write(_ssl, reinterpret_cast<void*>(&*buf.i), static_cast<int>(buf.b.end() - buf.i));
+        assert(ret > 0 || SSL_get_error(_ssl, ret) == SSL_ERROR_WANT_WRITE);
+        if(ret > 0)
+        {
+            _sentBytes = ret;
+        }
         assert(BIO_ctrl_pending(_iocpBio));
         _writeBuffer.resize(BIO_ctrl_pending(_iocpBio));
 #ifndef NDEBUG
@@ -828,6 +833,24 @@ IceSSL::TransceiverI::finishWrite(IceInternal::Buffer& buf)
     else
     {
         _writeI += _write.count;
+        
+        if(_iocpBio && _writeI == _writeBuffer.end() && _sentBytes > 0)
+        {
+            int packetSize = static_cast<int>(buf.b.end() - buf.i);
+            if(_instance->traceLevel() >= 3)
+            {
+                Trace out(_instance->logger(), _instance->traceCategory());
+                out << "sent " << _sentBytes << " of " << packetSize << " bytes via " << protocol() << "\n" << toString();
+            }
+            
+            if(_instance->stats())
+            {
+                _instance->stats()->bytesSent(_instance->protocol(), static_cast<Int>(_sentBytes));
+            }
+            
+            buf.i += _sentBytes;
+            _sentBytes = 0;
+        }
     }
 }
 
@@ -848,41 +871,40 @@ IceSSL::TransceiverI::startRead(IceInternal::Buffer& buf)
     if(_readI == _readBuffer.end())
     {
         assert(!buf.b.empty() && buf.i != buf.b.end());
-        assert(!BIO_ctrl_get_read_request(_iocpBio));
-
-        ERR_clear_error(); // Clear any spurious errors.
-        int packetSize = static_cast<int>(buf.b.end() - buf.i);
-        int ret = SSL_read(_ssl, reinterpret_cast<void*>(&*buf.i), packetSize);
-        if(ret > 0)
+        if(!BIO_ctrl_get_read_request(_iocpBio))
         {
-            if(_instance->traceLevel() >= 3)
+            ERR_clear_error(); // Clear any spurious errors.
+            int packetSize = static_cast<int>(buf.b.end() - buf.i);
+            int ret = SSL_read(_ssl, reinterpret_cast<void*>(&*buf.i), packetSize);
+            if(ret > 0)
             {
-                Trace out(_instance->logger(), _instance->traceCategory());
-                out << "received " << ret << " of " << packetSize << " bytes via " << protocol() << "\n" << toString();
+                if(_instance->traceLevel() >= 3)
+                {
+                    Trace out(_instance->logger(), _instance->traceCategory());
+                    out << "received " << ret << " of " << packetSize << " bytes via " << protocol() << "\n" << toString();
+                }
+                
+                if(_instance->stats())
+                {
+                    _instance->stats()->bytesReceived(_instance->protocol(), static_cast<Int>(ret));
+                }
+                
+                buf.i += ret;
+                
+                _read.count = 0;
+                completed(IceInternal::SocketOperationRead);
+                return;
             }
-
-            if(_instance->stats())
-            {
-                _instance->stats()->bytesReceived(_instance->protocol(), static_cast<Int>(ret));
-            }
-
-            buf.i += ret;
-
-            _read.count = 0;
-            completed(IceInternal::SocketOperationRead);
-            return;
+            assert(ret <= 0 && SSL_get_error(_ssl, ret) == SSL_ERROR_WANT_READ);
         }
 
-        assert(ret <= 0 && SSL_get_error(_ssl, ret) == SSL_ERROR_WANT_READ);
         assert(BIO_ctrl_get_read_request(_iocpBio));
         _readBuffer.resize(BIO_ctrl_get_read_request(_iocpBio));
         _readI = _readBuffer.begin();
     }
 
     assert(!_readBuffer.empty() && _readI != _readBuffer.end());
-
-    const int packetSize = static_cast<int>(_readBuffer.end() - _readI);
-    readAsync(reinterpret_cast<char*>(&*_readI), packetSize);
+    readAsync(reinterpret_cast<char*>(&*_readI), static_cast<int>(_readBuffer.end() - _readI));
 }
 
 void
@@ -921,7 +943,6 @@ IceSSL::TransceiverI::finishRead(IceInternal::Buffer& buf)
 
         if(_iocpBio && _readI == _readBuffer.end())
         {
-            assert(_readI == _readBuffer.end());
             int n = BIO_write(_iocpBio, &_readBuffer[0], static_cast<int>(_readBuffer.size()));
             if(n < 0) // Expected if the transceiver was closed.
             {
@@ -930,6 +951,28 @@ IceSSL::TransceiverI::finishRead(IceInternal::Buffer& buf)
                 throw ex;
             }
             assert(n == static_cast<int>(_readBuffer.size()));
+
+            if(!buf.b.empty() && buf.i != buf.b.end())
+            {
+                ERR_clear_error(); // Clear any spurious errors.
+                int packetSize = static_cast<int>(buf.b.end() - buf.i);
+                int ret = SSL_read(_ssl, reinterpret_cast<void*>(&*buf.i), packetSize);
+                if(ret > 0)
+                {
+                    if(_instance->traceLevel() >= 3)
+                    {
+                        Trace out(_instance->logger(), _instance->traceCategory());
+                        out << "received " << ret << " of " << packetSize << " bytes via " << protocol() << "\n" << toString();
+                    }
+                
+                    if(_instance->stats())
+                    {
+                        _instance->stats()->bytesReceived(_instance->protocol(), static_cast<Int>(ret));
+                    }
+                
+                    buf.i += ret;
+                }
+            }
         }
     }
 }
