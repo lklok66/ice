@@ -15,10 +15,66 @@ from DistUtils import *
 import FixUtil
 
 #
+# Files that will be excluded from all source distributions.
+#
+excludeFiles = [ \
+    "/certs/cakey.pem",
+    "/distribution",
+    "/protobuf",
+]
+
+#
+# Windows files that will be excluded from Unix source distributions.
+# 
+excludeWindowsFiles = [ \
+    "/vsaddin/",
+    "*.rc",
+    "*.sln",
+    "*.csproj",
+    "*.vbproj",
+    "*.vcproj",
+    "*.vcxproj",
+    "*.vcxproj.filters",
+    "Make*mak*",
+    "Make.rules.msvc",
+    ".depend.mak",
+    "*.exe.config",
+    "MSG00001.bin",
+    "/cpp/test/WinRT",
+    "/cpp/demo/**/generated",
+    "/cpp/demo/**/MFC",
+    "/**/winrt",
+    "/cs/**/compact",
+    "/cs/**/cf",
+    "/cs/**/sl",
+]
+
+#
+# Unix files that will be excluded from Windows source distributions.
+# 
+# Don't remove C++ source Makefile from the Windows distribution since
+# the mingw build requires it.
+#
+excludeUnixFiles = [ \
+    "/Makefile",
+]
+for l in ["/java", "/py", "/php", "/cs", "/cpp/demo"]:
+    excludeUnixFiles += [
+        l + "/**/Makefile",
+        l + "/**/Make.rules",
+        l + "/**/Make.rules.cs",
+        l + "/**/Make.rules.php",
+        l + "/**/Make.rules",
+        l + "/**/Make.rules.Darwin",
+        l + "/**/Make.rules.Linux",
+        l + "/**/.depend"
+    ]
+
+#
 # Files from the top-level, cpp, java and cs config directories to include in the demo 
 # source distribution config directory.
 #
-configFiles = [ \
+demoConfigFiles = [ \
     "Make.*", \
     "common.xml", \
 ]
@@ -27,7 +83,7 @@ configFiles = [ \
 # Files from the top-level certs directory to include in the demo distribution certs
 # directory.
 #
-certsFiles = [ \
+demoCertsFiles = [ \
     "*.jks", \
     "*.pem", \
     "*.pfx", \
@@ -44,7 +100,6 @@ def usage():
     print "Options:"
     print "-h      Show this message."
     print "-v      Be verbose."
-    print "-t FILE ThirdParty source archive"
     print "-c DIR  Compare distribution to the one from DIR and"
     print "        save the result in the README file"
 
@@ -70,28 +125,19 @@ checkGitVersion() # Ensure we're using the right git version
 
 verbose = 0
 compareToDir = None
-thirdpartyArchive = None
 for (o, a) in opts:
     if o == "-h":
         usage()
         sys.exit(0)
     elif o == "-v":
         verbose = 1
-    elif o == "-t":
-        thirdpartyArchive = a
     elif o == "-c":
         compareToDir = a
 
-        
-if compareToDir == None and thirdpartyArchive == None:
-    usage()
-    sys.exit(1)
-    
-if not os.path.exists(thirdpartyArchive):
-    print "ThirdParty archive not found in `" + thirdpartyArchive + "'"
-    sys.exit(1)
-
 cwd = os.getcwd()
+if compareToDir and not os.path.isabs(compareToDir):
+    compareToDir = os.path.join(cwd, compareToDir)
+
 gitRepoDir = os.path.join(os.getcwd(), os.path.dirname(__file__), "..")
 
 # Restore git attributes and core.autocrlf on exit.
@@ -129,12 +175,9 @@ print "Creating " + version + " source distributions in " + distDir
 demoscriptDir = os.path.join(distDir, "Ice-" + version + "-demo-scripts")
 demoDir = os.path.join(distDir, "Ice-" + version + "-demos")
 winDemoDir = os.path.join(distDir, "demos")
-coreSrcDir = os.path.join(distDir, "Ice-" + version + "++")
 srcDir = os.path.join(distDir, "Ice-" + version)
-winCoreSrcDir = os.path.join(distDir, "Ice++")
 winSrcDir = os.path.join(distDir, "Ice")
 rpmBuildDir = os.path.join(distDir, "Ice-rpmbuild-" + version)
-debCoreSrcDir = os.path.join(distDir, "ice" + mmversion + "++-" + version)
 debSrcDir = os.path.join(distDir, "ice" + mmversion + "-" + version)
 distFilesDir = os.path.join(distDir, "distfiles-" + version)
 winDistFilesDir = os.path.join(distDir, "distfiles")
@@ -143,14 +186,13 @@ os.mkdir(demoDir)
 os.mkdir(winDemoDir)
 os.mkdir(rpmBuildDir)
 
-def createDistfiles(platform, whichDestDir):
+def createDistfilesDist(platform, whichDestDir):
     print "Creating " + platform + " distfiles git archive using " + tag + "...",
     sys.stdout.flush()
-    os.system("git archive --worktree-attributes --prefix=tmp/ " + tag + " | ( cd " + distDir + " && tar xfm - )")
+    os.mkdir(whichDestDir)
+    os.system("git archive --worktree-attributes " + tag + ":distribution/ | ( cd " + whichDestDir + " && tar xfm - )")
     print "ok"
 
-    move(os.path.join(distDir, "tmp", "distribution"), whichDestDir)
-    remove(os.path.join(distDir, "tmp"))
     os.chdir(whichDestDir)
 
     print "Walking through distribution to fix permissions, versions, etc...",
@@ -189,6 +231,65 @@ def createDistfiles(platform, whichDestDir):
         for d in dirnames:
             os.chmod(os.path.join(root, d), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) # rwxr-xr-x
 
+    print "ok"
+
+def createSourceDist(platform, destDir):
+    if platform == "UNIX":
+        prefix = "Ice-" + version
+    else:
+        prefix = "Ice"
+
+    print "Creating " + platform + " git archive using " + tag + "...",
+    sys.stdout.flush()
+    os.system("git archive --worktree-attributes --prefix=" + prefix + "/ " + tag + 
+              " | ( cd " + destDir + " && tar xfm - )")
+    print "ok"
+
+    print "Walking through distribution to fix permissions, versions, etc...",
+    sys.stdout.flush()
+    
+    current = os.getcwd()
+    os.chdir(os.path.join(destDir, prefix))
+
+    fixVersion("RELEASE_NOTES", *versions)
+    if os.path.exists("vsaddin"):
+        fixVersion(os.path.join("vsaddin", "config", "Ice-VS2008.AddIn"), *versions)
+        fixVersion(os.path.join("vsaddin", "config", "Ice-VS2010.AddIn"), *versions)
+        fixVersion(os.path.join("vsaddin", "config", "Ice-VS2012.AddIn"), *versions)
+        fixVersion(os.path.join("vsaddin", "config", "Ice.props"), *versions)
+
+
+    if os.path.exists(os.path.join("cpp", "config", "Make.rules")):
+        fixMakeRules(os.path.join("cpp", "config", "Make.rules"))
+
+    for root, dirnames, filenames in os.walk('.'):
+        for f in filenames:
+            filepath = os.path.join(root, f) 
+            if f == "expect.py":
+                move(filepath, os.path.join(distDir, demoscriptDir, filepath))
+                continue
+            elif fnmatch.fnmatch(f, "README*") or fnmatch.fnmatch(f, "*.Addin"):
+                fixVersion(filepath, *versions)
+            elif fnmatch.fnmatch(f, "*.y") or fnmatch.fnmatch(f, "*.l"):
+                fixMakefileForFile(filepath)
+            elif f == "Grammar.cpp":
+                checkBisonVersion(filepath)
+            elif f == "Scanner.cpp":
+                checkFlexVersion(filepath)
+                
+            if platform == "Windows":
+                for name in ["README", "CHANGES", "LICENSE", "ICE_LICENSE", "RELEASE_NOTES"]:
+                    if fnmatch.fnmatch(f, name) and not fnmatch.fnmatch(f, name + ".txt"):
+                        os.rename(filepath, filepath + ".txt")
+                        filepath = filepath + ".txt"
+                        f = f + ".txt"
+
+            fixFilePermission(filepath, verbose)
+
+        for d in dirnames:
+            os.chmod(os.path.join(root, d), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) # rwxr-xr-x
+
+    os.chdir(current)
     print "ok"
 
 def checkBisonVersion(filename):
@@ -260,404 +361,42 @@ def fixGitAttributes(checkout, autocrlf, excludes):
     os.remove(origfile)
 
 ###### UNIX distfiles 
-fixGitAttributes(True, False, ["/certs", 
-                               "/config",
-                               "/cpp",
-                               "/cs",
-                               "/demoscript",
-                               "/dists",
-                               "/java",
-                               "/php",
-                               "/py",
-                               "/rb",
-                               "/scripts",
-                               "/slice",
-                               "/vb",
-                               "/vsaddin"])
-
-createDistfiles("UNIX", distFilesDir)
+excludeForDistFiles = [ "fixCopyright.py", "fixVersion.py", "makedist.py" ]
+fixGitAttributes(True, False, excludeForDistFiles)
+createDistfilesDist("UNIX", distFilesDir)
 
 ###### Windows distfiles 
-
-# No copy this time. Use the same .gitattributes file as the UNIX distfiles dist
-fixGitAttributes(False, True, [])
-createDistfiles("Windows", winDistFilesDir)
-
-###### UNIX core source code distribution
-fixGitAttributes(True, False, ["allDemos.py",
-                               "expect.py",
-                               "/allTests.py",
-                               "/distribution/",
-                               "/demoscript/",
-                               "/cs/",
-                               "/java/",
-                               "/php/",
-                               "/py/",
-                               "/rb/",
-                               "/vb/",
-                               "/vsaddin/",
-                               "*.rc",
-                               "*.sln",
-                               "*.csproj",
-                               "*.vbproj",
-                               "*.vcproj",
-                               "*.vcxproj",
-                               "*.vcxproj.filters",
-                               "Make*mak*",
-                               "Make.rules.msvc",
-                               ".depend.mak",
-                               "/Makefile",
-                               "/cpp/doc/",
-                               "/cpp/demo/*/*/generated/",
-                               "/cpp/demo/book/",
-                               "/cpp/demo/Database/",
-                               "/cpp/demo/Freeze/",
-                               "/cpp/demo/Glacier2/",
-                               "/cpp/demo/Ice/MFC/",
-                               "/cpp/demo/Ice/winrt/",
-                               "/cpp/demo/IceGrid/",
-                               "/cpp/demo/IcePatch2/",
-                               "/cpp/demo/IceStorm/",
-                               "/cpp/demo/Makefile",
-                               "/cpp/include/Freeze/",
-                               "/cpp/include/IceXML/",
-                               "/cpp/include/Makefile",
-                               "/cpp/src/Freeze/",
-                               "/cpp/src/FreezeScript/",
-                               "/cpp/src/Glacier2/",
-                               "/cpp/src/IceDB/",
-                               "/cpp/src/IceGrid/",
-                               "/cpp/src/IcePatch2/",
-                               "/cpp/src/iceserviceinstall/",
-                               "/cpp/src/IceStorm/",
-                               "/cpp/src/IceXML/",
-                               "/cpp/src/Makefile",
-                               "/cpp/src/slice2cs/",
-                               "/cpp/src/slice2freeze/",
-                               "/cpp/src/slice2freezej/",
-                               "/cpp/src/slice2html/",
-                               "/cpp/src/slice2java/",
-                               "/cpp/src/slice2php/",
-                               "/cpp/src/slice2py/",
-                               "/cpp/src/slice2rb/",
-                               "/cpp/test/Freeze/",
-                               "/cpp/test/FreezeScript/",
-                               "/cpp/test/Glacier2/",
-                               "/cpp/test/IceGrid/",
-                               "/cpp/test/IceStorm/",
-                               "/cpp/test/Makefile",
-                               "/cpp/test/WinRT/",
-                               "/protobuf",
-                               "/scripts/IceGridAdmin.py",
-                               "/scripts/IceStormUtil.py"])
-
-#
-# Extract the sources with git archive using the given tag.
-#
-print "Creating UNIX core git archive using " + tag + "...",
-sys.stdout.flush()
-os.system("git archive --worktree-attributes --prefix=" + os.path.basename(coreSrcDir) + "/ " + tag + 
-    " | ( cd " + distDir + " && tar xfm - )")
-print "ok"
-
-os.chdir(coreSrcDir)
-
-#
-# Copy third-party subdirectory from distribution
-#
-copy(os.path.join(distFilesDir, "src", "core", "third-party"), "third-party")
-
-#
-# Extract mcpp to third-party subdirectory and apply patches.
-#
-os.system("cd third-party && tar zxf %s ThirdParty-Sources-%s/mcpp-2.7.2.tar.gz --strip-components 1" % (thirdpartyArchive, version))
-os.system("cd third-party && tar zxf mcpp-2.7.2.tar.gz")
-os.mkdir("third-party/patches")
-copy(os.path.join(distFilesDir, "src", "thirdparty", "mcpp", "patch.mcpp.2.7.2"), os.path.join("third-party", "patches", "patch.mcpp.2.7.2"))
-os.system("cd third-party/mcpp-2.7.2 && patch -p0 < ../patches/patch.mcpp.2.7.2")
-
-for root, dirnames, filesnames in os.walk("."):
-    for f in filesnames:
-
-        #
-        # Rename Makefile.core files as Makefile
-        #
-        if fnmatch.fnmatch(f, "Makefile.core"):
-            oldname = os.path.join(root, f)
-            newname = os.path.join(root, "Makefile")
-            os.rename(oldname, newname)
-
-        #
-        # Remove test not corresponding to Ice core.
-        #
-        if fnmatch.fnmatch(f, "allTests.py"):
-            fixAllTest(os.path.join(root, f), ["Freeze", "FreezeScript", "Glacier2", "IceGrid", \
-             "IcePatch2", "IceStorm"])
+fixGitAttributes(False, True, []) # No copy this time. Use the same .gitattributes file as the UNIX distfiles dist
+createDistfilesDist("Windows", winDistFilesDir)
 
 ###### UNIX source code distribution
-fixGitAttributes(True, False, ["/distribution",
-                               "/vsaddin",
-                               "*.rc",
-                               "*.sln",
-                               "*.csproj",
-                               "*.vbproj",
-                               "*.vcproj",
-                               "*.vcxproj",
-                               "*.vcxproj.filters",
-                               "Make*mak*",
-                               "Make.rules.msvc",
-                               ".depend.mak",
-                               "*.exe.config",
-                               "/cpp/test/WinRT",
-                               "/cpp/demo/**/generated",
-                               "/cs/demo/**/generated/*",
-                               "/cpp/demo/Ice/MFC",
-                               "/cpp/demo/IcePatch2/MFC",
-                               "/cpp/demo/Ice/winrt",
-                               "/cpp/demo/Glacier/winrt",
-                               "/cs/demo/Ice/sl",
-                               "/cs/demo/Ice/compact",
-                               "/cs/demo/Glacier2/sl",
-                               "/protobuf"])
+fixGitAttributes(True, False, excludeFiles + excludeWindowsFiles)
+createSourceDist("UNIX", distDir)
 
-#
-# Extract the sources with git archive using the given tag.
-#
-print "Creating UNIX git archive using " + tag + "...",
-sys.stdout.flush()
-os.system("git archive --worktree-attributes --prefix=Ice-" + version + "/ " + tag + 
-    " | ( cd " + distDir + " && tar xfm - )")
-copy(os.path.join(distFilesDir, "src", "common", "README.core"), os.path.join(coreSrcDir, "README"), False)
-print "ok"
-
-for d in [coreSrcDir, srcDir]:
-    os.chdir(d)
-    print "Walking through distribution to fix permissions, versions, etc...",
-    sys.stdout.flush()
-
-    fixVersion("RELEASE_NOTES", *versions)
-    if os.path.exists(os.path.join("cpp", "config", "glacier2router.cfg")):
-        fixVersion(os.path.join("cpp", "config", "glacier2router.cfg"), *versions)
-    if os.path.exists(os.path.join("cpp", "config", "icegridregistry.cfg")):
-        fixVersion(os.path.join("cpp", "config", "icegridregistry.cfg"), *versions)
-
-    makefileFixList = []
-    for root, dirnames, filenames in os.walk('.'):
-
-        for f in filenames:
-            filepath = os.path.join(root, f) 
-            if f == "expect.py":
-                move(filepath, os.path.join(distDir, demoscriptDir, filepath))
-            else:
-                # Fix version of README files and keep track of bison/flex files for later processing
-                if fnmatch.fnmatch(f, "README*"):
-                    fixVersion(filepath, *versions)
-                elif fnmatch.fnmatch(f, "*.y") or fnmatch.fnmatch(f, "*.l"):
-                    makefileFixList.append(filepath)
-                elif f == "Grammar.cpp":
-                    checkBisonVersion(filepath)
-                elif f == "Scanner.cpp":
-                    checkFlexVersion(filepath)
-
-                fixFilePermission(filepath, verbose)
-        
-        for d in dirnames:
-            os.chmod(os.path.join(root, d), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) # rwxr-xr-x
-
-    print "ok"
-
-    print "Fixing Makefile ...",
-    sys.stdout.flush()
-    for x in makefileFixList:
-        (dir,file) = os.path.split(x)
-        (base,ext) = os.path.splitext(file)
-        fixMakefile(os.path.join(dir,"Makefile"), base, ext)
-    fixMakeRules(os.path.join("cpp", "config", "Make.rules"))
-    print "ok"
-
+# Move the demoscript directory and the associated top level demo script.
 os.chdir(srcDir)
-move("demoscript", os.path.join(demoscriptDir, "demoscript")) # Move the demoscript directory
-# and the associated top level demo script.
+move("demoscript", os.path.join(demoscriptDir, "demoscript"))
 move("allDemos.py", os.path.join(demoscriptDir, "demoscript", "allDemos.py"))
 
-###### Windows core source code distribution
-fixGitAttributes(True, True, ["allDemos.py",
-                              "expect.py",
-                              "/allTests.py",
-                              "/distribution/",
-                              "/demoscript/",
-                              "/cs/",
-                              "/java/",
-                              "/php/",
-                              "/py/",
-                              "/rb/",
-                              "/vb/",
-                              "/vsaddin/",
-                              "*.csproj",
-                              "*.vbproj",
-                              "Makefile",
-                              "Makefile.core",
-                              "/cpp/doc/",
-                              "/cpp/demo/book/",
-                              "/cpp/demo/Database/",
-                              "/cpp/demo/Freeze/",
-                              "/cpp/demo/Glacier2/",
-                              "/cpp/demo/Ice/MFC/",
-                              "/cpp/demo/Ice/winrt/",
-                              "/cpp/demo/IceGrid/",
-                              "/cpp/demo/IcePatch2/",
-                              "/cpp/demo/IceStorm/",
-                              "/cpp/demo/Makefile.mak",
-                              "/cpp/include/Freeze/",
-                              "/cpp/include/IceXml/",
-                              "/cpp/include/Makefile.mak",
-                              "/cpp/src/Freeze/",
-                              "/cpp/src/FreezeScript/",
-                              "/cpp/src/Glacier2/",
-                              "/cpp/src/IceDB/",
-                              "/cpp/src/IceGrid/",
-                              "/cpp/src/IcePatch2/",
-                              "/cpp/src/iceserviceinstall/",
-                              "/cpp/src/IceStorm/",
-                              "/cpp/src/IceXML/",
-                              "/cpp/src/Makefile.mak",
-                              "/cpp/src/slice2cs/",
-                              "/cpp/src/slice2freeze/",
-                              "/cpp/src/slice2freezej/",
-                              "/cpp/src/slice2html/",
-                              "/cpp/src/slice2java/",
-                              "/cpp/src/slice2php/",
-                              "/cpp/src/slice2py/",
-                              "/cpp/src/slice2rb/",
-                              "/cpp/test/Freeze/",
-                              "/cpp/test/FreezeScript/",
-                              "/cpp/test/Glacier2/",
-                              "/cpp/test/IceGrid/",
-                              "/cpp/test/IceStorm/",
-                              "/cpp/test/Makefile.mak",
-                              "/cpp/test/WinRT/",
-                              "/scripts/IceGridAdmin.py",
-                              "/scripts/IceStormUtil.py"])
+###### Windows source code distribution
+fixGitAttributes(True, True, excludeFiles + excludeUnixFiles + ["/demoscript", "expect.py", "allDemos.py"])
+createSourceDist("Windows", distDir)
 
-#
-# Extract the sources with git archive using the given tag.
-#
-print "Creating Windows git archive using " + tag + "...",
-sys.stdout.flush()
-os.system("git archive --worktree-attributes --prefix=" + os.path.basename(winCoreSrcDir) + "/ " + tag + \
-    " | ( cd " + distDir + " && tar xfm - )")
-print "ok"
-
-copy(os.path.join(distFilesDir, "src", "common", "README.core"), os.path.join(winCoreSrcDir, "README"), False)
-os.chdir(winCoreSrcDir)
-
-for root, dirnames, filesnames in os.walk("."):
-    for f in filesnames:
-
-        #
-        # Rename Makefile.core files as Makefile
-        #
-        if fnmatch.fnmatch(f, "Makefile.mak.core"):
-            oldname = os.path.join(root, f)
-            newname = os.path.join(root, "Makefile.mak")
-            os.rename(oldname, newname)
-
-        #
-        # Remove test not corresponding to Ice core.
-        #
-        if fnmatch.fnmatch(f, "allTests.py"):
-            fixAllTest(os.path.join(root, f), ["Freeze", "FreezeScript", "Glacier2", "IceGrid", \
-             "IcePatch2", "IceStorm"])
-
-
-
-fixGitAttributes(True, True, ["/distribution", "/demoscript", "allDemos.py"])
-
-# Don't remove Makefile from the Windows distribution since the
-# mingw build requires it.
-
-#
-# Extract the sources with git archive using the given tag.
-#
-print "Creating Windows git archive using " + tag + "...",
-sys.stdout.flush()
-os.system("git archive --worktree-attributes --prefix=Ice/ " + tag + " | ( cd " + distDir + " && tar xfm - )")
-print "ok"
-
-for d in [winCoreSrcDir, winSrcDir]:
-    os.chdir(d)
-
-    print "Walking through distribution to fix permissions, versions, etc...",
-    sys.stdout.flush()
-
-    fixVersion("RELEASE_NOTES", *versions)
-    if os.path.exists(os.path.join("cpp", "config", "glacier2router.cfg")):
-        fixVersion(os.path.join("cpp", "config", "glacier2router.cfg"), *versions)
-    if os.path.exists(os.path.join("cpp", "config", "icegridregistry.cfg")):
-        fixVersion(os.path.join("cpp", "config", "icegridregistry.cfg"), *versions)
-
-    if os.path.exists("vsaddin"):
-        fixVersion(os.path.join("vsaddin", "config", "Ice-VS2008.AddIn"), *versions)
-        fixVersion(os.path.join("vsaddin", "config", "Ice-VS2010.AddIn"), *versions)
-        fixVersion(os.path.join("vsaddin", "config", "Ice-VS2012.AddIn"), *versions)
-        fixVersion(os.path.join("vsaddin", "config", "Ice.props"), *versions)
-
-    makefileFixList = []
-    for root, dirnames, filenames in os.walk('.'):
-
-        for f in filenames:
-            filepath = os.path.join(root, f) 
-            if f == "expect.py":
-                remove(filepath)
-            else:
-                # Fix version of README files and keep track of bison/flex files for later processing
-                if fnmatch.fnmatch(f, "README*"):
-                    fixVersion(filepath, *versions)
-                elif fnmatch.fnmatch(f, "*.y") or fnmatch.fnmatch(f, "*.l"):
-                    makefileFixList.append(filepath)
-                fixFilePermission(filepath, verbose)
-
-        for d in dirnames:
-            os.chmod(os.path.join(root, d), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) # rwxr-xr-x
-
-    print "ok"
-
-    print "Fixing Makefile.mak ...",
-    sys.stdout.flush()
-    for x in makefileFixList:
-        (dir,file) = os.path.split(x)
-        (base,ext) = os.path.splitext(file)
-        fixMakefile(os.path.join(dir,"Makefile.mak"), base, ext)
-    fixMakeRules(os.path.join("cpp", "config", "Make.rules"))
-    print "ok"
-
-    for root, dirnames, filesnames in os.walk("."):
-        for f in filesnames:
-
-            #
-            # Change text based file extension to .txt
-            #
-            for name in ["README", "CHANGES", "LICENSE", "ICE_LICENSE", "RELEASE_NOTES"]:
-                if fnmatch.fnmatch(f, name) and not fnmatch.fnmatch(f, name + ".txt") :
-                    oldname = os.path.join(root, f)
-                    newname = oldname + ".txt"
-                    os.rename(oldname, newname)
-
-os.chdir(srcDir)
 
 #
 # Consolidate demo, demo scripts distributions.
 #
 print "Consolidating demo and demo scripts distributions...",
+os.chdir(srcDir)
 sys.stdout.flush()
 
 # Unix demo distribution
 copy("ICE_LICENSE", demoDir)
 copy(os.path.join(distFilesDir, "src", "common", "README.DEMOS"), demoDir)
 
-copyMatchingFiles(os.path.join("certs"), os.path.join(demoDir, "certs"), certsFiles)
+copyMatchingFiles(os.path.join("certs"), os.path.join(demoDir, "certs"), demoCertsFiles)
 for d in ["", "cpp", "java", "cs"]:
-    copyMatchingFiles(os.path.join(d, "config"), os.path.join(demoDir, "config"), configFiles)
+    copyMatchingFiles(os.path.join(d, "config"), os.path.join(demoDir, "config"), demoConfigFiles)
 
 copy(os.path.join(distFilesDir, "src", "common", "Make.rules"), os.path.join(demoDir, "config"), False)
 copy(os.path.join(distFilesDir, "src", "common", "Make.rules.cs"), os.path.join(demoDir, "config"), False)
@@ -683,15 +422,12 @@ for root, dirnames, filesnames in os.walk(demoDir):
         if fnmatch.fnmatch(f, "config*"):
             substitute(os.path.join(root, f), configSubstituteExprs)
 
-#
-# vb directory in Unix source distribution only needed to copy demo scripts.
-#
-remove(os.path.join(srcDir, 'vb'))
+remove(os.path.join(srcDir, 'vb')) # vb directory in Unix source distribution only needed to copy demo scripts.
 
 # Windows demo distribution
 copy(os.path.join(winDistFilesDir, "src", "common", "README.DEMOS.txt"), os.path.join(winDemoDir, "README.txt"))
 
-copyMatchingFiles(os.path.join(winSrcDir, "certs"), os.path.join(winDemoDir, "certs"), certsFiles)
+copyMatchingFiles(os.path.join(winSrcDir, "certs"), os.path.join(winDemoDir, "certs"), demoCertsFiles)
 
 os.mkdir(os.path.join(winDemoDir, "config"))
 
@@ -711,43 +447,33 @@ for sd in os.listdir(winSrcDir):
 
 rmFiles = []
 
+projectSubstituteExprs = [(re.compile(re.escape('"README"')), '"README.txt"'),
+                          (re.compile(re.escape("PublicKeyToken=1f998c50fec78381")), "PublicKeyToken=cdd571ade22f2f16"),
+                          (re.compile(re.escape("..\\..\\..\\..\\..\\certs\\winrt\\cacert.pem")), 
+                           "..\\..\\..\\..\\certs\\winrt\\cacert.pem")]
+
 for root, dirnames, filesnames in os.walk(winDemoDir):
     for f in filesnames:
 
         if fnmatch.fnmatch(f, "README") and not fnmatch.fnmatch(f, "README.txt"):
-            oldreadme = os.path.join(root, f)
-            newreadme = oldreadme + ".txt"
-            os.rename(oldreadme, newreadme)
-
-        if fnmatch.fnmatch(f, "config*"):
+            os.rename(os.path.join(root, f), os.path.join(root, f + ".txt"))
+        elif fnmatch.fnmatch(f, "config*"):
             substitute(os.path.join(root, f), configSubstituteExprs)
+
+        for m in [ "*.vcproj", "*.vcxproj", "*.vcxproj.filters", "*.csproj", "*.vbproj" ]:
+            if fnmatch.fnmatch(f, m):
+                FixUtil.fileMatchAndReplace(os.path.join(root, f), projectSubstituteExprs, False)
 
         for m in [ "Makefile", ".depend", "*.exe.config" ]:
             if fnmatch.fnmatch(f, m):
                 rmFiles.append(os.path.join(root[len(winDemoDir) + 1:], f))
-
+        
 for d in ["democs", "demovb"]:
     for root, dirnames, filesnames in os.walk(os.path.join(winDemoDir, d)):
         for f in filesnames:
             for m in [ "Makefile.mak", ".depend.mak" ]:
                 if fnmatch.fnmatch(f, m):
                     rmFiles.append(os.path.join(root[len(winDemoDir) + 1:], f))
-
-            for m in [ "*.csproj", "*.vbproj" ]:
-                if fnmatch.fnmatch(f, m):
-                    FixUtil.fileMatchAndReplace(os.path.join(root, f),
-                                                [(re.escape("PublicKeyToken=1f998c50fec78381"),
-                                                  "PublicKeyToken=cdd571ade22f2f16")], False)
-
-for d in ["demo", "democs", "demovb"]:
-    for root, dirnames, filesnames in os.walk(os.path.join(winDemoDir, d)):
-        for f in filesnames:
-            for m in [ "*.vcproj", "*.vcxproj", "*.vcxproj.filters", "*.csproj", "*.vbproj" ]:
-                if fnmatch.fnmatch(f, m):
-                    FixUtil.fileMatchAndReplace(os.path.join(root, f), [(re.escape('"README"'), '"README.txt"')], False)
-                    FixUtil.fileMatchAndReplace(os.path.join(root, f), 
-                                                [(re.escape("..\\..\\..\\..\\..\\certs\\winrt\\cacert.pem"), 
-                                                  "..\\..\\..\\..\\certs\\winrt\\cacert.pem")], False)
 
 for f in rmFiles: remove(os.path.join(winDemoDir, f))
 
@@ -767,8 +493,6 @@ rpmBuildFiles = [ \
 copyMatchingFiles(os.path.join(distFilesDir), rpmBuildDir, rpmBuildFiles)
 
 ###### Debian source code distribution
-
-copy(coreSrcDir, debCoreSrcDir, False)
 copy(srcDir, debSrcDir, False)
 
 #
@@ -787,25 +511,21 @@ copy(os.path.join(distFilesDir, "src", "deb", "DEB_README"), \
 print "Archiving..."
 sys.stdout.flush()
 os.chdir(distDir)
-for d in [coreSrcDir, srcDir, demoDir, distFilesDir, rpmBuildDir, debSrcDir, debCoreSrcDir]:
+for d in [srcDir, demoDir, distFilesDir, rpmBuildDir, debSrcDir]:
     tarArchive(d, verbose)
-
-move(os.path.join(distDir, "ice" + mmversion + "++-" + version + ".tar.gz"), \
-     os.path.join(distDir, "ice" + mmversion + "++_" + version + ".orig.tar.gz"))
 
 move(os.path.join(distDir, "ice" + mmversion + "-" + version + ".tar.gz"), \
      os.path.join(distDir, "ice" + mmversion + "_" + version + ".orig.tar.gz"))
 
 for (dir, archiveDir) in [(demoscriptDir, "Ice-" + version + "-demos")]:
     tarArchive(dir, verbose, archiveDir)
+    
+for (dir, archiveDir) in [(demoscriptDir, "Ice-" + version + "-demos")]:
+    zipArchive(dir, verbose, archiveDir)
 
 for (dir, archiveDir) in [(winDistFilesDir, "distfiles-" + version)]:
     zipArchive(dir, verbose, archiveDir)
 os.rename(os.path.join(distDir, "distfiles.zip"), os.path.join(distDir, "distfiles-" + version + ".zip"))
-
-for (dir, archiveDir) in [(winCoreSrcDir, "Ice-" + version + "++")]:
-    zipArchive(dir, verbose, archiveDir)
-os.rename(os.path.join(distDir, "Ice++.zip"), os.path.join(distDir, "Ice-" + version + "++.zip"))
 
 for (dir, archiveDir) in [(winSrcDir, "Ice-" + version)]:
     zipArchive(dir, verbose, archiveDir)
@@ -815,21 +535,26 @@ for (dir, archiveDir) in [(winDemoDir, "Ice-" + version + "-demos")]:
     zipArchive(dir, verbose, archiveDir)
 os.rename(os.path.join(distDir, "demos.zip"), os.path.join(distDir, "Ice-" + version + "-demos.zip"))
 
-
 #
 # Write source distribution report in README file.
 #
-writeSrcDistReport("Ice", version, compareToDir, [srcDir, demoDir, winDemoDir, distFilesDir, winDistFilesDir, 
-    rpmBuildDir, debSrcDir, debCoreSrcDir, demoscriptDir])
+writeSrcDistReport("Ice", version, tag, compareToDir, 
+                   [(srcDir + ".tar.gz", srcDir), 
+                    (demoDir + ".tar.gz", demoDir),
+                    (rpmBuildDir + ".tar.gz", rpmBuildDir),
+                    ("ice" + mmversion + "_" + version + ".orig.tar.gz", debSrcDir),
+                    (demoscriptDir + ".tar.gz", demoscriptDir),
+                    (os.path.join(distDir, "distfiles-" + version + ".zip"), winDistFilesDir),
+                    (os.path.join(distDir, "Ice-" + version + ".zip"), winSrcDir),
+                    (os.path.join(distDir, "Ice-" + version + "-demos.zip"), winDemoDir),
+                    ])
 
 #
 # Done.
 #
 print "Cleaning up...",
 sys.stdout.flush()
-remove(coreSrcDir)
 remove(srcDir)
-remove(winCoreSrcDir)
 remove(winSrcDir)
 remove(demoDir)
 remove(winDemoDir)
@@ -838,5 +563,4 @@ remove(rpmBuildDir)
 remove(distFilesDir)
 remove(winDistFilesDir)
 remove(debSrcDir)
-remove(debCoreSrcDir)
 print "ok"

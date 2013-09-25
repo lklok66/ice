@@ -52,7 +52,7 @@ public class EndpointHostResolver
             }
         }
 
-        Ice.Instrumentation.CommunicatorObserver obsv = _instance.initializationData().observer;
+        Ice.Instrumentation.CommunicatorObserver obsv = _instance.getObserver();
         Ice.Instrumentation.Observer observer = null;
         if(obsv != null)
         {
@@ -110,7 +110,7 @@ public class EndpointHostResolver
         entry.endpoint = endpoint;
         entry.callback = callback;
 
-        Ice.Instrumentation.CommunicatorObserver obsv = _instance.initializationData().observer;
+        Ice.Instrumentation.CommunicatorObserver obsv = _instance.getObserver();
         if(obsv != null)
         {
             entry.observer = obsv.getEndpointLookupObserver(endpoint);
@@ -206,33 +206,32 @@ public class EndpointHostResolver
                     threadObserver.stateChanged(Ice.Instrumentation.ThreadState.ThreadStateInUseForOther,
                                                 Ice.Instrumentation.ThreadState.ThreadStateIdle);
                 }
+
+                if(r.observer != null)
+                {
+                    r.observer.detach();
+                }
             }
             catch(Ice.LocalException ex)
             {
                 if(r.observer != null)
                 {
                     r.observer.failed(ex.ice_name());
-                }
-                r.callback.exception(ex);
-            }
-            finally
-            {
-                if(r.observer != null)
-                {
                     r.observer.detach();
                 }
+                r.callback.exception(ex);
             }
         }
 
         for(ResolveEntry entry : _queue)
         {
             Ice.CommunicatorDestroyedException ex = new Ice.CommunicatorDestroyedException();
-            entry.callback.exception(ex);
             if(entry.observer != null)
             {
                 entry.observer.failed(ex.ice_name());
                 entry.observer.detach();
             }
+            entry.callback.exception(ex);
         }
         _queue.clear();
     }
@@ -240,7 +239,7 @@ public class EndpointHostResolver
     synchronized public void
     updateObserver()
     {
-        Ice.Instrumentation.CommunicatorObserver obsv = _instance.initializationData().observer;
+        Ice.Instrumentation.CommunicatorObserver obsv = _instance.getObserver();
         if(obsv != null)
         {
             _observer = obsv.getThreadObserver("Communicator",

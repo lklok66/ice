@@ -54,7 +54,7 @@ namespace IceInternal
                 }
             }
 
-            Ice.Instrumentation.CommunicatorObserver obsv = _instance.initializationData().observer;
+            Ice.Instrumentation.CommunicatorObserver obsv = _instance.getObserver();
             Ice.Instrumentation.Observer observer = null;
             if(obsv != null)
             {
@@ -133,7 +133,7 @@ namespace IceInternal
                 entry.endpoint = endpoint;
                 entry.callback = callback;
 
-                Ice.Instrumentation.CommunicatorObserver obsv = _instance.initializationData().observer;
+                Ice.Instrumentation.CommunicatorObserver obsv = _instance.getObserver();
                 if(obsv != null)
                 {
                     entry.observer = obsv.getEndpointLookupObserver(endpoint);
@@ -231,33 +231,32 @@ namespace IceInternal
                         threadObserver.stateChanged(Ice.Instrumentation.ThreadState.ThreadStateInUseForOther, 
                                                     Ice.Instrumentation.ThreadState.ThreadStateIdle);
                     }
+
+                    if(r.observer != null)
+                    {
+                        r.observer.detach();
+                    }
                 }
                 catch(Ice.LocalException ex)
                 {
                     if(r.observer != null)
                     {
                         r.observer.failed(ex.ice_name());
-                    }
-                    r.callback.exception(ex);
-                }
-                finally
-                {
-                    if(r.observer != null)
-                    {
                         r.observer.detach();
                     }
+                    r.callback.exception(ex);
                 }
             }
 
             foreach(ResolveEntry entry in _queue)
             {
                 Ice.CommunicatorDestroyedException ex = new Ice.CommunicatorDestroyedException();
-                entry.callback.exception(ex);
                 if(entry.observer != null)
                 {
                     entry.observer.failed(ex.ice_name());
                     entry.observer.detach();
                 }
+                entry.callback.exception(ex);
             }
             _queue.Clear();
 
@@ -273,7 +272,7 @@ namespace IceInternal
             _m.Lock();
             try
             {
-                Ice.Instrumentation.CommunicatorObserver obsv = _instance.initializationData().observer;
+                Ice.Instrumentation.CommunicatorObserver obsv = _instance.getObserver();
                 if(obsv != null)
                 {
                     _observer = obsv.getThreadObserver("Communicator", 

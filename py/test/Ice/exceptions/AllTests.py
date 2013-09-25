@@ -702,7 +702,7 @@ def allTests(communicator):
             test(False)
 
         try:
-            thrower.throwMemoryLimitException(array.array('B', (0 for x in xrange(20 * 1024)))) # 20KB
+            thrower.throwMemoryLimitException(bytearray(20 * 1024)) # 20KB
             test(False)
         except Ice.MemoryLimitException:
             pass
@@ -710,8 +710,7 @@ def allTests(communicator):
             test(False)
 
         try:
-            thrower.end_throwMemoryLimitException(
-                thrower.begin_throwMemoryLimitException(array.array('B', (0 for x in xrange(20 * 1024))))) # 20KB
+            thrower.end_throwMemoryLimitException(thrower.begin_throwMemoryLimitException(bytearray(20 * 1024))) # 20KB
             test(False)
         except Ice.MemoryLimitException:
             pass

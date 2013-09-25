@@ -981,6 +981,10 @@ namespace Ice.VisualStudio
         {
             try
             {
+                if(!Util.isSliceBuilderEnabled(project))
+                {
+                    return;
+                }
                 DependenciesMap dependenciesMap = getDependenciesMap();
                 if(dependenciesMap.ContainsKey(project.FullName))
                 {
@@ -1008,6 +1012,10 @@ namespace Ice.VisualStudio
         {
             try
             {
+                if(!Util.isSliceBuilderEnabled(project))
+                {
+                    return;
+                }
                 DependenciesMap dependenciesMap = getDependenciesMap();
                 String oldPath = Path.Combine(Path.GetDirectoryName(project.FullName), oldName);
                 if(dependenciesMap.ContainsKey(oldPath))
@@ -1716,6 +1724,18 @@ namespace Ice.VisualStudio
             IncludePathList includes = 
                 new IncludePathList(Util.getProjectProperty(project, Util.PropertyIceIncludePath));
             string extraOpts = Util.getProjectProperty(project, Util.PropertyIceExtraOptions).Trim();
+
+            //
+            // Add per build configuration extra options.
+            //
+            Configuration activeConfiguration = Util.getActiveConfiguration(project);
+            if(activeConfiguration != null && !activeConfiguration.ConfigurationName.Equals("All"))
+            {
+                string property = Util.PropertyIceExtraOptions + "_" + activeConfiguration.ConfigurationName;
+                extraOpts += " " + Util.getProjectProperty(project, property).Trim();
+                extraOpts = extraOpts.Trim();
+            }
+
             bool tie = Util.getProjectPropertyAsBool(project, Util.PropertyIceTie);
             bool ice = Util.getProjectPropertyAsBool(project, Util.PropertyIcePrefix);
             bool streaming = Util.getProjectPropertyAsBool(project, Util.PropertyIceStreaming);
@@ -3182,7 +3202,7 @@ namespace Ice.VisualStudio
         //
         private void bringErrorsToFront()
         {
-            if(_errorListProvider == null)
+            if(commandLine || _errorListProvider == null)
             {
                 return;
             }
@@ -3595,6 +3615,6 @@ namespace Ice.VisualStudio
         private uint _dwCookie;
         private bool _opening = false;
         private bool _opened = false; // True after solutionOpened has been executed.
-        public bool commandLine;
+        static public bool commandLine;
     }
 }

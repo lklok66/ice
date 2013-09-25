@@ -16,6 +16,9 @@ import signal
 import time
 import subprocess
 
+javaHome = os.environ.get("JAVA_HOME", "")
+javaCmd = '"%s"' % os.path.join(javaHome, "bin", "java") if javaHome else "java"
+
 # Locate the top level directory of the demo dist (or the top of the
 # source tree for a source dist).
 path = [ ".", "..", "../..", "../../..", "../../../.." ]
@@ -51,6 +54,107 @@ host = "127.0.0.1"
 # Echo the commands.
 #
 debug = False
+
+def getJavaVersion():
+    p = subprocess.Popen(javaCmd + " -version", shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+    if(p.wait() != 0):
+        print(javaCmd + " -version failed:\n" + p.stdout.read().strip())
+        sys.exit(1)
+    matchVersion = re.compile('java version \"(.*)\"')
+    m = matchVersion.match(p.stdout.readline().decode('UTF-8'))
+    return m.group(1)
+    
+class filereader(Expect.reader):
+    def __init__(self, desc, p):
+        Expect.reader.__init__(self, desc, p, None)
+
+    def run(self):
+
+        try:
+            while True:
+                c = self.p.read(1)
+                if not c: 
+                    time.sleep(0.1) 
+                    continue
+
+                if c == '\r': continue
+                self.cv.acquire()
+                try:
+                    # Depending on Python version and platform, the value c could be a
+                    # string or a bytes object.
+                    if type(c) != str:
+                        c = c.decode()
+                    self.trace(c)
+                    self.buf.write(c)
+                    self.cv.notify()
+                finally:
+                    self.cv.release()
+        except ValueError as e:
+            pass
+        except IOError as e:
+            print(e)
+
+class FileExpect(object):
+    def __init__(self, path):
+
+        self.buf = "" # The part before the match
+        self.before = "" # The part before the match
+        self.after = "" # The part after the match
+        self.matchindex = 0 # the index of the matched pattern
+        self.match = None # The last match
+
+        self.f = open(path)
+        self.r = filereader(path, self.f)
+
+        # The thread is marked as a daemon thread. This is done so that if
+        # an expect script runs off the end of main without kill/wait on each
+        # spawned process the script will not hang tring to join with the
+        # reader thread. Instead __del__ (below) will be called which
+        # terminates and joins with the reader thread.
+        self.r.setDaemon(True)
+        self.r.start()
+
+    def __del__(self):
+        # Terminate and clean up.
+        if self.r is not None:
+            self.terminate()
+
+    def expect(self, pattern, timeout = 20):
+        """pattern is either a string, or a list of string regexp patterns.
+
+           timeout == None expect can block indefinitely.
+
+           timeout == -1 then the default is used.
+        """
+        if timeout == -1:
+            timeout = self.timeout
+
+        if type(pattern) != list:
+            pattern = [ pattern ]
+        def compile(s):
+            if type(s) == str:
+                return re.compile(s, re.S)
+            return None
+        pattern = [ ( p, compile(p) ) for p in pattern ]
+        try:
+            self.buf, self.before, self.after, self.match, self.matchindex = self.r.match(pattern, timeout)
+        except Expect.TIMEOUT as e:
+            self.buf = ""
+            self.before = ""
+            self.after = ""
+            self.match = None
+            self.matchindex = 0
+            raise e
+        return self.matchindex
+            
+    def terminate(self):
+        try:
+            self.f.close()
+        except:
+            pass
+        self.r.join()
+        self.r = None
+
 
 def getCppCompiler():
     if not isWin32():
@@ -131,30 +235,25 @@ def configurePaths():
         addenv("CLASSPATH", "classes")
         return # That's it, we're done!
 
-    shlibVar = None
-    libDir = None
-    if not isWin32():
-        libDir = os.path.join(getIceDir("cpp"), "lib")
-
-    # 64-bits binaries are located in a subdirectory with binary
-    # distributions.
+    # Always add the bin directory to the PATH, it contains executable
+    # which might not be in the compiler/arch bin sub-directory.
     binDir = os.path.join(getIceDir("cpp"), "bin")
     addenv("PATH", binDir)
 
+    libDir = None if isWin32() else os.path.join(getIceDir("cpp"), "lib")
     if iceHome:
+
+        # Add compiler sub-directory
         if isWin32():
             subdir = None
-            if getCppCompiler() == "VC110":
+            if getCppCompiler() == "VC110" and getMapping() != "py":
                 subdir = "vc110"
 
             if subdir:
-                if x64:
-                    addenv("PATH", os.path.join(binDir, subdir, "x64"))
-                else:
-                    addenv("PATH", os.path.join(binDir, subdir))
-            elif x64:
-                addenv("PATH", os.path.join(binDir, "x64"))
-        elif x64:
+                binDir = os.path.join(binDir, subdir)
+
+        # Add x64 sub-directory
+        if x64:
             if isSolaris():
                 if isSparc():
                     libDir = os.path.join(libDir, "64")
@@ -162,18 +261,20 @@ def configurePaths():
                 else:
                     libDir = os.path.join(libDir, "amd64")
                     binDir = os.path.join(binDir, "amd64")
-            else:
+            elif isWin32():
+                libDir = os.path.join(libDir, "x64")
+                binDir = os.path.join(binDir, "x64")
+            elif not isDarwin():
                 libDir = libDir + "64"
                 binDir = binDir + "64"
-            addenv("PATH", binDir)
-        elif isDarwin() and cpp11:
+
+        if isDarwin() and cpp11:
             libDir = os.path.join(libDir, "c++11")
             binDir = os.path.join(binDir, "c++11")
-            addenv("PATH", binDir)
 
-    # Only add the lib directory to the shared library path if we're
-    # not using the embedded location.
-    if libDir and iceHome != "/opt/Ice-3.5":
+    if binDir != os.path.join(getIceDir("cpp"), "bin"):
+        addenv("PATH", binDir)
+    if libDir:
         addLdPath(libDir)
 
     if not iceHome:
@@ -613,6 +714,8 @@ def spawn(command, cwd = None, mapping = None):
             command = command.replace("java", "java -Djava.net.preferIPv4Stack=true", 1)
         if isSolaris() and x64:
             command = command.replace("java", "java -d64", 1)
+        if javaCmd != "java":
+            command = command.replace("java", javaCmd, 1)
     elif mapping == "cpp":
         if cwd != None:
             desc = os.path.join(cwd, desc)
@@ -626,6 +729,9 @@ def spawn(command, cwd = None, mapping = None):
     if debug:
         print('(%s)' % (command))
     return Expect.Expect(command, logfile = tracefile, desc = desc, mapping = mapping, cwd = cwd)
+
+def watch(path):
+    return FileExpect(path)
 
 def cleanDbDir(path):
     for filename in [ os.path.join(path, f) for f in os.listdir(path) if f != ".gitignore" and f != "DB_CONFIG"]:
@@ -653,10 +759,7 @@ def addLdPath(libpath):
         else:
             addenv("LD_LIBRARY_PATH", libpath)
     else:
-        if x64:
-            addenv("LD_LIBRARY_PATH_64", libpath)
-        else:
-            addenv("LD_LIBRARY_PATH", libpath)
+        addenv("LD_LIBRARY_PATH", libpath)
 
 def processCmdLine():
     def usage():

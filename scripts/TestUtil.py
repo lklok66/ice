@@ -22,7 +22,13 @@ socksProxy = False              # Use SOCKS proxy running on localhost
 iceHome = None                  # Binary distribution to use (None to use binaries from source distribution)
 x64 = False                     # Binary distribution is 64-bit
 cpp11 = False                   # Binary distribution is c++ 11
-javaCmd = "java"                # Default java loader
+
+
+# Default java loader
+
+javaHome = os.environ.get("JAVA_HOME", "")
+javaCmd = '"%s"' % os.path.join(javaHome, "bin", "java") if javaHome else "java"
+
 valgrind = False                # Set to True to use valgrind for C++ executables.
 appverifier = False             # Set to True to use appverifier for C++ executables, This is windows only feature
 tracefile = None
@@ -597,18 +603,6 @@ def getIceSoVersion():
             return '%db' % (majorVersion * 10 + minorVersion)
     else:
         return '%d' % (majorVersion * 10 + minorVersion)
-
-def getIceSSLVersion():
-    process = subprocess.Popen("java -version", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-    if not process or not process.stdout:
-        print("unable to get IceSSL version!")
-        sys.exit(1)
-    version = process.stdout.readline()
-    if not version:
-        print("unable to get IceSSL version!")
-        sys.exit(1)
-    version = version.decode("utf-8")
-    return version.strip()
 
 def getJdkVersion():
     process = subprocess.Popen("java -version", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
@@ -1472,7 +1466,7 @@ def getCppBinDir(lang = None):
                     binDir = os.path.join(binDir, "sparcv9")
                 else:
                     binDir = os.path.join(binDir, "amd64")
-            elif isWin32():
+            elif isWin32() and lang != "php" and lang != "rb":
                 binDir = os.path.join(binDir, "x64")
         if isDarwin() and cpp11:
           binDir = os.path.join(binDir, "c++11")
@@ -1869,11 +1863,18 @@ def runTests(start, expanded, num = 0, script = False):
                 print("%s*** test not supported with SOCKS%s" % (prefix, suffix))
                 continue
 
-            if args.find("compact") != -1 and "nocompact" in config:
+            if args.find("compact") != -1 and \
+                         ("nocompact" in config or \
+                          args.find("ssl") != -1 or \
+                          args.find("compress") != -1):
                 print("%s*** test not supported with Compact Framework%s" % (prefix, suffix))
                 continue
 
-            if args.find("silverlight") != -1 and "nosilverlight" in config:
+            if args.find("silverlight") != -1 and \
+                         ("nosilverlight" in config or \
+                          args.find("ssl") != -1 or \
+                          args.find("mx") != -1 or \
+                          args.find("compress") != -1):
                 print("%s*** test not supported with Silverlight%s" % (prefix, suffix))
                 continue
 

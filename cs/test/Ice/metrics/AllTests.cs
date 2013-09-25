@@ -377,9 +377,9 @@ public class AllTests : TestCommon.TestApp
     }
 
 #if SILVERLIGHT
-    override public void run(Ice.Communicator communicator)
+    override public void run(Ice.Communicator communicator, CommunicatorObserverI obsv)
 #else
-    public static MetricsPrx allTests(Ice.Communicator communicator)
+    public static MetricsPrx allTests(Ice.Communicator communicator, CommunicatorObserverI obsv)
 #endif
     {
         MetricsPrx metrics = MetricsPrxHelper.checkedCast(communicator.stringToProxy("metrics:default -p 12010"));
@@ -1054,6 +1054,41 @@ public class AllTests : TestCommon.TestApp
         catch(IceMX.UnknownMetricsView)
         {
         }
+
+        WriteLine("ok");
+
+        Write("testing instrumentation observer delegate... ");
+        Flush();
+
+        test(obsv.threadObserver.getTotal() > 0);
+        test(obsv.connectionObserver.getTotal() > 0);
+        test(obsv.connectionEstablishmentObserver.getTotal() > 0);
+        test(obsv.endpointLookupObserver.getTotal() > 0);
+        test(obsv.dispatchObserver.getTotal() > 0);
+        test(obsv.invocationObserver.getTotal() > 0);
+        test(obsv.invocationObserver.remoteObserver.getTotal() > 0);
+
+        test(obsv.threadObserver.getCurrent() > 0);
+        test(obsv.connectionObserver.getCurrent() > 0);
+        test(obsv.connectionEstablishmentObserver.getCurrent() == 0);
+        test(obsv.endpointLookupObserver.getCurrent() == 0);
+        test(obsv.dispatchObserver.getCurrent() == 0);
+        test(obsv.invocationObserver.getCurrent() == 0);
+        test(obsv.invocationObserver.remoteObserver.getCurrent() == 0);
+
+        test(obsv.threadObserver.getFailedCount() == 0);
+        test(obsv.connectionObserver.getFailedCount() > 0);
+        test(obsv.connectionEstablishmentObserver.getFailedCount() > 0);
+        test(obsv.endpointLookupObserver.getFailedCount() > 0);
+        //test(obsv.dispatchObserver.getFailedCount() > 0);
+        test(obsv.invocationObserver.getFailedCount() > 0);
+        test(obsv.invocationObserver.remoteObserver.getFailedCount() > 0);
+
+        test(obsv.threadObserver.states > 0);
+        test(obsv.connectionObserver.received > 0 && obsv.connectionObserver.sent > 0);
+        //test(obsv.dispatchObserver.userExceptionCount > 0);
+        test(obsv.invocationObserver.userExceptionCount > 0 && obsv.invocationObserver.retriedCount > 0);
+        test(obsv.invocationObserver.remoteObserver.replySize > 0);
 
         WriteLine("ok");
 
