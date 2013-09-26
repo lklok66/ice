@@ -493,7 +493,7 @@ IceInternal::EndpointHostResolver::resolve(const string& host, int port, Ice::En
     }
 
     ObserverHelperT<> observer;
-    const CommunicatorObserverPtr& obsv = _instance->initializationData().observer;
+    const CommunicatorObserverPtr& obsv = _instance->getObserver();
     if(obsv)
     {
         observer.attach(obsv->getEndpointLookupObserver(endpoint));
@@ -555,7 +555,7 @@ IceInternal::EndpointHostResolver::resolve(const string& host, int port, Ice::En
     entry.endpoint = endpoint;
     entry.callback = callback;
 
-    const CommunicatorObserverPtr& obsv = _instance->initializationData().observer;
+    const CommunicatorObserverPtr& obsv = _instance->getObserver();
     if(obsv)
     {
         entry.observer = obsv->getEndpointLookupObserver(endpoint);
@@ -626,31 +626,32 @@ IceInternal::EndpointHostResolver::run()
             {
                 threadObserver->stateChanged(ThreadStateInUseForOther, ThreadStateIdle);
             }
+
+            if(r.observer)
+            {
+                r.observer->detach();
+            }
         }
         catch(const Ice::LocalException& ex)
         {
             if(r.observer)
             {
                 r.observer->failed(ex.ice_name());
+                r.observer->detach();
             }
             r.callback->exception(ex);
-        }
-
-        if(r.observer)
-        {
-            r.observer->detach();
         }
     }
 
     for(deque<ResolveEntry>::const_iterator p = _queue.begin(); p != _queue.end(); ++p)
     {
         Ice::CommunicatorDestroyedException ex(__FILE__, __LINE__);
-        p->callback->exception(ex);
         if(p->observer)
         {
             p->observer->failed(ex.ice_name());
             p->observer->detach();
         }
+        p->callback->exception(ex);
     }
     _queue.clear();
 
@@ -664,7 +665,7 @@ void
 IceInternal::EndpointHostResolver::updateObserver()
 {
     Lock sync(*this);
-    const CommunicatorObserverPtr& obsv = _instance->initializationData().observer;
+    const CommunicatorObserverPtr& obsv = _instance->getObserver();
     if(obsv)
     {
         _observer.attach(obsv->getThreadObserver("Communicator", name(), ThreadStateIdle, _observer.get()));
