@@ -1265,7 +1265,7 @@ Ice::ConnectionI::startAsync(SocketOperation operation)
         }
         else if(operation & SocketOperationRead)
         {
-            if(_observer)
+            if(_observer && !_readHeader)
             {
                 _observer.startRead(_readStream);
             }
@@ -1297,7 +1297,7 @@ Ice::ConnectionI::finishAsync(SocketOperation operation)
         else if(operation & SocketOperationRead)
         {
             _transceiver->finishRead(_readStream);
-            if(_observer)
+            if(_observer && !_readHeader)
             {
                 _observer.finishRead(_readStream);
             }
@@ -1366,7 +1366,7 @@ Ice::ConnectionI::message(ThreadPoolCurrent& current)
 
             while(readyOp & SocketOperationRead)
             {
-                if(_observer)
+                if(_observer && !_readHeader)
                 {
                     _observer.startRead(_readStream);
                 }
@@ -1377,7 +1377,7 @@ Ice::ConnectionI::message(ThreadPoolCurrent& current)
                     readyOp = static_cast<SocketOperation>(readyOp & ~SocketOperationRead);
                     break;
                 }
-                else if(_observer)
+                else if(_observer && !_readHeader)
                 {
                     assert(_readStream.i == _readStream.b.end());
                     _observer.finishRead(_readStream);
@@ -1386,7 +1386,12 @@ Ice::ConnectionI::message(ThreadPoolCurrent& current)
                 if(_readHeader) // Read header if necessary.
                 {
                     _readHeader = false;
-                        
+
+                    if(_observer)
+                    {
+                        _observer->receivedBytes(static_cast<int>(headerSize));
+                    }
+                
                     ptrdiff_t pos = _readStream.i - _readStream.b.begin();
                     if(pos < headerSize)
                     {
