@@ -56,17 +56,20 @@ IceInternal::IPEndpointInfoI::~IPEndpointInfoI()
 {
 }
 
-Ice::Short IceInternal::IPEndpointInfoI::type() const
+Ice::Short
+IceInternal::IPEndpointInfoI::type() const
 {
     return _endpoint->type();
 }
 
-bool IceInternal::IPEndpointInfoI::datagram() const
+bool
+IceInternal::IPEndpointInfoI::datagram() const
 {
     return _endpoint->datagram();
 }
 
-bool IceInternal::IPEndpointInfoI::secure() const
+bool
+IceInternal::IPEndpointInfoI::secure() const
 {
     return _endpoint->secure();
 }

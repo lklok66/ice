@@ -48,13 +48,35 @@ IceInternal::TcpEndpointI::TcpEndpointI(const ProtocolInstancePtr& instance, Bas
 EndpointInfoPtr
 IceInternal::TcpEndpointI::getInfo() const
 {
-    class InfoI : public Ice::TCPEndpointInfo, public IPEndpointInfoI
+    class InfoI : public Ice::TCPEndpointInfo
     {
     public:
         
-        InfoI(const EndpointIPtr& endpoint) : IPEndpointInfoI(endpoint)
+        InfoI(const EndpointIPtr& endpoint) : _endpoint(endpoint)
         {
         }
+
+        virtual Ice::Short
+        type() const
+        {
+            return _endpoint->type();
+        }
+        
+        virtual bool
+        datagram() const
+        {
+            return _endpoint->datagram();
+        }
+        
+        virtual bool
+        secure() const
+        {
+            return _endpoint->secure();
+        }
+
+    private:
+        
+        const EndpointIPtr _endpoint;
     };
 
     TCPEndpointInfoPtr info = new InfoI(const_cast<TcpEndpointI*>(this));

@@ -27,7 +27,7 @@
 namespace IceInternal
 {
 
-class ICE_API IPEndpointInfoI : virtual public Ice::IPEndpointInfo
+class ICE_API IPEndpointInfoI : public Ice::IPEndpointInfo
 {
 public:
 

@@ -33,7 +33,7 @@ const short EndpointType = 2;
  * Provides access to an SSL endpoint information.
  *
  **/
-["cpp:virtual"] local class EndpointInfo extends Ice::IPEndpointInfo
+local class EndpointInfo extends Ice::IPEndpointInfo
 {
 };
 
