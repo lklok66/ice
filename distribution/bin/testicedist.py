@@ -446,6 +446,9 @@ class Platform:
         
         if buildConfiguration != "debug":
             env["OPTIMIZE"] = "yes"
+            
+        if buildConfiguration == "winrt":
+            env["WINRT"] = "yes"
 
         if self._iceHome:
             env["ICE_HOME"] = self._iceHome
@@ -456,14 +459,14 @@ class Platform:
         if self.is64(arch) and not self.isWindows():
             env["LP64"] = "yes"
             
-        if lang == "java":
-            javaHome = self.getJavaHome(arch, self.getJavaVersion(buildConfiguration))
-            if javaHome:
-                env["JAVA_HOME"] = javaHome
-                prependPathToEnvironVar(env, "PATH", os.path.join(javaHome, "bin"))
+        javaHome = self.getJavaHome(arch, self.getJavaVersion(buildConfiguration))
+        if javaHome:
+            env["JAVA_HOME"] = javaHome
+            prependPathToEnvironVar(env, "PATH", os.path.join(javaHome, "bin"))
             
-            if os.path.exists(os.path.join(self._iceHome, "lib", "db.jar")):
-                prependPathToEnvironVar(env, "CLASSPATH", os.path.join(self._iceHome, "lib", "db.jar"))
+        if os.path.exists(os.path.join(self._iceHome, "lib", "db.jar")):
+            prependPathToEnvironVar(env, "CLASSPATH", os.path.join(self._iceHome, "lib", "db.jar"))
+
         return env
     
     def checkJavaSupport(self, arch, buildConfiguration, output):
@@ -1015,7 +1018,7 @@ class Linux(Platform):
 
         if self.isUbuntu():
             minorVersion = version.split('.')[1]
-            jvmDir += "/jvm/java-%s-openjdk-%s" % (minorVersion, "amd64" if arch == "x86_64" else "i836")
+            jvmDir += "/jvm/java-%s-openjdk-%s" % (minorVersion, "amd64" if arch == "x64" else "i836")
             if not os.path.exists(jvmDir):
                 jvmDir += "/jvm/java-%s-oracle" % (minorVersion)
         else:
@@ -1123,7 +1126,7 @@ class Windows(Platform):
         
     def makeDemosCommand(self, compiler, arch, buildConfiguration, lang, buildDir):
         bConf = "Debug" if buildConfiguration == "debug" else "Release"
-        bArch = ".NET" if lang in ["cs", "vb"] else "Win32" if arch == "x86" else "x64"
+        bArch = "Any CPU" if lang in ["cs", "vb"] else "Win32" if arch == "x86" else "x64"
         commands = []
         #
         # For VC110 demos we need first to upgrade the project files, the projects in the archive are for VC100,
@@ -1199,8 +1202,8 @@ class Windows(Platform):
             archs.append("x64")
         return archs
 
-    def getJavaHome(self, arch, buildConfiguration):
-        return BuildUtils.getJavaHome(arch, self.getJavaVersion(buildConfiguration))
+    def getJavaHome(self, arch, version):
+        return BuildUtils.getJavaHome(arch, version)
 
     def getPlatformEnvironment(self, compiler, arch, buildConfiguration, lang, useBinDist):
         env = Platform.getPlatformEnvironment(self, compiler, arch, buildConfiguration, lang, useBinDist)

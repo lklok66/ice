@@ -322,7 +322,7 @@ builds = {
             "release": ["cpp", "cs", "java", "py", "vsaddin"], 
             "debug": ["cpp"]},
         "amd64": {
-            "release": ["cpp"], 
+            "release": ["cpp", "py"], 
             "debug": ["cpp"]}},
     "VC110": {
         "x86": {
@@ -762,6 +762,11 @@ if os.path.exists(pdbinstallerDir):
     shutil.rmtree(pdbinstallerDir, onerror = _handle_error)
 
 for root, dirnames, filenames in os.walk(installerDir):
+    #
+    # Keep WinRT SDK PDBs in the main installer
+    #
+    if root.startswith(os.path.join(installerDir, "SDKs")):
+        continue
     for f in filenames:
         if f in filterFiles:
             continue
