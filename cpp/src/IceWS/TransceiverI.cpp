@@ -190,7 +190,7 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& h
                 // encoded with Base64.
                 //
                 vector<unsigned char> key(16);
-                IceUtilInternal::generateRandom(reinterpret_cast<char*>(&key[0]), key.size());
+                IceUtilInternal::generateRandom(reinterpret_cast<char*>(&key[0]), static_cast<int>(key.size()));
                 _key = IceInternal::Base64::encode(key);
                 out << _key << "\r\n\r\n"; // EOM
 
@@ -1183,7 +1183,7 @@ IceWS::TransceiverI::postRead(Buffer& buf)
         // Unmask the data we just read.
         //
         IceInternal::Buffer::Container::iterator p = _readStart;
-        for(int n = _readStart - buf.b.begin(); p < buf.i; ++p, ++n)
+        for(size_t n = _readStart - buf.b.begin(); p < buf.i; ++p, ++n)
         {
             *p ^= _readMask[n % 4];
         }
