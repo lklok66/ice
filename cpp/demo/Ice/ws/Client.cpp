@@ -61,8 +61,6 @@ HelloClient::run(int argc, char* argv[])
 
     HelloPrx oneway = twoway->ice_oneway();
     HelloPrx batchOneway = twoway->ice_batchOneway();
-    HelloPrx datagram = twoway->ice_datagram();
-    HelloPrx batchDatagram = twoway->ice_batchDatagram();
 
     bool secure = false;
     int timeout = -1;
@@ -88,28 +86,6 @@ HelloClient::run(int argc, char* argv[])
             else if(c == 'O')
             {
                 batchOneway->sayHello(delay);
-            }
-            else if(c == 'd')
-            {
-                if(secure)
-                {
-                    cout << "secure datagrams are not supported" << endl;
-                }
-                else
-                {
-                    datagram->sayHello(delay);
-                }
-            }
-            else if(c == 'D')
-            {
-                if(secure)
-                {
-                    cout << "secure datagrams are not supported" << endl;
-                }
-                else
-                {
-                    batchDatagram->sayHello(delay);
-                }
             }
             else if(c == 'f')
             {
@@ -192,8 +168,6 @@ HelloClient::run(int argc, char* argv[])
                 twoway = twoway->ice_secure(secure);
                 oneway = oneway->ice_secure(secure);
                 batchOneway = batchOneway->ice_secure(secure);
-                datagram = datagram->ice_secure(secure);
-                batchDatagram = batchDatagram->ice_secure(secure);
 
                 if(secure)
                 {
@@ -240,8 +214,6 @@ HelloClient::menu()
         "t: send greeting as twoway\n"
         "o: send greeting as oneway\n"
         "O: send greeting as batch oneway\n"
-        "d: send greeting as datagram\n"
-        "D: send greeting as batch datagram\n"
         "f: flush all batch requests\n"
         "T: set a timeout\n"
         "P: set server delay\n"

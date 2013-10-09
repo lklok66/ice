@@ -881,8 +881,7 @@ IceWS::TransceiverI::handleRequest(Buffer& responseBuffer)
     string input = key + _wsUUID;
     vector<unsigned char> v(&input[0], &input[0] + input.size());
     vector<unsigned char> hash = calcSHA1(v);
-    out << IceInternal::Base64::encode(hash) << "\r\n"
-        << "\r\n"; // EOM
+    out << IceInternal::Base64::encode(hash) << "\r\n" << "\r\n"; // EOM
 
     string str = out.str();
     responseBuffer.b.resize(str.size());
