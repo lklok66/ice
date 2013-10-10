@@ -92,7 +92,7 @@ bool
 IceWS::HttpParser::parse(const Ice::Byte* begin, const Ice::Byte* end)
 {
     const Ice::Byte* p = begin;
-    const Ice::Byte* start;
+    const Ice::Byte* start = 0;
     const string::value_type CR = '\r';
     const string::value_type LF = '\n';
 
