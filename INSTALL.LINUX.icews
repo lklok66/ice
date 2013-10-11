@@ -1,0 +1,118 @@
+======================================================================
+Requirements
+======================================================================
+
+
+IceWS is expected to build and run properly on Linux distributions
+supported by Ice 3.5
+
+
+Ice and third-party libraries
+-----------------------------
+
+IceWS requires Ice 3.5.1 to be installed for the slice2cpp translator.
+
+It also has dependencies on a number of third-party libraries:
+
+- OpenSSL 0.9.8 or later
+- bzip2 1.0
+
+Some of these packages may have been included in your Linux
+distribution. For those packages that are not installed or have an
+older version than what is listed above, we recommend downloading the
+Ice third-party source archive from
+
+  http://www.zeroc.com/download.html
+
+This archive contains the source distributions for each of the
+third-party dependencies, as well as required source patches and
+configuration instructions.
+
+For more information about these dependencies, please refer to
+the links below:
+
+OpenSSL        http://www.openssl.org
+bzip2          http://www.bzip.org
+
+
+======================================================================
+Compilation and Testing
+======================================================================
+
+Extract the IceWS archive in any directory you like (for example, in
+your home directory):
+
+$ tar xvfz IceWS-@ver@.tar.gz
+
+Change the working directory to IceWS-@ver@/cpp:
+
+$ cd IceWS-@ver@/cpp
+
+Edit config/Make.rules to establish your build configuration. The
+comments in the file provide more information. Pay particular
+attention to the variables that define the locations of the third-
+party libraries.
+
+Now you're ready to build Ice:
+
+$ make
+
+This will build the Ice core libraries, IceSSL and the IceWS
+transport.
+
+Python is required to run the test suite:
+
+  http://www.python.org/download
+
+After a successful build, you can run the test suite:
+
+$ make test
+
+This is equivalent to:
+
+$ python allTests.py
+
+If everything worked out, you should see lots of "ok" messages. In
+case of a failure, the tests abort with "failed".
+
+If you want to try out any of the demos, make sure to update your PATH
+environment variable to add the "bin" directory, and your
+LD_LIBRARY_PATH environment variable to add the "lib" directory:
+
+$ export PATH=`pwd`/bin:$PATH
+$ export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
+
+
+======================================================================
+32-bit builds on x86_64
+======================================================================
+
+By default, builds on x86_64 are 64-bit. To perform a 32-bit build
+on a x86_64 Linux system, set the environment variable LP64 to no,
+as shown below:
+
+$ export LP64=no
+
+
+======================================================================
+Installation
+======================================================================
+
+Simply run "make install". This will install Ice in the directory
+specified by the "prefix" variable in config/Make.rules.
+
+After installation, make sure that the <prefix>/bin directory is in
+your PATH.
+
+If you choose to not embed a runpath into executables at build time
+(see your build settings in cpp/config/Make.rules) or didn't create a
+symbolic link from the runpath directory to the installation
+directory, you also need to add the <prefix>/lib directory to your
+LD_LIBRARY_PATH.
+
+When compiling Ice programs, you must pass the location of the
+<prefix>/include directory to the compiler with the -I option, and the
+location of the <prefix>/lib directory with the -L option.
+
+On a x86_64 system, the libraries are installed in <prefix>/lib64
+unless LP64 is set to no. No other changes are necessary.

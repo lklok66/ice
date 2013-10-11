@@ -16,7 +16,7 @@ from stat import *
 # languages to be built on each platform.
 #
 
-version = "@ver@"
+version = "0.1.0"
 distDir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(os.path.join(distDir, "lib"))
 import DistUtils
@@ -54,16 +54,7 @@ def usage():
 # Instantiate the gobal platform object with the given third-parties
 #
 thirdParties = [
-    "BerkeleyDB", \
-    "Expat", \
     "OpenSSL", \
-    "Mcpp", \
-    "Iconv", \
-    "JGoodiesCommon", \
-    "JGoodiesLooks", \
-    "JGoodiesForms", \
-    "Proguard", \
-    "JavaApplicationBundler"
 ]
 platform = DistUtils.getPlatform(thirdParties)
 
@@ -73,7 +64,7 @@ platform = DistUtils.getPlatform(thirdParties)
 verbose = 0
 forceclean = 0
 nobuild = 0
-buildLanguages = [ ]
+buildLanguages = [ "cpp" ]
 for x in sys.argv[1:]:
     if x == "-h":
         usage()
@@ -109,14 +100,14 @@ else:
     quiet = ""
 
 #
-# Ensure the script is being run from the dist-@ver@ directory.
+# Ensure the script is being run from the dist-0.1.0 directory.
 #
 cwd = os.getcwd()
 if not os.path.exists(os.path.join(distDir, "src", "windows", "LICENSE.rtf")):
-    print sys.argv[0] + ": you must run makebindist.py from the dist-" + version + " directory created by makedist.py"
+    print sys.argv[0] + ": you must run makewsbindist.py from the dist-" + version + " directory created by makedist.py"
     sys.exit(1)
 
-print "Building Ice " + version + " binary distribution (" + platform.getPackageName("Ice", version) + ".tar.gz)"
+print "Building IceWS " + version + " binary distribution (" + platform.getPackageName("IceWS", version) + ".tar.gz)"
 print "Using the following third party libraries:"
 if not platform.checkAndPrintThirdParties():
     print "error: some required third party dependencies were not found"
@@ -126,8 +117,8 @@ if not platform.checkAndPrintThirdParties():
 # Ensure that the source archive or directory exists and create the build directory.
 #
 buildRootDir = os.path.join(distDir, "..", os.path.join("build-" + platform.pkgPlatform + "-" + version))
-srcDir = os.path.join(buildRootDir, "Ice-" + version + "-src")
-buildDir = os.path.join(buildRootDir, "Ice-" + version)
+srcDir = os.path.join(buildRootDir, "IceWS-" + version + "-src")
+buildDir = os.path.join(buildRootDir, "IceWS-" + version)
 
 if forceclean or not os.path.exists(srcDir) or not os.path.exists(buildDir):
     if os.path.exists(buildRootDir):
@@ -140,15 +131,15 @@ if forceclean or not os.path.exists(srcDir) or not os.path.exists(buildDir):
     #
     # If we can't find the source archive in the current directory, ask its location
     #
-    if not os.path.exists(os.path.join(cwd, "Ice-" + version + ".tar.gz")):
+    if not os.path.exists(os.path.join(cwd, "IceWS-" + version + ".tar.gz")):
         print
         src = raw_input("Couldn't find Ice-" + version + ".tar.gz in current directory, please specify\n" + \
                         "where to download or copy the source distribution or hit enter to \n" + \
                         "download it from sun:/share/srcdists/" + version + ": ")
         if src == "":
             src = "sun:/share/srcdists/" + version + "/Ice-" + version + ".tar.gz"
-        elif not src.endswith("Ice-" + version + ".tar.gz"):
-            src = os.path.join(src, "Ice-" + version + ".tar.gz")
+        elif not src.endswith("IceWS-" + version + ".tar.gz"):
+            src = os.path.join(src, "IceWS-" + version + ".tar.gz")
 
         if os.system("scp " + src + " ."):
             print sys.argv[0] + ": couldn't copy " + src
@@ -157,22 +148,22 @@ if forceclean or not os.path.exists(srcDir) or not os.path.exists(buildDir):
     print "Unpacking ./Ice-" + version + ".tar.gz ...",
     sys.stdout.flush()
     os.chdir(buildRootDir)
-    if os.system("gunzip -c " + os.path.join(cwd, "Ice-" + version + ".tar.gz") + " | tar x" + quiet + "f -"):
+    if os.system("gunzip -c " + os.path.join(cwd, "IceWS-" + version + ".tar.gz") + " | tar x" + quiet + "f -"):
         print sys.argv[0] + ": failed to unpack ./Ice-" + version + ".tar.gz"
         sys.exit(1)
-    os.rename("Ice-" + version, srcDir)
+    os.rename("IceWS-" + version, srcDir)
     
     if "cpp-64" in buildLanguages:
-        if os.system("gunzip -c " + os.path.join(cwd, "Ice-" + version + ".tar.gz") + " | tar x" + quiet + "f -"):
+        if os.system("gunzip -c " + os.path.join(cwd, "IceWS-" + version + ".tar.gz") + " | tar x" + quiet + "f -"):
             print sys.argv[0] + ": failed to unpack ./Ice-" + version + ".tar.gz"
             sys.exit(1)
-        os.rename("Ice-" + version, srcDir + "-64")
+        os.rename("IceWS-" + version, srcDir + "-64")
 
     if "cpp-11" in buildLanguages:
-        if os.system("gunzip -c " + os.path.join(cwd, "Ice-" + version + ".tar.gz") + " | tar x" + quiet + "f -"):
+        if os.system("gunzip -c " + os.path.join(cwd, "IceWS-" + version + ".tar.gz") + " | tar x" + quiet + "f -"):
             print sys.argv[0] + ": failed to unpack ./Ice-" + version + ".tar.gz"
             sys.exit(1)
-        os.rename("Ice-" + version, srcDir + "-11")
+        os.rename("IceWS-" + version, srcDir + "-11")
 
     os.chdir(cwd)
     print "ok"
@@ -249,17 +240,15 @@ platform.completeDistribution(buildDir, version)
 #
 # Copy platform specific files (README, SOURCES, etc)
 #
-print "Copying distribution files (README, SOURCES, etc)...",
-sys.stdout.flush()
-platform.copyDistributionFiles(distDir, buildDir)
-copy(os.path.join(srcDir, "CHANGES"), os.path.join(buildDir, "CHANGES"))
-copy(os.path.join(srcDir, "RELEASE_NOTES"), os.path.join(buildDir, "RELEASE_NOTES"))
-print "ok"
+# print "Copying distribution files (README, SOURCES, etc)...",
+# sys.stdout.flush()
+# platform.copyDistributionFiles(distDir, buildDir)
+# print "ok"
 
 #
 # Everything should be clean now, we can create the binary distribution archive
 # 
-platform.createArchive(cwd, "Ice", buildRootDir, distDir, version, quiet)
+platform.createArchive(cwd, "IceWS", buildRootDir, distDir, version, quiet)
 
 #
 # Done.

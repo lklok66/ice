@@ -395,6 +395,9 @@ def run(tests, root = False):
         a = '--protocol=ws %s'  % arg
         expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
+        a = '--protocol=wss %s'  % arg
+        expanded.append([ (test, a, config) for test,config in tests if "core" in config])
+
         a = '--protocol=tcp --compress %s'  % arg
         expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
