@@ -805,7 +805,7 @@ class Platform:
         # LP64
         if language == "cpp-64":
             envs.append("LP64=yes")
-        else if self.pkgArch != "x86_64":
+        elif self.pkgArch != "x86_64":
             envs.append("LP64=no")
             
         return string.join(envs, " ")
