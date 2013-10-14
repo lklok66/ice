@@ -26,12 +26,6 @@ prefix			= C:\IceWS-$(ICEWS_VERSION)
 #RELEASEPDBS            = yes
 
 #
-# Specify your C++ compiler, or leave unset for auto-detection.
-# Supported values are: VC90, VC100, VC110
-#
-#CPP_COMPILER = VCxxx
-
-#
 # If third party libraries are not installed in the default location
 # or THIRDPARTY_HOME is not set in your environment variables then
 # change the following setting to reflect the installation location.
@@ -57,46 +51,11 @@ ICE_HOME = $(PROGRAMFILES)\ZeroC\Ice-$(ICE_VERSION)
 !endif
 !endif
 
-#
-# Define if you want the Ice DLLs to have compiler specific names.
-# Will be set to yes by default when CPP_COMPILER=VC90, and unset 
-# otherwise 
-#
-#UNIQUE_DLL_NAMES	= yes
-
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
 
-#
-# Check CPP_COMPILER
-#
-!if "$(CPP_COMPILER)" == ""
-
-!if "$(VISUALSTUDIOVERSION)" == "11.0"
-CPP_COMPILER            = VC110
-!elseif ([cl 2>&1 | findstr "Version\ 16" > nul] == 0)
-CPP_COMPILER            = VC100
-!elseif ([cl 2>&1 | findstr "Version\ 17" > nul] == 0)
-CPP_COMPILER            = VC110
-!elseif ([cl 2>&1 | findstr "Version\ 15" > nul] == 0)
-CPP_COMPILER            = VC90
-!else
-!error Cannot detect C++ compiler 
-!endif
-
-#!message CPP_COMPILER set to $(CPP_COMPILER)
-!elseif "$(CPP_COMPILER)" != "VC90" && "$(CPP_COMPILER)" != "VC100" && "$(CPP_COMPILER)" != "VC110"
-!error Invalid CPP_COMPILER setting: $(CPP_COMPILER). Must be one of: VC90, VC100 or VC110.
-!endif
-
-#
-# With VC90, we want unique dll names by default
-#
-!if "$(CPP_COMPILER)" == "VC90" && "$(UNIQUE_DLL_NAMES)" == ""
-UNIQUE_DLL_NAMES	= yes
-!endif
 
 #
 # Common definitions
@@ -134,17 +93,7 @@ SETARGV			= setargv.obj
 #
 !include        $(top_srcdir)/config/Make.rules.msvc
 
-!if "$(WINRT)" == "yes" && "$(CPP_COMPILER)" != "VC110"
-!error CPP_COMPILER: $(CPP_COMPILER) not supported to build Ice for WinRT
-!endif
-
-!if "$(CPP_COMPILER)" == "VC90"
-libsuff			= \vc90$(x64suffix)
-!elseif "$(CPP_COMPILER)" == "VC110"
-libsuff			= \vc110$(x64suffix)
-!else
 libsuff			= $(x64suffix)
-!endif
 
 !if "$(ice_src_dist)" != ""
 !if "$(THIRDPARTY_HOME)" != ""
@@ -152,16 +101,6 @@ CPPFLAGS        = -I"$(THIRDPARTY_HOME)\include" $(CPPFLAGS)
 LDFLAGS         = $(PRELIBPATH)"$(THIRDPARTY_HOME)\lib$(libsuff)" $(LDFLAGS)
 !endif
 !else
-!endif
-
-!if "$(UNIQUE_DLL_NAMES)" == "yes"
-!if "$(CPP_COMPILER)" == "VC90"
-COMPSUFFIX	= _vc90
-!elseif "$(CPP_COMPILER)" == "VC100"
-COMPSUFFIX	= _vc100
-!elseif "$(CPP_COMPILER)" == "VC110"
-COMPSUFFIX  = _vc110
-!endif
 !endif
 
 !if "$(OPTIMIZE)" != "yes"

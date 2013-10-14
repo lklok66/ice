@@ -15,7 +15,7 @@ Note that the Visual Studio project files require the Ice Visual
 Studio Add-In, installed as part of the installation of the Ice binary
 distribution.
 
-To build the demos, start Visual Studio and open the solution
+To build the demos, start Visual Studio 2012 and open the solution
 demo\demo.sln.
 
 Select your target configuration: Debug or Release, Win32 or x64 (on
@@ -30,7 +30,7 @@ Add the "bin" directory of the IceWS binary distribution to your PATH.
 
 For x86 builds:
 
-> set PATH=<dir>\IceWS-0.10\bin;%PATH%
+> set PATH=<dir>\IceWS-0.1.0\bin;%PATH%
 
 For x64 builds:
 

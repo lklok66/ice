@@ -26,8 +26,8 @@ Ice WebSocket transport
 -----------------------
 
 This distribution includes patched Ice and IceSSL libraries as well as
-the Ice WebSocket transport. The Ice and IceSSL libraries are binary
-compatible with Ice 3.5.1 libraries.
+the Ice WebSocket transport for Visual Studio 2012. The Ice and IceSSL
+libraries are binary compatible with Ice 3.5.1.
 
 The WebSocket transport is intended to be used in environments where
 only connections to the HTTP or HTTPs ports are allowed.

@@ -19,35 +19,11 @@
 #
 #RELEASEPDBS            = yes
 
-#
-# Specify your C++ compiler, or leave unset for auto-detection.
-# Supported values are: VC100, VC110
-#
-#CPP_COMPILER           = VCxxx 
-
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
 
-#
-# Check CPP_COMPILER
-#
-!if "$(CPP_COMPILER)" == ""
-
-!if "$(VISUALSTUDIOVERSION)" == "11.0"
 CPP_COMPILER            = VC110
-!elseif ([cl 2>&1 | findstr "Version\ 16" > nul] == 0)
-CPP_COMPILER            = VC100
-!elseif ([cl 2>&1 | findstr "Version\ 17" > nul] == 0)
-CPP_COMPILER            = VC110
-!else
-!error Cannot detect C++ compiler 
-!endif
-
-#!message CPP_COMPILER set to $(CPP_COMPILER)
-!elseif "$(CPP_COMPILER)" != "VC100" && "$(CPP_COMPILER)" != "VC110"
-!error Invalid CPP_COMPILER setting: $(CPP_COMPILER). Must be one of: VC100 or VC110.
-!endif
 
 #
 # Common definitions
@@ -67,11 +43,7 @@ SETARGV			= setargv.obj
 #
 !include        $(top_srcdir)/config/Make.rules.msvc
 
-!if "$(CPP_COMPILER)" == "VC110"
-libsuff			= \vc110$(x64suffix)
-!else
 libsuff			= $(x64suffix)
-!endif
 
 !if "$(OPTIMIZE)" != "yes"
 LIBSUFFIX          	= $(LIBSUFFIX)d

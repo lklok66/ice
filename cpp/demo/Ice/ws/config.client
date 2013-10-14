@@ -1,4 +1,4 @@
-Hello.Proxy=hello:ws -h localhost -p 10000 -r "/foofoo":wss -h localhost -p 10001 -r "/foofoo"
+Hello.Proxy=hello:ws -h 127.0.0.1 -p 8080 -r "/hello/":wss -h 127.0.0.1 -p 8081 -r "/hello/"
 
 #
 # Warn about connection exceptions
