@@ -240,10 +240,11 @@ platform.completeDistribution(buildDir, version)
 #
 # Copy platform specific files (README, SOURCES, etc)
 #
-# print "Copying distribution files (README, SOURCES, etc)...",
-# sys.stdout.flush()
-# platform.copyDistributionFiles(distDir, buildDir)
-# print "ok"
+print "Copying distribution files (README, SOURCES, etc)...",
+sys.stdout.flush()
+for f in [ 'README', 'SOURCES' ]:
+    copy(os.path.join(distDir, "src", "ws", f), os.path.join(buildDir, f))
+print "ok"
 
 #
 # Everything should be clean now, we can create the binary distribution archive
