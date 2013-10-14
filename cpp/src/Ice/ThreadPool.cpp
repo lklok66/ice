@@ -985,13 +985,11 @@ IceInternal::ThreadPool::ioCompleted(ThreadPoolCurrent& current)
             if(_serialize)
             {
                 _selector.disable(current._handler.get(), current.operation);
-                if(current._handler->_hasMoreData)
-                {
-                    // Make sure the handler isn't in the set of pending handlers (this can
-                    // for example occur if the handler is updated for reads while IO is being
-                    // processed).
-                    _pendingHandlers.erase(current._handler.get());
-                }
+
+                // Make sure the handler isn't in the set of pending handlers (this can
+                // for example occur if the handler is has more data and its added by
+                // ThreadPool::update while we were processing IO).
+                _pendingHandlers.erase(current._handler.get());
             }
             else if(current._handler->_hasMoreData && current._handler->_registered & SocketOperationRead)
             {
