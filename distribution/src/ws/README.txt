@@ -41,4 +41,30 @@ More information on the WebSocket transport from
 
   http://www.zeroc.com/labs/icews/index.html
 
+Using this distribution
+-----------------------
 
+Follow the intructions from the Ice release notes to build and run
+your application:
+
+  http://doc.zeroc.com/display/Ice/Release+Notes
+
+Since the patched Ice and IceSSL libraries from this distribution are
+binary compatible with Ice 3.5.1, you can continue building your
+application as usual and only update your runtime configuration to
+look fo the patched libraries from the IceWS distribution.
+
+Note that this distribution only includes binaries for Visual Studio
+2012.
+
+To use the IceWS transport, you will need to update your environment
+to first look for libraries from the bin directory of your IceWS
+installation.
+
+You can set the PATH environment variable:
+
+  > set PATH=<IceWS installation directory>\bin;%PATH%
+
+If your application is a 64bits application:
+
+  > set PATH=<IceWS installation directory>\bin\x64;%PATH%

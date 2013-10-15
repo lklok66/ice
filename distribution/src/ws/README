@@ -38,5 +38,34 @@ traffic to the appropriate back-end servers.
 
 More information on the WebSocket transport from
 
-  http://www.zeroc.com/labs/icews/index.html
+  http://www.zeroc.com/labs/icews/index.htm
+
+Using this distribution
+-----------------------
+
+Follow the intructions from the Ice release notes to build and run
+your application:
+
+  http://doc.zeroc.com/display/Ice/Release+Notes
+
+Since the patched Ice and IceSSL libraries from this distribution are
+binary compatible with Ice 3.5.1, you can continue building your
+application as usual and only update your runtime configuration to
+look fo the patched libraries from the IceWS distribution.
+
+To use the IceWS transport, you will need to update your environment
+(or your application embedded library search path) to first look for
+libraries from the lib directory of your IceWS installation.
+
+On Linux, you can set the LD_LIBRARY_PATH environment variable:
+
+  $ export LD_LIBRARY_PATH=<IceWS installation directory>/lib:$LD_LIBRARY_PATH
+
+On OS X, you can set the DYLD_LIBRARY_PATH environment variable:
+
+  $ export DYLD_LIBRARY_PATH=<IceWS installation directory>/lib:$DYLD_LIBRARY_PATH
+
+If using the C++11 libraries on OS X:
+
+  $ export DYLD_LIBRARY_PATH=<IceWS installation directory>/lib/c++11:$DYLD_LIBRARY_PATH
 
