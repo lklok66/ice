@@ -1,10 +1,37 @@
 ======================================================================
+Overview
+======================================================================
+
+This file describes the IceWS source distribution, including
+information about compiler requirements, third-party dependencies, and
+instructions for building and testing the distribution.
+
+The IceWS distribution includes a modified version of Ice 3.5.1 and
+the Ice for WebSocket (IceWS) transport plug-in.
+
+There are three components produced by the build:
+
+* Replacements for the shared libraries libIce.so and libIceSSL.so
+* A new shared library libIceWS.so
+
+In order to use the IceWS transport plug-in, you must also use the
+replacements for libIce and libIceSSL instead of the libraries from
+the standard Ice 3.5.1 distribution.
+
+If you prefer, you can download a binary distribution that contains
+the header files and pre-compiled libraries necessary for using IceWS
+at the link below:
+
+  http://www.zeroc.com/labs/icews/download.html
+
+
+======================================================================
 Requirements
 ======================================================================
 
 
 IceWS is expected to build and run properly on Linux distributions
-supported by Ice 3.5
+supported by Ice 3.5.
 
 
 Ice and third-party libraries
@@ -12,7 +39,7 @@ Ice and third-party libraries
 
 IceWS requires Ice 3.5.1 to be installed for the slice2cpp translator.
 
-It also has dependencies on a number of third-party libraries:
+It also has dependencies on the following third-party libraries:
 
 - OpenSSL 0.9.8 or later
 - bzip2 1.0
@@ -66,11 +93,7 @@ Python is required to run the test suite:
 
 After a successful build, you can run the test suite:
 
-$ make test
-
-This is equivalent to:
-
-$ python allTests.py
+$ python allTests.py --all
 
 If everything worked out, you should see lots of "ok" messages. In
 case of a failure, the tests abort with "failed".

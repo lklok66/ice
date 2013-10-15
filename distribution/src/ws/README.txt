@@ -22,37 +22,39 @@ available for customers who wish to use Ice in proprietary products.
 Please contact sales@zeroc.com for more information on licensing Ice.
 
 
-Ice WebSocket transport
------------------------
+Ice for WebSocket transport
+---------------------------
 
 This distribution includes patched Ice and IceSSL libraries as well as
-the Ice WebSocket transport for Visual Studio 2012. The Ice and IceSSL
-libraries are binary compatible with Ice 3.5.1.
+the Ice for WebSocket (IceWS) transport plug-in for Visual Studio
+2012. The Ice and IceSSL libraries are binary-compatible with Ice
+3.5.1.
 
 The WebSocket transport is intended to be used in environments where
-only connections to the HTTP or HTTPs ports are allowed.
+only connections to the HTTP or HTTPS ports are allowed.
 
 It can also be used to simplify the firewall setup and deployment on
 the server side where a web infrastructure already exists. For
 example, a reversed HTTP proxy can be used to forward either the HTTP
 traffic or web socket traffic to the appropriate back-end servers.
 
-More information on the WebSocket transport from
+You can find more information on the WebSocket transport at
 
   http://www.zeroc.com/labs/icews/index.html
+
 
 Using this distribution
 -----------------------
 
-Follow the intructions from the Ice release notes to build and run
+Follow the instructions from the Ice release notes to build and run
 your application:
 
   http://doc.zeroc.com/display/Ice/Release+Notes
 
 Since the patched Ice and IceSSL libraries from this distribution are
-binary compatible with Ice 3.5.1, you can continue building your
-application as usual and only update your runtime configuration to
-look fo the patched libraries from the IceWS distribution.
+binary-compatible with Ice 3.5.1, you can continue building your
+application as usual and only update your run-time configuration to
+look for the patched libraries from the IceWS distribution.
 
 Note that this distribution only includes binaries for Visual Studio
 2012.
@@ -65,6 +67,6 @@ You can set the PATH environment variable:
 
   > set PATH=<IceWS installation directory>\bin;%PATH%
 
-If your application is a 64bits application:
+Or for 64-bit applications:
 
   > set PATH=<IceWS installation directory>\bin\x64;%PATH%

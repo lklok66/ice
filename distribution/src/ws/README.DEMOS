@@ -12,6 +12,7 @@ demos, follow the instructions below.
 This section describes how to build the demos included in the IceWS
 demo distribution.
 
+
 Build Instructions
 ------------------
 
@@ -33,8 +34,7 @@ To build the demos you need to:
 
     $ export ICEWS_HOME=$HOME/testing/IceWS-0.1.0
 
-
-  - Review the build settings found in config/Make.rules. 
+  - Review the build settings found in config/Make.rules.
 
     For example, for C++, set OPTIMIZE=yes in order to build with
     optimization, or for C++ set LP64=yes if you are building against
@@ -45,6 +45,7 @@ To build the demos you need to:
 
     cd IceWS-0.1.0-demos/demo
     make
+
 
 ======================================================================
 2. Running the Ice Demos
