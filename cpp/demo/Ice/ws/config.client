@@ -1,4 +1,4 @@
-Hello.Proxy=hello:ws -h 127.0.0.1 -p 8080 -r "/hello/":wss -h 127.0.0.1 -p 8081 -r "/hello/"
+Hello.Proxy=hello:ws -h 127.0.0.1 -p 10000:wss -h 127.0.0.1 -p 10001
 
 #
 # Warn about connection exceptions
