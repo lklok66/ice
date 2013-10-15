@@ -28,17 +28,6 @@ from DistUtils import copy
 make = "make" if sys.platform.startswith("linux") else "gmake"
 
 #
-# Defines which languages are to also be built in 64bits mode
-#
-# NOTE: makebindist.py doesn't currently support different third party locations
-# for 32 and 64 bits. This is an issue on HP-UX for example where Bzip2 32bits is
-# in /usr/local and in /opt for the 64bits version.
-#
-build_lp64 = { \
-    'SunOS' : ['cpp'], \
-}
-
-#
 # Program usage.
 #
 def usage():
@@ -64,7 +53,13 @@ platform = DistUtils.getPlatform(thirdParties)
 verbose = 0
 forceclean = 0
 nobuild = 0
-buildLanguages = [ "cpp" ]
+
+(sysname, nodename, release, ver, machine) = os.uname()
+if sysname == "Darwin":
+    buildLanguages = [ "cpp", "cpp-11" ]
+else:
+    buildLanguages = [ "cpp" ]
+
 for x in sys.argv[1:]:
     if x == "-h":
         usage()
