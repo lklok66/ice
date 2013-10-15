@@ -11,7 +11,7 @@ Ice and third-party libraries
 
 IceWS requires Ice 3.5.1 to be installed for the slice2cpp translator.
 
-Ice has dependencies on a number of third-party libraries:
+IceWS has dependencies on a number of third-party libraries:
 
 - OpenSSL 0.9.8 or later
 - bzip2 1.0
@@ -56,7 +56,9 @@ Now you're ready to build Ice:
 
 $ make
 
-This will build the Ice core libraries, services, tests and examples.
+This will build the Ice core libraries, IceSSL and the IceWS
+transport.
+
 After a successful build, you can run the test suite:
 
 $ make test
@@ -80,12 +82,11 @@ $ export DYLD_LIBRARY_PATH=`pwd`/lib:$DYLD_LIBRARY_PATH
 Installation
 ======================================================================
 
-Simply run "make install". This will install Ice in the directory
+Simply run "make install". This will install IceWS in the directory
 specified by the "prefix" variable in config/Make.rules.
 
 After installation, make sure that the <prefix>/bin directory is in
 your PATH. For C++11 builds binaries are installed in <prefix>/bin/c++11.
-
 
 If you choose to not embed a runpath into executables at build time
 (see your build settings in cpp/config/Make.rules) or didn't create a

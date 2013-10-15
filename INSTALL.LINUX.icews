@@ -98,7 +98,7 @@ $ export LP64=no
 Installation
 ======================================================================
 
-Simply run "make install". This will install Ice in the directory
+Simply run "make install". This will install IceWS in the directory
 specified by the "prefix" variable in config/Make.rules.
 
 After installation, make sure that the <prefix>/bin directory is in

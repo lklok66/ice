@@ -63,8 +63,8 @@ Using your favorite Zip tool, unzip the IceWS source archive anywhere
 you like.
 
 Open a command prompt that is configured for your target architecture.
-For example, when using Visual Studio 2010 or Visual Studio 2012, you
-have several alternatives:
+For example, when using Visual Studio 2012, you have several
+alternatives:
 
  - Visual Studio Command Prompt
  - Visual Studio x64 Win64 Command Prompt
@@ -83,7 +83,7 @@ Change the working directory to IceWS-@ver@. For example:
 Edit config\Make.rules.mak to establish your build configuration. The
 comments in the file provide more information.
 
-Now you're ready to build Ice:
+Now you're ready to build IceWS:
 
 > nmake /f Makefile.mak
 
@@ -95,7 +95,7 @@ Python is required to run the test suite:
 
   http://www.python.org/download
 
-Open a command prompt and change to the top-level Ice directory.
+Open a command prompt and change to the top-level IceWS directory.
 
 Add the "bin" directory of the third-party libraries to your PATH.
 
@@ -116,17 +116,17 @@ case of a failure, the tests abort with "failed".
 
 If you want to try out any of the demos, make sure to update your PATH
 environment variable to add the "bin" directory, which contains the
-Ice DLLs and executables.
+DLLs and executables.
 
 
 ======================================================================
 x64 Platform
 ======================================================================
 
-Building Ice on x64 with the Visual Studio 2010 or Visual Studio 2012
-C++ compiler is like building Ice on x86. You just need to
-perform the build in a "Visual Studio x64 Win64 Command Prompt", and
-not in a regular "Visual Studio 2010/2012 Command Prompt".
+Building IceWS on x64 with the Visual Studio 2012 C++ compiler is like
+building IceWS on x86. You just need to perform the build in a "Visual
+Studio x64 Win64 Command Prompt", and not in a regular "Visual Studio
+2010/2012 Command Prompt".
 
 Note that you must be using a Windows x64 platform when compiling a
 64-bit version of Ice.
@@ -136,7 +136,7 @@ Note that you must be using a Windows x64 platform when compiling a
 Installation
 ======================================================================
 
-Simply run "nmake /f Makefile.mak install". This will install Ice in
+Simply run "nmake /f Makefile.mak install". This will install IceWS in
 the directory specified by the "prefix" variable in
 config\Make.rules.mak.
 

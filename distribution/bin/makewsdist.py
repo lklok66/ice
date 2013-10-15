@@ -355,7 +355,7 @@ def createSourceDist(platform, destDir):
     for root, dirnames, filenames in os.walk('.'):
         for f in filenames:
             filepath = os.path.join(root, f) 
-            if fnmatch.fnmatch(f, "README*") or fnmatch.fnmatch(f, "*.Addin"):
+            if fnmatch.fnmatch(f, "README*") or fnmatch.fnmatch(f, "INSTALL*") or fnmatch.fnmatch(f, "*.Addin"):
                 fixVersion(filepath, *versions)
             if fnmatch.fnmatch(f, "*.y") or fnmatch.fnmatch(f, "*.l"):
                 fixMakefileForFile(filepath)
