@@ -147,6 +147,7 @@ excludeWindowsFiles = [ \
     ".depend.mak",
     "*.exe.config",
     "MSG00001.bin",
+    "INSTALL.WINDOWS.icews",
     "/cpp/bin",
     "/cpp/test/WinRT",
     "/cpp/demo/**/generated",
@@ -164,6 +165,8 @@ excludeWindowsFiles = [ \
 # the mingw build requires it.
 #
 excludeUnixFiles = [ \
+    "INSTALL.LINUX.icews",
+    "INSTALL.OSX.icews",
     "Makefile",
     "Makefile.icews",
     "*.sln",

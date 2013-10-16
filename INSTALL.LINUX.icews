@@ -80,7 +80,7 @@ comments in the file provide more information. Pay particular
 attention to the variables that define the locations of the third-
 party libraries.
 
-Now you're ready to build Ice:
+Now you're ready to build IceWS:
 
 $ make
 
@@ -98,11 +98,9 @@ $ python allTests.py --all
 If everything worked out, you should see lots of "ok" messages. In
 case of a failure, the tests abort with "failed".
 
-If you want to try out any of the demos, make sure to update your PATH
-environment variable to add the "bin" directory, and your
+If you want to try out any of the demos, make sure to update your
 LD_LIBRARY_PATH environment variable to add the "lib" directory:
 
-$ export PATH=`pwd`/bin:$PATH
 $ export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
 
 
@@ -123,9 +121,6 @@ Installation
 
 Simply run "make install". This will install IceWS in the directory
 specified by the "prefix" variable in config/Make.rules.
-
-After installation, make sure that the <prefix>/bin directory is in
-your PATH.
 
 If you choose to not embed a runpath into executables at build time
 (see your build settings in cpp/config/Make.rules) or didn't create a

@@ -157,6 +157,6 @@ Ice project, make sure to add the bin directory to the Visual C++
 "Executable files", the include directory to the "Include files" and
 the lib directory to the "Library files" in the IDE.
 
-If you built a 64-bit version of Ice, the binaries are installed in
-the bin\x64 directory and the libraries are installed in the lib\x64
+If you built a 64-bit version, the binaries are installed in the
+bin\x64 directory and the libraries are installed in the lib\x64
 directory.
