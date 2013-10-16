@@ -582,18 +582,20 @@ IceInternal::ThreadPool::initialize(const EventHandlerPtr& handler)
 void
 IceInternal::ThreadPool::update(const EventHandlerPtr& handler, SocketOperation remove, SocketOperation add)
 {
-    if(remove == add)
-    {
-        return;
-    }
-
     Lock sync(*this);
     assert(!_destroyed);
+
+    // Don't remove what needs to be added
+    remove = static_cast<SocketOperation>(remove & ~add);
 
     // Don't remove/add if already un-registered or registered
     remove  = static_cast<SocketOperation>(handler->_registered & remove);
     add  = static_cast<SocketOperation>(~handler->_registered & add);
-
+    if(remove == add)
+    {
+        return;
+    }
+    
     _selector.update(handler.get(), remove, add);
 #if !defined(ICE_USE_IOCP) && !defined(ICE_OS_WINRT)
     if(add & SocketOperationRead && handler->_hasMoreData && !(handler->_disabled & SocketOperationRead))
