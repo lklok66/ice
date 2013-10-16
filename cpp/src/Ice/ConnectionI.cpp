@@ -1507,13 +1507,16 @@ Ice::ConnectionI::message(ThreadPoolCurrent& current)
                     newOp = static_cast<SocketOperation>(newOp | sendNextMessage(sentCBs));
                 }
 
-                scheduleTimeout(newOp);
-                _threadPool->update(this, current.operation, newOp);
+                if(_state < StateClosed)
+                {
+                    scheduleTimeout(newOp);
+                    _threadPool->update(this, current.operation, newOp);
+                } 
+
                 if(!readyOp)
                 {
                     return;
                 }
-                assert(readyOp);
 
                 //
                 // We increment the dispatch count to prevent the
