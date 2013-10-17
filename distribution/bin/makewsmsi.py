@@ -388,7 +388,7 @@ for arch in ["x86", "amd64"]:
 #
 # docs dir
 #
-docsDir = os.path.join(distFiles, "src", "windows", "docs", "main")
+docsDir = os.path.join(distFiles, "src", "ws")
 for f in ["README.txt", "SOURCES.txt", "THIRD_PARTY_LICENSE.txt"]:
     copy(os.path.join(docsDir, f), os.path.join(installerDir, f), verbose = verbose)
 
