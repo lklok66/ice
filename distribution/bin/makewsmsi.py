@@ -376,7 +376,7 @@ for arch in ["x86", "amd64"]:
             installDir = os.path.join(buildDir, "IceWS-%s" % version)
 
             if compiler == "VC110":
-                for d in ["bin", "lib", "include", "slice"]:
+                for d in ["bin"]:
                     for root, dirnames, filenames in os.walk(os.path.join(installDir, d)):
                         for f in filenames:
                             if f in filterFiles:
@@ -384,6 +384,11 @@ for arch in ["x86", "amd64"]:
                             targetFile = relPath(installDir, installerDir, os.path.join(root, f))
                             if not os.path.exists(targetFile):
                                 copy(os.path.join(root, f), targetFile, verbose = verbose)
+
+                for f in ["ICE_LICENSE.txt", "LICENSE.txt"]:
+                    targetFile = os.path.join(installerDir, f)
+                    if not os.path.exists(targetFile):
+                        copy(os.path.join(installDir, f), targetFile, verbose = verbose)
 
 #
 # docs dir
