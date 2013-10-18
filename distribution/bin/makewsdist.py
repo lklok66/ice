@@ -56,6 +56,7 @@ excludeFiles = [ \
     "/cpp/CHANGES",
     "/cpp/Makefile",
     "/cpp/Makefile.mak",
+    "/cpp/doc",
     "/cpp/man",
     "/cpp/src/Makefile",
     "/cpp/src/Makefile.mak",

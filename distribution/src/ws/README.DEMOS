@@ -28,12 +28,6 @@ To build the demos you need to:
 
     $ export ICE_HOME=$HOME/testing/Ice-3.5.1
 
-  - If you did not install IceWS in its default location, set the
-    environment variable ICEWS_HOME to point to your IceWS
-    installation root directory. For example, in a Bash shell:
-
-    $ export ICEWS_HOME=$HOME/testing/IceWS-0.1.0
-
   - Review the build settings found in config/Make.rules.
 
     For example, for C++, set OPTIMIZE=yes in order to build with

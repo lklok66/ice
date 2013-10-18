@@ -11,7 +11,7 @@
 # The "root directory" for runpath embedded in executables. Can be unset
 # to avoid adding a runpath to Ice executables.
 #
-embedded_runpath_prefix  ?= /opt/IceWS-$(VERSION_MAJOR).$(VERSION_MINOR)
+#embedded_runpath_prefix  ?= /opt/IceWS-$(VERSION_MAJOR).$(VERSION_MINOR)
 
 #
 # Define OPTIMIZE as yes if you want to build with

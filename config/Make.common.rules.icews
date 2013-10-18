@@ -22,8 +22,8 @@ VERSION			= 3.5.1ws
 SHORT_VERSION           = 3.5
 SOVERSION		= 35
 
-ICEWS_VERSION		= 0.1.0
 ICE_VERSION		= 3.5.1
+ICEWS_VERSION           = 0.1.0
 
 INSTALL			= cp -fp
 INSTALL_PROGRAM		= ${INSTALL}
@@ -162,33 +162,33 @@ endif
 #
 ifndef ice_src_dist
 
-    ifneq ($(ICEWS_HOME),)
-        ifneq ($(shell test -f $(ICEWS_HOME)/include/IceWS/IceWS.h && echo 0), 0)
-$(error Unable to find IceWS.h in $(ICEWS_HOME)/include/IceWS, please verify ICEWS_HOME is properly configured and Ice is correctly installed.)
+    ifneq ($(ICE_HOME),)
+        ifneq ($(shell test -f $(ICE_HOME)/include/Ice/Ice.h && echo 0), 0)
+$(error Unable to find Ice.h in $(ICE_HOME)/include/Ice, please verify ICE_HOME is properly configured and Ice is correctly installed.)
         endif
-        ice_dir = $(ICEWS_HOME)
+        ice_dir = $(ICE_HOME)
     else
-	ifeq ($(shell test -f /usr/include/IceWS/IceWS.h && echo 0), 0)
+	ifeq ($(shell test -f /usr/include/Ice/Ice.h && echo 0), 0)
             ice_dir = /usr
-            ifeq ($(shell test -f /opt/IceWS-$(ICEWS_VERSION)/include/IceWS/IceWS.h && echo 0), 0)
-                $(warning Found $(slice_translator) in both /usr/bin and /opt/IceWS-$(ICEWS_VERSION)/bin, /usr/include/IceWS/IceWS.h will be used!)
+            ifeq ($(shell test -f /opt/Ice-$(ICE_VERSION)/include/Ice/Ice.h && echo 0), 0)
+                $(warning Found $(slice_translator) in both /usr/bin and /opt/Ice-$(ICE_VERSION)/bin, /usr/include/Ice/Ice.h will be used!)
             endif
-            ifeq ($(shell test -f /Library/Developer/IceWS-$(ICEWS_VERSION)/include/IceWS/IceWS.h && echo 0), 0)
-               $(warning Found $(slice_translator) in both /usr/bin and /Library/Developer/IceWS-$(ICEWS_VERSION)/bin, /usr/include/IceWS/IceWS.h will be used!)
+            ifeq ($(shell test -f /Library/Developer/Ice-$(ICE_VERSION)/include/Ice/Ice.h && echo 0), 0)
+               $(warning Found $(slice_translator) in both /usr/bin and /Library/Developer/Ice-$(ICE_VERSION)/bin, /usr/include/Ice/Ice.h will be used!)
             endif
         else
-            ifeq ($(shell test -f /opt/IceWS-$(ICEWS_VERSION)/include/IceWS/IceWS.h && echo 0), 0)
-                ice_dir = /opt/IceWS-$(ICEWS_VERSION)
+            ifeq ($(shell test -f /opt/Ice-$(ICE_VERSION)/include/Ice/Ice.h && echo 0), 0)
+                ice_dir = /opt/Ice-$(ICE_VERSION)
             else
-                ifeq ($(shell test -f /Library/Developer/IceWS-$(ICEWS_VERSION)/include/IceWS/IceWS.h && echo 0), 0)
-                    ice_dir = /Library/Developer/IceWS-$(ICEWS_VERSION)
+                ifeq ($(shell test -f /Library/Developer/Ice-$(ICE_VERSION)/include/Ice/Ice.h && echo 0), 0)
+                    ice_dir = /Library/Developer/Ice-$(ICE_VERSION)
                 endif
             endif
         endif
     endif
 
     ifndef ice_dir
-$(error Unable to find a valid IceWS distribution, please verify ICEWS_HOME is properly configured and Ice is correctly installed.)
+$(error Unable to find a valid Ice distribution, please verify ICE_HOME is properly configured and Ice is correctly installed.)
     endif
     ice_bin_dist = 1
 endif
@@ -204,13 +204,13 @@ endif
 # Set slicedir to the path of the directory containing the Slice files.
 #
 ifeq ($(ice_dir), /usr)
-    slicedir = /usr/share/IceWS-$(ICEWS_VERSION)/slice
+    slicedir = /usr/share/Ice-$(ICE_VERSION)/slice
 else
     slicedir = $(ice_dir)/slice
 endif
 
 ifeq ($(prefix), /usr)
-    install_slicedir = /usr/share/IceWS-$(ICEWS_VERSION)/slice
+    install_slicedir = /usr/share/Ice-$(ICE_VERSION)/slice
 else
     install_slicedir = $(prefix)/slice
 endif
@@ -347,18 +347,6 @@ install-common::
 	    echo "Creating $(prefix)..." ; \
 	    $(call mkdir,$(prefix), -p) ; \
 	fi
-
-	@if test ! -d $(DESTDIR)$(install_slicedir) ; \
-	then \
-	    echo "Creating $(DESTDIR)$(install_slicedir)..." ; \
-	    $(call mkdir, $(DESTDIR)$(install_slicedir), -p) ; \
-	    cd $(top_srcdir)/../slice ; \
-	    for subdir in * ; \
-	    do \
-	        echo "Copying slice/$$subdir to $(DESTDIR)$(install_slicedir)..." ; \
-	        cp -fpr $$subdir $(DESTDIR)$(install_slicedir) ; \
-	    done ; \
-	    fi
 
 	@if test ! -f $(DESTDIR)$(prefix)/ICE_LICENSE$(TEXT_EXTENSION) ; \
 	then \

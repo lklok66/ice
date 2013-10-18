@@ -43,10 +43,8 @@ ARCH			= x86
 
 !if "$(PROCESSOR_ARCHITECTURE)" == "AMD64"
 ice_bin_dist_dir = $(PROGRAMFILES) (x86)\ZeroC\Ice-$(ICE_VERSION)
-ice_ws_bin_dist_dir = $(PROGRAMFILES) (x86)\ZeroC\IceWS-$(ICEWS_VERSION)
 !else
 ice_bin_dist_dir = $(PROGRAMFILES)\ZeroC\Ice-$(ICE_VERSION)
-ice_ws_bin_dist_dir = $(PROGRAMFILES)\ZeroC\IceWS-$(ICEWS_VERSION)
 !endif
 
 #
@@ -95,19 +93,19 @@ ice_src_dist = 1
 #
 !if "$(ice_src_dist)" == ""
 
-!if "$(ICEWS_HOME)" != ""
-!if !exist ("$(ICEWS_HOME)\include\IceWS\IceWS.h")
-!error Unable to find IceWS.h in $(ICEWS_HOME)\include\IceWS, please verify ICEWS_HOME is properly configured and Ice is correctly installed.
+!if "$(ICE_HOME)" != ""
+!if !exist ("$(ICE_HOME)\include\Ice\Ice.h")
+!error Unable to find Ice.h in $(ICE_HOME)\include\Ice, please verify ICE_HOME is properly configured and Ice is correctly installed.
 !endif
-ice_dir = $(ICEWS_HOME)
+ice_dir = $(ICE_HOME)
 !elseif exist ($(top_srcdir)/bin/$(slice_translator))
 ice_dir = $(top_srcdir)
-!elseif exist ("$(ice_ws_bin_dist_dir)\include\IceWS\IceWS.h")
+!elseif exist ("$(ice_ws_bin_dist_dir)\include\Ice\Ice.h")
 ice_dir = $(ice_ws_bin_dist_dir)
 !endif
 
 !if "$(ice_dir)" == ""
-!error Unable to find a valid IceWS distribution, please verify ICEWS_HOME is properly configured and Ice is correctly installed.
+!error Unable to find a valid Ice distribution, please verify ICE_HOME is properly configured and Ice is correctly installed.
 !endif
 ice_bin_dist = 1
 !endif
@@ -133,12 +131,6 @@ install-common::
 	    mkdir "$(prefix)"
 
 !if "$(WINRT)" != "yes" && "$(install_slicedir)" != ""
-	@if not exist "$(install_slicedir)" \
-	    @echo "Creating $(install_slicedir)..." && \
-	    mkdir "$(install_slicedir)" && \
-	    @echo "Copying slice files..." && \
-	    cmd /c "xcopy /s /y $(top_srcdir)\..\slice "$(install_slicedir)"" || exit 1
-
 	@if not exist "$(prefix)\ICE_LICENSE$(TEXT_EXT)" \
 	    @copy $(top_srcdir)\..\ICE_LICENSE$(TEXT_EXT) "$(prefix)"
 	@if not exist "$(prefix)\LICENSE$(TEXT_EXT)" \
