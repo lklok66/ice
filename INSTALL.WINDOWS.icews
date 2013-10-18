@@ -152,11 +152,19 @@ Simply run "nmake /f Makefile.mak install". This will install IceWS in
 the directory specified by the "prefix" variable in
 config\Make.rules.mak.
 
-After installation, if you plan to use the Visual Studio IDE for your
-Ice project, make sure to add the bin directory to the Visual C++
-"Executable files", the include directory to the "Include files" and
-the lib directory to the "Library files" in the IDE.
+Follow the instructions from the Ice release notes to build and run
+your application:
 
-If you built a 64-bit version, the binaries are installed in the
-bin\x64 directory and the libraries are installed in the lib\x64
-directory.
+  http://doc.zeroc.com/display/Ice/Release+Notes
+
+To use the IceWS transport, you will need to update your environment
+to first look for libraries from the bin directory of your IceWS
+installation.
+
+You can set the PATH environment variable:
+
+  > set PATH=<IceWS installation directory>\bin;%PATH%
+
+Or for 64-bit applications:
+
+  > set PATH=<IceWS installation directory>\bin\x64;%PATH%

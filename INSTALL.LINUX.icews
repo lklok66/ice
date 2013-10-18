@@ -122,15 +122,18 @@ Installation
 Simply run "make install". This will install IceWS in the directory
 specified by the "prefix" variable in config/Make.rules.
 
-If you choose to not embed a runpath into executables at build time
-(see your build settings in cpp/config/Make.rules) or didn't create a
-symbolic link from the runpath directory to the installation
-directory, you also need to add the <prefix>/lib directory to your
-LD_LIBRARY_PATH.
+Follow the instructions from the Ice release notes to build and run
+your application:
 
-When compiling Ice programs, you must pass the location of the
-<prefix>/include directory to the compiler with the -I option, and the
-location of the <prefix>/lib directory with the -L option.
+  http://doc.zeroc.com/display/Ice/Release+Notes
+
+To use the IceWS transport, you will need to update your environment
+(or your application's embedded library search path) to first look for
+libraries from the lib directory of your IceWS installation.
+
+You can set the LD_LIBRARY_PATH environment variable:
+
+  $ export LD_LIBRARY_PATH=<IceWS installation directory>/lib:$LD_LIBRARY_PATH
 
 On a x86_64 system, the libraries are installed in <prefix>/lib64
 unless LP64 is set to no. No other changes are necessary.
