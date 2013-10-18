@@ -100,8 +100,8 @@ ice_src_dist = 1
 ice_dir = $(ICE_HOME)
 !elseif exist ($(top_srcdir)/bin/$(slice_translator))
 ice_dir = $(top_srcdir)
-!elseif exist ("$(ice_ws_bin_dist_dir)\include\Ice\Ice.h")
-ice_dir = $(ice_ws_bin_dist_dir)
+!elseif exist ("$(ice_bin_dist_dir)\include\Ice\Ice.h")
+ice_dir = $(ice_bin_dist_dir)
 !endif
 
 !if "$(ice_dir)" == ""

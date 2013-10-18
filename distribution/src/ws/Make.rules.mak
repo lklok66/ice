@@ -43,7 +43,7 @@ SETARGV			= setargv.obj
 #
 !include        $(top_srcdir)/config/Make.rules.msvc
 
-libsuff			= $(x64suffix)
+libsuff			= \vc110$(x64suffix)
 
 !if "$(OPTIMIZE)" != "yes"
 LIBSUFFIX          	= $(LIBSUFFIX)d
