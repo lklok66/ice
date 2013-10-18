@@ -134,6 +134,10 @@ else
 install_mandir		:= $(prefix)/share/man/man1
 endif
 
+installlib	= $(INSTALL) $(2)/$(3) $(1); \
+		  rm -f $(1)/$(4); ln -s $(3) $(1)/$(4); \
+		  chmod a+rx $(1)/$(3) 
+
 ifneq ($(embedded_runpath_prefix),)
     runpath_libdir	:= $(embedded_runpath_prefix)/$(libsubdir)
 else
