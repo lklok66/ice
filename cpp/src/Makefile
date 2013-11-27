@@ -30,6 +30,7 @@ else
 			  slice2py \
 			  slice2rb \
 			  slice2html \
+			  slice2js \
 			  Ice \
 			  IceXML \
 			  IceSSL \
