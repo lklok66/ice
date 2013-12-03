@@ -21,7 +21,7 @@ var RouterInfo = function(router)
     this._serverEndpoints = null;
     this._adapter = null;
     this._identities = new HashMap(); // Set<Identity> = Map<Identity, 1>
-    this._identities.comparator = function(i1, i2) { return i1.equals(i2); };
+    this._identities.comparator = HashMap.compareEquals;
     this._evictedIdentities = [];
 }
 

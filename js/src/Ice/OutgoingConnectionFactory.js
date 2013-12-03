@@ -7,11 +7,14 @@
 //
 // **********************************************************************
 
+var ArrayUtil = require("./ArrayUtil");
 var ConnectionI = require("./ConnectionI");
 var Debug = require("./Debug");
 var Ex = require("./Exception");
+var ExUtil = require("./ExUtil");
 var HashMap = require("./HashMap");
 
+var Endpt = require("./EndpointTypes").Ice;
 var LocalEx = require("./LocalException").Ice;
 
 //
@@ -26,10 +29,12 @@ var OutgoingConnectionFactory = function(communicator, instance)
     // TODO
     //this._reaper = new ConnectionReaper();
 
-    // TODO
     this._connections = new ConnectionListMap(); // map<Connector, Vector<Ice.ConnectionI>>
+    this._connections.comparator = HashMap.compareEquals;
     this._connectionsByEndpoint = new ConnectionListMap(); // map<EndpointI, Vector<Ice.ConnectionI>>
-    this._pending = new HashMap(); // map<Connector, IdentitySet<ConnectCallback>>
+    this._connectionsByEndpoint.comparator = HashMap.compareEquals;
+    this._pending = new HashMap(); // map<Connector, HashMap<ConnectCallback, 1>>
+    this._pending.comparator = HashMap.compareEquals;
     this._pendingConnectCount = 0;
 
     this._waitComplete = null;
@@ -128,9 +133,9 @@ OutgoingConnectionFactory.prototype.setRouterInfo = function(
     routerInfo.getClientEndpoints(
         function(endpoints)
         {
-            self.gotClientEndpoints(endpoints, successCallback, cbContext);
+            self.gotClientEndpoints(endpoints, routerInfo, successCallback, cbContext);
         },
-        routerInfo, exceptionCallback, cbContext);
+        exceptionCallback, cbContext);
 }
 
 OutgoingConnectionFactory.prototype.gotClientEndpoints = function(endpoints, routerInfo, successCallback, cbContext)
@@ -166,15 +171,14 @@ OutgoingConnectionFactory.prototype.gotClientEndpoints = function(endpoints, rou
         //
         endpoint = endpoint.changeCompress(false);
 
-        // TODO
-        for each(var v:Object in this._connections)
+        for(var e = this._connections.entries; e != null; e = e.next)
         {
-            var connectionList:Vector.<Ice.ConnectionI> = v as Vector.<Ice.ConnectionI>;
-            for each(var connection:Ice.ConnectionI in connectionList)
+            var connectionList = e.value;
+            for(var i = 0; i < connectionList.length; ++i)
             {
-                if(connection.endpoint().equals(endpoint))
+                if(connectionList[i].endpoint().equals(endpoint))
                 {
-                    connection.setAdapter(adapter);
+                    connectionList[i].setAdapter(adapter);
                 }
             }
         }
@@ -190,57 +194,66 @@ OutgoingConnectionFactory.prototype.removeAdapter = function(adapter)
         return;
     }
 
-    for(var e:Ice.HashMapEntry = this._connections.entries; e != null; e = e.next)
+    for(var e = this._connections.entries; e != null; e = e.next)
     {
-        const connectionList:Vector.<Ice.ConnectionI> = e.value as Vector.<Ice.ConnectionI>;
-        for each(var connection:Ice.ConnectionI in connectionList)
+        var connectionList = e.value;
+        for(var i = 0; i < connectionList.length; ++i)
         {
-            if(connection.getAdapter() == adapter)
+            if(connectionList[i].getAdapter() === adapter)
             {
-                connection.setAdapter(null);
+                connectionList[i].setAdapter(null);
             }
         }
     }
 }
 
-public function flushAsyncBatchRequests(outAsync:CommunicatorBatchOutgoingAsync):void
+OutgoingConnectionFactory.prototype.flushAsyncBatchRequests = function(outAsync)
 {
-    var c:Vector.<Ice.ConnectionI> = new Vector.<Ice.ConnectionI>();
+    var c = [];
 
     if(!this._destroyed)
     {
-        for(var e:Ice.HashMapEntry = this._connections.entries; e != null; e = e.next)
+        for(var e = this._connections.entries; e != null; e = e.next)
         {
-            const connectionList:Vector.<Ice.ConnectionI> = e.value as Vector.<Ice.ConnectionI>;
-            for each(var connection:Ice.ConnectionI in connectionList)
+            var connectionList = e.value;
+            for(var i = 0; i < connectionList.length; ++i)
             {
-                if(connection.isActiveOrHolding())
+                if(connectionList[i].isActiveOrHolding())
                 {
-                    c.push(connection);
+                    c.push(connectionList[i]);
                 }
             }
         }
     }
 
-    for each(var conn:Ice.ConnectionI in c)
+    for(var i = 0; i < c.length; ++i)
     {
         try
         {
-            outAsync.flushConnection(conn);
+            outAsync.flushConnection(c[i]);
         }
-        catch(ex:Ice.LocalException)
+        catch(ex)
         {
-            // Ignore.
+            if(ex instanceof Ex.LocalException)
+            {
+                // Ignore.
+            }
+            else
+            {
+                throw ex;
+            }
         }
     }
 }
 
-private function applyOverrides(endpts:Vector.<EndpointI>):Vector.<EndpointI>
+OutgoingConnectionFactory.prototype.applyOverrides = function(endpts)
 {
-    const defaultsAndOverrides:DefaultsAndOverrides = this._instance.defaultsAndOverrides();
-    var endpoints:Vector.<EndpointI> = new Vector.<EndpointI>();
-    for each(var endpoint:EndpointI in endpts)
+    var defaultsAndOverrides:DefaultsAndOverrides = this._instance.defaultsAndOverrides();
+    var endpoints = [];
+    for(var i = 0; i < endpts.length; ++i)
     {
+        var endpoint = endpts[i];
+
         //
         // Modify endpoints with overrides.
         //
@@ -257,28 +270,28 @@ private function applyOverrides(endpts:Vector.<EndpointI>):Vector.<EndpointI>
     return endpoints;
 }
 
-private function findConnectionByEndpoint(endpoints:Vector.<EndpointI>, compress:Ice.BooleanHolder):Ice.ConnectionI
+OutgoingConnectionFactory.prototype.findConnectionByEndpoint = function(endpoints, compress)
 {
     if(this._destroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
 
-    const defaultsAndOverrides:DefaultsAndOverrides = this._instance.defaultsAndOverrides();
-    CONFIG::debug { Debug.assert(endpoints.length > 0); }
+    var defaultsAndOverrides:DefaultsAndOverrides = this._instance.defaultsAndOverrides();
+    Debug.assert(endpoints.length > 0);
 
-    for each(var endpoint:EndpointI in endpoints)
+    for(var i = 0; i < endpoints.length; ++i)
     {
-        const connectionList:Vector.<Ice.ConnectionI> =
-            this._connectionsByEndpoint.find(endpoint) as Vector.<Ice.ConnectionI>;
-        if(connectionList == null)
+        var endpoint = endpoints[i];
+        var connectionList = this._connectionsByEndpoint.get(endpoint);
+        if(connectionList === undefined)
         {
             continue;
         }
 
-        for each(var connection:Ice.ConnectionI in connectionList)
+        for(var i = 0; i < connectionList.length; ++i)
         {
-            if(connection.isActiveOrHolding()) // Don't return destroyed or un-validated connections
+            if(connectionList[i].isActiveOrHolding()) // Don't return destroyed or un-validated connections
             {
                 if(defaultsAndOverrides.overrideCompress)
                 {
@@ -288,7 +301,7 @@ private function findConnectionByEndpoint(endpoints:Vector.<EndpointI>, compress
                 {
                     compress.value = endpoint.compress();
                 }
-                return connection;
+                return connectionList[i];
             }
         }
     }
@@ -296,25 +309,27 @@ private function findConnectionByEndpoint(endpoints:Vector.<EndpointI>, compress
     return null;
 }
 
-private function findConnection(connectors:Vector.<ConnectorInfo>, compress:Ice.BooleanHolder):Ice.ConnectionI
+OutgoingConnectionFactory.prototype.findConnection = function(connectors, compress)
 {
-    const defaultsAndOverrides:DefaultsAndOverrides = this._instance.defaultsAndOverrides();
-    for each(var ci:ConnectorInfo in connectors)
+    var defaultsAndOverrides:DefaultsAndOverrides = this._instance.defaultsAndOverrides();
+    for(var i = 0; i < connectors.length; ++i)
     {
-        if(this._pending.find(ci.connector) != null)
+        var ci = connectors[i];
+
+        if(this._pending.has(ci.connector))
         {
             continue;
         }
 
-        const connectionList:Vector.<Ice.ConnectionI> = this._connections.find(ci.connector) as Vector.<Ice.ConnectionI>;
-        if(connectionList == null)
+        var connectionList = this._connections.get(ci.connector);
+        if(connectionList === undefined)
         {
             continue;
         }
 
-        for each(var connection:Ice.ConnectionI in connectionList)
+        for(var i = 0; i < connectionList.length; ++i)
         {
-            if(connection.isActiveOrHolding()) // Don't return destroyed or un-validated connections
+            if(connectionList[i].isActiveOrHolding()) // Don't return destroyed or un-validated connections
             {
                 if(defaultsAndOverrides.overrideCompress)
                 {
@@ -324,7 +339,7 @@ private function findConnection(connectors:Vector.<ConnectorInfo>, compress:Ice.
                 {
                     compress.value = ci.endpoint.compress();
                 }
-                return connection;
+                return connectionList[i];
             }
         }
     }
@@ -332,7 +347,7 @@ private function findConnection(connectors:Vector.<ConnectorInfo>, compress:Ice.
     return null;
 }
 
-public function incPendingConnectCount():void
+OutgoingConnectionFactory.prototype.incPendingConnectCount = function()
 {
     //
     // Keep track of the number of pending connects. The outgoing connection factory
@@ -349,18 +364,17 @@ public function incPendingConnectCount():void
     ++this._pendingConnectCount;
 }
 
-public function decPendingConnectCount():void
+OutgoingConnectionFactory.prototype.decPendingConnectCount = function()
 {
     --this._pendingConnectCount;
-    CONFIG::debug { Debug.assert(this._pendingConnectCount >= 0); }
-    if(this._destroyed && this._pendingConnectCount == 0)
+    Debug.assert(this._pendingConnectCount >= 0);
+    if(this._destroyed && this._pendingConnectCount === 0)
     {
-        checkFinished();
+        this.checkFinished();
     }
 }
 
-public function getConnection(connectors:Vector.<ConnectorInfo>, cb:ConnectCallback,
-                              compress:Ice.BooleanHolder):Ice.ConnectionI
+OutgoingConnectionFactory.prototype.getConnection = function(connectors, cb, compress)
 {
     if(this._destroyed)
     {
@@ -370,11 +384,12 @@ public function getConnection(connectors:Vector.<ConnectorInfo>, cb:ConnectCallb
     //
     // Reap closed connections
     //
-    const cons:Vector.<Ice.ConnectionI> = this._reaper.swapConnections();
-    if(cons != null)
+    var cons = this._reaper.swapConnections();
+    if(cons !== null)
     {
-        for each(var c:Ice.ConnectionI in cons)
+        for(var i = 0; i < cons.length; ++i)
         {
+            var c = cons[i];
             this._connections.removeConnection(c.connector(), c);
             this._connectionsByEndpoint.removeConnection(c.endpoint(), c);
             this._connectionsByEndpoint.removeConnection(c.endpoint().changeCompress(true), c);
@@ -394,13 +409,13 @@ public function getConnection(connectors:Vector.<ConnectorInfo>, cb:ConnectCallb
         //
         // Search for a matching connection. If we find one, we're done.
         //
-        const connection:Ice.ConnectionI = findConnection(connectors, compress);
-        if(connection != null)
+        var connection = this.findConnection(connectors, compress);
+        if(connection !== null)
         {
             return connection;
         }
 
-        if(addToPending(cb, connectors))
+        if(this.addToPending(cb, connectors))
         {
             //
             // A connection is already pending.
@@ -429,16 +444,16 @@ public function getConnection(connectors:Vector.<ConnectorInfo>, cb:ConnectCallb
     return null;
 }
 
-public function createConnection(transceiver:Transceiver, ci:ConnectorInfo):Ice.ConnectionI
+OutgoingConnectionFactory.prototype.createConnection = function(transceiver, ci)
 {
-    CONFIG::debug { Debug.assert(this._pending.find(ci.connector) != null && transceiver != null); }
+    Debug.assert(this._pending.has(ci.connector) && transceiver !== null); }
 
     //
     // Create and add the connection to the connection map. Adding the connection to the map
     // is necessary to support the interruption of the connection initialization and validation
     // in case the communicator is destroyed.
     //
-    var connection:Ice.ConnectionI = null;
+    var connection = null;
     try
     {
         if(this._destroyed)
@@ -446,74 +461,78 @@ public function createConnection(transceiver:Transceiver, ci:ConnectorInfo):Ice.
             throw new LocalEx.CommunicatorDestroyedException();
         }
 
-        connection = new Ice.ConnectionI(this._communicator, this._instance, this._reaper, transceiver, ci.connector,
-                                         ci.endpoint.changeCompress(false), null);
+        connection = new ConnectionI(this._communicator, this._instance, this._reaper, transceiver, ci.connector,
+                                     ci.endpoint.changeCompress(false), null);
     }
-    catch(ex:Ice.LocalException)
+    catch(ex)
     {
-        try
+        if(ex instanceof Ex.LocalException)
         {
-            transceiver.close();
-        }
-        catch(exc:Ice.LocalException)
-        {
-            // Ignore
+            try
+            {
+                transceiver.close();
+            }
+            catch(exc)
+            {
+                // Ignore
+            }
         }
         throw ex;
     }
 
-    this._connections.put(ci.connector, connection);
-    this._connectionsByEndpoint.put(connection.endpoint(), connection);
-    this._connectionsByEndpoint.put(connection.endpoint().changeCompress(true), connection);
+    this._connections.set(ci.connector, connection);
+    this._connectionsByEndpoint.set(connection.endpoint(), connection);
+    this._connectionsByEndpoint.set(connection.endpoint().changeCompress(true), connection);
     return connection;
 }
 
-public function finishGetConnection(connectors:Vector.<ConnectorInfo>, ci:ConnectorInfo,
-                                    connection:Ice.ConnectionI, cb:ConnectCallback):void
+OutgoingConnectionFactory.prototype.finishGetConnection = function(connectors, ci, connection, cb)
 {
-    var connectionCallbacks:IdentitySet = new IdentitySet();
-    if(cb != null)
+    // cb is-a ConnectCallback
+
+    var connectionCallbacks = new HashMap(); // connectionCallbacks is a hash set
+    if(cb !== null)
     {
-        connectionCallbacks.add(cb);
+        connectionCallbacks.set(cb, 1);
     }
 
-    var callbacks:IdentitySet = new IdentitySet();
-    var key:Object;
-    var cc:ConnectCallback;
-    for each(var c:ConnectorInfo in connectors)
+    var callbacks = new HashMap(); // callbacks is a hash set
+    for(var i = 0; i < connectors.length; ++i)
     {
-        const cbs:IdentitySet = this._pending.remove(c.connector) as IdentitySet;
-        if(cbs != null)
+        var c = connectors[i];
+        var cbs = this._pending.get(c.connector);
+        if(cbs !== undefined)
         {
-            for(key in cbs.entries)
+            this._pending.delete(c.connector);
+            for(var e = cbs.entries; e != null; e = e.next)
             {
-                cc = key as ConnectCallback;
+                var cc = e.key;
                 if(cc.hasConnector(ci))
                 {
-                    connectionCallbacks.add(cc);
+                    connectionCallbacks.set(cc, 1);
                 }
                 else
                 {
-                    callbacks.add(cc);
+                    callbacks.set(cc, 1);
                 }
             }
         }
     }
 
-    for(key in connectionCallbacks.entries)
+    for(var e = connectionCallbacks.entries; e != null; e = e.next)
     {
-        cc = key as ConnectCallback;
+        var cc = e.key;
         cc.removeFromPending();
-        callbacks.remove(cc);
+        callbacks.delete(cc);
     }
-    for(key in callbacks.entries)
+    for(var e = callbacks.entries; e != null; e = e.next)
     {
-        cc = key as ConnectCallback;
+        var cc = e.key;
         cc.removeFromPending();
     }
 
-    var compress:Boolean;
-    const defaultsAndOverrides:DefaultsAndOverrides = this._instance.defaultsAndOverrides();
+    var compress;
+    var defaultsAndOverrides:DefaultsAndOverrides = this._instance.defaultsAndOverrides();
     if(defaultsAndOverrides.overrideCompress)
     {
         compress = defaultsAndOverrides.overrideCompressValue;
@@ -523,88 +542,91 @@ public function finishGetConnection(connectors:Vector.<ConnectorInfo>, ci:Connec
         compress = ci.endpoint.compress();
     }
 
-    for(key in callbacks.entries)
+    for(var e = callbacks.entries; e != null; e = e.next)
     {
-        cc = key as ConnectCallback;
+        var cc = e.key;
         cc.getConnection();
     }
-    for(key in connectionCallbacks.entries)
+    for(var e = connectionCallbacks.entries; e != null; e = e.next)
     {
-        cc = key as ConnectCallback;
+        var cc = e.key;
         cc.setConnection(connection, compress);
     }
 
-    checkFinished();
+    this.checkFinished();
 }
 
-public function finishGetConnectionEx(connectors:Vector.<ConnectorInfo>, ex:Ice.LocalException,
-                                      cb:ConnectCallback):void
+OutgoingConnectionFactory.prototype.finishGetConnectionEx = function(connectors, ex, cb)
 {
-    var failedCallbacks:IdentitySet = new IdentitySet();
-    if(cb != null)
+    // cb is-a ConnectCallback
+
+    var failedCallbacks = new HashMap(); // failedCallbacks is a hash set
+    if(cb !== null)
     {
-        failedCallbacks.add(cb);
+        failedCallbacks.set(cb, 1);
     }
 
-    var callbacks:IdentitySet = new IdentitySet();
-    var key:Object;
-    var cc:ConnectCallback;
-    for each(var c:ConnectorInfo in connectors)
+    var callbacks = new HashMap(); // callbacks is a hash set
+    for(var i = 0; i < connectors.length; ++i)
     {
-        const cbs:IdentitySet = this._pending.remove(c.connector) as IdentitySet;
-        if(cbs != null)
+        var c = connectors[i];
+        var cbs = this._pending.get(c.connector);
+        if(cbs !== undefined)
         {
-            for(key in cbs.entries)
+            this._pending.delete(c.connector);
+            for(var e = cbs.entries; e != null; e = e.next)
             {
-                cc = key as ConnectCallback;
+                var cc = e.key;
                 if(cc.removeConnectors(connectors))
                 {
-                    failedCallbacks.add(cc);
+                    failedCallbacks.set(cc, 1);
                 }
                 else
                 {
-                    callbacks.add(cc);
+                    callbacks.set(cc, 1);
                 }
             }
         }
     }
 
-    for(key in callbacks.entries)
+    for(var e = callbacks.entries; e != null; e = e.next)
     {
-        cc = key as ConnectCallback;
-        CONFIG::debug { Debug.assert(!failedCallbacks.contains(cc)); }
+        var cc = e.key;
+        Debug.assert(!failedCallbacks.has(cc));
         cc.removeFromPending();
     }
-    checkFinished();
+    this.checkFinished();
 
-    for(key in callbacks.entries)
+    for(var e = callbacks.entries; e != null; e = e.next)
     {
-        cc = key as ConnectCallback;
+        var cc = e.key;
         cc.getConnection();
     }
-    for(key in failedCallbacks.entries)
+    for(var e = failedCallbacks.entries; e != null; e = e.next)
     {
-        cc = key as ConnectCallback;
+        var cc = e.key;
         cc.setException(ex);
     }
 }
 
-private function addToPending(cb:ConnectCallback, connectors:Vector.<ConnectorInfo>):Boolean
+OutgoingConnectionFactory.prototype.addToPending = function(cb, connectors)
 {
+    // cb is-a ConnectCallback
+
     //
     // Add the callback to each connector pending list.
     //
-    var found:Boolean = false;
-    var p:ConnectorInfo;
-    for each(p in connectors)
+    var found = false;
+    for(var i = 0; i < connectors.length; ++i)
     {
-        const cbs:IdentitySet = this._pending.find(p.connector) as IdentitySet;
-        if(cbs != null)
+        var p = connectors[i];
+        var cbs = this._pending.get(p.connector);
+        if(cbs !== undefined)
         {
             found = true;
-            if(cb != null)
+            if(cb !== null)
             {
-                cbs.add(cb); // Add the callback to each pending connector.
+                cbs.set(cb, 1); // Add the callback to each pending connector.
             }
         }
     }
@@ -619,37 +641,41 @@ private function addToPending(cb:ConnectCallback, connectors:Vector.<ConnectorIn
     // responsible for its establishment. We add empty pending lists,
     // other callbacks to the same connectors will be queued.
     //
-    for each(p in connectors)
+    for(var i = 0; i < connectors.length; ++i)
     {
-        if(this._pending.find(p.connector) == null)
+        var p = connectors[i];
+        if(!this._pending.has(p.connector))
         {
-            this._pending.put(p.connector, new IdentitySet());
+            this._pending.set(p.connector, new HashMap());
         }
     }
 
     return false;
 }
 
-public function removeFromPending(cb:ConnectCallback, connectors:Vector.<ConnectorInfo>):void
+OutgoingConnectionFactory.prototype.removeFromPending = function(cb, connectors)
 {
-    for each(var p:ConnectorInfo in connectors)
+    // cb is-a ConnectCallback
+
+    for(var i = 0; i < connectors.length; ++i)
     {
-        const cbs:IdentitySet = this._pending.find(p.connector) as IdentitySet;
-        if(cbs != null)
+        var p = connectors[i];
+        var cbs = this._pending.get(p.connector);
+        if(cbs !== undefined)
         {
-            cbs.remove(cb);
+            cbs.delete(cb);
         }
     }
 }
 
-public function handleConnectionException(ex:Ice.LocalException, hasMore:Boolean):void
+OutgoingConnectionFactory.prototype.handleConnectionException = function(ex, hasMore)
 {
-    const traceLevels:TraceLevels = this._instance.traceLevels();
+    var traceLevels = this._instance.traceLevels();
     if(traceLevels.retry >= 2)
     {
-        var s:Vector.<String> = new Vector.<String>();
+        var s = [];
         s.push("connection to endpoint failed");
-        if(ex is LocalEx.CommunicatorDestroyedException)
+        if(ex instanceof LocalEx.CommunicatorDestroyedException)
         {
             s.push("\n");
         }
@@ -664,19 +690,19 @@ public function handleConnectionException(ex:Ice.LocalException, hasMore:Boolean
                 s.push(" and no more endpoints to try\n");
             }
         }
-        s.push(Ex.toString(ex));
-        this._instance.initializationData().logger._trace(traceLevels.retryCat, s.join(""));
+        s.push(ExUtil.toString(ex));
+        this._instance.initializationData().logger.trace(traceLevels.retryCat, s.join(""));
     }
 }
 
-public function handleException(ex:Ice.LocalException, hasMore:Boolean):void
+OutgoingConnectionFactory.prototype.handleException = function(ex, hasMore)
 {
-    const traceLevels:TraceLevels = this._instance.traceLevels();
+    var traceLevels:TraceLevels = this._instance.traceLevels();
     if(traceLevels.retry >= 2)
     {
-        var s:Vector.<String> = new Vector.<String>();
+        var s = [];
         s.push("couldn't resolve endpoint host");
-        if(ex is LocalEx.CommunicatorDestroyedException)
+        if(ex instanceof LocalEx.CommunicatorDestroyedException)
         {
             s.push("\n");
         }
@@ -691,17 +717,17 @@ public function handleException(ex:Ice.LocalException, hasMore:Boolean):void
                 s.push(" and no more endpoints to try\n");
             }
         }
-        s.push(Ex.toString(ex));
-        this._instance.initializationData().logger._trace(traceLevels.retryCat, s.join(""));
+        s.push(ExUtil.toString(ex));
+        this._instance.initializationData().logger.trace(traceLevels.retryCat, s.join(""));
     }
 }
 
-private function checkFinished():void
+OutgoingConnectionFactory.prototype.checkFinished = function()
 {
     //
     // Can't continue until the factory is destroyed and there are no pending connections.
     //
-    if(this._waitComplete == null || !this._destroyed || this._pending.length > 0 || this._pendingConnectCount > 0)
+    if(this._waitComplete === null || !this._destroyed || this._pending.size > 0 || this._pendingConnectCount > 0)
     {
         return;
     }
@@ -709,12 +735,10 @@ private function checkFinished():void
     //
     // Count the number of connections.
     //
-    var size:int = 0;
-    var connectionList:Vector.<Ice.ConnectionI>;
-    var e:Ice.HashMapEntry;
-    for(e = this._connections.entries; e != null; e = e.next)
+    var size = 0;
+    for(var e = this._connections.entries; e != null; e = e.next)
     {
-        connectionList = e.value as Vector.<Ice.ConnectionI>;
+        var connectionList = e.value;
         size += connectionList.length;
     }
 
@@ -723,395 +747,393 @@ private function checkFinished():void
     //
     if(size > 0)
     {
-        var cb:ConnectionsFinished = new ConnectionsFinished(size, connectionsFinished);
-        for(e = this._connections.entries; e != null; e = e.next)
+        var cb = new ConnectionsFinished(size, this.connectionsFinished, this);
+        for(var e = this._connections.entries; e != null; e = e.next)
         {
-            connectionList = e.value as Vector.<Ice.ConnectionI>;
-            for each(var connection:Ice.ConnectionI in connectionList)
+            var connectionList = e.value;
+            for(var i = 0; i < connectionList.length; ++i)
             {
-                connection.waitUntilFinished(cb.finished);
+                connectionList[i].waitUntilFinished(cb.finished, cb);
             }
         }
     }
     else
     {
-        connectionsFinished();
+        this.connectionsFinished();
     }
 }
 
-private function connectionsFinished():void
+OutgoingConnectionFactory.prototype.connectionsFinished = function()
 {
     // Ensure all the connections are finished and reapable at this point.
-    var cons:Vector.<Ice.ConnectionI> = this._reaper.swapConnections();
-    if(cons != null)
+    var cons = this._reaper.swapConnections();
+    if(cons !== null)
     {
-        var size:int = 0;
-        for(var e:Ice.HashMapEntry = this._connections.entries; e != null; e = e.next)
+        var size = 0;
+        for(var e = this._connections.entries; e != null; e = e.next)
         {
-            const connectionList:Vector.<Ice.ConnectionI> = e.value as Vector.<Ice.ConnectionI>;
+            var connectionList = e.value;
             size += connectionList.length;
         }
-        CONFIG::debug { Debug.assert(cons.length == size); }
+        Debug.assert(cons.length == size);
         this._connections.clear();
         this._connectionsByEndpoint.clear();
     }
     else
     {
-        CONFIG::debug { Debug.assert(this._connections.length == 0); }
-        CONFIG::debug { Debug.assert(this._connectionsByEndpoint.length == 0); }
+        Debug.assert(this._connections.size == 0);
+        Debug.assert(this._connectionsByEndpoint.size == 0);
     }
 
-    CONFIG::debug { Debug.assert(this._waitComplete != null); }
-    this._waitComplete(this._waitResult);
+    Debug.assert(this._waitComplete !== null);
+    this._waitComplete(this._waitResult); // TODO: Call context? Or use promise?
 }
 
 modules.export = OutgoingConnectionFactory;
 
-import Ice.ConnectionI;
-import Ice.HashMap;
-import IceInternal.Debug;
+//
+// Value is a Vector<Ice.ConnectionI>
+//
+var ConnectionListMap = function(h)
+{
+    HashMap.call(this, h);
+}
+
+ConnectionListMap.prototype = new HashMap();
+ConnectionListMap.prototype.constructor = ConnectionListMap;
+
+ConnectionListMap.prototype.set = function(key, value)
+{
+    var list = this.get(key);
+    if(list === undefined)
+    {
+        list = [];
+        HashMap.prototype.set.call(this, key, list);
+    }
+    Debug.assert(value instanceof ConnectionI);
+    list.push(value);
+    return undefined;
+}
+
+ConnectionListMap.prototype.removeConnection = function(key, conn)
+{
+    var list = this.get(key);
+    Debug.assert(list !== null);
+    var idx = list.indexOf(conn);
+    Debug.assert(idx != -1);
+    list.splice(idx, 1);
+    if(list.length === 0)
+    {
+        this.delete(key);
+    }
+}
+
+var ConnectorInfo = function(c, e)
+{
+    this.connector = c;
+    this.endpoint = e;
+}
+
+ConnectorInfo.prototype.equals = function(rhs)
+{
+    return this.connector.equals(rhs.connector);
+}
+
+ConnectorInfo.prototype.hashCode = function()
+{
+    return this.connector.hashCode();
+}
+
+var ConnectCallback = function(
+    f,
+    endpoints,
+    more,
+    selType,
+    successCallback,    // function(connection, compress)
+    exceptionCallback,  // function(ex)
+    cbContext)
+{
+    this._factory = f;
+    this._endpoints = endpoints;
+    this._hasMore = more;
+    this._selType = selType;
+    this._successCallback = successCallback;
+    this._exceptionCallback = exceptionCallback;
+    this._cbContext = cbContext;
+    this._endpointsIndex = 0;
+    this._index = 0;
+    this._currentEndpoint = null;
+    this._connectors = [];
+    this._current = null;
+}
 
 //
-// Value is a Vector.<Ice.ConnectionI>
+// Methods from ConnectionI_StartCallback
 //
-class ConnectionListMap extends Ice.HashMap
+ConnectCallback.prototype.connectionStartCompleted = function(connection)
 {
-    public override function put(key:Object, value:Object):Object
+    connection.activate();
+    this._factory.finishGetConnection(this._connectors, this._current, connection, this);
+}
+
+ConnectCallback.prototype.connectionStartFailed = function(connection, ex)
+{
+    Debug.assert(this._current != null);
+
+    this._factory.handleConnectionException(ex, this._hasMore || this._index < this._connectors.length);
+    if(ex instanceof LocalEx.CommunicatorDestroyedException) // No need to continue.
     {
-        var prev:Object = null;
-        var list:Vector.<Ice.ConnectionI> = find(key) as Vector.<Ice.ConnectionI>;
-        if(list == null)
+        this._factory.finishGetConnectionEx(this._connectors, ex, this);
+    }
+    else if(this._index < this._connectors.length) // Try the next connector.
+    {
+        this.nextConnector();
+    }
+    else
+    {
+        this._factory.finishGetConnectionEx(this._connectors, ex, this);
+    }
+}
+
+//
+// Methods from EndpointI_connectors
+//
+ConnectCallback.prototype.connectors = function(cons)
+{
+    //
+    // Shuffle connectors if endpoint selection type is Random.
+    //
+    if(this._selType === Endpt.EndpointSelectionType.Random)
+    {
+        ArrayUtil.shuffle(cons);
+    }
+
+    for(var i = 0; i < cons.length; ++i)
+    {
+        this._connectors.push(new ConnectorInfo(cons[i], this._currentEndpoint));
+    }
+
+    if(this._endpointsIndex < this._endpoints.length)
+    {
+        this.nextEndpoint();
+    }
+    else
+    {
+        Debug.assert(this._connectors.length > 0);
+
+        //
+        // We now have all the connectors for the given endpoints. We can try to obtain the
+        // connection.
+        //
+        this._index = 0;
+        this.getConnection();
+    }
+}
+
+ConnectCallback.prototype.exception = function(ex)
+{
+    this._factory.handleException(ex, this._hasMore || this._endpointsIndex < this._endpoints.length);
+    if(this._endpointsIndex < this._endpoints.length)
+    {
+        this.nextEndpoint();
+    }
+    else if(this._connectors.length > 0)
+    {
+        //
+        // We now have all the connectors for the given endpoints. We can try to obtain the
+        // connection.
+        //
+        this._index = 0;
+        this.getConnection();
+    }
+    else
+    {
+        this._exceptionCallback.call(this._cbContext === undefined ? this._exceptionCallback : this._cbContext, ex);
+        this._factory.decPendingConnectCount(); // Must be called last.
+    }
+}
+
+ConnectCallback.prototype.setConnection = function(connection, compress)
+{
+    //
+    // Callback from the factory: the connection to one of the callback
+    // connectors has been established.
+    //
+    this._successCallback.call(this._cbContext === undefined ? this._successCallback : this._cbContext, connection,
+                               compress);
+    this._factory.decPendingConnectCount(); // Must be called last.
+}
+
+ConnectCallback.prototype.setException = function(ex)
+{
+    //
+    // Callback from the factory: connection establishment failed.
+    //
+    this._exceptionCallback.call(this._cbContext === undefined ? this._exceptionCallback : this._cbContext, ex);
+    this._factory.decPendingConnectCount(); // Must be called last.
+}
+
+ConnectCallback.prototype.hasConnector = function(ci)
+{
+    return this.findConnectorInfo(ci) != -1;
+}
+
+ConnectCallback.prototype.findConnectorInfo = function(ci)
+{
+    for(var index = 0; index < this._connectors.length; ++index)
+    {
+        if(ci.equals(this._connectors[index]))
         {
-            list = new Vector.<Ice.ConnectionI>();
-            super.put(key, list);
+            return index;
+        }
+    }
+    return -1;
+}
+
+ConnectCallback.prototype.removeConnectors = function(connectors)
+{
+    var len = this._connectors.length;
+    for(var i = 0; i < connectors.length; ++i)
+    {
+        var idx = this.findConnectorInfo(connectors[i]);
+        if(idx !== -1)
+        {
+            this._connectors.splice(idx, 1);
+        }
+    }
+    this._index = 0;
+    return this._connectors.length == 0;
+}
+
+ConnectCallback.prototype.removeFromPending = function()
+{
+    this._factory.removeFromPending(this, this._connectors);
+}
+
+ConnectCallback.prototype.getConnectors = function()
+{
+    try
+    {
+        //
+        // Notify the factory that there's an async connect pending. This is necessary
+        // to prevent the outgoing connection factory to be destroyed before all the
+        // pending asynchronous connects are finished.
+        //
+        this._factory.incPendingConnectCount();
+    }
+    catch(ex)
+    {
+        if(ex instanceof Ex.LocalException)
+        {
+            this._exceptionCallback.call(this._cbContext === undefined ? this._exceptionCallback : this._cbContext, ex);
+            return;
         }
         else
         {
-            prev = list;
+            throw ex;
         }
-        CONFIG::debug { IceInternal.Debug.assert(value is Ice.ConnectionI); }
-        list.push(value);
-        return prev;
     }
 
-    public function removeConnection(key:Object, value:Ice.ConnectionI):void
+    this.nextEndpoint();
+}
+
+ConnectCallback.prototype.nextEndpoint = function()
+{
+    try
     {
-        const list:Vector.<Ice.ConnectionI> = find(key) as Vector.<Ice.ConnectionI>;
-        CONFIG::debug { IceInternal.Debug.assert(list != null); }
-        const idx:int = list.indexOf(value);
-        CONFIG::debug { IceInternal.Debug.assert(idx != -1); }
-        list.splice(idx, 1);
-        if(list.length == 0)
+        Debug.assert(this._endpointsIndex < this._endpoints.length);
+        this._currentEndpoint = this._endpoints[this._endpointsIndex++];
+        this._currentEndpoint.connectors_async(this); // TODO
+    }
+    catch(ex)
+    {
+        if(ex instanceof Ex.LocalException)
         {
-            remove(key);
+            this.exception(ex);
+        }
+        else
+        {
+            throw ex;
         }
     }
 }
 
-import Ice.ConnectionI_StartCallback;
-import LocalEx.CommunicatorDestroyedException;
-import Ice.EndpointSelectionType;
-import Ice.LocalException;
-import IceInternal.Connector;
-import IceInternal.EndpointI;
-import IceInternal.EndpointI_connectors;
-import IceInternal.OutgoingConnectionFactory;
-import IceInternal.OutgoingConnectionFactory_CreateConnectionCallback;
-import IceInternal.VectorUtil;
-
-class ConnectCallback implements Ice.ConnectionI_StartCallback, IceInternal.EndpointI_connectors
+ConnectCallback.prototype.getConnection = function()
 {
-    public function ConnectCallback(f:IceInternal.OutgoingConnectionFactory, endpoints:Vector.<IceInternal.EndpointI>,
-                                    more:Boolean,
-                                    selType:Ice.EndpointSelectionType,
-                                    cb:IceInternal.OutgoingConnectionFactory_CreateConnectionCallback)
-    {
-        _factory = f;
-        _endpoints = endpoints;
-        _hasMore = more;
-        _callback = cb;
-        _selType = selType;
-        _endpointsIndex = 0;
-        _index = 0;
-    }
-
-    //
-    // Methods from ConnectionI_StartCallback
-    //
-    public function connectionStartCompleted(connection:Ice.ConnectionI):void
-    {
-        connection.activate();
-        _factory.finishGetConnection(_connectors, _current, connection, this);
-    }
-
-    public function connectionStartFailed(connection:Ice.ConnectionI, ex:Ice.LocalException):void
-    {
-        CONFIG::debug { Debug.assert(_current != null); }
-
-        _factory.handleConnectionException(ex, _hasMore || _index < _connectors.length);
-        if(ex is LocalEx.CommunicatorDestroyedException) // No need to continue.
-        {
-            _factory.finishGetConnectionEx(_connectors, ex, this);
-        }
-        else if(_index < _connectors.length) // Try the next connector.
-        {
-            nextConnector();
-        }
-        else
-        {
-            _factory.finishGetConnectionEx(_connectors, ex, this);
-        }
-    }
-
-    //
-    // Methods from EndpointI_connectors
-    //
-    public function connectors(cons:Vector.<IceInternal.Connector>):void
+    try
     {
         //
-        // Shuffle connectors if endpoint selection type is Random.
+        // If all the connectors have been created, we ask the factory to get a
+        // connection.
         //
-        if(_selType == Ice.EndpointSelectionType.Random)
-        {
-            VectorUtil.shuffle(cons);
-        }
-
-        for each(var p:IceInternal.Connector in cons)
-        {
-            _connectors.push(new ConnectorInfo(p, _currentEndpoint));
-        }
-
-        if(_endpointsIndex < _endpoints.length)
-        {
-            nextEndpoint();
-        }
-        else
-        {
-            CONFIG::debug { Debug.assert(_connectors.length > 0); }
-
-            //
-            // We now have all the connectors for the given endpoints. We can try to obtain the
-            // connection.
-            //
-            _index = 0;
-            getConnection();
-        }
-    }
-
-    public function exception(ex:Ice.LocalException):void
-    {
-        _factory.handleException(ex, _hasMore || _endpointsIndex < _endpoints.length);
-        if(_endpointsIndex < _endpoints.length)
-        {
-            nextEndpoint();
-        }
-        else if(_connectors.length > 0)
+        var compress = { value: false };
+        var connection = this._factory.getConnection(this._connectors, this, compress);
+        if(connection === null)
         {
             //
-            // We now have all the connectors for the given endpoints. We can try to obtain the
-            // connection.
+            // A null return value from getConnection indicates that the connection
+            // is being established and that everthing has been done to ensure that
+            // the callback will be notified when the connection establishment is
+            // done.
             //
-            _index = 0;
-            getConnection();
-        }
-        else
-        {
-            _callback.setException(ex);
-            _factory.decPendingConnectCount(); // Must be called last.
-        }
-    }
-
-    public function setConnection(connection:Ice.ConnectionI, compress:Boolean):void
-    {
-        //
-        // Callback from the factory: the connection to one of the callback
-        // connectors has been established.
-        //
-        _callback.setConnection(connection, compress);
-        _factory.decPendingConnectCount(); // Must be called last.
-    }
-
-    public function setException(ex:Ice.LocalException):void
-    {
-        //
-        // Callback from the factory: connection establishment failed.
-        //
-        _callback.setException(ex);
-        _factory.decPendingConnectCount(); // Must be called last.
-    }
-
-    public function hasConnector(ci:ConnectorInfo):Boolean
-    {
-        return findConnectorInfo(ci) != -1;
-    }
-
-    private function findConnectorInfo(ci:ConnectorInfo):int
-    {
-        var index:int = -1;
-        _connectors.some(
-            function(item:ConnectorInfo, idx:int, v:Vector.<ConnectorInfo>):Boolean
-            {
-                if(ci.equals(item))
-                {
-                    index = idx;
-                    return true;
-                }
-                return false;
-            });
-        return index;
-    }
-
-    public function removeConnectors(connectors:Vector.<ConnectorInfo>):Boolean
-    {
-        var len:int = _connectors.length;
-        for each(var ci:ConnectorInfo in connectors)
-        {
-            const i:int = findConnectorInfo(ci);
-            if(i != -1)
-            {
-                _connectors.splice(i, 1);
-            }
-        }
-        _index = 0;
-        return _connectors.length == 0;
-    }
-
-    public function removeFromPending():void
-    {
-        _factory.removeFromPending(this, _connectors);
-    }
-
-    public function getConnectors():void
-    {
-        try
-        {
-            //
-            // Notify the factory that there's an async connect pending. This is necessary
-            // to prevent the outgoing connection factory to be destroyed before all the
-            // pending asynchronous connects are finished.
-            //
-            _factory.incPendingConnectCount();
-        }
-        catch(ex:Ice.LocalException)
-        {
-            _callback.setException(ex);
             return;
         }
 
-        nextEndpoint();
+        this._successCallback.call(this._cbContext === undefined ? this._successCallback : this._cbContext, connection,
+                                   compress.value);
+        this._factory.decPendingConnectCount(); // Must be called last.
     }
-
-    public function nextEndpoint():void
+    catch(ex)
     {
-        try
+        if(ex instanceof Ex.LocalException)
         {
-            CONFIG::debug { Debug.assert(_endpointsIndex < _endpoints.length); }
-            _currentEndpoint = _endpoints[_endpointsIndex++];
-            _currentEndpoint.connectors_async(this);
+            this._exceptionCallback.call(this._cbContext === undefined ? this._exceptionCallback : this._cbContext, ex);
+            this._factory.decPendingConnectCount(); // Must be called last.
         }
-        catch(ex:Ice.LocalException)
+        else
         {
-            exception(ex);
-        }
-    }
-
-    public function getConnection():void
-    {
-        try
-        {
-            //
-            // If all the connectors have been created, we ask the factory to get a
-            // connection.
-            //
-            const compress:Ice.BooleanHolder = new Ice.BooleanHolder();
-            const connection:Ice.ConnectionI = _factory.getConnection(_connectors, this, compress);
-            if(connection == null)
-            {
-                //
-                // A null return value from getConnection indicates that the connection
-                // is being established and that everthing has been done to ensure that
-                // the callback will be notified when the connection establishment is
-                // done.
-                //
-                return;
-            }
-
-            _callback.setConnection(connection, compress.value);
-            _factory.decPendingConnectCount(); // Must be called last.
-        }
-        catch(ex:Ice.LocalException)
-        {
-            _callback.setException(ex);
-            _factory.decPendingConnectCount(); // Must be called last.
+            throw ex;
         }
     }
-
-    public function nextConnector():void
-    {
-        var connection:Ice.ConnectionI = null;
-        try
-        {
-            CONFIG::debug { Debug.assert(_index < _connectors.length); }
-            _current = _connectors[_index++];
-            connection = _factory.createConnection(_current.connector.connect(), _current);
-            connection.start(this);
-        }
-        catch(ex:Ice.LocalException)
-        {
-            connectionStartFailed(connection, ex);
-        }
-    }
-
-    private var _factory:OutgoingConnectionFactory;
-    private var _hasMore:Boolean;
-    private var _callback:OutgoingConnectionFactory_CreateConnectionCallback;
-    private var _endpoints:Vector.<IceInternal.EndpointI>;
-    private var _selType:Ice.EndpointSelectionType;
-    private var _endpointsIndex:int; // Current index of _endpoints
-    private var _currentEndpoint:EndpointI;
-    private var _connectors:Vector.<ConnectorInfo> = new Vector.<ConnectorInfo>();
-    private var _index:int; // Current index of _connectors
-    private var _current:ConnectorInfo;
 }
 
-class ConnectorInfo
+ConnectCallback.prototype.nextConnector = function()
 {
-    public function ConnectorInfo(c:IceInternal.Connector, e:IceInternal.EndpointI)
+    var connection = null;
+    try
     {
-        connector = c;
-        endpoint = e;
+        Debug.assert(this._index < this._connectors.length);
+        this._current = this._connectors[this._index++];
+        connection = this._factory.createConnection(this._current.connector.connect(), this._current);
+        connection.start(this); // TODO
     }
-
-    public function equals(obj:Object):Boolean
+    catch(ex)
     {
-        const r:ConnectorInfo = obj as ConnectorInfo;
-        return connector.equals(r.connector);
-    }
-
-    public var connector:IceInternal.Connector;
-    public var endpoint:IceInternal.EndpointI;
-}
-
-class ConnectionsFinished
-{
-    public function ConnectionsFinished(size:int, complete:Function)
-    {
-        _size = size;
-        _complete = complete;
-        _count = 0;
-    }
-
-    public function finished():void
-    {
-        CONFIG::debug { Debug.assert(_count < _size); }
-        ++_count;
-        if(_count == _size)
+        if(ex instanceof Ex.LocalException)
         {
-            _complete();
+            this.connectionStartFailed(connection, ex);
+        }
+        else
+        {
+            throw ex;
         }
     }
+}
 
-    private var _size:int;
-    private var _complete:Function;
-    private var _count:int;
+var ConnectionsFinished = function(size, complete, cbContext)
+{
+    this._size = size;
+    this._complete = complete;
+    this._cbContext = cbContext;
+    this._count = 0;
+}
+
+ConnectionsFinished.prototype.finished = function()
+{
+    Debug.assert(this._count < this._size);
+    ++this._count;
+    if(this._count === this._size)
+    {
+        this._complete.call(this._cbContext === undefined ? this._complete : this._cbContext);
+    }
 }

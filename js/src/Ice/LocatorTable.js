@@ -14,7 +14,7 @@ var LocatorTable = function()
 {
     this._adapterEndpointsTable = new HashMap(); // Map<String, EndpointTableEntry>
     this._objectTable = new HashMap(); // Map<Ice.Identity, ReferenceTableEntry>
-    this._objectTable.comparator = function(i1, i2) { return i1.equals(i2); };
+    this._objectTable.comparator = HashMap.compareEquals;
 }
 
 LocatorTable.prototype.clear = function()

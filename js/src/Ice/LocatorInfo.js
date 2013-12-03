@@ -26,7 +26,7 @@ var LocatorInfo = function(locator, table, background)
 
     this._adapterRequests = new HashMap(); // Map<String, Request>
     this._objectRequests = new HashMap(); // Map<Ice.Identity, Request>
-    this._objectRequests.comparator = function(i1, i2) { return i1.equals(i2); };
+    this._objectRequests.comparator = HashMap.compareEquals;
 }
 
 LocatorInfo.prototype.destroy = function()

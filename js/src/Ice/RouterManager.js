@@ -15,7 +15,7 @@ var RouterPrx = require("./Router").Ice.RouterPrx;
 var RouterManager = function()
 {
     this._table = new HashMap(); // Map<Ice.RouterPrx, RouterInfo>
-    this._table.comparator = function(p1, p2) { return p1.equals(p2); };
+    this._table.comparator = HashMap.compareEquals;
 }
 
 RouterManager.prototype.destroy = function()

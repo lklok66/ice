@@ -47,6 +47,10 @@ var HashMap = function(h)
         get: function() { return this._comparator; },
         set: function(fn) { this._comparator = fn; }
     });
+
+    Object.defineProperty(this, "compareEquals", {
+        get: function() { return function(k1, k2) { return k1.equals(k2); }; }
+    });
 }
 
 HashMap.prototype.set = function(key, value)
