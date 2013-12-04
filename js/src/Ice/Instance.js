@@ -16,6 +16,7 @@ var ImplicitContextI = require("./ImplicitContextI");
 var IdentityUtil = require("./IdentityUtil");
 var LocatorManager = require("./LocatorManager");
 var Logger = require("./Logger");
+var Network = require("./Network");
 var Properties = require("./Properties");
 var ProxyFactory = require("./ProxyFactory");
 var Ref = require("./Reference");
@@ -114,6 +115,11 @@ Instance.prototype.outgoingConnectionFactory = function()
     return this._outgoingConnectionFactory;
 }
 
+Instance.prototype.preferIPv6 = function()
+{
+    return this._preferIPv6;
+}
+
 /* TODO
 Instance.prototype.connectionMonitor = function()
 {
@@ -146,9 +152,19 @@ Instance.prototype.objectAdapterFactory = function()
 
     Debug.assert(this._objectAdapterFactory !== null);
     return this._objectAdapterFactory;
+}*/
+
+Instance.prototype.protocolSupport = function()
+{
+    if(this._state == Instance.StateDestroyed)
+    {
+        throw new LocalEx.CommunicatorDestroyedException();
+    }
+
+    return this._protocolSupport;
 }
 
-Instance.prototype.endpointHostResolver = function()
+/*Instance.prototype.endpointHostResolver = function()
 {
     if(this._state === Instance.StateDestroyed)
     {
@@ -317,7 +333,7 @@ Instance.prototype.finishSetup = function(communicator, ar)
 
         this._proxyFactory = new ProxyFactory(this);
 
-        /* TODO
+        
         var ipv4 = this._initData.properties.getPropertyAsIntWithDefault("Ice.IPv4", 1) > 0;
         var ipv6 = this._initData.properties.getPropertyAsIntWithDefault("Ice.IPv6", 0) > 0;
         if(!ipv4 && !ipv6)
@@ -336,8 +352,8 @@ Instance.prototype.finishSetup = function(communicator, ar)
         {
             this._protocolSupport = Network.EnableIPv6;
         }
-        */
-
+        this._preferIPv6 = this._initData.properties.getPropertyAsInt("Ice.PreferIPv6Address") > 0;
+        
         this._endpointFactoryManager = new EndpointFactoryManager(this);
         var tcpEndpointFactory = new TcpEndpointFactory(this);
         this._endpointFactoryManager.add(tcpEndpointFactory);
