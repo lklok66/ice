@@ -9,6 +9,7 @@
 
 var ArrayUtil = require("./ArrayUtil");
 var ConnectionI = require("./ConnectionI");
+var ConnectionReaper = require("./ConnectionReaper");
 var Debug = require("./Debug");
 var Ex = require("./Exception");
 var ExUtil = require("./ExUtil");
@@ -26,14 +27,10 @@ var OutgoingConnectionFactory = function(communicator, instance)
     this._instance = instance;
     this._destroyed = false;
 
-    // TODO
-    //this._reaper = new ConnectionReaper();
+    this._reaper = new ConnectionReaper();
 
-    this._connections = new ConnectionListMap(); // map<Connector, Vector<Ice.ConnectionI>>
-    this._connections.comparator = HashMap.compareEquals;
-    this._connectionsByEndpoint = new ConnectionListMap(); // map<EndpointI, Vector<Ice.ConnectionI>>
-    this._connectionsByEndpoint.comparator = HashMap.compareEquals;
-    this._pending = new HashMap(); // map<Connector, HashMap<ConnectCallback, 1>>
+    this._connectionsByEndpoint = new ConnectionListMap(); // map<EndpointI, Array<Ice.ConnectionI>>
+    this._pending = new HashMap(); // map<EndpointI, Array<ConnectCallback>>
     this._pending.comparator = HashMap.compareEquals;
     this._pendingConnectCount = 0;
 
@@ -48,7 +45,7 @@ OutgoingConnectionFactory.prototype.destroy = function()
         return;
     }
 
-    for(var e = this._connections.entries; e != null; e = e.next)
+    for(var e = this._connectionsByEndpoint.entries; e != null; e = e.next)
     {
         var connectionList = e.value;
         for(var i = 0; i < connectionList.length; ++i)
@@ -111,7 +108,7 @@ OutgoingConnectionFactory.prototype.create = function(
     }
 
     var cb = new ConnectCallback(this, endpoints, hasMore, selType, successCallback, exceptionCallback, cbContext);
-    cb.getConnectors();
+    cb.start();
 }
 
 OutgoingConnectionFactory.prototype.setRouterInfo = function(
@@ -171,7 +168,7 @@ OutgoingConnectionFactory.prototype.gotClientEndpoints = function(endpoints, rou
         //
         endpoint = endpoint.changeCompress(false);
 
-        for(var e = this._connections.entries; e != null; e = e.next)
+        for(var e = this._connectionsByEndpoint.entries; e != null; e = e.next)
         {
             var connectionList = e.value;
             for(var i = 0; i < connectionList.length; ++i)
@@ -194,7 +191,7 @@ OutgoingConnectionFactory.prototype.removeAdapter = function(adapter)
         return;
     }
 
-    for(var e = this._connections.entries; e != null; e = e.next)
+    for(var e = this._connectionsByEndpoint.entries; e != null; e = e.next)
     {
         var connectionList = e.value;
         for(var i = 0; i < connectionList.length; ++i)
@@ -213,7 +210,7 @@ OutgoingConnectionFactory.prototype.flushAsyncBatchRequests = function(outAsync)
 
     if(!this._destroyed)
     {
-        for(var e = this._connections.entries; e != null; e = e.next)
+        for(var e = this._connectionsByEndpoint.entries; e != null; e = e.next)
         {
             var connectionList = e.value;
             for(var i = 0; i < connectionList.length; ++i)
@@ -283,6 +280,12 @@ OutgoingConnectionFactory.prototype.findConnectionByEndpoint = function(endpoint
     for(var i = 0; i < endpoints.length; ++i)
     {
         var endpoint = endpoints[i];
+
+        if(this._pending.has(endpoint))
+        {
+            continue;
+        }
+
         var connectionList = this._connectionsByEndpoint.get(endpoint);
         if(connectionList === undefined)
         {
@@ -300,44 +303,6 @@ OutgoingConnectionFactory.prototype.findConnectionByEndpoint = function(endpoint
                 else
                 {
                     compress.value = endpoint.compress();
-                }
-                return connectionList[i];
-            }
-        }
-    }
-
-    return null;
-}
-
-OutgoingConnectionFactory.prototype.findConnection = function(connectors, compress)
-{
-    var defaultsAndOverrides:DefaultsAndOverrides = this._instance.defaultsAndOverrides();
-    for(var i = 0; i < connectors.length; ++i)
-    {
-        var ci = connectors[i];
-
-        if(this._pending.has(ci.connector))
-        {
-            continue;
-        }
-
-        var connectionList = this._connections.get(ci.connector);
-        if(connectionList === undefined)
-        {
-            continue;
-        }
-
-        for(var i = 0; i < connectionList.length; ++i)
-        {
-            if(connectionList[i].isActiveOrHolding()) // Don't return destroyed or un-validated connections
-            {
-                if(defaultsAndOverrides.overrideCompress)
-                {
-                    compress.value = defaultsAndOverrides.overrideCompressValue;
-                }
-                else
-                {
-                    compress.value = ci.endpoint.compress();
                 }
                 return connectionList[i];
             }
@@ -374,7 +339,7 @@ OutgoingConnectionFactory.prototype.decPendingConnectCount = function()
     }
 }
 
-OutgoingConnectionFactory.prototype.getConnection = function(connectors, cb, compress)
+OutgoingConnectionFactory.prototype.getConnection = function(endpoints, cb, compress)
 {
     if(this._destroyed)
     {
@@ -390,7 +355,6 @@ OutgoingConnectionFactory.prototype.getConnection = function(connectors, cb, com
         for(var i = 0; i < cons.length; ++i)
         {
             var c = cons[i];
-            this._connections.removeConnection(c.connector(), c);
             this._connectionsByEndpoint.removeConnection(c.endpoint(), c);
             this._connectionsByEndpoint.removeConnection(c.endpoint().changeCompress(true), c);
         }
@@ -409,13 +373,13 @@ OutgoingConnectionFactory.prototype.getConnection = function(connectors, cb, com
         //
         // Search for a matching connection. If we find one, we're done.
         //
-        var connection = this.findConnection(connectors, compress);
+        var connection = this.findConnectionByEndpoint(endpoints, compress);
         if(connection !== null)
         {
             return connection;
         }
 
-        if(this.addToPending(cb, connectors))
+        if(this.addToPending(cb, endpoints))
         {
             //
             // A connection is already pending.
@@ -425,9 +389,9 @@ OutgoingConnectionFactory.prototype.getConnection = function(connectors, cb, com
         else
         {
             //
-            // No connection is currently pending to one of our connectors, so we
+            // No connection is currently pending to one of our endpoints, so we
             // get out of this loop and start the connection establishment to one of the
-            // given connectors.
+            // given endpoints.
             //
             break;
         }
@@ -435,18 +399,18 @@ OutgoingConnectionFactory.prototype.getConnection = function(connectors, cb, com
 
     //
     // At this point, we're responsible for establishing the connection to one of
-    // the given connectors. If it's a non-blocking connect, calling nextConnector
+    // the given endpoints. If it's a non-blocking connect, calling nextEndpoint
     // will start the connection establishment. Otherwise, we return null to get
     // the caller to establish the connection.
     //
-    cb.nextConnector();
+    cb.nextEndpoint();
 
     return null;
 }
 
-OutgoingConnectionFactory.prototype.createConnection = function(transceiver, ci)
+OutgoingConnectionFactory.prototype.createConnection = function(transceiver, endpoint)
 {
-    Debug.assert(this._pending.has(ci.connector) && transceiver !== null); }
+    Debug.assert(this._pending.has(endpoint) && transceiver !== null);
 
     //
     // Create and add the connection to the connection map. Adding the connection to the map
@@ -461,8 +425,8 @@ OutgoingConnectionFactory.prototype.createConnection = function(transceiver, ci)
             throw new LocalEx.CommunicatorDestroyedException();
         }
 
-        connection = new ConnectionI(this._communicator, this._instance, this._reaper, transceiver, ci.connector,
-                                     ci.endpoint.changeCompress(false), null);
+        connection = new ConnectionI(this._communicator, this._instance, this._reaper, transceiver,
+                                     endpoint.changeCompress(false), null);
     }
     catch(ex)
     {
@@ -480,54 +444,59 @@ OutgoingConnectionFactory.prototype.createConnection = function(transceiver, ci)
         throw ex;
     }
 
-    this._connections.set(ci.connector, connection);
     this._connectionsByEndpoint.set(connection.endpoint(), connection);
     this._connectionsByEndpoint.set(connection.endpoint().changeCompress(true), connection);
     return connection;
 }
 
-OutgoingConnectionFactory.prototype.finishGetConnection = function(connectors, ci, connection, cb)
+OutgoingConnectionFactory.prototype.finishGetConnection = function(endpoints, endpoint, connection, cb)
 {
     // cb is-a ConnectCallback
 
-    var connectionCallbacks = new HashMap(); // connectionCallbacks is a hash set
+    var connectionCallbacks = [];
     if(cb !== null)
     {
-        connectionCallbacks.set(cb, 1);
+        connectionCallbacks.push(cb);
     }
 
-    var callbacks = new HashMap(); // callbacks is a hash set
-    for(var i = 0; i < connectors.length; ++i)
+    var callbacks = [];
+    for(var i = 0; i < endpoints.length; ++i)
     {
-        var c = connectors[i];
-        var cbs = this._pending.get(c.connector);
+        var endpt = endpoints[i];
+        var cbs = this._pending.get(endpt);
         if(cbs !== undefined)
         {
-            this._pending.delete(c.connector);
-            for(var e = cbs.entries; e != null; e = e.next)
+            this._pending.delete(endpt);
+            for(var j = 0; j < cbs.length; ++j)
             {
-                var cc = e.key;
-                if(cc.hasConnector(ci))
+                var cc = cbs[j];
+                if(cc.hasEndpoint(endpoint))
                 {
-                    connectionCallbacks.set(cc, 1);
+                    if(connectionCallbacks.indexOf(cc) === -1)
+                    {
+                        connectionCallbacks.push(cc);
+                    }
                 }
                 else
                 {
-                    callbacks.set(cc, 1);
+                    if(callbacks.indexOf(cc) === -1)
+                    {
+                        callbacks.push(cc);
+                    }
                 }
             }
         }
     }
 
-    for(var e = connectionCallbacks.entries; e != null; e = e.next)
+    for(var i = 0; i < connectionCallbacks.length; ++i)
     {
-        var cc = e.key;
+        var cc = connectionCallbacks[i];
         cc.removeFromPending();
         callbacks.delete(cc);
     }
-    for(var e = callbacks.entries; e != null; e = e.next)
+    for(var i = 0; i < callbacks.length; ++i)
     {
-        var cc = e.key;
+        var cc = callbacks[i];
         cc.removeFromPending();
     }
 
@@ -539,94 +508,103 @@ OutgoingConnectionFactory.prototype.finishGetConnection = function(connectors, c
     }
     else
     {
-        compress = ci.endpoint.compress();
+        compress = endpoint.compress();
     }
 
-    for(var e = callbacks.entries; e != null; e = e.next)
+    for(var i = 0; i < callbacks.length; ++i)
     {
-        var cc = e.key;
+        var cc = callbacks[i];
         cc.getConnection();
     }
-    for(var e = connectionCallbacks.entries; e != null; e = e.next)
+    for(var i = 0; i < connectionCallbacks.length; ++i)
     {
-        var cc = e.key;
+        var cc = connectionCallbacks[i];
         cc.setConnection(connection, compress);
     }
 
     this.checkFinished();
 }
 
-OutgoingConnectionFactory.prototype.finishGetConnectionEx = function(connectors, ex, cb)
+OutgoingConnectionFactory.prototype.finishGetConnectionEx = function(endpoints, ex, cb)
 {
     // cb is-a ConnectCallback
 
-    var failedCallbacks = new HashMap(); // failedCallbacks is a hash set
+    var failedCallbacks = [];
     if(cb !== null)
     {
-        failedCallbacks.set(cb, 1);
+        failedCallbacks.push(cb);
     }
 
-    var callbacks = new HashMap(); // callbacks is a hash set
-    for(var i = 0; i < connectors.length; ++i)
+    var callbacks = [];
+    for(var i = 0; i < endpoints.length; ++i)
     {
-        var c = connectors[i];
-        var cbs = this._pending.get(c.connector);
+        var endpt = endpoints[i];
+        var cbs = this._pending.get(endpt);
         if(cbs !== undefined)
         {
-            this._pending.delete(c.connector);
-            for(var e = cbs.entries; e != null; e = e.next)
+            this._pending.delete(endpt);
+            for(var j = 0; j < cbs.length; ++j)
             {
-                var cc = e.key;
-                if(cc.removeConnectors(connectors))
+                var cc = cbs[j];
+                if(cc.removeEndpoints(endpoints))
                 {
-                    failedCallbacks.set(cc, 1);
+                    if(failedCallbacks.indexOf(cc) === -1)
+                    {
+                        failedCallbacks.push(cc);
+                    }
                 }
                 else
                 {
-                    callbacks.set(cc, 1);
+                    if(callbacks.indexOf(cc) === -1)
+                    {
+                        callbacks.push(cc);
+                    }
                 }
             }
         }
     }
 
-    for(var e = callbacks.entries; e != null; e = e.next)
+    for(var i = 0; i < callbacks.length; ++i)
     {
-        var cc = e.key;
-        Debug.assert(!failedCallbacks.has(cc));
+        var cc = callbacks[i];
+        Debug.assert(failedCallbacks.indexOf(cc) === -1);
         cc.removeFromPending();
     }
     this.checkFinished();
 
-    for(var e = callbacks.entries; e != null; e = e.next)
+    for(var i = 0; i < callbacks.length; ++i)
     {
-        var cc = e.key;
+        var cc = callbacks[i];
         cc.getConnection();
     }
-    for(var e = failedCallbacks.entries; e != null; e = e.next)
+    for(var i = 0; i < failedCallbacks.length; ++i)
     {
-        var cc = e.key;
+        var cc = failedCallbacks[i];
         cc.setException(ex);
     }
 }
 
-OutgoingConnectionFactory.prototype.addToPending = function(cb, connectors)
+OutgoingConnectionFactory.prototype.addToPending = function(cb, endpoints)
 {
     // cb is-a ConnectCallback
 
     //
-    // Add the callback to each connector pending list.
+    // Add the callback to each pending list.
     //
     var found = false;
-    for(var i = 0; i < connectors.length; ++i)
+    if(cb !== null)
     {
-        var p = connectors[i];
-        var cbs = this._pending.get(p.connector);
-        if(cbs !== undefined)
+        for(var i = 0; i < endpoints.length; ++i)
         {
-            found = true;
-            if(cb !== null)
+            var p = endpoints[i];
+            var cbs = this._pending.get(p);
+            if(cbs !== undefined)
             {
-                cbs.set(cb, 1); // Add the callback to each pending connector.
+                found = true;
+                if(cbs.indexOf(cb) === -1)
+                {
+                    cbs.push(cb); // Add the callback to each pending endpoint.
+                }
             }
         }
     }
@@ -637,33 +615,37 @@ OutgoingConnectionFactory.prototype.addToPending = function(cb, connectors)
     }
 
     //
-    // If there's no pending connection for the given connectors, we're
+    // If there's no pending connection for the given endpoints, we're
     // responsible for its establishment. We add empty pending lists,
-    // other callbacks to the same connectors will be queued.
+    // other callbacks to the same endpoints will be queued.
     //
-    for(var i = 0; i < connectors.length; ++i)
+    for(var i = 0; i < endpoints.length; ++i)
     {
-        var p = connectors[i];
-        if(!this._pending.has(p.connector))
+        var p = endpoints[i];
+        if(!this._pending.has(p))
         {
-            this._pending.set(p.connector, new HashMap());
+            this._pending.set(p, []);
         }
     }
 
     return false;
 }
 
-OutgoingConnectionFactory.prototype.removeFromPending = function(cb, connectors)
+OutgoingConnectionFactory.prototype.removeFromPending = function(cb, endpoints)
 {
     // cb is-a ConnectCallback
 
-    for(var i = 0; i < connectors.length; ++i)
+    for(var i = 0; i < endpoints.length; ++i)
     {
-        var p = connectors[i];
-        var cbs = this._pending.get(p.connector);
+        var p = endpoints[i];
+        var cbs = this._pending.get(p);
         if(cbs !== undefined)
         {
-            cbs.delete(cb);
+            var idx = cbs.indexOf(cb);
+            if(idx !== -1)
+            {
+                cbs.splice(idx, 1);
+            }
         }
     }
 }
@@ -736,7 +718,7 @@ OutgoingConnectionFactory.prototype.checkFinished = function()
     // Count the number of connections.
     //
     var size = 0;
-    for(var e = this._connections.entries; e != null; e = e.next)
+    for(var e = this._connectionsByEndpoint.entries; e != null; e = e.next)
     {
         var connectionList = e.value;
         size += connectionList.length;
@@ -748,7 +730,7 @@ OutgoingConnectionFactory.prototype.checkFinished = function()
     if(size > 0)
     {
         var cb = new ConnectionsFinished(size, this.connectionsFinished, this);
-        for(var e = this._connections.entries; e != null; e = e.next)
+        for(var e = this._connectionsByEndpoint.entries; e != null; e = e.next)
         {
             var connectionList = e.value;
             for(var i = 0; i < connectionList.length; ++i)
@@ -770,18 +752,16 @@ OutgoingConnectionFactory.prototype.connectionsFinished = function()
     if(cons !== null)
     {
         var size = 0;
-        for(var e = this._connections.entries; e != null; e = e.next)
+        for(var e = this._connectionsByEndpoint.entries; e != null; e = e.next)
         {
             var connectionList = e.value;
             size += connectionList.length;
         }
         Debug.assert(cons.length == size);
-        this._connections.clear();
         this._connectionsByEndpoint.clear();
     }
     else
     {
-        Debug.assert(this._connections.size == 0);
         Debug.assert(this._connectionsByEndpoint.size == 0);
     }
 
@@ -797,6 +777,7 @@ modules.export = OutgoingConnectionFactory;
 var ConnectionListMap = function(h)
 {
     HashMap.call(this, h);
+    this.comparator = HashMap.compareEquals;
 }
 
 ConnectionListMap.prototype = new HashMap();
@@ -828,22 +809,6 @@ ConnectionListMap.prototype.removeConnection = function(key, conn)
     }
 }
 
-var ConnectorInfo = function(c, e)
-{
-    this.connector = c;
-    this.endpoint = e;
-}
-
-ConnectorInfo.prototype.equals = function(rhs)
-{
-    return this.connector.equals(rhs.connector);
-}
-
-ConnectorInfo.prototype.hashCode = function()
-{
-    return this.connector.hashCode();
-}
-
 var ConnectCallback = function(
     f,
     endpoints,
@@ -860,11 +825,16 @@ var ConnectCallback = function(
     this._successCallback = successCallback;
     this._exceptionCallback = exceptionCallback;
     this._cbContext = cbContext;
-    this._endpointsIndex = 0;
     this._index = 0;
-    this._currentEndpoint = null;
-    this._connectors = [];
     this._current = null;
+
+    //
+    // Shuffle endpoints if endpoint selection type is Random.
+    //
+    if(this._selType === Endpt.EndpointSelectionType.Random)
+    {
+        ArrayUtil.shuffle(this._endpoints);
+    }
 }
 
 //
@@ -873,83 +843,25 @@ var ConnectCallback = function(
 ConnectCallback.prototype.connectionStartCompleted = function(connection)
 {
     connection.activate();
-    this._factory.finishGetConnection(this._connectors, this._current, connection, this);
+    this._factory.finishGetConnection(this._endpoints, this._current, connection, this);
 }
 
 ConnectCallback.prototype.connectionStartFailed = function(connection, ex)
 {
-    Debug.assert(this._current != null);
+    Debug.assert(this._current !== null);
 
-    this._factory.handleConnectionException(ex, this._hasMore || this._index < this._connectors.length);
+    this._factory.handleConnectionException(ex, this._hasMore || this._index < this._endpoints.length);
     if(ex instanceof LocalEx.CommunicatorDestroyedException) // No need to continue.
     {
-        this._factory.finishGetConnectionEx(this._connectors, ex, this);
+        this._factory.finishGetConnectionEx(this._endpoints, ex, this);
     }
-    else if(this._index < this._connectors.length) // Try the next connector.
-    {
-        this.nextConnector();
-    }
-    else
-    {
-        this._factory.finishGetConnectionEx(this._connectors, ex, this);
-    }
-}
-
-//
-// Methods from EndpointI_connectors
-//
-ConnectCallback.prototype.connectors = function(cons)
-{
-    //
-    // Shuffle connectors if endpoint selection type is Random.
-    //
-    if(this._selType === Endpt.EndpointSelectionType.Random)
-    {
-        ArrayUtil.shuffle(cons);
-    }
-
-    for(var i = 0; i < cons.length; ++i)
-    {
-        this._connectors.push(new ConnectorInfo(cons[i], this._currentEndpoint));
-    }
-
-    if(this._endpointsIndex < this._endpoints.length)
+    else if(this._index < this._endpoints.length) // Try the next endpoint.
     {
         this.nextEndpoint();
     }
     else
     {
-        Debug.assert(this._connectors.length > 0);
-
-        //
-        // We now have all the connectors for the given endpoints. We can try to obtain the
-        // connection.
-        //
-        this._index = 0;
-        this.getConnection();
-    }
-}
-
-ConnectCallback.prototype.exception = function(ex)
-{
-    this._factory.handleException(ex, this._hasMore || this._endpointsIndex < this._endpoints.length);
-    if(this._endpointsIndex < this._endpoints.length)
-    {
-        this.nextEndpoint();
-    }
-    else if(this._connectors.length > 0)
-    {
-        //
-        // We now have all the connectors for the given endpoints. We can try to obtain the
-        // connection.
-        //
-        this._index = 0;
-        this.getConnection();
-    }
-    else
-    {
-        this._exceptionCallback.call(this._cbContext === undefined ? this._exceptionCallback : this._cbContext, ex);
-        this._factory.decPendingConnectCount(); // Must be called last.
+        this._factory.finishGetConnectionEx(this._endpoints, ex, this);
     }
 }
 
@@ -973,16 +885,16 @@ ConnectCallback.prototype.setException = function(ex)
     this._factory.decPendingConnectCount(); // Must be called last.
 }
 
-ConnectCallback.prototype.hasConnector = function(ci)
+ConnectCallback.prototype.hasEndpoint = function(endpt)
 {
-    return this.findConnectorInfo(ci) != -1;
+    return this.findEndpoint(endpt) != -1;
 }
 
-ConnectCallback.prototype.findConnectorInfo = function(ci)
+ConnectCallback.prototype.findEndpoint = function(endpt)
 {
-    for(var index = 0; index < this._connectors.length; ++index)
+    for(var index = 0; index < this._endpoints.length; ++index)
     {
-        if(ci.equals(this._connectors[index]))
+        if(endpt.equals(this._endpoints[index]))
         {
             return index;
         }
@@ -990,27 +902,26 @@ ConnectCallback.prototype.findConnectorInfo = function(ci)
     return -1;
 }
 
-ConnectCallback.prototype.removeConnectors = function(connectors)
+ConnectCallback.prototype.removeEndpoints = function(endpoints)
 {
-    var len = this._connectors.length;
-    for(var i = 0; i < connectors.length; ++i)
+    for(var i = 0; i < endpoints.length; ++i)
     {
-        var idx = this.findConnectorInfo(connectors[i]);
+        var idx = this.findEndpoint(endpoints[i]);
         if(idx !== -1)
         {
-            this._connectors.splice(idx, 1);
+            this._endpoints.splice(idx, 1);
         }
     }
     this._index = 0;
-    return this._connectors.length == 0;
+    return this._endpoints.length == 0;
 }
 
 ConnectCallback.prototype.removeFromPending = function()
 {
-    this._factory.removeFromPending(this, this._connectors);
+    this._factory.removeFromPending(this, this._endpoints);
 }
 
-ConnectCallback.prototype.getConnectors = function()
+ConnectCallback.prototype.start = function()
 {
     try
     {
@@ -1034,28 +945,7 @@ ConnectCallback.prototype.getConnectors = function()
         }
     }
 
-    this.nextEndpoint();
-}
-
-ConnectCallback.prototype.nextEndpoint = function()
-{
-    try
-    {
-        Debug.assert(this._endpointsIndex < this._endpoints.length);
-        this._currentEndpoint = this._endpoints[this._endpointsIndex++];
-        this._currentEndpoint.connectors_async(this); // TODO
-    }
-    catch(ex)
-    {
-        if(ex instanceof Ex.LocalException)
-        {
-            this.exception(ex);
-        }
-        else
-        {
-            throw ex;
-        }
-    }
+    this.getConnection();
 }
 
 ConnectCallback.prototype.getConnection = function()
@@ -1063,11 +953,10 @@ ConnectCallback.prototype.getConnection = function()
     try
     {
         //
-        // If all the connectors have been created, we ask the factory to get a
-        // connection.
+        // Ask the factory to get a connection.
         //
         var compress = { value: false };
-        var connection = this._factory.getConnection(this._connectors, this, compress);
+        var connection = this._factory.getConnection(this._endpoints, this, compress);
         if(connection === null)
         {
             //
@@ -1092,26 +981,27 @@ ConnectCallback.prototype.getConnection = function()
         }
         else
         {
+            this._factory.decPendingConnectCount(); // Must be called last.
             throw ex;
         }
     }
 }
 
-ConnectCallback.prototype.nextConnector = function()
+ConnectCallback.prototype.nextEndpoint = function()
 {
     var connection = null;
     try
     {
-        Debug.assert(this._index < this._connectors.length);
-        this._current = this._connectors[this._index++];
-        connection = this._factory.createConnection(this._current.connector.connect(), this._current);
+        Debug.assert(this._index < this._endpoints.length);
+        this._current = this._endpoints[this._index++];
+        connection = this._factory.createConnection(this._current.connect(), this._current);
         connection.start(this); // TODO
     }
     catch(ex)
     {
         if(ex instanceof Ex.LocalException)
         {
-            this.connectionStartFailed(connection, ex);
+            this.connectionStartFailed(connection, ex); // TODO: Update callback method/scheme
         }
         else
         {

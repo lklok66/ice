@@ -345,11 +345,6 @@ TcpEndpointI.prototype.transceiver = function(endpoint)
     return null;
 }
 
-TcpEndpointI.prototype.connectors_async = function(successCallback, exceptionCallback, cbContext)
-{
-    this._instance.endpointHostResolver().resolve(this._host, this, successCallback, exceptionCallback, cbContext);
-}
-
 //
 // Return an acceptor for this endpoint, or null if no acceptors
 // is available. In case an acceptor is created, this operation
@@ -365,28 +360,15 @@ TcpEndpointI.prototype.acceptor = function(endpoint, adapterName)
     return p;
 }
 
-//
-// Expand endpoint out in to separate endpoints for each local
-// host if listening on INADDR_ANY.
-//
-TcpEndpointI.prototype.expand = function()
+TcpEndpointI.prototype.connect = function()
 {
-    var endps = [];
-    /* TODO
-    var hosts = Network.getHostsForEndpointExpand(this._host, this._instance.protocolSupport(), false);
-    if(hosts == null || hosts.length == 0)
+    if(this._instance.traceLevels().network >= 2)
     {
-        endps.push(this);
+        var msg = "trying to establish tcp connection to " + this._host + ":" + this._port;
+        this._instance.initializationData().logger.trace(this._instance.traceLevels().networkCat, msg);
     }
-    else
-    {
-        for each(var h:String in hosts)
-        {
-            endps.push(new TcpEndpointI(_instance, h, _port, _timeout, _connectionId, _compress));
-        }
-    }
-    */
-    return endps;
+
+    return TcpTransceiver.createOutgoing(this._instance, this._host, this._port);
 }
 
 //
@@ -506,18 +488,6 @@ TcpEndpointI.prototype.compareTo = function(p)
     {
         return this._host < p._host ? -1 : 1;
     }
-}
-
-TcpEndpointI.prototype.connectors = function(addresses)
-{
-    var v = [];
-
-    for(var i = 0; i < addresses.length; ++i)
-    {
-        v.push(new TcpConnector(this._instance, addresses[i], this._port, this._timeout, this._connectionId));
-    }
-
-    return v;
 }
 
 TcpEndpointI.prototype.calcHashValue = function()

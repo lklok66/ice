@@ -291,11 +291,6 @@ OpaqueEndpointI.prototype.transceiver = function(endpoint)
     return null;
 }
 
-OpaqueEndpointI.prototype.connectors_async = function(successCallback, exceptionCallback, cbContext)
-{
-    successCallback.call(cbContext === undefined ? successCallback : cbContext, []);
-}
-
 //
 // Return an acceptor for this endpoint, or null if no acceptors
 // is available. In case an acceptor is created, this operation
@@ -309,16 +304,9 @@ OpaqueEndpointI.prototype.acceptor = function(endpoint, adapterName)
     return null;
 }
 
-//
-// Expand endpoint out in to separate endpoints for each local
-// host if listening on INADDR_ANY on server side or if no host
-// was specified on client side.
-//
-OpaqueEndpointI.prototype.expand = function()
+OpaqueEndpointI.prototype.connect = function()
 {
-    var endps = [];
-    endps.push(this);
-    return endps;
+    return null;
 }
 
 //
@@ -439,12 +427,6 @@ OpaqueEndpointI.prototype.compareTo = function(p)
     }
 
     return 0;
-}
-
-OpaqueEndpointI.prototype.connectors = function(addresses)
-{
-    Debug.assert(false);
-    return null;
 }
 
 OpaqueEndpointI.prototype.calcHashValue = function()
