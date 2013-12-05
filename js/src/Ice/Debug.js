@@ -7,17 +7,20 @@
 //
 // **********************************************************************
 
+var AssertionFailedException = function(msg)
+{
+    Error.call(this, msg);
+}
+
+AssertionFailedException.prototype = new Error();
+AssertionFailedException.prototype.constructor = AssertionFailedException;
+
+module.exports.AssertionFailedException = AssertionFailedException;
+
 module.exports.assert = function(b, msg)
 {
     if(!b)
     {
-        if(typeof(console.assert) === undefined)
-        {
-            throw new Error(msg === undefined ? "assertion failed" : msg);
-        }
-        else
-        {
-            console.assert(b);
-        }
+        throw new AssertionFailedException(msg === undefined ? "assertion failed" : msg);
     }
 }

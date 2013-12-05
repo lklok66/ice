@@ -90,34 +90,28 @@ RouterInfo.prototype.getClientEndpoints = function()
 
 RouterInfo.prototype.getServerEndpoints = function()
 {
-    var promise = new Promise();
-
     if(this._serverEndpoints !== null) // Lazy initialization.
     {
-        promise.succeed(this._serverEndpoints);
+        return Promise.succeed(this._serverEndpoints);
     }
     else
     {
         var self = this;
-        this._router.getServerProxy().then(
+        return this._router.getServerProxy().then(
             function(proxy)
             {
-                promise.succeed(self.setServerEndpoints(proxy));
+                return self.setServerEndpoints(proxy);
             },
             function(ex)
             {
                 Debug.assert(ex instanceof Ex.LocalException);
-                promise.fail(ex);
+                throw ex;
             });
     }
-
-    return promise;
 }
 
 RouterInfo.prototype.addProxy = function(proxy)
 {
-    var promise = new Promise();
-
     Debug.assert(proxy !== null);
 
     if(this._identities.has(proxy.ice_getIdentity()))
@@ -125,25 +119,22 @@ RouterInfo.prototype.addProxy = function(proxy)
         //
         // Only add the proxy to the router if it's not already in our local map.
         //
-        promise.succeed();
+        return Promise.succeed();
     }
     else
     {
         var self = this;
-        this._router.addProxies([ proxy ]).then(
+        return this._router.addProxies([ proxy ]).then(
             function(evictedProxies)
             {
                 self.addAndEvictProxies(proxy, evictedProxies);
-                promise.succeed();
             },
             function(ex)
             {
                 Debug.assert(ex instanceof Ex.LocalException);
-                promise.fail(ex);
+                throw ex;
             });
     }
-
-    return promise;
 }
 
 RouterInfo.prototype.setAdapter = function(adapter)

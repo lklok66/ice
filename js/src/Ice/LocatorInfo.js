@@ -62,27 +62,21 @@ LocatorInfo.prototype.getLocator = function()
 
 LocatorInfo.prototype.getLocatorRegistry = function()
 {
-    var promise = new Promise();
-
     if(this._locatorRegistry !== null)
     {
-        promise.succeed(this._locatorRegistry);
+        return Promise.succeed(this._locatorRegistry);
     }
     else
     {
         var self = this;
-        this._locator.getRegistry().then(
+        return this._locator.getRegistry().then(
             function(reg)
             {
                 //
                 // The locator registry can't be located.
                 //
                 self._locatorRegistry = LocatorRegistryPrx.uncheckedCast(reg.ice_locator(null));
-                promise.succeed(self._locatorRegistry);
-            },
-            function(ex)
-            {
-                promise.fail(ex);
+                return self._locatorRegistry;
             });
     }
 
@@ -458,11 +452,17 @@ RequestCallback.prototype.response = function(locatorInfo, proxy)
             locatorInfo.getEndpoints(r, this._ref, this._ttl).then(
                 function(endpts, b)
                 {
-                    self._promise.succeed(endpts, b);
+                    if(self._promise !== null)
+                    {
+                        self._promise.succeed(endpts, b);
+                    }
                 },
                 function(ex)
                 {
-                    self._promise.fail(ex);
+                    if(self._promise !== null)
+                    {
+                        self._promise.fail(ex);
+                    }
                 });
             return;
         }
@@ -472,7 +472,11 @@ RequestCallback.prototype.response = function(locatorInfo, proxy)
     {
         locatorInfo.getEndpointsTrace(this._ref, endpoints, false);
     }
-    this._promise.succeed(endpoints === null ? [] : endpoints, false);
+
+    if(this._promise !== null)
+    {
+        this._promise.succeed(endpoints === null ? [] : endpoints, false);
+    }
 }
 
 RequestCallback.prototype.exception = function(locatorInfo, exc)
@@ -483,7 +487,10 @@ RequestCallback.prototype.exception = function(locatorInfo, exc)
     }
     catch(ex)
     {
-        this._promise.fail(ex);
+        if(this._promise !== null)
+        {
+            this._promise.fail(ex);
+        }
     }
 }
 
