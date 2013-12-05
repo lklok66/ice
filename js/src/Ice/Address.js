@@ -7,10 +7,10 @@
 //
 // **********************************************************************
 
-var Address = function(address, port)
+var Address = function(host, port)
 {
-    this._address = address;
-    this._port = port;
+    this.host = address;
+    this.port = port;
 }
 
 module.exports = Address;

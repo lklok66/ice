@@ -8,7 +8,7 @@
 // **********************************************************************
 
 var Instance = require("./Instance");
-var AsyncResult = require("./AsyncResult");
+var Promise = require("./Promise");
 
 //
 // Ice.Communicator
@@ -22,33 +22,14 @@ var Communicator = function(initData)
 // Certain initialization tasks need to be completed after the
 // constructor.
 //
-Communicator.prototype.finishSetup = function(ar)
+Communicator.prototype.finishSetup = function(promise)
 {
-    try
-    {
-        this._instance.finishSetup(this, ar);
-    }
-    catch(ex)
-    {
-        this._instance.destroy(null);
-        throw ex;
-    }
+    this._instance.finishSetup(this, promise);
 }
 
 Communicator.prototype.destroy = function()
 {
-    var ar = new AsyncResult(this, null, null, null, "destroy");
-    ar.__response = function()
-    {
-        ar.responseCallback(ar);
-    }
-    ar.__complete = function()
-    {
-        ar.completed = true;
-        ar.__finished();
-    }
-    this._instance.destroy(ar);
-    return ar;
+    return this._instance.destroy();
 }
 
 Communicator.prototype.shutdown = function()

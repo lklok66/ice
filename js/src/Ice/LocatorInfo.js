@@ -7,11 +7,11 @@
 //
 // **********************************************************************
 
-var AsyncResult = require("./AsyncResult");
 var Debug = require("./Debug");
 var Ex = require("./Exception");
 var ExUtil = require("./ExUtil");
 var HashMap = require("./HashMap");
+var Promise = require("./Promise");
 var Protocol = require("./Protocol");
 
 var LocalEx = require("./LocalException").Ice;
@@ -62,40 +62,37 @@ LocatorInfo.prototype.getLocator = function()
 
 LocatorInfo.prototype.getLocatorRegistry = function()
 {
-    var result = new GetLocatorRegistryAsyncResult(); // TODO
+    var promise = new Promise();
 
     if(this._locatorRegistry !== null)
     {
-        result.__complete(this._locatorRegistry);
-        return result;
+        promise.succeed(this._locatorRegistry);
+    }
+    else
+    {
+        var self = this;
+        this._locator.getRegistry().then(
+            function(reg)
+            {
+                //
+                // The locator registry can't be located.
+                //
+                self._locatorRegistry = LocatorRegistryPrx.uncheckedCast(reg.ice_locator(null));
+                promise.succeed(self._locatorRegistry);
+            },
+            function(ex)
+            {
+                promise.fail(ex);
+            });
     }
 
-    var self = this;
-    this._locator.getRegistry().whenCompleted(
-        function(r, reg)
-        {
-            //
-            // The locator registry can't be located.
-            //
-            self._locatorRegistry = LocatorRegistryPrx.uncheckedCast(reg.ice_locator(null));
-            result.__complete(self._locatorRegistry);
-        },
-        function(r, ex)
-        {
-            result.__exception(ex);
-        });
-
-    return result;
+    return promise;
 }
 
-LocatorInfo.prototype.getEndpoints = function(
-    ref,
-    wellKnownRef,
-    ttl,
-    successCallback,    // function(endpoints, cached)
-    exceptionCallback,  // function(ex)
-    cbContext)
+LocatorInfo.prototype.getEndpoints = function(ref, wellKnownRef, ttl)
 {
+    var promise = new Promise();
+
     Debug.assert(ref.isIndirect());
     var endpoints = null;
     var cached = { value: false };
@@ -106,13 +103,12 @@ LocatorInfo.prototype.getEndpoints = function(
         {
             if(this._background && endpoints !== null)
             {
-                this.getAdapterRequest(ref).addCallback(ref, wellKnownRef, ttl, null, null, null);
+                this.getAdapterRequest(ref).addCallback(ref, wellKnownRef, ttl, null);
             }
             else
             {
-                this.getAdapterRequest(ref).addCallback(ref, wellKnownRef, ttl, successCallback, exceptionCallback,
-                                                        cbContext);
-                return;
+                this.getAdapterRequest(ref).addCallback(ref, wellKnownRef, ttl, promise);
+                return promise;
             }
         }
     }
@@ -123,12 +119,12 @@ LocatorInfo.prototype.getEndpoints = function(
         {
             if(this._background && r !== null)
             {
-                this.getObjectRequest(ref).addCallback(ref, null, ttl, null, null, null);
+                this.getObjectRequest(ref).addCallback(ref, null, ttl, null);
             }
             else
             {
-                this.getObjectRequest(ref).addCallback(ref, null, ttl, successCallback, exceptionCallback, cbContext);
-                return;
+                this.getObjectRequest(ref).addCallback(ref, null, ttl, promise);
+                return promise;
             }
         }
 
@@ -138,8 +134,8 @@ LocatorInfo.prototype.getEndpoints = function(
         }
         else if(!r.isWellKnown())
         {
-            this.getEndpoints(r, ref, ttl, successCallback, exceptionCallback, cbContext);
-            return;
+            this.getEndpoints(r, ref, ttl, promise);
+            return promise;
         }
     }
 
@@ -148,10 +144,10 @@ LocatorInfo.prototype.getEndpoints = function(
     {
         this.getEndpointsTrace(ref, endpoints, true);
     }
-    if(successCallback !== null)
-    {
-        successCallback.call(cbContext === undefined ? successCallback : cbContext, endpoints, true);
-    }
+
+    promise.succeed(endpoints, true);
+
+    return promise;
 }
 
 LocatorInfo.prototype.clearCache = function(ref)
@@ -426,13 +422,11 @@ LocatorInfo.prototype.finishRequest = function(ref, wellKnownRefs, proxy, notReg
 
 module.exports = LocatorInfo;
 
-var RequestCallback = function(ref, ttl, successCallback, exceptionCallback, cbContext)
+var RequestCallback = function(ref, ttl, promise)
 {
     this._ref = ref;
     this._ttl = ttl;
-    this._successCallback = successCallback;
-    this._exceptionCallback = exceptionCallback;
-    this._cbContext = cbContext;
+    this._promise = promise;
 }
 
 RequestCallback.prototype.response = function(locatorInfo, proxy)
@@ -460,8 +454,16 @@ RequestCallback.prototype.response = function(locatorInfo, proxy)
             // by the locator is an indirect proxy. We now need to resolve the endpoints
             // of this indirect proxy.
             //
-            locatorInfo.getEndpoints(r, this._ref, this._ttl, this._successCallback, this._exceptionCallback,
-                                     this._cbContext);
+            var self = this;
+            locatorInfo.getEndpoints(r, this._ref, this._ttl).then(
+                function(endpts, b)
+                {
+                    self._promise.succeed(endpts, b);
+                },
+                function(ex)
+                {
+                    self._promise.fail(ex);
+                });
             return;
         }
     }
@@ -470,11 +472,7 @@ RequestCallback.prototype.response = function(locatorInfo, proxy)
     {
         locatorInfo.getEndpointsTrace(this._ref, endpoints, false);
     }
-    if(this._successCallback !== null)
-    {
-        this._successCallback.call(this._cbContext === undefined ? this._successCallback : this._cbContext,
-                                   endpoints === null ? [] : endpoints, false);
-    }
+    this._promise.succeed(endpoints === null ? [] : endpoints, false);
 }
 
 RequestCallback.prototype.exception = function(locatorInfo, exc)
@@ -485,18 +483,7 @@ RequestCallback.prototype.exception = function(locatorInfo, exc)
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
-        {
-            if(this._exceptionCallback != null)
-            {
-                this._exceptionCallback.call(this._cbContext === undefined ? this._exceptionCallback : this._cbContext,
-                                             ex);
-            }
-        }
-        else
-        {
-            throw ex;
-        }
+        this._promise.fail(ex);
     }
 }
 
@@ -513,9 +500,9 @@ var Request = function(locatorInfo, ref)
     this._exception = null;
 }
 
-Request.prototype.addCallback = function(ref, wellKnownRef, ttl, successCallback, exceptionCallback, cbContext)
+Request.prototype.addCallback = function(ref, wellKnownRef, ttl, promise)
 {
-    var callback = new RequestCallback(ref, ttl, successCallback, exceptionCallback, cbContext);
+    var callback = new RequestCallback(ref, ttl, promise);
     if(this._response)
     {
         callback.response(this._locatorInfo, this._proxy);
@@ -582,13 +569,12 @@ ObjectRequest.prototype.send = function()
     try
     {
         var self = this;
-        var r = this._locatorInfo.getLocator().findObjectById(this._ref.getIdentity());
-        r.whenCompleted(
-            function(ar, proxy)
+        this._locatorInfo.getLocator().findObjectById(this._ref.getIdentity()).then(
+            function(proxy)
             {
                 self.response(proxy);
             },
-            function(ar, ex)
+            function(ex)
             {
                 self.exception(ex);
             });
@@ -613,13 +599,12 @@ AdapterRequest.prototype.send = function()
     try
     {
         var self = this;
-        var r = this._locatorInfo.getLocator().findAdapterById(this._ref.getAdapterId());
-        r.whenCompleted(
-            function(ar, proxy)
+        this._locatorInfo.getLocator().findAdapterById(this._ref.getAdapterId()).then(
+            function(proxy)
             {
                 self.response(proxy);
             },
-            function(ar, ex)
+            function(ex)
             {
                 self.exception(ex);
             });
@@ -628,25 +613,4 @@ AdapterRequest.prototype.send = function()
     {
         this.exception(ex);
     }
-}
-
-var GetLocatorRegistryAsyncResult = function()
-{
-    AsyncResult.call(this, null, null, null, null, "getLocatoryRegistry");
-    this._registry = null;
-}
-
-GetLocatorRegistryAsyncResult.prototype = new AsyncResult();
-GetLocatorRegistryAsyncResult.prototype.constructor = GetLocatorRegistryAsyncResult;
-
-GetLocatorRegistryAsyncResult.prototype.__complete = function(registry)
-{
-    this._registry = registry;
-    this.completed = true;
-    this.__finished();
-}
-
-GetLocatorRegistryAsyncResult.prototype.__response = function()
-{
-    this.responseCallback.call(this.cbContext === null ? this.responseCallback : this.cbContext, this._registry);
 }

@@ -17,6 +17,7 @@ var IdentityUtil = require("./IdentityUtil");
 var LocatorManager = require("./LocatorManager");
 var Logger = require("./Logger");
 var Network = require("./Network");
+var Promise = require("./Promise");
 var Properties = require("./Properties");
 var ProxyFactory = require("./ProxyFactory");
 var Ref = require("./Reference");
@@ -26,12 +27,16 @@ var TraceLevels = require("./TraceLevels");
 
 var LocalEx = require("./LocalException").Ice;
 
+var StateActive = 0;
+var StateDestroyInProgress = 1;
+var StateDestroyed = 2;
+
 //
 // Instance - only for use by Communicator
 //
 var Instance = function(initData)
 {
-    this._state = Instance.StateActive;
+    this._state = StateActive;
     this._initData = initData;
 }
 
@@ -62,7 +67,7 @@ Instance.prototype.defaultsAndOverrides = function()
 
 Instance.prototype.routerManager = function()
 {
-    if(this._state === Instance.StateDestroyed)
+    if(this._state === StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -73,7 +78,7 @@ Instance.prototype.routerManager = function()
 
 Instance.prototype.locatorManager = function()
 {
-    if(this._state === Instance.StateDestroyed)
+    if(this._state === StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -84,7 +89,7 @@ Instance.prototype.locatorManager = function()
 
 Instance.prototype.referenceFactory = function()
 {
-    if(this._state === Instance.StateDestroyed)
+    if(this._state === StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -95,7 +100,7 @@ Instance.prototype.referenceFactory = function()
 
 Instance.prototype.proxyFactory = function()
 {
-    if(this._state === Instance.StateDestroyed)
+    if(this._state === StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -106,7 +111,7 @@ Instance.prototype.proxyFactory = function()
 
 Instance.prototype.outgoingConnectionFactory = function()
 {
-    if(this._state === Instance.StateDestroyed)
+    if(this._state === StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -123,7 +128,7 @@ Instance.prototype.preferIPv6 = function()
 /* TODO
 Instance.prototype.connectionMonitor = function()
 {
-    if(this._state === Instance.StateDestroyed)
+    if(this._state === StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -134,7 +139,7 @@ Instance.prototype.connectionMonitor = function()
 
 Instance.prototype.servantFactoryManager = function()
 {
-    if(this._state === Instance.StateDestroyed)
+    if(this._state === StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -145,7 +150,7 @@ Instance.prototype.servantFactoryManager = function()
 
 Instance.prototype.objectAdapterFactory = function()
 {
-    if(this._state === Instance.StateDestroyed)
+    if(this._state === StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -156,7 +161,7 @@ Instance.prototype.objectAdapterFactory = function()
 
 Instance.prototype.protocolSupport = function()
 {
-    if(this._state == Instance.StateDestroyed)
+    if(this._state == StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -166,7 +171,7 @@ Instance.prototype.protocolSupport = function()
 
 /*Instance.prototype.endpointHostResolver = function()
 {
-    if(this._state === Instance.StateDestroyed)
+    if(this._state === StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -177,7 +182,7 @@ Instance.prototype.protocolSupport = function()
 
 Instance.prototype.retryQueue = function()
 {
-    if(this._state === Instance.StateDestroyed)
+    if(this._state === StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -188,7 +193,7 @@ Instance.prototype.retryQueue = function()
 
 Instance.prototype.timer = function()
 {
-    if(this._state === Instance.StateDestroyed)
+    if(this._state === StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -200,7 +205,7 @@ Instance.prototype.timer = function()
 
 Instance.prototype.endpointFactoryManager = function()
 {
-    if(this._state === Instance.StateDestroyed)
+    if(this._state === StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -212,7 +217,7 @@ Instance.prototype.endpointFactoryManager = function()
 /* TODO
 Instance.prototype.pluginManager = function()
 {
-    if(this._state === Instance.StateDestroyed)
+    if(this._state === StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -257,7 +262,7 @@ Instance.prototype.identityToString = function(ident)
 
 Instance.prototype.setDefaultLocator = function(locator)
 {
-    if(this._state == Instance.StateDestroyed)
+    if(this._state == StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -267,7 +272,7 @@ Instance.prototype.setDefaultLocator = function(locator)
 
 Instance.prototype.setDefaultRouter = function(router)
 {
-    if(this._state == Instance.StateDestroyed)
+    if(this._state == StateDestroyed)
     {
         throw new LocalEx.CommunicatorDestroyedException();
     }
@@ -280,12 +285,13 @@ Instance.prototype.setLogger = function(logger)
     this._initData.logger = logger;
 }
 
-Instance.StateActive = 0;
-Instance.StateDestroyInProgress = 1;
-Instance.StateDestroyed = 2;
-
-Instance.prototype.finishSetup = function(communicator, ar)
+Instance.prototype.finishSetup = function(communicator, promise)
 {
+    //
+    // If promise == null, it means the caller is requesting a synchronous setup.
+    // Otherwise, we resolve the promise after all initialization is complete.
+    //
+
     try
     {
         if(this._initData.properties === null)
@@ -333,7 +339,6 @@ Instance.prototype.finishSetup = function(communicator, ar)
 
         this._proxyFactory = new ProxyFactory(this);
 
-        
         var ipv4 = this._initData.properties.getPropertyAsIntWithDefault("Ice.IPv4", 1) > 0;
         var ipv6 = this._initData.properties.getPropertyAsIntWithDefault("Ice.IPv6", 0) > 0;
         if(!ipv4 && !ipv6)
@@ -451,49 +456,67 @@ Instance.prototype.finishSetup = function(communicator, ar)
         //
         if(this._initData.properties.getPropertyAsIntWithDefault("Ice.Admin.DelayCreation", 0) <= 0)
         {
-            if(checkAdmin(ar !== undefined && ar !== null))
+            if(this.checkAdmin(promise !== null))
             {
                 //
                 // If the user calls initializeWithAdmin and the Admin OA is properly
                 // configured, we call getAdmin now and delay completion of initializeWithAdmin
                 // until getAdmin completes.
                 //
-                getAdmin(communicator).whenCompleted(
-                    function(r:Ice.AsyncResult, admin:Ice.ObjectPrx):void
+                this.getAdmin(communicator).then(
+                    function(admin)
                     {
-                        ar.__complete(communicator);
+                        promise.succeed(communicator);
                     },
-                    function(r:Ice.AsyncResult, e:Ice.Exception):void
+                    function(ex)
                     {
-                        ar.__exception(e);
-                        destroy(null);
+                        this.destroy().then(
+                            function()
+                            {
+                                promise.fail(ex);
+                            },
+                            function(e)
+                            {
+                                promise.fail(ex);
+                            });
                     });
                 return;
             }
         }
         */
 
-        if(ar !== undefined && ar !== null)
+        if(promise !== null)
         {
-            ar.__complete(communicator);
+            promise.succeed(communicator);
         }
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(promise !== null)
         {
-            this.destroy(null);
-            if(ar !== undefined && ar !== null)
+            if(ex instanceof Ex.LocalException)
             {
-                ar.__exception(ex);
+                this.destroy().then(
+                    function()
+                    {
+                        promise.fail(ex);
+                    },
+                    function(e)
+                    {
+                        promise.fail(ex);
+                    });
             }
             else
             {
-                throw ex;
+                promise.fail(ex);
             }
         }
         else
         {
+            if(ex instanceof Ex.LocalException)
+            {
+                this.destroy();
+            }
             throw ex;
         }
     }
@@ -502,19 +525,18 @@ Instance.prototype.finishSetup = function(communicator, ar)
 //
 // Only for use by Ice.CommunicatorI
 //
-Instance.prototype.destroy = function(ar)
+Instance.prototype.destroy = function()
 {
+    var promise = new Promise();
+
     //
     // If the _state is not StateActive then the instance is
     // either being destroyed, or has already been destroyed.
     //
-    if(this._state != Instance.StateActive)
+    if(this._state != StateActive)
     {
-        if(ar != null)
-        {
-            ar.__complete();
-        }
-        return;
+        promise.succeed();
+        return promise;
     }
 
     try
@@ -525,7 +547,7 @@ Instance.prototype.destroy = function(ar)
         // outgoingConnectionFactory() from
         // ObjectAdapterI::deactivate() will cause an exception.
         //
-        this._state = Instance.StateDestroyInProgress;
+        this._state = StateDestroyInProgress;
 
         /* TODO
         if(this._objectAdapterFactory != null)
@@ -545,23 +567,25 @@ Instance.prototype.destroy = function(ar)
             objectAdapterFactoryShutdown(ar);
         }
         */
-        this.outgoingConnectionFactoryFinished(ar);
+
+        this.outgoingConnectionFactoryFinished(promise);
     }
     catch(ex)
     {
         if(ex instanceof Ex.LocalException)
         {
-            ar.__exception(ex);
-            return;
+            promise.fail(ex);
         }
         else
         {
             throw ex;
         }
     }
+
+    return promise;
 }
 
-Instance.prototype.outgoingConnectionFactoryFinished = function(ar)
+Instance.prototype.outgoingConnectionFactoryFinished = function(promise)
 {
     try
     {
@@ -625,7 +649,7 @@ Instance.prototype.outgoingConnectionFactoryFinished = function(ar)
         this._adminFacets.clear();
         */
 
-        this._state = Instance.StateDestroyed;
+        this._state = StateDestroyed;
 
         /* TODO
         if(_initData.properties.getPropertyAsInt("Ice.Warn.UnusedProperties") > 0)
@@ -645,24 +669,13 @@ Instance.prototype.outgoingConnectionFactoryFinished = function(ar)
         }
         */
 
-        if(ar !== null)
-        {
-            ar.__complete();
-        }
+        promise.succeed();
     }
     catch(ex)
     {
         if(ex instanceof Ex.LocalException)
         {
-            if(ar !== null)
-            {
-                ar.__exception(ex);
-                return;
-            }
-            else
-            {
-                throw ex;
-            }
+            promise.fail(ex);
         }
         else
         {

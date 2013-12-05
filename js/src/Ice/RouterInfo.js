@@ -10,6 +10,7 @@
 var Debug = require("./Debug");
 var Ex = require("./Exception");
 var HashMap = require("./HashMap");
+var Promise = require("./Promise");
 
 var RouterInfo = function(router)
 {
@@ -61,88 +62,88 @@ RouterInfo.prototype.getRouter = function()
     return this._router;
 }
 
-RouterInfo.prototype.getClientEndpoints = function(
-    successCallback,    // function(endpoints)
-    exceptionCallback,  // function(ex)
-    cbContext
-)
+RouterInfo.prototype.getClientEndpoints = function()
 {
+    var promise = new Promise();
+
     if(this._clientEndpoints !== null)
     {
-        successCallback.call(cbContext === undefined ? successCallback : cbContext, this._clientEndpoints);
-        return;
+        promise.succeed(this._clientEndpoints);
+    }
+    else
+    {
+        var self = this;
+        this._router.getClientProxy().then(
+            function(clientProxy)
+            {
+                self.setClientEndpoints(clientProxy, promise);
+            },
+            function(ex)
+            {
+                Debug.assert(ex instanceof Ex.LocalException);
+                promise.fail(ex);
+            });
     }
 
-    var self = this;
-    this._router.getClientProxy().whenCompleted(
-        function(r, clientProxy)
-        {
-            self.setClientEndpoints(clientProxy, successCallback, exceptionCallback, cbContext);
-        },
-        function(r, ex)
-        {
-            Debug.assert(ex instanceof Ex.LocalException);
-            exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext, ex);
-        });
+    return promise;
 }
 
-RouterInfo.prototype.getServerEndpoints = function(
-    successCallback,    // function(endpoints)
-    exceptionCallback,  // function(ex)
-    cbContext
-)
+RouterInfo.prototype.getServerEndpoints = function()
 {
+    var promise = new Promise();
+
     if(this._serverEndpoints !== null) // Lazy initialization.
     {
-        successCallback.call(cbContext === undefined ? successCallback : cbContext, this._clientEndpoints);
-        return;
+        promise.succeed(this._serverEndpoints);
+    }
+    else
+    {
+        var self = this;
+        this._router.getServerProxy().then(
+            function(proxy)
+            {
+                promise.succeed(self.setServerEndpoints(proxy));
+            },
+            function(ex)
+            {
+                Debug.assert(ex instanceof Ex.LocalException);
+                promise.fail(ex);
+            });
     }
 
-    var self = this;
-    this._router.getServerProxy().whenCompleted(
-        function(r, proxy)
-        {
-            successCallback.call(cbContext === undefined ? successCallback : cbContext,
-                                 self.setServerEndpoints(proxy));
-        },
-        function(r, ex)
-        {
-            Debug.assert(ex instanceof Ex.LocalException);
-            exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext, ex);
-        });
+    return promise;
 }
 
-RouterInfo.prototype.addProxy = function(
-    proxy,
-    successCallback,    // function()
-    exceptionCallback,  // function(ex)
-    cbContext
-)
+RouterInfo.prototype.addProxy = function(proxy)
 {
-    Debug.assert(proxy != null);
+    var promise = new Promise();
+
+    Debug.assert(proxy !== null);
 
     if(this._identities.has(proxy.ice_getIdentity()))
     {
         //
         // Only add the proxy to the router if it's not already in our local map.
         //
-        return true;
+        promise.succeed();
+    }
+    else
+    {
+        var self = this;
+        this._router.addProxies([ proxy ]).then(
+            function(evictedProxies)
+            {
+                self.addAndEvictProxies(proxy, evictedProxies);
+                promise.succeed();
+            },
+            function(ex)
+            {
+                Debug.assert(ex instanceof Ex.LocalException);
+                promise.fail(ex);
+            });
     }
 
-    var self = this;
-    this._router.addProxies([ proxy ]).whenCompleted(
-        function(r, evictedProxies)
-        {
-            self.addAndEvictProxies(proxy, evictedProxies);
-            successCallback.call(cbContext === undefined ? successCallback : cbContext);
-        },
-        function(r, ex)
-        {
-            Debug.assert(ex instanceof Ex.LocalException);
-            exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext, ex);
-        });
-
-    return false;
+    return promise;
 }
 
 RouterInfo.prototype.setAdapter = function(adapter)
@@ -160,12 +161,7 @@ RouterInfo.prototype.clearCache = function(ref)
     this._identities.delete(ref.getIdentity());
 }
 
-RouterInfo.prototype.setClientEndpoints = function(
-    clientProxy,
-    successCallback,    // function(endpoints)
-    exceptionCallback,  // function(ex)
-    cbContext
-)
+RouterInfo.prototype.setClientEndpoints = function(clientProxy, promise)
 {
     if(this._clientEndpoints === null)
     {
@@ -175,7 +171,7 @@ RouterInfo.prototype.setClientEndpoints = function(
             // If getClientProxy() return nil, use router endpoints.
             //
             this._clientEndpoints = this._router.__reference().getEndpoints();
-            successCallback.call(cbContext === undefined ? successCallback : cbContext, this._clientEndpoints);
+            promise.succeed(this._clientEndpoints);
         }
         else
         {
@@ -187,19 +183,23 @@ RouterInfo.prototype.setClientEndpoints = function(
             // existing connection.
             //
             var self = this;
-            this._router.ice_getConnection().whenCompleted(
-                function(r, con)
+            this._router.ice_getConnection().then(
+                function(con)
                 {
                     var proxy = clientProxy.ice_timeout(con.timeout());
                     self._clientEndpoints = proxy.__reference().getEndpoints();
-                    successCallback.call(cbContext === undefined ? successCallback : cbContext, self._clientEndpoints);
+                    promise.succeed(self._clientEndpoints);
                 },
-                function(r, ex)
+                function(ex)
                 {
                     Debug.assert(ex instanceof Ex.LocalException);
-                    exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext, ex);
+                    promise.fail(ex);
                 });
         }
+    }
+    else
+    {
+        promise.succeed(this._clientEndpoints);
     }
 }
 
