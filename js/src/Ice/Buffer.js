@@ -7,12 +7,11 @@
 //
 // **********************************************************************
 
-var Buffer = function(length)
+var Buffer = function()
 {
-    this._buffers = null;
-    this._length = length === undefined ? 256 : length;
-    this._size = 0;
-    this._capacity = 0;
+    this.b = null;
+    this.size = 0;
+    this.capacity = 0;
 }
 
 Buffer.prototype.resize = function(n)
@@ -21,72 +20,68 @@ Buffer.prototype.resize = function(n)
     {
         this.clear();
     }
-    else if(n > this._capacity)
+    else if(n > this.capacity)
     {
         this.reserve(n); 
     }
-    this._size = n;
+    this.size = n;
 }
 
 Buffer.prototype.clear = function()
 {
-    this._buffers = [];
-    this._size = 0;
-    this._capacity = 0;
+    this.b = null;
+    this.size = 0;
+    this.capacity = 0;
 }
 
 Buffer.prototype.reserve = function(n)
 {
-    if(this._capacity === n)
-    {
-        return;
-    }
-    
-    var c = this._capacity;
-    var b = Math.floor(n / this._length); // Number of buffers required to hold at least n bytes
-    if(n % this._length !== 0)
-    {
-        b++;
-    }
-    this._capacity = b * this._length;
+    var c = this.capacity;
     
     try
     {
-        if(this._capacity > c)
+        if(n > this.capacity)
         {
-            var buffers = this._buffers ? this._buffers.slice(0) : new Array();
-            for(var i = buffers.length; i < b; ++i)
+            this.capacity = Math.max(n, 2 * this.capacity);
+            this.capacity = Math.max(1024, this.capacity);
+            
+            if(!this.b)
             {
-                buffers.push(new Uint8Array(this._length));
+                this.b = new Uint8Array(this.capacity);
             }
-            this._buffers = buffers;
+            else
+            {
+                var b = new Uint8Array(this.capacity);
+                b.set(this.b);
+                this.b = b;
+            }
+        }
+        else if(n < this.capacity)
+        {
+            this.capacity = n;
+            this.b  = new Uint8Array(this.b.buffer.slice(0, this.capacity - 1));
         }
         else
         {
-            var buffers = this._buffers ? this._buffers.slice(0) : new Array();
-            for(var i = buffers.length; i > b; ++i)
-            {
-                buffers.pop();
-            }
-            this._buffers = buffers;
+            return;
         }
     }
-    catch(e)
+    catch(ex)
     {
-        this._capacity = c; // Restore the previous capacity.
-        throw e;
+        this.capacity = c; // Restore the previous capacity.
+        throw ex;
     }
 }
 
 Buffer.prototype.write = function(value)
 {
-    this.resize(this._size + 1);
-    this._buffers[this._buffers.length - 1][this._size - 1] = value;
+    this.resize(this.size + 1);
+    this.b[this.size - 1] = value;
 }
 
 Buffer.prototype.set = function(offset, value)
 {
-    this._buffers[Math.floor(offset / this._length)][offset % this._length] = value;
+    this.b[offset] = value;
 }
 
 Buffer.prototype.read = function(offset, length)
@@ -94,16 +89,11 @@ Buffer.prototype.read = function(offset, length)
     length = (length === undefined || length === null) ? 1 : length;
     if(length === 1)
     {
-        return this._buffers[Math.floor(offset / this._length)][offset % this._length];
+        return this.b[offset];
     }
     else
     {
-        var result = new Uint8Array(length);
-        for(var i = 0; i < length; ++i)
-        {
-            result[i] = this._buffers[Math.floor(offset + i / this._length)][offset + i % this._length];
-        }
-        return result;
+        return this.b.subarray(offset, offset + length);
     }
 }
 
