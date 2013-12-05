@@ -12,19 +12,19 @@
 //
 var EnumBase = function(name, value)
 {
-    Object.defineProperty(this, 'name', {
-        enumerable: true,
-        configurable: false,
-        writable: false,
-        value: name
-    });
-    Object.defineProperty(this, 'value', {
-        enumerable: true,
-        configurable: false,
-        writable: false,
-        value: value
-    });
+    this._name = name;
+    this._value = value;
 }
+
+Object.defineProperty(EnumBase.prototype, 'name', {
+    enumerable: true,
+    get: function() { return this._name; }
+});
+
+Object.defineProperty(EnumBase.prototype, 'value', {
+    enumerable: true,
+    get: function() { return this._value; }
+});
 
 EnumBase.prototype.equals = function(rhs)
 {
@@ -39,17 +39,17 @@ EnumBase.prototype.equals = function(rhs)
         return false;
     }
 
-    return this.value == rhs.value;
+    return this._value == rhs._value;
 }
 
 EnumBase.prototype.hashCode = function()
 {
-    return this.value;
+    return this._value;
 }
 
 EnumBase.prototype.toString = function()
 {
-    return this.name;
+    return this._name;
 }
 
 module.exports = EnumBase;

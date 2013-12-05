@@ -34,24 +34,24 @@ var HashMap = function(h)
         }
         this.merge(h);
     }
-
-    Object.defineProperty(this, "size", {
-        get: function() { return this._size; }
-    });
-
-    Object.defineProperty(this, "entries", {
-        get: function() { return this._head; }
-    });
-
-    Object.defineProperty(this, "comparator", {
-        get: function() { return this._comparator; },
-        set: function(fn) { this._comparator = fn; }
-    });
-
-    Object.defineProperty(this, "compareEquals", {
-        get: function() { return function(k1, k2) { return k1.equals(k2); }; }
-    });
 }
+
+Object.defineProperty(HashMap.prototype, "size", {
+    get: function() { return this._size; }
+});
+
+Object.defineProperty(HashMap.prototype, "entries", {
+    get: function() { return this._head; }
+});
+
+Object.defineProperty(HashMap.prototype, "comparator", {
+    get: function() { return this._comparator; },
+    set: function(fn) { this._comparator = fn; }
+});
+
+Object.defineProperty(HashMap.prototype, "compareEquals", {
+    get: function() { return function(k1, k2) { return k1.equals(k2); }; }
+});
 
 HashMap.prototype.set = function(key, value)
 {

@@ -27,25 +27,25 @@ var LocalExceptionWrapper = function(ex, retry)
         this._ex = ex._ex;
         this._retry = ex._retry;
     }
-
-    Object.defineProperty(this, "inner", {
-        get: function() { return this._ex; }
-    });
-
-    //
-    // If true, always repeat the request. Don't take retry settings
-    // or "at-most-once" guarantees into account.
-    //
-    // If false, only repeat the request if the retry settings allow
-    // to do so, and if "at-most-once" does not need to be guaranteed.
-    //
-    Object.defineProperty(this, "retry", {
-        get: function() { return this._retry; }
-    });
 }
 
 LocalExceptionWrapper.prototype = new Error();
 LocalExceptionWrapper.prototype.constructor = LocalExceptionWrapper;
+
+Object.defineProperty(LocalExceptionWrapper.prototype, "inner", {
+    get: function() { return this._ex; }
+});
+
+//
+// If true, always repeat the request. Don't take retry settings
+// or "at-most-once" guarantees into account.
+//
+// If false, only repeat the request if the retry settings allow
+// to do so, and if "at-most-once" does not need to be guaranteed.
+//
+Object.defineProperty(LocalExceptionWrapper.prototype, "retry", {
+    get: function() { return this._retry; }
+});
 
 LocalExceptionWrapper.throwWrapper = function(ex)
 {
