@@ -43,17 +43,17 @@ Promise.prototype.exception = function(onException)
 }
 
 Promise.prototype.resolve = function()
-{   
+{
     if(this._state === State.Pending)
     {
         return;
     }
-    
+
     var obj;
     while((obj = this._listeners.pop()))
     {
         //
-        // We use an anonymous function here to caputre the listeners
+        // We use an anonymous function here to capture the listeners
         // in the loop.
         //
         (function(self, listener)
@@ -66,10 +66,11 @@ Promise.prototype.resolve = function()
                     listener.promise.setState(self._state, self._args);
                 }
                 else
-                {                
+                {
                     var result = callback.apply(null, self._args);
+
                     //
-                    // Callback returns a new promise
+                    // Callback can return a new promise.
                     //
                     if(result && typeof result.then === 'function')
                     {
@@ -100,7 +101,7 @@ Promise.prototype.resolve = function()
 }
 
 Promise.prototype.progress = function()
-{   
+{
     //
     // Don't report progress events after the promise is fulfilled.
     //
@@ -111,14 +112,13 @@ Promise.prototype.progress = function()
 
     var args = arguments;
     var self = this;
-    
+
     //
     // Use setTimeout so the listener are not notified until the call stack is empty.
     //
     setTimeout(
         function()
         {
-            
             var i, listener;
             for(i = 0; i < self._listeners.length; ++i)
             {
@@ -147,7 +147,7 @@ Promise.prototype.setState = function(state, args)
         this._state = state;
         this._args = args;
         //
-        // Use setTimeout so the listener are not resolved until the call stack is empty.
+        // Use setTimeout so the listeners are not resolved until the call stack is empty.
         //
         var self = this;
         setTimeout(function(){ self.resolve(); }, 0);
@@ -197,11 +197,11 @@ Promise.all = function()
     {
         return arguments[0];
     }
-    
+
     var promise = new Promise();
     var promises = Array.prototype.slice.call(arguments);
     var results = new Array(arguments.length);
-    
+
     var pending = promises.length;
     for(var i = 0; i < promises.length; ++i)
     {
@@ -228,9 +228,9 @@ Promise.all = function()
     return promise;
 }
 
-// 
+//
 // Create a new promise object and call function fn with
-// the promise as its first argument, then return the created
+// the promise as its first argument, then return the new
 // promise.
 //
 Promise.deferred = function(fn)
@@ -240,9 +240,9 @@ Promise.deferred = function(fn)
     return promise;
 }
 
-// 
-// Create a new promise an call succeed with the received arguments
-// then we return the new created promise.
+//
+// Create a new promise, call succeed with the received arguments,
+// then return the new promise.
 //
 Promise.succeed = function()
 {
@@ -252,9 +252,9 @@ Promise.succeed = function()
     return p;
 }
 
-// 
-// Create a new promise an call fail with the received arguments
-// then we return the new created promise.
+//
+// Create a new promise, call fail with the received arguments,
+// then return the new promise.
 //
 Promise.fail = function()
 {
