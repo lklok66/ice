@@ -9,7 +9,7 @@
 
 var Address = function(host, port)
 {
-    this.host = address;
+    this.host = host;
     this.port = port;
 }
 
