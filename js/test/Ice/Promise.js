@@ -15,37 +15,16 @@ var PromiseTest = {}
 
 PromiseTest.run = function()
 {
-    function succeedPromise()
-    {
-       var r = new Promise();
-       r.succeed(1024);
-       return r;
-    }
-    
-    function succeedPromiseMultipleArgs()
-    {
-       var r = new Promise();
-       r.succeed(1024, "Hello World!");
-       return r;
-    }
-    
-    function failPromise()
-    {
-        var r = new Promise();
-        r.fail("promise.fail");
-        return r;
-    }
-
     Promise.deferred(
         function(promise)
         {
             process.stdout.write("Creating a promise object that is resolved and succeed... ");
-            var promise1 = succeedPromise();
+            var promise1 = Promise.succeed(1024);
             promise1.then(
                 function (i)
                 {
                     Debug.assert(i === 1024);
-                    Debug.assert(promise1._state === Promise.StateSuccess);
+                    Debug.assert(promise1.succeeded());
                     console.log("ok");
                     promise.succeed();
                 },
@@ -62,7 +41,7 @@ PromiseTest.run = function()
                 function(promise)
                 {
                     process.stdout.write("Creating a promise object that is resolved and failed... ");
-                    var promise1 = failPromise();
+                    var promise1 = Promise.fail("promise.fail");
                     promise1.then(
                         function (i)
                         {
@@ -72,7 +51,7 @@ PromiseTest.run = function()
                         function(e)
                         {
                             Debug.assert(e === "promise.fail");
-                            Debug.assert(promise1._state === Promise.StateFailed);
+                            Debug.assert(promise1.failed());
                             console.log("ok");
                             promise.succeed();
                         });
@@ -85,13 +64,13 @@ PromiseTest.run = function()
                 function(promise)
                 {
                     process.stdout.write("Creating a promise object that is resolved and succeed with multiple arguments... ");
-                    var promise1 = succeedPromiseMultipleArgs();
+                    var promise1 = Promise.succeed(1024, "Hello World!");
                     promise1.then(
                         function (i, msg)
                         {
                             Debug.assert(i === 1024);
                             Debug.assert(msg === "Hello World!");
-                            Debug.assert(promise1._state === Promise.StateSuccess);
+                            Debug.assert(promise1.succeeded());
                             console.log("ok");
                             promise.succeed();
                         },
@@ -109,12 +88,12 @@ PromiseTest.run = function()
                 function(promise)
                 {
                     process.stdout.write("Creating a promise with a callback that returns a new value... ");
-                    var promise1 = succeedPromise();
+                    var promise1 = Promise.succeed(1024);
                     promise1.then(
                         function (i)
                         {
                             Debug.assert(i === 1024);
-                            Debug.assert(promise1._state === Promise.StateSuccess);
+                            Debug.assert(promise1.succeeded());
                             return "Hello World!";
                         },
                         function(e)
@@ -143,7 +122,7 @@ PromiseTest.run = function()
                 function(promise)
                 {
                     process.stdout.write("Creating a promise object that recovers from a failure... ");
-                    var promise1 = failPromise();
+                    var promise1 = Promise.fail("promise.fail");
                     promise1.then(
                         function (i)
                         {
@@ -153,7 +132,7 @@ PromiseTest.run = function()
                         function(e)
                         {
                             Debug.assert(e === "promise.fail");
-                            Debug.assert(promise1._state === Promise.StateFailed);
+                            Debug.assert(promise1.failed());
                             return "Hello World!";
                         })
                     .then(
@@ -177,7 +156,7 @@ PromiseTest.run = function()
                 function(promise)
                 {
                     process.stdout.write("Creating a promise object that rethrow a.failure... ");
-                    var promise1 = failPromise();
+                    var promise1 = Promise.fail("promise.fail");
                     promise1.then(
                         function (i)
                         {
@@ -198,7 +177,7 @@ PromiseTest.run = function()
                         function(e)
                         {
                             Debug.assert(e === "promise.fail");
-                            Debug.assert(promise1._state === Promise.StateFailed);
+                            Debug.assert(promise1.failed());
                             console.log("ok");
                             promise.succeed();
                         });
@@ -211,12 +190,12 @@ PromiseTest.run = function()
                 function(promise)
                 {
                     process.stdout.write("A second call to then should produce the same results... ");
-                    var promise1 = succeedPromise();
+                    var promise1 = Promise.succeed(1024);
                     promise1.then(
                         function (i)
                         {
                             Debug.assert(i === 1024);
-                            Debug.assert(promise1._state === Promise.StateSuccess);
+                            Debug.assert(promise1.succeeded());
                         },
                         function(e)
                         {
@@ -227,7 +206,7 @@ PromiseTest.run = function()
                         function (i)
                         {
                             Debug.assert(i === 1024);
-                            Debug.assert(promise1._state === Promise.StateSuccess);
+                            Debug.assert(promise1.succeeded());
                         },
                         function(e)
                         {
@@ -235,7 +214,7 @@ PromiseTest.run = function()
                             Debug.assert(false, e);
                         });
                     
-                    promise1 = failPromise();
+                    promise1 = Promise.fail("promise.fail");
                     promise1.then(
                         function (i)
                         {
@@ -245,7 +224,7 @@ PromiseTest.run = function()
                         function(e)
                         {
                             Debug.assert(e === "promise.fail");
-                            Debug.assert(promise1._state === Promise.StateFailed);
+                            Debug.assert(promise1.failed());
                         });
                     promise1.then(
                         function (i)
@@ -256,7 +235,7 @@ PromiseTest.run = function()
                         function(e)
                         {
                             Debug.assert(e === "promise.fail");
-                            Debug.assert(promise1._state === Promise.StateFailed);
+                            Debug.assert(promise1.failed());
                             console.log("ok");
                             promise.succeed();
                         });
@@ -270,7 +249,7 @@ PromiseTest.run = function()
                 {
                     process.stdout.write("Create a promise that is not yet resolved, but will succeed... ");
                     var promise1 = new Promise();
-                    Debug.assert(promise1._state === Promise.StatePending);
+                    Debug.assert(!promise1.completed());
                     promise1.then(
                         function(i)
                         {
@@ -295,7 +274,7 @@ PromiseTest.run = function()
                 {
                     process.stdout.write("Create a promise that is not yet resolved, but will.fail... ");
                     var promise1 = new Promise();
-                    Debug.assert(promise1._state === Promise.StatePending);
+                    Debug.assert(!promise1.completed());
                     promise1.then(
                         function(i)
                         {
@@ -305,7 +284,7 @@ PromiseTest.run = function()
                         function(e)
                         {
                             Debug.assert(e === "promise.fail");
-                            Debug.assert(promise1._state === Promise.StateFailed);
+                            Debug.assert(promise1.failed());
                             console.log("ok");
                             promise.succeed();
                         }
@@ -359,9 +338,7 @@ PromiseTest.run = function()
                     ).then(
                         function(msg)
                         {
-                            Debug.assert(promise1._state === Promise.StateSuccess &&
-                                         promise2._state === Promise.StateSuccess &&
-                                         promise3._state === Promise.StateSuccess);
+                            Debug.assert(promise1.succeeded() && promise2.succeeded() && promise3.succeeded());
                             Debug.assert(msg === "Hello World!");
                             console.log("ok");
                             promise.succeed();
@@ -372,9 +349,7 @@ PromiseTest.run = function()
                             Debug.assert(false, e);
                         }
                     );
-                    Debug.assert(promise1._state === Promise.StatePending &&
-                                 promise2._state === Promise.StatePending &&
-                                 promise3._state === Promise.StatePending);
+                    Debug.assert(!promise1.completed() && !promise2.completed() && !promise3.completed());
                     
                     promise1.succeed(1);
                     promise2.succeed(2);
@@ -388,7 +363,7 @@ PromiseTest.run = function()
                 function(promise)
                 {
                     process.stdout.write("Use exception method on a Promise that will.fail... ");
-                    var promise1 = failPromise();
+                    var promise1 = Promise.fail("promise.fail");
                     promise1.exception(
                         function(e)
                         {
@@ -406,7 +381,7 @@ PromiseTest.run = function()
                 function(promise)
                 {
                     process.stdout.write("Promise exception propagation... ");
-                    var promise1 = failPromise();
+                    var promise1 = Promise.fail("promise.fail");
                     promise1.then(
                         function()
                         {

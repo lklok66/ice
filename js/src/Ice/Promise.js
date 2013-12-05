@@ -7,15 +7,19 @@
 //
 // **********************************************************************
 
+//
+// Promise State
+//
+var State = {};
+State.Pending = 0;
+State.Success = 1;
+State.Failed = 2;
+
 function Promise()
 {
-    this._state = Promise.StatePending;
+    this._state = State.Pending;
     this._listeners = [];
 }
-
-Promise.StatePending = 0;
-Promise.StateSuccess = 1;
-Promise.StateFailed = 2;
 
 Promise.prototype.then = function(onResponse, onException, onProgress)
 {
@@ -40,11 +44,11 @@ Promise.prototype.exception = function(onException)
 
 Promise.prototype.resolve = function()
 {   
-    if(this._state === Promise.StatePending)
+    if(this._state === State.Pending)
     {
         return;
     }
-
+    
     var obj;
     while((obj = this._listeners.pop()))
     {
@@ -54,7 +58,7 @@ Promise.prototype.resolve = function()
         //
         (function(self, listener)
         {
-            var callback = self._state === Promise.StateSuccess ? listener.onResponse : listener.onException;
+            var callback = self._state === State.Success ? listener.onResponse : listener.onException;
             try
             {
                 if(typeof callback !== 'function')
@@ -100,7 +104,7 @@ Promise.prototype.progress = function()
     //
     // Don't report progress events after the promise is fulfilled.
     //
-    if(this._state !== Promise.StatePending)
+    if(this._state !== State.Pending)
     {
         return;
     }
@@ -138,7 +142,7 @@ Promise.prototype.progress = function()
 
 Promise.prototype.setState = function(state, args)
 {
-    if(this._state === Promise.StatePending && state !== Promise.StatePending)
+    if(this._state === State.Pending && state !== State.Pending)
     {
         this._state = state;
         this._args = args;
@@ -152,28 +156,41 @@ Promise.prototype.setState = function(state, args)
 
 Promise.prototype.succeed = function()
 {
-    if(this._state === Promise.StatePending)
+    if(this._state === State.Pending)
     {
         var args = arguments;
-        this.setState(Promise.StateSuccess, args);
+        this.setState(State.Success, args);
     }
 }
 
 Promise.prototype.fail = function()
 {
-    if(this._state === Promise.StatePending)
+    if(this._state === State.Pending)
     {
         var args = arguments;
-        this.setState(Promise.StateFailed, args);
+        this.setState(State.Failed, args);
     }
 }
 
-/**
- * 
- * Create a new promise object that is fulfilled when all the promise arguments
- * are fulfilled or is rejected when one of the promises is rejected.
- * 
- **/
+Promise.prototype.succeeded = function()
+{
+    return this._state === State.Success;
+}
+
+Promise.prototype.failed = function()
+{
+    return this._state === State.Failed;
+}
+
+Promise.prototype.completed = function()
+{
+    return this._state !== State.Pending;
+}
+
+//
+// Create a new promise object that is fulfilled when all the promise arguments
+// are fulfilled or is rejected when one of the promises is rejected.
+//
 Promise.all = function()
 {
     if(arguments.length === 1)
@@ -211,18 +228,40 @@ Promise.all = function()
     return promise;
 }
 
-/**
- * 
- * Create a new promise object and call function fn with
- * the promise as its first argument, then return the created
- * promise.
- * 
- **/
+// 
+// Create a new promise object and call function fn with
+// the promise as its first argument, then return the created
+// promise.
+//
 Promise.deferred = function(fn)
 {
     var promise = new Promise();
     fn.apply(null, [promise]);
     return promise;
+}
+
+// 
+// Create a new promise an call succeed with the received arguments
+// then we return the new created promise.
+//
+Promise.succeed = function()
+{
+    var args = arguments;
+    var p = new Promise();
+    p.succeed.apply(p, args);
+    return p;
+}
+
+// 
+// Create a new promise an call fail with the received arguments
+// then we return the new created promise.
+//
+Promise.fail = function()
+{
+    var args = arguments;
+    var p = new Promise();
+    p.fail.apply(p, args);
+    return p;
 }
 
 module.exports = Promise;
