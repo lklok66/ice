@@ -167,6 +167,32 @@ ByteBuffer.prototype.putArray = function(v)
     this._position += v.length;
 }
 
+ByteBuffer.prototype.putShort = function(v)
+{
+    this.resize(this._limit + 2);
+    this.b.writeInt16LE(v, this._position, true);
+    this._position += 2;
+}
+
+ByteBuffer.prototype.putShortAt = function(i, v)
+{
+    if(i + 2 >= this._limit)
+    {
+        throw new Error("IndexOutOfBoundsException");
+    }
+    this.b.writeInt16LE(v, i, true);
+}
+
+ByteBuffer.prototype.putShortArray = function(v)
+{
+    this.resize(this._limit + (v.length * 2));
+    for(var i = 0; i < v.length; ++i)
+    {
+        this.b.writeInt16LE(v[i], this._position, true);
+        this._position += 2;
+    }
+}
+
 ByteBuffer.prototype.putInt = function(v)
 {
     this.resize(this._limit + 4);
@@ -245,6 +271,14 @@ ByteBuffer.prototype.putDoubleArray = function(v)
     }
 }
 
+ByteBuffer.prototype.putString = function(v)
+{
+    var sz = Buffer.byteLength(v); 
+    this.resize(this._limit + sz);
+    this.b.write(v, this._position);
+    this._position += sz;
+}
+
 ByteBuffer.prototype.get = function()
 {
     if(this._position >= this._limit)
@@ -274,6 +308,41 @@ ByteBuffer.prototype.getArray = function(length)
     return this.b.slice(this._position, this._position + length);
 }
 
+ByteBuffer.prototype.getShort = function()
+{
+    if(this._limit - this._position < 2)
+    {
+        throw new Error("BufferUnderflowException");
+    }
+    var v = this.b.readInt16LE(this._position, true);
+    this._position += 2;
+    return v;
+}
+
+ByteBuffer.prototype.getShortAt = function(i)
+{
+    if(this._limit - i < 2 || i < 0)
+    {
+        throw new Error("IndexOutOfBoundsException");
+    }
+    return this.b.readInt16LE(i, true);
+}
+
+ByteBuffer.prototype.getShortArray = function(length)
+{
+    if(this._position + (length * 2) > this._limit)
+    {
+        throw new Error("BufferUnderflowException");
+    }
+    var v = [];
+    for(var i = 0; i < length; ++i)
+    {
+        v[i] = this.b.readInt16LE(this._position, true);
+        this._position += 2;
+    }
+    return v;
+}
+
 ByteBuffer.prototype.getInt = function()
 {
     if(this._limit - this._position < 4)
@@ -292,6 +361,21 @@ ByteBuffer.prototype.getIntAt = function(i)
         throw new Error("IndexOutOfBoundsException");
     }
     return this.b.readInt32LE(i, true);
+}
+
+ByteBuffer.prototype.getIntArray = function(length)
+{
+    if(this._position + (length * 4) > this._limit)
+    {
+        throw new Error("BufferUnderflowException");
+    }
+    var v = [];
+    for(var i = 0; i < length; ++i)
+    {
+        v[i] = this.b.readInt32LE(this._position, true);
+        this._position += 4;
+    }
+    return v;
 }
 
 ByteBuffer.prototype.getFloat = function()
@@ -314,6 +398,21 @@ ByteBuffer.prototype.getFloatAt = function(i)
     return this.b.readFloatLE(i, true);
 }
 
+ByteBuffer.prototype.getFloatArray = function(length)
+{
+    if(this._position + (length * 4) > this._limit)
+    {
+        throw new Error("BufferUnderflowException");
+    }
+    var v = [];
+    for(var i = 0; i < length; ++i)
+    {
+        v[i] = this.b.readFloatLE(this._position, true);
+        this._position += 4;
+    }
+    return v;
+}
+
 ByteBuffer.prototype.getDouble = function()
 {
     if(this._limit - this._position < 8)
@@ -332,6 +431,30 @@ ByteBuffer.prototype.getDoubleAt = function(i)
         throw new Error("IndexOutOfBoundsException");
     }
     return this.b.readDoubleLE(i, true);
+}
+
+ByteBuffer.prototype.getDoubleArray = function(length)
+{
+    if(this._position + (length * 8) > this._limit)
+    {
+        throw new Error("BufferUnderflowException");
+    }
+    var v = [];
+    for(var i = 0; i < length; ++i)
+    {
+        v[i] = this.b.readDoubleLE(this._position, true);
+        this._position += 8;
+    }
+    return v;
+}
+
+ByteBuffer.prototype.getString = function(length)
+{
+    if(this._position + length > this._limit)
+    {
+        throw new Error("BufferUnderflowException");
+    }
+    return this.b.toString("utf8", this._position, length);
 }
 
 module.exports = ByteBuffer;

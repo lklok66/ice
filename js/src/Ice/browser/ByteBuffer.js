@@ -170,6 +170,32 @@ ByteBuffer.prototype.putArray = function(v)
     this._position += v.byteLength;
 }
 
+ByteBuffer.prototype.putShort = function(v)
+{
+    this.resize(this._limit + 2);
+    this.v.setInt16(this._position, v, true);
+    this._position += 2;
+}
+
+ByteBuffer.prototype.putShortAt = function(i, v)
+{
+    if(i + 2 >= this._limit)
+    {
+        throw new Error("IndexOutOfBoundsException");
+    }
+    this.v.setInt16(i, v, true);
+}
+
+ByteBuffer.prototype.putShortArray = function(v)
+{
+    this.resize(this._limit + (v.length * 2));
+    for(var i = 0; i < v.length; ++i)
+    {
+        this.v.setInt16(this._position, v[i], true);
+        this._position += 2;
+    }
+}
+
 ByteBuffer.prototype.putInt = function(v)
 {
     this.resize(this._limit + 4);
@@ -275,6 +301,26 @@ ByteBuffer.prototype.getArray = function(length)
         throw new Error("BufferUnderflowException");
     }
     return this.b.slice(this._position, this._position + length);
+}
+
+ByteBuffer.prototype.getShort = function()
+{
+    if(this._limit - this._position < 2)
+    {
+        throw new Error("BufferUnderflowException");
+    }
+    var v = this.v.getInt16(this._position, true);
+    this._position += 2;
+    return v;
+}
+
+ByteBuffer.prototype.getShortAt = function(i)
+{
+    if(this._limit - i < 2 || i < 0)
+    {
+        throw new Error("IndexOutOfBoundsException");
+    }
+    return this.v.getInt16(i, true);
 }
 
 ByteBuffer.prototype.getInt = function()
