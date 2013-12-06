@@ -17,44 +17,6 @@ var OptionalFormat = function(_n, _v)
 OptionalFormat.prototype = new __ice_EnumBase();
 OptionalFormat.prototype.constructor = OptionalFormat;
 
-Object.defineProperty(OptionalFormat, 'F1', {
-    enumerable: true,
-    value: new OptionalFormat("F1", 0)
-});
-
-Object.defineProperty(OptionalFormat, 'F2', {
-    enumerable: true,
-    value: new OptionalFormat("F2", 1)
-});
-
-Object.defineProperty(OptionalFormat, 'F4', {
-    enumerable: true,
-    value: new OptionalFormat("F4", 2)
-});
-
-Object.defineProperty(OptionalFormat, 'F8', {
-    enumerable: true,
-    value: new OptionalFormat("F8", 3)
-});
-
-Object.defineProperty(OptionalFormat, 'Size', {
-    enumerable: true,
-    value: new OptionalFormat("Size", 4)
-});
-
-Object.defineProperty(OptionalFormat, 'VSize', {
-    enumerable: true,
-    value: new OptionalFormat("VSize", 5)
-});
-
-Object.defineProperty(OptionalFormat, 'FSize', {
-    enumerable: true,
-    value: new OptionalFormat("FSize", 6)
-});
-
-Object.defineProperty(OptionalFormat, 'Class', {
-    enumerable: true,
-    value: new OptionalFormat("Class", 7)
-});
+__ice_EnumBase.defineEnum(OptionalFormat, {'F1':0, 'F2':1, 'F4':2, 'F8':3, 'Size':4, 'VSize':5, 'FSize':6, 'Class':7});
 
 module.exports = OptionalFormat;

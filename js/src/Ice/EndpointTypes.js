@@ -20,6 +20,8 @@
 
 var __ice_EnumBase = require("./EnumBase");
 var __ice_HashMap = require("./HashMap");
+var __ice_HashUtil = require("./HashUtil");
+var __ice_ArrayUtil = require("./ArrayUtil");
 
 var Ice = (function(_mod_Ice, undefined)
 {
@@ -35,14 +37,8 @@ var Ice = (function(_mod_Ice, undefined)
     }
     _mod_Ice.EndpointSelectionType.prototype = new __ice_EnumBase();
     _mod_Ice.EndpointSelectionType.prototype.constructor = _mod_Ice.EndpointSelectionType;
-    Object.defineProperty(_mod_Ice.EndpointSelectionType, 'Random', {
-        enumerable: true,
-        value: new _mod_Ice.EndpointSelectionType("Random", 0)
-    });
-    Object.defineProperty(_mod_Ice.EndpointSelectionType, 'Ordered', {
-        enumerable: true,
-        value: new _mod_Ice.EndpointSelectionType("Ordered", 1)
-    });
+    __ice_EnumBase.defineEnum(_mod_Ice.EndpointSelectionType, {
+        'Random':0, 'Ordered':1});
 
     return _mod_Ice;
 }(Ice || {}));

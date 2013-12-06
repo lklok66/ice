@@ -52,4 +52,24 @@ EnumBase.prototype.toString = function()
     return this._name;
 }
 
+EnumBase.defineEnum = function(type, enumerators)
+{
+    var enums = [];
+    for(var e in enumerators)
+    {
+        var value = enumerators[e];
+        var enumerator = new type(e, value);
+        enums[value] = enumerator;
+        Object.defineProperty(type, e, {
+            enumerable: true,
+            value: enumerator
+        });
+    }
+
+    Object.defineProperty(type, 'valueOf', {
+        enumerable: false,
+        value: function(v) { return enums[v]; }
+    });
+}
+
 module.exports = EnumBase;

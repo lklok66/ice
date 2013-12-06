@@ -17,19 +17,6 @@ var FormatType = function(_n, _v)
 FormatType.prototype = new __ice_EnumBase();
 FormatType.prototype.constructor = FormatType;
 
-Object.defineProperty(FormatType, 'DefaultFormat', {
-    enumerable: true,
-    value: new FormatType("DefaultFormat", 0)
-});
-
-Object.defineProperty(FormatType, 'CompactFormat', {
-    enumerable: true,
-    value: new FormatType("CompactFormat", 1)
-});
-
-Object.defineProperty(FormatType, 'SlicedFormat', {
-    enumerable: true,
-    value: new FormatType("SlicedFormat", 2)
-});
+__ice_EnumBase.defineEnum(FormatType, {'DefaultFormat':0, 'CompactFormat':1, 'SlicedFormat':2});
 
 module.exports = FormatType;

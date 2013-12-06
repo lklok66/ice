@@ -2039,19 +2039,29 @@ Slice::Gen::TypesVisitor::visitEnum(const EnumPtr& p)
     _out << eb;
     _out << nl << localScope << '.' << name << ".prototype = new " << baseRef << "();";
     _out << nl << localScope << '.' << name << ".prototype.constructor = " << localScope << '.' << name << ';';
+    _out << nl << baseRef << ".defineEnum(" << localScope << '.' << name << ", {";
+    _out.inc();
+    _out << nl;
 
     const EnumeratorList enumerators = p->getEnumerators();
+    int i = 0;
     for(EnumeratorList::const_iterator en = enumerators.begin(); en != enumerators.end(); ++en)
     {
-        _out << nl << "Object.defineProperty(" << localScope << '.' << name << ", '" << fixId((*en)->name())
-             << "', {";
-        _out.inc();
-        _out << nl << "enumerable: true,"
-             << nl << "value: new " << localScope << '.'
-             << name << "(\"" << (*en)->name() << "\", " << (*en)->value() << ')';
-        _out.dec();
-        _out << nl << "});";
+        if(en != enumerators.begin())
+        {
+            if(++i % 5 == 0)
+            {
+                _out << ',' << nl;
+            }
+            else
+            {
+                _out << ", ";
+            }
+        }
+        _out << "'" << fixId((*en)->name()) << "':" << (*en)->value();
     }
+    _out << "});";
+    _out.dec();
 
     //
     // EnumBase provides an equals() method
