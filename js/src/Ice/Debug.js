@@ -7,12 +7,19 @@
 //
 // **********************************************************************
 
-var AssertionFailedException = function(msg)
+var AssertionFailedException = function(message)
 {
-    Error.call(this, msg);
+    Error.call(this);
+    Error.captureStackTrace(this, this.constructor);
+    this.message = message;
 }
 
 AssertionFailedException.prototype = new Error();
+
+Object.defineProperty(AssertionFailedException.prototype, "name", {
+    get: function() { return "AssertionFailedException"; }
+});
+
 AssertionFailedException.prototype.constructor = AssertionFailedException;
 
 module.exports.AssertionFailedException = AssertionFailedException;
