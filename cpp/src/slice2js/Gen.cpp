@@ -1260,11 +1260,7 @@ Slice::Gen::RequireVisitor::RequireVisitor(IceUtilInternal::Output& out)
 bool
 Slice::Gen::RequireVisitor::visitClassDefStart(const ClassDefPtr& p)
 {
-    if(!p->isLocal())
-    {
-        _seenClass = true;
-    }
-
+    _seenClass = true; // Set regardless of whether p->isLocal()
     return false;
 }
 
@@ -1510,7 +1506,10 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
     writeDocComment(p, getDeprecateReason(p, 0, "type"));
     _out << nl << localScope << '.' << name << " = function" << spar << allParamNames << epar;
     _out << sb;
-    _out << nl << baseRef << ".call" << spar << "this" << baseParamNames << epar << ';';
+    if(!p->isLocal() || hasBaseClass)
+    {
+        _out << nl << baseRef << ".call" << spar << "this" << baseParamNames << epar << ';';
+    }
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
         const bool isProtected = p->hasMetaData("protected") || (*q)->hasMetaData("protected");
@@ -1544,8 +1543,12 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         }
     }
     _out << eb;
-    _out << nl << localScope << '.' << name << ".prototype = new " << baseRef << "();";
-    _out << nl << localScope << '.' << name << ".prototype.constructor = " << localScope << '.' << name << ';';
+
+    if(!p->isLocal() || hasBaseClass)
+    {
+        _out << nl << localScope << '.' << name << ".prototype = new " << baseRef << "();";
+        _out << nl << localScope << '.' << name << ".prototype.constructor = " << localScope << '.' << name << ';';
+    }
 
     if(!p->isLocal())
     {

@@ -426,7 +426,7 @@ OutgoingConnectionFactory.prototype.createConnection = function(transceiver, end
         }
 
         connection = new ConnectionI(this._communicator, this._instance, this._reaper, transceiver,
-                                     endpoint.changeCompress(false), null);
+                                     endpoint.changeCompress(false), false, null);
     }
     catch(ex)
     {
