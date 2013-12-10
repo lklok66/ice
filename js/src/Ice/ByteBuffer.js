@@ -18,7 +18,7 @@ var ByteBuffer = function()
     this._position = 0;
     this._limit = 0;
     this._shrinkCounter = 0;
-}
+};
 
 Object.defineProperty(ByteBuffer.prototype, "position", {
     get: function() { return this._position; },
@@ -55,11 +55,11 @@ Object.defineProperty(ByteBuffer.prototype, "remaining", {
 ByteBuffer.prototype.empty = function()
 {
     return this._limit === 0;
-}
+};
 
 ByteBuffer.prototype.resize = function(n)
 {
-    if(n == 0)
+    if(n === 0)
     {
         this.clear();
     }
@@ -68,14 +68,14 @@ ByteBuffer.prototype.resize = function(n)
         this.reserve(n); 
     }
     this._limit = n;
-}
+};
 
 ByteBuffer.prototype.clear = function()
 {
     this.b = null;
     this._position = 0;
     this._limit = 0;
-}
+};
 
 //
 // Call expand(n) to add room for n additional bytes. Note that expand()
@@ -90,7 +90,7 @@ ByteBuffer.prototype.expand = function(n)
     {
         this.resize(sz);
     }
-}
+};
 
 ByteBuffer.prototype.reset = function()
 {
@@ -114,13 +114,14 @@ ByteBuffer.prototype.reset = function()
     }
     this._limit = 0;
     this._position = 0;
-}
+};
 
 ByteBuffer.prototype.reserve = function(n)
 {
+    var b, capacity;
     if(n > this.capacity)
     {
-        var capacity = Math.max(n, 2 * this.capacity);
+        capacity = Math.max(n, 2 * this.capacity);
         capacity = Math.max(1024, capacity);
         if(!this.b)
         {
@@ -128,7 +129,7 @@ ByteBuffer.prototype.reserve = function(n)
         }
         else
         {
-            var b = new Buffer(capacity);
+            b = new Buffer(capacity);
             b.copy(this.b);
             this.b = b.buffer;
         }
@@ -141,14 +142,14 @@ ByteBuffer.prototype.reserve = function(n)
     {
         return;
     }
-}
+};
 
 ByteBuffer.prototype.put = function(v)
 {
     this.resize(this._limit + 1);
     this.b.writeUInt8(v, this._position, true);
     this._position++;
-}
+};
 
 ByteBuffer.prototype.putAt = function(i, v)
 {
@@ -157,7 +158,7 @@ ByteBuffer.prototype.putAt = function(i, v)
         throw new Error("IndexOutOfBoundsException");
     }
     this.b.this._position(v, i, true);
-}
+};
 
 ByteBuffer.prototype.putArray = function(v)
 {
@@ -165,14 +166,14 @@ ByteBuffer.prototype.putArray = function(v)
     this.resize(this._limit + v.length);
     this.b.copy(v, this._position);
     this._position += v.length;
-}
+};
 
 ByteBuffer.prototype.putShort = function(v)
 {
     this.resize(this._limit + 2);
     this.b.writeInt16LE(v, this._position, true);
     this._position += 2;
-}
+};
 
 ByteBuffer.prototype.putShortAt = function(i, v)
 {
@@ -181,24 +182,25 @@ ByteBuffer.prototype.putShortAt = function(i, v)
         throw new Error("IndexOutOfBoundsException");
     }
     this.b.writeInt16LE(v, i, true);
-}
+};
 
 ByteBuffer.prototype.putShortArray = function(v)
 {
+    var i, length;
     this.resize(this._limit + (v.length * 2));
-    for(var i = 0; i < v.length; ++i)
+    for(i = 0, length = v.length; i < length; ++i)
     {
         this.b.writeInt16LE(v[i], this._position, true);
         this._position += 2;
     }
-}
+};
 
 ByteBuffer.prototype.putInt = function(v)
 {
     this.resize(this._limit + 4);
     this.b.writeInt32LE(v, this._position, true);
     this._position += 4;
-}
+};
 
 ByteBuffer.prototype.putIntAt = function(i, v)
 {
@@ -207,24 +209,25 @@ ByteBuffer.prototype.putIntAt = function(i, v)
         throw new Error("IndexOutOfBoundsException");
     }
     this.b.writeInt32LE(v, i, true);
-}
+};
 
 ByteBuffer.prototype.putIntArray = function(v)
 {
+    var i, length;
     this.resize(this._limit + (v.length * 4));
-    for(var i = 0; i < v.length; ++i)
+    for(i = 0, length = v.length; i < length; ++i)
     {
         this.b.writeInt32LE(v[i], this._position, true);
         this._position += 4;
     }
-}
+};
 
 ByteBuffer.prototype.putFloat = function(v)
 {
     this.resize(this._limit + 4);
     this.b.writeFloatLE(v, this._position, true);
     this._position += 4;
-}
+};
 
 ByteBuffer.prototype.putFloatAt = function(i, v)
 {
@@ -233,24 +236,25 @@ ByteBuffer.prototype.putFloatAt = function(i, v)
         throw new Error("IndexOutOfBoundsException");
     }
     this.b.writeFloatLE(v, i, true);
-}
+};
 
 ByteBuffer.prototype.putFloatArray = function(v)
 {
+    var i, length;
     this.resize(this._limit + (v.length * 4));
-    for(var i = 0; i < v.length; ++i)
+    for(i = 0, length = v.length; i < length; ++i)
     {
         this.b.writeFloatLE(v[i], this._position, true);
         this._position += 4;
     }
-}
+};
 
 ByteBuffer.prototype.putDouble = function(v)
 {
     this.resize(this._limit + 8);
     this.b.writeDoubleLE(v, this._position, true);
     this._position += 8;
-}
+};
 
 ByteBuffer.prototype.putDoubleAt = function(i, v)
 {
@@ -259,17 +263,18 @@ ByteBuffer.prototype.putDoubleAt = function(i, v)
         throw new Error("IndexOutOfBoundsException");
     }
     this.b.writeDoubleLE(v, i, true);
-}
+};
 
 ByteBuffer.prototype.putDoubleArray = function(v)
 {
+    var i, length;
     this.resize(this._limit + (v.length * 8));
-    for(var i = 0; i < v.length; ++i)
+    for(i = 0, length = v.length; i < length; ++i)
     {
         this.b.writeDoubleLE(v[i], this._position, true);
         this._position += 8;
     }
-}
+};
 
 ByteBuffer.prototype.putString = function(v)
 {
@@ -277,18 +282,19 @@ ByteBuffer.prototype.putString = function(v)
     this.resize(this._limit + sz);
     this.b.write(v, this._position);
     this._position += sz;
-}
+};
 
 ByteBuffer.prototype.get = function()
 {
+    var v;
     if(this._position >= this._limit)
     {
         throw new Error("BufferUnderflowException");
     }
-    var v = this.b.readUInt8(this._position, true);
+    v = this.b.readUInt8(this._position, true);
     this._position++;
     return v;
-}
+};
 
 ByteBuffer.prototype.getAt = function(i)
 {
@@ -297,7 +303,7 @@ ByteBuffer.prototype.getAt = function(i)
         throw new Error("IndexOutOfBoundsException");
     }
     return this.b.readUInt8(i, true);
-}
+};
 
 ByteBuffer.prototype.getArray = function(length)
 {
@@ -306,18 +312,19 @@ ByteBuffer.prototype.getArray = function(length)
         throw new Error("BufferUnderflowException");
     }
     return this.b.slice(this._position, this._position + length);
-}
+};
 
 ByteBuffer.prototype.getShort = function()
 {
+    var v;
     if(this._limit - this._position < 2)
     {
         throw new Error("BufferUnderflowException");
     }
-    var v = this.b.readInt16LE(this._position, true);
+    v = this.b.readInt16LE(this._position, true);
     this._position += 2;
     return v;
-}
+};
 
 ByteBuffer.prototype.getShortAt = function(i)
 {
@@ -326,33 +333,34 @@ ByteBuffer.prototype.getShortAt = function(i)
         throw new Error("IndexOutOfBoundsException");
     }
     return this.b.readInt16LE(i, true);
-}
+};
 
 ByteBuffer.prototype.getShortArray = function(length)
 {
+    var v = [], i;
     if(this._position + (length * 2) > this._limit)
     {
         throw new Error("BufferUnderflowException");
     }
-    var v = [];
-    for(var i = 0; i < length; ++i)
+    for(i = 0; i < length; ++i)
     {
         v[i] = this.b.readInt16LE(this._position, true);
         this._position += 2;
     }
     return v;
-}
+};
 
 ByteBuffer.prototype.getInt = function()
 {
+    var v;
     if(this._limit - this._position < 4)
     {
         throw new Error("BufferUnderflowException");
     }
-    var v = this.b.readInt32LE(this._position, true);
+    v = this.b.readInt32LE(this._position, true);
     this._position += 4;
     return v;
-}
+};
 
 ByteBuffer.prototype.getIntAt = function(i)
 {
@@ -361,22 +369,22 @@ ByteBuffer.prototype.getIntAt = function(i)
         throw new Error("IndexOutOfBoundsException");
     }
     return this.b.readInt32LE(i, true);
-}
+};
 
 ByteBuffer.prototype.getIntArray = function(length)
 {
+    var v = [], i;
     if(this._position + (length * 4) > this._limit)
     {
         throw new Error("BufferUnderflowException");
     }
-    var v = [];
-    for(var i = 0; i < length; ++i)
+    for(i = 0; i < length; ++i)
     {
         v[i] = this.b.readInt32LE(this._position, true);
         this._position += 4;
     }
     return v;
-}
+};
 
 ByteBuffer.prototype.getFloat = function()
 {
@@ -387,7 +395,7 @@ ByteBuffer.prototype.getFloat = function()
     var v = this.b.readFloatLE(this._position, true);
     this._position += 4;
     return v;
-}
+};
 
 ByteBuffer.prototype.getFloatAt = function(i)
 {
@@ -396,22 +404,22 @@ ByteBuffer.prototype.getFloatAt = function(i)
         throw new Error("IndexOutOfBoundsException");
     }
     return this.b.readFloatLE(i, true);
-}
+};
 
 ByteBuffer.prototype.getFloatArray = function(length)
 {
+    var v = [], i;
     if(this._position + (length * 4) > this._limit)
     {
         throw new Error("BufferUnderflowException");
     }
-    var v = [];
-    for(var i = 0; i < length; ++i)
+    for(i = 0; i < length; ++i)
     {
         v[i] = this.b.readFloatLE(this._position, true);
         this._position += 4;
     }
     return v;
-}
+};
 
 ByteBuffer.prototype.getDouble = function()
 {
@@ -422,7 +430,7 @@ ByteBuffer.prototype.getDouble = function()
     var v = this.b.readDoubleLE(this._position, true);
     this._position += 8;
     return v;
-}
+};
 
 ByteBuffer.prototype.getDoubleAt = function(i)
 {
@@ -431,22 +439,22 @@ ByteBuffer.prototype.getDoubleAt = function(i)
         throw new Error("IndexOutOfBoundsException");
     }
     return this.b.readDoubleLE(i, true);
-}
+};
 
 ByteBuffer.prototype.getDoubleArray = function(length)
 {
+    var v = [], i;
     if(this._position + (length * 8) > this._limit)
     {
         throw new Error("BufferUnderflowException");
     }
-    var v = [];
-    for(var i = 0; i < length; ++i)
+    for(i = 0; i < length; ++i)
     {
         v[i] = this.b.readDoubleLE(this._position, true);
         this._position += 8;
     }
     return v;
-}
+};
 
 ByteBuffer.prototype.getString = function(length)
 {
@@ -455,6 +463,6 @@ ByteBuffer.prototype.getString = function(length)
         throw new Error("BufferUnderflowException");
     }
     return this.b.toString("utf8", this._position, length);
-}
+};
 
 module.exports = ByteBuffer;

@@ -7,14 +7,19 @@
 //
 // **********************************************************************
 
-var Debug = require("./Debug");
-var ExUtil = require("./ExUtil");
-var Protocol = require("./Protocol");
-var FormatType = require("./FormatType");
-var LocalEx = require("./LocalException").Ice;
-var Ver = require("./Version").Ice;
-var OptionalFormat = require("./OptionalFormat");
-var HashMap = require("./HashMap");
+var Debug = require("./Debug"),
+    Ex = require("./Ex"),
+    ExUtil = require("./ExUtil"),
+    FormatType = require("./FormatType"),
+    HashMap = require("./HashMap"),
+    IceObject = require("./IceObject"),
+    LocalEx = require("./LocalException").Ice,
+    OptionalFormat = require("./OptionalFormat"),
+    Protocol = require("./Protocol"),
+    SlicedData = require("./SlicedData"),
+    SliceInfo = require("/SliceInfo"),
+    TraceUtil = require("./TraceUtil"),
+    Version = require("./Version").Ice;
 
 var SliceType = {};
 SliceType.NoSlice = 0;
@@ -39,6 +44,61 @@ var MemberFormatFSize        = 5;
 var MemberFormatReserved     = 6;
 var MemberFormatEndMarker    = 7;
 
+
+var IndirectPatchEntry = function(index, patcher)
+{
+    this.index = index;
+    this.patcher = patcher;
+};
+
+var InstanceData = function(previous)
+{
+    if(previous !== null)
+    {
+        previous.next = this;
+    }
+    this.previous = previous;
+    this.next = null;
+};
+
+
+var SequencePatcher = function(seq, cls, type, index)
+{
+    this._seq = seq;
+    this._cls = cls;
+    this._type = type;
+    this._index = index;
+};
+
+SequencePatcher.prototype.patch = function(v)
+{
+    if(v !== null)
+    {
+        //
+        // Raise ClassCastException if the element doesn't match the expected type.
+        //
+        if(!(v instanceof this._cls))
+        {
+            // TODO use ClassCastException?
+            throw new Error("expected element of type " + this._type + " but received " +
+                            v.prototype.constructor.name);
+        }
+    }
+
+    this._seq[this._index] = v;
+};
+
+SequencePatcher.prototype.type = function()
+{
+    return this._type;
+};
+
+SequencePatcher.prototype.invoke = function(v)
+{
+    this.patch(v);
+};
+
+
 var EncapsDecoder = function(stream, encaps, sliceObjects, f)
 {
     this._stream = stream;
@@ -56,32 +116,32 @@ EncapsDecoder.prototype.readOpt = function()
 
 EncapsDecoder.prototype.readPendingObjects = function()
 {
+    return undefined;
 };
 
 EncapsDecoder.prototype.readTypeId = function(isIndex)
 {
+    var typeId, index;
     if(this._typeIdMap === null) // Lazy initialization
     {
         this._typeIdMap = new HashMap(); // java.util.TreeMap<Integer, String>();
     }
 
-    var typeId;
     if(isIndex)
     {
-        var index = this._stream.readSize();
+        index = this._stream.readSize();
         typeId = this._typeIdMap.get(index);
         if(typeId === null)
         {
             throw new LocalEx.UnmarshalOutOfBoundsException();
         }
-        return typeId;
     }
     else
     {
         typeId = this._stream.readString();
-        this._typeIdMap.put(++_typeIdIndex, typeId);
-        return typeId;
+        this._typeIdMap.put(++this._typeIdIndex, typeId);
     }
+    return typeId;
 };
 
 EncapsDecoder.prototype.newInstance = function(typeId)
@@ -89,8 +149,8 @@ EncapsDecoder.prototype.newInstance = function(typeId)
     //
     // Try to find a factory registered for the specific type.
     //
-    var userFactory = this._servantFactoryManager.find(typeId);
-    var v = null;
+    var userFactory = this._servantFactoryManager.find(typeId),
+        v = null;
     if(userFactory !== null)
     {
         v = userFactory.create(typeId);
@@ -128,7 +188,8 @@ EncapsDecoder.prototype.addPatchEntry = function(index, patcher)
     // Check if already un-marshalled the object. If that's the case,
     // just patch the object smart pointer and we're done.
     //
-    var obj = this._unmarshaledMap.get(index);
+    var obj = this._unmarshaledMap.get(index), 
+        l;
     if(obj !== null)
     {
         patcher.patch(obj);
@@ -145,7 +206,7 @@ EncapsDecoder.prototype.addPatchEntry = function(index, patcher)
     // the smart pointer will be patched when the instance is
     // un-marshalled.
     //
-    var l = this._patchMap.get(index);
+    l = this._patchMap.get(index);
     if(l === null)
     {
         //
@@ -164,7 +225,7 @@ EncapsDecoder.prototype.addPatchEntry = function(index, patcher)
 
 EncapsDecoder.prototype.unmarshal = function(index, v)
 {
-    var i, length;
+    var i, length, l;
     //
     // Add the object to the map of un-marshalled objects, this must
     // be done before reading the objects (for circular references).
@@ -181,17 +242,17 @@ EncapsDecoder.prototype.unmarshal = function(index, v)
         //
         // Patch all instances now that the object is un-marshalled.
         //
-        var l = this._patchMap.get(index);
+        l = this._patchMap.get(index);
         if(l !== null)
         {
-            assert(l.size() > 0);
+            Debug.assert(l.size() > 0);
             
             //
             // Patch all pointers that refer to the instance.
             //
             for(i = 0, length = l.length; i < length; ++i)
             {
-                p.patch(l[i]);
+                l[i].patch(v);
             }
             
             //
@@ -267,7 +328,7 @@ EncapsDecoder10.prototype.readObject = function(patcher)
     var index = this._stream.readInt();
     if(index > 0)
     {
-        throw new Ice.MarshalException("invalid object id");
+        throw new LocalEx.MarshalException("invalid object id");
     }
     index = -index;
 
@@ -283,7 +344,7 @@ EncapsDecoder10.prototype.readObject = function(patcher)
 
 EncapsDecoder10.prototype.throwException = function(factory)
 {
-    Debug.assert(this._sliceType == SliceType.NoSlice);
+    Debug.assert(this._sliceType === SliceType.NoSlice);
 
     //
     // User exception with the 1.0 encoding start with a boolean flag
@@ -292,8 +353,9 @@ EncapsDecoder10.prototype.throwException = function(factory)
     // This allows reading the pending objects even if some part of
     // the exception was sliced.
     //
-    var usesClasses = this._stream.readBool();
-
+    var usesClasses = this._stream.readBool(),
+        mostDerivedId,
+        userEx;
     this._sliceType = SliceType.ExceptionSlice;
     this._skipFirstSlice = false;
 
@@ -301,10 +363,10 @@ EncapsDecoder10.prototype.throwException = function(factory)
     // Read the first slice header.
     //
     this.startSlice();
-    var mostDerivedId = this._typeId;
+    mostDerivedId = this._typeId;
     while(true)
     {
-        var userEx = null;
+        userEx = null;
 
         //
         // Use a factory if one was provided.
@@ -324,7 +386,7 @@ EncapsDecoder10.prototype.throwException = function(factory)
 
         if(userEx === null)
         {
-            userEx = this._stream.createUserException(_typeId);
+            userEx = this._stream.createUserException(this._typeId);
         }
 
         //
@@ -352,7 +414,7 @@ EncapsDecoder10.prototype.throwException = function(factory)
         }
         catch(ex)
         {
-            //TODO assert Ice.UnmarshalOutOfBoundsException
+            // TODO assert Ice.UnmarshalOutOfBoundsException
             
             //
             // An oversight in the 1.0 encoding means there is no marker to indicate
@@ -374,18 +436,19 @@ EncapsDecoder10.prototype.startInstance = function(sliceType)
     this._skipFirstSlice = true;
 };
 
-EncapsDecoder10.prototype.endInstance = function(preserve)
+EncapsDecoder10.prototype.endInstance = function(/*preserve*/)
 {
+    var sz;
     //
     // Read the Ice::Object slice.
     //
     if(this._sliceType === SliceType.ObjectSlice)
     {
         this.startSlice();
-        var sz = this._stream.readSize(); // For compatibility with the old AFM.
+        sz = this._stream.readSize(); // For compatibility with the old AFM.
         if(sz !== 0)
         {
-            throw new Ice.MarshalException("invalid Object slice");
+            throw new LocalEx.MarshalException("invalid Object slice");
         }
         this.endSlice();
     }
@@ -396,6 +459,7 @@ EncapsDecoder10.prototype.endInstance = function(preserve)
 
 EncapsDecoder10.prototype.startSlice = function()
 {
+    var isIndex;
     //
     // If first slice, don't read the header, it was already read in
     // readInstance or throwException to find the factory.
@@ -414,8 +478,8 @@ EncapsDecoder10.prototype.startSlice = function()
     //
     if(this._sliceType === SliceType.ObjectSlice) // For exceptions, the type ID is always encoded as a string
     {
-        var isIndex = this._stream.readBool();
-        this._typeId = readTypeId(isIndex);
+        isIndex = this._stream.readBool();
+        this._typeId = this.readTypeId(isIndex);
     }
     else
     {
@@ -425,7 +489,7 @@ EncapsDecoder10.prototype.startSlice = function()
     this._sliceSize = this._stream.readInt();
     if(this._sliceSize < 4)
     {
-        throw new Ice.UnmarshalOutOfBoundsException();
+        throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 
     return this._typeId;
@@ -433,6 +497,7 @@ EncapsDecoder10.prototype.startSlice = function()
 
 EncapsDecoder10.prototype.endSlice = function()
 {
+    return undefined;
 };
 
 EncapsDecoder10.prototype.skipSlice = function()
@@ -456,11 +521,11 @@ EncapsDecoder10.prototype.skipSlice = function()
 
 EncapsDecoder10.prototype.readPendingObjects = function()
 {
-    var num;
+    var k, num;
     do
     {
         num = this._stream.readSize();
-        for(var k = num; k > 0; --k)
+        for(k = num; k > 0; --k)
         {
             this.readInstance();
         }
@@ -473,17 +538,19 @@ EncapsDecoder10.prototype.readPendingObjects = function()
         // If any entries remain in the patch map, the sender has sent an index for an object, but failed
         // to supply the object.
         //
-        throw new Ice.MarshalException("index for class received, but no instance");
+        throw new LocalEx.MarshalException("index for class received, but no instance");
     }
 };
 
 EncapsDecoder10.prototype.readInstance = function()
 {
-    var index = this._stream.readInt();
+    var index = this._stream.readInt(),
+        mostDerivedId,
+        v = null;
 
     if(index <= 0)
     {
-        throw new Ice.MarshalException("invalid object id");
+        throw new LocalEx.MarshalException("invalid object id");
     }
 
     this._sliceType = SliceType.ObjectSlice;
@@ -493,17 +560,16 @@ EncapsDecoder10.prototype.readInstance = function()
     // Read the first slice header.
     //
     this.startSlice();
-    var mostDerivedId = this._typeId;
-    var v = null;
+    mostDerivedId = this._typeId;
     while(true)
     {
         //
         // For the 1.0 encoding, the type ID for the base Object class
         // marks the last slice.
         //
-        if(this._typeId.equals(Ice.ObjectImpl.ice_staticId()))
+        if(this._typeId.equals(IceObject.ice_staticId()))
         {
-            throw new Ice.NoObjectFactoryException("", mostDerivedId);
+            throw new LocalEx.NoObjectFactoryException("", mostDerivedId);
         }
 
         v = this.newInstance(this._typeId);
@@ -521,7 +587,7 @@ EncapsDecoder10.prototype.readInstance = function()
         //
         if(!this._sliceObjects)
         {
-            throw new Ice.NoObjectFactoryException("object slicing is disabled", _typeId);
+            throw new LocalEx.NoObjectFactoryException("object slicing is disabled", this._typeId);
         }
 
         //
@@ -547,12 +613,15 @@ var EncapsDecoder11 = function(stream, encaps, sliceObjects, f)
 
 EncapsDecoder11.prototype.readObject = function(patcher)
 {
-    var index = this._stream.readSize();
+    var index = this._stream.readSize(),
+        e; // IndirectPatchEntry
+        
     if(index < 0)
     {
-        throw new Ice.MarshalException("invalid object id");
+        throw new LocalEx.MarshalException("invalid object id");
     }
-    else if(index === 0)
+    
+    if(index === 0)
     {
         if(patcher !== null)
         {
@@ -578,7 +647,7 @@ EncapsDecoder11.prototype.readObject = function(patcher)
             {
                 this._current.indirectPatchList = []; //java.util.ArrayDeque<IndirectPatchEntry>();
             }
-            var e = new IndirectPatchEntry();
+            e = new IndirectPatchEntry();
             e.index = index - 1;
             e.patcher = patcher;
             this._current.indirectPatchList.push(e);
@@ -593,6 +662,9 @@ EncapsDecoder11.prototype.readObject = function(patcher)
 EncapsDecoder11.prototype.throwException = function(factory)
 {
     Debug.assert(this._current === null);
+    
+    var mostDerivedId,
+        userEx;
 
     this.push(SliceType.ExceptionSlice);
 
@@ -600,10 +672,10 @@ EncapsDecoder11.prototype.throwException = function(factory)
     // Read the first slice header.
     //
     this.startSlice();
-    var mostDerivedId = this._current.typeId;
+    mostDerivedId = this._current.typeId;
     while(true)
     {
-        var userEx = null;
+        userEx = null;
 
         //
         // Use a factory if one was provided.
@@ -646,12 +718,9 @@ EncapsDecoder11.prototype.throwException = function(factory)
         {
             if(mostDerivedId.indexOf("::") === 0)
             {
-                throw new Ice.UnknownUserException(mostDerivedId.substr(2));
+                throw new LocalEx.UnknownUserException(mostDerivedId.substr(2));
             }
-            else
-            {
-                throw new Ice.UnknownUserException(mostDerivedId);
-            }
+            throw new LocalEx.UnknownUserException(mostDerivedId);
         }
 
         this.startSlice();
@@ -699,16 +768,16 @@ EncapsDecoder11.prototype.startSlice = function()
     // string or as an index, for exceptions it's always encoded as a
     // string.
     //
-    if(this._current.sliceType == SliceType.ObjectSlice)
+    if(this._current.sliceType === SliceType.ObjectSlice)
     {
         if((this._current.sliceFlags & FLAG_HAS_TYPE_ID_COMPACT) === FLAG_HAS_TYPE_ID_COMPACT) // Must be checked 1st!
         {
             this._current.typeId = "";
-            this._current.compactId = _stream.readSize();
+            this._current.compactId = this._stream.readSize();
         }
         else if((this._current.sliceFlags & (FLAG_HAS_TYPE_ID_INDEX | FLAG_HAS_TYPE_ID_STRING)) !== 0)
         {
-            this._current.typeId = readTypeId((this._current.sliceFlags & FLAG_HAS_TYPE_ID_INDEX) !== 0);
+            this._current.typeId = this.readTypeId((this._current.sliceFlags & FLAG_HAS_TYPE_ID_INDEX) !== 0);
             this._current.compactId = -1;
         }
         else
@@ -732,7 +801,7 @@ EncapsDecoder11.prototype.startSlice = function()
         this._current.sliceSize = this._stream.readInt();
         if(this._current.sliceSize < 4)
         {
-            throw new Ice.UnmarshalOutOfBoundsException();
+            throw new LocalEx.UnmarshalOutOfBoundsException();
         }
     }
     else
@@ -745,7 +814,10 @@ EncapsDecoder11.prototype.startSlice = function()
 
 EncapsDecoder11.prototype.endSlice = function()
 {
-    var i, length;
+    var e,
+        i, 
+        indirectionTable = [],
+        length;
     
     if((this._current.sliceFlags & FLAG_HAS_OPTIONAL_MEMBERS) !== 0)
     {
@@ -761,8 +833,8 @@ EncapsDecoder11.prototype.endSlice = function()
         //
         // The table is written as a sequence<size> to conserve space.
         //
-        var indirectionTable = new Array(this._stream.readAndCheckSeqSize(1));
-        for(i = 0, length = indirectionTable.length; i < length; ++i)
+        length = this._stream.readAndCheckSeqSize(1);
+        for(i = 0; i < length; ++i)
         {
             indirectionTable[i] = this.readInstance(this._stream.readSize(), null);
         }        
@@ -774,12 +846,12 @@ EncapsDecoder11.prototype.endSlice = function()
         //
         if(indirectionTable.length === 0)
         {
-            throw new Ice.MarshalException("empty indirection table");
+            throw new LocalEx.MarshalException("empty indirection table");
         }
         if((this._current.indirectPatchList === null || this._current.indirectPatchList.isEmpty()) &&
            (this._current.sliceFlags & FLAG_HAS_OPTIONAL_MEMBERS) === 0)
         {
-            throw new Ice.MarshalException("no references to indirection table");
+            throw new LocalEx.MarshalException("no references to indirection table");
         }
 
         //
@@ -789,11 +861,11 @@ EncapsDecoder11.prototype.endSlice = function()
         {
             for(i = 0, length = this._current.indirectPatchList.length; i < length; ++i)
             {
-                var e = this._current.indirectPatchList[i];
+                e = this._current.indirectPatchList[i];
                 Debug.assert(e.index >= 0);
                 if(e.index >= indirectionTable.length)
                 {
-                    throw new Ice.MarshalException("indirection out of range");
+                    throw new LocalEx.MarshalException("indirection out of range");
                 }
                 this.addPatchEntry(indirectionTable[e.index], e.patcher);
             }
@@ -804,10 +876,16 @@ EncapsDecoder11.prototype.endSlice = function()
 
 EncapsDecoder11.prototype.skipSlice = function()
 {
+    var logger,
+        slicingCat,
+        start,
+        info, b, end, dataEnd,
+        i, length, indirectionTable = [];
+        
     if(this._stream.instance().traceLevels().slicing > 0)
     {
-        var logger = this._stream.instance().initializationData().logger;
-        var slicingCat = _stream.instance().traceLevels().slicingCat;
+        logger = this._stream.instance().initializationData().logger;
+        slicingCat = this._stream.instance().traceLevels().slicingCat;
         if(this._current.sliceType === SliceType.ExceptionSlice)
         {
             TraceUtil.traceSlicing("exception", this._current.typeId, slicingCat, logger);
@@ -818,7 +896,7 @@ EncapsDecoder11.prototype.skipSlice = function()
         }
     }
 
-    var start = this._stream.pos();
+    start = this._stream.pos();
 
     if((this._current.sliceFlags & FLAG_HAS_SLICE_SIZE) !== 0)
     {
@@ -829,35 +907,31 @@ EncapsDecoder11.prototype.skipSlice = function()
     {
         if(this._current.sliceType === SliceType.ObjectSlice)
         {
-            throw new Ice.NoObjectFactoryException(
+            throw new LocalEx.NoObjectFactoryException(
                 "compact format prevents slicing (the sender should use the sliced format instead)", 
                 this._current.typeId);
         }
-        else
+
+        if(this._current.typeId.startsWith("::"))
         {
-            if(this._current.typeId.startsWith("::"))
-            {
-                throw new Ice.UnknownUserException(this._current.typeId.substring(2));
-            }
-            else
-            {
-                throw new Ice.UnknownUserException(this._current.typeId);
-            }
+            throw new LocalEx.UnknownUserException(this._current.typeId.substring(2));
         }
+
+        throw new LocalEx.UnknownUserException(this._current.typeId);
     }
 
     //
     // Preserve this slice.
     //
-    var info = new Ice.SliceInfo();
+    info = new SliceInfo();
     info.typeId = this._current.typeId;
     info.compactId = this._current.compactId;
-    info.hasOptionalMembers = (_current.sliceFlags & FLAG_HAS_OPTIONAL_MEMBERS) !== 0;
+    info.hasOptionalMembers = (this._current.sliceFlags & FLAG_HAS_OPTIONAL_MEMBERS) !== 0;
     info.isLastSlice = (this._current.sliceFlags & FLAG_IS_LAST_SLICE) !== 0;
     
-    var b = this._stream.b;
-    var end = b.position();
-    var dataEnd = end;
+    b = this._stream.b;
+    end = b.position();
+    dataEnd = end;
     if(info.hasOptionalMembers)
     {
         //
@@ -888,10 +962,8 @@ EncapsDecoder11.prototype.skipSlice = function()
 
     if((this._current.sliceFlags & FLAG_HAS_INDIRECTION_TABLE) !== 0)
     {
-        var indirectionTable = new Array(_stream.readAndCheckSeqSize(1));
-        
-        var i, length;
-        for(i = 0, length = indirectionTable.length; i < length; ++i)
+        length = this._stream.readAndCheckSeqSize(1);
+        for(i = 0; i < length; ++i)
         {
             this.indirectionTable[i] = this.readInstance(this._stream.readSize(), null);
         }
@@ -911,7 +983,8 @@ EncapsDecoder11.prototype.readOpt = function(readTag, expectedFormat)
     {
         return this._stream.readOptImpl(readTag, expectedFormat);
     }
-    else if((this._current.sliceFlags & FLAG_HAS_OPTIONAL_MEMBERS) !== 0)
+    
+    if((this._current.sliceFlags & FLAG_HAS_OPTIONAL_MEMBERS) !== 0)
     {
         return this._stream.readOptImpl(readTag, expectedFormat);
     }
@@ -921,6 +994,10 @@ EncapsDecoder11.prototype.readOpt = function(readTag, expectedFormat)
 EncapsDecoder11.prototype.readInstance = function(index, patcher)
 {
     Debug.assert(index > 0);
+    
+    var mostDerivedId,
+        v = null,
+        compactIdResolver;
     
     if(index > 1)
     {
@@ -944,9 +1021,8 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
     // Read the first slice header.
     //
     this.startSlice();
-    var mostDerivedId = this._current.typeId;
-    var v = null;
-    var compactIdResolver = this._stream.instance().initializationData().compactIdResolver;
+    mostDerivedId = this._current.typeId;
+    compactIdResolver = this._stream.instance().initializationData().compactIdResolver;
     while(true)
     {
         if(this._current.compactId >= 0)
@@ -963,15 +1039,12 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
                 }
                 catch(ex)
                 {
-                    if(ex instanceof Ice.LocalException)
+                    if(ex instanceof LocalEx.LocalException)
                     {
                         throw ex;
                     }
-                    else
-                    {
-                        throw new Ice.MarshalException("exception in CompactIdResolver for ID " + 
-                                                       this._current.compactId, ex);
-                    }
+                    throw new LocalEx.MarshalException("exception in CompactIdResolver for ID " + 
+                                                    this._current.compactId, ex);
                 }
             }
             if(this._current.typeId.length() === 0)
@@ -998,7 +1071,7 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
         //
         if(!this._sliceObjects)
         {
-            throw new Ice.NoObjectFactoryException("object slicing is disabled", this._current.typeId);
+            throw new LocalEx.NoObjectFactoryException("object slicing is disabled", this._current.typeId);
         }
 
         //
@@ -1017,10 +1090,10 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
             // We pass the "::Ice::Object" ID to indicate that this is the
             // last chance to preserve the object.
             //
-            v = this.newInstance(Ice.ObjectImpl.ice_staticId());
+            v = this.newInstance(IceObject.ice_staticId());
             if(v === null)
             {
-                v = new Ice.UnknownSlicedObject(mostDerivedId);
+                v = new LocalEx.UnknownSlicedObject(mostDerivedId);
             }
 
             break;
@@ -1040,7 +1113,7 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
         // If any entries remain in the patch map, the sender has sent an index for an object, but failed
         // to supply the object.
         //
-        throw new Ice.MarshalException("index for class received, but no instance");
+        throw new LocalEx.MarshalException("index for class received, but no instance");
     }
 
     if(patcher !== null)
@@ -1052,6 +1125,8 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
 
 EncapsDecoder11.prototype.readSlicedData = function()
 {
+    var n, table, info, j, length;
+    
     if(this._current.slices === null) // No preserved slices.
     {
         return null;
@@ -1062,7 +1137,7 @@ EncapsDecoder11.prototype.readSlicedData = function()
     // in _slices.
     //
     Debug.assert(this._current.slices.size() === this._current.indirectionTables.size());
-    for(var n = 0; n < this._current.slices.size(); ++n)
+    for(n = 0; n < this._current.slices.size(); ++n)
     {
         //
         // We use the "objects" list in SliceInfo to hold references
@@ -1070,17 +1145,18 @@ EncapsDecoder11.prototype.readSlicedData = function()
         // been read yet in the case of a circular reference to an
         // enclosing object.
         //
-        var table = this._current.indirectionTables.get(n);
-        var info = this._current.slices.get(n);
-        info.objects = new Array(table !== null ? table.length : 0);
-        for(var j = 0; j < info.objects.length; ++j)
+        table = this._current.indirectionTables.get(n);
+        info = this._current.slices.get(n);
+        info.objects = [];
+        length = table !== null ? table.length : 0;
+        for(j = 0; j < length; ++j)
         {
-            this.addPatchEntry(table[j], new SequencePatcher(info.objects, Ice.Object, 
-                                                             Ice.ObjectImpl.ice_staticId(), j));
+            this.addPatchEntry(table[j], new SequencePatcher(info.objects, IceObject, 
+                                                             IceObject.ice_staticId(), j));
         }
     }
 
-    return new Ice.SlicedData(this._current.slices);
+    return new SlicedData(this._current.slices);
 };
 
 EncapsDecoder11.prototype.push = function(sliceType)
@@ -1097,22 +1173,6 @@ EncapsDecoder11.prototype.push = function(sliceType)
     this._current.skipFirstSlice = false;
 };
 
-var IndirectPatchEntry = function(index, patcher)
-{
-    this.index = index;
-    this.patcher = patcher;
-};
-
-var InstanceData = function(previous)
-{
-    if(previous !== null)
-    {
-        previous.next = this;
-    }
-    this.previous = previous;
-    this.next = null;
-};
-
 var EncapsEncoder = function(stream, encaps)
 {
     this._stream = stream;
@@ -1121,13 +1181,14 @@ var EncapsEncoder = function(stream, encaps)
     this._marshaledMap = new HashMap(); //java.util.IdentityHashMap<Ice.Object, Integer>();
 };
 
-EncapsEncoder.prototype.writeOpt = function(tag, format)
+EncapsEncoder.prototype.writeOpt = function()
 {
     return false;
 };
 
 EncapsEncoder.prototype.writePendingObjects = function()
 {
+    return undefined;
 };
 
 EncapsEncoder.prototype.registerTypeId = function(typeId)
@@ -1142,11 +1203,8 @@ EncapsEncoder.prototype.registerTypeId = function(typeId)
     {
         return p;
     }
-    else
-    {
-        this._typeIdMap.put(typeId, ++_typeIdIndex);
-        return -1;
-    }
+    this._typeIdMap.put(typeId, ++this._typeIdIndex);
+    return -1;
 };
 
 var EncapsEncoder10 = function(stream, encaps)
@@ -1184,14 +1242,14 @@ EncapsEncoder10.prototype.writeUserException = function(v)
     //
     var usesClasses = v.__usesClasses();
     this._stream.writeBool(usesClasses);
-    v.__write(_stream);
+    v.__write(this._stream);
     if(usesClasses)
     {
         this.writePendingObjects();
     }
 };
 
-EncapsEncoder10.prototype.startInstance = function(sliceType, sliceData)
+EncapsEncoder10.prototype.startInstance = function(sliceType)
 {
     this._sliceType = sliceType;
 };
@@ -1203,14 +1261,14 @@ EncapsEncoder10.prototype.endInstance = function()
         //
         // Write the Object slice.
         //
-        this.startSlice(Ice.ObjectImpl.ice_staticId(), -1, true);
+        this.startSlice(IceObject.ice_staticId(), -1, true);
         this._stream.writeSize(0); // For compatibility with the old AFM.
         this.endSlice();
     }
     this._sliceType = SliceType.NoSlice;
 };
 
-EncapsEncoder10.prototype.startSlice = function(typeId, compactId, last)
+EncapsEncoder10.prototype.startSlice = function(typeId)
 {
     //
     // For object slices, encode a boolean to indicate how the type ID
@@ -1252,27 +1310,29 @@ EncapsEncoder10.prototype.endSlice = function()
 
 EncapsEncoder10.prototype.writePendingObjects = function()
 {
-    var self = this;
-    var writeCB = function(key, value)
-    {
-        //
-        // Ask the instance to marshal itself. Any new class
-        // instances that are triggered by the classes marshaled
-        // are added to toBeMarshaledMap.
-        //
-        self._stream.writeInt(value);
+    var self = this,
+        writeCB = function(key, value)
+                    {
+                        //
+                        // Ask the instance to marshal itself. Any new class
+                        // instances that are triggered by the classes marshaled
+                        // are added to toBeMarshaledMap.
+                        //
+                        self._stream.writeInt(value);
 
-        try
-        {
-            key.ice_preMarshal();
-        }
-        catch(ex)
-        {
-            self._stream.instance().initializationData().logger.warning("exception raised by ice_preMarshal:\n" + Ex.toString(ex));
-        }
+                        try
+                        {
+                            key.ice_preMarshal();
+                        }
+                        catch(ex)
+                        {
+                            self._stream.instance().initializationData().logger.warning(
+                                "exception raised by ice_preMarshal:\n" + Ex.toString(ex));
+                        }
 
-        key.__write(self._stream);
-    };
+                        key.__write(self._stream);
+                    },
+        savedMap;
     
     while(this._toBeMarshaledMap.size() > 0)
     {
@@ -1284,7 +1344,7 @@ EncapsEncoder10.prototype.writePendingObjects = function()
         //
         this._marshaledMap.putAll(this._toBeMarshaledMap);
 
-        var savedMap = this._toBeMarshaledMap;
+        savedMap = this._toBeMarshaledMap;
         this._toBeMarshaledMap = new HashMap(); //java.util.IdentityHashMap<Ice.Object, Integer>();
         this._stream.writeSize(savedMap.size());
         savedMap.forEach(writeCB);
@@ -1332,11 +1392,12 @@ var EncapsEncoder11 = function(stream, encaps)
 
 EncapsEncoder11.prototype.writeObject = function(v)
 {
+    var index, idx;
     if(v === null)
     {
         this._stream.writeSize(0);
     }
-    else if(this._current !== null && this._encaps.format === Ice.FormatType.SlicedFormat)
+    else if(this._current !== null && this._encaps.format === FormatType.SlicedFormat)
     {
         if(this._current.indirectionTable === null) // Lazy initialization
         {
@@ -1351,11 +1412,11 @@ EncapsEncoder11.prototype.writeObject = function(v)
         // each slice and is always read (even if the Slice is
         // unknown).
         // 
-        var index = this._current.indirectionMap.get(v);
+        index = this._current.indirectionMap.get(v);
         if(index === null)
         {
             this._current.indirectionTable.add(v);
-            var idx = this._current.indirectionTable.size(); // Position + 1 (0 is reserved for nil)
+            idx = this._current.indirectionTable.size(); // Position + 1 (0 is reserved for nil)
             this._current.indirectionMap.put(v, idx);
             this._stream.writeSize(idx); 
         }
@@ -1383,7 +1444,7 @@ EncapsEncoder11.prototype.startInstance = function(sliceType, data)
     }
     else
     {
-        this._current = _current.next === null ? new InstanceData(this._current) : this._current.next;
+        this._current = this._current.next === null ? new InstanceData(this._current) : this._current.next;
     }
     this._current.sliceType = sliceType;
     this._current.firstSlice = true;
@@ -1407,7 +1468,7 @@ EncapsEncoder11.prototype.startSlice = function(typeId, compactId, last)
     this._current.sliceFlagsPos = this._stream.pos();
 
     this._current.sliceFlags = 0;
-    if(this._encaps.format === Ice.FormatType.SlicedFormat)
+    if(this._encaps.format === FormatType.SlicedFormat)
     {
         this._current.sliceFlags |= FLAG_HAS_SLICE_SIZE; // Encode the slice size if using the sliced format.
     }
@@ -1429,7 +1490,7 @@ EncapsEncoder11.prototype.startSlice = function(typeId, compactId, last)
         // Encode the type ID (only in the first slice for the compact
         // encoding).
         // 
-        if(this._encaps.format === Ice.FormatType.SlicedFormat || this._current.firstSlice)
+        if(this._encaps.format === FormatType.SlicedFormat || this._current.firstSlice)
         {
             if(compactId >= 0)
             {
@@ -1468,6 +1529,8 @@ EncapsEncoder11.prototype.startSlice = function(typeId, compactId, last)
 
 EncapsEncoder11.prototype.endSlice = function()
 {
+    var sz, i, length;
+    
     //
     // Write the optional member end marker if some optional members
     // were encoded. Note that the optional members are encoded before
@@ -1481,10 +1544,10 @@ EncapsEncoder11.prototype.endSlice = function()
     //
     // Write the slice length if necessary.
     //
-    if((_current.sliceFlags & FLAG_HAS_SLICE_SIZE) !== 0)
+    if((this._current.sliceFlags & FLAG_HAS_SLICE_SIZE) !== 0)
     {
-        var sz = this._stream.pos() - this._current.writeSlice + 4;
-        this._stream.rewriteInt(sz, _current.writeSlice - 4);
+        sz = this._stream.pos() - this._current.writeSlice + 4;
+        this._stream.rewriteInt(sz, this._current.writeSlice - 4);
     }
 
     //
@@ -1492,14 +1555,13 @@ EncapsEncoder11.prototype.endSlice = function()
     //
     if(this._current.indirectionTable !== null && !this._current.indirectionTable.isEmpty())
     {
-        Debug.assert(this._encaps.format === Ice.FormatType.SlicedFormat);
+        Debug.assert(this._encaps.format === FormatType.SlicedFormat);
         this._current.sliceFlags |= FLAG_HAS_INDIRECTION_TABLE;
 
         //
         // Write the indirection object table.
         //
         this._stream.writeSize(this._current.indirectionTable.length);
-        var i, length;
         for(i = 0, length = this._current.indirectionTable.length; i < length; ++i)
         {
             this.writeInstance(this._current.indirectionTable[i]);
@@ -1520,18 +1582,14 @@ EncapsEncoder11.prototype.writeOpt = function(tag, format)
     {
         return this._stream.writeOptImpl(tag, format);
     }
-    else
+    
+    if(this._stream.writeOptImpl(tag, format))
     {
-        if(this._stream.writeOptImpl(tag, format))
-        {
-            this._current.sliceFlags |= FLAG_HAS_OPTIONAL_MEMBERS;
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        this._current.sliceFlags |= FLAG_HAS_OPTIONAL_MEMBERS;
+        return true;
     }
+    
+    return false;
 };
 
 EncapsEncoder11.prototype.writeSlicedData = function(slicedData)
@@ -1544,13 +1602,15 @@ EncapsEncoder11.prototype.writeSlicedData = function(slicedData)
     // essentially "slices" the object into the most-derived type
     // known by the sender.
     //
-    if(this._encaps.format !== Ice.FormatType.SlicedFormat)
+    if(this._encaps.format !== FormatType.SlicedFormat)
     {
         return;
     }
 
-    var i, length, info;
-    for(i = 0, length = slicedData.slices.length; i < length; ++i)
+    var i, ii, info,
+        j, jj;
+        
+    for(i = 0, ii = slicedData.slices.length; i < ii; ++i)
     {
         info = slicedData.slices[i];
         this.startSlice(info.typeId, info.compactId, info.isLastSlice);
@@ -1576,8 +1636,7 @@ EncapsEncoder11.prototype.writeSlicedData = function(slicedData)
                 this._current.indirectionMap = new HashMap(); //java.util.IdentityHashMap<Ice.Object, Integer>();
             }
             
-            var j, jlength;
-            for(j = 0, jlength = info.objects.length; j < jlength; ++j)
+            for(j = 0, jj = info.objects.length; j < jj; ++j)
             {
                 this._current.indirectionTable.add(info.objects[j]);
             }
@@ -1620,18 +1679,9 @@ EncapsEncoder11.prototype.writeInstance = function(v)
     v.__write(this._stream);
 };
 
-var InstanceData = function(previous)
-{
-    if(previous !== null)
-    {
-        previous.next = this;
-    }
-    this.previous = previous;
-    this.next = null;
-};
-
 var ReadEncaps = function()
 {
+    return undefined;
 };
 
 ReadEncaps.prototype.reset = function()
@@ -1642,12 +1692,13 @@ ReadEncaps.prototype.reset = function()
 ReadEncaps.prototype.setEncoding = function(encoding)
 {
     this.encoding = encoding;
-    encoding_1_0 = encoding.equals(Version.Encoding_1_0);
+    this.encoding_1_0 = encoding.equals(Version.Encoding_1_0);
 };
 
 
 var WriteEncaps = function()
 {
+    return undefined;
 };
 
 WriteEncaps.prototype.reset = function()
@@ -1658,7 +1709,7 @@ WriteEncaps.prototype.reset = function()
 WriteEncaps.prototype.setEncoding = function(encoding)
 {
     this.encoding = encoding;
-    encoding_1_0 = encoding.equals(Version.Encoding_1_0);
+    this.encoding_1_0 = encoding.equals(Version.Encoding_1_0);
 };
 
 var BasicStream = function(instance, encoding, unlimited)
@@ -1725,12 +1776,14 @@ BasicStream.prototype.clear = function()
 BasicStream.prototype.swap = function(other)
 {
     Debug.assert(this._instance === other._instance);
+    
+    var tmpBuf, tmpClosure, tmpUnlimited, tmpStartSeq, tmpMinSeqSize, tmpSizePos;
 
-    var tmpBuf = other._buf;
+    tmpBuf = other._buf;
     other._buf = this._buf;
     this._buf = tmpBuf;
 
-    var tmpClosure = other._closure;
+    tmpClosure = other._closure;
     other._closure = this._closure;
     this._closure = tmpClosure;
 
@@ -1742,19 +1795,19 @@ BasicStream.prototype.swap = function(other)
     this.resetEncaps();
     other.resetEncaps();
 
-    var tmpUnlimited = other._unlimited;
+    tmpUnlimited = other._unlimited;
     other._unlimited = this._unlimited;
     this._unlimited = tmpUnlimited;
 
-    var tmpStartSeq = other._startSeq;
+    tmpStartSeq = other._startSeq;
     other._startSeq = this._startSeq;
     this._startSeq = tmpStartSeq;
 
-    var tmpMinSeqSize = other._minSeqSize;
+    tmpMinSeqSize = other._minSeqSize;
     other._minSeqSize = this._minSeqSize;
     this._minSeqSize = tmpMinSeqSize;
 
-    var tmpSizePos = other._sizePos;
+    tmpSizePos = other._sizePos;
     other._sizePos = this._sizePos;
     this._sizePos = tmpSizePos;
 };
@@ -1891,11 +1944,14 @@ BasicStream.prototype.endWriteEncaps = function()
     Debug.assert(this._writeEncapsStack !== null);
 
     // Size includes size and version.
-    var start = this._writeEncapsStack.start;
-    var sz = this_buf.size() - start;
-    this._buf.b.putInt(start, sz);
+    var start = this._writeEncapsStack.start,
+        sz,
+        curr;
+        
+    sz = this._buf.limit() - start;
+    this._buf.putIntAt(start, sz);
 
-    var curr = this._writeEncapsStack;
+    curr = this._writeEncapsStack;
     this._writeEncapsStack = curr.next;
     curr.next = this._writeEncapsCache;
     this._writeEncapsCache = curr;
@@ -1935,7 +1991,9 @@ BasicStream.prototype.getWriteEncoding = function()
 
 BasicStream.prototype.startReadEncaps = function()
 {
-    var curr = this._readEncapsCache;
+    var curr = this._readEncapsCache,
+        encoding,
+        sz;
     if(curr !== null)
     {
         curr.reset();
@@ -1957,7 +2015,7 @@ BasicStream.prototype.startReadEncaps = function()
     // stream. If I use an Int, it is always 4 bytes. For
     // readSize()/writeSize(), it could be 1 or 5 bytes.
     //
-    var sz = this.readInt();
+    sz = this.readInt();
     if(sz < 6)
     {
         throw new LocalEx.UnmarshalOutOfBoundsException();
@@ -1968,7 +2026,7 @@ BasicStream.prototype.startReadEncaps = function()
     }
     this._readEncapsStack.sz = sz;
 
-    var encoding = new Ver.EncodingVersion();
+    encoding = new Version.EncodingVersion();
     encoding.__read(this);
     Protocol.checkSupportedEncoding(encoding); // Make sure the encoding is supported.
     this._readEncapsStack.setEncoding(encoding);
@@ -1990,7 +2048,7 @@ BasicStream.prototype.endReadEncaps = function()
     }
     else if(this._buf.b.position() !== this._readEncapsStack.start + this._readEncapsStack.sz)
     {
-        if(this._buf.b.position() + 1 != this._readEncapsStack.start + this._readEncapsStack.sz)
+        if(this._buf.b.position() + 1 !== this._readEncapsStack.start + this._readEncapsStack.sz)
         {
             throw new LocalEx.EncapsulationException();
         }
@@ -2009,7 +2067,7 @@ BasicStream.prototype.endReadEncaps = function()
         }
         catch(java.nio.BufferUnderflowException ex)
         {
-            throw new Ice.UnmarshalOutOfBoundsException();
+            throw new LocalEx.UnmarshalOutOfBoundsException();
         }*/
     }
 
@@ -2022,13 +2080,14 @@ BasicStream.prototype.endReadEncaps = function()
 
 BasicStream.prototype.skipEmptyEncaps = function(encoding)
 {
-    var sz = readInt();
+    var sz = this.readInt(),
+        pos;
     if(sz !== 6)
     {
         throw new LocalEx.EncapsulationException();
     }
 
-    var pos = this._buf.b.position();
+    pos = this._buf.b.position();
     if(pos + 2 > this._buf.size())
     {
         throw new LocalEx.UnmarshalOutOfBoundsException();
@@ -2040,9 +2099,9 @@ BasicStream.prototype.skipEmptyEncaps = function(encoding)
     }
     else
     {
-        this._buf.b.position(pos + 2);
+        this._buf.position(pos + 2);
     }
-}
+};
 
 BasicStream.prototype.endReadEncapsChecked = function() // Used by public stream API.
 {
@@ -2069,11 +2128,11 @@ BasicStream.prototype.readEncaps = function(encoding)
     if(encoding !== null)
     {
         encoding.__read(this);
-        this._buf.b.position(this._buf.b.position() - 6);
+        this._buf.position = this._buf.position - 6;
     }
     else
     {
-        this._buf.b.position(_buf.b.position() - 4);
+        this._buf.position = this._buf.position - 4;
     }
 
     //TODO
@@ -2086,13 +2145,13 @@ BasicStream.prototype.readEncaps = function(encoding)
     }
     catch(java.nio.BufferUnderflowException ex)
     {
-        throw new Ice.UnmarshalOutOfBoundsException();
+        throw new LocalEx.UnmarshalOutOfBoundsException();
     }*/
 };
 
 BasicStream.prototype.getReadEncoding = function()
 {
-    return this._readEncapsStack !== null ? this._readEncapsStack.encoding : _encoding;
+    return this._readEncapsStack !== null ? this._readEncapsStack.encoding : this._encoding;
 };
 
 BasicStream.prototype.getReadEncapsSize = function()
@@ -2103,19 +2162,21 @@ BasicStream.prototype.getReadEncapsSize = function()
 
 BasicStream.prototype.skipEncaps = function()
 {
-    var sz = this.readInt();
+    var sz = this.readInt(),
+        encoding;
     if(sz < 6)
     {
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-    var encoding = new Ver.EncodingVersion();
+    encoding = new Version.EncodingVersion();
     encoding.__read(this);
     try
     {
-        _buf.b.position(_buf.b.position() + sz - 6);
+        this._buf.position = this._buf.position + sz - 6;
     }
     catch(ex)
     {
+        //TODO What exception can be throw here?
         Debug.assert(ex instanceof LocalEx.IllegalArgumentException);
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
@@ -2158,7 +2219,8 @@ BasicStream.prototype.readPendingObjects = function()
     {
         this._readEncapsStack.decoder.readPendingObjects();
     }
-    else if(this._readEncapsStack !== null ? this._readEncapsStack.encoding_1_0 : this._encoding.equals(Protocol.Encoding_1_0))
+    else if((this._readEncapsStack !== null && this._readEncapsStack.encoding_1_0) ||
+            (this._readEncapsStack === null && this._encoding.equals(Protocol.Encoding_1_0)))
     {
         //
         // If using the 1.0 encoding and no objects were read, we
@@ -2179,7 +2241,8 @@ BasicStream.prototype.writePendingObjects = function()
     {
         this._writeEncapsStack.encoder.writePendingObjects();
     }
-    else if(this._writeEncapsStack !== null ? this._writeEncapsStack.encoding_1_0 : this._encoding.equals(Protocol.Encoding_1_0))
+    else if((this._writeEncapsStack !== null && this._writeEncapsStack.encoding_1_0) ||
+            (this._writeEncapsStack === null && this._encoding.equals(Protocol.Encoding_1_0)))
     {
         //
         // If using the 1.0 encoding and no objects were written, we
@@ -2212,22 +2275,20 @@ BasicStream.prototype.writeSize = function(v)
 
 BasicStream.prototype.readSize = function()
 {
+    var b, v;
     try
     {
-        var b = this._buf.get();
+        b = this._buf.get();
         if(b === -1)
         {
-            var v = this._buf.getInt();
+            v = this._buf.getInt();
             if(v < 0)
             {
                 throw new LocalEx.UnmarshalOutOfBoundsException();
             }
             return v;
         }
-        else
-        {
-            return b < 0 ? b + 256 : b;
-        }
+        return b < 0 ? b + 256 : b;
     }
     catch(ex)
     {
@@ -2264,7 +2325,7 @@ BasicStream.prototype.readAndCheckSeqSize = function(minSize)
     //
     if(this._startSeq === -1 || this._buf.position > (this._startSeq + this._minSeqSize))
     {
-        this._startSeq = _buf.position;
+        this._startSeq = this._buf.position;
         this._minSeqSize = sz * minSize;
     }
     else
@@ -2277,7 +2338,7 @@ BasicStream.prototype.readAndCheckSeqSize = function(minSize)
     // possibly enclosed sequences), something is wrong with the marshalled
     // data: it's claiming having more data that what is possible to read.
     //
-    if(this._startSeq + _minSeqSize > this._buf.limit)
+    if(this._startSeq + this._minSeqSize > this._buf.limit)
     {
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
@@ -2346,10 +2407,7 @@ BasicStream.prototype.writeOpt = function(tag, format)
     {
         return this._writeEncapsStack.encoder.writeOpt(tag, format);
     }
-    else
-    {
-        return this.writeOptImpl(tag, format);
-    }
+    return this.writeOptImpl(tag, format);
 };
 
 BasicStream.prototype.readOpt = function(tag, expectedFormat)
@@ -2359,13 +2417,10 @@ BasicStream.prototype.readOpt = function(tag, expectedFormat)
     {
         return this._readEncapsStack.decoder.readOpt(tag, expectedFormat);
     }
-    else
-    {
-        return this.readOptImpl(tag, expectedFormat);
-    }
+    return this.readOptImpl(tag, expectedFormat);
 };
 
-BasicStream.prototype.writeByte = function(byte v)
+BasicStream.prototype.writeByte = function(v)
 {
     this._buf.put(v);
 };
@@ -2427,14 +2482,14 @@ BasicStream.prototype.readByte = function()
 {
     try
     {
-        return _buf.get();
+        return this._buf.get();
     }
     catch(ex)
     {
         //TODO assert BufferUnderflowException?
-        throw new Ice.UnmarshalOutOfBoundsException();
+        throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}
+};
 
 /*public void
 readByte(int tag, Ice.ByteOptional v)
@@ -2454,13 +2509,14 @@ BasicStream.prototype.readByteSeq = function()
     try
     {
         var sz = this.readAndCheckSeqSize(1);
-        return _buf.getArray(sz);
+        return this._buf.getArray(sz);
     }
-    catch(java.nio.BufferUnderflowException ex)
+    catch(ex)
     {
-        throw new Ice.UnmarshalOutOfBoundsException();
+        //TODO assert java.nio.BufferUnderflowException 
+        throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}
+};
 
 /*public void
 readByteSeq(int tag, Ice.Optional<byte[]> v)
@@ -2522,10 +2578,11 @@ writeBool(int tag, boolean v)
 BasicStream.prototype.rewriteBool = function(v, dest)
 {
     this._buf.putAt(dest, v ? 1 : 0);
-}
+};
 
 BasicStream.prototype.writeBoolSeq = function(v)
 {
+    var i, length;
     if(v === null)
     {
         this.writeSize(0);
@@ -2533,12 +2590,12 @@ BasicStream.prototype.writeBoolSeq = function(v)
     else
     {
         this.writeSize(v.length);
-        for(var i = 0; i < v.length; ++i)
+        for(i = 0, length = v.length; i < length; ++i)
         {
-            this._buf.put(b ? 1 : 0);
+            this._buf.put(v[i] ? 1 : 0);
         }
     }
-}
+};
 
 /*public void
 writeBoolSeq(int tag, Ice.Optional<boolean[]> v)
@@ -2558,7 +2615,7 @@ writeBoolSeq(int tag, boolean[] v)
     }
 }*/
 
-BasicStream.prototype.readBool = prototype()
+BasicStream.prototype.readBool = function()
 {
     try
     {
@@ -2569,7 +2626,7 @@ BasicStream.prototype.readBool = prototype()
         // TODO assert BufferUnderflowException
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}
+};
 
 //TODO Optionals
 /*public void
@@ -2588,11 +2645,11 @@ readBool(int tag, Ice.BooleanOptional v)
 
 BasicStream.prototype.readBoolSeq = function()
 {
+    var sz, v = [], i;
     try
     {
-        var sz = readAndCheckSeqSize(1);
-        var v = new Array(sz);
-        for(var i = 0; i < sz; ++i)
+        sz = this.readAndCheckSeqSize(1);
+        for(i = 0; i < sz; ++i)
         {
             v[i] = this._buf.get() === 1;
         }
@@ -2603,7 +2660,7 @@ BasicStream.prototype.readBoolSeq = function()
         //TODO assert BufferUnderflowException
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}
+};
 
 //TODO Optionals
 /*public void
@@ -2623,7 +2680,7 @@ readBoolSeq(int tag, Ice.Optional<boolean[]> v)
 BasicStream.prototype.writeShort = function(v)
 {
     this._buf.putShort(v);
-}
+};
 
 // TODO Optionals
 /*public void
@@ -2644,7 +2701,7 @@ writeShort(int tag, short v)
     }
 }*/
 
-BasicStream.prototype.writeShortSeq(v)
+BasicStream.prototype.writeShortSeq = function(v)
 {
     if(v === null)
     {
@@ -2655,7 +2712,7 @@ BasicStream.prototype.writeShortSeq(v)
         this.writeSize(v.length);
         this._buf.putShortArray(v);
     }
-}
+};
 
 /*public void
 writeShortSeq(int tag, Ice.Optional<short[]> v)
@@ -2686,9 +2743,9 @@ BasicStream.prototype.readShort = function()
     catch(ex)
     {
         // TODO assert BufferUnderflowException?
-        throw new Ice.UnmarshalOutOfBoundsException();
+        throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}
+};
 
 // TODO Optionals
 /*public void
@@ -2711,12 +2768,12 @@ BasicStream.prototype.readShortSeq = function()
         var sz = this.readAndCheckSeqSize(2);
         return this._buf.getShortArray(sz);
     }
-    catch(java.nio.BufferUnderflowException ex)
+    catch(ex)
     {
         // TODO assert BufferUnderflowException ?
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}
+};
 
 //TODO Optionals
 /*public void
@@ -2736,7 +2793,7 @@ readShortSeq(int tag, Ice.Optional<short[]> v)
 BasicStream.prototype.writeInt = function(v)
 {
     this._buf.putInt(v);
-}
+};
 
 //TODO Optionals
 /*public void
@@ -2759,8 +2816,8 @@ writeInt(int tag, int v)
 
 BasicStream.prototype.rewriteInt = function(v, dest)
 {
-    this._buf.b.putIntAt(dest, v);
-}
+    this._buf.putIntAt(dest, v);
+};
 
 
 BasicStream.prototype.writeIntSeq = function(v)
@@ -2774,7 +2831,7 @@ BasicStream.prototype.writeIntSeq = function(v)
         this.writeSize(v.length);
         this._buf.putIntArray(v);
     }
-}
+};
 
 //TODO Optionals
 /*public void
@@ -2807,7 +2864,7 @@ BasicStream.prototype.readInt = function()
         //TODO assert BufferUnderflowException 
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}
+};
 
 //TODO Optionals
 /*public void
@@ -2827,15 +2884,15 @@ BasicStream.prototype.readIntSeq = function()
 {
     try
     {
-        var sz = readAndCheckSeqSize(4);
+        var sz = this.readAndCheckSeqSize(4);
         return this._buf.getIntArray(sz);
     }
     catch(ex)
     {
         // TODO assert BufferUnderflowException?
-        throw new Ice.UnmarshalOutOfBoundsException();
+        throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}
+};
 
 //TODO Optionals
 /*public void
@@ -2971,7 +3028,7 @@ readLongSeq(int tag, Ice.Optional<long[]> v)
 BasicStream.prototype.writeFloat = function(v)
 {
     this._buf.putFloat(v);
-}
+};
 
 /*public void
 writeFloat(int tag, Ice.FloatOptional v)
@@ -2991,7 +3048,6 @@ writeFloat(int tag, float v)
     }
 }*/
 
-public void
 BasicStream.prototype.writeFloatSeq = function(v)
 {
     if(v === null)
@@ -3003,7 +3059,7 @@ BasicStream.prototype.writeFloatSeq = function(v)
         this.writeSize(v.length);
         this._buf.putFloatArray(v);
     }
-}
+};
 
 //TODO Optionals
 /*public void
@@ -3029,14 +3085,14 @@ BasicStream.prototype.readFloat = function()
 {
     try
     {
-        return _buf.getFloat();
+        return this._buf.getFloat();
     }
     catch(ex)
     {
         //TODO assert BufferUnderflowException?
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}
+};
 
 //TODO Optionals
 /*public void
@@ -3062,9 +3118,9 @@ BasicStream.prototype.readFloatSeq = function()
     catch(ex)
     {
         // TODO BufferUnderflowException
-        throw new Ice.UnmarshalOutOfBoundsException();
+        throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}
+};
 
 //TODO Optionals
 /*public void
@@ -3084,7 +3140,7 @@ readFloatSeq(int tag, Ice.Optional<float[]> v)
 BasicStream.prototype.writeDouble = function(v)
 {
     this._buf.putDouble(v);
-}
+};
 
 //TODO Optionals
 /*public void
@@ -3116,7 +3172,7 @@ BasicStream.prototype.writeDoubleSeq = function(v)
         this.writeSize(v.length);
         this._buf.putDoubleArray(v);
     }
-}
+};
 
 //TODO Optionals
 /*public void
@@ -3149,7 +3205,7 @@ BasicStream.prototype.readDouble = function()
         //TODO assert BufferUnderflowException
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}
+};
 
 // TODO Optionals
 /*public void
@@ -3177,7 +3233,7 @@ BasicStream.prototype.readDoubleSeq = function()
         //TODO assert BufferUnderflowException?
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}
+};
 
 /*public void
 readDoubleSeq(int tag, Ice.Optional<double[]> v)
@@ -3205,7 +3261,7 @@ BasicStream.prototype.writeString = function(v)
         this._buf.putString(v);
         this.endSize();
     }
-}
+};
 
 //TODO Optionals
 /*public void
@@ -3229,6 +3285,7 @@ writeString(int tag, String v)
 
 BasicStream.prototype.writeStringSeq = function(v)
 {
+    var i, length;
     if(v === null)
     {
         this.writeSize(0);
@@ -3236,12 +3293,12 @@ BasicStream.prototype.writeStringSeq = function(v)
     else
     {
         this.writeSize(v.length);
-        for(var i = 0; i < v.length; ++i)
+        for(i = 0, length = v.length; i < length; ++i)
         {
             this.writeString(v[i]);
         }
     }
-}
+};
 
 // TODO Optionals
 /*public void
@@ -3268,31 +3325,28 @@ BasicStream.prototype.readString = function()
 {
     var len = this.readSize();
 
-    if(len == 0)
+    if(len === 0)
     {
         return "";
     }
-    else
+    //
+    // Check the buffer has enough bytes to read.
+    //
+    if(this._buf.b.remaining < len)
     {
-        //
-        // Check the buffer has enough bytes to read.
-        //
-        if(this._buf.b.remaining < len)
-        {
-            throw new LocalEx.UnmarshalOutOfBoundsException();
-        }
-
-        try
-        {
-            return this._buf.getString(len);
-        }
-        catch(ex)
-        {
-            // TODO assert BufferUnderflowException?
-            throw new LocalEx.UnmarshalOutOfBoundsException();
-        }
+        throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}
+
+    try
+    {
+        return this._buf.getString(len);
+    }
+    catch(ex)
+    {
+        // TODO assert BufferUnderflowException?
+        throw new LocalEx.UnmarshalOutOfBoundsException();
+    }
+};
 
 //TODO Optionals
 /*public void
@@ -3310,14 +3364,15 @@ readString(int tag, Ice.Optional<String> v)
 
 BasicStream.prototype.readStringSeq = function()
 {
-    var sz = this.readAndCheckSeqSize(1);
-    var v = new Array(sz);
-    for(var i = 0; i < sz; ++i)
+    var sz = this.readAndCheckSeqSize(1),
+        v = [],
+        i;
+    for(i = 0; i < sz; ++i)
     {
         v[i] = this.readString();
     }
     return v;
-}
+};
 
 //TODO Optionals
 /*public void
@@ -3337,7 +3392,7 @@ readStringSeq(int tag, Ice.Optional<String[]> v)
 BasicStream.prototype.writeProxy = function(v)
 {
     this._instance.proxyFactory().proxyToStream(v, this);
-}
+};
 
 //TODO Optionals
 /*public void
@@ -3363,7 +3418,7 @@ writeProxy(int tag, Ice.ObjectPrx v)
 BasicStream.prototype.readProxy = function()
 {
     return this._instance.proxyFactory().streamToProxy(this);
-}
+};
 
 /*TODO Optionals
 BasicStream.prototype.readOptionalProxy = function(tag, v)
@@ -3389,7 +3444,7 @@ BasicStream.prototype.writeEnum = function(v, maxValue)
         }
         else if(maxValue < 32767)
         {
-            this.writeShort((v);
+            this.writeShort(v);
         }
         else
         {
@@ -3400,8 +3455,7 @@ BasicStream.prototype.writeEnum = function(v, maxValue)
     {
         this.writeSize(v);
     }
-}
-
+};
 
 BasicStream.prototype.readEnum = function(maxValue)
 {
@@ -3411,27 +3465,21 @@ BasicStream.prototype.readEnum = function(maxValue)
         {
             return this.readByte();
         }
-        else if(maxValue < 32767)
+        
+        if(maxValue < 32767)
         {
             return this.readShort();
         }
-        else
-        {
-            return this.readInt();
-        }
+        return this.readInt();
     }
-    else
-    {
-        return this.readSize();
-    }
-}
-
+    return this.readSize();
+};
 
 BasicStream.prototype.writeObject = function(v)
 {
     this.initWriteEncaps();
     this._writeEncapsStack.encoder.writeObject(v);
-}
+};
 
 //TODO Optionals
 /*public <T extends Ice.Object> void
@@ -3455,7 +3503,7 @@ BasicStream.prototype.readObject = function(patcher)
 {
     this.initReadEncaps();
     this._readEncapsStack.decoder.readObject(patcher);
-}
+};
 
 //TODO Optionals
 /*BasicStream.prototype.readOptionalObject = function(tag, v)
@@ -3476,21 +3524,23 @@ BasicStream.prototype.writeUserException = function(e)
 {
     this.initWriteEncaps();
     this._writeEncapsStack.encoder.writeUserException(e);
-}
+};
 
 BasicStream.prototype.throwException = function(factory)
 {
     this.initReadEncaps();
     this._readEncapsStack.decoder.throwException(factory);
-}
+};
 
 BasicStream.prototype.sliceObjects = function(b)
 {
     this._sliceObjects = b;
-}
+};
 
 BasicStream.prototype.readOptImpl = function(readTag, expectedFormat)
 {
+    var b, v, format, tag, offset;
+    
     if(this.isReadEncoding_1_0())
     {
         return false; // Optional members aren't supported with the 1.0 encoding.
@@ -3503,41 +3553,42 @@ BasicStream.prototype.readOptImpl = function(readTag, expectedFormat)
             return false; // End of encapsulation also indicates end of optionals.
         }
 
-        var b = this.readByte();
-        var v = b < 0 ? b + 256 : b;
+        b = this.readByte();
+        v = b < 0 ? b + 256 : b;
         if(v === OPTIONAL_END_MARKER)
         {
             this._buf.position -= 1; // Rewind.
             return false;
         }
 
-        var format = OptionalFormat.valueOf(v & 0x07); // First 3 bits.
-        var tag = v >> 3;
-        if(tag == 30)
+        format = OptionalFormat.valueOf(v & 0x07); // First 3 bits.
+        tag = v >> 3;
+        if(tag === 30)
         {
             tag = this.readSize();
         }
 
         if(tag > readTag)
         {
-            var offset = tag < 30 ? 1 : (tag < 255 ? 2 : 6); // Rewind
+            offset = tag < 30 ? 1 : (tag < 255 ? 2 : 6); // Rewind
             this._buf.position -= offset;
             return false; // No optional data members with the requested tag.
         }
-        else if(tag < readTag)
+        
+        if(tag < readTag)
         {
             this.skipOpt(format); // Skip optional data members
         }
         else
         {
-            if(format != expectedFormat)
+            if(format !== expectedFormat)
             {
                 throw new LocalEx.MarshalException("invalid optional data member `" + tag + "': unexpected format");
             }
             return true;
         }
     }
-}
+};
 
 BasicStream.prototype.writeOptImpl = function(tag, format)
 {
@@ -3559,57 +3610,42 @@ BasicStream.prototype.writeOptImpl = function(tag, format)
         this.writeSize(tag);
     }
     return true;
-}
+};
 
 BasicStream.prototype.skipOpt = function(format)
 {
     switch(format)
     {
-    case F1:
-    {
-        this.skip(1);
-        break;
+        case OptionalFormat.F1:
+            this.skip(1);
+            break;
+        case OptionalFormat.F2:
+            this.skip(2);
+            break;
+        case OptionalFormat.F4:
+            this.skip(4);
+            break;
+        case OptionalFormat.F8:
+            this.skip(8);
+            break;
+        case OptionalFormat.Size:
+            this.skipSize();
+            break;
+        case OptionalFormat.VSize:
+            this.skip(this.readSize());
+            break;
+        case OptionalFormat.FSize:
+            this.skip(this.readInt());
+            break;
+        case OptionalFormat.Class:
+            this.readObject(null);
+            break;
     }
-    case F2:
-    {
-        this.skip(2);
-        break;
-    }
-    case F4:
-    {
-        this.skip(4);
-        break;
-    }
-    case F8:
-    {
-        this.skip(8);
-        break;
-    }
-    case Size:
-    {
-        this.skipSize();
-        break;
-    }
-    case VSize:
-    {
-        this.skip(this.readSize());
-        break;
-    }
-    case FSize:
-    {
-        this.skip(this.readInt());
-        break;
-    }
-    case Class:
-    {
-        this.readObject(null);
-        break;
-    }
-    }
-}
+};
 
 BasicStream.prototype.skipOpts = function()
 {
+    var b, v, format;
     //
     // Skip remaining un-read optional members.
     //
@@ -3620,30 +3656,30 @@ BasicStream.prototype.skipOpts = function()
             return; // End of encapsulation also indicates end of optionals.
         }
 
-        var b = this.readByte();
-        var v = b < 0 ? b + 256 : b;
+        b = this.readByte();
+        v = b < 0 ? b + 256 : b;
         if(v === OPTIONAL_END_MARKER)
         {
             return;
         }
         
-        var format = OptionalFormat.valueOf(v & 0x07); // Read first 3 bits.
-        if((v >> 3) == 30)
+        format = OptionalFormat.valueOf(v & 0x07); // Read first 3 bits.
+        if((v >> 3) === 30)
         {
             this.skipSize();
         }
         this.skipOpt(format);
     }
-}
+};
 
 BasicStream.prototype.skip = function(size)
 {
     if(size > this._buf.remaining)
     {
-        throw new Ice.UnmarshalOutOfBoundsException();
+        throw new LocalEx.UnmarshalOutOfBoundsException();
     }
     this._buf.position += size;
-}
+};
 
 BasicStream.prototype.skipSize = function()
 {
@@ -3652,41 +3688,41 @@ BasicStream.prototype.skipSize = function()
     {
         this.skip(4);
     }
-}
+};
 
 Object.defineProperty(BasicStream.prototype, "pos", {
-    get: fucntion() { return this._buf.position; },
-    set: fucntion(n) { this._buf.position = n; }
+    get: function() { return this._buf.position; },
+    set: function(n) { this._buf.position = n; }
 });
 
 Object.defineProperty(BasicStream.prototype, "size", {
-    get: fucntion() { return this._buf.limit; }
-}
+    get: function() { return this._buf.limit; }
+});
 
 BasicStream.prototype.isEmpty = function()
 {
     return this._buf.empty();
-}
+};
 
 BasicStream.prototype.expand = function(n)
 {
-    if(!this._unlimited && this._buf != null && this._buf.position + n > this._messageSizeMax)
+    if(!this._unlimited && this._buf !== null && this._buf.position + n > this._messageSizeMax)
     {
         ExUtil.throwMemoryLimitException(this._buf.position + n, this._messageSizeMax);
     }
     this._buf.expand(n);
-}
+};
 
 BasicStream.prototype.createObject = function(id)
 {
-    var obj = null;
+    var obj = null, Class;
 
     try
     {
-        var c = global.__IceClassRegistry__ ? global.__IceClassRegistry__[id] : undefined;
-        if(c)
+        Class = global.__IceClassRegistry__ ? global.__IceClassRegistry__[id] : undefined;
+        if(Class)
         {
-            obj = new c();
+            obj = new Class();
         }
     }
     catch(ex)
@@ -3695,38 +3731,30 @@ BasicStream.prototype.createObject = function(id)
     }
 
     return obj;
-}
+};
 
 BasicStream.prototype.getTypeId = function(compactId)
 {
-    var className = "IceCompactId.TypeId_" + compactId;
-    var c = global.__IceClassRegistry__ ? global.__IceClassRegistry__[className] : undefined;
-    if(c)
-    {
-        return c.typeId;
-    }
-    else
-    {
-        return "";
-    }
-}
+    var Class = global.__IceClassRegistry__ ? global.__IceClassRegistry__["IceCompactId.TypeId_" + compactId] : undefined;
+    return Class ? Class.typeId : ""; 
+};
 
 BasicStream.prototype.isReadEncoding_1_0 = function()
 {
     return this._readEncapsStack !== null ? this._readEncapsStack.encoding_1_0 : this._encoding.equals(Version.Encoding_1_0);
-}
+};
 
 BasicStream.prototype.isWriteEncoding_1_0 = function()
 {
     return this._writeEncapsStack !== null ? this._writeEncapsStack.encoding_1_0 : this._encoding.equals(Version.Encoding_1_0);
-}
+};
 
 BasicStream.prototype.initReadEncaps = function()
 {
     if(this._readEncapsStack === null) // Lazy initialization
     {
         this._readEncapsStack = this._readEncapsCache;
-        if(this._readEncapsStack != null)
+        if(this._readEncapsStack !== null)
         {
             this._readEncapsCache = this._readEncapsCache.next;
         }
@@ -3750,7 +3778,7 @@ BasicStream.prototype.initReadEncaps = function()
             this._readEncapsStack.decoder = new EncapsDecoder11(this, this._readEncapsStack, this._sliceObjects, factoryManager);
         }
     }
-}
+};
 
 BasicStream.prototype.initWriteEncaps = function()
 {
@@ -3768,7 +3796,7 @@ BasicStream.prototype.initWriteEncaps = function()
         this._writeEncapsStack.setEncoding(this._encoding);
     }
 
-    if(_writeEncapsStack.format === FormatType.DefaultFormat)
+    if(this._writeEncapsStack.format === FormatType.DefaultFormat)
     {
         this._writeEncapsStack.format = this._instance.defaultsAndOverrides().defaultFormat;
     }
@@ -3784,26 +3812,26 @@ BasicStream.prototype.initWriteEncaps = function()
             this._writeEncapsStack.encoder = new EncapsEncoder11(this, this._writeEncapsStack);
         }
     }
-}
+};
 
 BasicStream.prototype.createUserException = function(id)
 {
-    var userEx = null;
+    var userEx = null, Class;
 
     try
     {
-        var c = global.__IceExceptionRegistry__ ? global.__IceExceptionRegistry__[id] : undefined;
-        if(c != null)
+        Class = global.__IceExceptionRegistry__ ? global.__IceExceptionRegistry__[id] : undefined;
+        if(Class)
         {
-            userEx = new c();
+            userEx = new Class();
         }
     }
     catch(ex)
     {
-        throw new Ice.MarshalException(ex);
+        throw new LocalEx.MarshalException(ex);
     }
 
     return userEx;
-}
+};
 
 module.exports = BasicStream;
