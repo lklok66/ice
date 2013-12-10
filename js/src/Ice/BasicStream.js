@@ -17,8 +17,6 @@ var ByteBuffer = require("./ByteBuffer"),
     LocalEx = require("./LocalException").Ice,
     OptionalFormat = require("./OptionalFormat"),
     Protocol = require("./Protocol"),
-    SlicedData = require("./SlicedData"),
-    SliceInfo = require("/SliceInfo"),
     TraceUtil = require("./TraceUtil"),
     Version = require("./Version").Ice;
 
@@ -921,7 +919,7 @@ EncapsDecoder11.prototype.skipSlice = function()
     //
     // Preserve this slice.
     //
-    info = new SliceInfo();
+    info = {};
     info.typeId = this._current.typeId;
     info.compactId = this._current.compactId;
     info.hasOptionalMembers = (this._current.sliceFlags & FLAG_HAS_OPTIONAL_MEMBERS) !== 0;
@@ -1154,7 +1152,7 @@ EncapsDecoder11.prototype.readSlicedData = function()
         }
     }
 
-    return new SlicedData(this._current.slices);
+    return {slices: this._current.slices};
 };
 
 EncapsDecoder11.prototype.push = function(sliceType)
