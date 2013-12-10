@@ -14,8 +14,9 @@ var HashMap = require("./HashMap");
 var LocalExceptionWrapper = require("./LocalExceptionWrapper");
 var Promise = require("./Promise");
 var Protocol = require("./Protocol");
+var Timer = require("./Timer");
 var TimeUtil = require("./TimeUtil");
-var TraceUtil = require("./TraceUtil"); // TODO
+var TraceUtil = require("./TraceUtil");
 
 var LocalEx = require("./LocalException").Ice;
 
@@ -41,23 +42,26 @@ var ConnectionI = function(communicator, instance, reaper, transceiver, endpoint
     var initData = instance.initializationData();
     this._logger = initData.logger; // Cached for better performance.
     this._traceLevels = instance.traceLevels(); // Cached for better performance.
-    this._readTimer = new flash.utils.Timer(1);
-    this._readTimer.addEventListener(flash.events.TimerEvent.TIMER, timedOut);
-    this._writeTimer = new flash.utils.Timer(1);
-    this._writeTimer.addEventListener(flash.events.TimerEvent.TIMER, timedOut);
+    this_timer = instance.timer();
+    this._writeTimeoutId = 0;
+    this._writeTimeoutScheduled = false;
+    this._readTimeoutId = 0;
+    this._readTimeoutScheduled = false;
     this._warn = initData.properties.getPropertyAsInt("Ice.Warn.Connections") > 0;
     this._warnUdp = instance.initializationData().properties.getPropertyAsInt("Ice.Warn.Datagrams") > 0;
     this._acmAbsoluteTimeoutMillis = 0;
     this._nextRequestId = 1;
     this._batchAutoFlush = initData.properties.getPropertyAsIntWithDefault("Ice.BatchAutoFlush", 1) > 0 ? true : false;
-    this._batchStream = new BasicStream(instance, this._batchAutoFlush);
+    this._batchStream = new BasicStream(instance, Protocol.currentProtocolEncoding, this._batchAutoFlush);
     this._batchStreamInUse = false;
     this._batchRequestNum = 0;
     this._batchRequestCompress = false;
     this._batchMarker = 0;
-    this._readStream = new BasicStream(instance);
+    this._readStream = new BasicStream(instance, Protocol.currentProtocolEncoding);
     this._readHeader = false;
-    this._writeStream = new BasicStream(instance);
+    this._readStreamPos = -1;
+    this._writeStream = new BasicStream(instance, Protocol.currentProtocolEncoding);
+    this._writeStreamPos = -1;
     this._dispatchCount = 0;
     this._state = StateNotInitialized;
 
@@ -96,7 +100,7 @@ var ConnectionI = function(communicator, instance, reaper, transceiver, endpoint
             this._acmTimeout = this._instance.clientACM();
         }
     }
-}
+};
 
 ConnectionI.prototype.start = function()
 {
@@ -123,7 +127,7 @@ ConnectionI.prototype.start = function()
     }
 
     return this._startPromise;
-}
+};
 
 ConnectionI.prototype.activate = function()
 {
@@ -138,7 +142,7 @@ ConnectionI.prototype.activate = function()
     }
 
     this.setState(StateActive);
-}
+};
 
 ConnectionI.prototype.hold = function()
 {
@@ -148,7 +152,7 @@ ConnectionI.prototype.hold = function()
     }
 
     this.setState(StateHolding);
-}
+};
 
 // DestructionReason.
 ConnectionI.ObjectAdapterDeactivated = 0;
@@ -170,7 +174,7 @@ ConnectionI.prototype.destroy = function(reason)
             break;
         }
     }
-}
+};
 
 ConnectionI.prototype.close = function(force)
 {
@@ -199,7 +203,7 @@ ConnectionI.prototype.close = function(force)
     }
 
     return promise;
-}
+};
 
 ConnectionI.prototype.checkClose = function()
 {
@@ -208,7 +212,7 @@ ConnectionI.prototype.checkClose = function()
     // requests have completed and we can transition to StateClosing.
     // We also complete outstanding promises.
     //
-    if(this._asyncRequests.length == 0 && this._closePromises !== null)
+    if(this._asyncRequests.length === 0 && this._closePromises !== null)
     {
         this.setStateEx(StateClosing, new LocalEx.CloseConnectionException());
         for(var i = 0; i < this._closePromises.length; ++i)
@@ -217,12 +221,12 @@ ConnectionI.prototype.checkClose = function()
         }
         this._closePromises = null;
     }
-}
+};
 
 ConnectionI.prototype.isActiveOrHolding = function()
 {
     return this._state > StateNotValidated && this._state < StateClosing;
-}
+};
 
 ConnectionI.prototype.isFinished = function()
 {
@@ -233,7 +237,7 @@ ConnectionI.prototype.isFinished = function()
 
     Debug.assert(this._state === StateFinished);
     return true;
-}
+};
 
 ConnectionI.prototype.throwException = function()
 {
@@ -242,7 +246,7 @@ ConnectionI.prototype.throwException = function()
         Debug.assert(this._state >= StateClosing);
         throw this._exception;
     }
-}
+};
 
 ConnectionI.prototype.waitUntilHolding = function()
 {
@@ -250,7 +254,7 @@ ConnectionI.prototype.waitUntilHolding = function()
     this._holdPromises.push(promise);
     this.checkState();
     return promise;
-}
+};
 
 ConnectionI.prototype.waitUntilFinished = function()
 {
@@ -258,7 +262,7 @@ ConnectionI.prototype.waitUntilFinished = function()
     this._finishedPromises.push(promise);
     this.checkState();
     return promise;
-}
+};
 
 ConnectionI.prototype.monitor = function(now)
 {
@@ -281,7 +285,7 @@ ConnectionI.prototype.monitor = function(now)
     {
         this.setStateEx(StateClosing, new LocalEx.ConnectionTimeoutException());
     }
-}
+};
 
 ConnectionI.prototype.sendAsyncRequest = function(out, compress, response)
 {
@@ -326,9 +330,10 @@ ConnectionI.prototype.sendAsyncRequest = function(out, compress, response)
         os.writeInt(requestId);
     }
 
+    var status;
     try
     {
-        this.sendMessage(OutgoingMessage.create(out, out.__os(), compress, requestId));
+        status = this.sendMessage(OutgoingMessage.create(out, out.__os(), compress, requestId));
     }
     catch(ex)
     {
@@ -351,7 +356,9 @@ ConnectionI.prototype.sendAsyncRequest = function(out, compress, response)
         //
         this._asyncRequests.set(requestId, out);
     }
-}
+
+    return status;
+};
 
 ConnectionI.prototype.prepareBatchRequest = function(os)
 {
@@ -392,7 +399,7 @@ ConnectionI.prototype.prepareBatchRequest = function(os)
     // The batch stream now belongs to the caller, until
     // finishBatchRequest() or abortBatchRequest() is called.
     //
-}
+};
 
 ConnectionI.prototype.finishBatchRequest = function(os, compress)
 {
@@ -526,7 +533,7 @@ ConnectionI.prototype.finishBatchRequest = function(os, compress)
         }
         throw ex;
     }
-}
+};
 
 ConnectionI.prototype.abortBatchRequest = function()
 {
@@ -537,7 +544,7 @@ ConnectionI.prototype.abortBatchRequest = function()
 
     Debug.assert(this._batchStreamInUse);
     this._batchStreamInUse = false;
-}
+};
 
 var __flushBatchRequests_name = "flushBatchRequests";
 
@@ -558,7 +565,7 @@ ConnectionI.prototype.flushBatchRequests = function()
     return result;
     */
     return promise;
-}
+};
 
 ConnectionI.prototype.flushAsyncBatchRequests = function(outAsync)
 {
@@ -606,7 +613,7 @@ ConnectionI.prototype.flushAsyncBatchRequests = function(outAsync)
     this._batchRequestNum = 0;
     this._batchRequestCompress = false;
     this._batchMarker = 0;
-}
+};
 
 ConnectionI.prototype.sendResponse = function(os, compressFlag)
 {
@@ -647,7 +654,7 @@ ConnectionI.prototype.sendResponse = function(os, compressFlag)
             throw ex;
         }
     }
-}
+};
 
 ConnectionI.prototype.sendNoResponse = function()
 {
@@ -685,12 +692,12 @@ ConnectionI.prototype.sendNoResponse = function()
             throw ex;
         }
     }
-}
+};
 
 ConnectionI.prototype.endpoint = function()
 {
     return this._endpoint;
-}
+};
 
 ConnectionI.prototype.setAdapter = function(adapter)
 {
@@ -714,17 +721,17 @@ ConnectionI.prototype.setAdapter = function(adapter)
     {
         this._servantManager = null;
     }
-}
+};
 
 ConnectionI.prototype.getAdapter = function()
 {
     return this._adapter;
-}
+};
 
 ConnectionI.prototype.getEndpoint = function()
 {
     return this._endpoint;
-}
+};
 
 ConnectionI.prototype.createProxy = function(ident)
 {
@@ -733,7 +740,7 @@ ConnectionI.prototype.createProxy = function(ident)
     // reference.
     //
     return this._instance.proxyFactory().referenceToProxy(this._instance.referenceFactory().createFixed(ident, this));
-}
+};
 
 //
 // Transceiver callbacks
@@ -763,7 +770,7 @@ ConnectionI.prototype.socketConnected = function()
         //
         this.socketBytesAvailable();
     }
-}
+};
 
 ConnectionI.prototype.socketBytesAvailable = function()
 {
@@ -969,17 +976,17 @@ ConnectionI.prototype.socketBytesAvailable = function()
         this.dispatch(info);
     }
     while(_hasMoreData.value);
-}
+};
 
 ConnectionI.prototype.socketClosed = function()
 {
     this.setStateEx(StateClosed, new LocalEx.ConnectionLostException());
-}
+};
 
 ConnectionI.prototype.socketError = function(ex)
 {
     this.setStateEx(StateClosed, ex);
-}
+};
 
 ConnectionI.prototype.dispatch = function(info)
 {
@@ -1035,7 +1042,7 @@ ConnectionI.prototype.dispatch = function(info)
             this.checkState();
         }
     }
-}
+};
 
 ConnectionI.prototype.finish = function()
 {
@@ -1064,12 +1071,12 @@ ConnectionI.prototype.finish = function()
         this._reaper.add(this);
     }
     this.setState(StateFinished);
-}
+};
 
 ConnectionI.prototype.toString = function()
 {
     return this._desc;
-}
+};
 
 ConnectionI.prototype.timedOut = function(event) // TODO
 {
@@ -1085,17 +1092,17 @@ ConnectionI.prototype.timedOut = function(event) // TODO
     {
         this.setStateEx(StateClosed, new LocalEx.CloseTimeoutException());
     }
-}
+};
 
 ConnectionI.prototype.type = function()
 {
     return this._type;
-}
+};
 
 ConnectionI.prototype.timeout = function()
 {
     return this._endpoint.timeout();
-}
+};
 
 ConnectionI.prototype.getInfo = function()
 {
@@ -1107,12 +1114,12 @@ ConnectionI.prototype.getInfo = function()
     info.adapterName = this._adapter !== null ? this._adapter.getName() : "";
     info.incoming = this._incoming;
     return info;
-}
+};
 
 ConnectionI.prototype.exception = function(ex)
 {
     this.setStateEx(StateClosed, ex);
-}
+};
 
 ConnectionI.prototype.invokeException = function(ex, invokeNum)
 {
@@ -1137,7 +1144,7 @@ ConnectionI.prototype.invokeException = function(ex, invokeNum)
             this.checkState();
         }
     }
-}
+};
 
 ConnectionI.prototype.setStateEx = function(state, ex)
 {
@@ -1187,7 +1194,7 @@ ConnectionI.prototype.setStateEx = function(state, ex)
     // connection that is not yet marked as closed or closing.
     //
     this.setState(state);
-}
+};
 
 ConnectionI.prototype.setState = function(state)
 {
@@ -1366,7 +1373,7 @@ ConnectionI.prototype.setState = function(state)
     }
 
     this.checkState();
-}
+};
 
 ConnectionI.prototype.initiateShutdown = function()
 {
@@ -1406,13 +1413,13 @@ ConnectionI.prototype.initiateShutdown = function()
         //
         //this._transceiver.shutdownWrite();
     }
-}
+};
 
 ConnectionI.prototype.initialize = function()
 {
     this.scheduleTimeout(this._writeTimer, this.connectTimeout());
     this._transceiver.initialize(this); // TODO
-}
+};
 
 ConnectionI.prototype.validate = function()
 {
@@ -1505,7 +1512,7 @@ ConnectionI.prototype.validate = function()
     this._readStream.pos = 0;
 
     return true;
-}
+};
 
 ConnectionI.prototype.sendMessage = function(message)
 {
@@ -1524,7 +1531,7 @@ ConnectionI.prototype.sendMessage = function(message)
     {
         this._acmAbsoluteTimeoutMillis = TimeUtil.now() + this._acmTimeout * 1000;
     }
-}
+};
 
 ConnectionI.prototype.parseMessage = function()
 {
@@ -1675,7 +1682,7 @@ ConnectionI.prototype.parseMessage = function()
     }
 
     return info;
-}
+};
 
 ConnectionI.prototype.invokeAll = function(stream, invokeNum, requestId, compress, servantManager, adapter)
 {
@@ -1737,7 +1744,7 @@ ConnectionI.prototype.invokeAll = function(stream, invokeNum, requestId, compres
             throw ex;
         }
     }
-}
+};
 
 ConnectionI.prototype.scheduleTimeout = function(timer, timeout)
 {
@@ -1748,12 +1755,12 @@ ConnectionI.prototype.scheduleTimeout = function(timer, timeout)
 
     timer.delay = timeout; // Changing the delay resets the timer.
     timer.start();
-}
+};
 
 ConnectionI.prototype.unscheduleTimeout = function(timer)
 {
     timer.stop();
-}
+};
 
 ConnectionI.prototype.connectTimeout = function()
 {
@@ -1766,7 +1773,7 @@ ConnectionI.prototype.connectTimeout = function()
     {
         return this._endpoint.timeout();
     }
-}
+};
 
 ConnectionI.prototype.closeTimeout = function()
 {
@@ -1779,12 +1786,12 @@ ConnectionI.prototype.closeTimeout = function()
     {
         return this._endpoint.timeout();
     }
-}
+};
 
 ConnectionI.prototype.warning = function(msg, ex)
 {
     this._logger.warning(msg + ":\n" + this._desc + "\n" + ExUtil.toString(ex));
-}
+};
 
 ConnectionI.prototype.checkState = function()
 {
@@ -1821,7 +1828,7 @@ ConnectionI.prototype.checkState = function()
         }
         this._finishedPromises = [];
     }
-}
+};
 
 module.exports = ConnectionI;
 
@@ -1836,7 +1843,7 @@ var MessageInfo = function(instance)
     this.servantManager = null;
     this.adapter = null;
     this.outAsync = null;
-}
+};
 
 var OutgoingMessage = function()
 {
@@ -1845,7 +1852,7 @@ var OutgoingMessage = function()
     this.compress = false;
     this.requestId = 0;
     this.isSent = false;
-}
+};
 
 OutgoingMessage.createForStream = function(stream, compress)
 {
@@ -1856,7 +1863,7 @@ OutgoingMessage.createForStream = function(stream, compress)
     m.requestId = 0;
     m.isSent = false;
     return m;
-}
+};
 
 OutgoingMessage.create = function(out, stream, compress, requestId)
 {
@@ -1867,7 +1874,7 @@ OutgoingMessage.create = function(out, stream, compress, requestId)
     m.requestId = requestId;
     m.isSent = false;
     return m;
-}
+};
 
 OutgoingMessage.prototype.sent = function(connection)
 {
@@ -1877,7 +1884,7 @@ OutgoingMessage.prototype.sent = function(connection)
     {
         this.outAsync.__sent(connection);
     }
-}
+};
 
 OutgoingMessage.prototype.finished = function(ex)
 {
@@ -1885,4 +1892,4 @@ OutgoingMessage.prototype.finished = function(ex)
     {
         this.outAsync.__finishedEx(ex, this.isSent);
     }
-}
+};

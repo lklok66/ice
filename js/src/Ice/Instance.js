@@ -23,6 +23,7 @@ var ProxyFactory = require("./ProxyFactory");
 var Ref = require("./Reference");
 var RouterManager = require("./RouterManager");
 var TcpEndpointFactory = require("./TcpEndpointFactory");
+var Timer = require("./Timer");
 var TraceLevels = require("./TraceLevels");
 
 var LocalEx = require("./LocalException").Ice;
@@ -54,14 +55,14 @@ Instance.prototype.initializationData = function()
 Instance.prototype.traceLevels = function()
 {
     // This value is immutable.
-    Debug.assert(this._traceLevels != null);
+    Debug.assert(this._traceLevels !== null);
     return this._traceLevels;
 }
 
 Instance.prototype.defaultsAndOverrides = function()
 {
     // This value is immutable.
-    Debug.assert(this._defaultsAndOverrides != null);
+    Debug.assert(this._defaultsAndOverrides !== null);
     return this._defaultsAndOverrides;
 }
 
@@ -169,7 +170,8 @@ Instance.prototype.protocolSupport = function()
     return this._protocolSupport;
 }
 
-/*Instance.prototype.endpointHostResolver = function()
+/*
+Instance.prototype.endpointHostResolver = function()
 {
     if(this._state === StateDestroyed)
     {
@@ -190,6 +192,7 @@ Instance.prototype.retryQueue = function()
     Debug.assert(this._retryQueue !== null);
     return this._retryQueue;
 }
+*/
 
 Instance.prototype.timer = function()
 {
@@ -201,7 +204,6 @@ Instance.prototype.timer = function()
     Debug.assert(this._timer !== null);
     return this._timer;
 }
-*/
 
 Instance.prototype.endpointFactoryManager = function()
 {
@@ -294,6 +296,8 @@ Instance.prototype.finishSetup = function(communicator, promise)
 
     try
     {
+        this._timer = new Timer();
+
         if(this._initData.properties === null)
         {
             this._initData.properties = Properties.createProperties();
@@ -428,13 +432,13 @@ Instance.prototype.finishSetup = function(communicator, promise)
         // might depend on endpoint factories to be installed by plug-ins.
         //
         var router = my.RouterPrxHelper.uncheckedCast(this._proxyFactory.propertyToProxy("Ice.Default.Router"));
-        if(router != null)
+        if(router !== null)
         {
             this._referenceFactory = this._referenceFactory.setDefaultRouter(router);
         }
 
         var loc = my.LocatorPrxHelper.uncheckedCast(this._proxyFactory.propertyToProxy("Ice.Default.Locator"));
-        if(loc != null)
+        if(loc !== null)
         {
             this._referenceFactory = this._referenceFactory.setDefaultLocator(loc);
         }
@@ -550,7 +554,7 @@ Instance.prototype.destroy = function()
         this._state = StateDestroyInProgress;
 
         /* TODO
-        if(this._objectAdapterFactory != null)
+        if(this._objectAdapterFactory)
         {
             _objectAdapterFactory.shutdown().whenCompleted(
                 function(r:Ice.AsyncResult):void
@@ -590,7 +594,7 @@ Instance.prototype.outgoingConnectionFactoryFinished = function(promise)
     try
     {
         /* TODO
-        if(this._retryQueue != null)
+        if(this._retryQueue)
         {
             this._retryQueue.destroy();
         }
@@ -600,19 +604,25 @@ Instance.prototype.outgoingConnectionFactoryFinished = function(promise)
         this._outgoingConnectionFactory = null;
         this._retryQueue = null;
 
-        if(this._connectionMonitor != null)
+        if(this._connectionMonitor)
         {
             this._connectionMonitor.destroy();
             this._connectionMonitor = null;
         }
 
-        if(this._servantFactoryManager != null)
+        if(this._timer)
+        {
+            this._timer.destroy();
+            this._timer = null;
+        }
+
+        if(this._servantFactoryManager)
         {
             this._servantFactoryManager.destroy();
             this._servantFactoryManager = null;
         }
 
-        if(this._referenceFactory != null)
+        if(this._referenceFactory)
         {
             //this._referenceFactory.destroy(); // No destroy function defined.
             this._referenceFactory = null;
@@ -621,25 +631,25 @@ Instance.prototype.outgoingConnectionFactoryFinished = function(promise)
         // this._proxyFactory.destroy(); // No destroy function defined.
         this._proxyFactory = null;
 
-        if(this._routerManager != null)
+        if(this._routerManager)
         {
             this._routerManager.destroy();
             this._routerManager = null;
         }
 
-        if(this._locatorManager != null)
+        if(this._locatorManager)
         {
             this._locatorManager.destroy();
             this._locatorManager = null;
         }
 
-        if(this._endpointFactoryManager != null)
+        if(this._endpointFactoryManager)
         {
             this._endpointFactoryManager.destroy();
             this._endpointFactoryManager = null;
         }
 
-        if(this._exceptionFactoryMap != null)
+        if(this._exceptionFactoryMap)
         {
             this._exceptionFactoryMap.clear();
             this._exceptionFactoryMap = null;

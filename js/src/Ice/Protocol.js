@@ -55,6 +55,18 @@ module.exports.replyMsg = 2;
 module.exports.validateConnectionMsg = 3;
 module.exports.closeConnectionMsg = 4;
 
+//
+// Reply status
+//
+module.exports.replyOK = 0;
+module.exports.replyUserException = 1;
+module.exports.replyObjectNotExist = 2;
+module.exports.replyFacetNotExist = 3;
+module.exports.replyOperationNotExist = 4;
+module.exports.replyUnknownLocalException = 5;
+module.exports.replyUnknownUserException = 6;
+module.exports.replyUnknownException = 7;
+
 module.exports.requestHdr = new Uint8Array([
     module.exports.magic[0],
     module.exports.magic[1],
