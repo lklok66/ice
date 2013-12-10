@@ -7,8 +7,9 @@
 //
 // **********************************************************************
 
-var Debug = require("./Debug"),
-    Ex = require("./Ex"),
+var ByteBuffer = require("./ByteBuffer"),
+    Debug = require("./Debug"),
+    Ex = require("./Exception"),
     ExUtil = require("./ExUtil"),
     FormatType = require("./FormatType"),
     HashMap = require("./HashMap"),
@@ -34,16 +35,6 @@ var FLAG_HAS_OPTIONAL_MEMBERS     = (1<<2);
 var FLAG_HAS_INDIRECTION_TABLE    = (1<<3);
 var FLAG_HAS_SLICE_SIZE           = (1<<4);
 var FLAG_IS_LAST_SLICE            = (1<<5);
-
-var MemberFormatF1           = 0;
-var MemberFormatF2           = 1;
-var MemberFormatF4           = 2;
-var MemberFormatF8           = 3;
-var MemberFormatVSize        = 4;
-var MemberFormatFSize        = 5;
-var MemberFormatReserved     = 6;
-var MemberFormatEndMarker    = 7;
-
 
 var IndirectPatchEntry = function(index, patcher)
 {
@@ -379,7 +370,10 @@ EncapsDecoder10.prototype.throwException = function(factory)
             }
             catch(ex)
             {
-                //TODO assert Ice.UserException
+                if(!(ex instanceof Ex.UserException))
+                {
+                    throw ex;
+                }
                 userEx = ex;
             }
         }
@@ -414,8 +408,6 @@ EncapsDecoder10.prototype.throwException = function(factory)
         }
         catch(ex)
         {
-            // TODO assert Ice.UnmarshalOutOfBoundsException
-            
             //
             // An oversight in the 1.0 encoding means there is no marker to indicate
             // the last slice of an exception. As a result, we just try to read the
@@ -424,7 +416,10 @@ EncapsDecoder10.prototype.throwException = function(factory)
             //
             // Set the reason member to a more helpful message.
             //
-            ex.reason = "unknown exception type `" + mostDerivedId + "'";
+            if(ex instanceof LocalEx.UnmarshalOutOfBoundsException)
+            {
+                ex.reason = "unknown exception type `" + mostDerivedId + "'";
+            }
             throw ex;
         }
     }
@@ -688,7 +683,10 @@ EncapsDecoder11.prototype.throwException = function(factory)
             }
             catch(ex)
             {
-                //TODO just catch Ice.UserException 
+                if(!(ex instanceof Ex.UserException))
+                {
+                    throw ex;
+                }
                 userEx = ex;
             }
         }
@@ -1712,7 +1710,7 @@ WriteEncaps.prototype.setEncoding = function(encoding)
     this.encoding_1_0 = encoding.equals(Version.Encoding_1_0);
 };
 
-var BasicStream = function(instance, encoding, unlimited)
+var BasicStream = function(instance, encoding, unlimited, data)
 {
     this._instance = instance;
     this._closure = null;
@@ -1726,10 +1724,19 @@ var BasicStream = function(instance, encoding, unlimited)
     this._sliceObjects = true;
 
     this._messageSizeMax = this._instance.messageSizeMax(); // Cached for efficiency.
-    this._unlimited = unlimited;
+    this._unlimited = unlimited !== undefined ? unlimited : false;
 
     this._startSeq = -1;
     this._sizePos = -1;
+    
+    if(data !== undefined)
+    {
+        this._buf = new ByteBuffer(data);
+    }
+    else
+    {
+        this._buf = new ByteBuffer();
+    }
     
     Object.defineProperty(this, "instance", {
         get: function() { return this._instance; }
@@ -1819,7 +1826,7 @@ BasicStream.prototype.resetEncaps = function()
     this._writeEncapsStack = null;
 };
 
-BasicStream.prototype.resize = function(sz, reading)
+BasicStream.prototype.resize = function(sz)
 {
     //
     // Check memory limit if stream is not unlimited.
@@ -1829,21 +1836,18 @@ BasicStream.prototype.resize = function(sz, reading)
         ExUtil.throwMemoryLimitException(sz, this._messageSizeMax);
     }
 
-    //TODO
-    this._buf.resize(sz, reading);
-    this._buf.b.position(sz);
+    this._buf.resize(sz);
+    this._buf.position = sz;
 };
 
 
 BasicStream.prototype.prepareWrite = function()
 {
-    //TODO
-    this._buf.b.limit(this._buf.size());
-    this._buf.b.position(0);
+    this._buf.position = 0;
     return this._buf;
 };
 
-BasicStream.prototype.prepareWrite.getBuffer = function()
+BasicStream.prototype.getBuffer = function()
 {
     return this._buf;
 };
@@ -1981,7 +1985,7 @@ BasicStream.prototype.writeEncaps = function(v)
         throw new LocalEx.EncapsulationException();
     }
     this.expand(v.length);
-    this._buf.b.put(v);
+    this._buf.putArray(v);
 };
 
 BasicStream.prototype.getWriteEncoding = function()
@@ -2365,39 +2369,26 @@ BasicStream.prototype.writeBlob = function(v)
     {
         return;
     }
+    this.expand(v.length);
     this._buf.putArray(v);
 };
 
-//TODO
-/*public void
-writeBlob(byte[] v, int off, int len)
+BasicStream.prototype.readBlob = function(sz)
 {
-    if(v == null)
+    if(this._buf.remaining < sz)
     {
-        return;
+        throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-    expand(len);
-    _buf.b.put(v, off, len);
-};
-
-public byte[]
-readBlob(int sz)
-{
-    if(_buf.b.remaining() < sz)
-    {
-        throw new Ice.UnmarshalOutOfBoundsException();
-    }
-    byte[] v = new byte[sz];
     try
     {
-        _buf.b.get(v);
-        return v;
+        return this._buf.getArray(sz);
     }
-    catch(java.nio.BufferUnderflowException ex)
+    catch(ex)
     {
-        throw new Ice.UnmarshalOutOfBoundsException();
+        //TODO assert java.nio.BufferUnderflowException
+        throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-}*/
+};
 
 // Read/write format and tag for optionals
 BasicStream.prototype.writeOpt = function(tag, format)
@@ -2425,7 +2416,8 @@ BasicStream.prototype.writeByte = function(v)
     this._buf.put(v);
 };
 
-BasicStream.prototype.writeOptionalByte = function(tag, v)
+//TODO Optionals
+/*BasicStream.prototype.writeOptionalByte = function(tag, v)
 {
     if(v !== null && v.isSet())
     {
@@ -2433,7 +2425,7 @@ BasicStream.prototype.writeOptionalByte = function(tag, v)
     }
 };
 
-/*public void
+public void
 writeByte(int tag, byte v)
 {
     if(writeOpt(tag, Ice.OptionalFormat.F1))
@@ -2449,6 +2441,7 @@ BasicStream.prototype.rewriteByte = function(v, dest)
 
 BasicStream.prototype.writeByteSeq = function(v)
 {
+    
     if(v === null)
     {
         this.writeSize(0);
@@ -2456,6 +2449,7 @@ BasicStream.prototype.writeByteSeq = function(v)
     else
     {
         this.writeSize(v.length);
+        this.expand(v.length);
         this._buf.putArray(v);
     }
 };
@@ -2553,6 +2547,7 @@ readSerializable()
 
 BasicStream.prototype.writeBool = function(v)
 {
+    this.expand(1);
     this._buf.put(v ? 1 : 0);
 };
 
@@ -2589,8 +2584,10 @@ BasicStream.prototype.writeBoolSeq = function(v)
     }
     else
     {
-        this.writeSize(v.length);
-        for(i = 0, length = v.length; i < length; ++i)
+        length = v.length;
+        this.writeSize(length);
+        this.expand(length);
+        for(i = 0; i < length; ++i)
         {
             this._buf.put(v[i] ? 1 : 0);
         }
@@ -2679,6 +2676,7 @@ readBoolSeq(int tag, Ice.Optional<boolean[]> v)
 
 BasicStream.prototype.writeShort = function(v)
 {
+    this.expand(2);
     this._buf.putShort(v);
 };
 
@@ -2710,6 +2708,7 @@ BasicStream.prototype.writeShortSeq = function(v)
     else
     {
         this.writeSize(v.length);
+        this.expand(v.length * 2);
         this._buf.putShortArray(v);
     }
 };
@@ -2792,6 +2791,7 @@ readShortSeq(int tag, Ice.Optional<short[]> v)
 
 BasicStream.prototype.writeInt = function(v)
 {
+    this.expand(4);
     this._buf.putInt(v);
 };
 
@@ -2829,6 +2829,7 @@ BasicStream.prototype.writeIntSeq = function(v)
     else
     {
         this.writeSize(v.length);
+        this.expand(v.length * 4);
         this._buf.putIntArray(v);
     }
 };
@@ -3027,6 +3028,7 @@ readLongSeq(int tag, Ice.Optional<long[]> v)
 
 BasicStream.prototype.writeFloat = function(v)
 {
+    this.expand(4);
     this._buf.putFloat(v);
 };
 
@@ -3057,6 +3059,7 @@ BasicStream.prototype.writeFloatSeq = function(v)
     else
     {
         this.writeSize(v.length);
+        this.expand(v.length * 4);
         this._buf.putFloatArray(v);
     }
 };
@@ -3139,6 +3142,7 @@ readFloatSeq(int tag, Ice.Optional<float[]> v)
 
 BasicStream.prototype.writeDouble = function(v)
 {
+    this.expand(8);
     this._buf.putDouble(v);
 };
 
@@ -3170,6 +3174,7 @@ BasicStream.prototype.writeDoubleSeq = function(v)
     else
     {
         this.writeSize(v.length);
+        this.expand(v.length * 8);
         this._buf.putDoubleArray(v);
     }
 };
@@ -3258,7 +3263,9 @@ BasicStream.prototype.writeString = function(v)
     else
     {
         this.startSize();
-        this._buf.putString(v);
+        var sz = ByteBuffer.byteLength(v);
+        this.expand(sz);
+        this._buf.putString(v, sz);
         this.endSize();
     }
 };

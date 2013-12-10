@@ -12,9 +12,16 @@
 // the store.
 //
 
-var ByteBuffer = function()
+var ByteBuffer = function(buffer)
 {
-    this.b = null; // Buffer
+    if(buffer !== undefined)
+    {
+        this.b = buffer;
+    }
+    else
+    {
+        this.b = buffer;
+    }
     this._position = 0;
     this._limit = 0;
     this._shrinkCounter = 0;
@@ -146,7 +153,10 @@ ByteBuffer.prototype.reserve = function(n)
 
 ByteBuffer.prototype.put = function(v)
 {
-    this.resize(this._limit + 1);
+    if(this._position == this._limit)
+    {
+        throw new Error("BufferOverflowException");
+    }
     this.b.writeUInt8(v, this._position, true);
     this._position++;
 };
@@ -162,22 +172,28 @@ ByteBuffer.prototype.putAt = function(i, v)
 
 ByteBuffer.prototype.putArray = function(v)
 {
-    //Expects an Buffer
-    this.resize(this._limit + v.length);
+    //Expects a Nodejs Buffer
+    if(this._position + v.length > this._limit)
+    {
+        throw new Error("BufferOverflowException");
+    }
     this.b.copy(v, this._position);
     this._position += v.length;
 };
 
 ByteBuffer.prototype.putShort = function(v)
 {
-    this.resize(this._limit + 2);
+    if(this._position + 2 > this._limit)
+    {
+        throw new Error("BufferOverflowException");
+    }
     this.b.writeInt16LE(v, this._position, true);
     this._position += 2;
 };
 
 ByteBuffer.prototype.putShortAt = function(i, v)
 {
-    if(i + 2 >= this._limit)
+    if(i + 2 > this._limit || i < 0)
     {
         throw new Error("IndexOutOfBoundsException");
     }
@@ -187,7 +203,10 @@ ByteBuffer.prototype.putShortAt = function(i, v)
 ByteBuffer.prototype.putShortArray = function(v)
 {
     var i, length;
-    this.resize(this._limit + (v.length * 2));
+    if(this._position + (v.length * 2) > this._limit)
+    {
+        throw new Error("BufferOverflowException");
+    }
     for(i = 0, length = v.length; i < length; ++i)
     {
         this.b.writeInt16LE(v[i], this._position, true);
@@ -197,14 +216,17 @@ ByteBuffer.prototype.putShortArray = function(v)
 
 ByteBuffer.prototype.putInt = function(v)
 {
-    this.resize(this._limit + 4);
+    if(this._position + 4 > this._limit)
+    {
+        throw new Error("BufferOverflowException");
+    }
     this.b.writeInt32LE(v, this._position, true);
     this._position += 4;
 };
 
 ByteBuffer.prototype.putIntAt = function(i, v)
 {
-    if(i + 4 >= this._limit)
+    if(i + 4 > this._limit || i < 0)
     {
         throw new Error("IndexOutOfBoundsException");
     }
@@ -214,7 +236,10 @@ ByteBuffer.prototype.putIntAt = function(i, v)
 ByteBuffer.prototype.putIntArray = function(v)
 {
     var i, length;
-    this.resize(this._limit + (v.length * 4));
+    if(this._position + (v.length * 4) > this._limit)
+    {
+        throw new Error("BufferOverflowException");
+    }
     for(i = 0, length = v.length; i < length; ++i)
     {
         this.b.writeInt32LE(v[i], this._position, true);
@@ -224,14 +249,17 @@ ByteBuffer.prototype.putIntArray = function(v)
 
 ByteBuffer.prototype.putFloat = function(v)
 {
-    this.resize(this._limit + 4);
+    if(this._position + 4 > this._limit)
+    {
+        throw new Error("BufferOverflowException");
+    }
     this.b.writeFloatLE(v, this._position, true);
     this._position += 4;
 };
 
 ByteBuffer.prototype.putFloatAt = function(i, v)
 {
-    if(i + 4 >= this._limit)
+    if(i + 4 > this._limit || i < 0)
     {
         throw new Error("IndexOutOfBoundsException");
     }
@@ -241,7 +269,10 @@ ByteBuffer.prototype.putFloatAt = function(i, v)
 ByteBuffer.prototype.putFloatArray = function(v)
 {
     var i, length;
-    this.resize(this._limit + (v.length * 4));
+    if(this._position + (v.length * 4) > this._limit)
+    {
+        throw new Error("BufferOverflowException");
+    }
     for(i = 0, length = v.length; i < length; ++i)
     {
         this.b.writeFloatLE(v[i], this._position, true);
@@ -251,14 +282,17 @@ ByteBuffer.prototype.putFloatArray = function(v)
 
 ByteBuffer.prototype.putDouble = function(v)
 {
-    this.resize(this._limit + 8);
+    if(this._position + 8 > this._limit)
+    {
+        throw new Error("BufferOverflowException");
+    }
     this.b.writeDoubleLE(v, this._position, true);
     this._position += 8;
 };
 
 ByteBuffer.prototype.putDoubleAt = function(i, v)
 {
-    if(i + 8 >= this._limit)
+    if(i + 8 > this._limit || i < 0)
     {
         throw new Error("IndexOutOfBoundsException");
     }
@@ -268,7 +302,10 @@ ByteBuffer.prototype.putDoubleAt = function(i, v)
 ByteBuffer.prototype.putDoubleArray = function(v)
 {
     var i, length;
-    this.resize(this._limit + (v.length * 8));
+    if(this._position + (v.length * 8) > this._limit)
+    {
+        throw new Error("BufferOverflowException");
+    }
     for(i = 0, length = v.length; i < length; ++i)
     {
         this.b.writeDoubleLE(v[i], this._position, true);
@@ -276,11 +313,25 @@ ByteBuffer.prototype.putDoubleArray = function(v)
     }
 };
 
-ByteBuffer.prototype.putString = function(v)
+ByteBuffer.byteLength = function(v)
 {
-    var sz = Buffer.byteLength(v); 
-    this.resize(this._limit + sz);
-    this.b.write(v, this._position);
+    return Buffer.byteLength(v);
+};
+
+ByteBuffer.prototype.putString = function(v, sz)
+{
+    var bytes = this.b.write(v, this._position);
+    if(this._position + sz > this._limit)
+    {
+        throw new Error("BufferOverflowException");
+    }
+    //
+    // Check all bytes were written
+    //
+    if(bytes < sz)
+    {
+        throw new Error("IndexOutOfBoundsException");
+    }
     this._position += sz;
 };
 
@@ -328,7 +379,7 @@ ByteBuffer.prototype.getShort = function()
 
 ByteBuffer.prototype.getShortAt = function(i)
 {
-    if(this._limit - i < 2 || i < 0)
+    if(i + 2 > this._limit || i < 0)
     {
         throw new Error("IndexOutOfBoundsException");
     }
@@ -364,7 +415,7 @@ ByteBuffer.prototype.getInt = function()
 
 ByteBuffer.prototype.getIntAt = function(i)
 {
-    if(this._limit - i < 4 || i < 0)
+    if(i + 4 > this._limit || i < 0)
     {
         throw new Error("IndexOutOfBoundsException");
     }
@@ -399,7 +450,7 @@ ByteBuffer.prototype.getFloat = function()
 
 ByteBuffer.prototype.getFloatAt = function(i)
 {
-    if(this._limit - i < 4 || i < 0)
+    if(i + 4 > this._limit || i < 0)
     {
         throw new Error("IndexOutOfBoundsException");
     }
@@ -434,7 +485,7 @@ ByteBuffer.prototype.getDouble = function()
 
 ByteBuffer.prototype.getDoubleAt = function(i)
 {
-    if(this._limit - i < 8 || i < 0)
+    if(i + 8 > this._limit || i < 0)
     {
         throw new Error("IndexOutOfBoundsException");
     }
