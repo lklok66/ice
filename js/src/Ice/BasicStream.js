@@ -138,7 +138,7 @@ EncapsDecoder.prototype.newInstance = function(typeId)
     //
     var userFactory = this._servantFactoryManager.find(typeId),
         v = null;
-    if(userFactory !== null)
+    if(userFactory !== undefined)
     {
         v = userFactory.create(typeId);
     }
@@ -150,7 +150,7 @@ EncapsDecoder.prototype.newInstance = function(typeId)
     if(v === null)
     {
         userFactory = this._servantFactoryManager.find("");
-        if(userFactory !== null)
+        if(userFactory !== undefined)
         {
             v = userFactory.create(typeId);
         }
