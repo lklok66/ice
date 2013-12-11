@@ -12,6 +12,8 @@
 // the store.
 //
 
+var Long = require("./Long");
+
 var ByteBuffer = function(buffer)
 {
     if(buffer !== undefined)
@@ -153,7 +155,7 @@ ByteBuffer.prototype.reserve = function(n)
 
 ByteBuffer.prototype.put = function(v)
 {
-    if(this._position == this._limit)
+    if(this._position === this._limit)
     {
         throw new Error("BufferOverflowException");
     }
@@ -310,6 +312,44 @@ ByteBuffer.prototype.putDoubleArray = function(v)
     {
         this.b.writeDoubleLE(v[i], this._position, true);
         this._position += 8;
+    }
+};
+
+ByteBuffer.prototype.putLong = function(v)
+{
+    if(this._position + 8 > this._limit)
+    {
+        throw new Error("BufferOverflowException");
+    }
+    this.b.writeUInt32LE(v.low, this._position, true);
+    this._position += 4;
+    this.b.writeUInt32LE(v.high, this._position, true);
+    this._position += 4;
+};
+
+ByteBuffer.prototype.putLongAt = function(i, v)
+{
+    if(i + 8 > this._limit || i < 0)
+    {
+        throw new Error("IndexOutOfBoundsException");
+    }
+    this.b.writeUInt32LE(v.low, i, true);
+    this.b.writeUInt32LE(v.high, i + 4, true);
+};
+
+ByteBuffer.prototype.putLongArray = function(v)
+{
+    var i, length;
+    if(this._position + (v.length * 8) > this._limit)
+    {
+        throw new Error("BufferOverflowException");
+    }
+    for(i = 0, length = v.length; i < length; ++i)
+    {
+        this.b.writeUInt32LE(v.low, this._position, true);
+        this._position += 4;
+        this.b.writeUInt32LE(v.high, this._position, true);
+        this._position += 4;
     }
 };
 
@@ -503,6 +543,51 @@ ByteBuffer.prototype.getDoubleArray = function(length)
     {
         v[i] = this.b.readDoubleLE(this._position, true);
         this._position += 8;
+    }
+    return v;
+};
+
+ByteBuffer.prototype.getDouble = function()
+{
+    if(this._limit - this._position < 8)
+    {
+        throw new Error("BufferUnderflowException");
+    }
+    var v = new Long();
+    v.low = this.b.readDoubleLE(this._position, true);
+    this._position += 4;
+    v.high = this.b.readDoubleLE(this._position, true);
+    this._position += 4;
+    return v;
+};
+
+ByteBuffer.prototype.getDoubleAt = function(i)
+{
+    if(i + 8 > this._limit || i < 0)
+    {
+        throw new Error("IndexOutOfBoundsException");
+    }
+    var v = new Long();
+    v.low = this.b.readDoubleLE(i, true);
+    v.high = this.b.readDoubleLE(i + 4, true);
+    return v;
+};
+
+ByteBuffer.prototype.getDoubleArray = function(length)
+{
+    var v = [], i, l;
+    if(this._position + (length * 8) > this._limit)
+    {
+        throw new Error("BufferUnderflowException");
+    }
+    for(i = 0; i < length; ++i)
+    {
+        l = new Long();
+        l.low = this.b.readDoubleLE(this._position, true);
+        this._position += 4;
+        l.high = this.b.readDoubleLE(this._position, true);
+        this._position += 4;
+        v[i] = l;
     }
     return v;
 };
