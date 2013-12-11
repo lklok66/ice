@@ -29,7 +29,7 @@ module.exports.findFirstOf = function(str, match, start)
     }
 
     return -1;
-}
+};
 
 //
 // Return the index of the first character in str which does
@@ -51,7 +51,7 @@ module.exports.findFirstNotOf = function(str, match, start)
     }
 
     return -1;
-}
+};
 
 //
 // Write the byte b as an escape sequence if it isn't a printable ASCII
@@ -126,7 +126,7 @@ function encodeChar(b, sb, special)
             else
             {
                 var c = String.fromCharCode(b);
-                if(special != null && special.indexOf(c) != -1)
+                if(special && special.indexOf(c) !== -1)
                 {
                     sb.push('\\');
                     sb.push(c);
@@ -149,9 +149,10 @@ module.exports.escapeString = function(s, special)
 {
     special = special === undefined ? null : special;
 
-    if(special != null)
+    var i, length;
+    if(special)
     {
-        for(var i = 0; i < special.length; ++i)
+        for(i = 0, length = special.length; i < length; ++i)
         {
             if(special.charCodeAt(i) < 32 || special.charCodeAt(i) > 126)
             {
@@ -160,10 +161,10 @@ module.exports.escapeString = function(s, special)
         }
     }
 
-    var result = [];
-    for(var i = 0; i < s.length; ++i)
+    var result = [], c;
+    for(i = 0, length = s.length; i < length; ++i)
     {
-        var c = s.charCodeAt(i);
+        c = s.charCodeAt(i);
         if(c < 128)
         {
             encodeChar(c, result, special);
@@ -182,7 +183,7 @@ module.exports.escapeString = function(s, special)
     }
 
     return result.join("");
-}
+};
 
 function checkChar(s, pos)
 {
@@ -316,10 +317,10 @@ function decodeChar(s, start, end, nextStart)
 //
 function decodeString(s, start, end, arr)
 {
-    var nextStart = { 'value': 0 };
+    var nextStart = { 'value': 0 }, c, c2, c3;
     while(start < end)
     {
-        var c = decodeChar(s, start, end, nextStart);
+        c = decodeChar(s, start, end, nextStart);
         start = nextStart.value;
 
         if(c < 128)
@@ -328,15 +329,15 @@ function decodeString(s, start, end, arr)
         }
         else if(c > 191 && c < 224)
         {
-            var c2 = decodeChar(s, start, end, nextStart);
+            c2 = decodeChar(s, start, end, nextStart);
             start = nextStart.value;
             arr.push(String.fromCharCode(((c & 31) << 6) | (c2 & 63)));
         }
         else
         {
-            var c2 = decodeChar(s, start, end, nextStart);
+            c2 = decodeChar(s, start, end, nextStart);
             start = nextStart.value;
-            var c3 = decodeChar(s, start, end, nextStart);
+            c3 = decodeChar(s, start, end, nextStart);
             start = nextStart.value;
             arr.push(String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63)));
         }
@@ -358,7 +359,7 @@ module.exports.unescapeString = function(s, start, end)
     decodeString(s, start, end, arr);
 
     return arr.join("");
-}
+};
 
 //
 // Split string helper; returns null for unmatched quotes
@@ -423,7 +424,7 @@ module.exports.splitString = function(str, delim)
     }
 
     return v;
-}
+};
 
 //
 // If a single or double quotation mark is found at the start position,
@@ -452,7 +453,7 @@ module.exports.checkQuote = function(s, start)
         return -1; // Unmatched quote
     }
     return 0; // Not quoted
-}
+};
 
 module.exports.hashCode = function(s)
 {
@@ -465,7 +466,7 @@ module.exports.hashCode = function(s)
     }
 
     return hash;
-}
+};
 
 module.exports.toInt = function(s)
 {
@@ -475,4 +476,4 @@ module.exports.toInt = function(s)
         throw new Error("conversion of `" + s + "' to int failed");
     }
     return n;
-}
+};

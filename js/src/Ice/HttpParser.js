@@ -14,7 +14,7 @@ var WebSocketException = require("./WebSocketException");
 //
 // Parser Type.
 //
-var Type = {}
+var Type = {};
 Type.Unknown = 0;
 Type.Request = 1;
 Type.Response = 2;
@@ -69,7 +69,7 @@ function readString(buffer, offset, length)
     var s = "";
     for(var i = 0; i < length; ++i)
     {
-        s += String.fromCharCode(buffer.read(offset + i));
+        s += String.fromCharCode(buffer.getAt(offset + i));
     }
     return s;
 }
@@ -85,58 +85,58 @@ var HttpParser = function()
     this._status = 0;
     this._reason = null;
     this._state = State.Init;
-    
-    Object.defineProperty(this, "type", {
-        get: function() { return this._type; }
-    });
-    
-    Object.defineProperty(this, "method", {
-        get: function() { 
-            Debug.assert(_type === Type.Request);
-            return this._method; 
-        }
-    });
-    
-    Object.defineProperty(this, "uri", {
-        get: function() { 
-            Debug.assert(_type === Type.Request);
-            return this._uri;
-        }
-    });
-    
-    Object.defineProperty(this, "headers", {
-        get: function() { return this._headers; }
-    });
-    
-    Object.defineProperty(this, "versionMajor", {
-        get: function() { return this._versionMajor; }
-    });
-    
-    Object.defineProperty(this, "versionMinor", {
-        get: function() { return this._versionMinor; }
-    });
-    
-    Object.defineProperty(this, "status", {
-        get: function() { return this._status; }
-    });
-    
-    Object.defineProperty(this, "reason", {
-        get: function() { return this._reason; }
-    });
-}
+};
 
-HttpParser.prototype.getHeader = function(name, value, toLower)
+Object.defineProperty(HttpParser.prototype, "type", {
+    get: function() { return this._type; }
+});
+    
+Object.defineProperty(HttpParser.prototype, "method", {
+    get: function() { 
+        Debug.assert(this._type === Type.Request);
+        return this._method; 
+    }
+});
+
+Object.defineProperty(HttpParser.prototype, "uri", {
+    get: function() { 
+        Debug.assert(this._type === Type.Request);
+        return this._uri;
+    }
+});
+
+Object.defineProperty(HttpParser.prototype, "headers", {
+    get: function() { return this._headers; }
+});
+
+Object.defineProperty(HttpParser.prototype, "versionMajor", {
+    get: function() { return this._versionMajor; }
+});
+
+Object.defineProperty(HttpParser.prototype, "versionMinor", {
+    get: function() { return this._versionMinor; }
+});
+
+Object.defineProperty(HttpParser.prototype, "status", {
+    get: function() { return this._status; }
+});
+
+Object.defineProperty(HttpParser.prototype, "reason", {
+    get: function() { return this._reason; }
+});
+
+HttpParser.prototype.getHeader = function(name, toLower)
 {
     var value = this._headers.find(name.toLowerCase());
-    if(value === null || value === undefined)
+    if(!value)
     {
-        return null;
+        return undefined;
     }
     else
     {
         return toLower ? value.trim().toLowerCase() : value.trim();
     }
-}
+};
 
 HttpParser.prototype.isCompleteMessage = function(buffer, begin, end)
 {
@@ -149,7 +149,7 @@ HttpParser.prototype.isCompleteMessage = function(buffer, begin, end)
     
     while(p < end)
     {
-        c = String.fromCharCode(buffer.read(p));
+        c = String.fromCharCode(buffer.getAt(p));
         if(c !== CR && c !== LF)
         {
             break;
@@ -163,7 +163,7 @@ HttpParser.prototype.isCompleteMessage = function(buffer, begin, end)
     var seenFirst = false;
     while(p < end)
     {
-        c = String.fromCharCode(buffer.read(p++));
+        c = String.fromCharCode(buffer.getAt(p++));
         process.stdout.write(c);
         if(c === LF)
         {
@@ -183,19 +183,22 @@ HttpParser.prototype.isCompleteMessage = function(buffer, begin, end)
     }
 
     return 0;
-}
+};
 
-HttpParser.prototype.parse = function(buffer, begin, end)
+/* jshint -W086 */
+HttpParser.prototype.parse = function(buffer, begin)
 {
     if(this._state == State.Complete)
     {
         this._state = State.Init;
     }
     
-    var p = begin;
-    while(p < buffer.size && this._state != State.Complete)
+    var p = begin,
+        start,
+        value, newValue;
+    while(p < buffer.limit && this._state != State.Complete)
     {
-        var c = String.fromCharCode(buffer.read(p));
+        var c = String.fromCharCode(buffer.getAt(p));
         switch(this._state)
         {
             case State.Init:
@@ -359,9 +362,9 @@ HttpParser.prototype.parse = function(buffer, begin, end)
                         {
                             throw new WebSocketException("malformed header");
                         }
-                        var value = this._headers.get(this._headerName);
+                        value = this._headers.get(this._headerName);
                         Debug.assert(value !== undefined);
-                        var newValue = value + " " + readString(buffer, start, p - start);
+                        newValue = value + " " + readString(buffer, start, p - start);
                         
                         this._headers.set(this._headerName, newValue);
                         this._state = c === CR ? State.HeaderFieldLF : State.HeaderFieldStart;
@@ -403,7 +406,7 @@ HttpParser.prototype.parse = function(buffer, begin, end)
                 if(this._headerName.length === 0)
                 {
                     this._headerName =  readString(buffer, start, p - start).toLowerCase();
-                    var value = this._headers.get(this._headerName);
+                    value = this._headers.get(this._headerName);
                     //
                     // Add a placeholder entry if necessary.
                     //
@@ -714,5 +717,7 @@ HttpParser.prototype.parse = function(buffer, begin, end)
         ++p;
     }
     return this._state === State.Complete;
-}
-module.exports = HttpParser
+};
+/* jshint +W086 */
+
+module.exports = HttpParser;

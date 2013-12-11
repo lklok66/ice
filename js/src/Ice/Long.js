@@ -18,3 +18,5 @@ var Long = function(high, low)
     this.high = high;
     this.low = low;
 };
+
+module.exports = Long;

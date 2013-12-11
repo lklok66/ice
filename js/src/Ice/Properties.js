@@ -30,7 +30,7 @@ var Properties = function(args, defaults)
         // would otherwise be shared between the two PropertiesI object.
         //
         //_properties = new HashMap(pi._properties);
-        for(var e = defaults._properties.entries; e != null; e = e.next)
+        for(var e = defaults._properties.entries; e !== null; e = e.next)
         {
             this._properties.set(e.key, { 'value': e.value.value, 'used': false });
         }
@@ -45,12 +45,12 @@ var Properties = function(args, defaults)
             args.push(v[i]);
         }
     }
-}
+};
 
 Properties.prototype.getProperty = function(key)
 {
     return this.getPropertyWithDefault(key, "");
-}
+};
 
 Properties.prototype.getPropertyWithDefault = function(key, value)
 {
@@ -64,12 +64,12 @@ Properties.prototype.getPropertyWithDefault = function(key, value)
     {
         return value;
     }
-}
+};
 
 Properties.prototype.getPropertyAsInt = function(key)
 {
     return this.getPropertyAsIntWithDefault(key, 0);
-}
+};
 
 Properties.prototype.getPropertyAsIntWithDefault = function(key, value)
 {
@@ -83,12 +83,12 @@ Properties.prototype.getPropertyAsIntWithDefault = function(key, value)
     {
         return value;
     }
-}
+};
 
 Properties.prototype.getPropertyAsList = function(key)
 {
     return this.getPropertyAsListWithDefault(key, 0);
-}
+};
 
 Properties.prototype.getPropertyAsListWithDefault = function(key, value)
 {
@@ -103,14 +103,14 @@ Properties.prototype.getPropertyAsListWithDefault = function(key, value)
         pv.used = true;
 
         var result = StringUtil.splitString(pv.value, ", \t\r\n");
-        if(result == null)
+        if(!result)
         {
             // TODO
             //Ice.Util.getProcessLogger().warning("mismatched quotes in property " + key
             //                                    + "'s value, returning default value");
             return value;
         }
-        if(result.length == 0)
+        if(result.length === 0)
         {
             result = value;
         }
@@ -120,12 +120,12 @@ Properties.prototype.getPropertyAsListWithDefault = function(key, value)
     {
         return value;
     }
-}
+};
 
 Properties.prototype.getPropertiesForPrefix = function(prefix)
 {
     var result = new HashMap();
-    for(var e = this._properties.entries; e != null; e = e.next)
+    for(var e = this._properties.entries; e !== null; e = e.next)
     {
         if(prefix === undefined || prefix === null || e.key.indexOf(prefix) === 0)
         {
@@ -134,14 +134,14 @@ Properties.prototype.getPropertiesForPrefix = function(prefix)
         }
     }
     return result;
-}
+};
 
 Properties.prototype.setProperty = function(key, value)
 {
     //
     // Trim whitespace
     //
-    if(key !== null)
+    if(key)
     {
         key = key.trim();
     }
@@ -149,9 +149,9 @@ Properties.prototype.setProperty = function(key, value)
     //
     // Check if the property is legal.
     //
-    //var logger = Util.getProcessLogger();
-    var logger = null; // TODO
-    if(key === undefined || key === null || key.length === 0)
+    //TODO
+    //var logger = Util.getProcessLogger(); 
+    if(!key || key.length === 0)
     {
         throw new LocalEx.InitializationException("Attempt to set property with empty key");
     }
@@ -187,7 +187,7 @@ Properties.prototype.setProperty = function(key, value)
                     //TODO
                     console.log("deprecated property: " + key);
                     //logger.warning("deprecated property: " + key);
-                    if(PropertyNames.validProps[i][j].deprecatedBy() != null)
+                    if(PropertyNames.validProps[i][j].deprecatedBy())
                     {
                         key = PropertyNames.validProps[i][j].deprecatedBy();
                     }
@@ -227,17 +227,17 @@ Properties.prototype.setProperty = function(key, value)
     {
         this._properties.delete(key);
     }
-}
+};
 
 Properties.prototype.getCommandLineOptions = function()
 {
-    var result = new Array();
-    for(var e = _properties.entries; e != null; e = e.next)
+    var result = [];
+    for(var e = this._properties.entries; e !== null; e = e.next)
     {
         result.push("--" + e.key + "=" + e.pv.value);
     }
     return result;
-}
+};
 
 Properties.prototype.parseCommandLineOptions = function(pfx, options)
 {
@@ -247,15 +247,15 @@ Properties.prototype.parseCommandLineOptions = function(pfx, options)
     }
     pfx = "--" + pfx;
 
-    var result = new Array();
+    var result = [];
     
     var self = this;
     options.forEach(
         function(opt)
         {
-            if(opt.indexOf(pfx) == 0)
+            if(opt.indexOf(pfx) === 0)
             {
-                if(opt.indexOf('=') == -1)
+                if(opt.indexOf('=') === -1)
                 {
                     opt += "=1";
                 }
@@ -268,17 +268,17 @@ Properties.prototype.parseCommandLineOptions = function(pfx, options)
             }
         });
     return result;
-}
+};
 
 Properties.prototype.parseIceCommandLineOptions = function(options)
 {
     var args = options.slice();
     for(var i = 0; i < PropertyNames.clPropNames.length; ++i)
     {
-        args = parseCommandLineOptions(PropertyNames.clPropNames[i], args);
+        args = this.parseCommandLineOptions(PropertyNames.clPropNames[i], args);
     }
     return args;
-}
+};
 
 Properties.prototype.load = function(file)
 {
@@ -305,7 +305,7 @@ Properties.prototype.load = function(file)
             }
         });
     return promise;
-}
+};
 
 Properties.prototype.parse = function(data)
 {
@@ -317,7 +317,7 @@ Properties.prototype.parse = function(data)
     {
         this.parseLine(line);
     }
-}
+};
 
 Properties.ParseStateKey = 0;
 Properties.ParseStateValue = 1;
@@ -357,7 +357,7 @@ Properties.prototype.parseLine = function(line)
                                     break;
 
                                 case ' ':
-                                    if(key.length != 0)
+                                    if(key.length !== 0)
                                     {
                                         whitespace += c;
                                     }
@@ -382,7 +382,7 @@ Properties.prototype.parseLine = function(line)
                     case '\t':
                     case '\r':
                     case '\n':
-                        if(key.length != 0)
+                        if(key.length !== 0)
                         {
                             whitespace += c;
                         }
@@ -419,7 +419,7 @@ Properties.prototype.parseLine = function(line)
                                 case '\\':
                                 case '#':
                                 case '=':
-                                    value += value.length == 0 ? escapedspace : whitespace;
+                                    value += value.length === 0 ? escapedspace : whitespace;
                                     whitespace = "";
                                     escapedspace = "";
                                     value += c;
@@ -431,7 +431,7 @@ Properties.prototype.parseLine = function(line)
                                     break;
 
                                 default:
-                                    value += value.length == 0 ? escapedspace : whitespace;
+                                    value += value.length === 0 ? escapedspace : whitespace;
                                     whitespace = "";
                                     escapedspace = "";
                                     value += '\\';
@@ -441,7 +441,7 @@ Properties.prototype.parseLine = function(line)
                         }
                         else
                         {
-                            value += value.length == 0 ? escapedspace : whitespace;
+                            value += value.length === 0 ? escapedspace : whitespace;
                             value += c;
                         }
                         break;
@@ -450,7 +450,7 @@ Properties.prototype.parseLine = function(line)
                     case '\t':
                     case '\r':
                     case '\n':
-                        if(value.length != 0)
+                        if(value.length !== 0)
                         {
                             whitespace += c;
                         }
@@ -462,7 +462,7 @@ Properties.prototype.parseLine = function(line)
                         break;
 
                     default:
-                        value += value.length == 0 ? escapedspace : whitespace;
+                        value += value.length === 0 ? escapedspace : whitespace;
                         whitespace = "";
                         escapedspace = "";
                         value += c;
@@ -491,17 +491,17 @@ Properties.prototype.parseLine = function(line)
     }
     
     this.setProperty(key, value);
-}
+};
 
-Properties.prototype.clone = function(file)
+Properties.prototype.clone = function()
 {
-    return new PropertiesI(null, this);
-}
+    return new Properties(null, this);
+};
 
 Properties.prototype.getUnusedProperties = function()
 {
-    var unused = new Array();
-    for(var e = _properties.entries; e != null; e = e.next)
+    var unused = [];
+    for(var e = this._properties.entries; e !== null; e = e.next)
     {
         if(!e.pv.used)
         {
@@ -509,11 +509,11 @@ Properties.prototype.getUnusedProperties = function()
         }
     }
     return unused;
-}
+};
 
 Properties.createProperties = function(args, defaults)
 {
     return new Properties(args, defaults);
-}
+};
 
 module.exports = Properties;

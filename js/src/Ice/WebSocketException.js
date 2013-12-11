@@ -13,7 +13,7 @@
 var WebSocketException = function(reason)
 {
     this.reason = reason;
-}
+};
 
 WebSocketException.prototype = new Error();
 WebSocketException.prototype.constructor = WebSocketException;

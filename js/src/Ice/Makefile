@@ -89,14 +89,15 @@ SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --ice -I$(slicedir)
 ifeq ($(OPTIMIZE),yes)
 bundle: $(GEN_SRCS) $(SRCS)
 	@mkdir -p $(libdir)
-	@rm -f $(libdir)/Ice.js
-	@rm -f $(libdir)/Ice.tmp.js
+	@rm -f $(libdir)/Ice.js $(libdir)/Ice.js.gz
 	node $(top_srcdir)/config/makebundle.js . > $(libdir)/Ice.tmp.js
 	java -jar $(CLOSURE_PATH)/compiler.jar $(CLOSUREFLAGS) --js $(libdir)/Ice.tmp.js --js_output_file $(libdir)/Ice.js
+	gzip -c9 $(libdir)/Ice.js > $(libdir)/Ice.js.gz
 	rm -f $(libdir)/Ice.tmp.js
 else
 bundle: $(GEN_SRCS) $(SRCS)
 	@mkdir -p $(libdir)
-	@rm -f $(libdir)/Ice.js
+	@rm -f $(libdir)/Ice.js $(libdir)/Ice.js.gz
 	node $(top_srcdir)/config/makebundle.js . > $(libdir)/Ice.js
+	gzip -c9 $(libdir)/Ice.js > $(libdir)/Ice.js.gz
 endif

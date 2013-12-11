@@ -15,11 +15,11 @@ State.Pending = 0;
 State.Success = 1;
 State.Failed = 2;
 
-function Promise()
+var Promise = function()
 {
     this._state = State.Pending;
     this._listeners = [];
-}
+};
 
 Promise.prototype.then = function(onResponse, onException, onProgress)
 {
@@ -35,12 +35,54 @@ Promise.prototype.then = function(onResponse, onException, onProgress)
             self.resolve();
         }, 0);
     return promise;
-}
+};
 
 Promise.prototype.exception = function(onException)
 {
     return this.then(null, onException);
-}
+};
+
+var resolveImp = function(self, listener)
+{
+    var callback = self._state === State.Success ? listener.onResponse : listener.onException;
+    try
+    {
+        if(typeof callback !== 'function')
+        {
+            listener.promise.setState(self._state, self._args);
+        }
+        else
+        {
+            var result = callback.apply(null, self._args);
+
+            //
+            // Callback can return a new promise.
+            //
+            if(result && typeof result.then === 'function')
+            {
+                result.then(
+                    function()
+                    {
+                        var args = arguments;
+                        listener.promise.succeed.apply(listener.promise, args);
+                    },
+                    function()
+                    {
+                        var args = arguments;
+                        listener.promise.fail.apply(listener.promise, args);
+                    });
+            }
+            else
+            {
+                listener.promise.succeed(result);
+            }
+        }
+    }
+    catch(e)
+    {
+        listener.promise.fail(e);
+    }
+};
 
 Promise.prototype.resolve = function()
 {
@@ -53,52 +95,12 @@ Promise.prototype.resolve = function()
     while((obj = this._listeners.pop()))
     {
         //
-        // We use an anonymous function here to capture the listeners
+        // We use a separate function here to capture the listeners
         // in the loop.
         //
-        (function(self, listener)
-        {
-            var callback = self._state === State.Success ? listener.onResponse : listener.onException;
-            try
-            {
-                if(typeof callback !== 'function')
-                {
-                    listener.promise.setState(self._state, self._args);
-                }
-                else
-                {
-                    var result = callback.apply(null, self._args);
-
-                    //
-                    // Callback can return a new promise.
-                    //
-                    if(result && typeof result.then === 'function')
-                    {
-                        result.then(
-                            function()
-                            {
-                                var args = arguments;
-                                listener.promise.succeed.apply(listener.promise, args);
-                            },
-                            function()
-                            {
-                                var args = arguments;
-                                listener.promise.fail.apply(listener.promise, args);
-                            });
-                    }
-                    else
-                    {
-                        listener.promise.succeed(result);
-                    }
-                }
-            }
-            catch(e)
-            {
-                listener.promise.fail(e);
-            }
-        })(this, obj);
+        resolveImp(this, obj);
     }
-}
+};
 
 Promise.prototype.progress = function()
 {
@@ -138,7 +140,7 @@ Promise.prototype.progress = function()
                 }
             }
         }, 0);
-}
+};
 
 Promise.prototype.setState = function(state, args)
 {
@@ -152,7 +154,7 @@ Promise.prototype.setState = function(state, args)
         var self = this;
         setTimeout(function(){ self.resolve(); }, 0);
     }
-}
+};
 
 Promise.prototype.succeed = function()
 {
@@ -161,7 +163,7 @@ Promise.prototype.succeed = function()
         var args = arguments;
         this.setState(State.Success, args);
     }
-}
+};
 
 Promise.prototype.fail = function()
 {
@@ -170,22 +172,22 @@ Promise.prototype.fail = function()
         var args = arguments;
         this.setState(State.Failed, args);
     }
-}
+};
 
 Promise.prototype.succeeded = function()
 {
     return this._state === State.Success;
-}
+};
 
 Promise.prototype.failed = function()
 {
     return this._state === State.Failed;
-}
+};
 
 Promise.prototype.completed = function()
 {
     return this._state !== State.Pending;
-}
+};
 
 //
 // Create a new promise object that is fulfilled when all the promise arguments
@@ -205,12 +207,16 @@ Promise.all = function()
     var pending = promises.length;
     for(var i = 0; i < promises.length; ++i)
     {
+        //
+        // Create a anonymous function to capture the loop index
+        //
+        
+        /*jshint -W083 */
         (function(j)
         {
             promises[j].then(
                 function()
                 {
-                    var args = arguments;
                     results[j] = arguments;
                     pending--;
                     if(pending === 0)
@@ -220,13 +226,13 @@ Promise.all = function()
                 },
                 function()
                 {
-                    var args = arguments;
-                    promise.fail.apply(promise, args)
+                    promise.fail.apply(promise, arguments);
                 });
-        })(i);
+        }(i));
+        /*jshint +W083 */
     }
     return promise;
-}
+};
 
 //
 // Create a new promise object and call function fn with
@@ -238,7 +244,7 @@ Promise.deferred = function(fn)
     var promise = new Promise();
     fn.apply(null, [promise]);
     return promise;
-}
+};
 
 //
 // Create a new promise, call succeed with the received arguments,
@@ -250,7 +256,7 @@ Promise.succeed = function()
     var p = new Promise();
     p.succeed.apply(p, args);
     return p;
-}
+};
 
 //
 // Create a new promise, call fail with the received arguments,
@@ -262,6 +268,6 @@ Promise.fail = function()
     var p = new Promise();
     p.fail.apply(p, args);
     return p;
-}
+};
 
 module.exports = Promise;

@@ -25,7 +25,7 @@ CLOSUREFLAGS = --language_in ECMASCRIPT5
 #
 # jslint flags
 #
-LINTFLAGS = --white true --sloppy true --nomen true --plusplus true --bitwise true --todo true --noempty true
+LINTFLAGS = --verbose
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
@@ -76,7 +76,7 @@ endif
 	$(SLICE2JS) $(SLICE2JSFLAGS) $<
 
 lint: $(TARGETS)
-	jslint $(LINTFLAGS) $(TARGETS)
+	jshint $(LINTFLAGS) $(TARGETS)
         
 .PHONY : lint
 

@@ -120,7 +120,7 @@ namespace IceInternal
 jsPreamble = commonPreamble + """
 var Property = require("./Property");
 
-var %(classname)s = {}
+var %(classname)s = {};
 """
 
 def usage():
@@ -536,8 +536,10 @@ class JSPropertyHandler(PropertyHandler):
     def startFiles(self):
         self.srcFile = file(self.className + ".js", "wb")
         self.srcFile.write(jsPreamble % {'inputfile' : self.inputfile, 'classname' : self.className})
+        self.srcFile.write("\n/* jshint -W044*/\n\n");
 
     def closeFiles(self):
+        self.srcFile.write("/* jshint +W044*/\n\n");
         self.srcFile.write("%s.validProps =\n" % (self.className))
         self.srcFile.write("[\n")
         for s in self.sections:
@@ -550,7 +552,7 @@ class JSPropertyHandler(PropertyHandler):
             self.srcFile.write("    \"%s\",\n" % s)
         self.srcFile.write("];\n\n")
         
-        self.srcFile.write("module.exports = %s\n" % (self.className));
+        self.srcFile.write("module.exports = %s;\n" % (self.className));
         self.srcFile.close()
 
     def fix(self, propertyName):

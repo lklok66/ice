@@ -55,7 +55,8 @@ var TraceLevels = function(properties)
         'slicingCat': {
             get: function() { return slicingCat; }
         }
-    }
-}
+    };
+};
+
 
 module.exports = TraceLevels;

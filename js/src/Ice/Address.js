@@ -11,6 +11,6 @@ var Address = function(host, port)
 {
     this.host = host;
     this.port = port;
-}
+};
 
 module.exports = Address;

@@ -21,10 +21,12 @@ module.exports.clone = function(arr)
     {
         return arr.slice();
     }
-}
+};
 
 module.exports.equals = function(v1, v2, equalFn)
 {
+    var i, length;
+    
     if(v1.length != v2.length)
     {
         return false;
@@ -32,7 +34,7 @@ module.exports.equals = function(v1, v2, equalFn)
 
     if(equalFn !== undefined && equalFn !== null)
     {
-        for(var i = 0; i < v1.length; ++i)
+        for(i = 0, length = v1.length; i < length; ++i)
         {
             if(!equalFn.call(equalFn, v1[i], v2[i]))
             {
@@ -42,7 +44,7 @@ module.exports.equals = function(v1, v2, equalFn)
     }
     else
     {
-        for(var i = 0; i < v1.length; ++i)
+        for(i = 0, length = v1.length; i < length; ++i)
         {
             if(v1[i] != v2[i])
             {
@@ -52,7 +54,7 @@ module.exports.equals = function(v1, v2, equalFn)
     }
 
     return true;
-}
+};
 
 module.exports.shuffle = function(arr)
 {
@@ -63,7 +65,7 @@ module.exports.shuffle = function(arr)
         arr[i - 1] = arr[rand];
         arr[rand] = e;
     }
-}
+};
 
 module.exports.indexOf = function(arr, elem, equalFn)
 {
@@ -86,7 +88,7 @@ module.exports.indexOf = function(arr, elem, equalFn)
     }
 
     return -1;
-}
+};
 
 module.exports.filter = function(arr, includeFn, obj)
 {
@@ -100,4 +102,4 @@ module.exports.filter = function(arr, includeFn, obj)
         }
     }
     return result;
-}
+};
