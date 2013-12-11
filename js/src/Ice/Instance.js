@@ -17,6 +17,7 @@ var IdentityUtil = require("./IdentityUtil");
 var LocatorManager = require("./LocatorManager");
 var Logger = require("./Logger");
 var Network = require("./Network");
+var ObjectFactoryManager = require("./ObjectFactoryManager");
 var Promise = require("./Promise");
 var Properties = require("./Properties");
 var ProxyFactory = require("./ProxyFactory");
@@ -136,7 +137,7 @@ Instance.prototype.connectionMonitor = function()
 
     Debug.assert(this._connectionMonitor !== null);
     return this._connectionMonitor;
-}
+}*/
 
 Instance.prototype.servantFactoryManager = function()
 {
@@ -149,6 +150,7 @@ Instance.prototype.servantFactoryManager = function()
     return this._servantFactoryManager;
 }
 
+/* TODO
 Instance.prototype.objectAdapterFactory = function()
 {
     if(this._state === StateDestroyed)
@@ -401,9 +403,10 @@ Instance.prototype.finishSetup = function(communicator, promise)
 
         /* TODO
         this._outgoingConnectionFactory = new OutgoingConnectionFactory(communicator, this);
-
+        */
         this._servantFactoryManager = new ObjectFactoryManager();
 
+        /* TODO
         this._objectAdapterFactory = new ObjectAdapterFactory(this, communicator);
 
         this._endpointHostResolver = new EndpointHostResolver(this);

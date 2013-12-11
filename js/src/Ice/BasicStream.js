@@ -64,13 +64,12 @@ SequencePatcher.prototype.patch = function(v)
     if(v !== null)
     {
         //
-        // Raise ClassCastException if the element doesn't match the expected type.
+        // Raise TypeError if the element doesn't match the expected type.
         //
         if(!(v instanceof this._cls))
         {
-            // TODO use ClassCastException?
-            throw new Error("expected element of type " + this._type + " but received " +
-                            v.prototype.constructor.name);
+            throw new TypeError("expected element of type " + this._type + " but received " +
+                                v.prototype.constructor.name);
         }
     }
 
@@ -86,7 +85,6 @@ SequencePatcher.prototype.invoke = function(v)
 {
     this.patch(v);
 };
-
 
 var EncapsDecoder = function(stream, encaps, sliceObjects, f)
 {
@@ -111,7 +109,7 @@ EncapsDecoder.prototype.readPendingObjects = function()
 EncapsDecoder.prototype.readTypeId = function(isIndex)
 {
     var typeId, index;
-    if(this._typeIdMap === null) // Lazy initialization
+    if(this._typeIdMap === undefined) // Lazy initialization
     {
         this._typeIdMap = new HashMap(); // java.util.TreeMap<Integer, String>();
     }
@@ -120,7 +118,7 @@ EncapsDecoder.prototype.readTypeId = function(isIndex)
     {
         index = this._stream.readSize();
         typeId = this._typeIdMap.get(index);
-        if(typeId === null)
+        if(typeId === undefined)
         {
             throw new LocalEx.UnmarshalOutOfBoundsException();
         }
@@ -926,7 +924,7 @@ EncapsDecoder11.prototype.skipSlice = function()
     info.isLastSlice = (this._current.sliceFlags & FLAG_IS_LAST_SLICE) !== 0;
     
     b = this._stream.b;
-    end = b.position();
+    end = b.position;
     dataEnd = end;
     if(info.hasOptionalMembers)
     {
@@ -2008,7 +2006,7 @@ BasicStream.prototype.startReadEncaps = function()
     curr.next = this._readEncapsStack;
     this._readEncapsStack = curr;
 
-    this._readEncapsStack.start = this._buf.b.position();
+    this._readEncapsStack.start = this._buf.position;
 
     //
     // I don't use readSize() and writeSize() for encapsulations,
@@ -2022,7 +2020,7 @@ BasicStream.prototype.startReadEncaps = function()
     {
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
-    if(sz - 4 > this._buf.b.remaining())
+    if(sz - 4 > this._buf.remaining)
     {
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
@@ -2043,14 +2041,14 @@ BasicStream.prototype.endReadEncaps = function()
     if(!this._readEncapsStack.encoding_1_0)
     {
         this.skipOpts();
-        if(this._buf.b.position() !== this._readEncapsStack.start + this._readEncapsStack.sz)
+        if(this._buf.position !== this._readEncapsStack.start + this._readEncapsStack.sz)
         {
             throw new LocalEx.EncapsulationException();
         }
     }
-    else if(this._buf.b.position() !== this._readEncapsStack.start + this._readEncapsStack.sz)
+    else if(this._buf.position !== this._readEncapsStack.start + this._readEncapsStack.sz)
     {
-        if(this._buf.b.position() + 1 !== this._readEncapsStack.start + this._readEncapsStack.sz)
+        if(this._buf.position + 1 !== this._readEncapsStack.start + this._readEncapsStack.sz)
         {
             throw new LocalEx.EncapsulationException();
         }
@@ -2062,15 +2060,14 @@ BasicStream.prototype.endReadEncaps = function()
         // in the encapsulation.
         //
         
-        // TODO
-        /*try
+        try
         {
-            _buf.b.get();
+            this._buf.get();
         }
-        catch(java.nio.BufferUnderflowException ex)
+        catch(ex)
         {
             throw new LocalEx.UnmarshalOutOfBoundsException();
-        }*/
+        }
     }
 
     var curr = this._readEncapsStack;
@@ -2089,7 +2086,7 @@ BasicStream.prototype.skipEmptyEncaps = function(encoding)
         throw new LocalEx.EncapsulationException();
     }
 
-    pos = this._buf.b.position();
+    pos = this._buf.position;
     if(pos + 2 > this._buf.size())
     {
         throw new LocalEx.UnmarshalOutOfBoundsException();
@@ -2122,7 +2119,7 @@ BasicStream.prototype.readEncaps = function(encoding)
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 
-    if(sz - 4 > this._buf.b.remaining())
+    if(sz - 4 > this._buf.remaining)
     {
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
@@ -2137,18 +2134,14 @@ BasicStream.prototype.readEncaps = function(encoding)
         this._buf.position = this._buf.position - 4;
     }
 
-    //TODO
-    /*
-    var v = new byte[sz];
     try
     {
-        v =_buf.b.get(v);
-        return v;
+        return this._buf.getArray(sz);
     }
-    catch(java.nio.BufferUnderflowException ex)
+    catch(ex)
     {
         throw new LocalEx.UnmarshalOutOfBoundsException();
-    }*/
+    }
 };
 
 BasicStream.prototype.getReadEncoding = function()
@@ -2178,8 +2171,6 @@ BasicStream.prototype.skipEncaps = function()
     }
     catch(ex)
     {
-        //TODO What exception can be throw here?
-        Debug.assert(ex instanceof LocalEx.IllegalArgumentException);
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
     return encoding;
@@ -2294,7 +2285,6 @@ BasicStream.prototype.readSize = function()
     }
     catch(ex)
     {
-        //TODO assert is BufferUnderflowException?
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -2383,7 +2373,6 @@ BasicStream.prototype.readBlob = function(sz)
     }
     catch(ex)
     {
-        //TODO assert java.nio.BufferUnderflowException
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -2478,7 +2467,6 @@ BasicStream.prototype.readByte = function()
     }
     catch(ex)
     {
-        //TODO assert BufferUnderflowException?
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -2505,7 +2493,6 @@ BasicStream.prototype.readByteSeq = function()
     }
     catch(ex)
     {
-        //TODO assert java.nio.BufferUnderflowException 
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -2618,7 +2605,6 @@ BasicStream.prototype.readBool = function()
     }
     catch(ex)
     {
-        // TODO assert BufferUnderflowException
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -2652,7 +2638,6 @@ BasicStream.prototype.readBoolSeq = function()
     }
     catch(ex)
     {
-        //TODO assert BufferUnderflowException
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -2739,7 +2724,6 @@ BasicStream.prototype.readShort = function()
     }
     catch(ex)
     {
-        // TODO assert BufferUnderflowException?
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -2767,7 +2751,6 @@ BasicStream.prototype.readShortSeq = function()
     }
     catch(ex)
     {
-        // TODO assert BufferUnderflowException ?
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -2860,7 +2843,6 @@ BasicStream.prototype.readInt = function()
     }
     catch(ex)
     {
-        //TODO assert BufferUnderflowException 
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -2888,7 +2870,6 @@ BasicStream.prototype.readIntSeq = function()
     }
     catch(ex)
     {
-        // TODO assert BufferUnderflowException?
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -3090,7 +3071,6 @@ BasicStream.prototype.readFloat = function()
     }
     catch(ex)
     {
-        //TODO assert BufferUnderflowException?
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -3118,7 +3098,6 @@ BasicStream.prototype.readFloatSeq = function()
     }
     catch(ex)
     {
-        // TODO BufferUnderflowException
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -3205,7 +3184,6 @@ BasicStream.prototype.readDouble = function()
     }
     catch(ex)
     {
-        //TODO assert BufferUnderflowException
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -3233,7 +3211,6 @@ BasicStream.prototype.readDoubleSeq = function()
     }
     catch(ex)
     {
-        //TODO assert BufferUnderflowException?
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
@@ -3337,7 +3314,7 @@ BasicStream.prototype.readString = function()
     //
     // Check the buffer has enough bytes to read.
     //
-    if(this._buf.b.remaining < len)
+    if(this._buf.remaining < len)
     {
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
@@ -3348,7 +3325,6 @@ BasicStream.prototype.readString = function()
     }
     catch(ex)
     {
-        // TODO assert BufferUnderflowException?
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
 };
