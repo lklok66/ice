@@ -1,0 +1,80 @@
+# **********************************************************************
+#
+# Copyright (c) 2003-2013 ZeroC, Inc. All rights reserved.
+#
+# This copy of Ice is licensed to you under the terms described in the
+# ICE_LICENSE file included in this distribution.
+#
+# **********************************************************************
+
+#
+# Define to yes for an optimized build.
+#
+OPTIMIZE ?= no
+
+#
+# Google Closure Compiler
+#
+CLOSURE_PATH=/opt/closure
+
+#
+# jslint flags
+#
+LINTFLAGS = --white true --sloppy true --nomen true --plusplus true --bitwise true --todo true --noempty true
+
+# ----------------------------------------------------------------------
+# Don't change anything below this line!
+# ----------------------------------------------------------------------
+
+#
+# Common definitions
+#
+ice_language = js
+slice_translator = slice2js
+
+bindir = $(top_srcdir)/bin
+libdir = $(top_srcdir)/lib
+
+ifeq ($(shell test -f $(top_srcdir)/config/Make.common.rules && echo 0),0)
+    include $(top_srcdir)/config/Make.common.rules
+else
+    include $(top_srcdir)/../config/Make.common.rules
+endif
+
+
+ifdef ice_src_dist
+    ifeq ($(ice_cpp_dir), $(ice_dir)/cpp)
+        SLICE2JS 	= $(ice_cpp_dir)/bin/slice2js
+        SLICEPARSERLIB 	= $(ice_cpp_dir)/lib/$(call mklibfilename,Slice,$(VERSION))
+    else
+        SLICE2JS 	= $(ice_cpp_dir)/$(binsubdir)/slice2js
+        SLICEPARSERLIB 	= $(ice_cpp_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
+    endif
+else
+    SLICE2JS 		= $(ice_dir)/$(binsubdir)/slice2js
+    SLICEPARSERLIB 	= $(ice_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
+endif
+
+TARGETS = $(GEN_SRCS)
+
+all:: $(TARGETS)
+
+ifneq ($(GEN_SRCS),)
+clean::
+	rm -rf $(GEN_SRCS)
+else
+clean::
+endif
+
+%.js: $(SDIR)/%.ice $(SLICE2JS) $(SLICEPARSERLIB)
+	rm -f $(*F).js
+	$(SLICE2JS) $(SLICE2JSFLAGS) $<
+
+lint: $(TARGETS)
+	jslint $(LINTFLAGS) $(TARGETS)
+        
+.PHONY : lint
+
+
+EVERYTHING		= all clean
+EVERYTHING_EXCEPT_ALL	= clean

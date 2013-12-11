@@ -1,0 +1,23 @@
+# Ignore generated files
+BuiltinSequences.ice
+Connection.ice
+Current.ice
+Endpoint.ice
+EndpointTypes.ice
+FacetMap.ice
+Identity.ice
+ImplicitContext.ice
+Instrumentation.ice
+LocalException.ice
+Locator.ice
+Metrics.ice
+ObjectAdapter.ice
+ObjectFactory.ice
+Plugin.ice
+Process.ice
+PropertiesAdmin.ice
+Router.ice
+ServantLocator.ice
+SliceChecksumDict.ice
+Stats.ice
+Version.ice
