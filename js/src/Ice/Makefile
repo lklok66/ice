@@ -14,22 +14,15 @@ SLICES = $(SDIR)/BuiltinSequences.ice \
 	$(SDIR)/Current.ice \
 	$(SDIR)/Endpoint.ice \
 	$(SDIR)/EndpointTypes.ice \
-	$(SDIR)/FacetMap.ice \
 	$(SDIR)/Identity.ice \
-	$(SDIR)/ImplicitContext.ice \
-	$(SDIR)/Instrumentation.ice \
 	$(SDIR)/LocalException.ice \
 	$(SDIR)/Locator.ice \
 	$(SDIR)/Metrics.ice \
-	$(SDIR)/ObjectAdapter.ice \
-	$(SDIR)/ObjectFactory.ice \
-	$(SDIR)/Plugin.ice \
 	$(SDIR)/Process.ice \
 	$(SDIR)/PropertiesAdmin.ice \
 	$(SDIR)/Router.ice \
 	$(SDIR)/ServantLocator.ice \
 	$(SDIR)/SliceChecksumDict.ice \
-	$(SDIR)/Stats.ice \
 	$(SDIR)/Version.ice
 	
 SDIR	= $(slicedir)/Ice

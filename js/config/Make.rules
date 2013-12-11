@@ -55,7 +55,7 @@ else
     SLICEPARSERLIB 	= $(ice_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
 endif
 
-TARGETS = $(GEN_SRCS)
+TARGETS = $(GEN_SRCS) $(SRCS)
 
 all:: $(TARGETS)
 
