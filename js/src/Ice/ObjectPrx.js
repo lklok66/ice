@@ -594,8 +594,6 @@ ObjectPrx.prototype.__handleException = function(handler, ex, interval, cnt)
             throw e;
         }
     }
-
-    return 0; // Satisfies the compiler.
 }
 
 ObjectPrx.prototype.__handleExceptionWrapper = function(handler, ex)

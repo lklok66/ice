@@ -17,6 +17,11 @@ OPTIMIZE ?= no
 #
 CLOSURE_PATH=/opt/closure
 
+
+#
+# Closure Flags
+#
+CLOSUREFLAGS = --language_in ECMASCRIPT5
 #
 # jslint flags
 #

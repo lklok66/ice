@@ -66,21 +66,17 @@ LocatorInfo.prototype.getLocatorRegistry = function()
     {
         return Promise.succeed(this._locatorRegistry);
     }
-    else
-    {
-        var self = this;
-        return this._locator.getRegistry().then(
-            function(reg)
-            {
-                //
-                // The locator registry can't be located.
-                //
-                self._locatorRegistry = LocatorRegistryPrx.uncheckedCast(reg.ice_locator(null));
-                return self._locatorRegistry;
-            });
-    }
 
-    return promise;
+    var self = this;
+    return this._locator.getRegistry().then(
+        function(reg)
+        {
+            //
+            // The locator registry can't be located.
+            //
+            self._locatorRegistry = LocatorRegistryPrx.uncheckedCast(reg.ice_locator(null));
+            return self._locatorRegistry;
+        });
 }
 
 LocatorInfo.prototype.getEndpoints = function(ref, wellKnownRef, ttl)

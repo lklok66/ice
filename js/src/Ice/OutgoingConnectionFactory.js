@@ -245,7 +245,7 @@ OutgoingConnectionFactory.prototype.flushAsyncBatchRequests = function(outAsync)
 
 OutgoingConnectionFactory.prototype.applyOverrides = function(endpts)
 {
-    var defaultsAndOverrides:DefaultsAndOverrides = this._instance.defaultsAndOverrides();
+    var defaultsAndOverrides = this._instance.defaultsAndOverrides();
     var endpoints = [];
     for(var i = 0; i < endpts.length; ++i)
     {
@@ -274,7 +274,7 @@ OutgoingConnectionFactory.prototype.findConnectionByEndpoint = function(endpoint
         throw new LocalEx.CommunicatorDestroyedException();
     }
 
-    var defaultsAndOverrides:DefaultsAndOverrides = this._instance.defaultsAndOverrides();
+    var defaultsAndOverrides = this._instance.defaultsAndOverrides();
     Debug.assert(endpoints.length > 0);
 
     for(var i = 0; i < endpoints.length; ++i)
@@ -501,7 +501,7 @@ OutgoingConnectionFactory.prototype.finishGetConnection = function(endpoints, en
     }
 
     var compress;
-    var defaultsAndOverrides:DefaultsAndOverrides = this._instance.defaultsAndOverrides();
+    var defaultsAndOverrides = this._instance.defaultsAndOverrides();
     if(defaultsAndOverrides.overrideCompress)
     {
         compress = defaultsAndOverrides.overrideCompressValue;
@@ -679,7 +679,7 @@ OutgoingConnectionFactory.prototype.handleConnectionException = function(ex, has
 
 OutgoingConnectionFactory.prototype.handleException = function(ex, hasMore)
 {
-    var traceLevels:TraceLevels = this._instance.traceLevels();
+    var traceLevels = this._instance.traceLevels();
     if(traceLevels.retry >= 2)
     {
         var s = [];

@@ -170,8 +170,8 @@ ProxyFactory.prototype.checkRetryAfterException = function(ex, ref, sleepInterva
 
             if(traceLevels.retry >= 1)
             {
-                const s = "retrying operation call to add proxy to router\n" + ExUtil.toString(ex);
-                logger.trace(traceLevels.retryCat, s);
+                logger.trace(traceLevels.retryCat, "retrying operation call to add proxy to router\n" +
+                                                   ExUtil.toString(ex));
             }
 
             if(sleepInterval !== null)
