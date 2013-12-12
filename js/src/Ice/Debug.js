@@ -12,7 +12,7 @@ var AssertionFailedException = function(message)
     Error.call(this);
     Error.captureStackTrace(this, this.constructor);
     this.message = message;
-}
+};
 
 AssertionFailedException.prototype = new Error();
 
@@ -30,4 +30,4 @@ module.exports.assert = function(b, msg)
     {
         throw new AssertionFailedException(msg === undefined ? "assertion failed" : msg);
     }
-}
+};

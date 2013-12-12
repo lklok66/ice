@@ -27,13 +27,13 @@ var LocatorInfo = function(locator, table, background)
     this._adapterRequests = new HashMap(); // Map<String, Request>
     this._objectRequests = new HashMap(); // Map<Ice.Identity, Request>
     this._objectRequests.comparator = HashMap.compareEquals;
-}
+};
 
 LocatorInfo.prototype.destroy = function()
 {
     this._locatorRegistry = null;
     this._table.clear();
-}
+};
 
 LocatorInfo.prototype.equals = function(rhs)
 {
@@ -48,17 +48,17 @@ LocatorInfo.prototype.equals = function(rhs)
     }
 
     return false;
-}
+};
 
 LocatorInfo.prototype.hashCode = function()
 {
      return this._locator.hashCode();
-}
+};
 
 LocatorInfo.prototype.getLocator = function()
 {
     return this._locator;
-}
+};
 
 LocatorInfo.prototype.getLocatorRegistry = function()
 {
@@ -77,7 +77,7 @@ LocatorInfo.prototype.getLocatorRegistry = function()
             self._locatorRegistry = LocatorRegistryPrx.uncheckedCast(reg.ice_locator(null));
             return self._locatorRegistry;
         });
-}
+};
 
 LocatorInfo.prototype.getEndpoints = function(ref, wellKnownRef, ttl)
 {
@@ -138,7 +138,7 @@ LocatorInfo.prototype.getEndpoints = function(ref, wellKnownRef, ttl)
     promise.succeed(endpoints, true);
 
     return promise;
-}
+};
 
 LocatorInfo.prototype.clearCache = function(ref)
 {
@@ -171,7 +171,7 @@ LocatorInfo.prototype.clearCache = function(ref)
             }
         }
     }
-}
+};
 
 LocatorInfo.prototype.trace = function(msg, ref, endpoints)
 {
@@ -204,14 +204,14 @@ LocatorInfo.prototype.trace = function(msg, ref, endpoints)
     }
 
     ref.getInstance().initializationData().logger.trace(ref.getInstance().traceLevels().locationCat, s.join(""));
-}
+};
 
 LocatorInfo.prototype.getEndpointsException = function(ref, exc)
 {
     Debug.assert(ref.isIndirect());
 
     var instance = ref.getInstance();
-
+    var s, e;
     try
     {
         throw exc;
@@ -222,14 +222,14 @@ LocatorInfo.prototype.getEndpointsException = function(ref, exc)
         {
             if(instance.traceLevels().location >= 1)
             {
-                var s = [];
+                s = [];
                 s.push("adapter not found\n");
                 s.push("adapter = ");
                 s.push(ref.getAdapterId());
                 instance.initializationData().logger.trace(instance.traceLevels().locationCat, s.join(""));
             }
 
-            var e = new LocalEx.NotRegisteredException();
+            e = new LocalEx.NotRegisteredException();
             e.kindOfObject = "object adapter";
             e.id = ref.getAdapterId();
             throw e;
@@ -238,14 +238,14 @@ LocatorInfo.prototype.getEndpointsException = function(ref, exc)
         {
             if(instance.traceLevels().location >= 1)
             {
-                var s = [];
+                s = [];
                 s.push("object not found\n");
                 s.push("object = ");
                 s.push(instance.identityToString(ref.getIdentity()));
                 instance.initializationData().logger.trace(instance.traceLevels().locationCat, s.join(""));
             }
 
-            var e = new LocalEx.NotRegisteredException();
+            e = new LocalEx.NotRegisteredException();
             e.kindOfObject = "object";
             e.id = instance.identityToString(ref.getIdentity());
             throw e;
@@ -258,7 +258,7 @@ LocatorInfo.prototype.getEndpointsException = function(ref, exc)
         {
             if(instance.traceLevels().location >= 1)
             {
-                var s = [];
+                s = [];
                 s.push("couldn't contact the locator to retrieve adapter endpoints\n");
                 if(ref.getAdapterId().length > 0)
                 {
@@ -282,7 +282,7 @@ LocatorInfo.prototype.getEndpointsException = function(ref, exc)
             Debug.assert(false);
         }
     }
-}
+};
 
 LocatorInfo.prototype.getEndpointsTrace = function(ref, endpoints, cached)
 {
@@ -318,7 +318,7 @@ LocatorInfo.prototype.getEndpointsTrace = function(ref, endpoints, cached)
         }
         instance.initializationData().logger.trace(instance.traceLevels().locationCat, s.join(""));
     }
-}
+};
 
 LocatorInfo.prototype.getAdapterRequest = function(ref)
 {
@@ -340,7 +340,7 @@ LocatorInfo.prototype.getAdapterRequest = function(ref)
     request = new AdapterRequest(this, ref);
     this._adapterRequests.set(ref.getAdapterId(), request);
     return request;
-}
+};
 
 LocatorInfo.prototype.getObjectRequest = function(ref)
 {
@@ -362,7 +362,7 @@ LocatorInfo.prototype.getObjectRequest = function(ref)
     request = new ObjectRequest(this, ref);
     this._objectRequests.set(ref.getIdentity(), request);
     return request;
-}
+};
 
 LocatorInfo.prototype.finishRequest = function(ref, wellKnownRefs, proxy, notRegistered)
 {
@@ -408,7 +408,7 @@ LocatorInfo.prototype.finishRequest = function(ref, wellKnownRefs, proxy, notReg
         Debug.assert(this._objectRequests.has(ref.getIdentity()));
         this._objectRequests.delete(ref.getIdentity());
     }
-}
+};
 
 module.exports = LocatorInfo;
 
@@ -417,7 +417,7 @@ var RequestCallback = function(ref, ttl, promise)
     this._ref = ref;
     this._ttl = ttl;
     this._promise = promise;
-}
+};
 
 RequestCallback.prototype.response = function(locatorInfo, proxy)
 {
@@ -473,7 +473,7 @@ RequestCallback.prototype.response = function(locatorInfo, proxy)
     {
         this._promise.succeed(endpoints === null ? [] : endpoints, false);
     }
-}
+};
 
 RequestCallback.prototype.exception = function(locatorInfo, exc)
 {
@@ -488,7 +488,7 @@ RequestCallback.prototype.exception = function(locatorInfo, exc)
             this._promise.fail(ex);
         }
     }
-}
+};
 
 var Request = function(locatorInfo, ref)
 {
@@ -501,7 +501,7 @@ var Request = function(locatorInfo, ref)
     this._response = false;
     this._proxy = null;
     this._exception = null;
-}
+};
 
 Request.prototype.addCallback = function(ref, wellKnownRef, ttl, promise)
 {
@@ -510,7 +510,7 @@ Request.prototype.addCallback = function(ref, wellKnownRef, ttl, promise)
     {
         callback.response(this._locatorInfo, this._proxy);
     }
-    else if(this._exception != null)
+    else if(this._exception !== null)
     {
         callback.exception(this._locatorInfo, this._exception);
     }
@@ -527,7 +527,7 @@ Request.prototype.addCallback = function(ref, wellKnownRef, ttl, promise)
             this.send();
         }
     }
-}
+};
 
 Request.prototype.response = function(proxy)
 {
@@ -538,7 +538,7 @@ Request.prototype.response = function(proxy)
     {
         this._callbacks[i].response(this._locatorInfo, proxy);
     }
-}
+};
 
 Request.prototype.exception = function(ex)
 {
@@ -548,7 +548,7 @@ Request.prototype.exception = function(ex)
     {
         this._callbacks[i].exception(this._locatorInfo, ex);
     }
-}
+};
 
 Request.prototype.send = function()
 {
@@ -556,13 +556,13 @@ Request.prototype.send = function()
     // Abstract
     //
     Debug.assert(false);
-}
+};
 
 var ObjectRequest = function(locatorInfo, reference)
 {
     Request.call(this, locatorInfo, reference);
     Debug.assert(reference.isWellKnown());
-}
+};
 
 ObjectRequest.prototype = new Request();
 ObjectRequest.prototype.constructor = ObjectRequest;
@@ -586,13 +586,13 @@ ObjectRequest.prototype.send = function()
     {
         this.exception(ex);
     }
-}
+};
 
 var AdapterRequest = function(locatorInfo, reference)
 {
     Request.call(this, locatorInfo, reference);
     Debug.assert(reference.isIndirect());
-}
+};
 
 AdapterRequest.prototype = new Request();
 AdapterRequest.prototype.constructor = AdapterRequest;
@@ -616,4 +616,4 @@ AdapterRequest.prototype.send = function()
     {
         this.exception(ex);
     }
-}
+};

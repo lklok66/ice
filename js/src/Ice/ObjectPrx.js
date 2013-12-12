@@ -22,22 +22,22 @@ var LocalEx = require("./LocalException").Ice;
 var ObjectPrx = function()
 {
     this._reference = null;
-}
+};
 
 ObjectPrx.prototype.hashCode = function(r)
 {
     return this._reference.hashCode();
-}
+};
 
 ObjectPrx.prototype.ice_getCommunicator = function()
 {
     return this._reference.getCommunicator();
-}
+};
 
 ObjectPrx.prototype.toString = function()
 {
     return this._reference.toString();
-}
+};
 
 ObjectPrx.prototype.ice_isA = function(__id, __context)
 {
@@ -59,7 +59,7 @@ ObjectPrx.prototype.ice_isA = function(__id, __context)
     }
     return __result;
     */
-}
+};
 
 ObjectPrx.prototype.ice_ping = function(__context)
 {
@@ -78,7 +78,7 @@ ObjectPrx.prototype.ice_ping = function(__context)
     }
     return __result;
     */
-}
+};
 
 ObjectPrx.prototype.ice_ids = function(__context)
 {
@@ -98,7 +98,7 @@ ObjectPrx.prototype.ice_ids = function(__context)
     }
     return __result;
     */
-}
+};
 
 ObjectPrx.prototype._ice_ids_completed = function(__oa, __cb, __excb, __cbctx)
 {
@@ -119,7 +119,7 @@ ObjectPrx.prototype._ice_ids_completed = function(__oa, __cb, __excb, __cbctx)
     {
         __is.skipEncaps();
     }
-}
+};
 
 ObjectPrx.prototype.ice_id = function(__context)
 {
@@ -139,12 +139,12 @@ ObjectPrx.prototype.ice_id = function(__context)
     }
     return __result;
     */
-}
+};
 
 ObjectPrx.prototype.ice_getIdentity = function()
 {
     return this._reference.getIdentity().clone();
-}
+};
 
 ObjectPrx.prototype.ice_identity = function(newIdentity)
 {
@@ -162,22 +162,22 @@ ObjectPrx.prototype.ice_identity = function(newIdentity)
         proxy.__setup(this._reference.changeIdentity(newIdentity));
         return proxy;
     }
-}
+};
 
 ObjectPrx.prototype.ice_getContext = function()
 {
     return new HashMap(this._reference.getContext());
-}
+};
 
 ObjectPrx.prototype.ice_context = function(newContext)
 {
     return this.__newInstance(this._reference.changeContext(newContext));
-}
+};
 
 ObjectPrx.prototype.ice_getFacet = function()
 {
     return this._reference.getFacet();
-}
+};
 
 ObjectPrx.prototype.ice_facet = function(newFacet)
 {
@@ -196,12 +196,12 @@ ObjectPrx.prototype.ice_facet = function(newFacet)
         proxy.__setup(this._reference.changeFacet(newFacet));
         return proxy;
     }
-}
+};
 
 ObjectPrx.prototype.ice_getAdapterId = function()
 {
     return this._reference.getAdapterId();
-}
+};
 
 ObjectPrx.prototype.ice_adapterId = function(newAdapterId)
 {
@@ -218,12 +218,12 @@ ObjectPrx.prototype.ice_adapterId = function(newAdapterId)
     {
         return this.__newInstance(this._reference.changeAdapterId(newAdapterId));
     }
-}
+};
 
 ObjectPrx.prototype.ice_getEndpoints = function()
 {
     return ArrayUtil.clone(this._reference.getEndpoints());
-}
+};
 
 ObjectPrx.prototype.ice_endpoints = function(newEndpoints)
 {
@@ -240,12 +240,12 @@ ObjectPrx.prototype.ice_endpoints = function(newEndpoints)
     {
         return this.__newInstance(this._reference.changeEndpoints(newEndpoints));
     }
-}
+};
 
 ObjectPrx.prototype.ice_getLocatorCacheTimeout = function()
 {
     return this._reference.getLocatorCacheTimeout();
-}
+};
 
 ObjectPrx.prototype.ice_locatorCacheTimeout = function(newTimeout)
 {
@@ -257,12 +257,12 @@ ObjectPrx.prototype.ice_locatorCacheTimeout = function(newTimeout)
     {
         return this.__newInstance(this._reference.changeLocatorCacheTimeout(newTimeout));
     }
-}
+};
 
 ObjectPrx.prototype.ice_isConnectionCached = function()
 {
     return this._reference.getCacheConnection();
-}
+};
 
 ObjectPrx.prototype.ice_connectionCached = function(newCache)
 {
@@ -274,12 +274,12 @@ ObjectPrx.prototype.ice_connectionCached = function(newCache)
     {
         return this.__newInstance(this._reference.changeCacheConnection(newCache));
     }
-}
+};
 
 ObjectPrx.prototype.ice_getEndpointSelection = function()
 {
     return this._reference.getEndpointSelection();
-}
+};
 
 ObjectPrx.prototype.ice_endpointSelection = function(newType)
 {
@@ -291,12 +291,12 @@ ObjectPrx.prototype.ice_endpointSelection = function(newType)
     {
         return this.__newInstance(this._reference.changeEndpointSelection(newType));
     }
-}
+};
 
 ObjectPrx.prototype.ice_isSecure = function()
 {
     return this._reference.getSecure();
-}
+};
 
 ObjectPrx.prototype.ice_secure = function(b)
 {
@@ -308,12 +308,12 @@ ObjectPrx.prototype.ice_secure = function(b)
     {
         return this.__newInstance(this._reference.changeSecure(b));
     }
-}
+};
 
 ObjectPrx.prototype.ice_getEncodingVersion = function()
 {
     return this._reference.getEncoding().clone();
-}
+};
 
 ObjectPrx.prototype.ice_encodingVersion = function(e)
 {
@@ -325,12 +325,12 @@ ObjectPrx.prototype.ice_encodingVersion = function(e)
     {
         return this.__newInstance(this._reference.changeEncoding(e));
     }
-}
+};
 
 ObjectPrx.prototype.ice_isPreferSecure = function()
 {
     return this._reference.getPreferSecure();
-}
+};
 
 ObjectPrx.prototype.ice_preferSecure = function(b)
 {
@@ -342,13 +342,13 @@ ObjectPrx.prototype.ice_preferSecure = function(b)
     {
         return this.__newInstance(this._reference.changePreferSecure(b));
     }
-}
+};
 
 ObjectPrx.prototype.ice_getRouter = function()
 {
     var ri = this._reference.getRouterInfo();
     return ri !== null ? ri.getRouter() : null;
-}
+};
 
 ObjectPrx.prototype.ice_router = function(router)
 {
@@ -361,13 +361,13 @@ ObjectPrx.prototype.ice_router = function(router)
     {
         return this.__newInstance(ref);
     }
-}
+};
 
 ObjectPrx.prototype.ice_getLocator = function()
 {
     var ri = this._reference.getLocatorInfo();
     return ri !== null ? ri.getLocator() : null;
-}
+};
 
 ObjectPrx.prototype.ice_locator = function(locator)
 {
@@ -380,12 +380,12 @@ ObjectPrx.prototype.ice_locator = function(locator)
     {
         return this.__newInstance(ref);
     }
-}
+};
 
 ObjectPrx.prototype.ice_isTwoway = function()
 {
     return this._reference.getMode() === Ref.Reference.ModeTwoway;
-}
+};
 
 ObjectPrx.prototype.ice_twoway = function()
 {
@@ -397,12 +397,12 @@ ObjectPrx.prototype.ice_twoway = function()
     {
         return this.__newInstance(this._reference.changeMode(Ref.Reference.ModeTwoway));
     }
-}
+};
 
 ObjectPrx.prototype.ice_isOneway = function()
 {
     return this._reference.getMode() === Ref.Reference.ModeOneway;
-}
+};
 
 ObjectPrx.prototype.ice_oneway = function()
 {
@@ -414,12 +414,12 @@ ObjectPrx.prototype.ice_oneway = function()
     {
         return this.__newInstance(this._reference.changeMode(Ref.Reference.ModeOneway));
     }
-}
+};
 
 ObjectPrx.prototype.ice_isBatchOneway = function()
 {
     return this._reference.getMode() === Ref.Reference.ModeBatchOneway;
-}
+};
 
 ObjectPrx.prototype.ice_batchOneway = function()
 {
@@ -431,12 +431,12 @@ ObjectPrx.prototype.ice_batchOneway = function()
     {
         return this.__newInstance(this._reference.changeMode(Ref.Reference.ModeBatchOneway));
     }
-}
+};
 
 ObjectPrx.prototype.ice_isDatagram = function()
 {
     return this._reference.getMode() === Ref.Reference.ModeDatagram;
-}
+};
 
 ObjectPrx.prototype.ice_datagram = function()
 {
@@ -448,12 +448,12 @@ ObjectPrx.prototype.ice_datagram = function()
     {
         return this.__newInstance(this._reference.changeMode(Ref.Reference.ModeDatagram));
     }
-}
+};
 
 ObjectPrx.prototype.ice_isBatchDatagram = function()
 {
     return this._reference.getMode() === Ref.Reference.ModeBatchDatagram;
-}
+};
 
 ObjectPrx.prototype.ice_batchDatagram = function()
 {
@@ -465,7 +465,7 @@ ObjectPrx.prototype.ice_batchDatagram = function()
     {
         return this.__newInstance(this._reference.changeMode(Ref.Reference.ModeBatchDatagram));
     }
-}
+};
 
 ObjectPrx.prototype.ice_compress = function(co)
 {
@@ -478,7 +478,7 @@ ObjectPrx.prototype.ice_compress = function(co)
     {
         return this.__newInstance(ref);
     }
-}
+};
 
 ObjectPrx.prototype.ice_timeout = function(t)
 {
@@ -491,12 +491,12 @@ ObjectPrx.prototype.ice_timeout = function(t)
     {
         return this.__newInstance(ref);
     }
-}
+};
 
 ObjectPrx.prototype.ice_getConnectionId = function()
 {
     return this._reference.getConnectionId();
-}
+};
 
 ObjectPrx.prototype.ice_connectionId = function(id)
 {
@@ -509,25 +509,25 @@ ObjectPrx.prototype.ice_connectionId = function(id)
     {
         return this.__newInstance(ref);
     }
-}
+};
 
 ObjectPrx.prototype.ice_getConnection = function()
 {
     // TODO
     return null;
-}
+};
 
 ObjectPrx.prototype.ice_getCachedConnection = function()
 {
     // TODO
     return null;
-}
+};
 
 ObjectPrx.prototype.ice_flushBatchRequests = function()
 {
     // TODO
     return null;
-}
+};
 
 ObjectPrx.prototype.equals = function(r)
 {
@@ -542,12 +542,12 @@ ObjectPrx.prototype.equals = function(r)
     }
 
     return false;
-}
+};
 
 ObjectPrx.prototype.__reference = function()
 {
     return this._reference;
-}
+};
 
 ObjectPrx.prototype.__copyFrom = function(from)
 {
@@ -560,7 +560,7 @@ ObjectPrx.prototype.__copyFrom = function(from)
     {
         this._handler = from._handler;
     }
-}
+};
 
 ObjectPrx.prototype.__handleException = function(handler, ex, interval, cnt)
 {
@@ -594,7 +594,7 @@ ObjectPrx.prototype.__handleException = function(handler, ex, interval, cnt)
             throw e;
         }
     }
-}
+};
 
 ObjectPrx.prototype.__handleExceptionWrapper = function(handler, ex)
 {
@@ -607,7 +607,7 @@ ObjectPrx.prototype.__handleExceptionWrapper = function(handler, ex)
     {
         throw ex.inner;
     }
-}
+};
 
 ObjectPrx.prototype.__handleExceptionWrapperRelaxed = function(handler, ex, interval, cnt)
 {
@@ -624,7 +624,7 @@ ObjectPrx.prototype.__handleExceptionWrapperRelaxed = function(handler, ex, inte
 
         return cnt;
     }
-}
+};
 
 ObjectPrx.prototype.__checkAsyncTwowayOnly = function(name)
 {
@@ -632,7 +632,7 @@ ObjectPrx.prototype.__checkAsyncTwowayOnly = function(name)
     {
         throw new Error("`" + name + "' can only be called with a twoway proxy");
     }
-}
+};
 
 //
 // Completed callback for operations that have no return value or out parameters.
@@ -650,7 +650,7 @@ ObjectPrx.prototype.__completed = function(__oa, __cb, __excb, __cbctx)
     {
         __cb.call(__cbctx === undefined ? __cb : __cbctx, __oa);
     }
-}
+};
 
 //
 // Completed callback for operations that return a bool as the only result.
@@ -683,7 +683,7 @@ ObjectPrx.prototype.__completed_bool = function(__oa, __cb, __excb, __cbctx)
     {
         __is.skipEncaps();
     }
-}
+};
 
 //
 // Completed callback for operations that return a byte as the only result.
@@ -716,7 +716,7 @@ ObjectPrx.prototype.__completed_byte = function(__oa, __cb, __excb, __cbctx)
     {
         __is.skipEncaps();
     }
-}
+};
 
 //
 // Completed callback for operations that return a short as the only result.
@@ -749,7 +749,7 @@ ObjectPrx.prototype.__completed_short = function(__oa, __cb, __excb, __cbctx)
     {
         __is.skipEncaps();
     }
-}
+};
 
 //
 // Completed callback for operations that return an int as the only result.
@@ -782,7 +782,7 @@ ObjectPrx.prototype.__completed_int = function(__oa, __cb, __excb, __cbctx)
     {
         __is.skipEncaps();
     }
-}
+};
 
 //
 // Completed callback for operations that return a long as the only result.
@@ -815,7 +815,7 @@ ObjectPrx.prototype.__completed_long = function(__oa, __cb, __excb, __cbctx)
     {
         __is.skipEncaps();
     }
-}
+};
 
 //
 // Completed callback for operations that return a float as the only result.
@@ -848,7 +848,7 @@ ObjectPrx.prototype.__completed_float = function(__oa, __cb, __excb, __cbctx)
     {
         __is.skipEncaps();
     }
-}
+};
 
 //
 // Completed callback for operations that return a double as the only result.
@@ -881,7 +881,7 @@ ObjectPrx.prototype.__completed_double = function(__oa, __cb, __excb, __cbctx)
     {
         __is.skipEncaps();
     }
-}
+};
 
 //
 // Completed callback for operations that return a string as the only result.
@@ -914,7 +914,7 @@ ObjectPrx.prototype.__completed_string = function(__oa, __cb, __excb, __cbctx)
     {
         __is.skipEncaps();
     }
-}
+};
 
 //
 // Completed callback for operations that return a proxy as the only result.
@@ -947,7 +947,7 @@ ObjectPrx.prototype.__completed_ObjectPrx = function(__oa, __cb, __excb, __cbctx
     {
         __is.skipEncaps();
     }
-}
+};
 
 //
 // Completed callback for operations that return an object as the only result.
@@ -981,7 +981,7 @@ ObjectPrx.prototype.__completed_Object = function(__oa, __cb, __excb, __cbctx)
     {
         __is.skipEncaps();
     }
-}
+};
 
 //
 // Check function for operations that declare no user exceptions.
@@ -1002,7 +1002,7 @@ ObjectPrx.prototype.__check = function(__oa, __excb, __cbctx)
             if(__excb !== null)
             {
                 __excb.call(__cbctx === undefined ? __excb : __cbctx, __oa,
-                            new LocalEx.UnknownUserException(__ex.ice_name()));
+                            new LocalEx.UnknownUserException(ex.ice_name()));
             }
             return false;
         }
@@ -1021,7 +1021,7 @@ ObjectPrx.prototype.__check = function(__oa, __excb, __cbctx)
     }
 
     return true;
-}
+};
 
 //
 // Only for use by IceInternal.ProxyFactory
@@ -1032,14 +1032,14 @@ ObjectPrx.prototype.__setup = function(ref)
     //Debug.assert(this._delegate === null); // TODO
 
     this._reference = ref;
-}
+};
 
 ObjectPrx.prototype.__newInstance = function(ref)
 {
-    var proxy = new this.__proto__.constructor();
+    var proxy = new (Object.getPrototypeOf(this)).constructor();
     proxy.__setup(ref);
     return proxy;
-}
+};
 
 ObjectPrx.prototype.__handleLocalException = function(__oa, __ex)
 {
@@ -1051,9 +1051,9 @@ ObjectPrx.prototype.__handleLocalException = function(__oa, __ex)
     {
         throw __ex;
     }
-}
+};
 
-ObjectPrx.prototype.__dispatchLocalException = function(__oa, __ex, __excb, __ctctx)
+ObjectPrx.prototype.__dispatchLocalException = function(__oa, __ex, __excb, __cbctx)
 {
     if(__ex instanceof Ex.LocalException)
     {
@@ -1067,7 +1067,7 @@ ObjectPrx.prototype.__dispatchLocalException = function(__oa, __ex, __excb, __ct
     {
         throw __ex;
     }
-}
+};
 
 //
 // NOT a prototype function
@@ -1075,7 +1075,7 @@ ObjectPrx.prototype.__dispatchLocalException = function(__oa, __ex, __excb, __ct
 ObjectPrx.checkedCast = function(prx, facet, ctx)
 {
     // TODO
-}
+};
 
 //
 // NOT a prototype function
@@ -1083,6 +1083,6 @@ ObjectPrx.checkedCast = function(prx, facet, ctx)
 ObjectPrx.uncheckedCast = function(prx, facet)
 {
     return prx;
-}
+};
 
 module.exports = ObjectPrx;

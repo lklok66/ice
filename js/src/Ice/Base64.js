@@ -89,7 +89,7 @@ module.exports.encode = function(buf) // Expects Uint8Array
     outString.push(retval.substring(iter));
 
     return outString.join("");
-}
+};
 
 module.exports.decode = function(str) // Returns Uint8Array
 {
@@ -174,7 +174,7 @@ module.exports.decode = function(str) // Returns Uint8Array
     }
 
     return off < retval.length ? retval.subarray(0, off) : retval;
-}
+};
 
 module.exports.isBase64 = function(c)
 {
@@ -209,7 +209,7 @@ module.exports.isBase64 = function(c)
     }
 
     return false;
-}
+};
 
 function encodeChar(uc)
 {

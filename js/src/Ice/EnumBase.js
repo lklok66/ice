@@ -14,7 +14,7 @@ var EnumBase = function(name, value)
 {
     this._name = name;
     this._value = value;
-}
+};
 
 Object.defineProperty(EnumBase.prototype, 'name', {
     enumerable: true,
@@ -40,17 +40,17 @@ EnumBase.prototype.equals = function(rhs)
     }
 
     return this._value == rhs._value;
-}
+};
 
 EnumBase.prototype.hashCode = function()
 {
     return this._value;
-}
+};
 
 EnumBase.prototype.toString = function()
 {
     return this._name;
-}
+};
 
 EnumBase.defineEnum = function(type, enumerators)
 {
@@ -70,6 +70,6 @@ EnumBase.defineEnum = function(type, enumerators)
         enumerable: false,
         value: function(v) { return enums[v]; }
     });
-}
+};
 
 module.exports = EnumBase;

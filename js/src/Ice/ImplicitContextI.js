@@ -17,7 +17,7 @@ var LocalEx = require("./LocalException").Ice;
 var ImplicitContextI = function()
 {
     this._context = new HashMap();
-}
+};
 
 ImplicitContextI.create = function(kind)
 {
@@ -33,12 +33,12 @@ ImplicitContextI.create = function(kind)
     {
         throw new LocalEx.InitializationException("'" + kind + "' is not a valid value for Ice.ImplicitContext");
     }
-}
+};
 
 ImplicitContextI.prototype.getContext = function()
 {
     return new HashMap(this._context);
-}
+};
 
 ImplicitContextI.prototype.setContext = function(context)
 {
@@ -50,7 +50,7 @@ ImplicitContextI.prototype.setContext = function(context)
     {
         this._context.clear();
     }
-}
+};
 
 ImplicitContextI.prototype.containsKey = function(key)
 {
@@ -60,7 +60,7 @@ ImplicitContextI.prototype.containsKey = function(key)
     }
 
     return this._context.has(key);
-}
+};
 
 ImplicitContextI.prototype.get = function(key)
 {
@@ -76,7 +76,7 @@ ImplicitContextI.prototype.get = function(key)
     }
 
     return val;
-}
+};
 
 ImplicitContextI.prototype.put = function(key, value)
 {
@@ -90,7 +90,7 @@ ImplicitContextI.prototype.put = function(key, value)
     }
 
     var oldVal = this._context.get(key);
-    if(oldVal == null)
+    if(oldVal === null)
     {
         oldVal = "";
     }
@@ -98,7 +98,7 @@ ImplicitContextI.prototype.put = function(key, value)
     this._context.set(key, value);
 
     return oldVal;
-}
+};
 
 ImplicitContextI.prototype.remove = function(key)
 {
@@ -115,7 +115,7 @@ ImplicitContextI.prototype.remove = function(key)
         val = "";
     }
     return val;
-}
+};
 
 ImplicitContextI.prototype.write = function(prxContext, os)
 {
@@ -126,7 +126,7 @@ ImplicitContextI.prototype.write = function(prxContext, os)
     else
     {
         var ctx = null;
-        if(this._context.size == 0)
+        if(this._context.size === 0)
         {
             ctx = prxContext;
         }
@@ -137,6 +137,6 @@ ImplicitContextI.prototype.write = function(prxContext, os)
         }
         ContextHelper.write(os, ctx);
     }
-}
+};
 
 module.exports = ImplicitContextI;

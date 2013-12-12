@@ -40,7 +40,7 @@ var Instance = function(initData)
 {
     this._state = StateActive;
     this._initData = initData;
-}
+};
 
 Instance.prototype.initializationData = function()
 {
@@ -51,21 +51,21 @@ Instance.prototype.initializationData = function()
     // This value is immutable.
     //
     return this._initData;
-}
+};
 
 Instance.prototype.traceLevels = function()
 {
     // This value is immutable.
     Debug.assert(this._traceLevels !== null);
     return this._traceLevels;
-}
+};
 
 Instance.prototype.defaultsAndOverrides = function()
 {
     // This value is immutable.
     Debug.assert(this._defaultsAndOverrides !== null);
     return this._defaultsAndOverrides;
-}
+};
 
 Instance.prototype.routerManager = function()
 {
@@ -76,7 +76,7 @@ Instance.prototype.routerManager = function()
 
     Debug.assert(this._routerManager !== null);
     return this._routerManager;
-}
+};
 
 Instance.prototype.locatorManager = function()
 {
@@ -87,7 +87,7 @@ Instance.prototype.locatorManager = function()
 
     Debug.assert(this._locatorManager !== null);
     return this._locatorManager;
-}
+};
 
 Instance.prototype.referenceFactory = function()
 {
@@ -98,7 +98,7 @@ Instance.prototype.referenceFactory = function()
 
     Debug.assert(this._referenceFactory !== null);
     return this._referenceFactory;
-}
+};
 
 Instance.prototype.proxyFactory = function()
 {
@@ -109,7 +109,7 @@ Instance.prototype.proxyFactory = function()
 
     Debug.assert(this._proxyFactory !== null);
     return this._proxyFactory;
-}
+};
 
 Instance.prototype.outgoingConnectionFactory = function()
 {
@@ -120,12 +120,12 @@ Instance.prototype.outgoingConnectionFactory = function()
 
     Debug.assert(this._outgoingConnectionFactory !== null);
     return this._outgoingConnectionFactory;
-}
+};
 
 Instance.prototype.preferIPv6 = function()
 {
     return this._preferIPv6;
-}
+};
 
 /* TODO
 Instance.prototype.connectionMonitor = function()
@@ -148,7 +148,7 @@ Instance.prototype.servantFactoryManager = function()
 
     Debug.assert(this._servantFactoryManager !== null);
     return this._servantFactoryManager;
-}
+};
 
 /* TODO
 Instance.prototype.objectAdapterFactory = function()
@@ -170,7 +170,7 @@ Instance.prototype.protocolSupport = function()
     }
 
     return this._protocolSupport;
-}
+};
 
 /*
 Instance.prototype.endpointHostResolver = function()
@@ -205,7 +205,7 @@ Instance.prototype.timer = function()
 
     Debug.assert(this._timer !== null);
     return this._timer;
-}
+};
 
 Instance.prototype.endpointFactoryManager = function()
 {
@@ -216,7 +216,7 @@ Instance.prototype.endpointFactoryManager = function()
 
     Debug.assert(this._endpointFactoryManager !== null);
     return this._endpointFactoryManager;
-}
+};
 
 /* TODO
 Instance.prototype.pluginManager = function()
@@ -235,34 +235,34 @@ Instance.prototype.messageSizeMax = function()
 {
     // This value is immutable.
     return this._messageSizeMax;
-}
+};
 
 Instance.prototype.clientACM = function()
 {
     // This value is immutable.
     return this._clientACM;
-}
+};
 
 Instance.prototype.serverACM = function()
 {
     // This value is immutable.
     return this._serverACM;
-}
+};
 
 Instance.prototype.getImplicitContext = function()
 {
     return this._implicitContext;
-}
+};
 
 Instance.prototype.stringToIdentity = function(s)
 {
     return IdentityUtil.stringToIdentity(s);
-}
+};
 
 Instance.prototype.identityToString = function(ident)
 {
     return IdentityUtil.identityToString(ident);
-}
+};
 
 Instance.prototype.setDefaultLocator = function(locator)
 {
@@ -272,7 +272,7 @@ Instance.prototype.setDefaultLocator = function(locator)
     }
 
     this._referenceFactory = this._referenceFactory.setDefaultLocator(locator);
-}
+};
 
 Instance.prototype.setDefaultRouter = function(router)
 {
@@ -282,12 +282,12 @@ Instance.prototype.setDefaultRouter = function(router)
     }
 
     this._referenceFactory = this._referenceFactory.setDefaultRouter(router);
-}
+};
 
 Instance.prototype.setLogger = function(logger)
 {
     this._initData.logger = logger;
-}
+};
 
 Instance.prototype.finishSetup = function(communicator, promise)
 {
@@ -527,7 +527,7 @@ Instance.prototype.finishSetup = function(communicator, promise)
             throw ex;
         }
     }
-}
+};
 
 //
 // Only for use by Ice.CommunicatorI
@@ -590,7 +590,7 @@ Instance.prototype.destroy = function()
     }
 
     return promise;
-}
+};
 
 Instance.prototype.outgoingConnectionFactoryFinished = function(promise)
 {
@@ -695,6 +695,6 @@ Instance.prototype.outgoingConnectionFactoryFinished = function(promise)
             throw ex;
         }
     }
-}
+};
 
 module.exports = Instance;

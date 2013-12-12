@@ -23,42 +23,42 @@ var AsyncResult = function(communicator, connection, proxy, adapter, op)
     this.exceptionCallback = null;
     this.cbContext = null;
     this.cookie = null;
-}
+};
 
 AsyncResult.prototype.getCommunicator = function()
 {
     return this.communicator;
-}
+};
 
 AsyncResult.prototype.getConnection = function()
 {
     return this.connection;
-}
+};
 
 AsyncResult.prototype.getProxy = function()
 {
     return this.proxy;
-}
+};
 
 AsyncResult.prototype.getAdapter = function()
 {
     return this.adapter;
-}
+};
 
 AsyncResult.prototype.getOperation = function()
 {
     return this.operation;
-}
+};
 
 AsyncResult.prototype.getCookie = function()
 {
     return this.cookie;
-}
+};
 
 AsyncResult.prototype.isCompleted = function()
 {
     return this.completed;
-}
+};
 
 AsyncResult.prototype.throwLocalException = function()
 {
@@ -66,7 +66,7 @@ AsyncResult.prototype.throwLocalException = function()
     {
         throw this.exception;
     }
-}
+};
 
 AsyncResult.prototype.whenCompleted = function(responseCallback, exceptionCallback, cbContext, cookie)
 {
@@ -88,14 +88,14 @@ AsyncResult.prototype.whenCompleted = function(responseCallback, exceptionCallba
     {
         this.__finished();
     }
-}
+};
 
 AsyncResult.prototype.__exception = function(ex)
 {
     this.completed = true;
     this.exception = ex;
     this.__finished();
-}
+};
 
 AsyncResult.prototype.__finished = function()
 {
@@ -125,7 +125,7 @@ AsyncResult.prototype.__finished = function()
             this.__warning(ex);
         }
     }
-}
+};
 
 AsyncResult.prototype.__warning = function(ex)
 {
@@ -142,6 +142,6 @@ AsyncResult.prototype.__warning = function(ex)
         Ice.Util.getProcessLogger().warning(msg);
     }
     */
-}
+};
 
 module.exports = AsyncResult;

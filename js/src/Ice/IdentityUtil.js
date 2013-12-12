@@ -29,9 +29,9 @@ module.exports.stringToIdentity = function(s)
     //
     var slash = -1;
     var pos = 0;
-    while((pos = s.indexOf('/', pos)) != -1)
+    while((pos = s.indexOf('/', pos)) !== -1)
     {
-        if(pos == 0 || s.charAt(pos - 1) != '\\')
+        if(pos === 0 || s.charAt(pos - 1) != '\\')
         {
             if(slash == -1)
             {
@@ -96,7 +96,7 @@ module.exports.stringToIdentity = function(s)
     }
 
     return ident;
-}
+};
 
 /**
  * Converts an object identity to a string.
@@ -107,7 +107,7 @@ module.exports.stringToIdentity = function(s)
  **/
 module.exports.identityToString = function(ident)
 {
-    if(ident.category === null || ident.category.length == 0)
+    if(ident.category === null || ident.category.length === 0)
     {
         return StringUtil.escapeString(ident.name, "/");
     }
@@ -115,7 +115,7 @@ module.exports.identityToString = function(ident)
     {
         return StringUtil.escapeString(ident.category, "/") + '/' + StringUtil.escapeString(ident.name, "/");
     }
-}
+};
 
 /**
  * Compares the object identities of two proxies.
@@ -149,13 +149,13 @@ module.exports.proxyIdentityCompare = function(lhs, rhs)
         var lhsIdentity = lhs.ice_getIdentity();
         var rhsIdentity = rhs.ice_getIdentity();
         var n;
-        if((n = lhsIdentity.name.localeCompare(rhsIdentity.name)) != 0)
+        if((n = lhsIdentity.name.localeCompare(rhsIdentity.name)) !== 0)
         {
             return n;
         }
         return lhsIdentity.category.localeCompare(rhsIdentity.category);
     }
-}
+};
 
 /**
  * Compares the object identities and facets of two proxies.
@@ -189,11 +189,11 @@ module.exports.proxyIdentityAndFacetCompare = function(lhs, rhs)
         var lhsIdentity = lhs.ice_getIdentity();
         var rhsIdentity = rhs.ice_getIdentity();
         var n;
-        if((n = lhsIdentity.name.localeCompare(rhsIdentity.name)) != 0)
+        if((n = lhsIdentity.name.localeCompare(rhsIdentity.name)) !== 0)
         {
             return n;
         }
-        if((n = lhsIdentity.category.localeCompare(rhsIdentity.category)) != 0)
+        if((n = lhsIdentity.category.localeCompare(rhsIdentity.category)) !== 0)
         {
             return n;
         }
@@ -214,4 +214,4 @@ module.exports.proxyIdentityAndFacetCompare = function(lhs, rhs)
         }
         return lhsFacet.localeCompare(rhsFacet);
     }
-}
+};

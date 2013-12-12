@@ -9,14 +9,14 @@
 
 var Debug = require("./Debug");
 var OpaqueEndpointI = require("./OpaqueEndpointI");
-
+var BasicStream = require("./BasicStream");
 var LocalEx = require("./LocalException").Ice;
 
 var EndpointFactoryManager = function(instance)
 {
     this._instance = instance;
     this._factories = [];
-}
+};
 
 EndpointFactoryManager.prototype.add = function(factory)
 {
@@ -26,7 +26,7 @@ EndpointFactoryManager.prototype.add = function(factory)
     }
 
     this._factories.push(factory);
-}
+};
 
 EndpointFactoryManager.prototype.get = function(type)
 {
@@ -38,7 +38,7 @@ EndpointFactoryManager.prototype.get = function(type)
         }
     }
     return null;
-}
+};
 
 EndpointFactoryManager.prototype.create = function(str, oaEndpoint)
 {
@@ -50,7 +50,7 @@ EndpointFactoryManager.prototype.create = function(str, oaEndpoint)
 
     var protocol;
     var rest = "";
-
+    var i, length;
     var pos = s.search(/[ \t\n\r]+/);
     if(pos === -1)
     {
@@ -71,7 +71,7 @@ EndpointFactoryManager.prototype.create = function(str, oaEndpoint)
     }
 
     var f;
-    for(var i = 0; i < this._factories.length; ++i)
+    for(i = 0, length = this._factories.length; i < length; ++i)
     {
         if(this._factories[i].protocol() === protocol)
         {
@@ -86,7 +86,7 @@ EndpointFactoryManager.prototype.create = function(str, oaEndpoint)
     if(protocol === "opaque")
     {
         var ue = OpaqueEndpointI.fromString(rest);
-        for(var i = 0; i < this._factories.length; ++i)
+        for(i = 0, length =  this._factories.length; i < length; ++i)
         {
             if(this._factories[i].type() == ue.type())
             {
@@ -106,7 +106,7 @@ EndpointFactoryManager.prototype.create = function(str, oaEndpoint)
     }
 
     return null;
-}
+};
 
 EndpointFactoryManager.prototype.read = function(s)
 {
@@ -120,7 +120,7 @@ EndpointFactoryManager.prototype.read = function(s)
         }
     }
     return OpaqueEndpointI.fromStream(type, s);
-}
+};
 
 EndpointFactoryManager.prototype.destroy = function()
 {
@@ -128,7 +128,7 @@ EndpointFactoryManager.prototype.destroy = function()
     {
         this._factories[i].destroy();
     }
-    _factories = [];
-}
+    this._factories = [];
+};
 
 module.exports = EndpointFactoryManager;

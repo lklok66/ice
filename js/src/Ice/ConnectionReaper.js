@@ -10,12 +10,12 @@
 var ConnectionReaper = function()
 {
     this._connections = [];
-}
+};
 
 ConnectionReaper.prototype.add = function(connection)
 {
     this._connections.push(connection);
-}
+};
 
 ConnectionReaper.prototype.swapConnections = function()
 {
@@ -26,6 +26,6 @@ ConnectionReaper.prototype.swapConnections = function()
     var connections = this._connections;
     this._connections = [];
     return connections;
-}
+};
 
 module.exports = ConnectionReaper;

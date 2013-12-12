@@ -88,6 +88,6 @@ var DefaultsAndOverrides = function(properties)
 
     var slicedFormat = properties.getPropertyAsIntWithDefault("Ice.Default.SlicedFormat", 0) > 0;
     this.defaultFormat = slicedFormat ? FormatType.SlicedFormat : FormatType.CompactFormat;
-}
+};
 
 module.exports = DefaultsAndOverrides;

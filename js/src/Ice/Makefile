@@ -21,8 +21,6 @@ SLICES = $(SDIR)/BuiltinSequences.ice \
 	$(SDIR)/Process.ice \
 	$(SDIR)/PropertiesAdmin.ice \
 	$(SDIR)/Router.ice \
-	$(SDIR)/ServantLocator.ice \
-	$(SDIR)/SliceChecksumDict.ice \
 	$(SDIR)/Version.ice
 	
 SDIR	= $(slicedir)/Ice
@@ -82,8 +80,20 @@ SRCS = Address.js \
         TraceLevels.js \
         WebSocketException.js
         
+
+        
 include $(top_srcdir)/config/Make.rules
 
+# Prevent generation of these files from .ice files
+
+Communicator.js:
+	
+Properties.js:
+	
+Logger.js:
+	
+ServantLocator.js:
+	
 SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --ice -I$(slicedir)
 
 ifeq ($(OPTIMIZE),yes)
