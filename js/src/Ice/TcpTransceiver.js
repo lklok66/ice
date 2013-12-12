@@ -13,6 +13,7 @@ var Debug = require("./Debug");
 var Ex = require("./Exception");
 var ExUtil = require("./ExUtil");
 var Network = require("./Network");
+var SocketOperation = require("./SocketOperation");
 
 var Conn = require("./Connection").Ice;
 var LocalEx = require("./LocalException").Ice;
@@ -77,13 +78,17 @@ TcpTransceiver.prototype.setCallbacks = function(
 
     var self = this;
     this._fd.on("connect", function() { self.socketConnected(); });
-    this._fd.on("data", function(buf) { self.socketBytesAvailable(buf); });
     this._fd.on("close", function(err) { self.socketClosed(err); });
     this._fd.on("error", function(err) { self.socketError(err); });
+
+    //
+    // Don't register for incoming data right away.
+    //
+    //this._fd.on("data", function(buf) { self.socketBytesAvailable(buf); });
 }
 
 //
-// Returns true when initialization is complete.
+// Returns SocketOperation.None when initialization is complete.
 //
 TcpTransceiver.prototype.initialize = function(readBuffer, writeBuffer)
 {
@@ -93,7 +98,7 @@ TcpTransceiver.prototype.initialize = function(readBuffer, writeBuffer)
         {
             this._state = StateConnectPending;
             this._fd.connect(this._addr.port, this._addr.host);
-            return false; // Waiting for connect to complete.
+            return SocketOperation.Connect; // Waiting for connect to complete.
         }
         else if(this._state === StateConnectPending)
         {
@@ -117,27 +122,28 @@ TcpTransceiver.prototype.initialize = function(readBuffer, writeBuffer)
                 if(this.write(writeBuffer))
                 {
                     //
-                    // Write completed without blocking.
+                    // Write completed immediately.
                     //
                     this._proxy.endWriteConnectRequest(writeBuffer);
 
                     //
                     // Try to read the response.
                     //
-                    if(this.read(readBuffer, dummy)) // TODO
+                    var dummy = { value: false };
+                    if(this.read(readBuffer, dummy))
                     {
                         //
-                        // Read completed without blocking - fall through.
+                        // Read completed immediately - fall through.
                         //
                         this._proxy.endReadConnectRequestResponse(readBuffer);
                     }
                     else
                     {
                         //
-                        // Return SocketOperationRead to indicate we need to complete the read.
+                        // Return SocketOperation.Read to indicate we need to complete the read.
                         //
                         this._state = StateProxyConnectRequestPending; // Wait for proxy response
-                        return false; // Wait for read.
+                        return SocketOperation.Read;
                     }
                 }
                 else
@@ -146,7 +152,7 @@ TcpTransceiver.prototype.initialize = function(readBuffer, writeBuffer)
                     // Return SocketOperationWrite to indicate we need to complete the write.
                     //
                     this._state = StateProxyConnectRequest; // Send proxy connect request
-                    return false; // Wait for write.
+                    return SocketOperation.Write;
                 }
             }
 
@@ -159,7 +165,7 @@ TcpTransceiver.prototype.initialize = function(readBuffer, writeBuffer)
             //
             this._proxy.endWriteConnectRequest(writeBuffer);
             this._state = StateProxyConnectRequestPending; // Wait for proxy response
-            return false; // Wait for read.
+            return SocketOperation.Read;
         }
         else if(this._state === StateProxyConnectRequestPending)
         {
@@ -192,7 +198,7 @@ TcpTransceiver.prototype.initialize = function(readBuffer, writeBuffer)
         this._logger.trace(this._traceLevels.networkCat, s);
     }
 
-    return true; // initialize complete.
+    return SocketOperation.None;
 }
 
 TcpTransceiver.prototype.register = function()
@@ -246,6 +252,11 @@ TcpTransceiver.prototype.write = function(byteBuffer)
     // Create a slice of the source buffer representing the remaining data to be written.
     //
     var slice = byteBuffer.b.slice(byteBuffer.position, byteBuffer.position + remaining);
+
+    //
+    // The socket will accept all of the data.
+    //
+    byteBuffer.position = byteBuffer.position + remaining;
 
     var self = this;
 
@@ -428,7 +439,7 @@ function fdToString(fd, proxy, targetAddr)
 
 function translateError(ex)
 {
-    // TODO
+    // TODO: Search the exception's error message for symbols like ECONNREFUSED ?
     return new LocalEx.SocketException(0, ex);
 }
 

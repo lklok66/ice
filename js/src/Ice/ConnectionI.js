@@ -7,18 +7,21 @@
 //
 // **********************************************************************
 
+var AsyncStatus = require("./AsyncStatus");
 var Debug = require("./Debug");
-var Ex = require("./Ex");
+var Ex = require("./Exception");
 var ExUtil = require("./ExUtil");
 var HashMap = require("./HashMap");
 var LocalExceptionWrapper = require("./LocalExceptionWrapper");
 var Promise = require("./Promise");
 var Protocol = require("./Protocol");
+var SocketOperation = require("./SocketOperation");
 var Timer = require("./Timer");
 var TimeUtil = require("./TimeUtil");
 var TraceUtil = require("./TraceUtil");
 
 var LocalEx = require("./LocalException").Ice;
+var Ver = require("./Version").Ice;
 
 var StateNotInitialized = 0;
 var StateNotValidated = 1;
@@ -47,9 +50,13 @@ var ConnectionI = function(communicator, instance, reaper, transceiver, endpoint
     this._writeTimeoutScheduled = false;
     this._readTimeoutId = 0;
     this._readTimeoutScheduled = false;
+
+    this._hasMoreData = { value: false };
+
     this._warn = initData.properties.getPropertyAsInt("Ice.Warn.Connections") > 0;
     this._warnUdp = instance.initializationData().properties.getPropertyAsInt("Ice.Warn.Datagrams") > 0;
     this._acmAbsoluteTimeoutMillis = 0;
+
     this._nextRequestId = 1;
     this._batchAutoFlush = initData.properties.getPropertyAsIntWithDefault("Ice.BatchAutoFlush", 1) > 0 ? true : false;
     this._batchStream = new BasicStream(instance, Protocol.currentProtocolEncoding, this._batchAutoFlush);
@@ -57,15 +64,24 @@ var ConnectionI = function(communicator, instance, reaper, transceiver, endpoint
     this._batchRequestNum = 0;
     this._batchRequestCompress = false;
     this._batchMarker = 0;
+
+    this._sendStreams = [];
+
     this._readStream = new BasicStream(instance, Protocol.currentProtocolEncoding);
     this._readHeader = false;
-    this._readStreamPos = -1;
     this._writeStream = new BasicStream(instance, Protocol.currentProtocolEncoding);
-    this._writeStreamPos = -1;
-    this._dispatchCount = 0;
-    this._state = StateNotInitialized;
 
-    this._hasMoreData = { value: false };
+    this._readStreamPos = -1;
+    this._writeStreamPos = -1;
+
+    this._dispatchCount = 0;
+
+    this._state = StateNotInitialized;
+    this._shutdownInitiated = false;
+    this._validated = false;
+
+    this._readProtocol = new Ver.ProtocolVersion();
+    this._readProtocolEncoding = new Ver.EncodingVersion();
 
     this._asyncRequests = new HashMap(); // Map<int, OutgoingAsync>
 
@@ -369,7 +385,14 @@ ConnectionI.prototype.prepareBatchRequest = function(os)
         // retry with a new connection. Otherwise, we must throw to notify the caller that
         // some previous batch requests were not sent.
         //
-        throw new LocalExceptionWrapper(this._exception, this._batchStream.isEmpty());
+        if(this._batchStream.isEmpty())
+        {
+            throw new LocalExceptionWrapper(this._exception, true);
+        }
+        else
+        {
+            throw this._exception;
+        }
     }
 
     Debug.assert(this._state > StateNotValidated);
@@ -424,7 +447,7 @@ ConnectionI.prototype.finishBatchRequest = function(os, compress)
             // exceeded and rollback stream to the marker.
             try
             {
-                this._transceiver.checkSendSize(this._batchStream, this._instance.messageSizeMax());
+                this._transceiver.checkSendSize(this._batchStream.getBuffer(), this._instance.messageSizeMax());
             }
             catch(ex)
             {
@@ -454,7 +477,7 @@ ConnectionI.prototype.finishBatchRequest = function(os, compress)
             var sz = this._batchStream.size - this._batchMarker;
             this._batchStream.pos = this._batchMarker;
             var lastRequest = this._batchStream.readBlob(sz);
-            this._batchStream.resize(this._batchMarker);
+            this._batchStream.resize(this._batchMarker, false);
 
             try
             {
@@ -464,7 +487,7 @@ ConnectionI.prototype.finishBatchRequest = function(os, compress)
                 this._batchStream.pos = Protocol.headerSize;
                 this._batchStream.writeInt(this._batchRequestNum);
 
-                this.sendMessage(OutgoingMessage.createForStream(this._batchStream, this._batchRequestCompress));
+                this.sendMessage(OutgoingMessage.createForStream(this._batchStream, this._batchRequestCompress, true));
             }
             catch(ex)
             {
@@ -483,7 +506,7 @@ ConnectionI.prototype.finishBatchRequest = function(os, compress)
             //
             // Reset the batch stream.
             //
-            this._batchStream = new BasicStream(this._instance, this._batchAutoFlush);
+            this._batchStream = new BasicStream(this._instance, Protocol.currentProtocolEncoding, this._batchAutoFlush);
             this._batchRequestNum = 0;
             this._batchRequestCompress = false;
             this._batchMarker = 0;
@@ -537,7 +560,7 @@ ConnectionI.prototype.finishBatchRequest = function(os, compress)
 
 ConnectionI.prototype.abortBatchRequest = function()
 {
-    this._batchStream = new BasicStream(this._instance, this._batchAutoFlush);
+    this._batchStream = new BasicStream(this._instance, Protocol.currentProtocolEncoding, this._batchAutoFlush);
     this._batchRequestNum = 0;
     this._batchRequestCompress = false;
     this._batchMarker = 0;
@@ -576,8 +599,12 @@ ConnectionI.prototype.flushAsyncBatchRequests = function(outAsync)
 
     if(this._batchRequestNum === 0)
     {
-        outAsync.__sent(this);
-        return;
+        var status = AsyncStatus.Sent;
+        if(!outAsync.__sent(this))
+        {
+            status |= AsyncStatus.InvokeSentCallback;
+        }
+        return status;
     }
 
     //
@@ -588,9 +615,10 @@ ConnectionI.prototype.flushAsyncBatchRequests = function(outAsync)
 
     this._batchStream.swap(outAsync.__os());
 
+    var status;
     try
     {
-        this.sendMessage(OutgoingMessage.create(outAsync, outAsync.__os(), this._batchRequestCompress, 0));
+        status = this.sendMessage(OutgoingMessage.create(outAsync, outAsync.__os(), this._batchRequestCompress, 0));
     }
     catch(ex)
     {
@@ -609,10 +637,11 @@ ConnectionI.prototype.flushAsyncBatchRequests = function(outAsync)
     //
     // Reset the batch stream.
     //
-    this._batchStream = new BasicStream(this._instance, this._batchAutoFlush);
+    this._batchStream = new BasicStream(this._instance, Protocol.currentProtocolEncoding, this._batchAutoFlush);
     this._batchRequestNum = 0;
     this._batchRequestCompress = false;
     this._batchMarker = 0;
+    return status;
 };
 
 ConnectionI.prototype.sendResponse = function(os, compressFlag)
@@ -636,7 +665,7 @@ ConnectionI.prototype.sendResponse = function(os, compressFlag)
             throw this._exception;
         }
 
-        this.sendMessage(OutgoingMessage.createForStream(os, compressFlag !== 0));
+        this.sendMessage(OutgoingMessage.createForStream(os, compressFlag !== 0, true));
 
         if(this._state === StateClosing && this._dispatchCount === 0)
         {
@@ -742,44 +771,18 @@ ConnectionI.prototype.createProxy = function(ident)
     return this._instance.proxyFactory().referenceToProxy(this._instance.referenceFactory().createFixed(ident, this));
 };
 
-//
-// Transceiver callbacks
-//
-ConnectionI.prototype.socketConnected = function()
-{
-    this.unscheduleTimeout(this._writeTimer);
-    this.setState(StateNotValidated);
-
-    //
-    // The socket has been successfully established, but the connection may not be
-    // validated yet. (The call to this.setState(StateNotValidated) also registers the
-    // transceiver for I/O callbacks, which means it's technically possible that
-    // an I/O callback could be invoked *before* setState returns. Consequently,
-    // we check the state again below.)
-    //
-    if(this._state === StateNotValidated)
-    {
-        //
-        // Although the socket is established, we may still encounter a connect timeout
-        // if the connection is not validated soon enough. For example, the server's
-        // object adapter may be in the holding state, in which case the incoming socket
-        // is accepted but a ValidateConnection message is not sent. We need to start a
-        // timer, and we cannot assume that a socket I/O callback will be invoked (which
-        // would start a timer). Therefore, we explicitly call socketBytesAvailable() for
-        // the sole purpose of invoking validate() and thus starting a timer.
-        //
-        this.socketBytesAvailable();
-    }
-};
-
-ConnectionI.prototype.socketBytesAvailable = function()
+ConnectionI.prototype.message = function(operation)
 {
     if(this._state >= StateClosed)
     {
         return;
     }
 
-    this.unscheduleTimeout(this._readTimer);
+    if((operation & SocketOperation.Write) != 0)
+    {
+        // TODO: Anything to do here?
+        Debug.assert(this._writeStream.getBuffer().remaining == 0);
+    }
 
     //
     // Keep reading until no more data is available.
@@ -791,11 +794,11 @@ ConnectionI.prototype.socketBytesAvailable = function()
 
         try
         {
-            if(!this._readStream.isEmpty())
+            if((operation & SocketOperation.Read) != 0 && !this._readStream.isEmpty())
             {
                 if(this._readHeader) // Read header if necessary.
                 {
-                    if(!this._transceiver.read(this._readStream, _hasMoreData))
+                    if(!this._transceiver.read(this._readStream.getBuffer(), this._hasMoreData))
                     {
                         //
                         // We didn't get enough data to complete the header.
@@ -803,7 +806,7 @@ ConnectionI.prototype.socketBytesAvailable = function()
                         return;
                     }
 
-                    Debug.assert(this._readStream.getBuffer().bytesAvailable === 0);
+                    Debug.assert(this._readStream.getBuffer().remaining === 0);
                     this._readHeader = false;
 
                     var pos = this._readStream.pos;
@@ -824,7 +827,7 @@ ConnectionI.prototype.socketBytesAvailable = function()
                        magic2 !== Protocol.magic[2] || magic3 !== Protocol.magic[3])
                     {
                         var bme = new LocalEx.BadMagicException();
-                        /* TODO
+                        /* TODO: Fix for sequence<byte> mapping
                         const m:flash.utils.ByteArray = new flash.utils.ByteArray();
                         m.endian = flash.utils.Endian.LITTLE_ENDIAN;
                         m.length = 4;
@@ -837,29 +840,11 @@ ConnectionI.prototype.socketBytesAvailable = function()
                         throw bme;
                     }
 
-                    var pMajor = this._readStream.readByte();
-                    var pMinor = this._readStream.readByte();
-                    if(pMajor !== Protocol.protocolMajor || pMinor > Protocol.protocolMinor)
-                    {
-                        var upe = new LocalEx.UnsupportedProtocolException();
-                        upe.badMajor = pMajor;
-                        upe.badMinor = pMinor;
-                        upe.major = Protocol.protocolMajor;
-                        upe.minor = Protocol.protocolMinor;
-                        throw upe;
-                    }
+                    this._readProtocol.__read(this._readStream);
+                    Protocol.checkSupportedProtocol(this._readProtocol);
 
-                    var eMajor = this._readStream.readByte();
-                    var eMinor = this._readStream.readByte();
-                    if(eMajor !== Protocol.encodingMajor || eMinor > Protocol.encodingMinor)
-                    {
-                        var uee = new LocalEx.UnsupportedEncodingException();
-                        uee.badMajor = eMajor;
-                        uee.badMinor = eMinor;
-                        uee.major = Protocol.encodingMajor;
-                        uee.minor = Protocol.encodingMinor;
-                        throw uee;
-                    }
+                    this._readProtocolEncoding.__read(this._readStream);
+                    Protocol.checkSupportedProtocolEncoding(this._readProtocolEncoding);
 
                     this._readStream.readByte(); // messageType
                     this._readStream.readByte(); // compress
@@ -887,23 +872,30 @@ ConnectionI.prototype.socketBytesAvailable = function()
                     }
                     else
                     {
-                        if(!this._transceiver.read(this._readStream, _hasMoreData))
+                        if(!this._transceiver.read(this._readStream.getBuffer(), this._hasMoreData))
                         {
                             Debug.assert(!this._readStream.isEmpty());
-                            this.scheduleTimeout(this._readTimer, this._endpoint.timeout());
+                            this.scheduleTimeout(SocketOperation.Read, this._endpoint.timeout());
                             return;
                         }
-                        Debug.assert(this._readStream.getBuffer().bytesAvailable === 0);
+                        Debug.assert(this._readStream.getBuffer().remaining === 0);
                     }
                 }
             }
 
             if(this._state <= StateNotValidated)
             {
-                if(!this.validate())
+                if(this._state === StateNotInitialized && !this.initialize())
                 {
                     return;
                 }
+
+                if(this._state <= StateNotValidated && !this.validate())
+                {
+                    return;
+                }
+
+                this._transceiver.unregister();
 
                 //
                 // We start out in holding state.
@@ -914,7 +906,19 @@ ConnectionI.prototype.socketBytesAvailable = function()
             {
                 Debug.assert(this._state <= StateClosing);
 
-                info = this.parseMessage();
+                //
+                // We parse messages first, if we receive a close
+                // connection message we won't send more messages.
+                //
+                if((operation & SocketOperation.Read) !== 0)
+                {
+                    info = this.parseMessage();
+                }
+
+                if((operation & SocketOperation.Write) !== 0)
+                {
+                    this.sendNextMessage();
+                }
 
                 //
                 // We increment the dispatch count to prevent the
@@ -975,15 +979,33 @@ ConnectionI.prototype.socketBytesAvailable = function()
 
         this.dispatch(info);
     }
-    while(_hasMoreData.value);
+    while(this._hasMoreData.value);
 };
 
-ConnectionI.prototype.socketClosed = function()
+//
+// Transceiver callbacks
+//
+ConnectionI.prototype.transceiverConnected = function()
+{
+    this.message(SocketOperation.Write);
+};
+
+ConnectionI.prototype.transceiverBytesAvailable = function()
+{
+    this.message(SocketOperation.Read);
+};
+
+ConnectionI.prototype.transceiverBytesWritten = function()
+{
+    this.message(SocketOperation.Write);
+};
+
+ConnectionI.prototype.transceiverClosed = function()
 {
     this.setStateEx(StateClosed, new LocalEx.ConnectionLostException());
 };
 
-ConnectionI.prototype.socketError = function(ex)
+ConnectionI.prototype.transceiverError = function(ex)
 {
     this.setStateEx(StateClosed, ex);
 };
@@ -1000,7 +1022,7 @@ ConnectionI.prototype.dispatch = function(info)
         this._startPromise = null;
     }
 
-    if(info != null)
+    if(info !== null)
     {
         if(info.outAsync != null)
         {
@@ -1021,7 +1043,7 @@ ConnectionI.prototype.dispatch = function(info)
     {
         if(--this._dispatchCount === 0)
         {
-            if(this._state === StateClosing)
+            if(this._state === StateClosing && !this._shutdownInitiated)
             {
                 try
                 {
@@ -1032,6 +1054,10 @@ ConnectionI.prototype.dispatch = function(info)
                     if(ex instanceof Ex.LocalException)
                     {
                         this.setStateEx(StateClosed, ex);
+                    }
+                    else
+                    {
+                        throw ex;
                     }
                 }
             }
@@ -1047,13 +1073,42 @@ ConnectionI.prototype.dispatch = function(info)
 ConnectionI.prototype.finish = function()
 {
     Debug.assert(this._state === StateClosed);
-    this.unscheduleTimeout(this._readTimer);
-    this.unscheduleTimeout(this._writeTimer);
+    this.unscheduleTimeout(SocketOperation.Read | SocketOperation.Write | SocketOperation.Connect);
 
     if(this._startPromise !== null)
     {
         this._startPromise.fail(this._exception);
         this._startPromise = null;
+    }
+
+    if(this._sendStreams.length > 0)
+    {
+        if(!this._writeStream.isEmpty())
+        {
+            //
+            // Return the stream to the outgoing call. This is important for
+            // retriable AMI calls which are not marshalled again.
+            //
+            var message = this._sendStreams[0];
+            this._writeStream.swap(message.stream);
+        }
+
+        //
+        // NOTE: for twoway requests which are not sent, finished can be called twice: the
+        // first time because the outgoing is in the _sendStreams set and the second time
+        // because it's either in the _requests/_asyncRequests set. This is fine, only the
+        // first call should be taken into account by the implementation of finished.
+        //
+        for(var i = 0; i < this._sendStreams.length; ++i)
+        {
+            var p = this._sendStreams[i];
+            if(p.requestId > 0)
+            {
+                this._asyncRequests.delete(p.requestId);
+            }
+            p.finished(this._exception);
+        }
+        this._sendStreams = [];
     }
 
     for(var e = this._asyncRequests.entries; e != null; e = e.next)
@@ -1078,7 +1133,7 @@ ConnectionI.prototype.toString = function()
     return this._desc;
 };
 
-ConnectionI.prototype.timedOut = function(event) // TODO
+ConnectionI.prototype.timedOut = function(event)
 {
     if(this._state <= StateNotValidated)
     {
@@ -1088,7 +1143,7 @@ ConnectionI.prototype.timedOut = function(event) // TODO
     {
         this.setStateEx(StateClosed, new LocalEx.TimeoutException());
     }
-    else if(this._state == StateClosing)
+    else if(this._state === StateClosing)
     {
         this.setStateEx(StateClosed, new LocalEx.CloseTimeoutException());
     }
@@ -1151,7 +1206,7 @@ ConnectionI.prototype.setStateEx = function(state, ex)
     Debug.assert(ex instanceof Ex.LocalException);
 
     //
-    // If this.setState() is called with an exception, then only closed
+    // If setState() is called with an exception, then only closed
     // and closing states are permissible.
     //
     Debug.assert(state >= StateClosing);
@@ -1165,25 +1220,22 @@ ConnectionI.prototype.setStateEx = function(state, ex)
     {
         this._exception = ex;
 
-        if(this._warn)
+        //
+        // We don't warn if we are not validated.
+        //
+        if(this._warn && this._validated)
         {
             //
-            // We don't warn if we are not validated.
+            // Don't warn about certain expected exceptions.
             //
-            if(this._state > StateNotValidated)
+            if(!(this._exception instanceof LocalEx.CloseConnectionException ||
+                 this._exception instanceof LocalEx.ForcedCloseConnectionException ||
+                 this._exception instanceof LocalEx.ConnectionTimeoutException ||
+                 this._exception instanceof LocalEx.CommunicatorDestroyedException ||
+                 this._exception instanceof LocalEx.ObjectAdapterDeactivatedException ||
+                 (this._exception instanceof LocalEx.ConnectionLostException && this._state === StateClosing)))
             {
-                //
-                // Don't warn about certain expected exceptions.
-                //
-                if(!(this._exception instanceof LocalEx.CloseConnectionException ||
-                     this._exception instanceof LocalEx.ForcedCloseConnectionException ||
-                     this._exception instanceof LocalEx.ConnectionTimeoutException ||
-                     this._exception instanceof LocalEx.CommunicatorDestroyedException ||
-                     this._exception instanceof LocalEx.ObjectAdapterDeactivatedException ||
-                     (this._exception instanceof LocalEx.ConnectionLostException && this._state === StateClosing)))
-                {
-                    this.warning("connection exception", this._exception);
-                }
+                this.warning("connection exception", this._exception);
             }
         }
     }
@@ -1240,7 +1292,7 @@ ConnectionI.prototype.setState = function(state)
             //
             // Register to receive validation message.
             //
-            if(!this._endpoint.datagram() && this._adapter === null)
+            if(!this._endpoint.datagram() && !this._incoming)
             {
                 //
                 // Once validation is complete, a new connection starts out in the
@@ -1276,7 +1328,10 @@ ConnectionI.prototype.setState = function(state)
             {
                 return;
             }
-            this._transceiver.unregister();
+            if(this._state === StateActive)
+            {
+                this._transceiver.unregister();
+            }
             break;
         }
 
@@ -1379,6 +1434,7 @@ ConnectionI.prototype.initiateShutdown = function()
 {
     Debug.assert(this._state === StateClosing);
     Debug.assert(this._dispatchCount === 0);
+    Debug.assert(!this._shutdownInitiated);
 
     if(!this._endpoint.datagram())
     {
@@ -1386,22 +1442,22 @@ ConnectionI.prototype.initiateShutdown = function()
         // Before we shut down, we send a close connection
         // message.
         //
-        var os = new BasicStream(this._instance, false);
+        var os = new BasicStream(this._instance, Protocol.currentProtocolEncoding, false);
         os.writeBlob(Protocol.magic);
-        os.writeByte(Protocol.protocolMajor);
-        os.writeByte(Protocol.protocolMinor);
-        os.writeByte(Protocol.encodingMajor);
-        os.writeByte(Protocol.encodingMinor);
+        Protocol.currentProtocol.__write(os);
+        Protocol.currentProtocolEncoding.__write(os);
         os.writeByte(Protocol.closeConnectionMsg);
-        os.writeByte(0); // compression status: always report 0 for CloseConnection in Java.
+        os.writeByte(0); // compression status: always report 0 for CloseConnection.
         os.writeInt(Protocol.headerSize); // Message size.
 
-        this.sendMessage(OutgoingMessage.createForStream(os, false));
-
-        //
-        // Schedule the close timeout to wait for the peer to close the connection.
-        //
-        this.scheduleTimeout(this._writeTimer, this.closeTimeout());
+        var status = this.sendMessage(OutgoingMessage.createForStream(os, false, false));
+        if((status & AsyncStatus.Sent) > 0)
+        {
+            //
+            // Schedule the close timeout to wait for the peer to close the connection.
+            //
+            this.scheduleTimeout(SocketOperation.Write, this.closeTimeout());
+        }
 
         //
         // The CloseConnection message should be sufficient. Closing the write
@@ -1417,8 +1473,19 @@ ConnectionI.prototype.initiateShutdown = function()
 
 ConnectionI.prototype.initialize = function()
 {
-    this.scheduleTimeout(this._writeTimer, this.connectTimeout());
-    this._transceiver.initialize(this); // TODO
+    var s = this._transceiver.initialize(this._readStream.getBuffer(), this._writeStream.getBuffer());
+    if(s != SocketOperation.None)
+    {
+        this.scheduleTimeout(s, this.connectTimeout());
+        return false;
+    }
+
+    //
+    // Update the connection description once the transceiver is initialized.
+    //
+    this._desc = this._transceiver.toString();
+    this.setState(StateNotValidated);
+    return true;
 };
 
 ConnectionI.prototype.validate = function()
@@ -1430,16 +1497,20 @@ ConnectionI.prototype.validate = function()
             if(this._writeStream.size === 0)
             {
                 this._writeStream.writeBlob(Protocol.magic);
-                this._writeStream.writeByte(Protocol.protocolMajor);
-                this._writeStream.writeByte(Protocol.protocolMinor);
-                this._writeStream.writeByte(Protocol.encodingMajor);
-                this._writeStream.writeByte(Protocol.encodingMinor);
+                Protocol.currentProtocol.__write(this._writeStream);
+                Protocol.currentProtocolEncoding.__write(this._writeStream);
                 this._writeStream.writeByte(Protocol.validateConnectionMsg);
                 this._writeStream.writeByte(0); // Compression status (always zero for validate connection).
                 this._writeStream.writeInt(Protocol.headerSize); // Message size.
                 TraceUtil.traceSend(this._writeStream, this._logger, this._traceLevels);
                 this._writeStream.prepareWrite();
-                this._transceiver.write(this._writeStream);
+            }
+
+            if(this._writeStream.pos != this._writeStream.size &&
+               !this._transceiver.write(this._writeStream.getBuffer()))
+            {
+                this.scheduleTimeout(SocketOperation.Write, this.connectTimeout());
+                return false;
             }
         }
         else // The client side has the passive role for connection validation.
@@ -1451,9 +1522,9 @@ ConnectionI.prototype.validate = function()
             }
 
             if(this._readStream.pos !== this._readStream.size &&
-               !this._transceiver.read(this._readStream, this._hasMoreData))
+               !this._transceiver.read(this._readStream.getBuffer(), this._hasMoreData))
             {
-                this.scheduleTimeout(this._readTimer, this.connectTimeout());
+                this.scheduleTimeout(SocketOperation.Read, this.connectTimeout());
                 return false;
             }
 
@@ -1467,28 +1538,13 @@ ConnectionI.prototype.validate = function()
                 bme.badMagic = m;
                 throw bme;
             }
-            var pMajor = this._readStream.readByte();
-            var pMinor = this._readStream.readByte();
-            if(pMajor !== Protocol.protocolMajor)
-            {
-                var upe = new LocalEx.UnsupportedProtocolException();
-                upe.badMajor = pMajor;
-                upe.badMinor = pMinor;
-                upe.major = Protocol.protocolMajor;
-                upe.minor = Protocol.protocolMinor;
-                throw upe;
-            }
-            var eMajor = this._readStream.readByte();
-            var eMinor = this._readStream.readByte();
-            if(eMajor !== Protocol.encodingMajor)
-            {
-                var uee = new LocalEx.UnsupportedEncodingException();
-                uee.badMajor = eMajor;
-                uee.badMinor = eMinor;
-                uee.major = Protocol.encodingMajor;
-                uee.minor = Protocol.encodingMinor;
-                throw uee;
-            }
+
+            this._readProtocol.__read(this._readStream);
+            Protocol.checkSupportedProtocol(this._readProtocol);
+
+            this._readProtocolEncoding.__read(this._readStream);
+            Protocol.checkSupportedProtocolEncoding(this._readProtocolEncoding);
+
             var messageType = this._readStream.readByte();
             if(messageType !== Protocol.validateConnectionMsg)
             {
@@ -1501,6 +1557,8 @@ ConnectionI.prototype.validate = function()
                 throw new LocalEx.IllegalMessageSizeException();
             }
             TraceUtil.traceRecv(this._readStream, this._logger, this._traceLevels);
+
+            this._validated = true;
         }
     }
 
@@ -1514,35 +1572,175 @@ ConnectionI.prototype.validate = function()
     return true;
 };
 
+ConnectionI.prototype.sendNextMessage = function()
+{
+    Debug.assert(this._sendStreams.length > 0);
+    Debug.assert(!this._writeStream.isEmpty() && this._writeStream.pos === this._writeStream.size);
+
+    var callbacks = []; // TODO: Use sent callbacks?
+    try
+    {
+        while(true)
+        {
+            //
+            // Notify the message that it was sent.
+            //
+            var message = this._sendStreams.shift();
+            this._writeStream.swap(message.stream);
+            if(message.sent(this, true))
+            {
+                callbacks.push(message);
+            }
+
+            //
+            // If there's nothing left to send, we're done.
+            //
+            if(this._sendStreams.length == 0)
+            {
+                break;
+            }
+
+            //
+            // If we are in the closed state, don't continue sending.
+            //
+            // The connection can be in the closed state if parseMessage
+            // (called before sendNextMessage by message()) closes the
+            // connection.
+            //
+            if(this._state >= StateClosed)
+            {
+                return callbacks;
+            }
+
+            //
+            // Otherwise, prepare the next message stream for writing.
+            //
+            message = this._sendStreams[0];
+            Debug.assert(!message.prepared);
+            var stream = message.stream;
+
+            stream.pos = 10;
+            stream.writeInt(stream.size);
+            stream.prepareWrite();
+            message.prepared = true;
+
+            if(message.outAsync != null)
+            {
+                TraceUtil.trace("sending asynchronous request", stream, this._logger, this._traceLevels);
+            }
+            else
+            {
+                TraceUtil.traceSend(stream, this._logger, this._traceLevels);
+            }
+            this._writeStream.swap(message.stream);
+
+            //
+            // Send the message.
+            //
+            if(this._writeStream.pos != this._writeStream.size &&
+               !this._transceiver.write(this._writeStream.getBuffer()))
+            {
+                Debug.assert(!this._writeStream.isEmpty());
+                this.scheduleTimeout(SocketOperation.Write, this._endpoint.timeout());
+                return callbacks;
+            }
+        }
+    }
+    catch(ex)
+    {
+        if(ex instanceof Ex.LocalException)
+        {
+            this.setState(StateClosed, ex);
+            return callbacks;
+        }
+        else
+        {
+            throw ex;
+        }
+    }
+
+    Debug.assert(this._writeStream.isEmpty());
+
+    //
+    // If all the messages were sent and we are in the closing state, we schedule
+    // the close timeout to wait for the peer to close the connection.
+    //
+    if(this._state === StateClosing)
+    {
+        this.scheduleTimeout(SocketOperation.Write, this.closeTimeout());
+    }
+
+    return callbacks;
+};
+
 ConnectionI.prototype.sendMessage = function(message)
 {
     Debug.assert(this._state < StateClosed);
 
-    message.stream.pos = 10;
-    message.stream.writeInt(message.stream.size);
-    message.stream.prepareWrite();
+    Debug.assert(!message.prepared);
+
+    var stream = message.stream;
+    stream.pos = 10;
+    stream.writeInt(stream.size);
+    stream.prepareWrite();
+    message.prepared = true;
 
     TraceUtil.trace("sending asynchronous request", message.stream, this._logger, this._traceLevels);
 
-    this._transceiver.write(message.stream);
-    message.sent(this);
-
-    if(this._acmTimeout > 0)
+    if(this._transceiver.write(message.stream.getBuffer()))
     {
-        this._acmAbsoluteTimeoutMillis = TimeUtil.now() + this._acmTimeout * 1000;
+        //
+        // Entire buffer was written immediately.
+        //
+        var status = AsyncStatus.Sent;
+        if(message.sent(this, false))
+        {
+            status |= AsyncStatus.InvokeSentCallback;
+        }
+        if(this._acmTimeout > 0)
+        {
+            this._acmAbsoluteTimeoutMillis = TimeUtil.now() + this._acmTimeout * 1000;
+        }
+        return status;
     }
+    message.adopt();
+
+    this._writeStream.swap(message.stream);
+    this._sendStreams.push(message);
+    this.scheduleTimeout(SocketOperation.Write, this._endpoint.timeout());
+    return AsyncStatus.Queued;
 };
 
-ConnectionI.prototype.parseMessage = function()
+var MessageInfo = function(stream)
+{
+    this.stream = stream;
+
+    this.invokeNum = 0;
+    this.requestId = 0;
+    this.compress = false;
+    this.servantManager = null;
+    this.adapter = null;
+    this.outAsync = null;
+};
+
+ConnectionI.prototype.parseMessage = function(stream)
 {
     Debug.assert(this._state > StateNotValidated && this._state < StateClosed);
 
-    var info = new MessageInfo(this._instance);
+    var info = new MessageInfo(stream);
 
     this._readStream.swap(info.stream);
     this._readStream.resize(Protocol.headerSize);
     this._readStream.pos = 0;
     this._readHeader = true;
+
+    //
+    // Connection is validated on first message. This is only used by
+    // setState() to check wether or not we can print a connection
+    // warning (a client might close the connection forcefully if the
+    // connection isn't validated).
+    //
+    this._validated = true;
 
     Debug.assert(info.stream.pos === info.stream.size);
 
@@ -1633,7 +1831,7 @@ ConnectionI.prototype.parseMessage = function()
                 info.requestId = info.stream.readInt();
                 info.outAsync = this._asyncRequests.get(info.requestId);
                 this._asyncRequests.delete(info.requestId);
-                if(info.outAsync === null)
+                if(info.outAsync === undefined)
                 {
                     throw new LocalEx.UnknownRequestIdException();
                 }
@@ -1696,34 +1894,17 @@ ConnectionI.prototype.invokeAll = function(stream, invokeNum, requestId, compres
             //
             var response = !this._endpoint.datagram() && requestId !== 0;
             inc = new Incoming(this._instance, this, adapter, response, compress, requestId);
-            var istr = inc.istr();
-            stream.swap(istr);
-            var ostr = inc.ostr();
 
             //
-            // Prepare the response if necessary.
+            // Dispatch the invocation.
             //
-            if(response)
-            {
-                Debug.assert(invokeNum === 1); // No further invocations if a response is expected.
-                ostr.writeBlob(Protocol.replyHdr);
-
-                //
-                // Add the request ID.
-                //
-                ostr.writeInt(requestId);
-            }
-
             inc.invoke(servantManager);
 
-            //
-            // If there are more invocations, we need the stream back.
-            //
-            if(--invokeNum > 0)
-            {
-                stream.swap(istr);
-            }
+            --invokeNum;
+            inc = null;
         }
+
+        stream.clear();
     }
     catch(ex)
     {
@@ -1746,20 +1927,38 @@ ConnectionI.prototype.invokeAll = function(stream, invokeNum, requestId, compres
     }
 };
 
-ConnectionI.prototype.scheduleTimeout = function(timer, timeout)
+ConnectionI.prototype.scheduleTimeout = function(op, timeout)
 {
     if(timeout < 0)
     {
         return;
     }
 
-    timer.delay = timeout; // Changing the delay resets the timer.
-    timer.start();
+    var self = this;
+    if((op & SocketOperation.Read) !== 0)
+    {
+        this._readTimeoutId = this._timer.schedule(timeout, function() { self.timedOut(); });
+        this._readTimeoutScheduled = true;
+    }
+    if((op & (SocketOperation.Write | SocketOperation.Connect)) !== 0)
+    {
+        this._writeTimeoutId = this._timer.schedule(timeout, function() { self.timedOut(); });
+        this._writeTimeoutScheduled = true;
+    }
 };
 
-ConnectionI.prototype.unscheduleTimeout = function(timer)
+ConnectionI.prototype.unscheduleTimeout = function(op)
 {
-    timer.stop();
+    if((op & SocketOperation.Read) !== 0 && this._readTimeoutScheduled)
+    {
+        this._timer.cancel(this._readTimeoutId);
+        this._readTimeoutScheduled = false;
+    }
+    if((op & (SocketOperation.Write | SocketOperation.Connect)) !== 0 && this._writeTimeoutScheduled)
+    {
+        this._timer.cancel(this._writeTimeoutId);
+        this._writeTimeoutScheduled = false;
+    }
 };
 
 ConnectionI.prototype.connectTimeout = function()
@@ -1832,36 +2031,25 @@ ConnectionI.prototype.checkState = function()
 
 module.exports = ConnectionI;
 
-var MessageInfo = function(instance)
-{
-    this.stream = new BasicStream(instance);
-
-    this.stream = null;
-    this.invokeNum = 0;
-    this.requestId = 0;
-    this.compress = false;
-    this.servantManager = null;
-    this.adapter = null;
-    this.outAsync = null;
-};
-
 var OutgoingMessage = function()
 {
     this.stream = null;
     this.outAsync = null;
     this.compress = false;
     this.requestId = 0;
+    this.prepared = false;
     this.isSent = false;
 };
 
-OutgoingMessage.createForStream = function(stream, compress)
+OutgoingMessage.createForStream = function(stream, compress, adopt)
 {
     var m = new OutgoingMessage();
     m.stream = stream;
-    m.outAsync = null;
     m.compress = compress;
-    m.requestId = 0;
+    m.adopt = adopt;
     m.isSent = false;
+    m.requestId = 0;
+    m.outAsync = null;
     return m;
 };
 
@@ -1869,11 +2057,23 @@ OutgoingMessage.create = function(out, stream, compress, requestId)
 {
     var m = new OutgoingMessage();
     m.stream = stream;
-    m.outAsync = out;
     m.compress = compress;
+    m.outAsync = out;
     m.requestId = requestId;
     m.isSent = false;
+    m.adopt = false;
     return m;
+};
+
+OutgoingMessage.prototype.adopt = function()
+{
+    if(this.adopt)
+    {
+        var stream = new BasicStream(this.stream.instance(), Protocol.currentProtocolEncoding);
+        stream.swap(this.stream);
+        this.stream = stream;
+        this.adopt = false;
+    }
 };
 
 OutgoingMessage.prototype.sent = function(connection)
@@ -1882,7 +2082,11 @@ OutgoingMessage.prototype.sent = function(connection)
 
     if(this.outAsync !== null)
     {
-        this.outAsync.__sent(connection);
+        return this.outAsync.__sent(connection);
+    }
+    else
+    {
+        return false;
     }
 };
 

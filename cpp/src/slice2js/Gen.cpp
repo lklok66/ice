@@ -245,26 +245,27 @@ Slice::JsVisitor::writePostUnmarshalParams(const ParamDeclList& params, const Op
 }
 
 void
-Slice::JsVisitor::writeMarshalDataMember(const DataMemberPtr& member, const string& name)
+Slice::JsVisitor::writeMarshalDataMember(const DataMemberPtr& member, int& iter)
 {
     // TODO
     if(member->optional())
     {
-        writeOptionalMarshalUnmarshalCode(_out, member->type(), name, member->tag(), true);
+        writeOptionalMarshalUnmarshalCode(_out, member->type(), fixId(member->name()), member->tag(), true);
     }
     else
     {
-        writeMarshalUnmarshalCode(_out, member->type(), name, true);
+        writeMarshalUnmarshalCode(_out, member->type(), "this." + fixId(member->name()), true);
     }
 }
 
 void
-Slice::JsVisitor::writeUnmarshalDataMember(const DataMemberPtr& member, const string& name, bool needPatcher,
-                                           int& patchIter)
+Slice::JsVisitor::writeUnmarshalDataMember(const DataMemberPtr& member, int& iter)
 {
     const bool classType = isClassType(member->type());
 
+    // TODO
     string patcher;
+#if 0
     if(classType)
     {
         patcher = "new Patcher__(" + getStaticId(member->type()) + ", this";
@@ -276,14 +277,18 @@ Slice::JsVisitor::writeUnmarshalDataMember(const DataMemberPtr& member, const st
         }
         patcher += ")";
     }
+#endif
 
     if(member->optional())
     {
-        writeOptionalMarshalUnmarshalCode(_out, member->type(), classType ? patcher : name, member->tag(), false);
+        writeOptionalMarshalUnmarshalCode(_out, member->type(), classType ? patcher : fixId(member->name()),
+                                          member->tag(), false);
     }
     else
     {
-        writeMarshalUnmarshalCode(_out, member->type(), classType ? patcher : name, false);
+        // TODO
+        //writeMarshalUnmarshalCode(_out, member->type(), classType ? patcher : name, false);
+        writeMarshalUnmarshalCode(_out, member->type(), "this." + fixId(member->name()), false);
     }
 }
 
@@ -1951,6 +1956,29 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
     }
     _out << nl << "return __h;";
     _out << eb;
+
+    if(!p->isLocal())
+    {
+        _out << sp;
+        _out << nl << localScope << '.' << name << ".prototype.__write = function(__os)";
+        _out << sb;
+        for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+        {
+            int iter = 0;
+            writeMarshalDataMember(*q, iter);
+        }
+        _out << eb;
+
+        _out << sp;
+        _out << nl << localScope << '.' << name << ".prototype.__read = function(__is)";
+        _out << sb;
+        for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+        {
+            int iter = 0;
+            writeUnmarshalDataMember(*q, iter);
+        }
+        _out << eb;
+    }
 
 #if 0
     _out << sp << nl << "public java.lang.Object" << nl << "clone()";

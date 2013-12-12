@@ -307,7 +307,7 @@ Slice::JsGenerator::typeToString(const TypePtr& type, bool optional)
     DictionaryPtr d = DictionaryPtr::dynamicCast(type);
     if(d)
     {
-        return "Ice.HashMap";
+        return "__ice_HashMap";
     }
 
     ContainedPtr contained = ContainedPtr::dynamicCast(type);
@@ -391,16 +391,15 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
                                               const string& param,
                                               bool marshal)
 {
-#if 0 // TODO
     string stream;
 
     if(marshal)
     {
-        stream = streamingAPI ? "outS__" : "os__";
+        stream = "__os";
     }
     else
     {
-        stream = streamingAPI ? "inS__" : "is__";
+        stream = "__is";
     }
 
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
@@ -544,21 +543,11 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
         string typeS = typeToString(type);
         if(marshal)
         {
-            out << nl << typeS << "Helper.write";
-            if(!streamingAPI)
-            {
-                out << "__";
-            }
-            out << "(" << stream << ", " << param << ");";
+            out << nl << typeS << ".__write(" << stream << ", " << param << ");";
         }
         else
         {
-            out << nl << param << " = " << typeS << "Helper.read";
-            if(!streamingAPI)
-            {
-                out << "__";
-            }
-            out << "(" << stream << ");";
+            out << nl << param << " = " << typeS << ".__read(" << stream << ");";
         }
         return;
     }
@@ -582,49 +571,15 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-            if(!isValueType(st))
-            {
-                out << nl << "if(" << param << " == null)";
-                out << sb;
-                string typeS = typeToString(st);
-                out << nl << typeS << " tmp__ = new " << typeS << "();";
-                out << nl << "tmp__.";
-                out << (streamingAPI ? "ice_write" : "write__") << "(" << stream << ");";
-                out << eb;
-                out << nl << "else";
-                out << sb;
-                out << nl << param << "." << (streamingAPI ? "ice_write" : "write__") << "(" << stream << ");";
-                out << eb;
-            }
-            else
-            {
-                if(streamingAPI)
-                {
-                    out << nl << param << ".ice_write(" << stream << ");";
-                }
-                else
-                {
-                    out << nl << param << ".write__(" << stream << ");";
-                }
-            }
+            out << nl << param << ".__write(" << stream << ");";
         }
         else
         {
-            if(!isValueType(st))
-            {
-                out << nl << "if(" << param << " == null)";
-                out << sb;
-                out << nl << param << " = new " << typeToString(type) << "();";
-                out << eb;
-            }
-            if(streamingAPI)
-            {
-                out << nl << param << ".ice_read(" << stream << ");";
-            }
-            else
-            {
-                out << nl << param << ".read__(" << stream << ");";
-            }
+            out << nl << "if(" << param << " == null)";
+            out << sb;
+            out << nl << param << " = new " << typeToString(type) << "();"; // TODO: Fix reference to type
+            out << eb;
+            out << nl << param << ".__read(" << stream << ");";
         }
         return;
     }
@@ -634,32 +589,17 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-            if(streamingAPI)
-            {
-                out << nl << "if((int)" << param << " < " << en->minValue()
-                    << " || (int)" << param << " > " << en->maxValue() << ")";
-                out << sb;
-                out << nl << "throw new Ice.MarshalException(\"enumerator out of range\");";
-                out << eb;
-            }
-            out << nl << stream << ".writeEnum((int)" << param << ", " << en->maxValue() << ");";
+            out << nl << stream << ".writeEnum(" << param << ".value, " << en->maxValue() << ");";
         }
         else
         {
-            out << nl << param << " = (" << fixId(en->scoped()) << ')' << stream << ".readEnum(" << en->maxValue()
-                << ");";
-            if(streamingAPI)
-            {
-                out << nl << "if((int)" << param << " < " << en->minValue() << " || (int)" << param << " > "
-                    << en->maxValue() << ")";
-                out << sb;
-                out << nl << "throw new Ice.MarshalException(\"enumerator out of range\");";
-                out << eb;
-            }
+            out << nl << param << " = " << typeToString(en) << ".valueOf(" << stream << ".readEnum(" << en->maxValue()
+                << "));";
         }
         return;
     }
 
+#if 0 // TODO
     SequencePtr seq = SequencePtr::dynamicCast(type);
     if(seq)
     {
