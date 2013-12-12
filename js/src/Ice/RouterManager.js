@@ -16,16 +16,16 @@ var RouterManager = function()
 {
     this._table = new HashMap(); // Map<Ice.RouterPrx, RouterInfo>
     this._table.comparator = HashMap.compareEquals;
-}
+};
 
 RouterManager.prototype.destroy = function()
 {
-    for(var e = this._table.entries; e != null; e = e.next)
+    for(var e = this._table.entries; e !== null; e = e.next)
     {
         e.destroy();
     }
     this._table.clear();
-}
+};
 
 //
 // Returns router info for a given router. Automatically creates
@@ -55,7 +55,7 @@ RouterManager.prototype.find = function(rtr)
     }
 
     return info;
-}
+};
 
 RouterManager.prototype.erase = function(rtr)
 {
@@ -69,6 +69,6 @@ RouterManager.prototype.erase = function(rtr)
         this._table.delete(router);
     }
     return info;
-}
+};
 
 module.exports = RouterManager;

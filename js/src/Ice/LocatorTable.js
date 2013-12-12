@@ -9,19 +9,20 @@
 
 var HashMap = require("./HashMap");
 var TimeUtil = require("./TimeUtil");
+var Debug = require("./Debug");
 
 var LocatorTable = function()
 {
     this._adapterEndpointsTable = new HashMap(); // Map<String, EndpointTableEntry>
     this._objectTable = new HashMap(); // Map<Ice.Identity, ReferenceTableEntry>
     this._objectTable.comparator = HashMap.compareEquals;
-}
+};
 
 LocatorTable.prototype.clear = function()
 {
     this._adapterEndpointsTable.clear();
     this._objectTable.clear();
-}
+};
 
 LocatorTable.prototype.getAdapterEndpoints = function(adapter, ttl, cached)
 {
@@ -39,19 +40,19 @@ LocatorTable.prototype.getAdapterEndpoints = function(adapter, ttl, cached)
     }
     cached.value = false;
     return null;
-}
+};
 
 LocatorTable.prototype.addAdapterEndpoints = function(adapter, endpoints)
 {
     this._adapterEndpointsTable.set(adapter, new EndpointTableEntry(TimeUtil.now(), endpoints));
-}
+};
 
 LocatorTable.prototype.removeAdapterEndpoints = function(adapter)
 {
     var entry = this._adapterEndpointsTable.get(adapter);
     this._adapterEndpointsTable.delete(adapter);
     return entry !== undefined ? entry.endpoints : null;
-}
+};
 
 LocatorTable.prototype.getObjectReference = function(id, ttl, cached)
 {
@@ -69,19 +70,19 @@ LocatorTable.prototype.getObjectReference = function(id, ttl, cached)
     }
     cached.value = false;
     return null;
-}
+};
 
 LocatorTable.prototype.addObjectReference = function(id, ref)
 {
     this._objectTable.set(id, new ReferenceTableEntry(TimeUtil.now(), ref));
-}
+};
 
 LocatorTable.prototype.removeObjectReference = function(id)
 {
     var entry = this._objectTable.get(id);
     this._objectTable.delete(id);
     return entry !== undefined ? entry.reference : null;
-}
+};
 
 LocatorTable.prototype.checkTTL = function(time, ttl)
 {
@@ -94,7 +95,7 @@ LocatorTable.prototype.checkTTL = function(time, ttl)
     {
         return TimeUtil.now() - time <= (ttl * 1000);
     }
-}
+};
 
 module.exports = LocatorTable;
 
@@ -102,10 +103,10 @@ var EndpointTableEntry = function(time, endpoints)
 {
     this.time = time;
     this.endpoints = endpoints;
-}
+};
 
 var ReferenceTableEntry = function(time, reference)
 {
     this.time = time;
     this.reference = reference;
-}
+};

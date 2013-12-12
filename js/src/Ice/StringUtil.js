@@ -126,7 +126,7 @@ function encodeChar(b, sb, special)
             else
             {
                 var c = String.fromCharCode(b);
-                if(special && special.indexOf(c) !== -1)
+                if(special !== null && special.indexOf(c) !== -1)
                 {
                     sb.push('\\');
                     sb.push(c);
@@ -150,7 +150,7 @@ module.exports.escapeString = function(s, special)
     special = special === undefined ? null : special;
 
     var i, length;
-    if(special)
+    if(special !== null)
     {
         for(i = 0, length = special.length; i < length; ++i)
         {

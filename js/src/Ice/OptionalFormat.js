@@ -12,7 +12,7 @@ var __ice_EnumBase = require("./EnumBase");
 var OptionalFormat = function(_n, _v)
 {
     __ice_EnumBase.call(this, _n, _v);
-}
+};
 
 OptionalFormat.prototype = new __ice_EnumBase();
 OptionalFormat.prototype.constructor = OptionalFormat;

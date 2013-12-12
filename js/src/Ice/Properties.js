@@ -103,7 +103,7 @@ Properties.prototype.getPropertyAsListWithDefault = function(key, value)
         pv.used = true;
 
         var result = StringUtil.splitString(pv.value, ", \t\r\n");
-        if(!result)
+        if(result === null)
         {
             // TODO
             //Ice.Util.getProcessLogger().warning("mismatched quotes in property " + key
@@ -141,7 +141,7 @@ Properties.prototype.setProperty = function(key, value)
     //
     // Trim whitespace
     //
-    if(key)
+    if(key !== null && key !== undefined)
     {
         key = key.trim();
     }
@@ -151,7 +151,7 @@ Properties.prototype.setProperty = function(key, value)
     //
     //TODO
     //var logger = Util.getProcessLogger(); 
-    if(!key || key.length === 0)
+    if(key === null || key === undefined || key.length === 0)
     {
         throw new LocalEx.InitializationException("Attempt to set property with empty key");
     }
@@ -162,7 +162,7 @@ Properties.prototype.setProperty = function(key, value)
         var prefix = key.substr(0, dotPos);
         for(var i = 0; i < PropertyNames.validProps.length; ++i)
         {
-            var pattern = PropertyNames.validProps[i][0].pattern();
+            var pattern = PropertyNames.validProps[i][0].pattern;
             dotPos = pattern.indexOf(".");
             //
             // Each top level prefix describes a non-empty namespace. Having a string without a
@@ -182,14 +182,14 @@ Properties.prototype.setProperty = function(key, value)
                 var pComp = new RegExp(pattern);
                 found = pComp.test(key);
 
-                if(found && PropertyNames.validProps[i][j].deprecated())
+                if(found && PropertyNames.validProps[i][j].deprecated)
                 {
                     //TODO
                     console.log("deprecated property: " + key);
                     //logger.warning("deprecated property: " + key);
-                    if(PropertyNames.validProps[i][j].deprecatedBy())
+                    if(PropertyNames.validProps[i][j].deprecatedBy !== null)
                     {
-                        key = PropertyNames.validProps[i][j].deprecatedBy();
+                        key = PropertyNames.validProps[i][j].deprecatedBy;
                     }
                 }
             }

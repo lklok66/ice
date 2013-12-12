@@ -123,7 +123,7 @@ module.exports.checkSupportedProtocol = function(v)
     {
         throw new LocalEx.UnsupportedProtocolException("", v, module.exports.currentProtocol);
     }
-}
+};
 
 module.exports.checkSupportedProtocolEncoding = function(v)
 {
@@ -132,7 +132,7 @@ module.exports.checkSupportedProtocolEncoding = function(v)
     {
         throw new LocalEx.UnsupportedEncodingException("", v, module.exports.currentProtocolEncoding);
     }
-}
+};
 
 module.exports.checkSupportedEncoding = function(v)
 {
@@ -140,7 +140,7 @@ module.exports.checkSupportedEncoding = function(v)
     {
         throw new LocalEx.UnsupportedEncodingException("", v, module.exports.currentEncoding);
     }
-}
+};
 
 //
 // Either return the given protocol if not compatible, or the greatest
@@ -164,7 +164,7 @@ module.exports.getCompatibleProtocol = function(v)
         //
         return module.exports.currentProtocol; 
     }
-}
+};
 
 //
 // Either return the given encoding if not compatible, or the greatest
@@ -188,12 +188,12 @@ module.exports.getCompatibleEncoding = function(v)
         //
         return module.exports.currentEncoding; 
     }
-}
+};
 
 module.exports.isSupported = function(version, supported)
 {
     return version.major == supported.major && version.minor <= supported.minor;
-}
+};
 
 /**
  * Converts a string to a protocol version.
@@ -205,7 +205,7 @@ module.exports.isSupported = function(version, supported)
 module.exports.stringToProtocolVersion = function(version)
 {
     return new Ver.ProtocolVersion(stringToMajor(version), stringToMinor(version));
-}
+};
 
 /**
  * Converts a string to an encoding version.
@@ -217,7 +217,7 @@ module.exports.stringToProtocolVersion = function(version)
 module.exports.stringToEncodingVersion = function(version)
 {
     return new Ver.EncodingVersion(stringToMajor(version), stringToMinor(version));
-}
+};
 
 /**
  * Converts a protocol version to a string.
@@ -229,7 +229,7 @@ module.exports.stringToEncodingVersion = function(version)
 module.exports.protocolVersionToString = function(v)
 {
     return majorMinorToString(v.major, v.minor);
-}
+};
 
 /**
  * Converts an encoding version to a string.
@@ -241,7 +241,7 @@ module.exports.protocolVersionToString = function(v)
 module.exports.encodingVersionToString = function(v)
 {
     return majorMinorToString(v.major, v.minor);
-}
+};
 
 function stringToMajor(str)
 {

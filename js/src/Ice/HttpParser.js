@@ -128,7 +128,7 @@ Object.defineProperty(HttpParser.prototype, "reason", {
 HttpParser.prototype.getHeader = function(name, toLower)
 {
     var value = this._headers.find(name.toLowerCase());
-    if(!value)
+    if(value === undefined || value === null)
     {
         return undefined;
     }

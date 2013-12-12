@@ -32,7 +32,7 @@ var Ice = (function(my, undefined)
     my.Properties = Properties;
     my.UserException = Ex.UserException;
 
-    for(s in LocalEx)
+    for(var s in LocalEx)
     {
         my[s] = LocalEx[s];
     }
@@ -49,7 +49,7 @@ var Ice = (function(my, undefined)
     {
         this.properties = null;
         this.logger = null;
-    }
+    };
 
     my.InitializationData.prototype.clone = function()
     {
@@ -57,7 +57,7 @@ var Ice = (function(my, undefined)
         r.properties = this.properties;
         r.logger = this.logger;
         return r;
-    }
+    };
 
     //
     // Ice.initialize()
@@ -106,7 +106,7 @@ var Ice = (function(my, undefined)
         var result = new Communicator(initData);
         result.finishSetup(null);
         return result;
-    }
+    };
 
     //
     // Ice.createProperties()
@@ -114,7 +114,7 @@ var Ice = (function(my, undefined)
     my.createProperties = function(args, defaults)
     {
         return new Properties(args, defaults);
-    }
+    };
 
     return my;
 }(Ice || {}));

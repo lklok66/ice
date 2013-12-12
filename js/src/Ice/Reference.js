@@ -20,6 +20,9 @@ var EndpointTypes = require("./EndpointTypes").ice;
 var Id = require("./Identity").ice;
 var LocalEx = require("./LocalException").Ice;
 
+var RouterPrx = require("./Router").Ice.RouterPrx;
+var LocatorPrx = require("./Locator").Ice.LocatorPrx;
+
 //
 // Only for use by Instance
 //
@@ -29,33 +32,33 @@ var ReferenceFactory = function(instance, communicator)
     this._communicator = communicator;
     this._defaultRouter = null;
     this._defaultLocator = null;
-}
+};
 
 ReferenceFactory.prototype.create = function(ident, facet, tmpl, endpoints)
 {
-    if(ident.name.length == 0 && ident.category.length == 0)
+    if(ident.name.length === 0 && ident.category.length === 0)
     {
         return null;
     }
 
     return this.createImpl(ident, facet, tmpl.getMode(), tmpl.getSecure(), tmpl.getProtocol(), tmpl.getEncoding(),
                            endpoints, null, null);
-}
+};
 
 ReferenceFactory.prototype.createWithAdapterId = function(ident, facet, tmpl, adapterId)
 {
-    if(ident.name.length == 0 && ident.category.length == 0)
+    if(ident.name.length === 0 && ident.category.length === 0)
     {
         return null;
     }
 
     return this.createImpl(ident, facet, tmpl.getMode(), tmpl.getSecure(), tmpl.getProtocol(), tmpl.getEncoding(),
                            null, adapterId, null);
-}
+};
 
 ReferenceFactory.prototype.createFixed = function(ident, fixedConnection)
 {
-    if(ident.name.length == 0 && ident.category.length == 0)
+    if(ident.name.length === 0 && ident.category.length === 0)
     {
         return null;
     }
@@ -73,21 +76,21 @@ ReferenceFactory.prototype.createFixed = function(ident, fixedConnection)
         this._instance.defaultsAndOverrides().defaultEncoding,
         fixedConnection);
     return ref;
-}
+};
 
 ReferenceFactory.prototype.copy = function(r)
 {
     var ident = r.getIdentity();
-    if(ident.name.length == 0 && ident.category.length == 0)
+    if(ident.name.length === 0 && ident.category.length === 0)
     {
         return null;
     }
     return r.clone();
-}
+};
 
 ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
 {
-    if(s === undefined || s === null || s.length == 0)
+    if(s === undefined || s === null || s.length === 0)
     {
         return null;
     }
@@ -109,14 +112,14 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
     //
     var idstr = null;
     end = StringUtil.checkQuote(s, beg);
-    if(end == -1)
+    if(end === -1)
     {
         throw new LocalEx.ProxyParseException("mismatched quotes around identity in `" + s + "'");
     }
-    else if(end == 0)
+    else if(end === 0)
     {
         end = StringUtil.findFirstOf(s, delim + ":@", beg);
-        if(end == -1)
+        if(end === -1)
         {
             end = s.length;
         }
@@ -129,7 +132,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
         end++; // Skip trailing quote
     }
 
-    if(beg == end)
+    if(beg === end)
     {
         throw new LocalEx.ProxyParseException("no identity in `" + s + "'");
     }
@@ -139,7 +142,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
     //
     var ident = this._instance.stringToIdentity(idstr);
 
-    if(ident.name.length == 0)
+    if(ident.name.length === 0)
     {
         //
         // An identity with an empty name and a non-empty
@@ -175,7 +178,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
     while(true)
     {
         beg = StringUtil.findFirstNotOf(s, delim, end);
-        if(beg == -1)
+        if(beg === -1)
         {
             break;
         }
@@ -221,10 +224,10 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
                     throw new LocalEx.ProxyParseException("mismatched quotes around value for " + option +
                                                       " option in `" + s + "'");
                 }
-                else if(end == 0)
+                else if(end === 0)
                 {
                     end = StringUtil.findFirstOf(s, delim + ":@", beg);
-                    if(end == -1)
+                    if(end === -1)
                     {
                         end = s.length;
                     }
@@ -375,7 +378,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
         }
     }
 
-    if(beg == -1)
+    if(beg === -1)
     {
         return this.createImpl(ident, facet, mode, secure, protocol, encoding, null, null, propertyPrefix);
     }
@@ -436,7 +439,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
 
             var es = s.substring(beg, end);
             var endp = this._instance.endpointFactoryManager().create(es, false);
-            if(endp != null)
+            if(endp !== null)
             {
                 endpoints.push(endp);
             }
@@ -445,12 +448,12 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
                 unknownEndpoints.push(es);
             }
         }
-        if(endpoints.length == 0)
+        if(endpoints.length === 0)
         {
             Debug.assert(unknownEndpoints.length > 0);
             throw new LocalEx.EndpointParseException("invalid endpoint `" + unknownEndpoints[0] + "' in `" + s + "'");
         }
-        else if(unknownEndpoints.length != 0 &&
+        else if(unknownEndpoints.length !== 0 &&
             this._instance.initializationData().properties.getPropertyAsIntWithDefault("Ice.Warn.Endpoints", 1) > 0)
         {
             var msg = [];
@@ -476,14 +479,14 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
 
         var adapterstr = null;
         end = StringUtil.checkQuote(s, beg);
-        if(end == -1)
+        if(end === -1)
         {
             throw new LocalEx.ProxyParseException("mismatched quotes around adapter id in `" + s + "'");
         }
-        else if(end == 0)
+        else if(end === 0)
         {
             end = StringUtil.findFirstOf(s, delim, beg);
-            if(end == -1)
+            if(end === -1)
             {
                 end = s.length;
             }
@@ -496,7 +499,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
             end++; // Skip trailing quote
         }
 
-        if(end != s.length && StringUtil.findFirstNotOf(s, delim, end) != -1)
+        if(end !== s.length && StringUtil.findFirstNotOf(s, delim, end) !== -1)
         {
             throw new LocalEx.ProxyParseException("invalid trailing characters after `" + s.substring(0, end + 1) +
                                                   "' in `" + s + "'");
@@ -510,7 +513,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
         {
             throw new LocalEx.ProxyParseException("invalid adapter id in `" + s + "': " + ex.message);
         }
-        if(adapter.length == 0)
+        if(adapter.length === 0)
         {
             throw new LocalEx.ProxyParseException("empty adapter id in `" + s + "'");
         }
@@ -518,7 +521,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
     }
 
     throw new LocalEx.ProxyParseException("malformed proxy `" + s + "'");
-}
+};
 
 /* TODO
 ReferenceFactory.prototype.createFromStream = function(ident, s)
@@ -582,7 +585,7 @@ ReferenceFactory.prototype.createFromStream = function(ident, s)
 
 ReferenceFactory.prototype.setDefaultRouter = function(defaultRouter)
 {
-    if(this._defaultRouter == null ? defaultRouter == null : this._defaultRouter.equals(defaultRouter))
+    if(this._defaultRouter === null ? defaultRouter === null : this._defaultRouter.equals(defaultRouter))
     {
         return this;
     }
@@ -591,16 +594,16 @@ ReferenceFactory.prototype.setDefaultRouter = function(defaultRouter)
     factory._defaultLocator = this._defaultLocator;
     factory._defaultRouter = defaultRouter;
     return factory;
-}
+};
 
 ReferenceFactory.prototype.getDefaultRouter = function()
 {
     return this._defaultRouter;
-}
+};
 
 ReferenceFactory.prototype.setDefaultLocator = function(defaultLocator)
 {
-    if(this._defaultLocator == null ? defaultLocator == null : this._defaultLocator.equals(defaultLocator))
+    if(this._defaultLocator === null ? defaultLocator === null : this._defaultLocator.equals(defaultLocator))
     {
         return this;
     }
@@ -609,12 +612,12 @@ ReferenceFactory.prototype.setDefaultLocator = function(defaultLocator)
     factory._defaultRouter = this._defaultRouter;
     factory._defaultLocator = defaultLocator;
     return factory;
-}
+};
 
 ReferenceFactory.prototype.getDefaultLocator = function()
 {
     return this._defaultLocator;
-}
+};
 
 var suffixes =
 [
@@ -643,12 +646,12 @@ ReferenceFactory.prototype.checkForUnknownProperties = function(prefix)
     }
     */
 
-    var unknownProps = [];
+    var unknownProps = [], i, length;
     var props = this._instance.initializationData().properties.getPropertiesForPrefix(prefix + ".");
-    for(var e = props.entries; e != null; e = e.next)
+    for(var e = props.entries; e !== null; e = e.next)
     {
         var valid = false;
-        for(var i = 0; i < suffixes.length; ++i)
+        for(i = 0, length = suffixes.length; i < length; ++i)
         {
             if(e.key === prefix + "." + suffixes[i])
             {
@@ -659,7 +662,7 @@ ReferenceFactory.prototype.checkForUnknownProperties = function(prefix)
 
         if(!valid)
         {
-            unknownProps.push(prop);
+            unknownProps.push(e.key);
         }
     }
 
@@ -669,14 +672,14 @@ ReferenceFactory.prototype.checkForUnknownProperties = function(prefix)
         message.push("found unknown properties for proxy '");
         message.push(prefix);
         message.push("':");
-        for(var i = 0; i < unknownProps.length; ++i)
+        for(i = 0, length = unknownProps.length; i < length; ++i)
         {
             message.push("\n    ");
             message.push(unknownProps[i]);
         }
         this._instance.initializationData().logger.warning(message.join(""));
     }
-}
+};
 
 ReferenceFactory.prototype.createImpl = function(ident, facet, mode, secure, protocol, encoding, endpoints, adapterId,
                                                  propertyPrefix)
@@ -687,9 +690,9 @@ ReferenceFactory.prototype.createImpl = function(ident, facet, mode, secure, pro
     // Default local proxy options.
     //
     var locatorInfo = null;
-    if(this._defaultLocator != null)
+    if(this._defaultLocator !== null)
     {
-        if(!_defaultLocator.__reference().getEncoding().equals(encoding))
+        if(!this._defaultLocator.__reference().getEncoding().equals(encoding))
         {
             locatorInfo = this._instance.locatorManager().find(this._defaultLocator.ice_encodingVersion(encoding));
         }
@@ -722,8 +725,8 @@ ReferenceFactory.prototype.createImpl = function(ident, facet, mode, secure, pro
         var property;
 
         property = propertyPrefix + ".Locator";
-        var locator = Loc.LocatorPrx.uncheckedCast(this._communicator.propertyToProxy(property));
-        if(locator != null)
+        var locator = LocatorPrx.uncheckedCast(this._communicator.propertyToProxy(property));
+        if(locator !== null)
         {
             if(!locator.__reference().getEncoding().equals(encoding))
             {
@@ -736,8 +739,8 @@ ReferenceFactory.prototype.createImpl = function(ident, facet, mode, secure, pro
         }
 
         property = propertyPrefix + ".Router";
-        var router = Rout.RouterPrx.uncheckedCast(this._communicator.propertyToProxy(property));
-        if(router != null)
+        var router = RouterPrx.uncheckedCast(this._communicator.propertyToProxy(property));
+        if(router !== null)
         {
             var match = ".Router";
             if(propertyPrefix.lastIndexOf(match) == propertyPrefix.length - match.length)
@@ -800,7 +803,7 @@ ReferenceFactory.prototype.createImpl = function(ident, facet, mode, secure, pro
                                  preferSecure,
                                  endpointSelection,
                                  locatorCacheTimeout);
-}
+};
 
 module.exports.ReferenceFactory = ReferenceFactory;
 
@@ -809,9 +812,9 @@ var Reference = function(instance, communicator, identity, facet, mode, secure, 
     //
     // Validate string arguments.
     //
-    Debug.assert(identity === undefined || identity.name != null);
-    Debug.assert(identity === undefined || identity.category != null);
-    Debug.assert(facet === undefined || facet != null);
+    Debug.assert(identity === undefined || identity.name !== null);
+    Debug.assert(identity === undefined || identity.category !== null);
+    Debug.assert(facet === undefined || facet !== null);
 
     this._instance = instance;
     this._communicator = communicator;
@@ -825,7 +828,7 @@ var Reference = function(instance, communicator, identity, facet, mode, secure, 
     this._hashInitialized = false;
     this._overrideCompress = false;
     this._compress = false; // Only used if _overrideCompress == true
-}
+};
 
 Reference._emptyContext = new HashMap();
 Reference.ModeTwoway = 0;
@@ -838,110 +841,110 @@ Reference.ModeLast = Reference.ModeBatchDatagram;
 Reference.prototype.getMode = function()
 {
     return this._mode;
-}
+};
 
 Reference.prototype.getSecure = function()
 {
     return this._secure;
-}
+};
 
 Reference.prototype.getProtocol = function()
 {
     return this._protocol;
-}
+};
 
 Reference.prototype.getEncoding = function()
 {
     return this._encoding;
-}
+};
 
 Reference.prototype.getIdentity = function()
 {
     return this._identity;
-}
+};
 
 Reference.prototype.getFacet = function()
 {
     return this._facet;
-}
+};
 
 Reference.prototype.getInstance = function()
 {
     return this._instance;
-}
+};
 
 Reference.prototype.getContext = function()
 {
     return this._context; // HashMap
-}
+};
 
 Reference.prototype.getCommunicator = function()
 {
     return this._communicator;
-}
+};
 
 Reference.prototype.getEndpoints = function()
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.getAdapterId = function()
 {
     // Abstract
     Debug.assert(false);
     return "";
-}
+};
 
 Reference.prototype.getRouterInfo = function()
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.getLocatorInfo = function()
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.getCacheConnection = function()
 {
     // Abstract
     Debug.assert(false);
     return false;
-}
+};
 
 Reference.prototype.getPreferSecure = function()
 {
     // Abstract
     Debug.assert(false);
     return false;
-}
+};
 
 Reference.prototype.getEndpointSelection = function()
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.getLocatorCacheTimeout = function()
 {
     // Abstract
     Debug.assert(false);
     return 0;
-}
+};
 
 Reference.prototype.getConnectionId = function()
 {
     // Abstract
     Debug.assert(false);
     return "";
-}
+};
 
 //
 // The change* methods (here and in derived classes) create
@@ -955,7 +958,7 @@ Reference.prototype.changeContext = function(newContext)
         newContext = Reference._emptyContext;
     }
     var r = this._instance.referenceFactory().copy(this);
-    if(newContext.size == 0)
+    if(newContext.size === 0)
     {
         r._context = Reference._emptyContext;
     }
@@ -964,7 +967,7 @@ Reference.prototype.changeContext = function(newContext)
         r._context = new HashMap(newContext);
     }
     return r;
-}
+};
 
 Reference.prototype.changeMode = function(newMode)
 {
@@ -975,7 +978,7 @@ Reference.prototype.changeMode = function(newMode)
     var r = this._instance.referenceFactory().copy(this);
     r._mode = newMode;
     return r;
-}
+};
 
 Reference.prototype.changeSecure = function(newSecure)
 {
@@ -986,7 +989,7 @@ Reference.prototype.changeSecure = function(newSecure)
     var r = this._instance.referenceFactory().copy(this);
     r._secure = newSecure;
     return r;
-}
+};
 
 Reference.prototype.changeIdentity = function(newIdentity)
 {
@@ -997,7 +1000,7 @@ Reference.prototype.changeIdentity = function(newIdentity)
     var r = this._instance.referenceFactory().copy(this);
     r._identity = new Id.Identity(newIdentity.name, newIdentity.category);
     return r;
-}
+};
 
 Reference.prototype.changeFacet = function(newFacet)
 {
@@ -1008,7 +1011,7 @@ Reference.prototype.changeFacet = function(newFacet)
     var r = this._instance.referenceFactory().copy(this);
     r._facet = newFacet;
     return r;
-}
+};
 
 Reference.prototype.changeEncoding = function(newEncoding)
 {
@@ -1019,7 +1022,7 @@ Reference.prototype.changeEncoding = function(newEncoding)
     var r = this._instance.referenceFactory().copy(this);
     r._encoding = newEncoding;
     return r;
-}
+};
 
 Reference.prototype.changeCompress = function(newCompress)
 {
@@ -1031,77 +1034,77 @@ Reference.prototype.changeCompress = function(newCompress)
     r._compress = newCompress;
     r._overrideCompress = true;
     return r;
-}
+};
 
 Reference.prototype.changeAdapterId = function(newAdapterId)
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.changeEndpoints = function(newEndpoints)
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.changeLocator = function(newLocator)
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.changeRouter = function(newRouter)
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.changeCacheConnection = function(newCache)
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.changePreferSecure = function(newPreferSecure)
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.changeEndpointSelection = function(newType)
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.changeLocatorCacheTimeout = function(newTimeout)
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.changeTimeout = function(newTimeout)
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.changeConnectionId = function(connectionId)
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.hashCode = function()
 {
@@ -1128,7 +1131,7 @@ Reference.prototype.hashCode = function()
     this._hashInitialized = true;
 
     return this._hashValue;
-}
+};
 
 //
 // Utility methods
@@ -1138,14 +1141,14 @@ Reference.prototype.isIndirect = function()
     // Abstract
     Debug.assert(false);
     return false;
-}
+};
 
 Reference.prototype.isWellKnown = function()
 {
     // Abstract
     Debug.assert(false);
     return false;
-}
+};
 
 //
 // Marshal the reference.
@@ -1160,7 +1163,7 @@ Reference.prototype.streamWrite = function(s)
     //
     // For compatibility with the old FacetPath.
     //
-    if(this._facet.length == 0)
+    if(this._facet.length === 0)
     {
         s.writeSize(0); // Empty string sequence
     }
@@ -1181,7 +1184,7 @@ Reference.prototype.streamWrite = function(s)
     }
 
     // Derived class writes the remainder of the reference.
-}
+};
 
 //
 // Convert the reference to its string form.
@@ -1222,7 +1225,7 @@ Reference.prototype.toString = function()
         // the facet string in quotes.
         //
         s.push(" -f ");
-        var fs = StringUtil.escapeString(_facet, "");
+        var fs = StringUtil.escapeString(this._facet, "");
         if(fs.search(/[ :@]/) != -1)
         {
             s.push('"');
@@ -1296,7 +1299,7 @@ Reference.prototype.toString = function()
     return s.join("");
 
     // Derived class writes the remainder of the string.
-}
+};
 
 //
 // Convert the reference to its property form.
@@ -1306,17 +1309,16 @@ Reference.prototype.toProperty = function(prefix)
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.getConnection = function(
     successCallback,    // function(connection, compress)
     exceptionCallback,  // function(ex)
-    cbContext
-)
+    cbContext)
 {
     // Abstract
     Debug.assert(false);
-}
+};
 
 Reference.prototype.equals = function(r)
 {
@@ -1369,14 +1371,14 @@ Reference.prototype.equals = function(r)
     }
 
     return true;
-}
+};
 
 Reference.prototype.clone = function()
 {
     // Abstract
     Debug.assert(false);
     return null;
-}
+};
 
 Reference.prototype.copyMembers = function(r)
 {
@@ -1386,7 +1388,7 @@ Reference.prototype.copyMembers = function(r)
     r._context = this._context;
     r._overrideCompress = this._overrideCompress;
     r._compress = this._compress;
-}
+};
 
 Reference._emptyEndpoints = [];
 
@@ -1396,7 +1398,7 @@ var FixedReference = function(instance, communicator, identity, facet, mode, sec
 {
     Reference.call(this, instance, communicator, identity, facet, mode, secure, Protocol.Protocol_1_0, encoding);
     this._fixedConnection = connection;
-}
+};
 
 FixedReference.prototype = new Reference();
 FixedReference.prototype.constructor = FixedReference;
@@ -1404,122 +1406,122 @@ FixedReference.prototype.constructor = FixedReference;
 FixedReference.prototype.getEndpoints = function()
 {
     return Reference._emptyEndpoints;
-}
+};
 
 FixedReference.prototype.getAdapterId = function()
 {
     return "";
-}
+};
 
 FixedReference.prototype.getRouterInfo = function()
 {
     return null;
-}
+};
 
 FixedReference.prototype.getLocatorInfo = function()
 {
     return null;
-}
+};
 
 FixedReference.prototype.getCacheConnection = function()
 {
     return false;
-}
+};
 
 FixedReference.prototype.getPreferSecure = function()
 {
     return false;
-}
+};
 
 FixedReference.prototype.getEndpointSelection = function()
 {
     return EndpointTypes.EndpointSelectionType.Random;
-}
+};
 
 FixedReference.prototype.getLocatorCacheTimeout = function()
 {
     return 0;
-}
+};
 
 FixedReference.prototype.getConnectionId = function()
 {
     return "";
-}
+};
 
 FixedReference.prototype.changeAdapterId = function(newAdapterId)
 {
     throw new LocalEx.FixedProxyException();
-}
+};
 
 FixedReference.prototype.changeEndpoints = function(newEndpoints)
 {
     throw new LocalEx.FixedProxyException();
-}
+};
 
 FixedReference.prototype.changeLocator = function(newLocator)
 {
     throw new LocalEx.FixedProxyException();
-}
+};
 
 FixedReference.prototype.changeRouter = function(newRouter)
 {
     throw new LocalEx.FixedProxyException();
-}
+};
 
 FixedReference.prototype.changeCacheConnection = function(newCache)
 {
     throw new LocalEx.FixedProxyException();
-}
+};
 
 FixedReference.prototype.changePreferSecure = function(prefSec)
 {
     throw new LocalEx.FixedProxyException();
-}
+};
 
 FixedReference.prototype.changeEndpointSelection = function(newType)
 {
     throw new LocalEx.FixedProxyException();
-}
+};
 
 FixedReference.prototype.changeLocatorCacheTimeout = function(newTimeout)
 {
     throw new LocalEx.FixedProxyException();
-}
+};
 
 FixedReference.prototype.changeTimeout = function(newTimeout)
 {
     throw new LocalEx.FixedProxyException();
-}
+};
 
 FixedReference.prototype.changeConnectionId = function(connectionId)
 {
     throw new LocalEx.FixedProxyException();
-}
+};
 
 FixedReference.prototype.isIndirect = function()
 {
     return false;
-}
+};
 
 FixedReference.prototype.isWellKnown = function()
 {
     return false;
-}
+};
 
 FixedReference.prototype.streamWrite = function(s)
 {
     throw new LocalEx.FixedProxyException();
-}
+};
 
 FixedReference.prototype.toString = function()
 {
     throw new LocalEx.FixedProxyException();
-}
+};
 
 FixedReference.prototype.toProperty = function(prefix)
 {
     throw new LocalEx.FixedProxyException();
-}
+};
 
 FixedReference.prototype.clone = function()
 {
@@ -1527,7 +1529,7 @@ FixedReference.prototype.clone = function()
                                this.getMode(), this.getSecure(), this.getEncoding(), this._fixedConnection);
     this.copyMembers(r);
     return r;
-}
+};
 
 FixedReference.prototype.getConnectionInternal = function(compress)
 {
@@ -1580,7 +1582,7 @@ FixedReference.prototype.getConnectionInternal = function(compress)
     {
         compress.value = defaultsAndOverrides.overrideCompressValue;
     }
-    else if(_overrideCompress)
+    else if(this._overrideCompress)
     {
         compress.value = this._compress;
     }
@@ -1589,13 +1591,12 @@ FixedReference.prototype.getConnectionInternal = function(compress)
         compress.value = this._fixedConnection.endpoint().compress();
     }
     return this._fixedConnection;
-}
+};
 
 FixedReference.prototype.getConnection = function(
     successCallback,    // function(connection, compress)
     exceptionCallback,  // function(ex)
-    cbContext
-)
+    cbContext)
 {
     try
     {
@@ -1605,7 +1606,7 @@ FixedReference.prototype.getConnection = function(
     }
     catch(ex)
     {
-        if(ex instanceof Ice.LocalException)
+        if(ex instanceof LocalEx.LocalException)
         {
             exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext, ex);
         }
@@ -1614,7 +1615,7 @@ FixedReference.prototype.getConnection = function(
             throw ex;
         }
     }
-}
+};
 
 FixedReference.prototype.equals = function(rhs)
 {
@@ -1631,7 +1632,7 @@ FixedReference.prototype.equals = function(rhs)
         return false;
     }
     return this._fixedConnection.equals(rhs._fixedConnection);
-}
+};
 
 module.exports.FixedReference = FixedReference;
 
@@ -1660,7 +1661,7 @@ var RoutableReference = function(instance, communicator, identity, facet, mode, 
         this._adapterId = "";
     }
     Debug.assert(this._adapterId.length === 0 || this._endpoints.length === 0);
-}
+};
 
 RoutableReference.prototype = new Reference();
 RoutableReference.prototype.constructor = RoutableReference;
@@ -1668,47 +1669,47 @@ RoutableReference.prototype.constructor = RoutableReference;
 RoutableReference.prototype.getEndpoints = function()
 {
     return this._endpoints;
-}
+};
 
 RoutableReference.prototype.getAdapterId = function()
 {
     return this._adapterId;
-}
+};
 
 RoutableReference.prototype.getRouterInfo = function()
 {
     return this._routerInfo;
-}
+};
 
 RoutableReference.prototype.getLocatorInfo = function()
 {
     return this._locatorInfo;
-}
+};
 
 RoutableReference.prototype.getCacheConnection = function()
 {
     return this._cacheConnection;
-}
+};
 
 RoutableReference.prototype.getPreferSecure = function()
 {
     return this._preferSecure;
-}
+};
 
 RoutableReference.prototype.getEndpointSelection = function()
 {
     return this._endpointSelection;
-}
+};
 
 RoutableReference.prototype.getLocatorCacheTimeout = function()
 {
     return this._locatorCacheTimeout;
-}
+};
 
 RoutableReference.prototype.getConnectionId = function()
 {
     return this._connectionId;
-}
+};
 
 RoutableReference.prototype.changeEncoding = function(newEncoding)
 {
@@ -1716,14 +1717,14 @@ RoutableReference.prototype.changeEncoding = function(newEncoding)
     if(r !== this)
     {
         var locInfo = r._locatorInfo;
-        if(locInfo != null && !locInfo.getLocator().ice_getEncodingVersion().equals(newEncoding))
+        if(locInfo !== null && !locInfo.getLocator().ice_getEncodingVersion().equals(newEncoding))
         {
             r._locatorInfo = this.getInstance().locatorManager().find(
                 locInfo.getLocator().ice_encodingVersion(newEncoding));
         }
     }
     return r;
-}
+};
 
 RoutableReference.prototype.changeCompress = function(newCompress)
 {
@@ -1738,7 +1739,7 @@ RoutableReference.prototype.changeCompress = function(newCompress)
         r._endpoints = newEndpoints;
     }
     return r;
-}
+};
 
 RoutableReference.prototype.changeAdapterId = function(newAdapterId)
 {
@@ -1750,11 +1751,11 @@ RoutableReference.prototype.changeAdapterId = function(newAdapterId)
     r._adapterId = newAdapterId;
     r._endpoints = Reference._emptyEndpoints;
     return r;
-}
+};
 
 RoutableReference.prototype.changeEndpoints = function(newEndpoints)
 {
-    if(ArrayUtil.equals(newEndpoints, this._endpoints, function(e1, e2) { return e1.equals(e2) }))
+    if(ArrayUtil.equals(newEndpoints, this._endpoints, function(e1, e2) { return e1.equals(e2); }))
     {
         return this;
     }
@@ -1763,7 +1764,7 @@ RoutableReference.prototype.changeEndpoints = function(newEndpoints)
     r._adapterId = "";
     r.applyOverrides(r._endpoints);
     return r;
-}
+};
 
 RoutableReference.prototype.changeLocator = function(newLocator)
 {
@@ -1775,7 +1776,7 @@ RoutableReference.prototype.changeLocator = function(newLocator)
     var r = this.getInstance().referenceFactory().copy(this);
     r._locatorInfo = newLocatorInfo;
     return r;
-}
+};
 
 RoutableReference.prototype.changeRouter = function(newRouter)
 {
@@ -1787,7 +1788,7 @@ RoutableReference.prototype.changeRouter = function(newRouter)
     var r = this.getInstance().referenceFactory().copy(this);
     r._routerInfo = newRouterInfo;
     return r;
-}
+};
 
 RoutableReference.prototype.changeCacheConnection = function(newCache)
 {
@@ -1798,7 +1799,7 @@ RoutableReference.prototype.changeCacheConnection = function(newCache)
     var r = this.getInstance().referenceFactory().copy(this);
     r._cacheConnection = newCache;
     return r;
-}
+};
 
 RoutableReference.prototype.changePreferSecure = function(newPreferSecure)
 {
@@ -1809,7 +1810,7 @@ RoutableReference.prototype.changePreferSecure = function(newPreferSecure)
     var r = this.getInstance().referenceFactory().copy(this);
     r._preferSecure = newPreferSecure;
     return r;
-}
+};
 
 RoutableReference.prototype.changeEndpointSelection = function(newType)
 {
@@ -1820,7 +1821,7 @@ RoutableReference.prototype.changeEndpointSelection = function(newType)
     var r = this.getInstance().referenceFactory().copy(this);
     r._endpointSelection = newType;
     return r;
-}
+};
 
 RoutableReference.prototype.changeLocatorCacheTimeout = function(newTimeout)
 {
@@ -1831,7 +1832,7 @@ RoutableReference.prototype.changeLocatorCacheTimeout = function(newTimeout)
     var r = this.getInstance().referenceFactory().copy(this);
     r._locatorCacheTimeout = newTimeout;
     return r;
-}
+};
 
 RoutableReference.prototype.changeTimeout = function(newTimeout)
 {
@@ -1852,7 +1853,7 @@ RoutableReference.prototype.changeTimeout = function(newTimeout)
         r._endpoints = newEndpoints;
     }
     return r;
-}
+};
 
 RoutableReference.prototype.changeConnectionId = function(id)
 {
@@ -1872,17 +1873,17 @@ RoutableReference.prototype.changeConnectionId = function(id)
         r._endpoints = newEndpoints;
     }
     return r;
-}
+};
 
 RoutableReference.prototype.isIndirect = function()
 {
-    return this._endpoints.length == 0;
-}
+    return this._endpoints.length === 0;
+};
 
 RoutableReference.prototype.isWellKnown = function()
 {
-    return this._endpoints.length == 0 && this._adapterId.length == 0;
-}
+    return this._endpoints.length === 0 && this._adapterId.length === 0;
+};
 
 RoutableReference.prototype.streamWrite = function(s)
 {
@@ -1891,7 +1892,7 @@ RoutableReference.prototype.streamWrite = function(s)
     s.writeSize(this._endpoints.length);
     if(this._endpoints.length > 0)
     {
-        Debug.assert(this._adapterId.length == 0);
+        Debug.assert(this._adapterId.length === 0);
         for(var i = 0; i < this._endpoints.length; ++i)
         {
             this._endpoints[i].streamWrite(s);
@@ -1901,7 +1902,7 @@ RoutableReference.prototype.streamWrite = function(s)
     {
         s.writeString(this._adapterId); // Adapter id.
     }
-}
+};
 
 RoutableReference.prototype.toString = function()
 {
@@ -1919,7 +1920,7 @@ RoutableReference.prototype.toString = function()
         for(var i = 0; i < this._endpoints.length; ++i)
         {
             var endp = this._endpoints[i].toString();
-            if(endp != null && endp.length > 0)
+            if(endp !== null && endp.length > 0)
             {
                 s.push(':');
                 s.push(endp);
@@ -1948,11 +1949,11 @@ RoutableReference.prototype.toString = function()
         }
     }
     return s.join("");
-}
+};
 
 RoutableReference.prototype.toProperty = function(prefix)
 {
-    var properties = new HashMap();
+    var properties = new HashMap(), e;
 
     properties.put(prefix, this.toString());
     properties.put(prefix + ".CollocationOptimized", "0");
@@ -1963,28 +1964,28 @@ RoutableReference.prototype.toProperty = function(prefix)
 
     properties.put(prefix + ".LocatorCacheTimeout", "" + this._locatorCacheTimeout);
 
-    if(this._routerInfo != null)
+    if(this._routerInfo !== null)
     {
         var h = this._routerInfo.getRouter();
         var routerProperties = h.__reference().toProperty(prefix + ".Router");
-        for(var e = routerProperties.entries; e != null; e = e.next)
+        for(e = routerProperties.entries; e !== null; e = e.next)
         {
             properties.set(e.key, e.value);
         }
     }
 
-    if(this._locatorInfo != null)
+    if(this._locatorInfo !== null)
     {
         var p = this._locatorInfo.getLocator();
         var locatorProperties = p.__reference().toProperty(prefix + ".Locator");
-        for(var e = locatorProperties.entries; e != null; e = e.next)
+        for(e = locatorProperties.entries; e !== null; e = e.next)
         {
             properties.set(e.key, e.value);
         }
     }
 
     return properties;
-}
+};
 
 RoutableReference.prototype.hashCode = function()
 {
@@ -1994,7 +1995,7 @@ RoutableReference.prototype.hashCode = function()
         this._hashValue = HashUtil.addString(this._hashValue, this._adapterId);
     }
     return this._hashValue;
-}
+};
 
 RoutableReference.prototype.equals = function(rhs)
 {
@@ -2044,11 +2045,11 @@ RoutableReference.prototype.equals = function(rhs)
     {
        return false;
     }
-    if(this._overrideTimeout && _timeout !== rhs._timeout)
+    if(this._overrideTimeout && this._timeout !== rhs._timeout)
     {
         return false;
     }
-    if(!ArrayUtil.equals(this._endpoints, rhs._endpoints, function(e1, e2) { return e1.equals(e2) }))
+    if(!ArrayUtil.equals(this._endpoints, rhs._endpoints, function(e1, e2) { return e1.equals(e2); }))
     {
         return false;
     }
@@ -2057,15 +2058,14 @@ RoutableReference.prototype.equals = function(rhs)
        return false;
     }
     return true;
-}
+};
 
 RoutableReference.prototype.getConnection = function(
     successCallback,    // function(connection, compress)
     exceptionCallback,  // function(ex)
-    cbContext
-)
+    cbContext)
 {
-    if(this._routerInfo != null)
+    if(this._routerInfo !== null)
     {
         //
         // If we route, we send everything to the router's client
@@ -2083,24 +2083,23 @@ RoutableReference.prototype.getConnection = function(
             {
                 self.getConnectionNoRouterInfo(successCallback, exceptionCallback, cbContext);
             }
-        }
+        };
         var setExceptionFn = function(ex)
         {
             exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext, ex);
-        }
+        };
         this._routerInfo.getClientEndpoints(setEndpointsFn, setExceptionFn);
     }
     else
     {
         this.getConnectionNoRouterInfo(successCallback, exceptionCallback, cbContext);
     }
-}
+};
 
 RoutableReference.prototype.getConnectionNoRouterInfo = function(
     successCallback,    // function(connection, compress)
     exceptionCallback,  // function(ex)
-    cbContext
-)
+    cbContext)
 {
     if(this._endpoints.length > 0)
     {
@@ -2109,11 +2108,11 @@ RoutableReference.prototype.getConnectionNoRouterInfo = function(
     }
 
     var self = this;
-    if(this._locatorInfo != null)
+    if(this._locatorInfo !== null)
     {
         var setEndpointsFn = function(endpoints, cached)
         {
-            if(endpoints.length == 0)
+            if(endpoints.length === 0)
             {
                 exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext,
                                        new LocalEx.NoEndpointException(self.toString()));
@@ -2124,7 +2123,7 @@ RoutableReference.prototype.getConnectionNoRouterInfo = function(
             var connSuccessFn = function(connection, compress)
             {
                 successCallback.call(cbContext === undefined ? successCallback : cbContext, connection, compress);
-            }
+            };
             var connExceptionFn = function(ex)
             {
                 if(ex instanceof LocalEx.NoEndpointException)
@@ -2152,13 +2151,13 @@ RoutableReference.prototype.getConnectionNoRouterInfo = function(
                     }
                     exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext, ex);
                 }
-            }
+            };
             self.createConnection(endpoints, connSuccessFn, connExceptionFn);
-        }
+        };
         var setExceptionFn = function(ex)
         {
             exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext, ex);
-        }
+        };
         this._locatorInfo.getEndpoints(this, null, this._locatorCacheTimeout, setEndpointsFn, setExceptionFn);
     }
     else
@@ -2166,7 +2165,7 @@ RoutableReference.prototype.getConnectionNoRouterInfo = function(
         exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext,
                                new LocalEx.NoEndpointException(this.toString()));
     }
-}
+};
 
 RoutableReference.prototype.clone = function()
 {
@@ -2176,7 +2175,7 @@ RoutableReference.prototype.clone = function()
                                   this._endpointSelection, this._locatorCacheTimeout);
     this.copyMembers(r);
     return r;
-}
+};
 
 RoutableReference.prototype.copyMembers = function(rhs)
 {
@@ -2187,7 +2186,7 @@ RoutableReference.prototype.copyMembers = function(rhs)
     rhs._overrideTimeout = this._overrideTimeout;
     rhs._timeout = this._timeout;
     rhs._connectionId = this._connectionId;
-}
+};
 
 RoutableReference.prototype.applyOverrides = function(endpts)
 {
@@ -2206,7 +2205,7 @@ RoutableReference.prototype.applyOverrides = function(endpts)
             endpts[i] = endpts[i].changeTimeout(this._timeout);
         }
     }
-}
+};
 
 RoutableReference.prototype.filterEndpoints = function(allEndpoints)
 {
@@ -2305,17 +2304,17 @@ RoutableReference.prototype.filterEndpoints = function(allEndpoints)
             {
                 return preferSecure ? -1 : 1;
             }
-        }
+        };
         endpoints.sort(compare);
     }
 
     return endpoints;
-}
+};
 
 RoutableReference.prototype.createConnection = function(allEndpoints, successCallback, exceptionCallback, cbContext)
 {
     var endpoints = this.filterEndpoints(allEndpoints);
-    if(endpoints.length == 0)
+    if(endpoints.length === 0)
     {
         exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext,
                                new LocalEx.NoEndpointException(this.toString()));
@@ -2326,13 +2325,14 @@ RoutableReference.prototype.createConnection = function(allEndpoints, successCal
     // Finally, create the connection.
     //
     var factory = this.getInstance().outgoingConnectionFactory();
+    var cb;
     if(this.getCacheConnection() || endpoints.length == 1)
     {
         //
         // Get an existing connection or create one if there's no
         // existing connection to one of the given endpoints.
         //
-        var cb = new CreateConnectionCallback(this, null, successCallback, exceptionCallback, cbContext);
+        cb = new CreateConnectionCallback(this, null, successCallback, exceptionCallback, cbContext);
         factory.create(endpoints, false, this.getEndpointSelection(), cb.setConnection, cb.setException, cb);
     }
     else
@@ -2345,10 +2345,10 @@ RoutableReference.prototype.createConnection = function(allEndpoints, successCal
         // connection for one of the endpoints.
         //
         var v = [ endpoints[0] ];
-        var cb = new CreateConnectionCallback(this, endpoints, successCallback, exceptionCallback, cbContext);
+        cb = new CreateConnectionCallback(this, endpoints, successCallback, exceptionCallback, cbContext);
         factory.create(v, true, this.getEndpointSelection(), cb.setConnection, cb.setException, cb);
     }
-}
+};
 
 module.exports.RoutableReference = RoutableReference;
 
@@ -2361,7 +2361,7 @@ var CreateConnectionCallback = function(r, endpoints, successCallback, exception
     this.cbContext = cbContext;
     this.i = 0;
     this.exception = null;
-}
+};
 
 CreateConnectionCallback.prototype.setConnection = function(connection, compress)
 {
@@ -2376,7 +2376,7 @@ CreateConnectionCallback.prototype.setConnection = function(connection, compress
     }
     this.successCallback.call(this.cbContext === undefined ? this.successCallback : this.cbContext, connection,
                               compress);
-}
+};
 
 CreateConnectionCallback.prototype.setException = function(ex)
 {
@@ -2385,7 +2385,7 @@ CreateConnectionCallback.prototype.setException = function(ex)
         this.exception = ex;
     }
 
-    if(this.endpoints == null || ++this.i == this.endpoints.length)
+    if(this.endpoints === null || ++this.i === this.endpoints.length)
     {
         this.exceptionCallback.call(this.cbContext === undefined ? this.exceptionCallback : this.cbContext,
                                     this.exception);
@@ -2396,4 +2396,4 @@ CreateConnectionCallback.prototype.setException = function(ex)
     var arr = [ this.endpoints[this.i] ];
     this.ref.getInstance().outgoingConnectionFactory().create(arr, more, this.ref.getEndpointSelection(),
                                                               this.setConnection, this.setException, this);
-}
+};

@@ -7,16 +7,18 @@
 //
 // **********************************************************************
 
+var ArrayUtil = require("/ArrayUtil");
 var Debug = require("./Debug");
 var Ex = require("./Exception");
 var HashMap = require("./HashMap");
 var Promise = require("./Promise");
+var LocalEx = require("/LocalException").Ice;
 
 var RouterInfo = function(router)
 {
     this._router = router;
 
-    Debug.assert(this._router != null);
+    Debug.assert(this._router !== null);
 
     this._clientEndpoints = null;
     this._serverEndpoints = null;
@@ -24,7 +26,7 @@ var RouterInfo = function(router)
     this._identities = new HashMap(); // Set<Identity> = Map<Identity, 1>
     this._identities.comparator = HashMap.compareEquals;
     this._evictedIdentities = [];
-}
+};
 
 RouterInfo.prototype.destroy = function()
 {
@@ -32,7 +34,7 @@ RouterInfo.prototype.destroy = function()
     this._serverEndpoints = [];
     this._adapter = null;
     this._identities.clear();
-}
+};
 
 RouterInfo.prototype.equals = function(rhs)
 {
@@ -47,12 +49,12 @@ RouterInfo.prototype.equals = function(rhs)
     }
 
     return false;
-}
+};
 
 RouterInfo.prototype.hashCode = function()
 {
     return this._router.hashCode();
-}
+};
 
 RouterInfo.prototype.getRouter = function()
 {
@@ -60,7 +62,7 @@ RouterInfo.prototype.getRouter = function()
     // No mutex lock necessary, _router is immutable.
     //
     return this._router;
-}
+};
 
 RouterInfo.prototype.getClientEndpoints = function()
 {
@@ -86,7 +88,7 @@ RouterInfo.prototype.getClientEndpoints = function()
     }
 
     return promise;
-}
+};
 
 RouterInfo.prototype.getServerEndpoints = function()
 {
@@ -108,7 +110,7 @@ RouterInfo.prototype.getServerEndpoints = function()
                 throw ex;
             });
     }
-}
+};
 
 RouterInfo.prototype.addProxy = function(proxy)
 {
@@ -135,22 +137,22 @@ RouterInfo.prototype.addProxy = function(proxy)
                 throw ex;
             });
     }
-}
+};
 
 RouterInfo.prototype.setAdapter = function(adapter)
 {
     this._adapter = adapter;
-}
+};
 
 RouterInfo.prototype.getAdapter = function()
 {
     return this._adapter;
-}
+};
 
 RouterInfo.prototype.clearCache = function(ref)
 {
     this._identities.delete(ref.getIdentity());
-}
+};
 
 RouterInfo.prototype.setClientEndpoints = function(clientProxy, promise)
 {
@@ -192,7 +194,7 @@ RouterInfo.prototype.setClientEndpoints = function(clientProxy, promise)
     {
         promise.succeed(this._clientEndpoints);
     }
-}
+};
 
 RouterInfo.prototype.setServerEndpoints = function(serverProxy)
 {
@@ -204,7 +206,7 @@ RouterInfo.prototype.setServerEndpoints = function(serverProxy)
     serverProxy = serverProxy.ice_router(null); // The server proxy cannot be routed.
     this._serverEndpoints = serverProxy.__reference().getEndpoints();
     return this._serverEndpoints;
-}
+};
 
 RouterInfo.prototype.addAndEvictProxies = function(proxy, evictedProxies)
 {
@@ -235,6 +237,6 @@ RouterInfo.prototype.addAndEvictProxies = function(proxy, evictedProxies)
     {
         this._identities.delete(evictedProxies[i].ice_getIdentity());
     }
-}
+};
 
 module.exports = RouterInfo;

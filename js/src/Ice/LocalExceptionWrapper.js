@@ -9,7 +9,7 @@
 
 var Ex = require("./Exception");
 var ExUtil = require("./ExUtil");
-
+var Debug = require("./Debug");
 var LocalEx = require("./LocalException").Ice;
 
 var LocalExceptionWrapper = function(ex, retry)
@@ -27,7 +27,7 @@ var LocalExceptionWrapper = function(ex, retry)
         this._ex = ex._ex;
         this._retry = ex._retry;
     }
-}
+};
 
 LocalExceptionWrapper.prototype = new Error();
 LocalExceptionWrapper.prototype.constructor = LocalExceptionWrapper;
@@ -68,6 +68,6 @@ LocalExceptionWrapper.throwWrapper = function(ex)
 
     var ue = new LocalEx.UnknownException(ExUtil.toString(ex), ex);
     throw new LocalExceptionWrapper(ue, false);
-}
+};
 
 module.exports = LocalExceptionWrapper;

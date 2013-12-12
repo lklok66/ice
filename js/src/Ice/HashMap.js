@@ -16,10 +16,11 @@ var HashMap = function(h)
     this._table = [];
     this._comparator = function(k1, k2) { return k1 === k2; };
 
-    if(h === undefined || h === null || h._size == 0)
+    var i, length;
+    if(h === undefined || h === null || h._size === 0)
     {
         this._threshold = this._initialCapacity * this._loadFactor;
-        for(var i = 0; i < this._initialCapacity; i++)
+        for(i = 0; i < this._initialCapacity; i++)
         {
             this._table[i] = null;
         }
@@ -28,13 +29,13 @@ var HashMap = function(h)
     {
         this._threshold = h._threshold;
         this._comparator = h._comparator;
-        for(var i = 0; i < h._table.length; i++)
+        for(i = 0, length = h._table.length; i < length; i++)
         {
             this._table[i] = null;
         }
         this.merge(h);
     }
-}
+};
 
 Object.defineProperty(HashMap.prototype, "size", {
     get: function() { return this._size; }
@@ -54,7 +55,7 @@ Object.defineProperty(HashMap.prototype, "compareEquals", {
 });
 
 HashMap.prototype.set = function(key, value)
-{
+{    
     var hash = this.computeHash(key);
 
     var index = this.hashIndex(hash, this._table.length);
@@ -62,9 +63,9 @@ HashMap.prototype.set = function(key, value)
     //
     // Search for an entry with the same key.
     //
-    for(var e = this._table[index]; e != null; e = e._nextInBucket)
+    for(var e = this._table[index]; e !== null; e = e._nextInBucket)
     {
-        if(e._hash == hash && this.isEqual(key, e._key))
+        if(e._hash === hash && this.isEqual(key, e._key))
         {
             //
             // Found a match, update the value.
@@ -80,18 +81,18 @@ HashMap.prototype.set = function(key, value)
     this.add(key, value, hash, index);
 
     return undefined;
-}
+};
 
 HashMap.prototype.get = function(key)
 {
     var e = this.findEntry(key, this.computeHash(key));
     return e !== undefined ? e._value : undefined;
-}
+};
 
 HashMap.prototype.has = function(key)
 {
     return this.findEntry(key, this.computeHash(key)) !== undefined;
-}
+};
 
 HashMap.prototype.delete = function(key)
 {
@@ -103,9 +104,9 @@ HashMap.prototype.delete = function(key)
     // Search for an entry with the same key.
     //
     var prev = null;
-    for(var e = this._table[index]; e != null; e = e._nextInBucket)
+    for(var e = this._table[index]; e !== null; e = e._nextInBucket)
     {
-        if(e._hash == hash && this.isEqual(key, e._key))
+        if(e._hash === hash && this.isEqual(key, e._key))
         {
             //
             // Found a match.
@@ -115,7 +116,7 @@ HashMap.prototype.delete = function(key)
             //
             // Remove from bucket.
             //
-            if(prev != null)
+            if(prev !== null)
             {
                 prev._nextInBucket = e._nextInBucket;
             }
@@ -148,7 +149,7 @@ HashMap.prototype.delete = function(key)
     }
 
     return undefined;
-}
+};
 
 HashMap.prototype.clear = function()
 {
@@ -158,38 +159,38 @@ HashMap.prototype.clear = function()
     }
     this._head = null;
     this._size = 0;
-}
+};
 
 HashMap.prototype.forEach = function(fn, obj)
 {
     obj = obj === undefined ? fn : obj;
-    for(var e = this._head; e != null; e = e._next)
+    for(var e = this._head; e !== null; e = e._next)
     {
         fn.call(obj, e._key, e._value);
     }
-}
+};
 
 HashMap.prototype.hashCode = function()
 {
     var hash = 0;
 
-    for(var e = this._head; e != null; e = e._next)
+    for(var e = this._head; e !== null; e = e._next)
     {
         hash = hash * 5 + this.computeHash(e._key);
         hash = hash * 5 + this.computeHash(e._value);
     }
 
     return hash;
-}
+};
 
 HashMap.prototype.equals = function(other)
 {
-    if(other == null || !(other instanceof HashMap) || this._size != other._size)
+    if(other === null || !(other instanceof HashMap) || this._size !== other._size)
     {
         return false;
     }
 
-    for(var e = this._head; e != null; e = e._next)
+    for(var e = this._head; e !== null; e = e._next)
     {
         var oe = other.findEntry(e._key, e._hash);
         if(oe === undefined || !this.isEqual(e._value, oe._value))
@@ -199,21 +200,21 @@ HashMap.prototype.equals = function(other)
     }
 
     return true;
-}
+};
 
 HashMap.prototype.clone = function()
 {
     return new HashMap(this);
-}
+};
 
 HashMap.prototype.merge = function(from)
 {
-    for(var e = from._head; e != null; e = e._next)
+    for(var e = from._head; e !== null; e = e._next)
     {
         var index = this.hashIndex(e._hash, this._table.length);
         this.add(e._key, e._value, e._hash, index);
     }
-}
+};
 
 HashMap.prototype.add = function(key, value, hash, index)
 {
@@ -278,7 +279,7 @@ HashMap.prototype.add = function(key, value, hash, index)
     this._table[index] = e;
 
     e._next = this._head;
-    if(this._head != null)
+    if(this._head !== null)
     {
         this._head._prev = e;
     }
@@ -289,7 +290,7 @@ HashMap.prototype.add = function(key, value, hash, index)
     {
         this.resize(this._table.length * 2);
     }
-}
+};
 
 HashMap.prototype.resize = function(capacity)
 {
@@ -304,7 +305,7 @@ HashMap.prototype.resize = function(capacity)
     //
     // Re-assign all entries to buckets.
     //
-    for(var e = this._head; e != null; e = e._next)
+    for(var e = this._head; e !== null; e = e._next)
     {
         var index = this.hashIndex(e._hash, capacity);
         e._nextInBucket = newTable[index];
@@ -313,7 +314,7 @@ HashMap.prototype.resize = function(capacity)
 
     this._table = newTable;
     this._threshold = (capacity * this._loadFactor);
-}
+};
 
 HashMap.prototype.findEntry = function(key, hash)
 {
@@ -322,7 +323,7 @@ HashMap.prototype.findEntry = function(key, hash)
     //
     // Search for an entry with the same key.
     //
-    for(var e = this._table[index]; e != null; e = e._nextInBucket)
+    for(var e = this._table[index]; e !== null; e = e._nextInBucket)
     {
         if(e._hash == hash && this.isEqual(key, e._key))
         {
@@ -331,12 +332,12 @@ HashMap.prototype.findEntry = function(key, hash)
     }
 
     return undefined;
-}
+};
 
 HashMap.prototype.hashIndex = function(hash, len)
 {
     return hash & (len - 1);
-}
+};
 
 HashMap.prototype.computeHash = function(v)
 {
@@ -347,15 +348,15 @@ HashMap.prototype.computeHash = function(v)
 
     var hash = 0;
     var type = typeof(v);
-    if(type === "string")
+    if(type === "string" || v instanceof String)
     {
         hash = this.computeStringHash(v);
     }
-    else if(type === "number")
+    else if(type === "number" || v instanceof Number)
     {
         hash = v.toFixed(0);
     }
-    else if(type === "boolean")
+    else if(type === "boolean" || v instanceof Boolean)
     {
         hash = v ? 1 : 0;
     }
@@ -364,7 +365,7 @@ HashMap.prototype.computeHash = function(v)
         throw "cannot compute hash for value of type " + type;
     }
     return hash;
-}
+};
 
 HashMap.prototype.computeStringHash = function(s)
 {
@@ -377,11 +378,11 @@ HashMap.prototype.computeStringHash = function(s)
     }
 
     return hash;
-}
+};
 
 HashMap.prototype.isEqual = function(k1, k2)
 {
     return this._comparator.call(this._comparator, k1, k2);
-}
+};
 
 module.exports = HashMap;

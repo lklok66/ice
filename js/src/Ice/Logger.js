@@ -17,12 +17,12 @@ var Logger = function(prefix)
     {
         this._prefix = "";
     }
-}
+};
 
 Logger.prototype.print = function(message)
 {
     this.write(message, false);
-}
+};
 
 Logger.prototype.trace = function(category, message)
 {
@@ -36,7 +36,7 @@ Logger.prototype.trace = function(category, message)
     s.push(": ");
     s.push(message);
     this.write(s.join(""), true);
-}
+};
 
 Logger.prototype.warning = function(message)
 {
@@ -49,7 +49,7 @@ Logger.prototype.warning = function(message)
     s.push("warning: ");
     s.push(message);
     this.write(s.join(""), true);
-}
+};
 
 Logger.prototype.error = function(message)
 {
@@ -62,12 +62,12 @@ Logger.prototype.error = function(message)
     s.push("error: ");
     s.push(message);
     this.write(s.join(""), true);
-}
+};
 
 Logger.prototype.cloneWithPrefix = function(prefix)
 {
     return new Logger(prefix);
-}
+};
 
 Logger.prototype.write = function(message, indent)
 {
@@ -82,7 +82,7 @@ Logger.prototype.write = function(message, indent)
 
     // TODO: Is console.log() always available?
     console.log(message);
-}
+};
 
 Logger.prototype.timestamp = function()
 {
@@ -93,6 +93,6 @@ Logger.prototype.timestamp = function()
     day = day < 10 ? "0" + day : day;
     // TODO: Include milliseconds?
     return mon + "-" + day + "-" + d.getFullYear() + " " + d.toLocaleTimeString();
-}
+};
 
 module.exports = Logger;

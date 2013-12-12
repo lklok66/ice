@@ -43,13 +43,13 @@ module.exports.compareAddress = function(addr1, addr2)
     }
 
     return 0;
-}
+};
 
 module.exports.getAddressForServer = function(host, port, protocol, preferIPv6)
 {
-    if(host === undefined || host === null || host.length == 0)
+    if(host === undefined || host === null || host.length === 0)
     {
-        if(protocol != module.exports.EnableIPv4)
+        if(protocol !== module.exports.EnableIPv4)
         {
             return new Address("::0", (port === undefined || port === null) ? 0 : port);
         }
@@ -59,12 +59,12 @@ module.exports.getAddressForServer = function(host, port, protocol, preferIPv6)
         }
     }
     return new Address(host, (port === undefined || port === null) ? 0 : port);
-}
+};
 
 module.exports.addrToString = function(host, port)
 {
     return host + ":" + port;
-}
+};
 
 module.exports.addressesToString = function(localHost, localPort, remoteHost, remotePort, proxy, targetAddr)
 {
@@ -89,14 +89,14 @@ module.exports.addressesToString = function(localHost, localPort, remoteHost, re
         s.push(" proxy address = ");
         s.push(module.exports.addrToString(remoteHost, remotePort));
         s.push("\nremote address = ");
-        s.push(module.exports.addrToString(target.host, target.port));
+        s.push(module.exports.addrToString(targetAddr.host, targetAddr.port));
     }
     else
     {
-        if(remoteHost === null && target !== null)
+        if(remoteHost === null && targetAddr !== null)
         {
-            remoteHost = target.host;
-            remotePort = target.port;
+            remoteHost = targetAddr.host;
+            remotePort = targetAddr.port;
         }
 
         if(remoteHost === null)
@@ -111,4 +111,4 @@ module.exports.addressesToString = function(localHost, localPort, remoteHost, re
     }
 
     return s.join("");
-}
+};

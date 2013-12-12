@@ -10,8 +10,7 @@
 var HashMap = require("./HashMap");
 var LocatorInfo = require("./LocatorInfo");
 var LocatorTable = require("./LocatorTable");
-
-var LocatorRegistryPrx = require("./Locator").Ice.LocatorRegisterPrx;
+var LocatorPrx = require("./Locator").Ice.LocatorPrx;
 
 var LocatorManager = function(properties)
 {
@@ -21,17 +20,17 @@ var LocatorManager = function(properties)
     this._table.comparator = HashMap.compareEquals;
     this._locatorTables = new HashMap(); // Map<Ice.Identity, LocatorTable>
     this._locatorTables.comparator = HashMap.compareEquals;
-}
+};
 
 LocatorManager.prototype.destroy = function()
 {
-    for(var e = this._table.entries; e != null; e = e.next)
+    for(var e = this._table.entries; e !== null; e = e.next)
     {
         e.value.destroy();
     }
     this._table.clear();
     this._locatorTables.clear();
-}
+};
 
 //
 // Returns locator info for a given locator. Automatically creates
@@ -73,6 +72,6 @@ LocatorManager.prototype.find = function(loc)
     }
 
     return info;
-}
+};
 
 module.exports = LocatorManager;

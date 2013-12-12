@@ -59,13 +59,13 @@ var ProxyFactory = function(instance)
     {
         this._retryIntervals = [ 0 ];
     }
-}
+};
 
 ProxyFactory.prototype.stringToProxy = function(str)
 {
     var ref = this._instance.referenceFactory().createFromString(str, null);
     return this.referenceToProxy(ref);
-}
+};
 
 ProxyFactory.prototype.proxyToString = function(proxy)
 {
@@ -77,14 +77,14 @@ ProxyFactory.prototype.proxyToString = function(proxy)
     {
         return "";
     }
-}
+};
 
 ProxyFactory.prototype.propertyToProxy = function(prefix)
 {
     var proxy = this._instance.initializationData().properties.getProperty(prefix);
     var ref = this._instance.referenceFactory().createFromString(proxy, prefix);
     return this.referenceToProxy(ref);
-}
+};
 
 ProxyFactory.prototype.proxyToProperty = function(proxy, prefix)
 {
@@ -96,7 +96,7 @@ ProxyFactory.prototype.proxyToProperty = function(proxy, prefix)
     {
         return new HashMap();
     }
-}
+};
 
 ProxyFactory.prototype.streamToProxy = function(s)
 {
@@ -105,7 +105,7 @@ ProxyFactory.prototype.streamToProxy = function(s)
 
     var ref = this._instance.referenceFactory().createFromStream(ident, s);
     return this.referenceToProxy(ref);
-}
+};
 
 ProxyFactory.prototype.referenceToProxy = function(ref)
 {
@@ -119,7 +119,7 @@ ProxyFactory.prototype.referenceToProxy = function(ref)
     {
         return null;
     }
-}
+};
 
 ProxyFactory.prototype.proxyToStream = function(proxy, s)
 {
@@ -134,7 +134,7 @@ ProxyFactory.prototype.proxyToStream = function(proxy, s)
         var ident = new Ident.Identity("", "");
         ident.__write(s);
     }
-}
+};
 
 ProxyFactory.prototype.checkRetryAfterException = function(ex, ref, sleepInterval, cnt)
 {
@@ -190,7 +190,7 @@ ProxyFactory.prototype.checkRetryAfterException = function(ex, ref, sleepInterva
             if(ref.isWellKnown())
             {
                 var li = ref.getLocatorInfo();
-                if(li != null)
+                if(li !== null)
                 {
                     li.clearCache(ref);
                 }
@@ -276,10 +276,10 @@ ProxyFactory.prototype.checkRetryAfterException = function(ex, ref, sleepInterva
         logger.trace(traceLevels.retryCat, msg);
     }
 
-    Debug.assert(sleepInterval != null);
+    Debug.assert(sleepInterval !== null);
     sleepInterval.value = interval;
 
     return cnt;
-}
+};
 
 module.exports = ProxyFactory;
