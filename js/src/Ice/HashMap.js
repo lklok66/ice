@@ -29,7 +29,9 @@ var HashMap = function(h)
     {
         this._threshold = h._threshold;
         this._comparator = h._comparator;
-        for(i = 0, length = h._table.length; i < length; i++)
+        length = h._table.length
+        this._table.length = length;
+        for(i = 0; i < length; i++)
         {
             this._table[i] = null;
         }
@@ -54,18 +56,14 @@ Object.defineProperty(HashMap.prototype, "compareEquals", {
     get: function() { return function(k1, k2) { return k1.equals(k2); }; }
 });
 
-HashMap.prototype.set = function(key, value)
-{    
-    var hash = this.computeHash(key);
-
-    var index = this.hashIndex(hash, this._table.length);
-
+function setInternal(map, key, value, hash, index)
+{
     //
     // Search for an entry with the same key.
     //
-    for(var e = this._table[index]; e !== null; e = e._nextInBucket)
+    for(var e = map._table[index]; e !== null; e = e._nextInBucket)
     {
-        if(e._hash === hash && this.isEqual(key, e._key))
+        if(e._hash === hash && map.isEqual(key, e._key))
         {
             //
             // Found a match, update the value.
@@ -78,9 +76,17 @@ HashMap.prototype.set = function(key, value)
     //
     // No match found, add a new entry.
     //
-    this.add(key, value, hash, index);
-
+    map.add(key, value, hash, index);
     return undefined;
+}
+
+HashMap.prototype.set = function(key, value)
+{    
+    var hash = this.computeHash(key);
+
+    var index = this.hashIndex(hash, this._table.length);
+
+    return setInternal(this, key, value, hash, index);
 };
 
 HashMap.prototype.get = function(key)
@@ -211,8 +217,7 @@ HashMap.prototype.merge = function(from)
 {
     for(var e = from._head; e !== null; e = e._next)
     {
-        var index = this.hashIndex(e._hash, this._table.length);
-        this.add(e._key, e._value, e._hash, index);
+        setInternal(this, e._key, e._value, e._hash, this.hashIndex(e._hash, this._table.length));
     }
 };
 

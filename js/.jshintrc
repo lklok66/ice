@@ -1,4 +1,6 @@
 {
   "node": true,
-  "undef": true
+  "undef": true,
+  "globals": { "__IceExceptionRegistry__" : false,
+               "__IceClassRegistry__" : false }
 }

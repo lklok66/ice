@@ -139,7 +139,7 @@ ByteBuffer.prototype.reserve = function(n)
         else
         {
             b = new Buffer(capacity);
-            b.copy(this.b);
+            this.b.copy(b);
             this.b = b.buffer;
         }
     }
@@ -179,7 +179,7 @@ ByteBuffer.prototype.putArray = function(v)
     {
         throw new Error("BufferOverflowException");
     }
-    this.b.copy(v, this._position);
+    v.copy(this.b, this._position);
     this._position += v.length;
 };
 
@@ -402,7 +402,9 @@ ByteBuffer.prototype.getArray = function(length)
     {
         throw new Error("BufferUnderflowException");
     }
-    return this.b.slice(this._position, this._position + length);
+    var buffer = new Buffer(length);
+    this.b.slice(this._position, this._position + length).copy(buffer);
+    return buffer;
 };
 
 ByteBuffer.prototype.getShort = function()
@@ -547,7 +549,7 @@ ByteBuffer.prototype.getDoubleArray = function(length)
     return v;
 };
 
-ByteBuffer.prototype.getDouble = function()
+ByteBuffer.prototype.getLong = function()
 {
     if(this._limit - this._position < 8)
     {
@@ -561,7 +563,7 @@ ByteBuffer.prototype.getDouble = function()
     return v;
 };
 
-ByteBuffer.prototype.getDoubleAt = function(i)
+ByteBuffer.prototype.getLongAt = function(i)
 {
     if(i + 8 > this._limit || i < 0)
     {
@@ -573,7 +575,7 @@ ByteBuffer.prototype.getDoubleAt = function(i)
     return v;
 };
 
-ByteBuffer.prototype.getDoubleArray = function(length)
+ByteBuffer.prototype.getLongArray = function(length)
 {
     var v = [], i, l;
     if(this._position + (length * 8) > this._limit)
