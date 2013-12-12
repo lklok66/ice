@@ -509,7 +509,7 @@ EncapsDecoder10.prototype.readPendingObjects = function()
     }
     while(num > 0);
 
-    if(this._patchMap !== null && !this._patchMap.size === 0)
+    if(this._patchMap !== null && this._patchMap.size !== 0)
     {
         //
         // If any entries remain in the patch map, the sender has sent an index for an object, but failed
@@ -1113,7 +1113,7 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
     //
     this.unmarshal(index, v);
 
-    if(this._current === null && this._patchMap !== null && !this._patchMap.size === 0)
+    if(this._current === null && this._patchMap !== null && this._patchMap.size !== 0)
     {
         //
         // If any entries remain in the patch map, the sender has sent an index for an object, but failed
@@ -1589,7 +1589,7 @@ EncapsEncoder11.prototype.endSlice = function()
     //
     // Only write the indirection table if it contains entries.
     //
-    if(this._current.indirectionTable && !this._current.indirectionTable.length === 0)
+    if(this._current.indirectionTable !== null && this._current.indirectionTable.length !== 0)
     {
         Debug.assert(this._encaps.format === FormatType.SlicedFormat);
         this._current.sliceFlags |= FLAG_HAS_INDIRECTION_TABLE;
@@ -3362,7 +3362,7 @@ readString(int tag, Ice.Optional<String> v)
 BasicStream.prototype.readStringSeq = function()
 {
     var sz = this.readAndCheckSeqSize(1);
-    var v = [],
+    var v = [];
     v.length = sz;
     for(var i = 0; i < sz; ++i)
     {

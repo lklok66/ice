@@ -29,7 +29,7 @@ var HashMap = function(h)
     {
         this._threshold = h._threshold;
         this._comparator = h._comparator;
-        length = h._table.length
+        length = h._table.length;
         this._table.length = length;
         for(i = 0; i < length; i++)
         {
