@@ -24,6 +24,8 @@ var LocalEx = require("./LocalException").Ice;
 var RouterPrx = require("./Router").Ice.RouterPrx;
 var LocatorPrx = require("./Locator").Ice.LocatorPrx;
 
+var Ver = require("./Version").Ice;
+
 //
 // Only for use by Instance
 //
@@ -524,7 +526,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
     throw new LocalEx.ProxyParseException("malformed proxy `" + s + "'");
 };
 
-/* TODO
+
 ReferenceFactory.prototype.createFromStream = function(ident, s)
 {
     //
@@ -532,7 +534,7 @@ ReferenceFactory.prototype.createFromStream = function(ident, s)
     // constructor read the identity, and pass it as a parameter.
     //
 
-    if(ident.name.length == 0 && ident.category.length == 0)
+    if(ident.name.length === 0 && ident.category.length === 0)
     {
         return null;
     }
@@ -540,8 +542,8 @@ ReferenceFactory.prototype.createFromStream = function(ident, s)
     //
     // For compatibility with the old FacetPath.
     //
-    const facetPath:Vector.<String> = Ice.StringSeqHelper.read(s);
-    var facet:String;
+    var facetPath = s.readStringSeq(); // String[]
+    var facet;
     if(facetPath.length > 0)
     {
         if(facetPath.length > 1)
@@ -555,24 +557,39 @@ ReferenceFactory.prototype.createFromStream = function(ident, s)
         facet = "";
     }
 
-    const mode:int = s.readByte();
+    var mode = s.readByte();
     if(mode < 0 || mode > RefMode.ModeLast)
     {
         throw new LocalEx.ProxyUnmarshalException();
     }
 
-    const secure:Boolean = s.readBool();
+    var secure = s.readBool();
 
-    var endpoints:Vector.<EndpointI> = null;
-    var adapterId:String = null;
+    var protocol = null;
+    var encoding = null;
+    if(!s.getReadEncoding().equals(Protocol.Encoding_1_0))
+    {
+        protocol = new Ver.ProtocolVersion();
+        protocol.__read(s);
+        encoding = new Ver.EncodingVersion();
+        encoding.__read(s);
+    }
+    else
+    {
+        protocol = Protocol.Protocol_1_0;
+        encoding = Protocol.Encoding_1_0;
+    }
+    
+    var endpoints = null; // EndpointI[]
+    var adapterId = null;
 
-    const sz:int = s.readSize();
+    var sz = s.readSize();
     if(sz > 0)
     {
-        endpoints = new Vector.<EndpointI>(sz);
-        for(var i:int = 0; i < sz; i++)
+        endpoints = [];
+        for(var i = 0; i < sz; i++)
         {
-            endpoints[i] = _instance.endpointFactoryManager().read(s);
+            endpoints[i] = this._instance.endpointFactoryManager().read(s);
         }
     }
     else
@@ -581,8 +598,7 @@ ReferenceFactory.prototype.createFromStream = function(ident, s)
     }
 
     return this.createImpl(ident, facet, mode, secure, protocol, encoding, endpoints, adapterId, null);
-}
-*/
+};
 
 ReferenceFactory.prototype.setDefaultRouter = function(defaultRouter)
 {

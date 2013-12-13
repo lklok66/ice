@@ -7,18 +7,19 @@
 //
 // **********************************************************************
 
-var ByteBuffer = require("./ByteBuffer"),
-    Debug = require("./Debug"),
-    Ex = require("./Exception"),
-    ExUtil = require("./ExUtil"),
-    FormatType = require("./FormatType"),
-    HashMap = require("./HashMap"),
-    IceObject = require("./Object"),
-    LocalEx = require("./LocalException").Ice,
-    OptionalFormat = require("./OptionalFormat"),
-    Protocol = require("./Protocol"),
-    TraceUtil = require("./TraceUtil"),
-    Version = require("./Version").Ice;
+var ByteBuffer = require("./ByteBuffer");
+var Debug = require("./Debug");
+var Ex = require("./Exception");
+var ExUtil = require("./ExUtil");
+var FormatType = require("./FormatType");
+var HashMap = require("./HashMap");
+var IceObject = require("./Object");
+var LocalEx = require("./LocalException").Ice;
+var OptionalFormat = require("./OptionalFormat");
+var OptionalObject = require("./OptionalObject");
+var Protocol = require("./Protocol");
+var TraceUtil = require("./TraceUtil");
+var Version = require("./Version").Ice;
 
 var SliceType = {};
 SliceType.NoSlice = 0;
@@ -2446,23 +2447,16 @@ BasicStream.prototype.writeByte = function(v)
     this._buf.put(v);
 };
 
-//TODO Optionals
-/*BasicStream.prototype.writeOptionalByte = function(tag, v)
+BasicStream.prototype.writeOptByte = function(tag, v)
 {
-    if(v !== null && v.isSet())
+    if(v !== undefined)
     {
-        this.writeByte(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.F1))
+        {
+            this.writeByte(v);
+        }
     }
 };
-
-public void
-writeByte(int tag, byte v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.F1))
-    {
-        writeByte(v);
-    }
-}*/
 
 BasicStream.prototype.rewriteByte = function(v, dest)
 {
@@ -2471,7 +2465,6 @@ BasicStream.prototype.rewriteByte = function(v, dest)
 
 BasicStream.prototype.writeByteSeq = function(v)
 {
-    
     if(v === null)
     {
         this.writeSize(0);
@@ -2484,23 +2477,16 @@ BasicStream.prototype.writeByteSeq = function(v)
     }
 };
 
-/*public void
-writeByteSeq(int tag, Ice.Optional<byte[]> v)
+BasicStream.prototype.writeOptByteSeq = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeByteSeq(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.VSize))
+        {
+            this.writeByteSeq(v);
+        }
     }
-}
-
-public void
-writeByteSeq(int tag, byte[] v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.VSize))
-    {
-        writeByteSeq(v);
-    }
-}*/
+};
 
 BasicStream.prototype.readByte = function()
 {
@@ -2514,18 +2500,17 @@ BasicStream.prototype.readByte = function()
     }
 };
 
-/*public void
-readByte(int tag, Ice.ByteOptional v)
+BasicStream.prototype.readOptByte = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.F1))
+    if(this.readOpt(tag, OptionalFormat.F1))
     {
-        v.set(readByte());
+        return this.readByte();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.readByteSeq = function()
 {
@@ -2540,18 +2525,17 @@ BasicStream.prototype.readByteSeq = function()
     }
 };
 
-/*public void
-readByteSeq(int tag, Ice.Optional<byte[]> v)
+BasicStream.prototype.readOptByteSeq = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.VSize))
+    if(this.readOpt(tag, OptionalFormat.VSize))
     {
-        v.set(readByteSeq());
+        return this.readByteSeq();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.writeBool = function(v)
 {
@@ -2559,24 +2543,17 @@ BasicStream.prototype.writeBool = function(v)
     this._buf.put(v ? 1 : 0);
 };
 
-//TODO Optionals
-/*public void
-writeBool(int tag, Ice.BooleanOptional v)
-{
-    if(v != null && v.isSet())
-    {
-        writeBool(tag, v.get());
-    }
-}
 
-public void
-writeBool(int tag, boolean v)
+BasicStream.prototype.writeOptBool = function(tag, v)
 {
-    if(writeOpt(tag, Ice.OptionalFormat.F1))
+    if(v !== undefined)
     {
-        writeBool(v);
+        if(this.writeOpt(tag, OptionalFormat.F1))
+        {
+            this.writeBool(v);
+        }
     }
-}*/
+};
 
 BasicStream.prototype.rewriteBool = function(v, dest)
 {
@@ -2601,23 +2578,16 @@ BasicStream.prototype.writeBoolSeq = function(v)
     }
 };
 
-/*public void
-writeBoolSeq(int tag, Ice.Optional<boolean[]> v)
+BasicStream.prototype.writeOptBoolSeq = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeBoolSeq(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.VSize))
+        {
+            this.writeBoolSeq(v);
+        }
     }
-}
-
-public void
-writeBoolSeq(int tag, boolean[] v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.VSize))
-    {
-        writeBoolSeq(v);
-    }
-}*/
+};
 
 BasicStream.prototype.readBool = function()
 {
@@ -2631,20 +2601,17 @@ BasicStream.prototype.readBool = function()
     }
 };
 
-//TODO Optionals
-/*public void
-readBool(int tag, Ice.BooleanOptional v)
+BasicStream.prototype.readOptBool = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.F1))
+    if(this.readOpt(tag, OptionalFormat.F1))
     {
-        v.set(readBool());
+        return this.readBool();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
-
+};
 
 BasicStream.prototype.readBoolSeq = function()
 {
@@ -2665,20 +2632,17 @@ BasicStream.prototype.readBoolSeq = function()
     }
 };
 
-//TODO Optionals
-/*public void
-readBoolSeq(int tag, Ice.Optional<boolean[]> v)
+BasicStream.prototype.readBoolSeq = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.VSize))
+    if(this.readOpt(tag, OptionalFormat.VSize))
     {
-        v.set(readBoolSeq());
+        return this.readBoolSeq();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
-
+};
 
 BasicStream.prototype.writeShort = function(v)
 {
@@ -2686,24 +2650,16 @@ BasicStream.prototype.writeShort = function(v)
     this._buf.putShort(v);
 };
 
-// TODO Optionals
-/*public void
-writeShort(int tag, Ice.ShortOptional v)
+BasicStream.prototype.writeOptShort = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeShort(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.F2))
+        {
+            this.writeShort(v);
+        }
     }
-}
-
-public void
-writeShort(int tag, short v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.F2))
-    {
-        writeShort(v);
-    }
-}*/
+};
 
 BasicStream.prototype.writeShortSeq = function(v)
 {
@@ -2719,25 +2675,17 @@ BasicStream.prototype.writeShortSeq = function(v)
     }
 };
 
-/*public void
-writeShortSeq(int tag, Ice.Optional<short[]> v)
+BasicStream.prototype.writeOptShortSeq = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeShortSeq(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.VSize))
+        {
+            this.writeSize((v === null || v.length === 0) ? 1 : v.length * 2 + (v.length > 254 ? 5 : 1));
+            this.writeShortSeq(v);
+        }
     }
-}
-
-public void
-writeShortSeq(int tag, short[] v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.VSize))
-    {
-        writeSize(v == null || v.length == 0 ? 1 : v.length * 2 + (v.length > 254 ? 5 : 1));
-        writeShortSeq(v);
-    }
-}*/
-
+};
 
 BasicStream.prototype.readShort = function()
 {
@@ -2751,19 +2699,17 @@ BasicStream.prototype.readShort = function()
     }
 };
 
-// TODO Optionals
-/*public void
-readShort(int tag, Ice.ShortOptional v)
+BasicStream.prototype.readOptShort = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.F2))
+    if(this.readOpt(tag, OptionalFormat.F2))
     {
-        v.set(readShort());
+        return this.readShort();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.readShortSeq = function()
 {
@@ -2777,20 +2723,18 @@ BasicStream.prototype.readShortSeq = function()
     }
 };
 
-//TODO Optionals
-/*public void
-readShortSeq(int tag, Ice.Optional<short[]> v)
+BasicStream.prototype.readOptShortSeq = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.VSize))
+    if(this.readOpt(tag, OptionalFormat.VSize))
     {
-        skipSize();
-        v.set(readShortSeq());
+        this.skipSize();
+        return this.readShortSeq();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.writeInt = function(v)
 {
@@ -2798,24 +2742,16 @@ BasicStream.prototype.writeInt = function(v)
     this._buf.putInt(v);
 };
 
-//TODO Optionals
-/*public void
-writeInt(int tag, Ice.IntOptional v)
+BasicStream.prototype.writeOptInt = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeInt(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.F4))
+        {
+            this.writeInt(v);
+        }
     }
-}
-
-public void
-writeInt(int tag, int v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.F4))
-    {
-        writeInt(v);
-    }
-}*/
+};
 
 BasicStream.prototype.rewriteInt = function(v, dest)
 {
@@ -2837,25 +2773,17 @@ BasicStream.prototype.writeIntSeq = function(v)
     }
 };
 
-//TODO Optionals
-/*public void
-writeIntSeq(int tag, Ice.Optional<int[]> v)
+BasicStream.prototype.writeOptIntSeq = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeIntSeq(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.VSize))
+        {
+            this.writeSize((v === null || v.length === 0) ? 1 : v.length * 4 + (v.length > 254 ? 5 : 1));
+            this.writeIntSeq(v);
+        }
     }
-}
-
-public void
-writeIntSeq(int tag, int[] v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.VSize))
-    {
-        writeSize(v == null || v.length == 0 ? 1 : v.length * 4 + (v.length > 254 ? 5 : 1));
-        writeIntSeq(v);
-    }
-}*/
+};
 
 BasicStream.prototype.readInt = function()
 {
@@ -2869,19 +2797,17 @@ BasicStream.prototype.readInt = function()
     }
 };
 
-//TODO Optionals
-/*public void
-readInt(int tag, Ice.IntOptional v)
+BasicStream.prototype.readOptInt = function(tag, v)
 {
-    if(readOpt(tag, Ice.OptionalFormat.F4))
+    if(this.readOpt(tag, OptionalFormat.F4))
     {
-        v.set(readInt());
+        return this.readInt();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.readIntSeq = function()
 {
@@ -2895,20 +2821,18 @@ BasicStream.prototype.readIntSeq = function()
     }
 };
 
-//TODO Optionals
-/*public void
-readIntSeq(int tag, Ice.Optional<int[]> v)
+BasicStream.prototype.readOptIntSeq = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.VSize))
+    if(this.readOpt(tag, OptionalFormat.VSize))
     {
-        skipSize();
-        v.set(readIntSeq());
+        this.skipSize();
+        return this.readIntSeq();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.writeLong = function(v)
 {
@@ -2916,24 +2840,16 @@ BasicStream.prototype.writeLong = function(v)
     this._buf.putLong(v);
 };
 
-// TODO Optionals
-/*public void
-writeLong(int tag, Ice.LongOptional v)
+BasicStream.prototype.writeOptLong = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeLong(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.F8))
+        {
+            this.writeLong(v);
+        }
     }
-}
-
-public void
-writeLong(int tag, long v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.F8))
-    {
-        writeLong(v);
-    }
-}*/
+};
 
 BasicStream.prototype.writeLongSeq = function(v)
 {
@@ -2949,25 +2865,17 @@ BasicStream.prototype.writeLongSeq = function(v)
     }
 };
 
-// TODO Optionals
-/*public void
-writeLongSeq(int tag, Ice.Optional<long[]> v)
+BasicStream.prototype.writeOptLongSeq = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeLongSeq(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.VSize))
+        {
+            this.writeSize((v === null || v.length === 0) ? 1 : v.length * 8 + (v.length > 254 ? 5 : 1));
+            this.writeLongSeq(v);
+        }
     }
-}
-
-public void
-writeLongSeq(int tag, long[] v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.VSize))
-    {
-        writeSize(v == null || v.length == 0 ? 1 : v.length * 8 + (v.length > 254 ? 5 : 1));
-        writeLongSeq(v);
-    }
-}*/
+};
 
 BasicStream.prototype.readLong = function()
 {
@@ -2981,19 +2889,17 @@ BasicStream.prototype.readLong = function()
     }
 };
 
-// TODO Optionals
-/*public void
-readLong(int tag, Ice.LongOptional v)
+BasicStream.prototype.readOptLong = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.F8))
+    if(this.readOpt(tag, OptionalFormat.F8))
     {
-        v.set(readLong());
+        return this.readLong();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.readLongSeq = function()
 {
@@ -3007,20 +2913,18 @@ BasicStream.prototype.readLongSeq = function()
     }
 };
 
-//TODO Optionals
-/*public void
-readLongSeq(int tag, Ice.Optional<long[]> v)
+BasicStream.prototype.readOptLongSeq = function(tag, v)
 {
-    if(readOpt(tag, Ice.OptionalFormat.VSize))
+    if(this.readOpt(tag, OptionalFormat.VSize))
     {
-        skipSize();
-        v.set(readLongSeq());
+        this.skipSize();
+        return this.readLongSeq();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.writeFloat = function(v)
 {
@@ -3028,23 +2932,16 @@ BasicStream.prototype.writeFloat = function(v)
     this._buf.putFloat(v);
 };
 
-/*public void
-writeFloat(int tag, Ice.FloatOptional v)
+BasicStream.prototype.writeOptFloat = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeFloat(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.F4))
+        {
+            this.writeFloat(v);
+        }
     }
-}
-
-public void
-writeFloat(int tag, float v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.F4))
-    {
-        writeFloat(v);
-    }
-}*/
+};
 
 BasicStream.prototype.writeFloatSeq = function(v)
 {
@@ -3060,25 +2957,17 @@ BasicStream.prototype.writeFloatSeq = function(v)
     }
 };
 
-//TODO Optionals
-/*public void
-writeFloatSeq(int tag, Ice.Optional<float[]> v)
+BasicStream.prototype.writeOptFloatSeq = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeFloatSeq(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.VSize))
+        {
+            this.writeSize((v === null || v.length === 0) ? 1 : v.length * 4 + (v.length > 254 ? 5 : 1));
+            this.writeFloatSeq(v);
+        }
     }
-}
-
-public void
-writeFloatSeq(int tag, float[] v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.VSize))
-    {
-        writeSize(v == null || v.length == 0 ? 1 : v.length * 4 + (v.length > 254 ? 5 : 1));
-        writeFloatSeq(v);
-    }
-}*/
+};
 
 BasicStream.prototype.readFloat = function()
 {
@@ -3092,19 +2981,17 @@ BasicStream.prototype.readFloat = function()
     }
 };
 
-//TODO Optionals
-/*public void
-readFloat(int tag, Ice.FloatOptional v)
+BasicStream.prototype.readOptFloat = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.F4))
+    if(this.readOpt(tag, OptionalFormat.F4))
     {
-        v.set(readFloat());
+        return this.readFloat();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.readFloatSeq = function()
 {
@@ -3118,20 +3005,18 @@ BasicStream.prototype.readFloatSeq = function()
     }
 };
 
-//TODO Optionals
-/*public void
-readFloatSeq(int tag, Ice.Optional<float[]> v)
+BasicStream.prototype.readFloatSeq = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.VSize))
+    if(this.readOpt(tag, OptionalFormat.VSize))
     {
-        skipSize();
-        v.set(readFloatSeq());
+        this.skipSize();
+        return this.readFloatSeq();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.writeDouble = function(v)
 {
@@ -3139,24 +3024,16 @@ BasicStream.prototype.writeDouble = function(v)
     this._buf.putDouble(v);
 };
 
-//TODO Optionals
-/*public void
-writeDouble(int tag, Ice.DoubleOptional v)
+BasicStream.prototype.writeOptDouble = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeDouble(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.F8))
+        {
+            this.writeDouble(v);
+        }
     }
-}
-
-public void
-writeDouble(int tag, double v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.F8))
-    {
-        writeDouble(v);
-    }
-}*/
+};
 
 BasicStream.prototype.writeDoubleSeq = function(v)
 {
@@ -3172,25 +3049,17 @@ BasicStream.prototype.writeDoubleSeq = function(v)
     }
 };
 
-//TODO Optionals
-/*public void
-writeDoubleSeq(int tag, Ice.Optional<double[]> v)
+BasicStream.prototype.writeOptDoubleSeq = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeDoubleSeq(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.VSize))
+        {
+            this.writeSize((v === null || v.length === 0) ? 1 : v.length * 8 + (v.length > 254 ? 5 : 1));
+            this.writeDoubleSeq(v);
+        }
     }
-}
-
-public void
-writeDoubleSeq(int tag, double[] v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.VSize))
-    {
-        writeSize(v == null || v.length == 0 ? 1 : v.length * 8 + (v.length > 254 ? 5 : 1));
-        writeDoubleSeq(v);
-    }
-}*/
+};
 
 BasicStream.prototype.readDouble = function()
 {
@@ -3204,19 +3073,17 @@ BasicStream.prototype.readDouble = function()
     }
 };
 
-// TODO Optionals
-/*public void
-readDouble(int tag, Ice.DoubleOptional v)
+BasicStream.prototype.readOptDouble = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.F8))
+    if(this.readOpt(tag, OptionalFormat.F8))
     {
-        v.set(readDouble());
+        return this.readDouble();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.readDoubleSeq = function()
 {
@@ -3230,19 +3097,18 @@ BasicStream.prototype.readDoubleSeq = function()
     }
 };
 
-/*public void
-readDoubleSeq(int tag, Ice.Optional<double[]> v)
+BasicStream.prototype.readOptDoubleSeq = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.VSize))
+    if(this.readOpt(tag, OptionalFormat.VSize))
     {
-        skipSize();
-        v.set(readDoubleSeq());
+        this.skipSize();
+        return this.readDoubleSeq();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.writeString = function(v)
 {
@@ -3260,25 +3126,16 @@ BasicStream.prototype.writeString = function(v)
     }
 };
 
-//TODO Optionals
-/*public void
-writeString(int tag, Ice.Optional<String> v)
+BasicStream.prototype.writeOptString = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeString(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.VSize))
+        {
+            this.writeString(v);
+        }
     }
-}
-
-public void
-writeString(int tag, String v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.VSize))
-    {
-        writeString(v);
-    }
-}*/
-
+};
 
 BasicStream.prototype.writeStringSeq = function(v)
 {
@@ -3298,26 +3155,18 @@ BasicStream.prototype.writeStringSeq = function(v)
     }
 };
 
-// TODO Optionals
-/*public void
-writeStringSeq(int tag, Ice.Optional<String[]> v)
+BasicStream.prototype.writeOptStringSeq = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeStringSeq(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.FSize))
+        {
+            this.startSize();
+            this.writeStringSeq(v);
+            this.endSize();
+        }
     }
-}
-
-public void
-writeStringSeq(int tag, String[] v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.FSize))
-    {
-        startSize();
-        writeStringSeq(v);
-        endSize();
-    }
-}*/
+};
 
 BasicStream.prototype.readString = function()
 {
@@ -3345,19 +3194,17 @@ BasicStream.prototype.readString = function()
     }
 };
 
-//TODO Optionals
-/*public void
-readString(int tag, Ice.Optional<String> v)
+BasicStream.prototype.readOptString = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.VSize))
+    if(this.readOpt(tag, OptionalFormat.VSize))
     {
-        v.set(readString());
+        return this.readString();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.readStringSeq = function()
 {
@@ -3371,65 +3218,54 @@ BasicStream.prototype.readStringSeq = function()
     return v;
 };
 
-//TODO Optionals
-/*public void
-readStringSeq(int tag, Ice.Optional<String[]> v)
+BasicStream.prototype.readOptStringSeq = function(tag)
 {
-    if(readOpt(tag, Ice.OptionalFormat.FSize))
+    if(this.readOpt(tag, OptionalFormat.FSize))
     {
-        skip(4);
-        v.set(readStringSeq());
+        this.skip(4);
+        return this.readStringSeq();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.writeProxy = function(v)
 {
     this._instance.proxyFactory().proxyToStream(v, this);
 };
 
-//TODO Optionals
-/*public void
-writeProxy(int tag, Ice.Optional<Ice.ObjectPrx> v)
+BasicStream.prototype.writeOptProxy = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeProxy(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.FSize))
+        {
+            this.startSize();
+            this.writeProxy(v);
+            this.endSize();
+        }
     }
-}
-
-public void
-writeProxy(int tag, Ice.ObjectPrx v)
-{
-    if(writeOpt(tag, Ice.OptionalFormat.FSize))
-    {
-        startSize();
-        writeProxy(v);
-        endSize();
-    }
-}*/
+};
 
 BasicStream.prototype.readProxy = function()
 {
     return this._instance.proxyFactory().streamToProxy(this);
 };
 
-/*TODO Optionals
-BasicStream.prototype.readOptionalProxy = function(tag, v)
+BasicStream.prototype.readOptProxy = function(tag)
 {
-    if(this.readOpt(tag, Ice.OptionalFormat.FSize))
+    if(this.readOpt(tag, OptionalFormat.FSize))
     {
         this.skip(4);
-        v.set(this.readProxy());
+        return this.readProxy();
     }
     else
     {
-        v.clear();
+        return undefined;
     }
-}*/
+};
 
 BasicStream.prototype.writeEnum = function(v, maxValue)
 {
@@ -3478,23 +3314,16 @@ BasicStream.prototype.writeObject = function(v)
     this._writeEncapsStack.encoder.writeObject(v);
 };
 
-//TODO Optionals
-/*public <T extends Ice.Object> void
-writeObject(int tag, Ice.Optional<T> v)
+BasicStream.prototype.writeOptObject = function(tag, v)
 {
-    if(v != null && v.isSet())
+    if(v !== undefined)
     {
-        writeObject(tag, v.get());
+        if(this.writeOpt(tag, OptionalFormat.Class))
+        {
+            this.writeObject(v);
+        }
     }
-}
-
-BasicStream.prototype.writeOptionalObject(tag, v)
-{
-    if(this.writeOpt(tag, Ice.OptionalFormat.Class))
-    {
-        this.writeObject(v);
-    }
-}*/
+};
 
 BasicStream.prototype.readObject = function(patcher)
 {
@@ -3502,20 +3331,17 @@ BasicStream.prototype.readObject = function(patcher)
     this._readEncapsStack.decoder.readObject(patcher);
 };
 
-//TODO Optionals
-/*BasicStream.prototype.readOptionalObject = function(tag, v)
+BasicStream.prototype.readOptObject = function(tag, v)
 {
     if(this.readOpt(tag, OptionalFormat.Class))
     {
-        //TODO OptionalObject mapping?
-        var opt = new Ice.OptionalObject(v, Ice.Object.class, Ice.ObjectImpl.ice_staticId());
-        this.readObject(opt);
+        this.readObject(new OptionalObject(v, IceObject, IceObject.ice_staticId()));
     }
     else
     {
         v.clear();
     }
-}*/
+};
 
 BasicStream.prototype.writeUserException = function(e)
 {
