@@ -1786,6 +1786,9 @@ var BasicStream = function(instance, encoding, unlimited, data)
     {
         this._buf = new ByteBuffer();
     }
+    
+    this._classRegistry = require("./TypeRegistry").ClassRegistry;
+    this._exceptionRegistry = require("./TypeRegistry").ExceptionRegistry;
 };
 
 Object.defineProperty(BasicStream.prototype, "instance", {
@@ -3542,8 +3545,8 @@ BasicStream.prototype.createObject = function(id)
 
     try
     {
-        Class = __IceClassRegistry__ ? __IceClassRegistry__[id] : undefined;
-        if(Class)
+        Class = this._classRegistry.find(id);
+        if(Class !== undefined)
         {
             obj = new Class();
         }
@@ -3558,8 +3561,8 @@ BasicStream.prototype.createObject = function(id)
 
 BasicStream.prototype.getTypeId = function(compactId)
 {
-    var Class = __IceClassRegistry__ ? __IceClassRegistry__["IceCompactId.TypeId_" + compactId] : undefined;
-    return Class ? Class.typeId : ""; 
+    var Class = this._classRegistry.find("IceCompactId.TypeId_" + compactId);
+    return Class !== undefined ? Class.typeId : ""; 
 };
 
 BasicStream.prototype.isReadEncoding_1_0 = function()
@@ -3643,8 +3646,8 @@ BasicStream.prototype.createUserException = function(id)
 
     try
     {
-        Class = __IceExceptionRegistry__ ? __IceExceptionRegistry__[id] : undefined;
-        if(Class)
+        Class = this._exceptionRegistry.find(id);
+        if(Class !== undefined)
         {
             userEx = new Class();
         }
