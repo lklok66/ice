@@ -12,8 +12,9 @@ var Debug = require("./Debug");
 var Ex = require("./Exception");
 var FormatType = require("./FormatType");
 var HashMap = require("./HashMap");
-var Ref = require("./Reference");
+var RefMode = require("./ReferenceMode");
 
+var Curr = require("./Current").Ice;
 var LocalEx = require("./LocalException").Ice;
 
 //
@@ -43,11 +44,11 @@ ObjectPrx.prototype.ice_isA = function(__id, __context)
 {
     /* TODO
     var __ice_isA_name = "ice_isA";
-    this.__checkAsyncTwowayOnly(__ice_isA_name);
+    ObjectPrx.__checkAsyncTwowayOnly(__ice_isA_name);
     var __result = new OutgoingAsync(this, __ice_isA_name, __completed_bool);
     try
     {
-        __result.__prepare(__ice_isA_name, OperationMode.Nonmutating, __context);
+        __result.__prepare(__ice_isA_name, Curr.OperationMode.Nonmutating, __context);
         var __os = __result.__startWriteParams(FormatType.DefaultFormat);
         __os.writeString(__id);
         __os.endWriteEncaps();
@@ -63,12 +64,11 @@ ObjectPrx.prototype.ice_isA = function(__id, __context)
 
 ObjectPrx.prototype.ice_ping = function(__context)
 {
-    /* TODO
     var __ice_ping_name = "ice_ping";
-    var __result = new OutgoingAsync(this, __ice_ping_name, __completed);
+    var __result = new OutgoingAsync(this, __ice_ping_name, ObjectPrx.__completed);
     try
     {
-        __result.__prepare(__ice_ping_name, OperationMode.Nonmutating, __context);
+        __result.__prepare(__ice_ping_name, Curr.OperationMode.Nonmutating, __context);
         __result.__writeEmptyParams();
         __result.__send();
     }
@@ -77,18 +77,17 @@ ObjectPrx.prototype.ice_ping = function(__context)
         this.__handleLocalException(__result, __ex);
     }
     return __result;
-    */
 };
 
 ObjectPrx.prototype.ice_ids = function(__context)
 {
     /* TODO
     var __ice_ids_name = "ice_ids";
-    this.__checkAsyncTwowayOnly(__ice_ids_name);
+    ObjectPrx.__checkAsyncTwowayOnly(__ice_ids_name);
     var __result = new OutgoingAsync(this, __ice_ids_name, this._ice_ids_completed);
     try
     {
-        __result.__prepare(__ice_ids_name, OperationMode.Nonmutating, __context);
+        __result.__prepare(__ice_ids_name, Curr.OperationMode.Nonmutating, __context);
         __result.__writeEmptyParams();
         __result.__send();
     }
@@ -100,9 +99,9 @@ ObjectPrx.prototype.ice_ids = function(__context)
     */
 };
 
-ObjectPrx.prototype._ice_ids_completed = function(__oa, __cb, __excb, __cbctx)
+ObjectPrx.prototype._ice_ids_completed = function(__r)
 {
-    if(!this.__check(__oa, __excb, __cbctx))
+    if(!ObjectPrx.__check(__r))
     {
         return;
     }
@@ -125,11 +124,11 @@ ObjectPrx.prototype.ice_id = function(__context)
 {
     /* TODO
     var __ice_id_name = "ice_id";
-    this.__checkAsyncTwowayOnly(__ice_id_name);
+    ObjectPrx.__checkAsyncTwowayOnly(__ice_id_name);
     var __result = new OutgoingAsync(this, __ice_id_name, __completed_string);
     try
     {
-        __result.__prepare(__ice_id_name, OperationMode.Nonmutating, __context);
+        __result.__prepare(__ice_id_name, Curr.OperationMode.Nonmutating, __context);
         __result.__writeEmptyParams();
         __result.__send();
     }
@@ -384,86 +383,86 @@ ObjectPrx.prototype.ice_locator = function(locator)
 
 ObjectPrx.prototype.ice_isTwoway = function()
 {
-    return this._reference.getMode() === Ref.Reference.ModeTwoway;
+    return this._reference.getMode() === RefMode.ModeTwoway;
 };
 
 ObjectPrx.prototype.ice_twoway = function()
 {
-    if(this._reference.getMode() === Ref.Reference.ModeTwoway)
+    if(this._reference.getMode() === RefMode.ModeTwoway)
     {
         return this;
     }
     else
     {
-        return this.__newInstance(this._reference.changeMode(Ref.Reference.ModeTwoway));
+        return this.__newInstance(this._reference.changeMode(RefMode.ModeTwoway));
     }
 };
 
 ObjectPrx.prototype.ice_isOneway = function()
 {
-    return this._reference.getMode() === Ref.Reference.ModeOneway;
+    return this._reference.getMode() === RefMode.ModeOneway;
 };
 
 ObjectPrx.prototype.ice_oneway = function()
 {
-    if(this._reference.getMode() === Ref.Reference.ModeOneway)
+    if(this._reference.getMode() === RefMode.ModeOneway)
     {
         return this;
     }
     else
     {
-        return this.__newInstance(this._reference.changeMode(Ref.Reference.ModeOneway));
+        return this.__newInstance(this._reference.changeMode(RefMode.ModeOneway));
     }
 };
 
 ObjectPrx.prototype.ice_isBatchOneway = function()
 {
-    return this._reference.getMode() === Ref.Reference.ModeBatchOneway;
+    return this._reference.getMode() === RefMode.ModeBatchOneway;
 };
 
 ObjectPrx.prototype.ice_batchOneway = function()
 {
-    if(this._reference.getMode() === Ref.Reference.ModeBatchOneway)
+    if(this._reference.getMode() === RefMode.ModeBatchOneway)
     {
         return this;
     }
     else
     {
-        return this.__newInstance(this._reference.changeMode(Ref.Reference.ModeBatchOneway));
+        return this.__newInstance(this._reference.changeMode(RefMode.ModeBatchOneway));
     }
 };
 
 ObjectPrx.prototype.ice_isDatagram = function()
 {
-    return this._reference.getMode() === Ref.Reference.ModeDatagram;
+    return this._reference.getMode() === RefMode.ModeDatagram;
 };
 
 ObjectPrx.prototype.ice_datagram = function()
 {
-    if(this._reference.getMode() === Ref.Reference.ModeDatagram)
+    if(this._reference.getMode() === RefMode.ModeDatagram)
     {
         return this;
     }
     else
     {
-        return this.__newInstance(this._reference.changeMode(Ref.Reference.ModeDatagram));
+        return this.__newInstance(this._reference.changeMode(RefMode.ModeDatagram));
     }
 };
 
 ObjectPrx.prototype.ice_isBatchDatagram = function()
 {
-    return this._reference.getMode() === Ref.Reference.ModeBatchDatagram;
+    return this._reference.getMode() === RefMode.ModeBatchDatagram;
 };
 
 ObjectPrx.prototype.ice_batchDatagram = function()
 {
-    if(this._reference.getMode() === Ref.Reference.ModeBatchDatagram)
+    if(this._reference.getMode() === RefMode.ModeBatchDatagram)
     {
         return this;
     }
     else
     {
-        return this.__newInstance(this._reference.changeMode(Ref.Reference.ModeBatchDatagram));
+        return this.__newInstance(this._reference.changeMode(RefMode.ModeBatchDatagram));
     }
 };
 
@@ -637,381 +636,287 @@ ObjectPrx.prototype.__checkAsyncTwowayOnly = function(name)
 //
 // Completed callback for operations that have no return value or out parameters.
 //
-ObjectPrx.prototype.__completed = function(__oa, __cb, __excb, __cbctx)
+ObjectPrx.__completed = function(__r)
 {
-    if(!this.__check(__oa, __excb, __cbctx))
+    if(!ObjectPrx.__check(__r))
     {
         return;
     }
 
-    __oa.readEmptyParams();
-
-    if(__cb !== null)
-    {
-        __cb.call(__cbctx === undefined ? __cb : __cbctx, __oa);
-    }
+    __r.readEmptyParams();
+    __r.success();
 };
 
 //
 // Completed callback for operations that return a bool as the only result.
 //
-ObjectPrx.prototype.__completed_bool = function(__oa, __cb, __excb, __cbctx)
+ObjectPrx.__completed_bool = function(__r)
 {
-    if(!this.__check(__oa, __excb, __cbctx))
+    if(!ObjectPrx.__check(__r))
     {
         return;
     }
 
-    var __is = __oa.__startReadParams();
-
-    if(__cb !== null)
+    var __is = __r.__startReadParams();
+    var __ret;
+    try
     {
-        var __ret;
-        try
-        {
-            __ret = __is.readBool();
-            __oa.endReadParams();
-        }
-        catch(__ex)
-        {
-            this.__dispatchLocalException(__oa, __ex, __excb, __cbctx);
-            return;
-        }
-        __cb.call(__cbctx === undefined ? __cb : __cbctx, __oa, __ret);
+        __ret = __is.readBool();
+        __r.endReadParams();
     }
-    else
+    catch(__ex)
     {
-        __is.skipEncaps();
+        ObjectPrx.__dispatchLocalException(__r, __ex);
+        return;
     }
+    __r.success(__r, __ret);
 };
 
 //
 // Completed callback for operations that return a byte as the only result.
 //
-ObjectPrx.prototype.__completed_byte = function(__oa, __cb, __excb, __cbctx)
+ObjectPrx.__completed_byte = function(__r)
 {
-    if(!this.__check(__oa, __excb, __cbctx))
+    if(!ObjectPrx.__check(__r))
     {
         return;
     }
 
-    var __is = __oa.__startReadParams();
-
-    if(__cb !== null)
+    var __is = __r.__startReadParams();
+    var __ret;
+    try
     {
-        var __ret;
-        try
-        {
-            __ret = __is.readByte();
-            __oa.endReadParams();
-        }
-        catch(__ex)
-        {
-            this.__dispatchLocalException(__oa, __ex, __excb, __cbctx);
-            return;
-        }
-        __cb.call(__cbctx === undefined ? __cb : __cbctx, __oa, __ret);
+        __ret = __is.readByte();
+        __r.endReadParams();
     }
-    else
+    catch(__ex)
     {
-        __is.skipEncaps();
+        ObjectPrx.__dispatchLocalException(__r, __ex);
+        return;
     }
+    __r.success(__r, __ret);
 };
 
 //
 // Completed callback for operations that return a short as the only result.
 //
-ObjectPrx.prototype.__completed_short = function(__oa, __cb, __excb, __cbctx)
+ObjectPrx.__completed_short = function(__r)
 {
-    if(!this.__check(__oa, __excb, __cbctx))
+    if(!ObjectPrx.__check(__r))
     {
         return;
     }
 
-    var __is = __oa.__startReadParams();
-
-    if(__cb !== null)
+    var __is = __r.__startReadParams();
+    var __ret;
+    try
     {
-        var __ret;
-        try
-        {
-            __ret = __is.readShort();
-            __oa.endReadParams();
-        }
-        catch(__ex)
-        {
-            this.__dispatchLocalException(__oa, __ex, __excb, __cbctx);
-            return;
-        }
-        __cb.call(__cbctx === undefined ? __cb : __cbctx, __oa, __ret);
+        var __ret = __is.readShort();
+        __r.endReadParams();
     }
-    else
+    catch(__ex)
     {
-        __is.skipEncaps();
+        ObjectPrx.__dispatchLocalException(__r, __ex);
+        return;
     }
+    __r.success(__r, __ret);
 };
 
 //
 // Completed callback for operations that return an int as the only result.
 //
-ObjectPrx.prototype.__completed_int = function(__oa, __cb, __excb, __cbctx)
+ObjectPrx.__completed_int = function(__r)
 {
-    if(!this.__check(__oa, __excb, __cbctx))
+    if(!ObjectPrx.__check(__r))
     {
         return;
     }
 
-    var __is = __oa.__startReadParams();
-
-    if(__cb !== null)
+    var __is = __r.__startReadParams();
+    var __ret;
+    try
     {
-        var __ret;
-        try
-        {
-            __ret = __is.readInt();
-            __oa.endReadParams();
-        }
-        catch(__ex)
-        {
-            this.__dispatchLocalException(__oa, __ex, __excb, __cbctx);
-            return;
-        }
-        __cb.call(__cbctx === undefined ? __cb : __cbctx, __oa, __ret);
+        __ret = __is.readInt();
+        __r.endReadParams();
     }
-    else
+    catch(__ex)
     {
-        __is.skipEncaps();
+        ObjectPrx.__dispatchLocalException(__r, __ex);
+        return;
     }
+    __r.success(__r, __ret);
 };
 
 //
 // Completed callback for operations that return a long as the only result.
 //
-ObjectPrx.prototype.__completed_long = function(__oa, __cb, __excb, __cbctx)
+ObjectPrx.__completed_long = function(__r)
 {
-    if(!this.__check(__oa, __excb, __cbctx))
+    if(!ObjectPrx.__check(__r))
     {
         return;
     }
 
-    var __is = __oa.__startReadParams();
-
-    if(__cb !== null)
+    var __is = __r.__startReadParams();
+    var __ret;
+    try
     {
-        var __ret;
-        try
-        {
-            __ret = __is.readLong();
-            __oa.endReadParams();
-        }
-        catch(__ex)
-        {
-            this.__dispatchLocalException(__oa, __ex, __excb, __cbctx);
-            return;
-        }
-        __cb.call(__cbctx === undefined ? __cb : __cbctx, __oa, __ret);
+        __ret = __is.readLong();
+        __r.endReadParams();
     }
-    else
+    catch(__ex)
     {
-        __is.skipEncaps();
+        ObjectPrx.__dispatchLocalException(__r, __ex);
+        return;
     }
+    __r.success(__r, __ret);
 };
 
 //
 // Completed callback for operations that return a float as the only result.
 //
-ObjectPrx.prototype.__completed_float = function(__oa, __cb, __excb, __cbctx)
+ObjectPrx.__completed_float = function(__r)
 {
-    if(!this.__check(__oa, __excb, __cbctx))
+    if(!ObjectPrx.__check(__r))
     {
         return;
     }
 
-    var __is = __oa.__startReadParams();
-
-    if(__cb !== null)
+    var __is = __r.__startReadParams();
+    var __ret;
+    try
     {
-        var __ret;
-        try
-        {
-            __ret = __is.readFloat();
-            __oa.endReadParams();
-        }
-        catch(__ex)
-        {
-            this.__dispatchLocalException(__oa, __ex, __excb, __cbctx);
-            return;
-        }
-        __cb.call(__cbctx === undefined ? __cb : __cbctx, __oa, __ret);
+        __ret = __is.readFloat();
+        __r.endReadParams();
     }
-    else
+    catch(__ex)
     {
-        __is.skipEncaps();
+        ObjectPrx.__dispatchLocalException(__r, __ex);
+        return;
     }
+    __r.success(__r, __ret);
 };
 
 //
 // Completed callback for operations that return a double as the only result.
 //
-ObjectPrx.prototype.__completed_double = function(__oa, __cb, __excb, __cbctx)
+ObjectPrx.__completed_double = function(__r)
 {
-    if(!this.__check(__oa, __excb, __cbctx))
+    if(!ObjectPrx.__check(__r))
     {
         return;
     }
 
-    var __is = __oa.__startReadParams();
-
-    if(__cb !== null)
+    var __is = __r.__startReadParams();
+    var __ret;
+    try
     {
-        var __ret;
-        try
-        {
-            __ret = __is.readDouble();
-            __oa.endReadParams();
-        }
-        catch(__ex)
-        {
-            this.__dispatchLocalException(__oa, __ex, __excb, __cbctx);
-            return;
-        }
-        __cb.call(__cbctx === undefined ? __cb : __cbctx, __oa, __ret);
+        __ret = __is.readDouble();
+        __r.endReadParams();
     }
-    else
+    catch(__ex)
     {
-        __is.skipEncaps();
+        ObjectPrx.__dispatchLocalException(__r, __ex);
+        return;
     }
+    __r.success(__r, __ret);
 };
 
 //
 // Completed callback for operations that return a string as the only result.
 //
-ObjectPrx.prototype.__completed_string = function(__oa, __cb, __excb, __cbctx)
+ObjectPrx.__completed_string = function(__r)
 {
-    if(!this.__check(__oa, __excb, __cbctx))
+    if(!ObjectPrx.__check(__r))
     {
         return;
     }
 
-    var __is = __oa.__startReadParams();
-
-    if(__cb !== null)
+    var __is = __r.__startReadParams();
+    var __ret;
+    try
     {
-        var __ret;
-        try
-        {
-            __ret = __is.readString();
-            __oa.endReadParams();
-        }
-        catch(__ex)
-        {
-            this.__dispatchLocalException(__oa, __ex, __excb, __cbctx);
-            return;
-        }
-        __cb.call(__cbctx === undefined ? __cb : __cbctx, __oa, __ret);
+        __ret = __is.readString();
+        __r.endReadParams();
     }
-    else
+    catch(__ex)
     {
-        __is.skipEncaps();
+        ObjectPrx.__dispatchLocalException(__r, __ex);
+        return;
     }
+    __r.success(__r, __ret);
 };
 
 //
 // Completed callback for operations that return a proxy as the only result.
 //
-ObjectPrx.prototype.__completed_ObjectPrx = function(__oa, __cb, __excb, __cbctx)
+ObjectPrx.__completed_ObjectPrx = function(__r)
 {
-    if(!this.__check(__oa, __excb, __cbctx))
+    if(!ObjectPrx.__check(__r))
     {
         return;
     }
 
-    var __is = __oa.__startReadParams();
-
-    if(__cb !== null)
+    var __is = __r.__startReadParams();
+    var __ret;
+    try
     {
-        var __ret;
-        try
-        {
-            __ret = __is.readProxy();
-            __oa.endReadParams();
-        }
-        catch(__ex)
-        {
-            this.__dispatchLocalException(__oa, __ex, __excb, __cbctx);
-            return;
-        }
-        __cb.call(__cbctx === undefined ? __cb : __cbctx, __oa, __ret);
+        __ret = __is.readProxy();
+        __r.endReadParams();
     }
-    else
+    catch(__ex)
     {
-        __is.skipEncaps();
+        ObjectPrx.__dispatchLocalException(__r, __ex);
+        return;
     }
+    __r.success(__r, __ret);
 };
 
 //
 // Completed callback for operations that return an object as the only result.
 //
-ObjectPrx.prototype.__completed_Object = function(__oa, __cb, __excb, __cbctx)
+ObjectPrx.__completed_Object = function(__r)
 {
-    if(!this.__check(__oa, __excb, __cbctx))
+    if(!ObjectPrx.__check(__r))
     {
         return;
     }
 
-    var __is = __oa.__startReadParams();
-
-    if(__cb !== null)
+    var __is = __r.__startReadParams();
+    var __ret = { value: null };
+    try
     {
-        var __ret = { value: null };
-        try
-        {
-            __ret = __is.readObject(__ret);
-            __is.readPendingObjects();
-            __oa.endReadParams();
-        }
-        catch(__ex)
-        {
-            this.__dispatchLocalException(__oa, __ex, __excb, __cbctx);
-            return;
-        }
-        __cb.call(__cbctx === undefined ? __cb : __cbctx, __oa, __ret.value);
+        __ret = __is.readObject(__ret);
+        __is.readPendingObjects();
+        __r.endReadParams();
     }
-    else
+    catch(__ex)
     {
-        __is.skipEncaps();
+        ObjectPrx.__dispatchLocalException(__r, __ex);
+        return;
     }
+    __r.success(__r, __ret.value);
 };
 
 //
 // Check function for operations that declare no user exceptions.
 //
-ObjectPrx.prototype.__check = function(__oa, __excb, __cbctx)
+ObjectPrx.__check = function(__r)
 {
     try
     {
-        if(!__oa.__check())
-        {
-            __oa.__throwUserException();
-        }
+        __r.__throwUserException();
     }
     catch(ex)
     {
         if(ex instanceof Ex.UserException)
         {
-            if(__excb !== null)
-            {
-                __excb.call(__cbctx === undefined ? __excb : __cbctx, __oa,
-                            new LocalEx.UnknownUserException(ex.ice_name()));
-            }
+            __r.fail(new LocalEx.UnknownUserException(ex.ice_name()));
             return false;
         }
         else if(ex instanceof Ex.LocalException)
         {
-            if(__excb !== null)
-            {
-                __excb.call(__cbctx === undefined ? __excb : __cbctx, __oa, ex);
-            }
+            __r.fail(ex);
             return false;
         }
         else
@@ -1041,11 +946,11 @@ ObjectPrx.prototype.__newInstance = function(ref)
     return proxy;
 };
 
-ObjectPrx.prototype.__handleLocalException = function(__oa, __ex)
+ObjectPrx.prototype.__handleLocalException = function(__r, __ex)
 {
     if(__ex instanceof Ex.LocalException)
     {
-        __oa.__exception(__ex);
+        __r.__exception(__ex);
     }
     else
     {
@@ -1053,15 +958,11 @@ ObjectPrx.prototype.__handleLocalException = function(__oa, __ex)
     }
 };
 
-ObjectPrx.prototype.__dispatchLocalException = function(__oa, __ex, __excb, __cbctx)
+ObjectPrx.__dispatchLocalException = function(__r, __ex)
 {
     if(__ex instanceof Ex.LocalException)
     {
-        if(__excb !== null)
-        {
-            __excb.call(__cbctx === undefined ? __excb : __cbctx, __oa, __ex);
-        }
-        return;
+        __r.fail(__ex);
     }
     else
     {

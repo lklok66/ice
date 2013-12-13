@@ -7,6 +7,7 @@
 //
 // **********************************************************************
 
+var ConnectionMonitor = require("./ConnectionMonitor");
 var Debug = require("./Debug");
 var DefaultsAndOverrides = require("./DefaultsAndOverrides");
 var EndpointFactoryManager = require("./EndpointFactoryManager");
@@ -127,7 +128,6 @@ Instance.prototype.preferIPv6 = function()
     return this._preferIPv6;
 };
 
-/* TODO
 Instance.prototype.connectionMonitor = function()
 {
     if(this._state === StateDestroyed)
@@ -137,7 +137,7 @@ Instance.prototype.connectionMonitor = function()
 
     Debug.assert(this._connectionMonitor !== null);
     return this._connectionMonitor;
-}*/
+};
 
 Instance.prototype.servantFactoryManager = function()
 {
@@ -445,6 +445,7 @@ Instance.prototype.finishSetup = function(communicator, promise)
         {
             this._referenceFactory = this._referenceFactory.setDefaultLocator(loc);
         }
+        */
 
         //
         // Create the connection monitor and ensure the interval for
@@ -453,9 +454,10 @@ Instance.prototype.finishSetup = function(communicator, promise)
         //
         var interval = this._initData.properties.getPropertyAsInt("Ice.MonitorConnections");
         this._connectionMonitor = new ConnectionMonitor(this, interval);
-        this._connectionMonitor.checkIntervalForACM(_clientACM);
-        this._connectionMonitor.checkIntervalForACM(_serverACM);
+        this._connectionMonitor.checkIntervalForACM(this._clientACM);
+        this._connectionMonitor.checkIntervalForACM(this._serverACM);
 
+        /*
         //
         // This must be done last as this call creates the Ice.Admin object adapter
         // and eventually registers a process proxy with the Ice locator (allowing
@@ -606,6 +608,7 @@ Instance.prototype.outgoingConnectionFactoryFinished = function(promise)
         this._objectAdapterFactory = null;
         this._outgoingConnectionFactory = null;
         this._retryQueue = null;
+        */
 
         if(this._connectionMonitor)
         {
@@ -652,6 +655,7 @@ Instance.prototype.outgoingConnectionFactoryFinished = function(promise)
             this._endpointFactoryManager = null;
         }
 
+        /*
         if(this._exceptionFactoryMap)
         {
             this._exceptionFactoryMap.clear();

@@ -7,12 +7,13 @@
 //
 // **********************************************************************
 
-var ArrayUtil = require("/ArrayUtil");
+var ArrayUtil = require("./ArrayUtil");
 var Debug = require("./Debug");
 var Ex = require("./Exception");
 var HashMap = require("./HashMap");
 var Promise = require("./Promise");
-var LocalEx = require("/LocalException").Ice;
+
+var LocalEx = require("./LocalException").Ice;
 
 var RouterInfo = function(router)
 {

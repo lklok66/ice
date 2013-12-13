@@ -7,7 +7,6 @@
 //
 // **********************************************************************
 
-var StringUtil = require("./StringUtil");
 var ArrayUtil = require("./ArrayUtil");
 var Debug = require("./Debug");
 var HashMap = require("./HashMap");
@@ -15,6 +14,8 @@ var HashUtil = require("./HashUtil");
 var ExUtil = require("./ExUtil");
 var OpaqueEndpointI = require("./OpaqueEndpointI");
 var Protocol = require("./Protocol");
+var RefMode = require("./ReferenceMode");
+var StringUtil = require("./StringUtil");
 
 var EndpointTypes = require("./EndpointTypes").ice;
 var Id = require("./Identity").ice;
@@ -71,7 +72,7 @@ ReferenceFactory.prototype.createFixed = function(ident, fixedConnection)
         this._communicator,
         ident,
         "", // Facet
-        fixedConnection.endpoint().datagram() ? Reference.ModeDatagram : Reference.ModeTwoway,
+        fixedConnection.endpoint().datagram() ? RefMode.ModeDatagram : RefMode.ModeTwoway,
         fixedConnection.endpoint().secure(),
         this._instance.defaultsAndOverrides().defaultEncoding,
         fixedConnection);
@@ -169,7 +170,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
     }
 
     var facet = "";
-    var mode = Reference.ModeTwoway;
+    var mode = RefMode.ModeTwoway;
     var secure = false;
     var encoding = this._instance.defaultsAndOverrides().defaultEncoding;
     var protocol = Protocol.Protocol_1_0;
@@ -274,7 +275,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
                     throw new LocalEx.ProxyParseException("unexpected argument `" + argument +
                                                           "' provided for -t option in `" + s + "'");
                 }
-                mode = Reference.ModeTwoway;
+                mode = RefMode.ModeTwoway;
                 break;
             }
 
@@ -285,7 +286,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
                     throw new LocalEx.ProxyParseException("unexpected argument `" + argument +
                                                           "' provided for -o option in `" + s + "'");
                 }
-                mode = Reference.ModeOneway;
+                mode = RefMode.ModeOneway;
                 break;
             }
 
@@ -296,7 +297,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
                     throw new LocalEx.ProxyParseException("unexpected argument `" + argument +
                                                           "' provided for -O option in `" + s + "'");
                 }
-                mode = Reference.ModeBatchOneway;
+                mode = RefMode.ModeBatchOneway;
                 break;
             }
 
@@ -307,7 +308,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
                     throw new LocalEx.ProxyParseException("unexpected argument `" + argument +
                                                           "' provided for -d option in `" + s + "'");
                 }
-                mode = Reference.ModeDatagram;
+                mode = RefMode.ModeDatagram;
                 break;
             }
 
@@ -318,7 +319,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
                     throw new LocalEx.ProxyParseException("unexpected argument `" + argument +
                                                           "' provided for -D option in `" + s + "'");
                 }
-                mode = Reference.ModeBatchDatagram;
+                mode = RefMode.ModeBatchDatagram;
                 break;
             }
 
@@ -555,7 +556,7 @@ ReferenceFactory.prototype.createFromStream = function(ident, s)
     }
 
     const mode:int = s.readByte();
-    if(mode < 0 || mode > Reference.ModeLast)
+    if(mode < 0 || mode > RefMode.ModeLast)
     {
         throw new LocalEx.ProxyUnmarshalException();
     }
@@ -831,12 +832,6 @@ var Reference = function(instance, communicator, identity, facet, mode, secure, 
 };
 
 Reference._emptyContext = new HashMap();
-Reference.ModeTwoway = 0;
-Reference.ModeOneway = 1;
-Reference.ModeBatchOneway = 2;
-Reference.ModeDatagram = 3;
-Reference.ModeBatchDatagram = 4;
-Reference.ModeLast = Reference.ModeBatchDatagram;
 
 Reference.prototype.getMode = function()
 {
@@ -1240,31 +1235,31 @@ Reference.prototype.toString = function()
 
     switch(this._mode)
     {
-        case Reference.ModeTwoway:
+        case RefMode.ModeTwoway:
         {
             s.push(" -t");
             break;
         }
 
-        case Reference.ModeOneway:
+        case RefMode.ModeOneway:
         {
             s.push(" -o");
             break;
         }
 
-        case Reference.ModeBatchOneway:
+        case RefMode.ModeBatchOneway:
         {
             s.push(" -O");
             break;
         }
 
-        case Reference.ModeDatagram:
+        case RefMode.ModeDatagram:
         {
             s.push(" -d");
             break;
         }
 
-        case Reference.ModeBatchDatagram:
+        case RefMode.ModeBatchDatagram:
         {
             s.push(" -D");
             break;
@@ -1535,9 +1530,9 @@ FixedReference.prototype.getConnectionInternal = function(compress)
 {
     switch(this.getMode())
     {
-        case Reference.ModeTwoway:
-        case Reference.ModeOneway:
-        case Reference.ModeBatchOneway:
+        case RefMode.ModeTwoway:
+        case RefMode.ModeOneway:
+        case RefMode.ModeBatchOneway:
         {
             if(this._fixedConnection.endpoint().datagram())
             {
@@ -1546,8 +1541,8 @@ FixedReference.prototype.getConnectionInternal = function(compress)
             break;
         }
 
-        case Reference.ModeDatagram:
-        case Reference.ModeBatchDatagram:
+        case RefMode.ModeDatagram:
+        case RefMode.ModeBatchDatagram:
         {
             if(!this._fixedConnection.endpoint().datagram())
             {
@@ -2227,9 +2222,9 @@ RoutableReference.prototype.filterEndpoints = function(allEndpoints)
     //
     switch(this.getMode())
     {
-        case Reference.ModeTwoway:
-        case Reference.ModeOneway:
-        case Reference.ModeBatchOneway:
+        case RefMode.ModeTwoway:
+        case RefMode.ModeOneway:
+        case RefMode.ModeBatchOneway:
         {
             //
             // Filter out datagram endpoints.
@@ -2238,8 +2233,8 @@ RoutableReference.prototype.filterEndpoints = function(allEndpoints)
             break;
         }
 
-        case Reference.ModeDatagram:
-        case Reference.ModeBatchDatagram:
+        case RefMode.ModeDatagram:
+        case RefMode.ModeBatchDatagram:
         {
             //
             // Filter out non-datagram endpoints.

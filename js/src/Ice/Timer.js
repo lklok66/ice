@@ -114,3 +114,5 @@ Timer.prototype.handleInterval = function(id)
         token.callback();
     }
 }
+
+module.exports = Timer;

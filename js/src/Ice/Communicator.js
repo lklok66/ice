@@ -18,6 +18,10 @@ var Communicator = function(initData)
     this._instance = new Instance(initData);
 };
 
+Object.defineProperty(Communicator.prototype, "instance", {
+    get: function() { return this._instance; }
+});
+
 //
 // Certain initialization tasks need to be completed after the
 // constructor.

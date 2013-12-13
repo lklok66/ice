@@ -7,9 +7,10 @@
 //
 // **********************************************************************
 
-var Endp = require("./Endpoint");
-var StringUtil = require("./StringUtil");
 var HashUtil = require("./HashUtil");
+var StringUtil = require("./StringUtil");
+
+var Endp = require("./Endpoint").Ice;
 var LocalEx = require("./LocalException").Ice;
 
 var TcpEndpointI = function(instance, ho, po, ti, conId, co)

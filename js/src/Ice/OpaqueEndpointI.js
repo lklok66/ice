@@ -7,12 +7,13 @@
 //
 // **********************************************************************
 
-var Endp = require("./Endpoint");
-var StringUtil = require("./StringUtil");
-var Debug = require("./Debug");
 var Base64 = require("./Base64");
-var Protocol = require("./Protocol");
+var Debug = require("./Debug");
 var HashUtil = require("./HashUtil");
+var Protocol = require("./Protocol");
+var StringUtil = require("./StringUtil");
+
+var Endp = require("./Endpoint").Ice;
 var LocalEx = require("./LocalException").Ice;
 
 var OpaqueEndpointI = function()

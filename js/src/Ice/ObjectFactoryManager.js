@@ -8,14 +8,14 @@
 // **********************************************************************
 
 var HashMap = require("./HashMap"),
-    LocalEx = require("./LocalException");
+    LocalEx = require("./LocalException").Ice;
 
 //
 // Only for use by Instance
 //
 var ObjectFactoryManager = function()
 {
-    this._factoryMap = new HashMap(); // java.util.HashMap<String, Ice.ObjectFactory>()
+    this._factoryMap = new HashMap(); // Map<String, ObjectFactory>
 };
 
 ObjectFactoryManager.prototype.add = function(factory, id)
@@ -29,7 +29,7 @@ ObjectFactoryManager.prototype.add = function(factory, id)
         ex.kindOfObject = "object factory";
         throw ex;
     }
-    this._factoryMap.put(id, factory);
+    this._factoryMap.set(id, factory);
 };
 
 ObjectFactoryManager.prototype.remove = function(id)
@@ -56,7 +56,7 @@ ObjectFactoryManager.prototype.destroy = function()
 {
     var oldMap = this._factoryMap,
         e = oldMap.entries;
-    this._factoryMap = new HashMap(); // java.util.HashMap<String, Ice.ObjectFactory>();
+    this._factoryMap = new HashMap(); // Map<String, ObjectFactory>
 
     while(e !== null)
     {
@@ -64,3 +64,5 @@ ObjectFactoryManager.prototype.destroy = function()
         e = e.next;
     }
 };
+
+module.exports = ObjectFactoryManager;
