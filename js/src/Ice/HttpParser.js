@@ -9,7 +9,6 @@
 
 var Debug = require("./Debug");
 var HashMap = require("./HashMap");
-var WebSocketException = require("./WebSocketException");
 
 //
 // Parser Type.
@@ -247,7 +246,7 @@ HttpParser.prototype.parse = function(buffer, begin)
                 }
                 else
                 {
-                    throw new WebSocketException("malformed request or response");
+                    throw new Error("malformed request or response");
                 }
                 break;
             }
@@ -275,7 +274,7 @@ HttpParser.prototype.parse = function(buffer, begin)
                 }
                 else if(c === CR || c === LF)
                 {
-                    throw new WebSocketException("malformed request");
+                    throw new Error("malformed request");
                 }
                 this._state = State.RequestURI;
                 continue;
@@ -298,7 +297,7 @@ HttpParser.prototype.parse = function(buffer, begin)
                 }
                 else if(c === CR || c === LF)
                 {
-                    throw new WebSocketException("malformed request");
+                    throw new Error("malformed request");
                 }
                 this._state = State.Version;
                 continue;
@@ -307,7 +306,7 @@ HttpParser.prototype.parse = function(buffer, begin)
             {
                 if(c !== LF)
                 {
-                    throw new WebSocketException("malformed request");
+                    throw new Error("malformed request");
                 }
                 this._state = State.HeaderFieldStart;
                 break;
@@ -360,7 +359,7 @@ HttpParser.prototype.parse = function(buffer, begin)
                     {
                         if(this._headerName === '')
                         {
-                            throw new WebSocketException("malformed header");
+                            throw new Error("malformed header");
                         }
                         value = this._headers.get(this._headerName);
                         Debug.assert(value !== undefined);
@@ -397,7 +396,7 @@ HttpParser.prototype.parse = function(buffer, begin)
                 }
                 else if(c === CR || c === LF)
                 {
-                    throw new WebSocketException("malformed header");
+                    throw new Error("malformed header");
                 }
                 break;
             }
@@ -422,7 +421,7 @@ HttpParser.prototype.parse = function(buffer, begin)
                 }
                 else if(c !== ':' || p === start)
                 {
-                    throw new WebSocketException("malformed header");
+                    throw new Error("malformed header");
                 }
 
                 this._state = State.HeaderFieldValueStart;
@@ -492,7 +491,7 @@ HttpParser.prototype.parse = function(buffer, begin)
             {
                 if(c !== LF)
                 {
-                    throw new WebSocketException("malformed header");
+                    throw new Error("malformed header");
                 }
                 this._state = State.HeaderFieldStart;
                 break;
@@ -501,7 +500,7 @@ HttpParser.prototype.parse = function(buffer, begin)
             {
                 if(c !== LF)
                 {
-                    throw new WebSocketException("malformed header");
+                    throw new Error("malformed header");
                 }
                 this._state = State.Complete;
                 break;
@@ -510,7 +509,7 @@ HttpParser.prototype.parse = function(buffer, begin)
             {
                 if(c !== 'H')
                 {
-                    throw new WebSocketException("malformed version");
+                    throw new Error("malformed version");
                 }
                 this._state = State.VersionH;
                 break;
@@ -519,7 +518,7 @@ HttpParser.prototype.parse = function(buffer, begin)
             {
                 if(c !== 'T')
                 {
-                    throw new WebSocketException("malformed version");
+                    throw new Error("malformed version");
                 }
                 this._state = State.VersionHT;
                 break;
@@ -528,7 +527,7 @@ HttpParser.prototype.parse = function(buffer, begin)
             {
                 if(c !== 'T')
                 {
-                    throw new WebSocketException("malformed version");
+                    throw new Error("malformed version");
                 }
                 this._state = State.VersionHTT;
                 break;
@@ -537,7 +536,7 @@ HttpParser.prototype.parse = function(buffer, begin)
             {
                 if(c !== 'P')
                 {
-                    throw new WebSocketException("malformed version");
+                    throw new Error("malformed version");
                 }
                 this._state = State.VersionHTTP;
                 break;
@@ -546,7 +545,7 @@ HttpParser.prototype.parse = function(buffer, begin)
             {
                 if(c !== '/')
                 {
-                    throw new WebSocketException("malformed version");
+                    throw new Error("malformed version");
                 }
                 this._state = State.VersionMajor;
                 break;
@@ -557,14 +556,14 @@ HttpParser.prototype.parse = function(buffer, begin)
                 {
                     if(this._versionMajor == -1)
                     {
-                        throw new WebSocketException("malformed version");
+                        throw new Error("malformed version");
                     }
                     this._state = State.VersionMinor;
                     break;
                 }
                 else if(c < '0' || c > '9')
                 {
-                    throw new WebSocketException("malformed version");
+                    throw new Error("malformed version");
                 }
                 if(this._versionMajor === -1)
                 {
@@ -580,7 +579,7 @@ HttpParser.prototype.parse = function(buffer, begin)
                 {
                     if(this._versionMinor === -1 || this._type !== Type.Request)
                     {
-                        throw new WebSocketException("malformed version");
+                        throw new Error("malformed version");
                     }
                     this._state = State.RequestLF;
                     break;
@@ -589,7 +588,7 @@ HttpParser.prototype.parse = function(buffer, begin)
                 {
                     if(this._versionMinor === -1 || this._type !== Type.Request)
                     {
-                        throw new WebSocketException("malformed version");
+                        throw new Error("malformed version");
                     }
                     this._state = State.HeaderFieldStart;
                     break;
@@ -598,14 +597,14 @@ HttpParser.prototype.parse = function(buffer, begin)
                 {
                     if(this._versionMinor === -1 || this._type !== Type.Response)
                     {
-                        throw new WebSocketException("malformed version");
+                        throw new Error("malformed version");
                     }
                     this._state = State.ResponseVersionSP;
                     break;
                 }
                 else if(c < '0' || c > '9')
                 {
-                    throw new WebSocketException("malformed version");
+                    throw new Error("malformed version");
                 }
                 if(this._versionMinor === -1)
                 {
@@ -638,7 +637,7 @@ HttpParser.prototype.parse = function(buffer, begin)
                 {
                     if(this._status === -1)
                     {
-                        throw new WebSocketException("malformed response status");
+                        throw new Error("malformed response status");
                     }
                     this._state = State.ResponseLF;
                     break;
@@ -647,7 +646,7 @@ HttpParser.prototype.parse = function(buffer, begin)
                 {
                     if(this._status === -1)
                     {
-                        throw new WebSocketException("malformed response status");
+                        throw new Error("malformed response status");
                     }
                     this._state = State.HeaderFieldStart;
                     break;
@@ -656,14 +655,14 @@ HttpParser.prototype.parse = function(buffer, begin)
                 {
                     if(this._status == -1)
                     {
-                        throw WebSocketException("malformed response status");
+                        throw Error("malformed response status");
                     }
                     this._state = State.ResponseReasonStart;
                     break;
                 }
                 else if(c < '0' || c > '9')
                 {
-                    throw new WebSocketException("malformed response status");
+                    throw new Error("malformed response status");
                 }
                 if(this._status === -1)
                 {
@@ -704,7 +703,7 @@ HttpParser.prototype.parse = function(buffer, begin)
             {
                 if(c !== LF)
                 {
-                    throw new WebSocketException("malformed status line");
+                    throw new Error("malformed status line");
                 }
                 this._state = State.HeaderFieldStart;
                 break;
