@@ -27,7 +27,7 @@ var RouterManager = require("./RouterManager");
 var TcpEndpointFactory = require("./TcpEndpointFactory");
 var Timer = require("./Timer");
 var TraceLevels = require("./TraceLevels");
-
+var ProcessLogger = require("./ProcessLogger");
 var LocalEx = require("./LocalException").Ice;
 
 var StateActive = 0;
@@ -307,7 +307,7 @@ Instance.prototype.finishSetup = function(communicator, promise)
 
         if(this._initData.logger === null)
         {
-            this._initData.logger = new Logger(this._initData.properties.getProperty("Ice.ProgramName"));
+            this._initData.logger = ProcessLogger.getProcessLogger();
         }
 
         this._traceLevels = new TraceLevels(this._initData.properties);

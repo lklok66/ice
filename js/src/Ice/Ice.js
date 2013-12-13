@@ -14,6 +14,7 @@ var HashMap = require("./HashMap");
 var IdentityUtil = require("./IdentityUtil");
 var IceObject = require("./Object");
 var Logger = require("./Logger");
+var ProcessLogger = require("./ProcessLogger");
 var ObjectPrx = require("./ObjectPrx");
 var Properties = require("./Properties");
 
@@ -115,6 +116,9 @@ var Ice = (function(my, undefined)
     {
         return new Properties(args, defaults);
     };
+    
+    my.getProcessLogger = ProcessLogger.getProcessLogger;
+    my.setProcessLogger = ProcessLogger.setProcessLogger;
 
     return my;
 }(Ice || {}));

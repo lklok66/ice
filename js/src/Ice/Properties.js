@@ -13,7 +13,7 @@ var LocalEx = require("./LocalException").Ice;
 var Promise = require("./Promise");
 var PropertyNames = require("./PropertyNames");
 var Debug = require("./Debug");
-
+var ProcessLogger = require("./ProcessLogger");
 var fs = require("fs");
 
 //
@@ -105,9 +105,8 @@ Properties.prototype.getPropertyAsListWithDefault = function(key, value)
         var result = StringUtil.splitString(pv.value, ", \t\r\n");
         if(result === null)
         {
-            // TODO
-            //Ice.Util.getProcessLogger().warning("mismatched quotes in property " + key
-            //                                    + "'s value, returning default value");
+            ProcessLogger.getProcessLogger().warning("mismatched quotes in property " + key
+                                                     + "'s value, returning default value");
             return value;
         }
         if(result.length === 0)
@@ -149,8 +148,7 @@ Properties.prototype.setProperty = function(key, value)
     //
     // Check if the property is legal.
     //
-    //TODO
-    //var logger = Util.getProcessLogger(); 
+    var logger = ProcessLogger.getProcessLogger(); 
     if(key === null || key === undefined || key.length === 0)
     {
         throw new LocalEx.InitializationException("Attempt to set property with empty key");
@@ -168,7 +166,6 @@ Properties.prototype.setProperty = function(key, value)
             // Each top level prefix describes a non-empty namespace. Having a string without a
             // prefix followed by a dot is an error.
             //
-            //TODO is possible to assert only in Debug mode?
             Debug.assert(dotPos != -1);
             var propPrefix = pattern.substring(0, dotPos - 1);
             if(propPrefix != prefix)
@@ -184,9 +181,7 @@ Properties.prototype.setProperty = function(key, value)
 
                 if(found && PropertyNames.validProps[i][j].deprecated)
                 {
-                    //TODO
-                    console.log("deprecated property: " + key);
-                    //logger.warning("deprecated property: " + key);
+                    logger.warning("deprecated property: " + key);
                     if(PropertyNames.validProps[i][j].deprecatedBy !== null)
                     {
                         key = PropertyNames.validProps[i][j].deprecatedBy;
@@ -198,8 +193,7 @@ Properties.prototype.setProperty = function(key, value)
             // TODO Add mismatchCase checks as we do in Java/C++/.NET
             if(!found)
             {
-                console.log("unknown property: " + key);
-                //logger.warning("unknown property: " + key);
+                logger.warning("unknown property: " + key);
             }
             else
             {
@@ -321,7 +315,7 @@ Properties.prototype.parse = function(data)
 
 Properties.ParseStateKey = 0;
 Properties.ParseStateValue = 1;
-    
+
 Properties.prototype.parseLine = function(line)
 {
     var key = "";
@@ -480,9 +474,7 @@ Properties.prototype.parseLine = function(line)
 
     if((state === Properties.ParseStateKey && key.length !== 0) || (state == Properties.ParseStateValue && key.length === 0))
     {
-        console.log("invalid config file entry: \"" + line + "\"");
-        // TODO
-        //Util.getProcessLogger().warning("invalid config file entry: \"" + line + "\"");
+        ProcessLogger.getProcessLogger().warning("invalid config file entry: \"" + line + "\"");
         return;
     }
     else if(key.length === 0)
