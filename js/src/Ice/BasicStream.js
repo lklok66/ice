@@ -3274,22 +3274,22 @@ BasicStream.prototype.writeEnum = function(v, maxValue)
 {
     if(this.isWriteEncoding_1_0())
     {
-        if(this.maxValue < 127)
+        if(maxValue < 127)
         {
-            this.writeByte(v);
+            this.writeByte(v.value);
         }
         else if(maxValue < 32767)
         {
-            this.writeShort(v);
+            this.writeShort(v.value);
         }
         else
         {
-            this.writeInt(v);
+            this.writeInt(v.value);
         }
     }
     else
     {
-        this.writeSize(v);
+        this.writeSize(v.value);
     }
 };
 

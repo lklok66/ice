@@ -77,9 +77,7 @@ SRCS = Address.js \
         TcpEndpointI.js \
         TcpTransceiver.js \
         TimeUtil.js \
-        TraceLevels.js \
-        WebSocketException.js
-        
+        TraceLevels.js
 
         
 include $(top_srcdir)/config/Make.rules
