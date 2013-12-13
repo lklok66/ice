@@ -95,3 +95,105 @@ module.exports.writeMap = function(os, v, callbacks)
         }
     }
 };
+
+module.exports.readByte = function(os)
+{
+    return os.read();
+};
+
+module.exports.readShort = function(os)
+{
+    return os.readShort();
+};
+
+module.exports.readInt = function(os)
+{
+    return os.readInt();
+};
+
+module.exports.readLong = function(os)
+{
+    return os.readLong();
+};
+
+module.exports.readFloat = function(os)
+{
+    return os.readFloat();
+};
+
+module.exports.readDouble = function(os)
+{
+    return os.readDouble();
+};
+
+module.exports.readString = function(os)
+{
+    return os.writeString(v);
+};
+
+var byteReadEnum function(os)
+{
+    return os.readEnum(0);
+};
+var shortReadEnum = function(os)
+{
+    return os.readEnum(127);
+};
+var intReadEnum = function(os)
+{
+    return os.readEnum(32767);
+};
+
+module.exports.generateReadEnum = function(maxValue)
+{
+    if(maxValue < 127)
+    {
+        return byteReadEnum;
+    }
+    else if(maxValue < 32767)
+    {
+        shortReadEnum;
+    }
+    else
+    {
+        return intReadEnum;
+    }
+};
+
+var _readStructCallbacks = {};
+
+module.exports.generateReaStruct = function(Type)
+{
+    var cb = _readStructCallbacks[Type];
+
+    if(cb !== undefined)
+    {
+        return cb;
+    }
+
+    cb = ( function(Type){
+            return function(os)
+                    {
+                        var v = new Type();
+                        v.__read(os);
+                        return v;
+                    };
+        }());
+    _readStructCallbacks[Type] = cb;
+    return cb;
+};
+
+module.exports.readSeq = function(os, callbacks)
+{
+    var sz = this.readAndCheckSeqSize(1);
+    var v = [];
+    v.length = sz;
+    var valueCB = callbacks[0];
+    callbacks = callbacks.slice(1);
+    for(var i = 0; i < sz; ++i)
+    {
+        v[i] = valueCB.call(null, os, callbacks);
+    }
+    return v;
+};
+
