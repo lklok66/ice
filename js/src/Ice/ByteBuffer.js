@@ -22,7 +22,7 @@ var ByteBuffer = function(buffer)
     }
     else
     {
-        this.b = buffer;
+        this.b = null;
     }
     this._position = 0;
     this._limit = 0;
@@ -132,7 +132,7 @@ ByteBuffer.prototype.reserve = function(n)
     {
         capacity = Math.max(n, 2 * this.capacity);
         capacity = Math.max(1024, capacity);
-        if(!this.b)
+        if(this.b === null)
         {
             this.b = new Buffer(capacity);
         }
@@ -600,7 +600,7 @@ ByteBuffer.prototype.getString = function(length)
     {
         throw new Error("BufferUnderflowException");
     }
-    return this.b.toString("utf8", this._position, length);
+    return this.b.toString("utf8", this._position, this._position + length);
 };
 
 module.exports = ByteBuffer;

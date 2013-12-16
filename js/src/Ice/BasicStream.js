@@ -1770,7 +1770,12 @@ Object.defineProperty(BasicStream.prototype, "instance", {
 });
 
 Object.defineProperty(BasicStream.prototype, "closure", {
-    get: function() { return this._type; }
+    get: function() { return this._type; },
+    set: function(type) { this._type = type; }
+});
+
+Object.defineProperty(BasicStream.prototype, "buffer", {
+    get: function() { return this._buf; }
 });
 
 //
@@ -1971,7 +1976,7 @@ BasicStream.prototype.endWriteEncaps = function()
     // Size includes size and version.
     var start = this._writeEncapsStack.start;
     
-    var sz = this._buf.limit() - start;
+    var sz = this._buf.limit - start;
     this._buf.putIntAt(start, sz);
 
     var curr = this._writeEncapsStack;
@@ -3095,11 +3100,10 @@ BasicStream.prototype.writeString = function(v)
     }
     else
     {
-        this.startSize();
         var sz = ByteBuffer.byteLength(v);
+        this.writeSize(sz);
         this.expand(sz);
         this._buf.putString(v, sz);
-        this.endSize();
     }
 };
 
@@ -3267,22 +3271,22 @@ BasicStream.prototype.writeEnum = function(v, maxValue)
     }
 };
 
-BasicStream.prototype.readEnum = function(maxValue)
+BasicStream.prototype.readEnum = function(Type)
 {
     if(this.getReadEncoding().equals(Protocol.Encoding_1_0))
     {
-        if(maxValue < 127)
+        if(Type.maxValue < 127)
         {
-            return this.readByte();
+            return Type.valueOf(this.readByte());
         }
         
-        if(maxValue < 32767)
+        if(Type.maxValue < 32767)
         {
-            return this.readShort();
+            return Type.valueOf(this.readShort());
         }
-        return this.readInt();
+        return Type.valueOf(this.readInt());
     }
-    return this.readSize();
+    return Type.valueOf(this.readSize());
 };
 
 BasicStream.prototype.writeObject = function(v)

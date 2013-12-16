@@ -79,9 +79,12 @@ module.exports.writeStringSeq = function(os, v)
     os.writeStringSeq(v);
 };
 
-module.exports.writeEnum = function(os, v)
+module.exports.generateWriteEnum = function(Type)
 {
-    os.writeEnum(v, v.maxValue);
+    return function(os, v)
+        {
+            return os.writedEnum(v, Type.maxValue);
+        };
 };
 
 module.exports.writeStruct = function(os, v)
@@ -202,33 +205,12 @@ module.exports.readStringSeq = function(os)
     return os.readStringSeq();
 };
 
-var byteReadEnum function(os)
+module.exports.generateReadEnum = function(Type)
 {
-    return os.readEnum(0);
-};
-var shortReadEnum = function(os)
-{
-    return os.readEnum(127);
-};
-var intReadEnum = function(os)
-{
-    return os.readEnum(32767);
-};
-
-module.exports.generateReadEnum = function(maxValue)
-{
-    if(maxValue < 127)
-    {
-        return byteReadEnum;
-    }
-    else if(maxValue < 32767)
-    {
-        shortReadEnum;
-    }
-    else
-    {
-        return intReadEnum;
-    }
+    return function(os)
+        {
+            return os.readEnum(0, Type);
+        };
 };
 
 module.exports.generateReaStruct = function(Type)

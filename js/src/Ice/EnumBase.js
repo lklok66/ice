@@ -55,6 +55,7 @@ EnumBase.prototype.toString = function()
 EnumBase.defineEnum = function(type, enumerators)
 {
     var enums = [];
+    var maxValue = 0;
     for(var e in enumerators)
     {
         var value = enumerators[e];
@@ -64,11 +65,18 @@ EnumBase.defineEnum = function(type, enumerators)
             enumerable: true,
             value: enumerator
         });
+        if(value > maxValue)
+        {
+            maxValue = value;
+        }
     }
 
     Object.defineProperty(type, 'valueOf', {
-        enumerable: false,
         value: function(v) { return enums[v]; }
+    });
+    
+    Object.defineProperty(type, 'maxValue', {
+        value: function() { return maxValue; }
     });
 };
 
