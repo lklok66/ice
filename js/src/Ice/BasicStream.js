@@ -41,41 +41,6 @@ var IndirectPatchEntry = function(index, patcher)
     this.patcher = patcher;
 };
 
-var SequencePatcher = function(seq, cls, type, index)
-{
-    this._seq = seq;
-    this._cls = cls;
-    this._type = type;
-    this._index = index;
-};
-
-SequencePatcher.prototype.patch = function(v)
-{
-    if(v !== null)
-    {
-        //
-        // Raise TypeError if the element doesn't match the expected type.
-        //
-        if(!(v instanceof this._cls))
-        {
-            throw new TypeError("expected element of type " + this._type + " but received " +
-                                v.prototype.constructor.name);
-        }
-    }
-
-    this._seq[this._index] = v;
-};
-
-SequencePatcher.prototype.type = function()
-{
-    return this._type;
-};
-
-SequencePatcher.prototype.invoke = function(v)
-{
-    this.patch(v);
-};
-
 var EncapsDecoder = function(stream, encaps, sliceObjects, f)
 {
     this._stream = stream;
@@ -170,7 +135,7 @@ EncapsDecoder.prototype.addPatchEntry = function(index, patcher)
     var obj = this._unmarshaledMap.get(index);
     if(obj !== undefined && obj !== null)
     {
-        patcher.patch(obj);
+        patcher.call(null, obj);
         return;
     }
 
@@ -310,7 +275,7 @@ EncapsDecoder10.prototype.readObject = function(patcher)
 
     if(index === 0)
     {
-        patcher.patch(null);
+        patcher.call(null, null);
     }
     else
     {
@@ -627,7 +592,7 @@ EncapsDecoder11.prototype.readObject = function(patcher)
     {
         if(patcher !== null)
         {
-            patcher.patch(null);
+            patcher.call(null, null);
         }
     }
     else if(this._current !== null && (this._current.sliceFlags & FLAG_HAS_INDIRECTION_TABLE) !== 0)
@@ -1125,9 +1090,20 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
 
     if(patcher !== null)
     {
-        patcher.patch(v);
+        patcher.call(null, v);
     }
     return index;
+};
+
+var sequencePatcher = function(seq, index, Type){
+    return function(v)
+        {
+            if(v !== null && !(v instanceof Type))
+            {
+                throw new TypeError("expected element of type " + Type.__ids[0] + " but received " + v);
+            }
+            this._seq[index] = v;
+        };
 };
 
 EncapsDecoder11.prototype.readSlicedData = function()
@@ -1138,7 +1114,6 @@ EncapsDecoder11.prototype.readSlicedData = function()
     {
         return null;
     }
-
     //
     // The _indirectionTables member holds the indirection table for each slice
     // in _slices.
@@ -1158,8 +1133,7 @@ EncapsDecoder11.prototype.readSlicedData = function()
         jj = table ? table.length : 0;
         for(j = 0; j < jj; ++j)
         {
-            this.addPatchEntry(table[j], new SequencePatcher(info.objects, IceObject, 
-                                                             IceObject.ice_staticId(), j));
+            this.addPatchEntry(table[j], sequencePatcher(info.objects, j, IceObject));
         }
     }
     return {slices: this._current.slices};

@@ -7,9 +7,16 @@
 //
 // **********************************************************************
 
+var HashMap = require("./HashMap");
+
 module.exports.writeByte = function(os, v)
 {
-    os.write(v);
+    os.writeByte(v);
+};
+
+module.exports.writeByteSeq = function(os, v)
+{
+    os.writeByteSeq(v);
 };
 
 module.exports.writeShort = function(os, v)
@@ -17,9 +24,19 @@ module.exports.writeShort = function(os, v)
     os.writeShort(v);
 };
 
+module.exports.writeShortSeq = function(os, v)
+{
+    os.writeShortSeq(v);
+};
+
 module.exports.writeInt = function(os, v)
 {
     os.writeInt(v);
+};
+
+module.exports.writeIntSeq = function(os, v)
+{
+    os.writeIntSeq(v);
 };
 
 module.exports.writeLong = function(os, v)
@@ -27,9 +44,19 @@ module.exports.writeLong = function(os, v)
     os.writeLong(v);
 };
 
+module.exports.writeLongSeq = function(os, v)
+{
+    os.writeLongSeq(v);
+};
+
 module.exports.writeFloat = function(os, v)
 {
     os.writeFloat(v);
+};
+
+module.exports.writeFloatSeq = function(os, v)
+{
+    os.writeFloatSeq(v);
 };
 
 module.exports.writeDouble = function(os, v)
@@ -37,9 +64,19 @@ module.exports.writeDouble = function(os, v)
     os.writeDouble(v);
 };
 
+module.exports.writeDoubleSeq = function(os, v)
+{
+    os.writeDoubleSeq(v);
+};
+
 module.exports.writeString = function(os, v)
 {
     os.writeString(v);
+};
+
+module.exports.writeStringSeq = function(os, v)
+{
+    os.writeStringSeq(v);
 };
 
 module.exports.writeEnum = function(os, v)
@@ -65,11 +102,10 @@ module.exports.writeSeq = function(os, v, callbacks)
     }
     else
     {
-        var valueCB = callbacks[0];
-        callbacks = callbacks.slice(1);
-        var length = v.length;
-        os.writeSize(length);
-        for(var i = 0; i < length; ++i)
+        var valueCB = callbacks.shift();
+        var sz = v.length;
+        os.writeSize(sz);
+        for(var i = 0; i < sz; ++i)
         {
             valueCB.call(null, os, v[i], callbacks);
         }
@@ -86,7 +122,7 @@ module.exports.writeMap = function(os, v, callbacks)
     {
         var keyCB = callbacks[0][0];
         var valueCB = callbacks[0][1];
-        callbacks = callbacks.slice(1);
+        callbacks.shift();
         os.writeSize(v.size);
         for(var e = v.entries; e !== null; e = e.next)
         {
@@ -98,7 +134,12 @@ module.exports.writeMap = function(os, v, callbacks)
 
 module.exports.readByte = function(os)
 {
-    return os.read();
+    return os.readByte();
+};
+
+module.exports.readByteSeq = function(os)
+{
+    return os.readByteSeq();
 };
 
 module.exports.readShort = function(os)
@@ -106,9 +147,19 @@ module.exports.readShort = function(os)
     return os.readShort();
 };
 
+module.exports.readShortSeq = function(os)
+{
+    return os.readShortSeq();
+};
+
 module.exports.readInt = function(os)
 {
     return os.readInt();
+};
+
+module.exports.readIntSeq = function(os)
+{
+    return os.readIntSeq();
 };
 
 module.exports.readLong = function(os)
@@ -116,9 +167,19 @@ module.exports.readLong = function(os)
     return os.readLong();
 };
 
+module.exports.readLongSeq = function(os)
+{
+    return os.readLongSeq();
+};
+
 module.exports.readFloat = function(os)
 {
     return os.readFloat();
+};
+
+module.exports.readFloatSeq = function(os)
+{
+    return os.readFloatSeq();
 };
 
 module.exports.readDouble = function(os)
@@ -126,9 +187,19 @@ module.exports.readDouble = function(os)
     return os.readDouble();
 };
 
+module.exports.readDoubleSeq = function(os)
+{
+    return os.readDoubleSeq();
+};
+
 module.exports.readString = function(os)
 {
-    return os.writeString(v);
+    return os.readString();
+};
+
+module.exports.readStringSeq = function(os)
+{
+    return os.readStringSeq();
 };
 
 var byteReadEnum function(os)
@@ -160,27 +231,31 @@ module.exports.generateReadEnum = function(maxValue)
     }
 };
 
-var _readStructCallbacks = {};
-
 module.exports.generateReaStruct = function(Type)
 {
-    var cb = _readStructCallbacks[Type];
+    return function(os)
+        {
+            var v = new Type();
+            v.__read(os);
+            return v;
+        };
+};
 
-    if(cb !== undefined)
-    {
-        return cb;
-    }
-
-    cb = ( function(Type){
-            return function(os)
+module.exports.generateReadObject = function(Type)
+{
+    return function(os)
+        {
+            var v = null;
+            os.reaObject(
+                function(obj){
+                    if(obj !== null && !(obj instanceof Type))
                     {
-                        var v = new Type();
-                        v.__read(os);
-                        return v;
-                    };
-        }());
-    _readStructCallbacks[Type] = cb;
-    return cb;
+                        throw new TypeError("expected element of type " + Type.__ids[0] + " but received " + obj);
+                    }
+                    v = obj;
+                });
+            return v;
+        };
 };
 
 module.exports.readSeq = function(os, callbacks)
@@ -188,8 +263,7 @@ module.exports.readSeq = function(os, callbacks)
     var sz = this.readAndCheckSeqSize(1);
     var v = [];
     v.length = sz;
-    var valueCB = callbacks[0];
-    callbacks = callbacks.slice(1);
+    var valueCB = callbacks.shift()
     for(var i = 0; i < sz; ++i)
     {
         v[i] = valueCB.call(null, os, callbacks);
@@ -197,3 +271,17 @@ module.exports.readSeq = function(os, callbacks)
     return v;
 };
 
+module.exports.readMap = function(os, v, callbacks)
+{
+    var v = new HashMap();
+    var sz = this.readAndCheckSeqSize(1);
+    
+    var keyCB = callbacks[0][0];
+    var valueCB = callbacks[0][1];
+    callbacks.shift();
+    for(var i = 0; i < sz; ++i)
+    {
+        v.set(keyCB.call(null, os), valueCB.call(null, os, callbacks));
+    }
+    return v;
+};
