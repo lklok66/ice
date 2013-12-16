@@ -83,7 +83,7 @@ module.exports.generateWriteEnum = function(Type)
 {
     return function(os, v)
         {
-            return os.writedEnum(v, Type.maxValue);
+            return os.writeEnum(v, Type.maxValue);
         };
 };
 
@@ -209,7 +209,7 @@ module.exports.generateReadEnum = function(Type)
 {
     return function(os)
         {
-            return os.readEnum(0, Type);
+            return os.readEnum(Type);
         };
 };
 
