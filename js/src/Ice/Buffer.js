@@ -8,14 +8,18 @@
 // **********************************************************************
 
 //
-// Ice/Buffer implementation to be used by Nodejs, it uses node Buffer as
-// the store.
+// Ice.Buffer implementation to be used by Node.js, it uses node Buffer 
+// as the store.
 //
 
-var Ice = {};
-Ice.Long = require("Ice/Long");
+//
+// Define Node.Buffer as an alias to NodeJS global Buffer type,
+// that allow us to refer to Ice.Buffer as Buffer in this file.
+//
+var Node = { Buffer: global.Buffer}
+var Long = require("./Long");
 
-Ice.Buffer = function(buffer)
+var Buffer = function(buffer)
 {
     if(buffer !== undefined)
     {
@@ -30,7 +34,7 @@ Ice.Buffer = function(buffer)
     this._shrinkCounter = 0;
 };
 
-Object.defineProperty(Ice.Buffer.prototype, "position", {
+Object.defineProperty(Buffer.prototype, "position", {
     get: function() { return this._position; },
     set: function(position){
         if(position >= 0 && position < this._limit)
@@ -40,7 +44,7 @@ Object.defineProperty(Ice.Buffer.prototype, "position", {
     }
 });
 
-Object.defineProperty(Ice.Buffer.prototype, "limit", {
+Object.defineProperty(Buffer.prototype, "limit", {
     get: function() { return this._limit; },
     set: function(limit){
         if(limit < this.capacity)
@@ -54,20 +58,20 @@ Object.defineProperty(Ice.Buffer.prototype, "limit", {
     }
 });
 
-Object.defineProperty(Ice.Buffer.prototype, "capacity", {
+Object.defineProperty(Buffer.prototype, "capacity", {
     get: function() { return this.b === null ? 0 : this.b.length; }
 });
 
-Object.defineProperty(Ice.Buffer.prototype, "remaining", {
+Object.defineProperty(Buffer.prototype, "remaining", {
     get: function() { return this._limit - this._position; }
 });
 
-Ice.Buffer.prototype.empty = function()
+Buffer.prototype.empty = function()
 {
     return this._limit === 0;
 };
 
-Ice.Buffer.prototype.resize = function(n)
+Buffer.prototype.resize = function(n)
 {
     if(n === 0)
     {
@@ -80,7 +84,7 @@ Ice.Buffer.prototype.resize = function(n)
     this._limit = n;
 };
 
-Ice.Buffer.prototype.clear = function()
+Buffer.prototype.clear = function()
 {
     this.b = null;
     this._position = 0;
@@ -93,7 +97,7 @@ Ice.Buffer.prototype.clear = function()
 // expand the buffer if the caller is writing to a location that is
 // already in the buffer.
 //
-Ice.Buffer.prototype.expand = function(n)
+Buffer.prototype.expand = function(n)
 {
     var sz = this.capacity === 0 ? n : this._position + n;
     if(sz > this._limit)
@@ -102,7 +106,7 @@ Ice.Buffer.prototype.expand = function(n)
     }
 };
 
-Ice.Buffer.prototype.reset = function()
+Buffer.prototype.reset = function()
 {
     if(this._limit > 0 && this._limit * 2 < this.capacity)
     {
@@ -126,7 +130,7 @@ Ice.Buffer.prototype.reset = function()
     this._position = 0;
 };
 
-Ice.Buffer.prototype.reserve = function(n)
+Buffer.prototype.reserve = function(n)
 {
     var b, capacity;
     if(n > this.capacity)
@@ -135,11 +139,11 @@ Ice.Buffer.prototype.reserve = function(n)
         capacity = Math.max(1024, capacity);
         if(this.b === null)
         {
-            this.b = new Buffer(capacity);
+            this.b = new Node.Buffer(capacity);
         }
         else
         {
-            b = new Buffer(capacity);
+            b = new Node.Buffer(capacity);
             this.b.copy(b);
             this.b = b.buffer;
         }
@@ -154,7 +158,7 @@ Ice.Buffer.prototype.reserve = function(n)
     }
 };
 
-Ice.Buffer.prototype.put = function(v)
+Buffer.prototype.put = function(v)
 {
     if(this._position === this._limit)
     {
@@ -164,7 +168,7 @@ Ice.Buffer.prototype.put = function(v)
     this._position++;
 };
 
-Ice.Buffer.prototype.putAt = function(i, v)
+Buffer.prototype.putAt = function(i, v)
 {
     if(i >= this._limit)
     {
@@ -173,7 +177,7 @@ Ice.Buffer.prototype.putAt = function(i, v)
     this.b.writeUInt8(v, i, true);
 };
 
-Ice.Buffer.prototype.putArray = function(v)
+Buffer.prototype.putArray = function(v)
 {
     //Expects a Nodejs Buffer
     if(this._position + v.length > this._limit)
@@ -184,7 +188,7 @@ Ice.Buffer.prototype.putArray = function(v)
     this._position += v.length;
 };
 
-Ice.Buffer.prototype.putShort = function(v)
+Buffer.prototype.putShort = function(v)
 {
     if(this._position + 2 > this._limit)
     {
@@ -194,7 +198,7 @@ Ice.Buffer.prototype.putShort = function(v)
     this._position += 2;
 };
 
-Ice.Buffer.prototype.putShortAt = function(i, v)
+Buffer.prototype.putShortAt = function(i, v)
 {
     if(i + 2 > this._limit || i < 0)
     {
@@ -203,7 +207,7 @@ Ice.Buffer.prototype.putShortAt = function(i, v)
     this.b.writeInt16LE(v, i, true);
 };
 
-Ice.Buffer.prototype.putShortArray = function(v)
+Buffer.prototype.putShortArray = function(v)
 {
     var i, length;
     if(this._position + (v.length * 2) > this._limit)
@@ -217,7 +221,7 @@ Ice.Buffer.prototype.putShortArray = function(v)
     }
 };
 
-Ice.Buffer.prototype.putInt = function(v)
+Buffer.prototype.putInt = function(v)
 {
     if(this._position + 4 > this._limit)
     {
@@ -227,7 +231,7 @@ Ice.Buffer.prototype.putInt = function(v)
     this._position += 4;
 };
 
-Ice.Buffer.prototype.putIntAt = function(i, v)
+Buffer.prototype.putIntAt = function(i, v)
 {
     if(i + 4 > this._limit || i < 0)
     {
@@ -236,7 +240,7 @@ Ice.Buffer.prototype.putIntAt = function(i, v)
     this.b.writeInt32LE(v, i, true);
 };
 
-Ice.Buffer.prototype.putIntArray = function(v)
+Buffer.prototype.putIntArray = function(v)
 {
     var i, length;
     if(this._position + (v.length * 4) > this._limit)
@@ -250,7 +254,7 @@ Ice.Buffer.prototype.putIntArray = function(v)
     }
 };
 
-Ice.Buffer.prototype.putFloat = function(v)
+Buffer.prototype.putFloat = function(v)
 {
     if(this._position + 4 > this._limit)
     {
@@ -260,7 +264,7 @@ Ice.Buffer.prototype.putFloat = function(v)
     this._position += 4;
 };
 
-Ice.Buffer.prototype.putFloatAt = function(i, v)
+Buffer.prototype.putFloatAt = function(i, v)
 {
     if(i + 4 > this._limit || i < 0)
     {
@@ -269,7 +273,7 @@ Ice.Buffer.prototype.putFloatAt = function(i, v)
     this.b.writeFloatLE(v, i, true);
 };
 
-Ice.Buffer.prototype.putFloatArray = function(v)
+Buffer.prototype.putFloatArray = function(v)
 {
     var i, length;
     if(this._position + (v.length * 4) > this._limit)
@@ -283,7 +287,7 @@ Ice.Buffer.prototype.putFloatArray = function(v)
     }
 };
 
-Ice.Buffer.prototype.putDouble = function(v)
+Buffer.prototype.putDouble = function(v)
 {
     if(this._position + 8 > this._limit)
     {
@@ -293,7 +297,7 @@ Ice.Buffer.prototype.putDouble = function(v)
     this._position += 8;
 };
 
-Ice.Buffer.prototype.putDoubleAt = function(i, v)
+Buffer.prototype.putDoubleAt = function(i, v)
 {
     if(i + 8 > this._limit || i < 0)
     {
@@ -302,7 +306,7 @@ Ice.Buffer.prototype.putDoubleAt = function(i, v)
     this.b.writeDoubleLE(v, i, true);
 };
 
-Ice.Buffer.prototype.putDoubleArray = function(v)
+Buffer.prototype.putDoubleArray = function(v)
 {
     var i, length;
     if(this._position + (v.length * 8) > this._limit)
@@ -316,7 +320,7 @@ Ice.Buffer.prototype.putDoubleArray = function(v)
     }
 };
 
-Ice.Buffer.prototype.putLong = function(v)
+Buffer.prototype.putLong = function(v)
 {
     if(this._position + 8 > this._limit)
     {
@@ -328,7 +332,7 @@ Ice.Buffer.prototype.putLong = function(v)
     this._position += 4;
 };
 
-Ice.Buffer.prototype.putLongAt = function(i, v)
+Buffer.prototype.putLongAt = function(i, v)
 {
     if(i + 8 > this._limit || i < 0)
     {
@@ -338,7 +342,7 @@ Ice.Buffer.prototype.putLongAt = function(i, v)
     this.b.writeUInt32LE(v.high, i + 4, true);
 };
 
-Ice.Buffer.prototype.putLongArray = function(v)
+Buffer.prototype.putLongArray = function(v)
 {
     var i, length;
     if(this._position + (v.length * 8) > this._limit)
@@ -354,12 +358,12 @@ Ice.Buffer.prototype.putLongArray = function(v)
     }
 };
 
-Ice.Buffer.byteLength = function(v)
+Buffer.byteLength = function(v)
 {
-    return Buffer.byteLength(v);
+    return Node.Buffer.byteLength(v);
 };
 
-Ice.Buffer.prototype.putString = function(v, sz)
+Buffer.prototype.putString = function(v, sz)
 {
     var bytes = this.b.write(v, this._position);
     if(this._position + sz > this._limit)
@@ -376,7 +380,7 @@ Ice.Buffer.prototype.putString = function(v, sz)
     this._position += sz;
 };
 
-Ice.Buffer.prototype.get = function()
+Buffer.prototype.get = function()
 {
     var v;
     if(this._position >= this._limit)
@@ -388,7 +392,7 @@ Ice.Buffer.prototype.get = function()
     return v;
 };
 
-Ice.Buffer.prototype.getAt = function(i)
+Buffer.prototype.getAt = function(i)
 {
     if(i < 0 || i >= this._limit)
     {
@@ -397,18 +401,18 @@ Ice.Buffer.prototype.getAt = function(i)
     return this.b.readUInt8(i, true);
 };
 
-Ice.Buffer.prototype.getArray = function(length)
+Buffer.prototype.getArray = function(length)
 {
     if(this._position + length > this._limit)
     {
         throw new Error("BufferUnderflowException");
     }
-    var buffer = new Buffer(length);
+    var buffer = new Node.Buffer(length);
     this.b.slice(this._position, this._position + length).copy(buffer);
     return buffer;
 };
 
-Ice.Buffer.prototype.getShort = function()
+Buffer.prototype.getShort = function()
 {
     var v;
     if(this._limit - this._position < 2)
@@ -420,7 +424,7 @@ Ice.Buffer.prototype.getShort = function()
     return v;
 };
 
-Ice.Buffer.prototype.getShortAt = function(i)
+Buffer.prototype.getShortAt = function(i)
 {
     if(i + 2 > this._limit || i < 0)
     {
@@ -429,7 +433,7 @@ Ice.Buffer.prototype.getShortAt = function(i)
     return this.b.readInt16LE(i, true);
 };
 
-Ice.Buffer.prototype.getShortArray = function(length)
+Buffer.prototype.getShortArray = function(length)
 {
     var v = [], i;
     if(this._position + (length * 2) > this._limit)
@@ -444,7 +448,7 @@ Ice.Buffer.prototype.getShortArray = function(length)
     return v;
 };
 
-Ice.Buffer.prototype.getInt = function()
+Buffer.prototype.getInt = function()
 {
     var v;
     if(this._limit - this._position < 4)
@@ -456,7 +460,7 @@ Ice.Buffer.prototype.getInt = function()
     return v;
 };
 
-Ice.Buffer.prototype.getIntAt = function(i)
+Buffer.prototype.getIntAt = function(i)
 {
     if(i + 4 > this._limit || i < 0)
     {
@@ -465,7 +469,7 @@ Ice.Buffer.prototype.getIntAt = function(i)
     return this.b.readInt32LE(i, true);
 };
 
-Ice.Buffer.prototype.getIntArray = function(length)
+Buffer.prototype.getIntArray = function(length)
 {
     var v = [], i;
     if(this._position + (length * 4) > this._limit)
@@ -480,7 +484,7 @@ Ice.Buffer.prototype.getIntArray = function(length)
     return v;
 };
 
-Ice.Buffer.prototype.getFloat = function()
+Buffer.prototype.getFloat = function()
 {
     if(this._limit - this._position < 4)
     {
@@ -491,7 +495,7 @@ Ice.Buffer.prototype.getFloat = function()
     return v;
 };
 
-Ice.Buffer.prototype.getFloatAt = function(i)
+Buffer.prototype.getFloatAt = function(i)
 {
     if(i + 4 > this._limit || i < 0)
     {
@@ -500,7 +504,7 @@ Ice.Buffer.prototype.getFloatAt = function(i)
     return this.b.readFloatLE(i, true);
 };
 
-Ice.Buffer.prototype.getFloatArray = function(length)
+Buffer.prototype.getFloatArray = function(length)
 {
     var v = [], i;
     if(this._position + (length * 4) > this._limit)
@@ -515,7 +519,7 @@ Ice.Buffer.prototype.getFloatArray = function(length)
     return v;
 };
 
-Ice.Buffer.prototype.getDouble = function()
+Buffer.prototype.getDouble = function()
 {
     if(this._limit - this._position < 8)
     {
@@ -526,7 +530,7 @@ Ice.Buffer.prototype.getDouble = function()
     return v;
 };
 
-Ice.Buffer.prototype.getDoubleAt = function(i)
+Buffer.prototype.getDoubleAt = function(i)
 {
     if(i + 8 > this._limit || i < 0)
     {
@@ -535,7 +539,7 @@ Ice.Buffer.prototype.getDoubleAt = function(i)
     return this.b.readDoubleLE(i, true);
 };
 
-Ice.Buffer.prototype.getDoubleArray = function(length)
+Buffer.prototype.getDoubleArray = function(length)
 {
     var v = [], i;
     if(this._position + (length * 8) > this._limit)
@@ -550,13 +554,13 @@ Ice.Buffer.prototype.getDoubleArray = function(length)
     return v;
 };
 
-Ice.Buffer.prototype.getLong = function()
+Buffer.prototype.getLong = function()
 {
     if(this._limit - this._position < 8)
     {
         throw new Error("BufferUnderflowException");
     }
-    var v = new Ice.Long();
+    var v = new Long();
     v.low = this.b.readUInt32LE(this._position, true);
     this._position += 4;
     v.high = this.b.readUInt32LE(this._position, true);
@@ -564,19 +568,19 @@ Ice.Buffer.prototype.getLong = function()
     return v;
 };
 
-Ice.Buffer.prototype.getLongAt = function(i)
+Buffer.prototype.getLongAt = function(i)
 {
     if(i + 8 > this._limit || i < 0)
     {
         throw new Error("IndexOutOfBoundsException");
     }
-    var v = new Ice.Long();
+    var v = new Long();
     v.low = this.b.readUInt32LE(i, true);
     v.high = this.b.readUInt32LE(i + 4, true);
     return v;
 };
 
-Ice.Buffer.prototype.getLongArray = function(length)
+Buffer.prototype.getLongArray = function(length)
 {
     var v = [], i, l;
     if(this._position + (length * 8) > this._limit)
@@ -585,7 +589,7 @@ Ice.Buffer.prototype.getLongArray = function(length)
     }
     for(i = 0; i < length; ++i)
     {
-        l = new Ice.Long();
+        l = new Long();
         l.low = this.b.readDoubleLE(this._position, true);
         this._position += 4;
         l.high = this.b.readDoubleLE(this._position, true);
@@ -595,7 +599,7 @@ Ice.Buffer.prototype.getLongArray = function(length)
     return v;
 };
 
-Ice.Buffer.prototype.getString = function(length)
+Buffer.prototype.getString = function(length)
 {
     if(this._position + length > this._limit)
     {
@@ -606,4 +610,4 @@ Ice.Buffer.prototype.getString = function(length)
     return s;
 };
 
-module.exports = Ice.Buffer;
+module.exports = Buffer;
