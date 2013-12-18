@@ -191,19 +191,19 @@ EncapsDecoder.prototype.unmarshal = function(index, v)
         l = this._patchMap.get(index);
         if(l !== undefined)
         {
-            Debug.assert(l.size() > 0);
+            Debug.assert(l.length > 0);
             //
             // Patch all pointers that refer to the instance.
             //
             for(i = 0, length = l.length; i < length; ++i)
             {
-                l[i].patch(v);
+                l[i](v);
             }
             //
             // Clear out the patch map for that index -- there is nothing left
             // to patch for that index for the time being.
             //
-            this._patchMap.remove(index);
+            this._patchMap.delete(index);
         }
     }
     
@@ -708,7 +708,7 @@ EncapsDecoder11.prototype.throwException = function(factory)
 EncapsDecoder11.prototype.startInstance = function(sliceType)
 {
     Debug.assert(sliceType !== undefined);
-    Debug.assert(this._current.sliceType !== null && this._current.sliceType.equals(sliceType));
+    Debug.assert(this._current.sliceType !== null && this._current.sliceType === sliceType);
     this._current.skipFirstSlice = true;
 };
 
@@ -1204,6 +1204,9 @@ var EncapsEncoder10 = function(stream, encaps)
     this._objectIdIndex = 0;
     this._toBeMarshaledMap = new HashMap(); // HashMap<Ice.Object, Integer>();
 };
+
+EncapsEncoder10.prototype = new EncapsEncoder();
+EncapsEncoder10.prototype.constructor = EncapsEncoder10;
 
 EncapsEncoder10.prototype.writeObject = function(v)
 {
@@ -1723,7 +1726,7 @@ ReadEncaps.prototype.reset = function()
 ReadEncaps.prototype.setEncoding = function(encoding)
 {
     this.encoding = encoding;
-    this.encoding_1_0 = encoding.equals(Version.Encoding_1_0);
+    this.encoding_1_0 = encoding.equals(Protocol.Encoding_1_0);
 };
 
 var WriteEncaps = function()
@@ -1744,7 +1747,7 @@ WriteEncaps.prototype.reset = function()
 WriteEncaps.prototype.setEncoding = function(encoding)
 {
     this.encoding = encoding;
-    this.encoding_1_0 = encoding.equals(Version.Encoding_1_0);
+    this.encoding_1_0 = encoding.equals(Protocol.Encoding_1_0);
 };
 
 var BasicStream = function(instance, encoding, unlimited, data)
@@ -3605,7 +3608,7 @@ BasicStream.prototype.getTypeId = function(compactId)
 
 BasicStream.prototype.isReadEncoding_1_0 = function()
 {
-    return this._readEncapsStack ? this._readEncapsStack.encoding_1_0 : this._encoding.equals(Version.Encoding_1_0);
+    return this._readEncapsStack !== null ? this._readEncapsStack.encoding_1_0 : this._encoding.equals(Version.Encoding_1_0);
 };
 
 BasicStream.prototype.isWriteEncoding_1_0 = function()
@@ -3615,10 +3618,10 @@ BasicStream.prototype.isWriteEncoding_1_0 = function()
 
 BasicStream.prototype.initReadEncaps = function()
 {
-    if(!this._readEncapsStack) // Lazy initialization
+    if(this._readEncapsStack === null) // Lazy initialization
     {
         this._readEncapsStack = this._readEncapsCache;
-        if(this._readEncapsStack)
+        if(this._readEncapsStack !== null)
         {
             this._readEncapsCache = this._readEncapsCache.next;
         }
@@ -3630,7 +3633,7 @@ BasicStream.prototype.initReadEncaps = function()
         this._readEncapsStack.sz = this._buf.limit;
     }
 
-    if(!this._readEncapsStack.decoder) // Lazy initialization.
+    if(this._readEncapsStack.decoder == null) // Lazy initialization.
     {
         var factoryManager = this._instance.servantFactoryManager();
         if(this._readEncapsStack.encoding_1_0)

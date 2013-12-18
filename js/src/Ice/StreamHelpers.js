@@ -23,6 +23,11 @@ StreamHelpers.BoolHelper.read = function(os)
     return os.readBool();
 };
 
+StreamHelpers.BoolHelper.toString = function()
+{
+    return "[object BoolHelper]";
+}
+
 Object.defineProperty(StreamHelpers.BoolHelper, "minWireSize", {
     get: function(){ return 1; }
 });
@@ -205,19 +210,19 @@ StreamHelpers.SequenceHelper = {};
 StreamHelpers.SequenceHelper.read = function(os, helpers)
 {
     var helper = helpers.shift();
-    var sz = this.readAndCheckSeqSize(helper.minWireSize);
+    var sz = os.readAndCheckSeqSize(helper.minWireSize);
     var v = [];
     v.length = sz;
     for(var i = 0; i < sz; ++i)
     {
-        v[i] = helper.read(os, helpers);
+        v[i] = helper.read(os, helpers.slice());
     }
     return v;
 };
 
 StreamHelpers.SequenceHelper.write = function(os, v, helpers)
 {
-    if(v === null || v.size === 0)
+    if(v === null || v.length === 0)
     {
         os.writeSize(0);
     }
@@ -227,10 +232,15 @@ StreamHelpers.SequenceHelper.write = function(os, v, helpers)
         var helper = helpers.shift();
         for(var i = 0; i < v.length; ++i)
         {
-            helper.write(os, v[i], helpers);
+            helper.write(os, v[i], helpers.slice());
         }
     }
 };
+
+StreamHelpers.SequenceHelper.toString = function()
+{
+    return "[object SequenceHelper]";
+}
 
 Object.defineProperty(StreamHelpers.SequenceHelper, "minWireSize", {
     get: function(){ return 1; }
@@ -305,7 +315,7 @@ StreamHelpers.DictionaryHelper.read = function(os, helpers)
     var helper = helpers.shift();
     for(var i = 0; i < sz; ++i)
     {
-        v.set(helper.key.read(os), helper.value.read(os, helpers));
+        v.set(helper.key.read(os), helper.value.read(os, helpers.slice()));
     }
     return v;
 };
@@ -323,7 +333,7 @@ StreamHelpers.DictionaryHelper.write = function(os, v, helpers)
         for(var e = v.entries; e !== null; e = e.next)
         {
             helper.key.write(os, e.key);
-            helper.value.write(os, e.value, helpers);
+            helper.value.write(os, e.value, helpers.slice());
         }
     }
 };

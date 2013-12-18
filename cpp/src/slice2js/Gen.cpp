@@ -245,12 +245,11 @@ Slice::JsVisitor::writePostUnmarshalParams(const ParamDeclList& params, const Op
 }
 
 void
-Slice::JsVisitor::writeMarshalDataMember(const DataMemberPtr& member, int& iter)
+Slice::JsVisitor::writeMarshalDataMember(const DataMemberPtr& member)
 {
-    // TODO
     if(member->optional())
     {
-        writeOptionalMarshalUnmarshalCode(_out, member->type(), fixId(member->name()), member->tag(), true);
+        writeOptionalMarshalUnmarshalCode(_out, member->type(), "this." + fixId(member->name()), member->tag(), true);
     }
     else
     {
@@ -259,35 +258,15 @@ Slice::JsVisitor::writeMarshalDataMember(const DataMemberPtr& member, int& iter)
 }
 
 void
-Slice::JsVisitor::writeUnmarshalDataMember(const DataMemberPtr& member, int& iter)
+Slice::JsVisitor::writeUnmarshalDataMember(const DataMemberPtr& member)
 {
-    const bool classType = isClassType(member->type());
-
-    // TODO
-    string patcher;
-#if 0
-    if(classType)
-    {
-        patcher = "new Patcher__(" + getStaticId(member->type()) + ", this";
-        if(needPatcher)
-        {
-            ostringstream ostr;
-            ostr << ", " << patchIter++;
-            patcher += ostr.str();
-        }
-        patcher += ")";
-    }
-#endif
-
     if(member->optional())
     {
-        writeOptionalMarshalUnmarshalCode(_out, member->type(), classType ? patcher : fixId(member->name()),
+        writeOptionalMarshalUnmarshalCode(_out, member->type(), "this." + fixId(member->name()), 
                                           member->tag(), false);
     }
     else
     {
-        // TODO
-        //writeMarshalUnmarshalCode(_out, member->type(), classType ? patcher : name, false);
         writeMarshalUnmarshalCode(_out, member->type(), "this." + fixId(member->name()), false);
     }
 }
@@ -1465,6 +1444,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
 
     const DataMemberList allDataMembers = p->allDataMembers();
     const DataMemberList dataMembers = p->dataMembers();
+    const DataMemberList optionalMembers = p->orderedOptionalDataMembers();
 
     vector<string> allParamNames;
     for(DataMemberList::const_iterator q = allDataMembers.begin(); q != allDataMembers.end(); ++q)
@@ -1649,23 +1629,31 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
              << (!base ? "true" : "false") << ");"; 
         for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
         {
-            int iter = 0;
-            writeMarshalDataMember(*q, iter);
+            writeMarshalDataMember(*q);
         }
         _out << nl << "__os.endWriteSlice();";
+        if(base)
+        {
+            _out << nl << baseRef << ".prototype.__writeImpl.call(this, __os);";
+        }
         _out << eb;
 
         _out << sp;
-        _out << nl << localScope << '.' << name << ".prototype.__read = function(__is)";
+        _out << nl << localScope << '.' << name << ".prototype.__readImpl = function(__is)";
         _out << sb;
+        _out << nl << "__is.startReadSlice();";
         if(hasClassMembers)
         {
             _out << nl << "var self = this;";
         }
         for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
         {
-            int iter = 0;
-            writeUnmarshalDataMember(*q, iter);
+            writeUnmarshalDataMember(*q);
+        }
+        _out << nl << "__is.endReadSlice();";
+        if(base)
+        {
+            _out << nl << baseRef << ".prototype.__readImpl.call(this, __is);";
         }
         _out << eb;
 
@@ -2005,8 +1993,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         _out << sb;
         for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
         {
-            int iter = 0;
-            writeMarshalDataMember(*q, iter);
+            writeMarshalDataMember(*q);
         }
         _out << eb;
 
@@ -2015,8 +2002,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         _out << sb;
         for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
         {
-            int iter = 0;
-            writeUnmarshalDataMember(*q, iter);
+            writeUnmarshalDataMember(*q);
         }
         _out << eb;
     }

@@ -391,16 +391,7 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
                                               const string& param,
                                               bool marshal)
 {
-    string stream;
-
-    if(marshal)
-    {
-        stream = "__os";
-    }
-    else
-    {
-        stream = "__is";
-    }
+    string stream = marshal ? "__os" : "__is";
 
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
     if(builtin)
@@ -627,17 +618,7 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
                                                       int tag,
                                                       bool marshal)
 {
-#if 0 // TODO
-    string stream;
-
-    if(marshal)
-    {
-        stream = streamingAPI ? "outS__" : "os__";
-    }
-    else
-    {
-        stream = streamingAPI ? "inS__" : "is__";
-    }
+    string stream = marshal ? "__os" : "__is";
 
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
     if(builtin)
@@ -648,11 +629,11 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeByte(" << tag << ", " << param << ");";
+                    out << nl << stream << ".writeOptByte(" << tag << ", " << param << ");";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readByte(" << tag << ");";
+                    out << nl << param << " = " << stream << ".readOptByte(" << tag << ");";
                 }
                 break;
             }
@@ -660,11 +641,11 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeBool(" << tag << ", " << param << ");";
+                    out << nl << stream << ".writeOptBool(" << tag << ", " << param << ");";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readBool(" << tag << ");";
+                    out << nl << param << " = " << stream << ".readOptBool(" << tag << ");";
                 }
                 break;
             }
@@ -672,11 +653,11 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeShort(" << tag << ", " << param << ");";
+                    out << nl << stream << ".writeOptShort(" << tag << ", " << param << ");";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readShort(" << tag << ");";
+                    out << nl << param << " = " << stream << ".readOptShort(" << tag << ");";
                 }
                 break;
             }
@@ -684,11 +665,11 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeInt(" << tag << ", " << param << ");";
+                    out << nl << stream << ".writeOptInt(" << tag << ", " << param << ");";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readInt(" << tag << ");";
+                    out << nl << param << " = " << stream << ".readOptInt(" << tag << ");";
                 }
                 break;
             }
@@ -696,11 +677,11 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeLong(" << tag << ", " << param << ");";
+                    out << nl << stream << ".writeOptLong(" << tag << ", " << param << ");";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readLong(" << tag << ");";
+                    out << nl << param << " = " << stream << ".readOptLong(" << tag << ");";
                 }
                 break;
             }
@@ -708,11 +689,11 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeFloat(" << tag << ", " << param << ");";
+                    out << nl << stream << ".writeOptFloat(" << tag << ", " << param << ");";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readFloat(" << tag << ");";
+                    out << nl << param << " = " << stream << ".readOptFloat(" << tag << ");";
                 }
                 break;
             }
@@ -720,11 +701,11 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeDouble(" << tag << ", " << param << ");";
+                    out << nl << stream << ".writeOptDouble(" << tag << ", " << param << ");";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readDouble(" << tag << ");";
+                    out << nl << param << " = " << stream << ".readOptDouble(" << tag << ");";
                 }
                 break;
             }
@@ -732,11 +713,11 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeString(" << tag << ", " << param << ");";
+                    out << nl << stream << ".writeOptString(" << tag << ", " << param << ");";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readString(" << tag << ");";
+                    out << nl << param << " = " << stream << ".readOptString(" << tag << ");";
                 }
                 break;
             }
@@ -744,7 +725,7 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeObject(" << tag << ", " << param << ");";
+                    out << nl << stream << ".writeOptObject(" << tag << ", " << param << ");";
                 }
                 else
                 {
@@ -757,7 +738,7 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
                 string typeS = typeToString(type);
                 if(marshal)
                 {
-                    out << nl << stream << ".writeProxy(" << tag << ", " << param << ");";
+                    out << nl << stream << ".writeOptProxy(" << tag << ", " << param << ");";
                 }
                 else
                 {
@@ -774,7 +755,8 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
         }
         return;
     }
-
+    
+#if 0
     ProxyPtr prx = ProxyPtr::dynamicCast(type);
     if(prx)
     {
@@ -1147,7 +1129,7 @@ void
 Slice::JsGenerator::writeSequenceMarshalUnmarshalCode(Output& out, const SequencePtr& seq, const string& param,
                                                       bool marshal)
 {
-    string stream = marshal ? "os__" : "is__";
+    string stream = marshal ? "__os" : "__is";
 
     if(isObjectType(seq->type()))
     {
@@ -1189,7 +1171,7 @@ void
 Slice::JsGenerator::writeDictionaryMarshalUnmarshalCode(Output& out, const DictionaryPtr& dict, const string& param,
                                                       bool marshal)
 {
-    string stream = marshal ? "os__" : "is__";
+    string stream = marshal ? "__os" : "__is";
     if(isObjectType(dict->valueType()))
     {
         // Use ObjectDictionaryHelper
@@ -1239,15 +1221,8 @@ Slice::JsGenerator::writeOptionalSequenceMarshalUnmarshalCode(Output& out,
                                                               bool marshal)
 {
 #if 0 // TODO
-    string stream;
-    if(marshal)
-    {
-        stream = streamingAPI ? "outS__" : "os__";
-    }
-    else
-    {
-        stream = streamingAPI ? "inS__" : "is__";
-    }
+    string stream = marshal ? "__os" : "__is";
+
 
     const TypePtr type = seq->type();
     const string typeS = typeToString(type);
