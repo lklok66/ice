@@ -1,6 +1,7 @@
 
 
 var Promise = require("../../src/Ice/Promise");
+var Long = require("../../src/Ice/Long");
 var Communicator = require("../../src/Ice/Communicator");
 var InputStream = require("../../src/Ice/InputStream");
 var OutputStream = require("../../src/Ice/OutputStream");
@@ -8,6 +9,8 @@ var LocalEx = require("../../src/Ice/LocalException").Ice;
 var StreamHelpers = require("../../src/Ice/StreamHelpers");
 var Ice = require("../../src/Ice/Ice")
 var Debug = require("../../src/Ice/Debug");
+
+var Test = require("./StreamTest").Test;
 
 var is;
 var os;
@@ -114,6 +117,65 @@ StreamTest.run = function(){
         console.log("ok");
         
         process.stdout.write("testing constructed types... ");
+        os = new OutputStream(comm);
+        var MyEnumHelper = StreamHelpers.generateEnumHelper(Test.MyEnum);
+        MyEnumHelper.write(os, Test.MyEnum.enum3);
+        data = os.finished();
+        is = new InputStream(comm, data, true);
+        Debug.assert(MyEnumHelper.read(is).equals(Test.MyEnum.enum3));
+        os.destroy();
+        is.destroy();
+        
+        os = new OutputStream(comm);
+        var s = new Test.SmallStruct();
+        s.bo = true;
+        s.by = 1;
+        s.sh = 2;
+        s.i = 3;
+        s.l = new Long(0, 4);
+        s.f = 5.0;
+        s.d = 6.0;
+        s.str = "7";
+        s.e = Test.MyEnum.enum2;
+        //TODO
+        //s.p = Test.MyClassPrx.uncheckedCast(comm.stringToProxy("test:default"));
+        var SmallStructHelper = StreamHelpers.generateStructHelper(Test.SmallStruct);
+        SmallStructHelper.write(os, s);
+        data = os.finished();
+        is = new InputStream(comm, data, true);
+        Debug.assert(SmallStructHelper.read(is).equals(s));
+        os.destroy();
+        is.destroy();
+        
+        os = new OutputStream(comm);
+        var o = new Test.OptionalClass();
+        o.bo = true;
+        o.by = 5;
+        o.sh = 4;
+        o.i = 3;
+        os.writeObject(o);
+        os.writePendingObjects();
+        data = os.finished();
+        is = new InputStream(comm, data, true);
+        
+        var o2 = null;
+        is.readObject(function(obj) { o2 = obj;}, Test.OptionalClass );
+        is.readPendingObjects();
+        
+        Debug.assert(o2.bo == o.bo);
+        Debug.assert(o2.by == o.by);
+        /*if(comm.getProperties().getProperty("Ice.Default.EncodingVersion").equals("1.0"))
+        {
+            test(!o2.hasSh());
+            test(!o2.hasI());
+        }
+        else
+        {
+            test(o2.getSh() == o.getSh());
+            test(o2.getI() == o.getI());
+        }*/
+        os.destroy();
+        is.destroy();
         console.log("ok");
     }
     catch(ex)

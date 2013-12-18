@@ -19,4 +19,17 @@ var Long = function(high, low)
     this.low = low;
 };
 
+Long.prototype.equals = function(rhs)
+{
+    if(this === rhs)
+    {
+        return true;
+    }
+    if(!(rhs instanceof Long))
+    {
+        return false;
+    }
+    return this.high === rhs.high && this.low == rhs.low;
+}
+
 module.exports = Long;

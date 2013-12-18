@@ -9,113 +9,308 @@
 
 var HashMap = require("./HashMap");
 
-module.exports.writeByte = function(os, v)
+var StreamHelpers = {};
+
+StreamHelpers.BoolHelper = {};
+
+StreamHelpers.BoolHelper.write = function(os, v)
+{
+    os.writeBool(v);
+};
+
+StreamHelpers.BoolHelper.read = function(os)
+{
+    return os.readBool();
+};
+
+Object.defineProperty(StreamHelpers.BoolHelper, "minWireSize", {
+    get: function(){ return 1; }
+});
+
+StreamHelpers.ByteHelper= {};
+
+StreamHelpers.ByteHelper.write = function(os, v)
 {
     os.writeByte(v);
 };
 
-module.exports.writeByteSeq = function(os, v)
+StreamHelpers.ByteHelper.read = function(os)
 {
-    os.writeByteSeq(v);
+    return os.readByte();
 };
 
-module.exports.writeShort = function(os, v)
+Object.defineProperty(StreamHelpers.ByteHelper, "minWireSize", {
+    get: function(){ return 1; }
+});
+
+StreamHelpers.ShortHelper = {};
+
+StreamHelpers.ShortHelper.write = function(os, v)
 {
     os.writeShort(v);
 };
 
-module.exports.writeShortSeq = function(os, v)
+StreamHelpers.ShortHelper.read = function(os)
 {
-    os.writeShortSeq(v);
+    return os.readShort();
 };
 
-module.exports.writeInt = function(os, v)
+Object.defineProperty(StreamHelpers.ShortHelper, "minWireSize", {
+    get: function(){ return 2; }
+});
+
+
+StreamHelpers.IntHelper = {};
+
+StreamHelpers.IntHelper.write = function(os, v)
 {
     os.writeInt(v);
 };
 
-module.exports.writeIntSeq = function(os, v)
+StreamHelpers.IntHelper.read = function(os)
 {
-    os.writeIntSeq(v);
+    return os.readInt();
 };
 
-module.exports.writeLong = function(os, v)
+Object.defineProperty(StreamHelpers.IntHelper, "minWireSize", {
+    get: function(){ return 4; }
+});
+
+StreamHelpers.LongHelper = {};
+
+StreamHelpers.LongHelper.write = function(os, v)
 {
     os.writeLong(v);
 };
 
-module.exports.writeLongSeq = function(os, v)
+StreamHelpers.LongHelper.read = function(os)
 {
-    os.writeLongSeq(v);
+    return os.readLong();
 };
 
-module.exports.writeFloat = function(os, v)
+Object.defineProperty(StreamHelpers.LongHelper, "minWireSize", {
+    get: function(){ return 8; }
+});
+
+StreamHelpers.FloatHelper = {};
+
+StreamHelpers.FloatHelper.write = function(os, v)
 {
     os.writeFloat(v);
 };
 
-module.exports.writeFloatSeq = function(os, v)
+StreamHelpers.FloatHelper.read = function(os)
 {
-    os.writeFloatSeq(v);
+    return os.readFloat();
 };
 
-module.exports.writeDouble = function(os, v)
+Object.defineProperty(StreamHelpers.FloatHelper, "minWireSize", {
+    get: function(){ return 4; }
+});
+
+StreamHelpers.DoubleHelper = {};
+
+StreamHelpers.DoubleHelper.write = function(os, v)
 {
     os.writeDouble(v);
 };
 
-module.exports.writeDoubleSeq = function(os, v)
+StreamHelpers.DoubleHelper.read = function(os)
 {
-    os.writeDoubleSeq(v);
+    return os.readDouble();
 };
 
-module.exports.writeString = function(os, v)
+Object.defineProperty(StreamHelpers.DoubleHelper, "minWireSize", {
+    get: function(){ return 8; }
+});
+
+StreamHelpers.StringHelper = {};
+
+StreamHelpers.StringHelper.write = function(os, v)
 {
     os.writeString(v);
 };
 
-module.exports.writeStringSeq = function(os, v)
+StreamHelpers.StringHelper.read = function(os)
 {
-    os.writeStringSeq(v);
+    return os.readString();
 };
 
-module.exports.generateWriteEnum = function(Type)
+Object.defineProperty(StreamHelpers.StringHelper, "minWireSize", {
+    get: function(){ return 1; }
+});
+
+StreamHelpers.ProxyHelper = {};
+
+StreamHelpers.ProxyHelper.write = function(os, v)
 {
-    return function(os, v)
-        {
-            return os.writeEnum(v, Type.maxValue);
-        };
+    os.writeProxy(v);
 };
 
-module.exports.writeStruct = function(os, v)
+StreamHelpers.ProxyHelper.read = function(os)
 {
-    v.__write(os);
+    return os.readProxy();
 };
 
-module.exports.writeObject = function(os, v)
+Object.defineProperty(StreamHelpers.ProxyHelper, "minWireSize", {
+    get: function(){ return 1; }
+});
+
+StreamHelpers.generateEnumHelper = function(Type)
 {
-    os.writeObject(v);
+    var EnumHelper = {};
+
+    EnumHelper.write = function(os, v)
+    {
+        os.writeEnum(v, Type.MaxValue);
+    };
+
+    EnumHelper.read = function(os)
+    {
+        return os.readEnum(Type);
+    };
+
+    Object.defineProperty(EnumHelper, "minWireSize", {
+        get: function(){ return 1; }
+    });
+    
+    return EnumHelper;
 };
 
-module.exports.writeSeq = function(os, v, callbacks)
+StreamHelpers.generateStructHelper = function(Type)
 {
-    if(v === null || v.length === 0)
+    var StructHelper = {};
+
+    StructHelper.write = function(os, v)
+    {
+        v.__write(os);
+    };
+
+    StructHelper.read = function(os)
+    {
+        var v = new Type();
+        v.__read(os);
+        return v;
+    };
+
+    Object.defineProperty(StructHelper, "minWireSize", {
+        get: function(){ return 1; }
+    });
+    
+    return StructHelper;
+};
+
+StreamHelpers.SequenceHelper = {};
+
+StreamHelpers.SequenceHelper.read = function(os, helpers)
+{
+    var helper = helpers.shift();
+    var sz = this.readAndCheckSeqSize(helper.minWireSize);
+    var v = [];
+    v.length = sz;
+    for(var i = 0; i < sz; ++i)
+    {
+        v[i] = helper.read(os, helpers);
+    }
+    return v;
+};
+
+StreamHelpers.SequenceHelper.write = function(os, v, helpers)
+{
+    if(v === null || v.size === 0)
     {
         os.writeSize(0);
     }
     else
     {
-        var valueCB = callbacks.shift();
-        var sz = v.length;
-        os.writeSize(sz);
-        for(var i = 0; i < sz; ++i)
+        os.writeSize(v.length);
+        var helper = helpers.shift();
+        for(var i = 0; i < v.length; ++i)
         {
-            valueCB.call(null, os, v[i], callbacks);
+            helper.write(os, v[i], helpers);
         }
     }
 };
 
-module.exports.writeMap = function(os, v, callbacks)
+Object.defineProperty(StreamHelpers.SequenceHelper, "minWireSize", {
+    get: function(){ return 1; }
+});
+
+StreamHelpers.generateObjectSequenceHelper = function(Type)
+{
+    var ObjectSequenceHelper = {};
+
+    ObjectSequenceHelper.read = function(os)
+    {
+        var sz = os.readSize();
+        var v = [];
+        v.length = sz;
+        
+        var readObjectAtIndex = function(idx)
+        {
+            os.readObject(function(obj) { v[idx] = obj; }, Type);
+        };
+        
+        for(var i = 0; i < sz; ++i)
+        {
+            readObjectAtIndex(i);
+        }
+        return v;
+    };
+    
+    ObjectSequenceHelper.write = function(os, v)
+    {
+        if(v === null || v.size === 0)
+        {
+            os.writeSize(0);
+        }
+        else
+        {
+            os.writeSize(v.length);
+            for(var i = 0; i < v.length; ++i)
+            {
+                os.writeObject(v[i]);
+            }
+        }
+    };
+    
+    Object.defineProperty(ObjectSequenceHelper, "minWireSize", {
+        get: function(){ return 1; }
+    });
+    
+    return ObjectSequenceHelper;
+};
+
+StreamHelpers.generateKeyValueHelper = function(key, value)
+{
+    var KeyValueTypeHelper = {};
+
+    Object.defineProperty(KeyValueTypeHelper, "key", {
+        get: function(){ return key; }
+    });
+
+    Object.defineProperty(KeyValueTypeHelper, "value", {
+        get: function(){ return value; }
+    });
+    
+    return KeyValueTypeHelper;
+};
+
+StreamHelpers.DictionaryHelper = {};
+
+StreamHelpers.DictionaryHelper.read = function(os, helpers)
+{
+    var v = new HashMap();
+    var sz = this.readSize(1);
+    var helper = helpers.shift();
+    for(var i = 0; i < sz; ++i)
+    {
+        v.set(helper.key.read(os), helper.value.read(os, helpers));
+    }
+    return v;
+};
+
+StreamHelpers.DictionaryHelper.write = function(os, v, helpers)
 {
     if(v === null || v.size === 0)
     {
@@ -123,147 +318,67 @@ module.exports.writeMap = function(os, v, callbacks)
     }
     else
     {
-        var keyCB = callbacks[0][0];
-        var valueCB = callbacks[0][1];
-        callbacks.shift();
+        var helper = helpers.shift();
         os.writeSize(v.size);
         for(var e = v.entries; e !== null; e = e.next)
         {
-            keyCB.call(null, os, e.key);
-            valueCB.call(null, os, e.value, callbacks);
+            helper.key.write(os, e.key);
+            helper.value.write(os, e.value, helpers);
         }
     }
 };
 
-module.exports.readByte = function(os)
-{
-    return os.readByte();
-};
+Object.defineProperty(StreamHelpers.DictionaryHelper, "minWireSize", {
+    get: function(){ return 1; }
+});
+ 
 
-module.exports.readByteSeq = function(os)
+StreamHelpers.generateObjectDictionaryHelper = function(keyHelper, ObjectType)
 {
-    return os.readByteSeq();
-};
+    var ObjectDictionaryHelper = {};
 
-module.exports.readShort = function(os)
-{
-    return os.readShort();
-};
-
-module.exports.readShortSeq = function(os)
-{
-    return os.readShortSeq();
-};
-
-module.exports.readInt = function(os)
-{
-    return os.readInt();
-};
-
-module.exports.readIntSeq = function(os)
-{
-    return os.readIntSeq();
-};
-
-module.exports.readLong = function(os)
-{
-    return os.readLong();
-};
-
-module.exports.readLongSeq = function(os)
-{
-    return os.readLongSeq();
-};
-
-module.exports.readFloat = function(os)
-{
-    return os.readFloat();
-};
-
-module.exports.readFloatSeq = function(os)
-{
-    return os.readFloatSeq();
-};
-
-module.exports.readDouble = function(os)
-{
-    return os.readDouble();
-};
-
-module.exports.readDoubleSeq = function(os)
-{
-    return os.readDoubleSeq();
-};
-
-module.exports.readString = function(os)
-{
-    return os.readString();
-};
-
-module.exports.readStringSeq = function(os)
-{
-    return os.readStringSeq();
-};
-
-module.exports.generateReadEnum = function(Type)
-{
-    return function(os)
-        {
-            return os.readEnum(Type);
-        };
-};
-
-module.exports.generateReaStruct = function(Type)
-{
-    return function(os)
-        {
-            var v = new Type();
-            v.__read(os);
-            return v;
-        };
-};
-
-module.exports.generateReadObject = function(Type)
-{
-    return function(os)
-        {
-            var v = null;
-            os.reaObject(
-                function(obj){
-                    if(obj !== null && !(obj instanceof Type))
-                    {
-                        throw new TypeError("expected element of type " + Type.__ids[0] + " but received " + obj);
-                    }
-                    v = obj;
-                });
-            return v;
-        };
-};
-
-module.exports.readSeq = function(os, callbacks)
-{
-    var sz = this.readAndCheckSeqSize(1);
-    var v = [];
-    v.length = sz;
-    var valueCB = callbacks.shift()
-    for(var i = 0; i < sz; ++i)
+    ObjectDictionaryHelper.read = function(os)
     {
-        v[i] = valueCB.call(null, os, callbacks);
-    }
-    return v;
-};
-
-module.exports.readMap = function(os, v, callbacks)
-{
-    var v = new HashMap();
-    var sz = this.readAndCheckSeqSize(1);
+        var sz = os.readSize();
+        var v = new HashMap();
+        v.length = sz;
+        
+        var readObjectForKey = function(key)
+        {
+            os.readObject(function(obj) { v.set(key, obj); }, ObjectType);
+        };
+        
+        var key;
+        for(var i = 0; i < sz; ++i)
+        {
+            key = keyHelper.read(os);
+            readObjectForKey(key);
+        }
+        return v;
+    };
     
-    var keyCB = callbacks[0][0];
-    var valueCB = callbacks[0][1];
-    callbacks.shift();
-    for(var i = 0; i < sz; ++i)
+    ObjectDictionaryHelper.write = function(os, v)
     {
-        v.set(keyCB.call(null, os), valueCB.call(null, os, callbacks));
-    }
-    return v;
+        if(v === null || v.size === 0)
+        {
+            os.writeSize(0);
+        }
+        else
+        {
+            os.writeSize(v.size);
+            for(var e = v.entries; e !== null; e = e.next)
+            {
+                keyHelper.write(os, e.key);
+                os.writeObject(e.value);
+            }
+        }
+    };
+    
+    Object.defineProperty(ObjectDictionaryHelper, "minWireSize", {
+        get: function(){ return 1; }
+    });
+    
+    return ObjectDictionaryHelper;
 };
+
+module.exports = StreamHelpers;

@@ -37,13 +37,16 @@ protected:
     static std::string getLocalScope(const std::string&);
     static std::string getReference(const std::string&, const std::string&);
 
+    static std::string getHelper(const TypePtr&);
+    static void writeHelpers(::IceUtilInternal::Output&, const TypePtr&, bool);
+    static void writeDictionaryHelper(::IceUtilInternal::Output&, const TypePtr&, const TypePtr&);
     //
     // Generate code to marshal or unmarshal a type
     //
     void writeMarshalUnmarshalCode(::IceUtilInternal::Output&, const TypePtr&, const std::string&, bool);
     void writeOptionalMarshalUnmarshalCode(::IceUtilInternal::Output&, const TypePtr&, const std::string&, int, bool);
-    void writeSequenceMarshalUnmarshalCode(::IceUtilInternal::Output&, const SequencePtr&, const std::string&,
-                                           bool, bool);
+    void writeSequenceMarshalUnmarshalCode(::IceUtilInternal::Output&, const SequencePtr&, const std::string&, bool);
+    void writeDictionaryMarshalUnmarshalCode(::IceUtilInternal::Output&, const DictionaryPtr&, const std::string&, bool);
     void writeOptionalSequenceMarshalUnmarshalCode(::IceUtilInternal::Output&, const SequencePtr&, const std::string&,
                                                    int, bool);
 

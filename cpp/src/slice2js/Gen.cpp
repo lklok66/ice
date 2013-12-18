@@ -1299,13 +1299,14 @@ Slice::Gen::RequireVisitor::writeRequires()
 
     if(_seenClass)
     {
-        _out << nl << "var __ice_Object = require(\"./Object\");";
-        _out << nl << "var __ice_ObjectPrx = require(\"./ObjectPrx\");";
+        _out << nl << "var __ice_Object = require(\"Ice/Object\");";
+        _out << nl << "var __ice_ObjectPrx = require(\"Ice/ObjectPrx\");";
+        _out << nl << "var __ice_ClassRegistry = require(\"Ice/TypeRegistry\").ClassRegistry;";
     }
 
     if(_seenLocalException || _seenUserException)
     {
-        _out << nl << "var __ice_Ex = require(\"./Exception\");";
+        _out << nl << "var __ice_Ex = require(\"Ice/Exception\");";
     }
     if(_seenLocalException)
     {
@@ -1314,16 +1315,18 @@ Slice::Gen::RequireVisitor::writeRequires()
     if(_seenUserException)
     {
         _out << nl << "var __ice_UserException = __ice_Ex.UserException;";
+        _out << nl << "var __ice_ExceptionRegistry = require(\"Ice/TypeRegistry\").ExceptionRegistry;";
     }
 
     if(_seenEnum)
     {
-        _out << nl << "var __ice_EnumBase = require(\"./EnumBase\");";
+        _out << nl << "var __ice_EnumBase = require(\"Ice/EnumBase\");";
     }
 
-    _out << nl << "var __ice_HashMap = require(\"./HashMap\");";
-    _out << nl << "var __ice_HashUtil = require(\"./HashUtil\");";
-    _out << nl << "var __ice_ArrayUtil = require(\"./ArrayUtil\");";
+    _out << nl << "var __ice_HashMap = require(\"Ice/HashMap\");";
+    _out << nl << "var __ice_HashUtil = require(\"Ice/HashUtil\");";
+    _out << nl << "var __ice_ArrayUtil = require(\"Ice/ArrayUtil\");";
+    _out << nl << "var __ice_StreamHelpers = require(\"Ice/StreamHelpers\");";
 }
 
 Slice::Gen::CompactIdVisitor::CompactIdVisitor(IceUtilInternal::Output& out) :
@@ -1469,10 +1472,15 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         allParamNames.push_back(fixId((*q)->name()));
     }
 
+    bool hasClassMembers = false;
     vector<string> paramNames;
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
         paramNames.push_back(fixId((*q)->name()));
+        if(!hasClassMembers && ClassDeclPtr::dynamicCast((*q)->type()))
+        {
+            hasClassMembers = true;
+        }
     }
 
     vector<string> baseParamNames;
@@ -1631,9 +1639,36 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
     _out << eb;
 
     // TODO: equals?
-
+    
     if(!p->isLocal())
     {
+        _out << sp;
+        _out << nl << localScope << '.' << name << ".prototype.__writeImpl = function(__os)";
+        _out << sb;
+        _out << nl << "__os.startWriteSlice(" << localScope << "." << name << ".ice_staticId(), " << p->compactId() << ", "
+             << (!base ? "true" : "false") << ");"; 
+        for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+        {
+            int iter = 0;
+            writeMarshalDataMember(*q, iter);
+        }
+        _out << nl << "__os.endWriteSlice();";
+        _out << eb;
+
+        _out << sp;
+        _out << nl << localScope << '.' << name << ".prototype.__read = function(__is)";
+        _out << sb;
+        if(hasClassMembers)
+        {
+            _out << nl << "var self = this;";
+        }
+        for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+        {
+            int iter = 0;
+            writeUnmarshalDataMember(*q, iter);
+        }
+        _out << eb;
+
         for(OperationList::const_iterator q = ops.begin(); q != ops.end(); ++q)
         {
             _out << sp << nl << localScope << '.' << prxName << ".prototype." << fixId((*q)->name()) << " = function"
@@ -1642,6 +1677,12 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             // TODO
             _out << eb;
         }
+        
+        //
+        // Register the class prototype in the ClassRegistry
+        //
+        _out << nl << "__ice_ClassRegistry.register(" << localScope << "." << name << ".ice_staticId(), " 
+             << localScope << "." << name << ");";
     }
 
     return false;
@@ -2249,8 +2290,7 @@ void
 Slice::Gen::TypesVisitor::writeMemberEquals(const string& m1, const string& m2, const TypePtr& type, int iter)
 {
     const BuiltinPtr b = BuiltinPtr::dynamicCast(type);
-
-    if((b && b->kind() != Builtin::KindObjectProxy) || ClassDeclPtr::dynamicCast(type))
+    if((b && b->kind() != Builtin::KindObjectProxy && b->kind() != Builtin::KindLong) || ClassDeclPtr::dynamicCast(type))
     {
         _out << nl << "if(" << m1 << " !== " << m2 << ')';
         _out << sb;
@@ -2259,7 +2299,7 @@ Slice::Gen::TypesVisitor::writeMemberEquals(const string& m1, const string& m2, 
         return;
     }
 
-    if((b && b->kind() == Builtin::KindObjectProxy) || ProxyPtr::dynamicCast(type) ||
+    if((b && (b->kind() == Builtin::KindObjectProxy || b->kind() == Builtin::KindLong)) || ProxyPtr::dynamicCast(type) ||
        EnumPtr::dynamicCast(type) || StructPtr::dynamicCast(type) ||
        DictionaryPtr::dynamicCast(type))
     {

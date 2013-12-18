@@ -72,7 +72,12 @@ EnumBase.defineEnum = function(type, enumerators)
     }
 
     Object.defineProperty(type, 'valueOf', {
-        value: function(v) { return enums[v]; }
+        value: function(v) { 
+            if(v === undefined)
+            {
+                return type;
+            }
+            return enums[v]; }
     });
     
     Object.defineProperty(type, 'maxValue', {

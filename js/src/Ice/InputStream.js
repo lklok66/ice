@@ -136,14 +136,14 @@ InputStream.prototype.readProxy = function()
 };
 
 
-InputStream.prototype.readObject = function(cb)
+InputStream.prototype.readObject = function(cb, type)
 {
-    return this._is.readObject(cb);
+    return this._is.readObject(cb, type);
 };
 
-InputStream.prototype.readEnum = function(Type)
+InputStream.prototype.readEnum = function(type)
 {
-    return this._is.readEnum(Type);
+    return this._is.readEnum(type);
 };
 
 InputStream.prototype.throwException = function()

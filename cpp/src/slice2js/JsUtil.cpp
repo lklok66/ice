@@ -540,14 +540,13 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
     ProxyPtr prx = ProxyPtr::dynamicCast(type);
     if(prx)
     {
-        string typeS = typeToString(type);
         if(marshal)
         {
-            out << nl << typeS << ".__write(" << stream << ", " << param << ");";
+            out << nl << stream << ".writeProxy(" << param << ");";
         }
         else
         {
-            out << nl << param << " = " << typeS << ".__read(" << stream << ");";
+            out << nl << param << " = " << stream << ".readProxy();";
         }
         return;
     }
@@ -561,7 +560,13 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
         }
         else
         {
-            out << nl << stream << ".readObject(" << param << ");";
+            const string thisSuffix = "this.";
+            string p = param;
+            if(p.find(thisSuffix) == 0)
+            {
+                p = "self." + p.substr(thisSuffix.size());
+            }
+            out << nl << stream << ".readObject(function(obj){ " << p << " = obj; }, " << typeToString(type) << ");";
         }
         return;
     }
@@ -571,7 +576,7 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-            out << nl << param << ".__write(" << stream << ");";
+            out << nl << "__ice_StreamHelpers.writeStruct(" << stream << ", " << param << ");";
         }
         else
         {
@@ -589,44 +594,30 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-            out << nl << stream << ".writeEnum(" << param << ".value, " << en->maxValue() << ");";
+            out << nl << stream << ".writeEnum(" << param << ", " << en->maxValue() << ");";
         }
         else
         {
-            out << nl << param << " = " << typeToString(en) << ".valueOf(" << stream << ".readEnum(" << en->maxValue()
-                << "));";
+            out << nl << param << " = " << stream << ".readEnum(" << typeToString(en) << ");";
         }
         return;
     }
 
-#if 0 // TODO
+
     SequencePtr seq = SequencePtr::dynamicCast(type);
     if(seq)
     {
-        writeSequenceMarshalUnmarshalCode(out, seq, param, marshal, streamingAPI, true);
+        writeSequenceMarshalUnmarshalCode(out, seq, param, marshal);
         return;
     }
 
-    assert(ConstructedPtr::dynamicCast(type));
-    string typeS;
     DictionaryPtr d = DictionaryPtr::dynamicCast(type);
     if(d)
     {
-        typeS = fixId(d->scope()) + d->name();
+        writeDictionaryMarshalUnmarshalCode(out, d, param, marshal);
+        return;
     }
-    else
-    {
-        typeS = typeToString(type);
-    }
-    if(marshal)
-    {
-        out << nl << typeS << "Helper.write(" << stream << ", " << param << ");";
-    }
-    else
-    {
-        out << nl << param << " = " << typeS << "Helper.read(" << stream << ')' << ';';
-    }
-#endif
+    assert(false);
 }
 
 void
@@ -974,806 +965,270 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
 #endif
 }
 
-void
-Slice::JsGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
-                                                      const SequencePtr& seq,
-                                                      const string& param,
-                                                      bool marshal,
-                                                      bool useHelper)
+bool
+isObjectType(const TypePtr& type)
 {
-#if 0 // TODO
-    string stream;
-    if(marshal)
-    {
-        stream = streamingAPI ? "outS__" : "os__";
-    }
-    else
-    {
-        stream = streamingAPI ? "inS__" : "is__";
-    }
+    BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
 
-    if(useHelper)
-    {
-        ContainedPtr cont = ContainedPtr::dynamicCast(seq->container());
-        assert(cont);
-        string helperName = fixId(cont->scoped(), DotNet::ICloneable) + "." + seq->name() + "Helper";
-        if(marshal)
-        {
-            out << nl << helperName << ".write(" << stream << ", " << param << ");";
-        }
-        else
-        {
-            out << nl << param << " = " << helperName << ".read(" << stream << ");";
-        }
-        return;
-    }
+    return (builtin && builtin == Builtin::KindObject) || ClassDeclPtr::dynamicCast(type);
+}
 
-    TypePtr type = seq->type();
-    string typeS = typeToString(type);
-
-    const string genericPrefix = "clr:generic:";
-    string genericType;
-    string addMethod = "Add";
-    const bool isGeneric = seq->findMetaData(genericPrefix, genericType);
-    bool isStack = false;
-    bool isList = false;
-    bool isLinkedList = false;
-    bool isCustom = false;
-    if(isGeneric)
-    {
-        genericType = genericType.substr(genericPrefix.size());
-        if(genericType == "LinkedList")
-        {
-            addMethod = "AddLast";
-            isLinkedList = true;
-        }
-        else if(genericType == "Queue")
-        {
-            addMethod = "Enqueue";
-        }
-        else if(genericType == "Stack")
-        {
-            addMethod = "Push";
-            isStack = true;
-        }
-        else if(genericType == "List")
-        {
-            isList = true;
-        }
-        else
-        {
-            isCustom = true;
-        }
-    }
-    const bool isCollection = seq->hasMetaData("clr:collection");
-    const bool isArray = !isGeneric && !isCollection;
-    const string limitID = isArray ? "Length" : "Count";
-
+std::string
+Slice::JsGenerator::getHelper(const TypePtr& type)
+{
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
     if(builtin)
     {
         switch(builtin->kind())
         {
+            case Builtin::KindByte:
+            {
+                return "StreamHelpers.ByteHelper";
+            }
+            case Builtin::KindBool:
+            {
+                return "StreamHelpers.BoolHelper";
+            }
+            case Builtin::KindShort:
+            {
+                return "StreamHelpers.ShortHelper";
+            }
+            case Builtin::KindInt:
+            {
+                return "StreamHelpers.IntHelper";
+            }
+            case Builtin::KindLong:
+            {
+                return "StreamHelpers.LongHelper";
+            }
+            case Builtin::KindFloat:
+            {
+                return "StreamHelpers.FloatHelper";
+            }
+            case Builtin::KindDouble:
+            {
+                return "StreamHelpers.DoubleHelper";
+            }
+            case Builtin::KindString:
+            {
+                return "StreamHelpers.StringHelper";
+            }
             case Builtin::KindObject:
+            {
+                // Uses generateObjectSequenceHelper bellow
+                break;
+            }
             case Builtin::KindObjectProxy:
             {
-                if(marshal)
-                {
-                    out << nl << "if(" << param << " == null)";
-                    out << sb;
-                    out << nl << stream << ".writeSize(0);";
-                    out << eb;
-                    out << nl << "else";
-                    out << sb;
-                    out << nl << stream << ".writeSize(" << param << '.' << limitID << ");";
-                    if(isGeneric && !isList)
-                    {
-                        if(isStack)
-                        {
-                            //
-                            // If the collection is a stack, write in top-to-bottom order. Stacks
-                            // cannot contain Ice.Object.
-                            //
-                            out << nl << "Ice.ObjectPrx[] " << param << "_tmp = " << param << ".ToArray();";
-                            out << nl << "for(int ix__ = 0; ix__ < " << param << "_tmp.Length; ++ix__)";
-                            out << sb;
-                            out << nl << stream << ".writeProxy(" << param << "_tmp[ix__]);";
-                            out << eb;
-                        }
-                        else
-                        {
-                            out << nl << "_System.Collections.Generic.IEnumerator<" << typeS
-                                << "> e__ = " << param << ".GetEnumerator();";
-                            out << nl << "while(e__.MoveNext())";
-                            out << sb;
-                            string func = builtin->kind() == Builtin::KindObject ? "writeObject" : "writeProxy";
-                            out << nl << stream << '.' << func << "(e__.Current);";
-                            out << eb;
-                        }
-                    }
-                    else
-                    {
-                        out << nl << "for(int ix__ = 0; ix__ < " << param << '.' << limitID << "; ++ix__)";
-                        out << sb;
-                        string func = builtin->kind() == Builtin::KindObject ? "writeObject" : "writeProxy";
-                        out << nl << stream << '.' << func << '(' << param << "[ix__]);";
-                        out << eb;
-                    }
-                    out << eb;
-                }
-                else
-                {
-                    out << nl << "int " << param << "_lenx = " << stream << ".readAndCheckSeqSize("
-                        << static_cast<unsigned>(builtin->minWireSize()) << ");";
-                    out << nl << param << " = new ";
-                    if(builtin->kind() == Builtin::KindObject)
-                    {
-                        if(isArray)
-                        {
-                            out << "Ice.Object[" << param << "_lenx];";
-                        }
-                        else if(isCustom)
-                        {
-                            out << "global::" << genericType << "<Ice.Object>();";
-                        }
-                        else if(isGeneric)
-                        {
-                            out << "_System.Collections.Generic." << genericType << "<Ice.Object>(";
-                            if(!isLinkedList)
-                            {
-                                out << param << "_lenx";
-                            }
-                            out << ");";
-                        }
-                        else
-                        {
-                            out << typeToString(seq) << "(" << param << "_lenx);";
-                        }
-                        out << nl << "for(int ix__ = 0; ix__ < " << param << "_lenx; ++ix__)";
-                        out << sb;
-                        out << nl << stream << ".readObject(";
-                        string patcherName;
-                        if(isCustom)
-                        {
-                            patcherName = "CustomSeq";
-                        }
-                        else if(isList)
-                        {
-                            patcherName = "List";
-                        }
-                        else if(isArray)
-                        {
-                            patcherName = "Array";
-                        }
-                        else
-                        {
-                            patcherName = "Sequence";
-                        }
-                        out << "new IceInternal." << patcherName << "Patcher<Ice.Object>(\"::Ice::Object\", "
-                            << param << ", ix__));";
-                    }
-                    else
-                    {
-                        if(isArray)
-                        {
-                            out << "Ice.ObjectPrx[" << param << "_lenx];";
-                        }
-                        else if(isGeneric)
-                        {
-                            out << "_System.Collections.Generic." << genericType << "<Ice.ObjectPrx>(";
-                            if(!isLinkedList)
-                            {
-                                out << param << "_lenx";
-                            }
-                            out << ");";
-                        }
-                        else
-                        {
-                            out << typeToString(seq) << "(" << param << "_lenx);";
-                        }
-                        out << nl << "for(int ix__ = 0; ix__ < " << param << "_lenx; ++ix__)";
-                        out << sb;
-                        if(isArray)
-                        {
-                            out << nl << param << "[ix__] = " << stream << ".readProxy();";
-                        }
-                        else
-                        {
-                            out << nl << "Ice.ObjectPrx val__ = new Ice.ObjectPrxHelperBase();";
-                            out << nl << "val__ = " << stream << ".readProxy();";
-                            out << nl << param << "." << addMethod << "(val__);";
-                        }
-                    }
-                    out << eb;
-                }
-                break;
+                return "StreamHelpers.ProxyHelper";
             }
-            default:
+            case Builtin::KindLocalObject:
             {
-                string prefix = "clr:serializable:";
-                string meta;
-                if(seq->findMetaData(prefix, meta))
-                {
-                    if(marshal)
-                    {
-                        out << nl << stream << ".writeSerializable(" << param << ");";
-                    }
-                    else
-                    {
-                        out << nl << param << " = (" << typeToString(seq) << ")" << stream << ".readSerializable();";
-                    }
-                    break;
-                }
-
-                string func = typeS;
-                func[0] = toupper(static_cast<unsigned char>(typeS[0]));
-                if(marshal)
-                {
-                    if(isArray)
-                    {
-                        out << nl << stream << ".write" << func << "Seq(" << param << ");";
-                    }
-                    else if(isCollection)
-                    {
-                        out << nl << stream << ".write" << func << "Seq(" << param << " == null ? null : "
-                            << param << ".ToArray());";
-                    }
-                    else if(isCustom)
-                    {
-                        if(streamingAPI)
-                        {
-                            out << nl << stream << ".writeSize(" << param << '.' << limitID << ");";
-                            out << nl << "_System.Collections.Generic.IEnumerator<" << typeS
-                                << "> e__ = " << param << ".GetEnumerator();";
-                            out << nl << "while(e__.MoveNext())";
-                            out << sb;
-                            out << nl << stream << ".write" << func << "(e__.Current);";
-                            out << eb;
-                        }
-                        else
-                        {
-                            out << nl << stream << ".write" << func << "Seq(" << param << " == null ? 0 : "
-                                << param << ".Count, " << param << ");";
-                        }
-                    }
-                    else
-                    {
-                        assert(isGeneric);
-                        if(!streamingAPI)
-                        {
-                            out << nl << stream << ".write" << func << "Seq(" << param << " == null ? 0 : "
-                                << param << ".Count, " << param << ");";
-                        }
-                        else if(isLinkedList)
-                        {
-                            out << nl << stream << ".writeSize(" << param << '.' << limitID << ");";
-                            out << nl << "_System.Collections.Generic.IEnumerator<" << typeS
-                                << "> e__ = " << param << ".GetEnumerator();";
-                            out << nl << "while(e__.MoveNext())";
-                            out << sb;
-                            out << nl << stream << ".write" << func << "(e__.Current);";
-                            out << eb;
-                        }
-                        else
-                        {
-                            out << nl << stream << ".write" << func << "Seq(" << param << " == null ? null : "
-                                << param << ".ToArray());";
-                        }
-                    }
-                }
-                else
-                {
-                    if(isArray)
-                    {
-                        out << nl << param << " = " << stream << ".read" << func << "Seq();";
-                    }
-                    else if(isCustom)
-                    {
-                        out << sb;
-                        out << nl << param << " = new " << "global::" << genericType << "<"
-                            << typeToString(type) << ">();";
-                        out << nl << "int szx__ = " << stream << ".readSize();";
-                        out << nl << "for(int ix__ = 0; ix__ < szx__; ++ix__)";
-                        out << sb;
-                        out << nl << param << ".Add(" << stream << ".read" << func << "());";
-                        out << eb;
-                        out << eb;
-                    }
-                    else if(isCollection)
-                    {
-                        out << nl << param << " = new " << fixId(seq->scoped())
-                            << '(' << stream << ".read" << func << "Seq());";
-                    }
-                    else
-                    {
-                        assert(isGeneric);
-                        if(streamingAPI)
-                        {
-                            if(isStack)
-                            {
-                                //
-                                // Stacks are marshaled in top-to-bottom order. The "Stack(type[])"
-                                // constructor assumes the array is in bottom-to-top order, so we
-                                // read the array first, then reverse it.
-                                //
-                                out << nl << typeS << "[] arr__ = " << stream << ".read" << func << "Seq();";
-                                out << nl << "_System.Array.Reverse(arr__);";
-                                out << nl << param << " = new " << typeToString(seq) << "(arr__);";
-                            }
-                            else
-                            {
-                                out << nl << param << " = new " << typeToString(seq) << '(' << stream
-                                    << ".read" << func << "Seq());";
-                            }
-                        }
-                        else
-                        {
-                            out << nl << stream << ".read" << func << "Seq(out " << param << ");";
-                        }
-                    }
-                }
+                assert(false);
                 break;
             }
         }
-        return;
     }
-
-    ClassDeclPtr cl = ClassDeclPtr::dynamicCast(type);
-    if(cl)
-    {
-        if(marshal)
-        {
-            out << nl << "if(" << param << " == null)";
-            out << sb;
-            out << nl << stream << ".writeSize(0);";
-            out << eb;
-            out << nl << "else";
-            out << sb;
-            out << nl << stream << ".writeSize(" << param << '.' << limitID << ");";
-            if(isGeneric && !isList)
-            {
-                //
-                // Stacks cannot contain class instances, so there is no need to marshal a
-                // stack bottom-up here.
-                //
-                out << nl << "_System.Collections.Generic.IEnumerator<" << typeS
-                    << "> e__ = " << param << ".GetEnumerator();";
-                out << nl << "while(e__.MoveNext())";
-                out << sb;
-                out << nl << stream << ".writeObject(e__.Current);";
-                out << eb;
-            }
-            else
-            {
-                out << nl << "for(int ix__ = 0; ix__ < " << param << '.' << limitID << "; ++ix__)";
-                out << sb;
-                out << nl << stream << ".writeObject(" << param << "[ix__]);";
-                out << eb;
-            }
-            out << eb;
-        }
-        else
-        {
-            out << sb;
-            out << nl << "int szx__ = " << stream << ".readAndCheckSeqSize(" 
-                << static_cast<unsigned>(type->minWireSize()) << ");";
-            out << nl << param << " = new ";
-            if(isArray)
-            {
-                out << toArrayAlloc(typeS + "[]", "szx__");
-            }
-            else if(isCustom)
-            {
-                out << "global::" << genericType << "<" << typeS << ">()";
-            }
-            else if(isGeneric)
-            {
-                out << "_System.Collections.Generic." << genericType << "<" << typeS << ">(";
-                if(!isLinkedList)
-                {
-                    out << "szx__";
-                }
-                out << ")";
-            }
-            else
-            {
-                out << fixId(seq->scoped()) << "(szx__)";
-            }
-            out << ';';
-            out << nl << "for(int ix__ = 0; ix__ < szx__; ++ix__)";
-            out << sb;
-
-            string patcherName;
-            if(isCustom)
-            {
-                patcherName = "CustomSeq";
-            }
-            else if(isList)
-            {
-                patcherName = "List";
-            }
-            else if(isArray)
-            {
-                patcherName = "Array";
-            }
-            else
-            {
-                patcherName = "Sequence";
-            }
-            string scoped = ContainedPtr::dynamicCast(type)->scoped();
-            out << nl << "IceInternal." << patcherName << "Patcher<" << typeS << "> spx = new IceInternal."
-                << patcherName << "Patcher<" << typeS << ">(\"" << scoped << "\", " << param << ", ix__);";
-            out << nl << stream << ".readObject(";
-            out << "spx);";
-            out << eb;
-            out << eb;
-        }
-        return;
-    }
-
-    StructPtr st = StructPtr::dynamicCast(type);
-    if(st)
-    {
-        if(marshal)
-        {
-            out << nl << "if(" << param << " == null)";
-            out << sb;
-            out << nl << stream << ".writeSize(0);";
-            out << eb;
-            out << nl << "else";
-            out << sb;
-            out << nl << stream << ".writeSize(" << param << '.' << limitID << ");";
-            if(isGeneric && !isList)
-            {
-                //
-                // Stacks are marshaled top-down.
-                //
-                if(isStack)
-                {
-                    out << nl << typeS << "[] " << param << "_tmp = " << param << ".ToArray();";
-                    out << nl << "for(int ix__ = 0; ix__ < " << param << "_tmp.Length; ++ix__)";
-                }
-                else
-                {
-                    out << nl << "_System.Collections.Generic.IEnumerator<" << typeS
-                        << "> e__ = " << param << ".GetEnumerator();";
-                    out << nl << "while(e__.MoveNext())";
-                }
-            }
-            else
-            {
-                out << nl << "for(int ix__ = 0; ix__ < " << param << '.' << limitID << "; ++ix__)";
-            }
-            out << sb;
-            string call;
-            if(isGeneric && !isList && !isStack)
-            {
-                if(isValueType(type))
-                {
-                    call = "e__.Current";
-                }
-                else
-                {
-                    call = "(e__.Current == null ? new ";
-                    call += typeS + "() : e__.Current)";
-                }
-            }
-            else
-            {
-                if(isValueType(type))
-                {
-                    call = param;
-                    if(isStack)
-                    {
-                        call += "_tmp";
-                    }
-                }
-                else
-                {
-                    call = "(";
-                    call += param;
-                    if(isStack)
-                    {
-                        call += "_tmp";
-                    }
-                    call += "[ix__] == null ? new " + typeS + "() : " + param;
-                    if(isStack)
-                    {
-                        call += "_tmp";
-                    }
-                }
-                call += "[ix__]";
-                if(!isValueType(type))
-                {
-                    call += ")";
-                }
-            }
-            call += ".";
-            call += streamingAPI ? "ice_write" : "write__";
-            call += "(" + stream + ");";
-            out << nl << call;
-            out << eb;
-            out << eb;
-        }
-        else
-        {
-            out << sb;
-            out << nl << "int szx__ = " << stream << ".readAndCheckSeqSize(" 
-                << static_cast<unsigned>(type->minWireSize()) << ");";
-            if(isArray)
-            {
-                out << nl << param << " = new " << toArrayAlloc(typeS + "[]", "szx__") << ";";
-            }
-            else if(isCustom)
-            {
-                out << nl << param << " = new global::" << genericType << "<" << typeS << ">();";
-            }
-            else if(isStack)
-            {
-                out << nl << typeS << "[] " << param << "__tmp = new " << toArrayAlloc(typeS + "[]", "szx__") << ";";
-            }
-            else if(isGeneric)
-            {
-                out << nl << param << " = new _System.Collections.Generic." << genericType << "<" << typeS << ">(";
-                if(!isLinkedList)
-                {
-                    out << "szx__";
-                }
-                out << ");";
-            }
-            else
-            {
-                out << nl << param << " = new " << fixId(seq->scoped()) << "(szx__);";
-            }
-            out << nl << "for(int ix__ = 0; ix__ < szx__; ++ix__)";
-            out << sb;
-            if(isArray || isStack)
-            {
-                string v = isArray ? param : param + "__tmp";
-                if(!isValueType(st))
-                {
-                    out << nl << v << "[ix__] = new " << typeS << "();";
-                }
-                if(streamingAPI)
-                {
-                    out << nl << v << "[ix__].ice_read(" << stream << ");";
-                }
-                else
-                {
-                    out << nl << v << "[ix__].read__(" << stream << ");";
-                }
-            }
-            else
-            {
-                out << nl << typeS << " val__ = new " << typeS << "();";
-                if(streamingAPI)
-                {
-                    out << nl << "val__.ice_read(" << stream << ");";
-                }
-                else
-                {
-                    out << nl << "val__.read__(" << stream << ");";
-                }
-                out << nl << param << "." << addMethod << "(val__);";
-            }
-            out << eb;
-            if(isStack)
-            {
-                out << nl << "_System.Array.Reverse(" << param << "__tmp);";
-                out << nl << param << " = new _System.Collections.Generic." << genericType << "<" << typeS << ">("
-                    << param << "__tmp);";
-            }
-            out << eb;
-        }
-        return;
-    }
-
+    
     EnumPtr en = EnumPtr::dynamicCast(type);
     if(en)
     {
-        if(marshal)
+        stringstream os;
+        os << "StreamHelpers.generateEnumHelper(" << typeToString(type) << ")";
+        return os.str();
+    }
+    
+    ClassDeclPtr cls = ClassDeclPtr::dynamicCast(type);
+    if(cls || (builtin && builtin == Builtin::KindLocalObject))
+    {
+        stringstream os;
+        os << "StreamHelpers.generateObjectSequenceHelper(" << typeToString(type) <<")";
+        return os.str();
+    }
+    
+    ProxyPtr prx = ProxyPtr::dynamicCast(type);
+    if(prx)
+    {
+        return "StreamHelpers.ProxyHelper";
+    }
+    
+    SequencePtr seq = SequencePtr::dynamicCast(type);
+    if(seq)
+    {
+        if(isObjectType(seq->type()))
         {
-            out << nl << "if(" << param << " == null)";
-            out << sb;
-            out << nl << stream << ".writeSize(0);";
-            out << eb;
-            out << nl << "else";
-            out << sb;
-            out << nl << stream << ".writeSize(" << param << '.'<< limitID << ");";
-            if(isGeneric && !isList)
-            {
-                //
-                // Stacks are marshaled top-down.
-                //
-                if(isStack)
-                {
-                    out << nl << typeS << "[] " << param << "_tmp = " << param << ".ToArray();";
-                    out << nl << "for(int ix__ = 0; ix__ < " << param << "_tmp.Length; ++ix__)";
-                    out << sb;
-                    out << nl << stream << ".writeEnum((int)" << param << "_tmp[ix__], " << en->maxValue() << ");";
-                    out << eb;
-                }
-                else
-                {
-                    out << nl << "_System.Collections.Generic.IEnumerator<" << typeS
-                        << "> e__ = " << param << ".GetEnumerator();";
-                    out << nl << "while(e__.MoveNext())";
-                    out << sb;
-                    out << nl << stream << ".writeEnum((int)e__.Current, " << en->maxValue() << ");";
-                    out << eb;
-                }
-            }
-            else
-            {
-                out << nl << "for(int ix__ = 0; ix__ < " << param << '.' << limitID << "; ++ix__)";
-                out << sb;
-                out << nl << stream << ".writeEnum((int)" << param << "[ix__], " << en->maxValue() << ");";
-                out << eb;
-            }
-            out << eb;
+            stringstream os;
+            os << "StreamHelpers.generateObjectSequenceHelper(" << typeToString(seq->type()) <<")";
+            return os.str();
         }
         else
         {
-            out << sb;
-            out << nl << "int szx__ = " << stream << ".readAndCheckSeqSize(" << 
-                static_cast<unsigned>(type->minWireSize()) << ");";
-            if(isArray)
-            {
-                out << nl << param << " = new " << toArrayAlloc(typeS + "[]", "szx__") << ";";
-            }
-            else if(isCustom)
-            {
-                out << nl << param << " = new global::" << genericType << "<" << typeS << ">();";
-            }
-            else if(isStack)
-            {
-                out << nl << typeS << "[] " << param << "__tmp = new " << toArrayAlloc(typeS + "[]", "szx__") << ";";
-            }
-            else if(isGeneric)
-            {
-                out << nl << param << " = new _System.Collections.Generic." << genericType << "<" << typeS << ">(";
-                if(!isLinkedList)
-                {
-                    out << "szx__";
-                }
-                out << ");";
-            }
-            else
-            {
-                out << nl << param << " = new " << fixId(seq->scoped()) << "(szx__);";
-            }
-            out << nl << "for(int ix__ = 0; ix__ < szx__; ++ix__)";
-            out << sb;
-            if(isArray || isStack)
-            {
-                string v = isArray ? param : param + "__tmp";
-                out << nl << v << "[ix__] = (" << typeS << ')' << stream << ".readEnum(" << en->maxValue() << ");";
-            }
-            else
-            {
-                out << nl << param << "." << addMethod << "((" << typeS << ')' << stream << ".readEnum("
-                    << en->maxValue() << "));";
-            }
-            out << eb;
-            if(isStack)
-            {
-                out << nl << "_System.Array.Reverse(" << param << "__tmp);";
-                out << nl << param << " = new _System.Collections.Generic." << genericType << "<" << typeS << ">("
-                    << param << "__tmp);";
-            }
-            out << eb;
+            return "StreamHelpers.SequenceHelper";
+        }
+    }
+    
+    DictionaryPtr d = DictionaryPtr::dynamicCast(type);
+    if(d)
+    {
+        if(isObjectType(d->valueType()))
+        {
+            stringstream os;
+            os << "StreamHelpers.generateObjectDictionaryHelper("
+               << getHelper(d->keyType())
+               << typeToString(d->valueType()) << ")";
+            return os.str();
+        }
+        else
+        {
+            return "StreamHelpers.DictionaryHelper";
+        }
+    }
+    assert(false);
+    return "???";
+}
+
+void
+Slice::JsGenerator::writeDictionaryHelper(Output& out, const TypePtr& keyType, const TypePtr& valueType)
+{
+    out << ",";
+    out << nl << "{";
+    out.inc();
+    out << nl << "key:" << getHelper(keyType) << ", "
+        << nl << "value:" << getHelper(valueType);
+    out.dec();
+    out << nl << "}";
+    
+    SequencePtr seq = SequencePtr::dynamicCast(valueType);
+    if(seq)
+    {
+        writeHelpers(out, seq->type(), false);
+        return;
+    }
+    
+    DictionaryPtr dict = DictionaryPtr::dynamicCast(valueType);
+    if(dict)
+    {
+        writeHelpers(out, dict->valueType(), false);
+        return;
+    }
+}
+
+void
+Slice::JsGenerator::writeHelpers(Output& out, const TypePtr& type, bool first)
+{
+    if(!first)
+    {
+        out << ",";
+    }
+    out << nl << getHelper(type);
+    
+    SequencePtr seq = SequencePtr::dynamicCast(type);
+    if(seq)
+    {
+        if(!isObjectType(seq->type()))
+        {
+            writeHelpers(out, seq->type(), false);
         }
         return;
     }
-
-    string helperName;
-    if(ProxyPtr::dynamicCast(type))
+    
+    DictionaryPtr d = DictionaryPtr::dynamicCast(type);
+    if(d)
     {
-        helperName = fixId(ProxyPtr::dynamicCast(type)->_class()->scoped() + "PrxHelper");
+        if(!isObjectType(d->valueType()))
+        {
+            writeDictionaryHelper(out, d->keyType(), d->valueType());
+        }
+        return;
+    }
+}
+
+void
+Slice::JsGenerator::writeSequenceMarshalUnmarshalCode(Output& out, const SequencePtr& seq, const string& param,
+                                                      bool marshal)
+{
+    string stream = marshal ? "os__" : "is__";
+
+    if(isObjectType(seq->type()))
+    {
+        // Use ObjectSequenceHelper
+        if(marshal)
+        {
+            out << nl << "StreamHelpers.generateObjectSequenceHelper(" << typeToString(seq->type()) <<" ).write(" 
+                << stream << ", " << param << ");";
+        }
+        else
+        {
+            out << nl << param << " = " << "StreamHelpers.generateObjectSequenceHelper(" << typeToString(seq->type()) 
+                << ").read(" << stream << ");";
+        }
     }
     else
     {
-        helperName = fixId(ContainedPtr::dynamicCast(type)->scoped() + "Helper");
-    }
-
-    string func;
-    if(marshal)
-    {
-        func = "write";
-        if(!streamingAPI && ProxyPtr::dynamicCast(type))
+        // Use SequenceHelper
+        if(marshal)
         {
-           func += "__";
-        }
-        out << nl << "if(" << param << " == null)";
-        out << sb;
-        out << nl << stream << ".writeSize(0);";
-        out << eb;
-        out << nl << "else";
-        out << sb;
-        out << nl << stream << ".writeSize(" << param << '.' << limitID << ");";
-        if(isGeneric && !isList)
-        {
-            //
-            // Stacks are marshaled top-down.
-            //
-            if(isStack)
-            {
-                out << nl << typeS << "[] " << param << "_tmp = " << param << ".ToArray();";
-                out << nl << "for(int ix__ = 0; ix__ < " << param << "_tmp.Length; ++ix__)";
-                out << sb;
-                out << nl << helperName << '.' << func << '(' << stream << ", " << param << "_tmp[ix__]);";
-                out << eb;
-            }
-            else
-            {
-                out << nl << "_System.Collections.Generic.IEnumerator<" << typeS
-                    << "> e__ = " << param << ".GetEnumerator();";
-                out << nl << "while(e__.MoveNext())";
-                out << sb;
-                out << nl << helperName << '.' << func << '(' << stream << ", e__.Current);";
-                out << eb;
-            }
+            out << nl << "StreamHelpers.SequenceHelper.write(" << stream << ", " << param << ", [";
+            out.inc();
+            writeHelpers(out, seq->type(), true);
+            out.dec();
+            out << nl << "]);";
         }
         else
         {
-            out << nl << "for(int ix__ = 0; ix__ < " << param << '.' << limitID << "; ++ix__)";
-            out << sb;
-            out << nl << helperName << '.' << func << '(' << stream << ", " << param << "[ix__]);";
-            out << eb;
+            out << nl << param << " = " << "StreamHelpers.SequenceHelper.read(" << stream << ", [";
+            out.inc();
+            writeHelpers(out, seq->type(), true);
+            out.dec();
+            out << nl << "]);";
         }
-        out << eb;
+    }
+}
+
+void
+Slice::JsGenerator::writeDictionaryMarshalUnmarshalCode(Output& out, const DictionaryPtr& dict, const string& param,
+                                                      bool marshal)
+{
+    string stream = marshal ? "os__" : "is__";
+    if(isObjectType(dict->valueType()))
+    {
+        // Use ObjectDictionaryHelper
+        if(marshal)
+        {
+            out << nl << "StreamHelpers.generateObjectDictionaryHelper(" 
+                << getHelper(dict->keyType()) << ", "    
+                << typeToString(dict->valueType()) 
+                <<" ).write(" 
+                << stream << ", " << param << ");";
+        }
+        else
+        {
+            out << nl << param << " = " << "StreamHelpers.generateObjectDictionaryHelper(" 
+                << getHelper(dict->keyType()) << ", "
+                << typeToString(dict->valueType()) 
+                << ").read(" << stream << ");";
+        }
     }
     else
     {
-        func = "read";
-        if(!streamingAPI && ProxyPtr::dynamicCast(type))
+        // Use DictionaryHelper
+        if(marshal)
         {
-           func += "__";
-        }
-        out << sb;
-        out << nl << "int szx__ = " << stream << ".readAndCheckSeqSize("
-            << static_cast<unsigned>(type->minWireSize()) << ");";
-        if(isArray)
-        {
-            out << nl << param << " = new " << toArrayAlloc(typeS + "[]", "szx__") << ";";
-        }
-        else if(isCustom)
-        {
-            out << nl << param << " = new global::" << genericType << "<" << typeS << ">();";
-        }
-        else if(isStack)
-        {
-            out << nl << typeS << "[] " << param << "__tmp = new " << toArrayAlloc(typeS + "[]", "szx__") << ";";
-        }
-        else if(isGeneric)
-        {
-            out << nl << param << " = new _System.Collections.Generic." << genericType << "<" << typeS << ">();";
+            out << nl << "StreamHelpers.DictionaryHelper.write(" << stream << ", " << param << ", [";
+            out.inc();
+            writeDictionaryHelper(out, dict->keyType(), dict->valueType());
+            out.dec();
+            out << nl << "]);";
         }
         else
         {
-            out << nl << param << " = new " << fixId(seq->scoped()) << "(szx__);";
+            out << nl << param << " = " << "StreamHelpers.DictionaryHelper.read(" << stream << ", [";
+            out.inc();
+            writeDictionaryHelper(out, dict->keyType(), dict->valueType());
+            out.dec();
+            out << nl << "]);";
         }
-        out << nl << "for(int ix__ = 0; ix__ < szx__; ++ix__)";
-        out << sb;
-        if(isArray || isStack)
-        {
-            string v = isArray ? param : param + "__tmp";
-            out << nl << v << "[ix__] = " << helperName << '.' << func << '(' << stream << ");";
-        }
-        else
-        {
-            out << nl << param << "." << addMethod << "(" << helperName << '.' << func << '(' << stream << "));";
-        }
-        out << eb;
-        if(isStack)
-        {
-            out << nl << "_System.Array.Reverse(" << param << "__tmp);";
-            out << nl << param << " = new _System.Collections.Generic." << genericType << "<" << typeS << ">("
-                << param << "__tmp);";
-        }
-        out << eb;
     }
-#endif
 }
 
 void

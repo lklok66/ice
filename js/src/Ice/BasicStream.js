@@ -7,7 +7,10 @@
 //
 // **********************************************************************
 
-var ByteBuffer = require("./ByteBuffer");
+var Ice = {};
+
+Ice.Buffer = require("./Buffer");
+
 var Debug = require("./Debug");
 var Ex = require("./Exception");
 var ExUtil = require("./ExUtil");
@@ -83,7 +86,7 @@ EncapsDecoder.prototype.readTypeId = function(isIndex)
     else
     {
         typeId = this._stream.readString();
-        this._typeIdMap.put(++this._typeIdIndex, typeId);
+        this._typeIdMap.set(++this._typeIdIndex, typeId);
     }
     return typeId;
 };
@@ -157,7 +160,7 @@ EncapsDecoder.prototype.addPatchEntry = function(index, patcher)
         // index, so make a new entry in the patch map.
         //
         l = []; // Patcher[];
-        this._patchMap.put(index, l);
+        this._patchMap.set(index, l);
     }
 
     //
@@ -173,7 +176,7 @@ EncapsDecoder.prototype.unmarshal = function(index, v)
     // Add the object to the map of un-marshalled objects, this must
     // be done before reading the objects (for circular references).
     //
-    this._unmarshaledMap.put(index, v);
+    this._unmarshaledMap.set(index, v);
 
     //
     // Read the object.
@@ -212,7 +215,7 @@ EncapsDecoder.prototype.unmarshal = function(index, v)
         }
         catch(ex)
         {
-            this._stream.instance().initializationData().logger.warning("exception raised by ice_postUnmarshal:\n" + 
+            this._stream.instance.initializationData().logger.warning("exception raised by ice_postUnmarshal:\n" + 
                                                                         Ex.toString(ex));
         }
     }
@@ -240,7 +243,7 @@ EncapsDecoder.prototype.unmarshal = function(index, v)
                 }
                 catch(ex)
                 {
-                    this._stream.instance().initializationData().logger.warning(
+                    this._stream.instance.initializationData().logger.warning(
                                                         "exception raised by ice_postUnmarshal:\n" + Ex.toString(ex));
                 }
             }
@@ -446,16 +449,16 @@ EncapsDecoder10.prototype.endSlice = function()
 
 EncapsDecoder10.prototype.skipSlice = function()
 {
-    if(this._stream.instance().traceLevels().slicing > 0)
+    if(this._stream.instance.traceLevels().slicing > 0)
     {
-        var logger = this._stream.instance().initializationData().logger;
+        var logger = this._stream.instance.initializationData().logger;
         if(this._sliceType === SliceType.ObjectSlice)
         {
-            TraceUtil.traceSlicing("object", this._typeId, this._stream.instance().traceLevels().slicingCat, logger);
+            TraceUtil.traceSlicing("object", this._typeId, this._stream.instance.traceLevels().slicingCat, logger);
         }
         else
         {
-            TraceUtil.traceSlicing("exception", this._typeId, this._stream.instance().traceLevels().slicingCat, logger);
+            TraceUtil.traceSlicing("exception", this._typeId, this._stream.instance.traceLevels().slicingCat, logger);
         }
     }
     Debug.assert(this._sliceSize >= 4);
@@ -553,6 +556,10 @@ var EncapsDecoder11 = function(stream, encaps, sliceObjects, f)
     this._current = null;
     this._objectIdIndex = 1;
 };
+
+EncapsDecoder11.prototype = new EncapsDecoder;
+
+EncapsDecoder11.prototype.constructor = EncapsDecoder11;
 
 EncapsDecoder11.InstanceData = function(previous)
 {
@@ -780,7 +787,6 @@ EncapsDecoder11.prototype.startSlice = function()
     {
         this._current.sliceSize = 0;
     }
-
     return this._current.typeId;
 };
 
@@ -854,10 +860,10 @@ EncapsDecoder11.prototype.skipSlice = function()
         info, b, end, dataEnd,
         i, length, indirectionTable = [];
     
-    if(this._stream.instance().traceLevels().slicing > 0)
+    if(this._stream.instance.traceLevels().slicing > 0)
     {
-        logger = this._stream.instance().initializationData().logger;
-        slicingCat = this._stream.instance().traceLevels().slicingCat;
+        logger = this._stream.instance.initializationData().logger;
+        slicingCat = this._stream.instance.traceLevels().slicingCat;
         if(this._current.sliceType === SliceType.ExceptionSlice)
         {
             TraceUtil.traceSlicing("exception", this._current.typeId, slicingCat, logger);
@@ -994,7 +1000,7 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
     //
     this.startSlice();
     mostDerivedId = this._current.typeId;
-    compactIdResolver = this._stream.instance().initializationData().compactIdResolver;
+    compactIdResolver = this._stream.instance.initializationData().compactIdResolver;
     while(true)
     {
         if(this._current.compactId >= 0)
@@ -1019,13 +1025,13 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
                                                        this._current.compactId, ex);
                 }
             }
-            if(this._current.typeId.length() === 0)
+            if(this._current.typeId.length === 0)
             {
                 this._current.typeId = this._stream.getTypeId(this._current.compactId);
             }
         }
         
-        if(this._current.typeId.length() > 0)
+        if(this._current.typeId.length > 0)
         {
             v = this.newInstance(this._current.typeId);
             
@@ -1184,7 +1190,7 @@ EncapsEncoder.prototype.registerTypeId = function(typeId)
     {
         return p;
     }
-    this._typeIdMap.put(typeId, ++this._typeIdIndex);
+    this._typeIdMap.set(typeId, ++this._typeIdIndex);
     return -1;
 };
 
@@ -1312,7 +1318,7 @@ EncapsEncoder10.prototype.writePendingObjects = function()
                         }
                         catch(ex)
                         {
-                            self._stream.instance().initializationData().logger.warning(
+                            self._stream.instance.initializationData().logger.warning(
                                 "exception raised by ice_preMarshal:\n" + Ex.toString(ex));
                         }
 
@@ -1375,6 +1381,9 @@ var EncapsEncoder11 = function(stream, encaps)
     this._objectIdIndex = 1;
 };
 
+EncapsEncoder11.prototype = new EncapsEncoder;
+
+EncapsEncoder11.prototype.constructor = EncapsEncoder11;
 
 EncapsEncoder11.InstanceData = function(previous)
 {
@@ -1438,6 +1447,11 @@ EncapsEncoder11.prototype.writeObject = function(v)
     {
         this.writeInstance(v); // Write the instance or a reference if already marshaled.
     }
+};
+
+EncapsEncoder11.prototype.writePendingObjects = function()
+{
+    return undefined;
 };
 
 EncapsEncoder11.prototype.writeUserException = function(v)
@@ -1683,7 +1697,7 @@ EncapsEncoder11.prototype.writeInstance = function(v)
     }
     catch(ex)
     {
-        this._stream.instance().initializationData().logger.warning("exception raised by ice_preMarshal:\n" + 
+        this._stream.instance.initializationData().logger.warning("exception raised by ice_preMarshal:\n" + 
                                                                     Ex.toString(ex));
     }
 
@@ -1754,11 +1768,11 @@ var BasicStream = function(instance, encoding, unlimited, data)
     
     if(data !== undefined)
     {
-        this._buf = new ByteBuffer(data);
+        this._buf = new Ice.Buffer(data);
     }
     else
     {
-        this._buf = new ByteBuffer();
+        this._buf = new Ice.Buffer();
     }
     
     this._classRegistry = require("./TypeRegistry").ClassRegistry;
@@ -3100,7 +3114,7 @@ BasicStream.prototype.writeString = function(v)
     }
     else
     {
-        var sz = ByteBuffer.byteLength(v);
+        var sz = Ice.Buffer.byteLength(v);
         this.writeSize(sz);
         this.expand(sz);
         this._buf.putString(v, sz);
@@ -3152,7 +3166,6 @@ BasicStream.prototype.writeOptStringSeq = function(tag, v)
 BasicStream.prototype.readString = function()
 {
     var len = this.readSize();
-
     if(len === 0)
     {
         return "";
@@ -3306,22 +3319,69 @@ BasicStream.prototype.writeOptObject = function(tag, v)
     }
 };
 
-BasicStream.prototype.readObject = function(patcher)
+BasicStream.prototype.readObject = function(patcher, Type)
 {
     this.initReadEncaps();
-    this._readEncapsStack.decoder.readObject(patcher);
+    this._readEncapsStack.decoder.readObject(
+        function(obj){
+            if(obj !== null && !(obj instanceof Type))
+            {
+                throw new TypeError("expected element of type " + Type.__ids[0] + " but received " + obj);
+            }
+            patcher(obj);
+        });
 };
 
-BasicStream.prototype.readOptObject = function(tag, v)
+BasicStream.prototype.readOptionalObject = function(tag, patcher, Type)
 {
     if(this.readOpt(tag, OptionalFormat.Class))
     {
-        this.readObject(new OptionalObject(v, IceObject, IceObject.ice_staticId()));
+        this.readObject(patcher, Type);
     }
     else
     {
-        v.clear();
+        patcher(undefined);
     }
+};
+
+BasicStream.prototype.readSequence = function(os, helpers)
+{
+    var helper = helpers.shift();
+    var sz = this.readAndCheckSeqSize(helper.minWireSize);
+    var v = [];
+    v.length = sz;
+    for(var i = 0; i < sz; ++i)
+    {
+        v[i] = helper.read(this, helpers);
+    }
+    return v;
+};
+
+BasicStream.prototype.writeSequence = function(seq, helpers)
+{
+    var helper = helpers.shift();
+    for(var i = 0; i < seq.length; ++i)
+    {
+        helper.write(this, seq[i], helpers);
+    }
+};
+
+BasicStream.prototype.readObjectSequence = function(Type)
+{
+    var sz = this.readSize();
+    var v = [];
+    v.length = sz;
+    
+    var readObjectAtIndex = function(idx)
+    {
+        this.readObject(function(obj) { v[idx] = obj; }, Type);
+    };
+    
+    for(var i = 0; i < sz; ++i)
+    {
+        readObjectAtIndex(i);
+    }
+    return v;
 };
 
 BasicStream.prototype.writeUserException = function(e)
@@ -3567,7 +3627,7 @@ BasicStream.prototype.initReadEncaps = function()
             this._readEncapsStack = new ReadEncaps();
         }
         this._readEncapsStack.setEncoding(this._encoding);
-        this._readEncapsStack.sz = this._buf.limit();
+        this._readEncapsStack.sz = this._buf.limit;
     }
 
     if(!this._readEncapsStack.decoder) // Lazy initialization.
