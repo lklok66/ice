@@ -37,7 +37,7 @@ var Buffer = function(buffer)
 Object.defineProperty(Buffer.prototype, "position", {
     get: function() { return this._position; },
     set: function(position){
-        if(position >= 0 && position < this._limit)
+        if(position >= 0 && position <= this._limit)
         {
             this._position = position;
         }
@@ -409,6 +409,7 @@ Buffer.prototype.getArray = function(length)
     }
     var buffer = new Node.Buffer(length);
     this.b.slice(this._position, this._position + length).copy(buffer);
+    this._position += length;
     return buffer;
 };
 

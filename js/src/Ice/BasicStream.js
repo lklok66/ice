@@ -2130,7 +2130,7 @@ BasicStream.prototype.skipEmptyEncaps = function(encoding)
     }
 
     var pos = this._buf.position;
-    if(pos + 2 > this._buf.size())
+    if(pos + 2 > this._buf.limit)
     {
         throw new LocalEx.UnmarshalOutOfBoundsException();
     }
@@ -2141,7 +2141,7 @@ BasicStream.prototype.skipEmptyEncaps = function(encoding)
     }
     else
     {
-        this._buf.position(pos + 2);
+        this._buf.position = pos + 2;
     }
 };
 
