@@ -13,15 +13,19 @@ var Ice = {};
 _merge(Ice, require("./Communicator").Ice);
 _merge(Ice, require("./HashMap").Ice);
 _merge(Ice, require("./Object").Ice);
+_merge(Ice, require("./Long").Ice);
 _merge(Ice, require("./Logger").Ice);
 _merge(Ice, require("./ObjectPrx").Ice);
 _merge(Ice, require("./Properties").Ice);
 _merge(Ice, require("./IdentityUtil").Ice);
 _merge(Ice, require("./ProcessLogger").Ice);
+_merge(Ice, require("./Protocol").Ice);
 _merge(Ice, require("./Identity").Ice);
 _merge(Ice, require("./Exception").Ice);
 _merge(Ice, require("./LocalException").Ice);
 _merge(Ice, require("./BuiltinSequences").Ice);
+_merge(Ice, require("./StreamHelpers").Ice);
+_merge(Ice, require("./Promise").Ice);
 
 
 //

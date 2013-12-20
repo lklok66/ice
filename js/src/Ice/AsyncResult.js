@@ -115,13 +115,13 @@ AsyncResult.prototype.__throwUserException = function()
             throw ex;
         }
     }
-}
+};
 
 AsyncResult.prototype.__exception = function(ex)
 {
     this._state |= AsyncResult.Done;
     this.fail(this, ex);
-}
+};
 
 AsyncResult.prototype.__response = function()
 {
@@ -135,7 +135,7 @@ AsyncResult.prototype.__response = function()
         Debug.assert(this._completed !== null);
         this._completed(this);
     }
-}
+};
 
 module.exports.Ice = {};
 module.exports.Ice.AsyncResult = AsyncResult;

@@ -1,14 +1,12 @@
 
+
+var Ice = require("Ice/Ice");
+
+var Debug = require("Ice/Debug").Ice.Debug;
 var ArrayUtil = require("Ice/ArrayUtil").Ice.ArrayUtil;
-var Promise = require("Ice/Promise").Ice.Promise;
-var Long = require("Ice/Long").Ice.Long;
-var Communicator = require("Ice/Communicator").Ice.Communicator;
+
 var InputStream = require("Ice/InputStream").Ice.InputStream;
 var OutputStream = require("Ice/OutputStream").Ice.OutputStream;
-var StreamHelpers = require("Ice/StreamHelpers").Ice.StreamHelpers;
-var Ice = require("Ice/Ice");
-var Protocol = require("Ice/Protocol").Ice.Protocol;
-var Debug = require("Ice/Debug").Ice.Debug;
 
 var Test = require("./StreamTest").Test;
 
@@ -18,6 +16,11 @@ var data;
 StreamTest = {}
 
 var comm = Ice.initialize();
+
+function test(v)
+{
+    Debug.assert(v);
+}
 
 StreamTest.run = function(){
     try
@@ -166,7 +169,7 @@ StreamTest.run = function(){
             s.by = 1;
             s.sh = 2;
             s.i = 3;
-            s.l = new Long(0, 4);
+            s.l = new Ice.Long(0, 4);
             s.f = 5.0;
             s.d = 6.0;
             s.str = "7";
@@ -218,7 +221,7 @@ StreamTest.run = function(){
         
         (function()
         {
-            var os = new OutputStream(comm, Protocol.Encoding_1_0);
+            var os = new OutputStream(comm, Ice.Protocol.Encoding_1_0);
             var o = new Test.OptionalClass();
             o.bo = true;
             o.by = 5;
@@ -227,7 +230,7 @@ StreamTest.run = function(){
             os.writeObject(o);
             os.writePendingObjects();
             var data = os.finished();
-            var is = new InputStream(comm, data, true, Protocol.Encoding_1_0);
+            var is = new InputStream(comm, data, true, Ice.Protocol.Encoding_1_0);
             var o2 = null;
             is.readObject(function(obj) { o2 = obj;}, Test.OptionalClass );
             is.readPendingObjects();
@@ -290,7 +293,7 @@ StreamTest.run = function(){
                 0x22
             ];
             os = new OutputStream(comm);
-            Ice.ByteSeqHelper.write(os, arr, [StreamHelpers.ByteHelper]);
+            Ice.ByteSeqHelper.write(os, arr);
             var data = os.finished();
             var is = new InputStream(comm, data, true);
             var arr2 = Ice.ByteSeqHelper.read(is);
@@ -314,6 +317,344 @@ StreamTest.run = function(){
             {
                 Debug.assert(ArrayUtil.equals(arr2S[i], arrS[i]));
             }
+            os.destroy();
+            is.destroy();
+        }());
+        
+        (function()
+        {
+            var arr =
+            [
+                0x01,
+                0x11,
+                0x12,
+                0x22
+            ];
+            var os = new OutputStream(comm);
+            Ice.ShortSeqHelper.write(os, arr);
+            var data = os.finished();
+            var is = new InputStream(comm, data, true);
+            var arr2 = Ice.ShortSeqHelper.read(is);
+            Debug.assert(ArrayUtil.equals(arr2, arr));
+            os.destroy();
+            is.destroy();
+
+            var arrS =
+            [
+                arr,
+                [],
+                arr
+            ];
+            os = new OutputStream(comm);
+            Test.ShortSSHelper.write(os, arrS);
+            data = os.finished();
+            is = new InputStream(comm, data, true);
+            var arr2S = Test.ShortSSHelper.read(is);
+            Debug.assert(arr2S.length === arrS.length);
+            for(var i = 0; i < arr2S.length; ++i)
+            {
+                Debug.assert(ArrayUtil.equals(arr2S[i], arrS[i]));
+            }
+            os.destroy();
+            is.destroy();
+        }());
+        
+        (function()
+        {
+            var arr =
+            [
+                0x01,
+                0x11,
+                0x12,
+                0x22
+            ];
+            var os = new OutputStream(comm);
+            Ice.IntSeqHelper.write(os, arr);
+            var data = os.finished();
+            var is = new InputStream(comm, data, true);
+            var arr2 = Ice.IntSeqHelper.read(is);
+            Debug.assert(ArrayUtil.equals(arr2, arr));
+            os.destroy();
+            is.destroy();
+
+            var arrS =
+            [
+                arr,
+                [],
+                arr
+            ];
+            os = new OutputStream(comm);
+            Test.IntSSHelper.write(os, arrS);
+            data = os.finished();
+            is = new InputStream(comm, data, true);
+            var arr2S = Test.IntSSHelper.read(is);
+            Debug.assert(arr2S.length === arrS.length);
+            for(var i = 0; i < arr2S.length; ++i)
+            {
+                Debug.assert(ArrayUtil.equals(arr2S[i], arrS[i]));
+            }
+            os.destroy();
+            is.destroy();
+        }());
+        
+        (function()
+        {
+            var arr =
+            [
+                new Ice.Long(0x00, 0x01),
+                new Ice.Long(0x00, 0x11),
+                new Ice.Long(0x00, 0x12),
+                new Ice.Long(0x00, 0x22),
+            ];
+            var os = new OutputStream(comm);
+            Ice.LongSeqHelper.write(os, arr);
+            var data = os.finished();
+            var is = new InputStream(comm, data, true);
+            var arr2 = Ice.LongSeqHelper.read(is);
+            var eq = ArrayUtil.equals(arr2, arr, function(v1, v2) { return v1.equals(v2); });
+            Debug.assert(eq);
+            os.destroy();
+            is.destroy();
+
+            var arrS =
+            [
+                arr,
+                [],
+                arr
+            ];
+            os = new OutputStream(comm);
+            Test.LongSSHelper.write(os, arrS);
+            data = os.finished();
+            is = new InputStream(comm, data, true);
+            var arr2S = Test.LongSSHelper.read(is);
+            Debug.assert(arr2S.length === arrS.length);
+            for(var i = 0; i < arr2S.length; ++i)
+            {
+                Debug.assert(ArrayUtil.equals(arr2S[i], arrS[i], function(v1, v2) { return v1.equals(v2); }));
+            }
+            os.destroy();
+            is.destroy();
+        }());
+        
+        (function()
+        {
+            var arr =
+            [
+                1,
+                2,
+                3,
+                4
+            ];
+            var os = new OutputStream(comm);
+            Ice.FloatSeqHelper.write(os, arr);
+            var data = os.finished();
+            var is = new InputStream(comm, data, true);
+            var arr2 = Ice.FloatSeqHelper.read(is);
+            Debug.assert(ArrayUtil.equals(arr2, arr));
+            os.destroy();
+            is.destroy();
+
+            var arrS =
+            [
+                arr,
+                [],
+                arr
+            ];
+            os = new OutputStream(comm);
+            Test.FloatSSHelper.write(os, arrS);
+            data = os.finished();
+            is = new InputStream(comm, data, true);
+            var arr2S = Test.FloatSSHelper.read(is);
+            Debug.assert(arr2S.length === arrS.length);
+            for(var i = 0; i < arr2S.length; ++i)
+            {
+                Debug.assert(ArrayUtil.equals(arr2S[i], arrS[i]));
+            }
+            os.destroy();
+            is.destroy();
+        }());
+        
+        (function()
+        {
+            var arr =
+            [
+                1,
+                2,
+                3,
+                4
+            ];
+            var os = new OutputStream(comm);
+            Ice.DoubleSeqHelper.write(os, arr);
+            var data = os.finished();
+            var is = new InputStream(comm, data, true);
+            var arr2 = Ice.DoubleSeqHelper.read(is);
+            Debug.assert(ArrayUtil.equals(arr2, arr));
+            os.destroy();
+            is.destroy();
+
+            var arrS =
+            [
+                arr,
+                [],
+                arr
+            ];
+            os = new OutputStream(comm);
+            Test.DoubleSSHelper.write(os, arrS);
+            data = os.finished();
+            is = new InputStream(comm, data, true);
+            var arr2S = Test.DoubleSSHelper.read(is);
+            Debug.assert(arr2S.length === arrS.length);
+            for(var i = 0; i < arr2S.length; ++i)
+            {
+                Debug.assert(ArrayUtil.equals(arr2S[i], arrS[i]));
+            }
+            os.destroy();
+            is.destroy();
+        }());
+        
+        (function()
+        {
+            var arr =
+            [
+                "string1",
+                "string2",
+                "string3",
+                "string4"
+            ];
+            var os = new OutputStream(comm);
+            Ice.StringSeqHelper.write(os, arr);
+            var data = os.finished();
+            var is = new InputStream(comm, data, true);
+            var arr2 = Ice.StringSeqHelper.read(is);
+            Debug.assert(ArrayUtil.equals(arr2, arr));
+            os.destroy();
+            is.destroy();
+
+            var arrS =
+            [
+                arr,
+                [],
+                arr
+            ];
+            os = new OutputStream(comm);
+            Test.StringSSHelper.write(os, arrS);
+            data = os.finished();
+            is = new InputStream(comm, data, true);
+            var arr2S = Test.StringSSHelper.read(is);
+            Debug.assert(arr2S.length === arrS.length);
+            for(var i = 0; i < arr2S.length; ++i)
+            {
+                Debug.assert(ArrayUtil.equals(arr2S[i], arrS[i]));
+            }
+            os.destroy();
+            is.destroy();
+        }());
+        
+        (function()
+        {
+            var arr =
+            [
+                Test.MyEnum.enum3,
+                Test.MyEnum.enum2,
+                Test.MyEnum.enum1,
+                Test.MyEnum.enum2
+            ];
+            var os = new OutputStream(comm);
+            Test.MyEnumSHelper.write(os, arr);
+            var data = os.finished();
+            var is = new InputStream(comm, data, true);
+            var arr2 = Test.MyEnumSHelper.read(is);
+            Debug.assert(ArrayUtil.equals(arr2, arr, function(v1, v2){ return v1.equals(v2); }));
+            os.destroy();
+            is.destroy();
+
+            var arrS =
+            [
+                arr,
+                [],
+                arr
+            ];
+            os = new OutputStream(comm);
+            Test.MyEnumSSHelper.write(os, arrS);
+            data = os.finished();
+            is = new InputStream(comm, data, true);
+            var arr2S = Test.MyEnumSSHelper.read(is);
+            Debug.assert(arr2S.length === arrS.length);
+            for(var i = 0; i < arr2S.length; ++i)
+            {
+                Debug.assert(ArrayUtil.equals(arr2S[i], arrS[i], function(v1, v2){ return v1.equals(v2); }));
+            }
+            os.destroy();
+            is.destroy();
+        }());
+        
+        (function()
+        {
+            var arr = [];
+            arr.length = 4;
+            for(var i = 0; i < arr.length; ++i)
+            {
+                arr[i] = new Test.MyClass();
+                arr[i].c = arr[i];
+                arr[i].o = arr[i];
+                arr[i].s = new Test.SmallStruct();
+                arr[i].s.e = Test.MyEnum.enum2;
+                arr[i].seq1 = [true, false, true, false];
+                arr[i].seq2 = [1, 2, 3, 4];
+                arr[i].seq3 = [1, 2, 3, 4];
+                arr[i].seq4 = [1, 2, 3, 4];
+                arr[i].seq5 = [new Ice.Long(0, 1), new Ice.Long(0, 2), new Ice.Long(0, 3), new Ice.Long(0, 4)];
+                arr[i].seq6 = [1, 2, 3, 4];
+                arr[i].seq7 = [1, 2, 3, 4];
+                arr[i].seq8 = ["string1", "string2", "string3", "string4"];
+                arr[i].seq9 = [Test.MyEnum.enum3, Test.MyEnum.enum2, Test.MyEnum.enum1];
+                arr[i].seq10 = [null, null, null, null]; // null elements.
+                arr[i].d = new Ice.HashMap();
+                arr[i].d.set("hi", arr[i]);
+            }
+            var os = new OutputStream(comm);
+            Test.MyClassSHelper.write(os, arr);
+            os.writePendingObjects();
+            var data = os.finished();
+            var is = new InputStream(comm, data, true);
+            var arr2 = Test.MyClassSHelper.read(is);
+            is.readPendingObjects();
+            Debug.assert(arr2.length == arr.length);
+            for(i = 0; i < arr2.length; ++i)
+            {
+                test(arr2[i] !== null);
+                test(arr2[i].c === arr2[i]);
+                test(arr2[i].o === arr2[i]);
+                test(arr2[i].s.e === Test.MyEnum.enum2);
+                test(ArrayUtil.equals(arr2[i].seq1, arr[i].seq1));
+                test(ArrayUtil.equals(arr2[i].seq2, arr[i].seq2));
+                test(ArrayUtil.equals(arr2[i].seq3, arr[i].seq3));
+                test(ArrayUtil.equals(arr2[i].seq4, arr[i].seq4));
+                test(ArrayUtil.equals(arr2[i].seq5, arr[i].seq5, function(v1, v2) { return v1.equals(v2); }));
+                test(ArrayUtil.equals(arr2[i].seq6, arr[i].seq6));
+                test(ArrayUtil.equals(arr2[i].seq7, arr[i].seq7));
+                test(ArrayUtil.equals(arr2[i].seq8, arr[i].seq8));
+                test(ArrayUtil.equals(arr2[i].seq9, arr[i].seq9));
+                test(arr2[i].d.get("hi") === arr2[i]);
+            }
+            os.destroy();
+            is.destroy();
+
+            var arrS =
+            [
+                arr,
+                [],
+                arr
+            ];
+            os = new OutputStream(comm);
+            Test.MyClassSSHelper.write(os, arrS);
+            data = os.finished();
+            is = new InputStream(comm, data, true);
+            var arr2S = Test.MyClassSSHelper.read(is);
+            test(arr2S.length == arrS.length);
+            test(arr2S[0].length == arrS[0].length);
+            test(arr2S[1].length == arrS[1].length);
+            test(arr2S[2].length == arrS[2].length);
             os.destroy();
             is.destroy();
         }());

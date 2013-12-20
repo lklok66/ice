@@ -81,13 +81,6 @@ opFormatTypeToString(const OperationPtr& op)
     return "???";
 }
 
-bool
-isClassType(const TypePtr type)
-{
-    BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
-    return (builtin && builtin->kind() == Builtin::KindObject) || ClassDeclPtr::dynamicCast(type);
-}
-
 string
 getDeprecateReason(const ContainedPtr& p1, const ContainedPtr& p2, const string& type)
 {
@@ -1507,18 +1500,18 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         _out << nl << localScope << '.' << prxName << " = function" << spar << epar;
         _out << sb;
         _out << nl << basePrxRef << ".call" << spar << "this" << epar << ';';
-        _out << eb;
+        _out << eb << ";";
         _out << nl << localScope << '.' << prxName << ".prototype = new " << basePrxRef << "();";
         _out << nl << localScope << '.' << prxName << ".prototype.constructor = " << localScope << '.' << prxName
              << ';';
         _out << nl << localScope << '.' << prxName << ".checkedCast = function(__prx, __facet, __ctx)";
         _out << sb;
         // TODO
-        _out << eb;
+        _out << eb << ";";
         _out << nl << localScope << '.' << prxName << ".uncheckedCast = function(__prx, __facet)";
         _out << sb;
         // TODO
-        _out << eb;
+        _out << eb << ";";
     }
 
     _out << sp;
@@ -1561,7 +1554,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             _out << ';';
         }
     }
-    _out << eb;
+    _out << eb << ";";
 
     if(!p->isLocal() || hasBaseClass)
     {
@@ -1613,13 +1606,13 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         _out << nl << localScope << '.' << name << ".prototype.ice_ids = function(current)";
         _out << sb;
         _out << nl << "return " << localScope << '.' << name << ".__ids;";
-        _out << eb;
+        _out << eb << ";";
 
         _out << sp;
         _out << nl << localScope << '.' << name << ".ice_staticId = function()";
         _out << sb;
         _out << nl << "return " << localScope << '.' << name << ".__ids[" << scopedPos << "];";
-        _out << eb;
+        _out << eb << ";";
     }
 
     const OperationList ops = p->operations();
@@ -1642,7 +1635,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
     _out << nl << localScope << '.' << name << ".prototype.toString = function()";
     _out << sb;
     _out << nl << "return \"[object " << p->scoped().substr(2) << "]\";";
-    _out << eb;
+    _out << eb << ";";
 
     // TODO: equals?
     
@@ -1662,7 +1655,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         {
             _out << nl << baseRef << ".prototype.__writeImpl.call(this, __os);";
         }
-        _out << eb;
+        _out << eb << ";";
 
         _out << sp;
         _out << nl << localScope << '.' << name << ".prototype.__readImpl = function(__is)";
@@ -1681,7 +1674,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         {
             _out << nl << baseRef << ".prototype.__readImpl.call(this, __is);";
         }
-        _out << eb;
+        _out << eb << ";";
 
         for(OperationList::const_iterator q = ops.begin(); q != ops.end(); ++q)
         {
@@ -1689,7 +1682,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
                  << spar << getParams(*q) << "__ctx" << epar;
             _out << sb;
             // TODO
-            _out << eb;
+            _out << eb << ";";
         }
         
         //
@@ -1825,21 +1818,59 @@ Slice::Gen::TypesVisitor::visitOperation(const OperationPtr& p)
 void
 Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
 {
-    const string name = getLocalScope(p->scope()) + "." + fixId(p->name());
-    
     const TypePtr type = p->type();
     
+    //
+    // Stream helpers for sequences are lazy initialized as the required 
+    // types might not be available until later.
+    //
+    // We need to access classes through the class registry as classes may 
+    // have been defined in a separate unit.
+    //
+    const string scope = getLocalScope(p->scope());
+    const string name = fixId(p->name());
+    const string propertyName = name + "Helper";
+    const string helperName = scope + ".__" + propertyName;
+    _out << nl;
+    _out << nl << helperName << " = null;";
+    _out << nl << "Object.defineProperty(" << scope << ", \"" << propertyName << "\", ";
+    _out << sb;
+    _out << nl << "get: function()";
+    _out.inc();
+    _out << sb;
+    _out << nl << "if(" << helperName << " === null)";
+    _out << sb;
     if(isClassType(type))
     {
-        _out << nl << name << "Helper = Ice.StreamHelpers.generateObjectSeqHelper(" << typeToString(type) << ");";
+        _out << nl << helperName << " = Ice.StreamHelpers.generateObjectSeqHelper(";
+        _out.inc();
+        ContainedPtr contained = ContainedPtr::dynamicCast(type);
+        if(contained)
+        {
+            _out << nl << "Ice.ClassRegistry.find(\"" << contained->scoped() << "\"));";
+        }
+        else
+        {
+            //
+            // Ice.Object should be always available, so we don't need to go through
+            // the class registry.
+            //
+            _out << nl << typeToString(type) << ");";
+        }
+        _out.dec();
     }
     else
     {
-        _out << nl << name << "Helper = Ice.StreamHelpers.generateSeqHelper(";
+        _out << nl << helperName << " = Ice.StreamHelpers.generateSeqHelper(";
         _out.inc();
-        _out << nl << getHelper(type) << ");"; 
+        _out << nl << getHelper(type) << ");";
         _out.dec();
     }
+    _out << eb;
+    _out << nl << "return " << helperName << ";";
+    _out << eb;
+    _out.dec();
+    _out << eb << ");";
 }
 
 bool
@@ -1921,7 +1952,7 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
             _out << ';';
         }
     }
-    _out << eb;
+    _out << eb << ";";
     _out << nl << localScope << '.' << name << ".prototype = new " << baseRef << "();";
     _out << nl << localScope << '.' << name << ".prototype.constructor = " << localScope << '.' << name << ';';
 
@@ -1929,14 +1960,14 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     _out << nl << localScope << '.' << name << ".prototype.ice_name = function()";
     _out << sb;
     _out << nl << "return \"" << p->scoped().substr(2) << "\";";
-    _out << eb;
+    _out << eb << ";";
 
     _out << sp;
     _out << nl << localScope << '.' << name << ".prototype.toString = function()";
     _out << sb;
     // TODO
     _out << nl << "return this.ice_name();";
-    _out << eb;
+    _out << eb << ";";
 
     // TODO: equals?
 
@@ -2071,28 +2102,63 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
 void
 Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
 {
-    const string name = getLocalScope(p->scope()) + "." + fixId(p->name());
-    
     const TypePtr keyType = p->keyType();
     const TypePtr valueType = p->valueType();
     
+    //
+    // Stream helpers for dictionaries of objects are lazy initialized 
+    // as the required object type might not be available until later.
+    //
+    // We need to access the type through the class registry as it may 
+    // have been defined in a separate unit.
+    //
+    const string scope = getLocalScope(p->scope());
+    const string name = fixId(p->name());
+    const string propertyName = name + "Helper";
+    const string helperName = scope + ".__" + propertyName;
+
+    _out << nl;
+    _out << nl << helperName << " = null;";
+    _out << nl << "Object.defineProperty(" << scope << ", \"" << propertyName << "\", ";
+    _out << sb;
+    _out << nl << "get: function()";
+    _out.inc();
+    _out << sb;
+    _out << nl << "if(" << helperName << " === null)";
+    _out << sb;
     if(isClassType(valueType))
     {
-        StructPtr st = StructPtr::dynamicCast(keyType);
-        _out << nl << name << "Helper = Ice.StreamHelpers.generateObjectDictHelper(";
+        _out << nl << helperName << " = Ice.StreamHelpers.generateObjectDictHelper(";
         _out.inc();
         _out << nl << getHelper(keyType) << ", ";
-        _out << nl << typeToString(valueType) << ");";
+        ContainedPtr contained = ContainedPtr::dynamicCast(valueType);
+        if(contained)
+        {
+            _out << nl << "Ice.ClassRegistry.find(\"" << contained->scoped() << "\"));";
+        }
+        else
+        {
+            //
+            // Ice.Object should be always available, so we don't need to go through
+            // the class registry.
+            //
+            _out << nl << typeToString(valueType) << ");";
+        }
         _out.dec();
     }
     else
     {
-        _out << nl << name << "Helper = Ice.StreamHelpers.generateDictHelper(";
+        _out << nl << helperName << " = Ice.StreamHelpers.generateDictHelper(";
         _out.inc();
         _out << nl << getHelper(keyType) << ", ";
         _out << nl << getHelper(valueType) << ");";
         _out.dec();
     }
+    _out << eb;
+    _out << nl << "return " << helperName << ";";
+    _out << eb;
+    _out.dec();
+    _out << eb << ");";
 }
 
 void

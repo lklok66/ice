@@ -70,13 +70,13 @@ IceObject.prototype.__write = function(os)
     os.startWriteObject(null);
     this.__writeImpl(os);
     os.endWriteObject();
-}
+};
 
 IceObject.prototype.__read = function(is)
 {
     is.startReadObject();
     this.__readImpl(is);
     is.endReadObject(false);
-}
+};
 
 module.exports.Ice = { Object: IceObject};

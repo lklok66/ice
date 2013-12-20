@@ -10,11 +10,11 @@
 var FormatType = require("./FormatType");
 
 var EndpointSelectionType = require("./EndpointTypes").Ice.EndpointSelectionType;
+var Protocol = require("./Protocol").Ice.Protocol;
 
 var DefaultsAndOverrides = function(properties)
 {
     var value;
-    var Protocol = require("./Protocol").Ice.Protocol;
     
     this.defaultProtocol = properties.getPropertyWithDefault("Ice.Default.Protocol", "tcp");
 

@@ -17,6 +17,7 @@ var OutgoingAsync = require("./OutgoingAsync").Ice.OutgoingAsync;
 var Protocol = require("./Protocol").Ice.Protocol;
 var ReferenceMode = require("./ReferenceMode").Ice.ReferenceMode;
 var LocalException = require("./Exception").Ice.LocalException;
+var Promise = require("./Promise").Ice.Promise;
 
 var ConnectRequestHandler = function(ref, proxy)
 {

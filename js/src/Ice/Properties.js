@@ -106,8 +106,8 @@ Properties.prototype.getPropertyAsListWithDefault = function(key, value)
         var result = StringUtil.splitString(pv.value, ", \t\r\n");
         if(result === null)
         {
-            ProcessLogger.getProcessLogger().warning("mismatched quotes in property " + key
-                                                     + "'s value, returning default value");
+            ProcessLogger.getProcessLogger().warning("mismatched quotes in property " + key + 
+                                                     "'s value, returning default value");
             return value;
         }
         if(result.length === 0)

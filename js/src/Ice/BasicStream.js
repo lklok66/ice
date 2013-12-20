@@ -324,7 +324,7 @@ EncapsDecoder10.prototype.throwException = function(factory)
             }
             catch(ex)
             {
-                if(!(ex instanceof Ex.UserException))
+                if(!(ex instanceof Ice.UserException))
                 {
                     throw ex;
                 }
@@ -558,7 +558,7 @@ var EncapsDecoder11 = function(stream, encaps, sliceObjects, f)
     this._objectIdIndex = 1;
 };
 
-EncapsDecoder11.prototype = new EncapsDecoder;
+EncapsDecoder11.prototype = new EncapsDecoder();
 
 EncapsDecoder11.prototype.constructor = EncapsDecoder11;
 
@@ -1385,7 +1385,7 @@ var EncapsEncoder11 = function(stream, encaps)
     this._objectIdIndex = 1;
 };
 
-EncapsEncoder11.prototype = new EncapsEncoder;
+EncapsEncoder11.prototype = new EncapsEncoder();
 
 EncapsEncoder11.prototype.constructor = EncapsEncoder11;
 
@@ -3647,7 +3647,7 @@ BasicStream.prototype.initReadEncaps = function()
         this._readEncapsStack.sz = this._buf.limit;
     }
 
-    if(this._readEncapsStack.decoder == null) // Lazy initialization.
+    if(this._readEncapsStack.decoder === null) // Lazy initialization.
     {
         var factoryManager = this._instance.servantFactoryManager();
         if(this._readEncapsStack.encoding_1_0)

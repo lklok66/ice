@@ -11,6 +11,8 @@
 // Exception utilities
 //
 
+var UnexpectedObjectException = require("./LocalException").Ice.UnexpectedObjectException;
+var UnexpectedObjectException = require("./LocalException").Ice.UnexpectedObjectException;
 var ExUtil = {};
 
 ExUtil.toString = function(ex)
@@ -21,14 +23,14 @@ ExUtil.toString = function(ex)
 
 ExUtil.throwUOE = function(expectedType, actualType)
 {
-    throw new require("./LocalException").Ice.UnexpectedObjectException("expected element of type `" + expectedType + "' but received '" +
+    throw new UnexpectedObjectException("expected element of type `" + expectedType + "' but received '" +
                                          actualType, actualType, expectedType);
 };
 
 ExUtil.throwMemoryLimitException = function(requested, maximum)
 {
-    throw new require("./LocalException").Ice.UnexpectedObjectException("requested " + requested + " bytes, maximum allowed is " + maximum +
-                                   " bytes (see Ice.MessageSizeMax)");
+    throw new UnexpectedObjectException("requested " + requested + " bytes, maximum allowed is " + maximum +
+                                        " bytes (see Ice.MessageSizeMax)");
 };
 
 module.exports.Ice = {};

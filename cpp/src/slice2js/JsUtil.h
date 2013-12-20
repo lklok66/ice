@@ -29,6 +29,7 @@ public:
 
 protected:
 
+    static bool isClassType(const TypePtr&);
     static std::string fixId(const std::string&, bool = false);
     static std::string fixId(const ContainedPtr&, bool = false);
     static std::string getOptionalFormat(const TypePtr&);

@@ -113,6 +113,13 @@ fixIds(const StringList& ids)
     return newIds;
 }
 
+bool
+Slice::JsGenerator::isClassType(const TypePtr& type)
+{
+    BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
+    return (builtin && builtin->kind() == Builtin::KindObject) || ClassDeclPtr::dynamicCast(type);
+}
+
 //
 // If the passed name is a scoped name, return the identical scoped name,
 // but with all components that are JS keywords replaced by
@@ -414,7 +421,7 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
                 {
                     out << nl << param << " = " << stream << ".readByte()" << ';';
                 }
-                break;
+                return;
             }
             case Builtin::KindBool:
             {
@@ -426,7 +433,7 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
                 {
                     out << nl << param << " = " << stream << ".readBool()" << ';';
                 }
-                break;
+                return;
             }
             case Builtin::KindShort:
             {
@@ -438,7 +445,7 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
                 {
                     out << nl << param << " = " << stream << ".readShort()" << ';';
                 }
-                break;
+                return;
             }
             case Builtin::KindInt:
             {
@@ -450,7 +457,7 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
                 {
                     out << nl << param << " = " << stream << ".readInt()" << ';';
                 }
-                break;
+                return;
             }
             case Builtin::KindLong:
             {
@@ -462,7 +469,7 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
                 {
                     out << nl << param << " = " << stream << ".readLong()" << ';';
                 }
-                break;
+                return;
             }
             case Builtin::KindFloat:
             {
@@ -474,7 +481,7 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
                 {
                     out << nl << param << " = " << stream << ".readFloat()" << ';';
                 }
-                break;
+                return;
             }
             case Builtin::KindDouble:
             {
@@ -486,7 +493,7 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
                 {
                     out << nl << param << " = " << stream << ".readDouble()" << ';';
                 }
-                break;
+                return;
             }
             case Builtin::KindString:
             {
@@ -498,18 +505,11 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
                 {
                     out << nl << param << " = " << stream << ".readString()" << ';';
                 }
-                break;
+                return;
             }
             case Builtin::KindObject:
             {
-                if(marshal)
-                {
-                    out << nl << stream << ".writeObject(" << param << ");";
-                }
-                else
-                {
-                    out << nl << stream << ".readObject(" << param << ");";
-                }
+                // Handle by isClassType below.
                 break;
             }
             case Builtin::KindObjectProxy:
@@ -523,15 +523,14 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
                 {
                     out << nl << param << " = " << stream << ".readProxy()" << ';';
                 }
-                break;
+                return;
             }
             case Builtin::KindLocalObject:
             {
                 assert(false);
-                break;
+                return;
             }
         }
-        return;
     }
 
     ProxyPtr prx = ProxyPtr::dynamicCast(type);
@@ -548,8 +547,7 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
         return;
     }
 
-    ClassDeclPtr cl = ClassDeclPtr::dynamicCast(type);
-    if(cl)
+    if(isClassType(type))
     {
         if(marshal)
         {
