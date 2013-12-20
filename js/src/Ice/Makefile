@@ -32,10 +32,12 @@ SRCS = Address.js \
         AsyncResult.js \
         Base64.js \
         BasicStream.js \
-        ByteBuffer.js \
+        Buffer.js \
         Communicator.js \
         ConnectionI.js \
         ConnectionReaper.js \
+        ConnectionRequestHandler.js \
+        ConnectRequestHandler.js \
         Debug.js \
         DefaultsAndOverrides.js \
         EndpointFactoryManager.js \
@@ -62,6 +64,8 @@ SRCS = Address.js \
         OpaqueEndpointI.js \
         ObjectFactoryManager.js \
         OptionalFormat.js \
+        OutgoingAsyncBase.js \
+        OutgoingAsync.js \
         OutgoingConnectionFactory.js \
         Promise.js \
         Properties.js \
@@ -70,8 +74,10 @@ SRCS = Address.js \
         Protocol.js \
         ProxyFactory.js \
         Reference.js \
+        ReferenceMode.js \
         RouterInfo.js \
         RouterManager.js \
+        SocketOperation.js \
         StringUtil.js \
         TcpEndpointFactory.js \
         TcpEndpointI.js \

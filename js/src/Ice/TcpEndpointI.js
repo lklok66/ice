@@ -7,8 +7,10 @@
 //
 // **********************************************************************
 
+var Address = require("./Address");
 var HashUtil = require("./HashUtil");
 var StringUtil = require("./StringUtil");
+var TcpTransceiver = require("./TcpTransceiver");
 
 var Endp = require("./Endpoint").Ice;
 var LocalEx = require("./LocalException").Ice;
@@ -369,7 +371,7 @@ TcpEndpointI.prototype.connect = function()
         this._instance.initializationData().logger.trace(this._instance.traceLevels().networkCat, msg);
     }
 
-    return TcpTransceiver.createOutgoing(this._instance, this._host, this._port);
+    return TcpTransceiver.createOutgoing(this._instance, new Address(this._host, this._port));
 }
 
 //
@@ -386,7 +388,7 @@ TcpEndpointI.prototype.equivalent = function(endpoint)
 
 TcpEndpointI.prototype.hashCode = function()
 {
-    return _hashCode;
+    return this._hashCode;
 }
 
 //

@@ -36,6 +36,7 @@ module.exports.Exception = Exception;
 var LocalException = function(cause)
 {
     Exception.call(this, cause);
+    Error.captureStackTrace(this, LocalException);
 };
 
 LocalException.prototype = new Exception();
@@ -54,6 +55,7 @@ module.exports.LocalException = LocalException;
 var UserException = function(cause)
 {
     Exception.call(this, cause);
+    Error.captureStackTrace(this, UserException);
 };
 
 UserException.prototype = new Exception();

@@ -8,10 +8,13 @@
 // **********************************************************************
 
 var ArrayUtil = require("./ArrayUtil");
+var AsyncResult = require("./AsyncResult");
+var ConnectRequestHandler = require("./ConnectRequestHandler");
 var Debug = require("./Debug");
 var Ex = require("./Exception");
 var FormatType = require("./FormatType");
 var HashMap = require("./HashMap");
+var OutgoingAsync = require("./OutgoingAsync");
 var RefMode = require("./ReferenceMode");
 
 var Curr = require("./Current").Ice;
@@ -23,6 +26,7 @@ var LocalEx = require("./LocalException").Ice;
 var ObjectPrx = function()
 {
     this._reference = null;
+    this._handler = null;
 };
 
 ObjectPrx.prototype.hashCode = function(r)
@@ -42,61 +46,57 @@ ObjectPrx.prototype.toString = function()
 
 ObjectPrx.prototype.ice_isA = function(__id, __context)
 {
-    /* TODO
     var __ice_isA_name = "ice_isA";
-    ObjectPrx.__checkAsyncTwowayOnly(__ice_isA_name);
-    var __result = new OutgoingAsync(this, __ice_isA_name, __completed_bool);
+    this.__checkAsyncTwowayOnly(__ice_isA_name);
+    var __promise = new OutgoingAsync(this, __ice_isA_name, ObjectPrx.__completed_bool);
     try
     {
-        __result.__prepare(__ice_isA_name, Curr.OperationMode.Nonmutating, __context);
-        var __os = __result.__startWriteParams(FormatType.DefaultFormat);
+        __promise.__prepare(__ice_isA_name, Curr.OperationMode.Nonmutating, __context);
+        var __os = __promise.__startWriteParams(FormatType.DefaultFormat);
         __os.writeString(__id);
         __os.endWriteEncaps();
-        __result.__send();
+        __promise.__send();
     }
     catch(__ex)
     {
-        this.__handleLocalException(__result, __ex);
+        this.__handleLocalException(__promise, __ex);
     }
-    return __result;
-    */
+    return __promise;
 };
 
 ObjectPrx.prototype.ice_ping = function(__context)
 {
     var __ice_ping_name = "ice_ping";
-    var __result = new OutgoingAsync(this, __ice_ping_name, ObjectPrx.__completed);
+    var __promise = new OutgoingAsync(this, __ice_ping_name, ObjectPrx.__completed);
     try
     {
-        __result.__prepare(__ice_ping_name, Curr.OperationMode.Nonmutating, __context);
-        __result.__writeEmptyParams();
-        __result.__send();
+        __promise.__prepare(__ice_ping_name, Curr.OperationMode.Nonmutating, __context);
+        __promise.__writeEmptyParams();
+        __promise.__send();
     }
     catch(__ex)
     {
-        this.__handleLocalException(__result, __ex);
+        this.__handleLocalException(__promise, __ex);
     }
-    return __result;
+    return __promise;
 };
 
 ObjectPrx.prototype.ice_ids = function(__context)
 {
-    /* TODO
     var __ice_ids_name = "ice_ids";
-    ObjectPrx.__checkAsyncTwowayOnly(__ice_ids_name);
-    var __result = new OutgoingAsync(this, __ice_ids_name, this._ice_ids_completed);
+    this.__checkAsyncTwowayOnly(__ice_ids_name);
+    var __promise = new OutgoingAsync(this, __ice_ids_name, this._ice_ids_completed);
     try
     {
-        __result.__prepare(__ice_ids_name, Curr.OperationMode.Nonmutating, __context);
-        __result.__writeEmptyParams();
-        __result.__send();
+        __promise.__prepare(__ice_ids_name, Curr.OperationMode.Nonmutating, __context);
+        __promise.__writeEmptyParams();
+        __promise.__send();
     }
     catch(__ex)
     {
-        this.__handleLocalException(__result, __ex);
+        this.__handleLocalException(__promise, __ex);
     }
-    return __result;
-    */
+    return __promise;
 };
 
 ObjectPrx.prototype._ice_ids_completed = function(__r)
@@ -106,38 +106,37 @@ ObjectPrx.prototype._ice_ids_completed = function(__r)
         return;
     }
 
-    var __is = __oa.__startReadParams();
-
-    if(__cb !== null)
+    var __is = __r.__startReadParams();
+    var __ret;
+    try
     {
-        __ret = StringSeqHelper.read(__is);
-        __is.endReadParams();
-        __cb.call(__cbctx === undefined ? __cb : __cbctx, __oa, __ret);
+        __ret = __is.readStringSeq();
+        __r.__endReadParams();
     }
-    else
+    catch(__ex)
     {
-        __is.skipEncaps();
+        ObjectPrx.__dispatchLocalException(__r, __ex);
+        return;
     }
+    __r.succeed(__r, __ret);
 };
 
 ObjectPrx.prototype.ice_id = function(__context)
 {
-    /* TODO
     var __ice_id_name = "ice_id";
-    ObjectPrx.__checkAsyncTwowayOnly(__ice_id_name);
-    var __result = new OutgoingAsync(this, __ice_id_name, __completed_string);
+    this.__checkAsyncTwowayOnly(__ice_id_name);
+    var __promise = new OutgoingAsync(this, __ice_id_name, ObjectPrx.__completed_string);
     try
     {
-        __result.__prepare(__ice_id_name, Curr.OperationMode.Nonmutating, __context);
-        __result.__writeEmptyParams();
-        __result.__send();
+        __promise.__prepare(__ice_id_name, Curr.OperationMode.Nonmutating, __context);
+        __promise.__writeEmptyParams();
+        __promise.__send();
     }
     catch(__ex)
     {
-        this.__handleLocalException(__result, __ex);
+        this.__handleLocalException(__promise, __ex);
     }
-    return __result;
-    */
+    return __promise;
 };
 
 ObjectPrx.prototype.ice_getIdentity = function()
@@ -512,13 +511,15 @@ ObjectPrx.prototype.ice_connectionId = function(id)
 
 ObjectPrx.prototype.ice_getConnection = function()
 {
-    // TODO
-    return null;
+    return this.__getRequestHandler().onConnection();
 };
 
 ObjectPrx.prototype.ice_getCachedConnection = function()
 {
-    // TODO
+    if(this._handler !== null)
+    {
+        return this._handler.getConnection();
+    }
     return null;
 };
 
@@ -643,8 +644,8 @@ ObjectPrx.__completed = function(__r)
         return;
     }
 
-    __r.readEmptyParams();
-    __r.success();
+    __r.__readEmptyParams();
+    __r.succeed(__r);
 };
 
 //
@@ -662,14 +663,14 @@ ObjectPrx.__completed_bool = function(__r)
     try
     {
         __ret = __is.readBool();
-        __r.endReadParams();
+        __r.__endReadParams();
     }
     catch(__ex)
     {
         ObjectPrx.__dispatchLocalException(__r, __ex);
         return;
     }
-    __r.success(__r, __ret);
+    __r.succeed(__r, __ret);
 };
 
 //
@@ -687,14 +688,14 @@ ObjectPrx.__completed_byte = function(__r)
     try
     {
         __ret = __is.readByte();
-        __r.endReadParams();
+        __r.__endReadParams();
     }
     catch(__ex)
     {
         ObjectPrx.__dispatchLocalException(__r, __ex);
         return;
     }
-    __r.success(__r, __ret);
+    __r.succeed(__r, __ret);
 };
 
 //
@@ -712,14 +713,14 @@ ObjectPrx.__completed_short = function(__r)
     try
     {
         var __ret = __is.readShort();
-        __r.endReadParams();
+        __r.__endReadParams();
     }
     catch(__ex)
     {
         ObjectPrx.__dispatchLocalException(__r, __ex);
         return;
     }
-    __r.success(__r, __ret);
+    __r.succeed(__r, __ret);
 };
 
 //
@@ -737,14 +738,14 @@ ObjectPrx.__completed_int = function(__r)
     try
     {
         __ret = __is.readInt();
-        __r.endReadParams();
+        __r.__endReadParams();
     }
     catch(__ex)
     {
         ObjectPrx.__dispatchLocalException(__r, __ex);
         return;
     }
-    __r.success(__r, __ret);
+    __r.succeed(__r, __ret);
 };
 
 //
@@ -762,14 +763,14 @@ ObjectPrx.__completed_long = function(__r)
     try
     {
         __ret = __is.readLong();
-        __r.endReadParams();
+        __r.__endReadParams();
     }
     catch(__ex)
     {
         ObjectPrx.__dispatchLocalException(__r, __ex);
         return;
     }
-    __r.success(__r, __ret);
+    __r.succeed(__r, __ret);
 };
 
 //
@@ -787,14 +788,14 @@ ObjectPrx.__completed_float = function(__r)
     try
     {
         __ret = __is.readFloat();
-        __r.endReadParams();
+        __r.__endReadParams();
     }
     catch(__ex)
     {
         ObjectPrx.__dispatchLocalException(__r, __ex);
         return;
     }
-    __r.success(__r, __ret);
+    __r.succeed(__r, __ret);
 };
 
 //
@@ -812,14 +813,14 @@ ObjectPrx.__completed_double = function(__r)
     try
     {
         __ret = __is.readDouble();
-        __r.endReadParams();
+        __r.__endReadParams();
     }
     catch(__ex)
     {
         ObjectPrx.__dispatchLocalException(__r, __ex);
         return;
     }
-    __r.success(__r, __ret);
+    __r.succeed(__r, __ret);
 };
 
 //
@@ -837,14 +838,14 @@ ObjectPrx.__completed_string = function(__r)
     try
     {
         __ret = __is.readString();
-        __r.endReadParams();
+        __r.__endReadParams();
     }
     catch(__ex)
     {
         ObjectPrx.__dispatchLocalException(__r, __ex);
         return;
     }
-    __r.success(__r, __ret);
+    __r.succeed(__r, __ret);
 };
 
 //
@@ -862,14 +863,14 @@ ObjectPrx.__completed_ObjectPrx = function(__r)
     try
     {
         __ret = __is.readProxy();
-        __r.endReadParams();
+        __r.__endReadParams();
     }
     catch(__ex)
     {
         ObjectPrx.__dispatchLocalException(__r, __ex);
         return;
     }
-    __r.success(__r, __ret);
+    __r.succeed(__r, __ret);
 };
 
 //
@@ -888,14 +889,14 @@ ObjectPrx.__completed_Object = function(__r)
     {
         __ret = __is.readObject(__ret);
         __is.readPendingObjects();
-        __r.endReadParams();
+        __r.__endReadParams();
     }
     catch(__ex)
     {
         ObjectPrx.__dispatchLocalException(__r, __ex);
         return;
     }
-    __r.success(__r, __ret.value);
+    __r.succeed(__r, __ret.value);
 };
 
 //
@@ -926,6 +927,37 @@ ObjectPrx.__check = function(__r)
     }
 
     return true;
+};
+
+ObjectPrx.prototype.__getRequestHandler = function()
+{
+    if(this._reference.getCacheConnection())
+    {
+        if(this._handler !== null)
+        {
+            return this._handler;
+        }
+        this._handler = this.__createRequestHandler();
+        return this._handler;
+    }
+    else
+    {
+        return this.__createRequestHandler();
+    }
+};
+
+ObjectPrx.prototype.__setRequestHandler = function(handler)
+{
+    if(this._reference.getCacheConnection())
+    {
+        this._handler = handler;
+    }
+};
+
+ObjectPrx.prototype.__createRequestHandler = function()
+{
+    var handler = new ConnectRequestHandler(this._reference, this);
+    return handler.connect();
 };
 
 //
@@ -975,7 +1007,44 @@ ObjectPrx.__dispatchLocalException = function(__r, __ex)
 //
 ObjectPrx.checkedCast = function(prx, facet, ctx)
 {
-    // TODO
+    var __promise = null;
+    if(prx === undefined || prx === null)
+    {
+        __promise = new AsyncResult(null, "checkedCast", null, null, null, null);
+        __promise.succeed(__promise, null);
+    }
+    else
+    {
+        if(facet === undefined)
+        {
+            __promise = new AsyncResult(null, "checkedCast", null, prx, null, null);
+            __promise.succeed(__promise, prx);
+        }
+        else
+        {
+            var __bb = prx.ice_facet(facet);
+            var __h = new ObjectPrx();
+            __h.__copyFrom(__bb);
+            __promise = new AsyncResult(prx.ice_getCommunicator(), "checkedCast", null, __h, null, null);
+            __bb.ice_isA("::Ice::Object", ctx).then(
+                function(__r, __ret)
+                {
+                    __promise.succeed(__promise, __ret ? __h : null);
+                },
+                function(__r, __ex)
+                {
+                    if(__ex instanceof LocalEx.FacetNotExistException)
+                    {
+                        __promise.succeed(__promise, null);
+                    }
+                    else
+                    {
+                        __promise.fail(__promise, __ex);
+                    }
+                });
+        }
+    }
+    return __promise;
 };
 
 //
@@ -983,7 +1052,15 @@ ObjectPrx.checkedCast = function(prx, facet, ctx)
 //
 ObjectPrx.uncheckedCast = function(prx, facet)
 {
-    return prx;
+    var r = null;
+    if(prx !== undefined && prx !== null)
+    {
+        var bb = prx.ice_facet(facet);
+        var h = new ObjectPrx();
+        h.__copyFrom(bb);
+        r = h;
+    }
+    return r;
 };
 
 module.exports = ObjectPrx;

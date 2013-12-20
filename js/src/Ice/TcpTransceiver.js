@@ -34,12 +34,12 @@ var TcpTransceiver = function(instance)
     this._readPosition = 0;
 }
 
-TcpTransceiver.createOutgoing = function(instance, proxy, addr)
+TcpTransceiver.createOutgoing = function(instance, addr)
 {
     var transceiver = new TcpTransceiver(instance);
 
     transceiver._fd = new net.Socket();
-    transceiver._proxy = proxy;
+    transceiver._proxy = instance.networkProxy();
     transceiver._addr = addr;
     transceiver._connected = false;
     transceiver._desc = "remote address: " + Network.addrToString(addr.host, addr.port) + " <not connected>";

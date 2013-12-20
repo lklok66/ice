@@ -8,6 +8,7 @@
 // **********************************************************************
 
 var AsyncStatus = require("./AsyncStatus");
+var BasicStream = require("./BasicStream");
 var Debug = require("./Debug");
 var Ex = require("./Exception");
 var ExUtil = require("./ExUtil");
@@ -131,6 +132,14 @@ ConnectionI.prototype.start = function()
         }
 
         this._startPromise = new Promise();
+        var self = this;
+        this._transceiver.setCallbacks(
+            function() { self.transceiverConnected(); },
+            function() { self.transceiverBytesAvailable(); },
+            function() { self.transceiverBytesWritten(); },
+            function() { self.transceiverClosed(); },
+            function(ex) { self.transceiverError(ex); }
+        );
         this.initialize();
     }
     catch(ex)
@@ -447,7 +456,7 @@ ConnectionI.prototype.finishBatchRequest = function(os, compress)
             // exceeded and rollback stream to the marker.
             try
             {
-                this._transceiver.checkSendSize(this._batchStream.getBuffer(), this._instance.messageSizeMax());
+                this._transceiver.checkSendSize(this._batchStream.buffer, this._instance.messageSizeMax());
             }
             catch(ex)
             {
@@ -781,7 +790,7 @@ ConnectionI.prototype.message = function(operation)
     if((operation & SocketOperation.Write) != 0)
     {
         // TODO: Anything to do here?
-        Debug.assert(this._writeStream.getBuffer().remaining == 0);
+        Debug.assert(this._writeStream.buffer.remaining == 0);
     }
 
     //
@@ -798,7 +807,7 @@ ConnectionI.prototype.message = function(operation)
             {
                 if(this._readHeader) // Read header if necessary.
                 {
-                    if(!this._transceiver.read(this._readStream.getBuffer(), this._hasMoreData))
+                    if(!this._transceiver.read(this._readStream.buffer, this._hasMoreData))
                     {
                         //
                         // We didn't get enough data to complete the header.
@@ -806,7 +815,7 @@ ConnectionI.prototype.message = function(operation)
                         return;
                     }
 
-                    Debug.assert(this._readStream.getBuffer().remaining === 0);
+                    Debug.assert(this._readStream.buffer.remaining === 0);
                     this._readHeader = false;
 
                     var pos = this._readStream.pos;
@@ -872,13 +881,13 @@ ConnectionI.prototype.message = function(operation)
                     }
                     else
                     {
-                        if(!this._transceiver.read(this._readStream.getBuffer(), this._hasMoreData))
+                        if(!this._transceiver.read(this._readStream.buffer, this._hasMoreData))
                         {
                             Debug.assert(!this._readStream.isEmpty());
                             this.scheduleTimeout(SocketOperation.Read, this._endpoint.timeout());
                             return;
                         }
-                        Debug.assert(this._readStream.getBuffer().remaining === 0);
+                        Debug.assert(this._readStream.buffer.remaining === 0);
                     }
                 }
             }
@@ -1473,7 +1482,7 @@ ConnectionI.prototype.initiateShutdown = function()
 
 ConnectionI.prototype.initialize = function()
 {
-    var s = this._transceiver.initialize(this._readStream.getBuffer(), this._writeStream.getBuffer());
+    var s = this._transceiver.initialize(this._readStream.buffer, this._writeStream.buffer);
     if(s != SocketOperation.None)
     {
         this.scheduleTimeout(s, this.connectTimeout());
@@ -1507,7 +1516,7 @@ ConnectionI.prototype.validate = function()
             }
 
             if(this._writeStream.pos != this._writeStream.size &&
-               !this._transceiver.write(this._writeStream.getBuffer()))
+               !this._transceiver.write(this._writeStream.buffer))
             {
                 this.scheduleTimeout(SocketOperation.Write, this.connectTimeout());
                 return false;
@@ -1522,7 +1531,7 @@ ConnectionI.prototype.validate = function()
             }
 
             if(this._readStream.pos !== this._readStream.size &&
-               !this._transceiver.read(this._readStream.getBuffer(), this._hasMoreData))
+               !this._transceiver.read(this._readStream.buffer, this._hasMoreData))
             {
                 this.scheduleTimeout(SocketOperation.Read, this.connectTimeout());
                 return false;
@@ -1638,7 +1647,7 @@ ConnectionI.prototype.sendNextMessage = function()
             // Send the message.
             //
             if(this._writeStream.pos != this._writeStream.size &&
-               !this._transceiver.write(this._writeStream.getBuffer()))
+               !this._transceiver.write(this._writeStream.buffer))
             {
                 Debug.assert(!this._writeStream.isEmpty());
                 this.scheduleTimeout(SocketOperation.Write, this._endpoint.timeout());
@@ -1687,7 +1696,7 @@ ConnectionI.prototype.sendMessage = function(message)
 
     TraceUtil.trace("sending asynchronous request", message.stream, this._logger, this._traceLevels);
 
-    if(this._transceiver.write(message.stream.getBuffer()))
+    if(this._transceiver.write(message.stream.buffer))
     {
         //
         // Entire buffer was written immediately.
@@ -1711,9 +1720,9 @@ ConnectionI.prototype.sendMessage = function(message)
     return AsyncStatus.Queued;
 };
 
-var MessageInfo = function(stream)
+var MessageInfo = function(instance)
 {
-    this.stream = stream;
+    this.stream = new BasicStream(instance, Protocol.currentProtocolEncoding, false);
 
     this.invokeNum = 0;
     this.requestId = 0;
@@ -1723,11 +1732,11 @@ var MessageInfo = function(stream)
     this.outAsync = null;
 };
 
-ConnectionI.prototype.parseMessage = function(stream)
+ConnectionI.prototype.parseMessage = function()
 {
     Debug.assert(this._state > StateNotValidated && this._state < StateClosed);
 
-    var info = new MessageInfo(stream);
+    var info = new MessageInfo(this._instance);
 
     this._readStream.swap(info.stream);
     this._readStream.resize(Protocol.headerSize);

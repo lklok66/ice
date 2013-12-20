@@ -7,141 +7,134 @@
 //
 // **********************************************************************
 
-//
-// Ice.AsyncResult
-//
-var AsyncResult = function(communicator, connection, proxy, adapter, op)
+var BasicStream = require("./BasicStream");
+var Debug = require("./Debug");
+var Ex = require("./Exception");
+var Promise = require("./Promise");
+var Protocol = require("./Protocol");
+
+var AsyncResult = function(communicator, op, connection, proxy, adapter, completedFn)
 {
-    this.communicator = communicator;
-    this.connection = connection;
-    this.proxy = proxy;
-    this.adapter = adapter;
-    this.operation = op;
-    this.completed = false;
-    this.exception = null;
-    this.responseCallback = null;
-    this.exceptionCallback = null;
-    this.cbContext = null;
-    this.cookie = null;
-};
-
-AsyncResult.prototype.getCommunicator = function()
-{
-    return this.communicator;
-};
-
-AsyncResult.prototype.getConnection = function()
-{
-    return this.connection;
-};
-
-AsyncResult.prototype.getProxy = function()
-{
-    return this.proxy;
-};
-
-AsyncResult.prototype.getAdapter = function()
-{
-    return this.adapter;
-};
-
-AsyncResult.prototype.getOperation = function()
-{
-    return this.operation;
-};
-
-AsyncResult.prototype.getCookie = function()
-{
-    return this.cookie;
-};
-
-AsyncResult.prototype.isCompleted = function()
-{
-    return this.completed;
-};
-
-AsyncResult.prototype.throwLocalException = function()
-{
-    if(this.exception !== null)
-    {
-        throw this.exception;
-    }
-};
-
-AsyncResult.prototype.whenCompleted = function(responseCallback, exceptionCallback, cbContext, cookie)
-{
-    if(this.responseCallback !== null || this.exceptionCallback !== null || this.cbContext !== null ||
-       this.cookie !== null)
-    {
-        throw new Error("whenCompleted already invoked");
-    }
-
-    this.responseCallback = responseCallback === undefined ? null : responseCallback;
-    this.exceptionCallback = exceptionCallback === undefined ? null : exceptionCallback;
-    this.cbContext = cbContext === undefined ? null : cbContext;
-    this.cookie = cookie === undefined ? null : cookie;
-
     //
-    // The request may have already completed before the application calls whenCompleted.
+    // AsyncResult can be constructed by a sub-type's prototype, in which case the
+    // arguments are undefined.
     //
-    if(this.completed)
+    Promise.call(this);
+    if(communicator !== undefined)
     {
-        this.__finished();
+        this._communicator = communicator;
+        this._instance = communicator !== null ? communicator.instance : null;
+        this._operation = op;
+        this._completed = completedFn;
+        this._connection = connection;
+        this._proxy = proxy;
+        this._adapter = adapter;
+        this._is = null;
+        this._os =
+            communicator !== null ? new BasicStream(this._instance, Protocol.currentProtocolEncoding, false) : null;
+        this._state = 0;
+        this._sentSynchronously = false;
+        this._exception = null;
     }
 };
 
-AsyncResult.prototype.__exception = function(ex)
+AsyncResult.prototype = new Promise();
+AsyncResult.prototype.constructor = AsyncResult;
+
+AsyncResult.OK = 0x1;
+AsyncResult.Done = 0x2;
+AsyncResult.Sent = 0x4;
+
+Object.defineProperty(AsyncResult.prototype, "communicator", {
+    get: function() { return this._communicator; }
+});
+
+Object.defineProperty(AsyncResult.prototype, "connection", {
+    get: function() { return this._connection; }
+});
+
+Object.defineProperty(AsyncResult.prototype, "proxy", {
+    get: function() { return this._proxy; }
+});
+
+Object.defineProperty(AsyncResult.prototype, "adapter", {
+    get: function() { return this._adapter; }
+});
+
+Object.defineProperty(AsyncResult.prototype, "operation", {
+    get: function() { return this._operation; }
+});
+
+AsyncResult.prototype.__os = function()
 {
-    this.completed = true;
-    this.exception = ex;
-    this.__finished();
+    return this._os;
 };
 
-AsyncResult.prototype.__finished = function()
+AsyncResult.prototype.__is = function()
 {
-    if(this.exception !== null)
-    {
-        if(this.exceptionCallback !== null)
-        {
-            try
-            {
-                this.exceptionCallback.call(this.cbContext === null ? this.exceptionCallback : this.cbContext,
-                                            this.exception);
-            }
-            catch(ex)
-            {
-                this.__warning(ex);
-            }
-        }
-    }
-    else if(this.responseCallback !== null)
+    return this._is;
+};
+
+AsyncResult.prototype.__startReadParams = function()
+{
+    this._is.startReadEncaps();
+    return this._is;
+};
+
+AsyncResult.prototype.__endReadParams = function()
+{
+    this._is.endReadEncaps();
+};
+
+AsyncResult.prototype.__readEmptyParams = function()
+{
+    this._is.skipEmptyEncaps(null);
+};
+
+AsyncResult.prototype.__readParamEncaps = function()
+{
+    return this._is.readEncaps(null);
+};
+
+AsyncResult.prototype.__throwUserException = function()
+{
+    Debug.assert((this._state & AsyncResult.Done) !== 0);
+    if((this._state & AsyncResult.OK) === 0)
     {
         try
         {
-            this.__response();
+            this._is.startReadEncaps();
+            this._is.throwException();
         }
         catch(ex)
         {
-            this.__warning(ex);
+            if(ex instanceof Ex.UserException)
+            {
+                this._is.endReadEncaps();
+            }
+            throw ex;
         }
     }
-};
+}
 
-AsyncResult.prototype.__warning = function(ex)
+AsyncResult.prototype.__exception = function(ex)
 {
-    console.log(ex);
-    /* TODO
-    const msg:String = "exception raised by AMI callback:\n" + Ex.toString(ex);
-    if(_communicator !== null &&
-       _communicator.getProperties().getPropertyAsIntWithDefault("Ice.Warn.AMICallback", 1) > 0)
+    this._state |= AsyncResult.Done;
+    this.fail(this, ex);
+}
+
+AsyncResult.prototype.__response = function()
+{
+    //
+    // Note: no need to change the state here, specializations are responsible for
+    // changing the state.
+    //
+
+    if(this.proxy !== null && this.proxy.ice_isTwoway())
     {
-        _communicator.getLogger().warning(msg);
+        Debug.assert(this._completed !== null);
+        this._completed(this);
     }
-    else if(_communicator === null)
-    {
-        Ice.Util.getProcessLogger().warning(msg);
-    }
-    */
-};
+}
 
 module.exports = AsyncResult;

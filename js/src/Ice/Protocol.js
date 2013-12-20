@@ -7,6 +7,8 @@
 //
 // **********************************************************************
 
+var Node = { Buffer: global.Buffer};
+
 var StringUtil = require("./StringUtil");
 var LocalEx = require("./LocalException").Ice;
 var Ver = require("./Version").Ice;
@@ -33,7 +35,8 @@ module.exports.headerSize = 14;
 //
 // The magic number at the front of each message
 //
-module.exports.magic = [ 0x49, 0x63, 0x65, 0x50 ];      // 'I', 'c', 'e', 'P'
+//module.exports.magic = [ 0x49, 0x63, 0x65, 0x50 ];      // 'I', 'c', 'e', 'P'
+module.exports.magic = new Node.Buffer([ 0x49, 0x63, 0x65, 0x50 ]);      // 'I', 'c', 'e', 'P'
 
 //
 // The current Ice protocol and encoding version
@@ -67,7 +70,7 @@ module.exports.replyUnknownLocalException = 5;
 module.exports.replyUnknownUserException = 6;
 module.exports.replyUnknownException = 7;
 
-module.exports.requestHdr = new Uint8Array([
+module.exports.requestHdr = new Node.Buffer([
     module.exports.magic[0],
     module.exports.magic[1],
     module.exports.magic[2],
@@ -82,7 +85,7 @@ module.exports.requestHdr = new Uint8Array([
     0, 0, 0, 0  // Request ID (placeholder).
 ]);
 
-module.exports.requestBatchHdr = new Uint8Array([
+module.exports.requestBatchHdr = new Node.Buffer([
     module.exports.magic[0],
     module.exports.magic[1],
     module.exports.magic[2],
@@ -97,7 +100,7 @@ module.exports.requestBatchHdr = new Uint8Array([
     0, 0, 0, 0  // Number of requests in batch (placeholder).
 ]);
 
-module.exports.replyHdr = new Uint8Array([
+module.exports.replyHdr = new Node.Buffer([
     module.exports.magic[0],
     module.exports.magic[1],
     module.exports.magic[2],
@@ -119,7 +122,7 @@ module.exports.currentEncoding = new Ver.EncodingVersion(module.exports.encoding
 
 module.exports.checkSupportedProtocol = function(v)
 {
-    if(v.major != module.exports.currentProtocol.major || v.minor > module.exports.currentProtocol.minor)
+    if(v.major !== module.exports.currentProtocol.major || v.minor > module.exports.currentProtocol.minor)
     {
         throw new LocalEx.UnsupportedProtocolException("", v, module.exports.currentProtocol);
     }
@@ -127,7 +130,7 @@ module.exports.checkSupportedProtocol = function(v)
 
 module.exports.checkSupportedProtocolEncoding = function(v)
 {
-    if(v.major != module.exports.currentProtocolEncoding.major ||
+    if(v.major !== module.exports.currentProtocolEncoding.major ||
        v.minor > module.exports.currentProtocolEncoding.minor)
     {
         throw new LocalEx.UnsupportedEncodingException("", v, module.exports.currentProtocolEncoding);
@@ -136,7 +139,7 @@ module.exports.checkSupportedProtocolEncoding = function(v)
 
 module.exports.checkSupportedEncoding = function(v)
 {
-    if(v.major != module.exports.currentEncoding.major || v.minor > module.exports.currentEncoding.minor)
+    if(v.major !== module.exports.currentEncoding.major || v.minor > module.exports.currentEncoding.minor)
     {
         throw new LocalEx.UnsupportedEncodingException("", v, module.exports.currentEncoding);
     }
@@ -148,7 +151,7 @@ module.exports.checkSupportedEncoding = function(v)
 //
 module.exports.getCompatibleProtocol = function(v)
 {
-    if(v.major != module.exports.currentProtocol.major)
+    if(v.major !== module.exports.currentProtocol.major)
     {
         return v; // Unsupported protocol, return as is.
     }
@@ -172,7 +175,7 @@ module.exports.getCompatibleProtocol = function(v)
 //
 module.exports.getCompatibleEncoding = function(v)
 {
-    if(v.major != module.exports.currentEncoding.major)
+    if(v.major !== module.exports.currentEncoding.major)
     {
         return v; // Unsupported encoding, return as is.
     }
@@ -192,7 +195,7 @@ module.exports.getCompatibleEncoding = function(v)
 
 module.exports.isSupported = function(version, supported)
 {
-    return version.major == supported.major && version.minor <= supported.minor;
+    return version.major === supported.major && version.minor <= supported.minor;
 };
 
 /**

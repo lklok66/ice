@@ -52,7 +52,7 @@ Object.defineProperty(HashMap.prototype, "comparator", {
     set: function(fn) { this._comparator = fn; }
 });
 
-Object.defineProperty(HashMap.prototype, "compareEquals", {
+Object.defineProperty(HashMap, "compareEquals", {
     get: function() { return function(k1, k2) { return k1.equals(k2); }; }
 });
 

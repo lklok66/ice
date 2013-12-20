@@ -13,12 +13,13 @@ var HashMap = require("./HashMap");
 var HashUtil = require("./HashUtil");
 var ExUtil = require("./ExUtil");
 var OpaqueEndpointI = require("./OpaqueEndpointI");
+var Promise = require("./Promise");
 var Protocol = require("./Protocol");
 var RefMode = require("./ReferenceMode");
 var StringUtil = require("./StringUtil");
 
-var EndpointTypes = require("./EndpointTypes").ice;
-var Id = require("./Identity").ice;
+var EndpointTypes = require("./EndpointTypes").Ice;
+var Id = require("./Identity").Ice;
 var LocalEx = require("./LocalException").Ice;
 
 var RouterPrx = require("./Router").Ice.RouterPrx;
@@ -1322,10 +1323,7 @@ Reference.prototype.toProperty = function(prefix)
     return null;
 };
 
-Reference.prototype.getConnection = function(
-    successCallback,    // function(connection, compress)
-    exceptionCallback,  // function(ex)
-    cbContext)
+Reference.prototype.getConnection = function()
 {
     // Abstract
     Debug.assert(false);
@@ -1604,28 +1602,27 @@ FixedReference.prototype.getConnectionInternal = function(compress)
     return this._fixedConnection;
 };
 
-FixedReference.prototype.getConnection = function(
-    successCallback,    // function(connection, compress)
-    exceptionCallback,  // function(ex)
-    cbContext)
+FixedReference.prototype.getConnection = function()
 {
+    var promise = new Promise(); // success callback receives (connection, compress)
     try
     {
         var compress = { 'value': false };
         var connection = this.getConnectionInternal(compress);
-        successCallback.call(cbContext === undefined ? successCallback : cbContext, connection, compress.value);
+        promise.succeed(connection, compress.value);
     }
     catch(ex)
     {
         if(ex instanceof LocalEx.LocalException)
         {
-            exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext, ex);
+            promise.fail(ex);
         }
         else
         {
             throw ex;
         }
     }
+    return promise;
 };
 
 FixedReference.prototype.equals = function(rhs)
@@ -2071,11 +2068,10 @@ RoutableReference.prototype.equals = function(rhs)
     return true;
 };
 
-RoutableReference.prototype.getConnection = function(
-    successCallback,    // function(connection, compress)
-    exceptionCallback,  // function(ex)
-    cbContext)
+RoutableReference.prototype.getConnection = function()
 {
+    var promise = new Promise(); // success callback receives (connection, compress)
+
     if(this._routerInfo !== null)
     {
         //
@@ -2083,107 +2079,122 @@ RoutableReference.prototype.getConnection = function(
         // proxy endpoints.
         //
         var self = this;
-        var setEndpointsFn = function(endpts)
-        {
-            if(endpts.length > 0)
+        this._routerInfo.getClientEndpoints().then(
+            function(endpts)
             {
-                self.applyOverrides(endpts);
-                self.createConnection(endpts, successCallback, exceptionCallback, cbContext);
-            }
-            else
+                if(endpts.length > 0)
+                {
+                    self.applyOverrides(endpts);
+                    self.createConnection(endpts).then(
+                        function(connection, compress)
+                        {
+                            promise.succeed(connection, compress);
+                        },
+                        function(ex)
+                        {
+                            promise.fail(ex);
+                        });
+                }
+                else
+                {
+                    self.getConnectionNoRouterInfo(promise);
+                }
+            },
+            function(ex)
             {
-                self.getConnectionNoRouterInfo(successCallback, exceptionCallback, cbContext);
-            }
-        };
-        var setExceptionFn = function(ex)
-        {
-            exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext, ex);
-        };
-        this._routerInfo.getClientEndpoints(setEndpointsFn, setExceptionFn);
+                promise.fail(ex);
+            });
     }
     else
     {
-        this.getConnectionNoRouterInfo(successCallback, exceptionCallback, cbContext);
+        this.getConnectionNoRouterInfo(promise);
     }
+
+    return promise;
 };
 
-RoutableReference.prototype.getConnectionNoRouterInfo = function(
-    successCallback,    // function(connection, compress)
-    exceptionCallback,  // function(ex)
-    cbContext)
+RoutableReference.prototype.getConnectionNoRouterInfo = function(promise)
 {
     if(this._endpoints.length > 0)
     {
-        this.createConnection(this._endpoints, successCallback, exceptionCallback, cbContext);
+        this.createConnection(this._endpoints).then(
+            function(connection, compress)
+            {
+                promise.succeed(connection, compress);
+            },
+            function(ex)
+            {
+                promise.fail(ex);
+            });
         return;
     }
 
     var self = this;
     if(this._locatorInfo !== null)
     {
-        var setEndpointsFn = function(endpoints, cached)
-        {
-            if(endpoints.length === 0)
+        this._locatorInfo.getEndpoints(this, null, this._locatorCacheTimeout).then(
+            function(endpoints, cached)
             {
-                exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext,
-                                       new LocalEx.NoEndpointException(self.toString()));
-                return;
-            }
+                if(endpoints.length === 0)
+                {
+                    promise.fail(new LocalEx.NoEndpointException(self.toString()));
+                    return;
+                }
 
-            self.applyOverrides(endpoints);
-            var connSuccessFn = function(connection, compress)
-            {
-                successCallback.call(cbContext === undefined ? successCallback : cbContext, connection, compress);
-            };
-            var connExceptionFn = function(ex)
-            {
-                if(ex instanceof LocalEx.NoEndpointException)
-                {
-                    //
-                    // No need to retry if there's no endpoints.
-                    //
-                    exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext, ex);
-                }
-                else
-                {
-                    Debug.assert(self._locatorInfo !== null);
-                    self.getLocatorInfo().clearCache(self);
-                    if(cached)
+                self.applyOverrides(endpoints);
+                self.createConnection(endpoints).then(
+                    function(connection, compress)
                     {
-                        var traceLevels = self.getInstance().traceLevels();
-                        if(traceLevels.retry >= 2)
+                        promise.succeed(connection, compress);
+                    },
+                    function(ex)
+                    {
+                        if(ex instanceof LocalEx.NoEndpointException)
                         {
-                            var s = "connection to cached endpoints failed\n" +
-                                "removing endpoints from cache and trying one more time\n" + ExUtil.toString(ex);
-                            self.getInstance().initializationData().logger.trace(traceLevels.retryCat, s);
+                            //
+                            // No need to retry if there's no endpoints.
+                            //
+                            promise.fail(ex);
                         }
-                        self.getConnectionNoRouterInfo(successCallback, exceptionCallback, cbContext); // Retry.
-                        return;
-                    }
-                    exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext, ex);
-                }
-            };
-            self.createConnection(endpoints, connSuccessFn, connExceptionFn);
-        };
-        var setExceptionFn = function(ex)
-        {
-            exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext, ex);
-        };
-        this._locatorInfo.getEndpoints(this, null, this._locatorCacheTimeout, setEndpointsFn, setExceptionFn);
+                        else
+                        {
+                            Debug.assert(self._locatorInfo !== null);
+                            self.getLocatorInfo().clearCache(self);
+                            if(cached)
+                            {
+                                var traceLevels = self.getInstance().traceLevels();
+                                if(traceLevels.retry >= 2)
+                                {
+                                    var s = "connection to cached endpoints failed\n" +
+                                        "removing endpoints from cache and trying one more time\n" +
+                                        ExUtil.toString(ex);
+                                    self.getInstance().initializationData().logger.trace(traceLevels.retryCat, s);
+                                }
+                                self.getConnectionNoRouterInfo(promise); // Retry.
+                                return;
+                            }
+                            promise.fail(ex);
+                        }
+                    });
+            },
+            function(ex)
+            {
+                promise.fail(ex);
+            });
     }
     else
     {
-        exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext,
-                               new LocalEx.NoEndpointException(this.toString()));
+        promise.fail(new LocalEx.NoEndpointException(this.toString()));
     }
 };
 
 RoutableReference.prototype.clone = function()
 {
     var r = new RoutableReference(this.getInstance(), this.getCommunicator(), this.getIdentity(), this.getFacet(),
-                                  this.getMode(), this.getSecure(), this._endpoints, this._adapterId,
-                                  this._locatorInfo, this._routerInfo, this._cacheConnection, this._preferSecure,
-                                  this._endpointSelection, this._locatorCacheTimeout);
+                                  this.getMode(), this.getSecure(), this.getProtocol(), this.getEncoding(),
+                                  this._endpoints, this._adapterId, this._locatorInfo, this._routerInfo,
+                                  this._cacheConnection, this._preferSecure, this._endpointSelection,
+                                  this._locatorCacheTimeout);
     this.copyMembers(r);
     return r;
 };
@@ -2322,19 +2333,18 @@ RoutableReference.prototype.filterEndpoints = function(allEndpoints)
     return endpoints;
 };
 
-RoutableReference.prototype.createConnection = function(allEndpoints, successCallback, exceptionCallback, cbContext)
+RoutableReference.prototype.createConnection = function(allEndpoints)
 {
     var endpoints = this.filterEndpoints(allEndpoints);
     if(endpoints.length === 0)
     {
-        exceptionCallback.call(cbContext === undefined ? exceptionCallback : cbContext,
-                               new LocalEx.NoEndpointException(this.toString()));
-        return;
+        return Promise.fail(new LocalEx.NoEndpointException(this.toString()));
     }
 
     //
     // Finally, create the connection.
     //
+    var promise = new Promise();
     var factory = this.getInstance().outgoingConnectionFactory();
     var cb;
     if(this.getCacheConnection() || endpoints.length == 1)
@@ -2343,8 +2353,16 @@ RoutableReference.prototype.createConnection = function(allEndpoints, successCal
         // Get an existing connection or create one if there's no
         // existing connection to one of the given endpoints.
         //
-        cb = new CreateConnectionCallback(this, null, successCallback, exceptionCallback, cbContext);
-        factory.create(endpoints, false, this.getEndpointSelection(), cb.setConnection, cb.setException, cb);
+        cb = new CreateConnectionCallback(this, null, promise);
+        factory.create(endpoints, false, this.getEndpointSelection()).then(
+            function(connection, compress)
+            {
+                cb.setConnection(connection, compress);
+            },
+            function(ex)
+            {
+                cb.setException(ex);
+            });
     }
     else
     {
@@ -2356,20 +2374,28 @@ RoutableReference.prototype.createConnection = function(allEndpoints, successCal
         // connection for one of the endpoints.
         //
         var v = [ endpoints[0] ];
-        cb = new CreateConnectionCallback(this, endpoints, successCallback, exceptionCallback, cbContext);
-        factory.create(v, true, this.getEndpointSelection(), cb.setConnection, cb.setException, cb);
+        cb = new CreateConnectionCallback(this, endpoints, promise);
+        factory.create(v, true, this.getEndpointSelection()).then(
+            function(connection, compress)
+            {
+                cb.setConnection(connection, compress);
+            },
+            function(ex)
+            {
+                cb.setException(ex);
+            });
     }
+
+    return promise;
 };
 
 module.exports.RoutableReference = RoutableReference;
 
-var CreateConnectionCallback = function(r, endpoints, successCallback, exceptionCallback, cbContext)
+var CreateConnectionCallback = function(r, endpoints, promise)
 {
     this.ref = r;
     this.endpoints = endpoints;
-    this.successCallback = successCallback;
-    this.exceptionCallback = exceptionCallback;
-    this.cbContext = cbContext;
+    this.promise = promise;
     this.i = 0;
     this.exception = null;
 };
@@ -2385,8 +2411,7 @@ CreateConnectionCallback.prototype.setConnection = function(connection, compress
     {
         connection.setAdapter(this.ref.getRouterInfo().getAdapter());
     }
-    this.successCallback.call(this.cbContext === undefined ? this.successCallback : this.cbContext, connection,
-                              compress);
+    this.promise.succeed(connection, compress);
 };
 
 CreateConnectionCallback.prototype.setException = function(ex)
@@ -2398,13 +2423,20 @@ CreateConnectionCallback.prototype.setException = function(ex)
 
     if(this.endpoints === null || ++this.i === this.endpoints.length)
     {
-        this.exceptionCallback.call(this.cbContext === undefined ? this.exceptionCallback : this.cbContext,
-                                    this.exception);
+        this.promise.fail(this.exception);
         return;
     }
 
     var more = this.i != this.endpoints.length - 1;
     var arr = [ this.endpoints[this.i] ];
-    this.ref.getInstance().outgoingConnectionFactory().create(arr, more, this.ref.getEndpointSelection(),
-                                                              this.setConnection, this.setException, this);
+    var self = this;
+    this.ref.getInstance().outgoingConnectionFactory().create(arr, more, this.ref.getEndpointSelection()).then(
+        function(connection, compress)
+        {
+            self.setConnection(connection, compress);
+        },
+        function(ex)
+        {
+            self.setException(ex);
+        });
 };

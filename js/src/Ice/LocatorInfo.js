@@ -81,7 +81,7 @@ LocatorInfo.prototype.getLocatorRegistry = function()
 
 LocatorInfo.prototype.getEndpoints = function(ref, wellKnownRef, ttl)
 {
-    var promise = new Promise();
+    var promise = new Promise(); // success callback receives (endpoints, cached)
 
     Debug.assert(ref.isIndirect());
     var endpoints = null;

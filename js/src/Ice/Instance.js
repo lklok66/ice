@@ -19,6 +19,8 @@ var LocatorManager = require("./LocatorManager");
 var Logger = require("./Logger");
 var Network = require("./Network");
 var ObjectFactoryManager = require("./ObjectFactoryManager");
+var OutgoingConnectionFactory = require("./OutgoingConnectionFactory");
+var ProcessLogger = require("./ProcessLogger");
 var Promise = require("./Promise");
 var Properties = require("./Properties");
 var ProxyFactory = require("./ProxyFactory");
@@ -27,7 +29,7 @@ var RouterManager = require("./RouterManager");
 var TcpEndpointFactory = require("./TcpEndpointFactory");
 var Timer = require("./Timer");
 var TraceLevels = require("./TraceLevels");
-var ProcessLogger = require("./ProcessLogger");
+
 var LocalEx = require("./LocalException").Ice;
 
 var StateActive = 0;
@@ -41,6 +43,31 @@ var Instance = function(initData)
 {
     this._state = StateActive;
     this._initData = initData;
+
+    this._traceLevels = null;
+    this._defaultsAndOverrides = null;
+    this._messageSizeMax = null;
+    this._clientACM = null;
+    this._serverACM = null;
+    this._implicitContext = null;
+    this._routerManager = null;
+    this._locatorManager = null;
+    this._referenceFactory = null;
+    this._proxyFactory = null;
+    this._outgoingConnectionFactory = null;
+    this._connectionMonitor = null;
+    this._servantFactoryManager = null;
+    this._objectAdapterFactory = null;
+    this._protocolSupport = null;
+    this._retryQueue = null;
+    this._endpointHostResolver = null;
+    this._endpointFactoryManager = null;
+    this._exceptionFactoryMap = null;
+
+    this._adminAdapter = null;
+    this._adminFacets = new HashMap();
+    this._adminFacetFilter = [];
+    this._adminIdentity = null;
 };
 
 Instance.prototype.initializationData = function()
@@ -126,6 +153,11 @@ Instance.prototype.outgoingConnectionFactory = function()
 Instance.prototype.preferIPv6 = function()
 {
     return this._preferIPv6;
+};
+
+Instance.prototype.networkProxy = function()
+{
+    return this._networkProxy;
 };
 
 Instance.prototype.connectionMonitor = function()
@@ -345,6 +377,9 @@ Instance.prototype.finishSetup = function(communicator, promise)
 
         this._proxyFactory = new ProxyFactory(this);
 
+        // TODO: Network proxy
+        this._networkProxy = null;
+
         var ipv4 = this._initData.properties.getPropertyAsIntWithDefault("Ice.IPv4", 1) > 0;
         var ipv6 = this._initData.properties.getPropertyAsIntWithDefault("Ice.IPv6", 0) > 0;
         if(!ipv4 && !ipv6)
@@ -401,9 +436,7 @@ Instance.prototype.finishSetup = function(communicator, promise)
         }
         */
 
-        /* TODO
         this._outgoingConnectionFactory = new OutgoingConnectionFactory(communicator, this);
-        */
         this._servantFactoryManager = new ObjectFactoryManager();
 
         /* TODO
@@ -577,7 +610,33 @@ Instance.prototype.destroy = function()
         }
         */
 
-        this.outgoingConnectionFactoryFinished(promise);
+        if(this._outgoingConnectionFactory !== null)
+        {
+            this._outgoingConnectionFactory.destroy();
+        }
+
+        if(this._objectAdapterFactory !== null)
+        {
+            this._objectAdapterFactory.destroy();
+        }
+
+        if(this._outgoingConnectionFactory !== null)
+        {
+            var self = this;
+            this._outgoingConnectionFactory.waitUntilFinished().then(
+                function()
+                {
+                    self.outgoingConnectionFactoryFinished(promise);
+                },
+                function(ex)
+                {
+                    promise.fail(ex);
+                });
+        }
+        else
+        {
+            this.outgoingConnectionFactoryFinished(promise);
+        }
     }
     catch(ex)
     {

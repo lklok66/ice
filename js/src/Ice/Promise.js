@@ -17,8 +17,8 @@ State.Failed = 2;
 
 var Promise = function()
 {
-    this._state = State.Pending;
-    this._listeners = [];
+    this.__state = State.Pending;
+    this.__listeners = [];
 };
 
 Promise.prototype.then = function(onResponse, onException, onProgress)
@@ -31,7 +31,13 @@ Promise.prototype.then = function(onResponse, onException, onProgress)
     setTimeout(
         function()
         {
-            self._listeners.push({promise:promise, onResponse:onResponse, onException:onException, onProgress:onProgress});
+            self.__listeners.push(
+                {
+                    promise:promise,
+                    onResponse:onResponse,
+                    onException:onException,
+                    onProgress:onProgress
+                });
             self.resolve();
         }, 0);
     return promise;
@@ -44,12 +50,12 @@ Promise.prototype.exception = function(onException)
 
 var resolveImp = function(self, listener)
 {
-    var callback = self._state === State.Success ? listener.onResponse : listener.onException;
+    var callback = self.__state === State.Success ? listener.onResponse : listener.onException;
     try
     {
         if(typeof callback !== 'function')
         {
-            listener.promise.setState(self._state, self._args);
+            listener.promise.setState(self.__state, self._args);
         }
         else
         {
@@ -86,13 +92,13 @@ var resolveImp = function(self, listener)
 
 Promise.prototype.resolve = function()
 {
-    if(this._state === State.Pending)
+    if(this.__state === State.Pending)
     {
         return;
     }
 
     var obj;
-    while((obj = this._listeners.pop()))
+    while((obj = this.__listeners.pop()))
     {
         //
         // We use a separate function here to capture the listeners
@@ -107,7 +113,7 @@ Promise.prototype.progress = function()
     //
     // Don't report progress events after the promise is fulfilled.
     //
-    if(this._state !== State.Pending)
+    if(this.__state !== State.Pending)
     {
         return;
     }
@@ -122,9 +128,9 @@ Promise.prototype.progress = function()
         function()
         {
             var i, listener;
-            for(i = 0; i < self._listeners.length; ++i)
+            for(i = 0; i < self.__listeners.length; ++i)
             {
-                listener = self._listeners[i];
+                listener = self.__listeners[i];
 
                 try
                 {
@@ -144,9 +150,9 @@ Promise.prototype.progress = function()
 
 Promise.prototype.setState = function(state, args)
 {
-    if(this._state === State.Pending && state !== State.Pending)
+    if(this.__state === State.Pending && state !== State.Pending)
     {
-        this._state = state;
+        this.__state = state;
         this._args = args;
         //
         // Use setTimeout so the listeners are not resolved until the call stack is empty.
@@ -158,7 +164,7 @@ Promise.prototype.setState = function(state, args)
 
 Promise.prototype.succeed = function()
 {
-    if(this._state === State.Pending)
+    if(this.__state === State.Pending)
     {
         var args = arguments;
         this.setState(State.Success, args);
@@ -167,7 +173,7 @@ Promise.prototype.succeed = function()
 
 Promise.prototype.fail = function()
 {
-    if(this._state === State.Pending)
+    if(this.__state === State.Pending)
     {
         var args = arguments;
         this.setState(State.Failed, args);
@@ -176,17 +182,17 @@ Promise.prototype.fail = function()
 
 Promise.prototype.succeeded = function()
 {
-    return this._state === State.Success;
+    return this.__state === State.Success;
 };
 
 Promise.prototype.failed = function()
 {
-    return this._state === State.Failed;
+    return this.__state === State.Failed;
 };
 
 Promise.prototype.completed = function()
 {
-    return this._state !== State.Pending;
+    return this.__state !== State.Pending;
 };
 
 //

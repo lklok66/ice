@@ -47,7 +47,7 @@ RouterManager.prototype.find = function(rtr)
     if(info === undefined)
     {
         info = new RouterInfo(router);
-        this._table.put(router, info);
+        this._table.set(router, info);
     }
     else
     {
