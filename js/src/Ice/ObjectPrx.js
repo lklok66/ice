@@ -1011,7 +1011,16 @@ ObjectPrx.__dispatchLocalException = function(__r, __ex)
 //
 ObjectPrx.checkedCast = function(prx, facet, ctx)
 {
+    return ObjectPrx.checkedCastImpl(ObjectPrx, "::Ice::Object", prx, facet, ctx);
+};
+
+//
+// NOT a prototype function
+//
+ObjectPrx.checkedCastImpl = function(type, id, prx, facet, ctx)
+{
     var __promise = null;
+
     if(prx === undefined || prx === null)
     {
         __promise = new AsyncResult(null, "checkedCast", null, null, null, null);
@@ -1019,35 +1028,32 @@ ObjectPrx.checkedCast = function(prx, facet, ctx)
     }
     else
     {
-        if(facet === undefined)
+        if(facet !== undefined)
         {
-            __promise = new AsyncResult(null, "checkedCast", null, prx, null, null);
-            __promise.succeed(__promise, prx);
+            prx = prx.ice_facet(facet);
         }
-        else
-        {
-            var __bb = prx.ice_facet(facet);
-            var __h = new ObjectPrx();
-            __h.__copyFrom(__bb);
-            __promise = new AsyncResult(prx.ice_getCommunicator(), "checkedCast", null, __h, null, null);
-            __bb.ice_isA("::Ice::Object", ctx).then(
-                function(__r, __ret)
+
+        var __h = new type();
+        __h.__copyFrom(prx);
+        __promise = new AsyncResult(prx.ice_getCommunicator(), "checkedCast", null, __h, null, null);
+        prx.ice_isA(id, ctx).then(
+            function(__r, __ret)
+            {
+                __promise.succeed(__promise, __ret ? __h : null);
+            },
+            function(__r, __ex)
+            {
+                if(__ex instanceof Ice.FacetNotExistException)
                 {
-                    __promise.succeed(__promise, __ret ? __h : null);
-                },
-                function(__r, __ex)
+                    __promise.succeed(__promise, null);
+                }
+                else
                 {
-                    if(__ex instanceof Ice.FacetNotExistException)
-                    {
-                        __promise.succeed(__promise, null);
-                    }
-                    else
-                    {
-                        __promise.fail(__promise, __ex);
-                    }
-                });
-        }
+                    __promise.fail(__promise, __ex);
+                }
+            });
     }
+
     return __promise;
 };
 
@@ -1056,13 +1062,19 @@ ObjectPrx.checkedCast = function(prx, facet, ctx)
 //
 ObjectPrx.uncheckedCast = function(prx, facet)
 {
+    return ObjectPrx.uncheckedCastImpl(ObjectPrx, prx, facet);
+};
+
+//
+// NOT a prototype function
+//
+ObjectPrx.uncheckedCastImpl = function(type, prx, facet)
+{
     var r = null;
     if(prx !== undefined && prx !== null)
     {
-        var bb = prx.ice_facet(facet);
-        var h = new ObjectPrx();
-        h.__copyFrom(bb);
-        r = h;
+        r = new type();
+        r.__copyFrom(prx.ice_facet(facet));
     }
     return r;
 };

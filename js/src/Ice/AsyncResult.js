@@ -31,7 +31,7 @@ var AsyncResult = function(communicator, op, connection, proxy, adapter, complet
         this._adapter = adapter;
         this._is = null;
         this._os =
-            communicator !== null ? BasicStream(this._instance, Protocol.currentProtocolEncoding, false) : null;
+            communicator !== null ? new BasicStream(this._instance, Protocol.currentProtocolEncoding, false) : null;
         this._state = 0;
         this._sentSynchronously = false;
         this._exception = null;

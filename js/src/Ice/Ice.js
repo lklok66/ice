@@ -26,7 +26,12 @@ _merge(Ice, require("./LocalException").Ice);
 _merge(Ice, require("./BuiltinSequences").Ice);
 _merge(Ice, require("./StreamHelpers").Ice);
 _merge(Ice, require("./Promise").Ice);
+_merge(Ice, require("./EndpointTypes").Ice);
+_merge(Ice, require("./Locator").Ice);
+_merge(Ice, require("./Router").Ice);
+_merge(Ice, require("./Version").Ice);
 
+var Protocol = require("./Protocol").Ice.Protocol;
 
 //
 // Ice.InitializationData
@@ -101,5 +106,24 @@ Ice.createProperties = function(args, defaults)
 {
     return new Ice.Properties(args, defaults);
 };
+
+Ice.stringToProtocolVersion = Protocol.stringToProtocolVersion;
+Ice.stringToEncodingVersion = Protocol.stringToEncodingVersion;
+Ice.protocolVersionToString = Protocol.protocolVersionToString;
+Ice.encodingVersionToString = Protocol.encodingVersionToString;
+
+Ice.currentProtocol = function()
+{
+    return Protocol.currentProtocol.clone();
+};
+
+Ice.currentEncoding = function()
+{
+    return Protocol.currentEncoding.clone();
+};
+
+Ice.Protocol_1_0 = Protocol.Protocol_1_0;
+Ice.Encoding_1_0 = Protocol.Encoding_1_0;
+Ice.Encoding_1_1 = Protocol.Encoding_1_1;
 
 module.exports = Ice;

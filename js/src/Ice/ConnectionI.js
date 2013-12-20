@@ -19,7 +19,8 @@ var SocketOperation = require("./SocketOperation").Ice.SocketOperation;
 var Timer = require("Ice/Timer").Ice.Timer;
 var TimeUtil = require("./TimeUtil").Ice.TimeUtil;
 var TraceUtil = require("./TraceUtil").Ice.TraceUtil;
-var Version = require("Ice/Version").Ice.Version;
+var ProtocolVersion = require("Ice/Version").Ice.ProtocolVersion;
+var EncodingVersion = require("Ice/Version").Ice.EncodingVersion;
 
 var _merge = require("Ice/Util").merge;
 
@@ -85,8 +86,8 @@ var ConnectionI = function(communicator, instance, reaper, transceiver, endpoint
     this._shutdownInitiated = false;
     this._validated = false;
 
-    this._readProtocol = new Version.ProtocolVersion();
-    this._readProtocolEncoding = new Version.EncodingVersion();
+    this._readProtocol = new ProtocolVersion();
+    this._readProtocolEncoding = new EncodingVersion();
 
     this._asyncRequests = new HashMap(); // Map<int, OutgoingAsync>
 

@@ -48,10 +48,6 @@ RouterManager.prototype.find = function(rtr)
         info = new RouterInfo(router);
         this._table.set(router, info);
     }
-    else
-    {
-        info = null;
-    }
 
     return info;
 };

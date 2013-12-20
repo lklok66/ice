@@ -18,7 +18,7 @@ var Protocol = require("./Protocol").Ice.Protocol;
 var RefMode = require("./ReferenceMode").Ice.ReferenceMode;
 var StringUtil = require("./StringUtil").Ice.StringUtil;
 
-var EndpointTypes = require("./EndpointTypes").Ice.EndpointTypes;
+var EndpointSelectionType = require("./EndpointTypes").Ice.EndpointSelectionType;
 var Identity = require("./Identity").Ice.Identity;
 
 var RouterPrx = require("./Router").Ice.RouterPrx;
@@ -788,11 +788,11 @@ ReferenceFactory.prototype.createImpl = function(ident, facet, mode, secure, pro
             var type = properties.getProperty(property);
             if(type == "Random")
             {
-                endpointSelection = EndpointTypes.EndpointSelectionType.Random;
+                endpointSelection = EndpointSelectionType.Random;
             }
             else if(type == "Ordered")
             {
-                endpointSelection = EndpointTypes.EndpointSelectionType.Ordered;
+                endpointSelection = EndpointSelectionType.Ordered;
             }
             else
             {
@@ -1448,7 +1448,7 @@ FixedReference.prototype.getPreferSecure = function()
 
 FixedReference.prototype.getEndpointSelection = function()
 {
-    return EndpointTypes.EndpointSelectionType.Random;
+    return EndpointSelectionType.Random;
 };
 
 FixedReference.prototype.getLocatorCacheTimeout = function()
@@ -1967,14 +1967,14 @@ RoutableReference.prototype.toProperty = function(prefix)
 {
     var properties = new HashMap(), e;
 
-    properties.put(prefix, this.toString());
-    properties.put(prefix + ".CollocationOptimized", "0");
-    properties.put(prefix + ".ConnectionCached", this._cacheConnection ? "1" : "0");
-    properties.put(prefix + ".PreferSecure", this._preferSecure ? "1" : "0");
-    properties.put(prefix + ".EndpointSelection",
-                   this._endpointSelection === EndpointTypes.EndpointSelectionType.Random ? "Random" : "Ordered");
+    properties.set(prefix, this.toString());
+    properties.set(prefix + ".CollocationOptimized", "0");
+    properties.set(prefix + ".ConnectionCached", this._cacheConnection ? "1" : "0");
+    properties.set(prefix + ".PreferSecure", this._preferSecure ? "1" : "0");
+    properties.set(prefix + ".EndpointSelection",
+                   this._endpointSelection === EndpointSelectionType.Random ? "Random" : "Ordered");
 
-    properties.put(prefix + ".LocatorCacheTimeout", "" + this._locatorCacheTimeout);
+    properties.set(prefix + ".LocatorCacheTimeout", "" + this._locatorCacheTimeout);
 
     if(this._routerInfo !== null)
     {
@@ -2280,7 +2280,7 @@ RoutableReference.prototype.filterEndpoints = function(allEndpoints)
     //
     switch(this.getEndpointSelection())
     {
-        case EndpointTypes.EndpointSelectionType.Random:
+        case EndpointSelectionType.Random:
         {
             //
             // Shuffle the endpoints.
@@ -2288,7 +2288,7 @@ RoutableReference.prototype.filterEndpoints = function(allEndpoints)
             ArrayUtil.shuffle(endpoints);
             break;
         }
-        case EndpointTypes.EndpointSelectionType.Ordered:
+        case EndpointSelectionType.Ordered:
         {
             // Nothing to do.
             break;

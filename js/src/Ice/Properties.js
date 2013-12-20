@@ -13,6 +13,7 @@ var Promise = require("./Promise").Ice.Promise;
 var PropertyNames = require("./PropertyNames").Ice.PropertyNames;
 var Debug = require("./Debug").Ice.Debug;
 var ProcessLogger = require("./ProcessLogger").Ice.ProcessLogger;
+var getProcessLogger = require("./ProcessLogger").Ice.getProcessLogger;
 var InitializationException = require("./LocalException").Ice.InitializationException;
 
 var fs = require("fs");
@@ -106,8 +107,7 @@ Properties.prototype.getPropertyAsListWithDefault = function(key, value)
         var result = StringUtil.splitString(pv.value, ", \t\r\n");
         if(result === null)
         {
-            ProcessLogger.getProcessLogger().warning("mismatched quotes in property " + key + 
-                                                     "'s value, returning default value");
+            getProcessLogger().warning("mismatched quotes in property " + key + "'s value, returning default value");
             return value;
         }
         if(result.length === 0)
@@ -149,7 +149,7 @@ Properties.prototype.setProperty = function(key, value)
     //
     // Check if the property is legal.
     //
-    var logger = ProcessLogger.getProcessLogger(); 
+    var logger = getProcessLogger();
     if(key === null || key === undefined || key.length === 0)
     {
         throw new InitializationException("Attempt to set property with empty key");
@@ -473,9 +473,10 @@ Properties.prototype.parseLine = function(line)
     }
     value += escapedspace;
 
-    if((state === Properties.ParseStateKey && key.length !== 0) || (state == Properties.ParseStateValue && key.length === 0))
+    if((state === Properties.ParseStateKey && key.length !== 0) ||
+       (state == Properties.ParseStateValue && key.length === 0))
     {
-        ProcessLogger.getProcessLogger().warning("invalid config file entry: \"" + line + "\"");
+        getProcessLogger().warning("invalid config file entry: \"" + line + "\"");
         return;
     }
     else if(key.length === 0)

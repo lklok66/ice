@@ -1500,18 +1500,19 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         _out << nl << localScope << '.' << prxName << " = function" << spar << epar;
         _out << sb;
         _out << nl << basePrxRef << ".call" << spar << "this" << epar << ';';
-        _out << eb << ";";
+        _out << eb << ';';
         _out << nl << localScope << '.' << prxName << ".prototype = new " << basePrxRef << "();";
         _out << nl << localScope << '.' << prxName << ".prototype.constructor = " << localScope << '.' << prxName
              << ';';
         _out << nl << localScope << '.' << prxName << ".checkedCast = function(__prx, __facet, __ctx)";
         _out << sb;
-        // TODO
-        _out << eb << ";";
+        _out << nl << "return Ice.ObjectPrx.checkedCastImpl(" << localScope << '.' << prxName << ", "
+             << localScope << '.' << name << ".ice_staticId(), __prx, __facet, __ctx);";
+        _out << eb << ';';
         _out << nl << localScope << '.' << prxName << ".uncheckedCast = function(__prx, __facet)";
         _out << sb;
-        // TODO
-        _out << eb << ";";
+        _out << nl << "return Ice.ObjectPrx.uncheckedCastImpl(" << localScope << '.' << prxName << ", __prx, __facet);";
+        _out << eb << ';';
     }
 
     _out << sp;
