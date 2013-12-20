@@ -32,4 +32,5 @@ Long.prototype.equals = function(rhs)
     return this.high === rhs.high && this.low == rhs.low;
 }
 
-module.exports = Long;
+module.exports.Ice = {};
+module.exports.Ice.Long = Long;

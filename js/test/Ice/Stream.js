@@ -1,16 +1,14 @@
 
-
-var ArrayUtil = require("Ice/ArrayUtil");
-var Promise = require("Ice/Promise");
-var Long = require("Ice/Long");
-var Communicator = require("Ice/Communicator");
-var InputStream = require("Ice/InputStream");
-var OutputStream = require("Ice/OutputStream");
-var LocalEx = require("Ice/LocalException").Ice;
-var StreamHelpers = require("Ice/StreamHelpers");
+var ArrayUtil = require("Ice/ArrayUtil").Ice.ArrayUtil;
+var Promise = require("Ice/Promise").Ice.Promise;
+var Long = require("Ice/Long").Ice.Long;
+var Communicator = require("Ice/Communicator").Ice.Communicator;
+var InputStream = require("Ice/InputStream").Ice.InputStream;
+var OutputStream = require("Ice/OutputStream").Ice.OutputStream;
+var StreamHelpers = require("Ice/StreamHelpers").Ice.StreamHelpers;
 var Ice = require("Ice/Ice");
-var Protocol = require("Ice/Protocol");
-var Debug = require("Ice/Debug");
+var Protocol = require("Ice/Protocol").Ice.Protocol;
+var Debug = require("Ice/Debug").Ice.Debug;
 
 var Test = require("./StreamTest").Test;
 
@@ -65,7 +63,7 @@ StreamTest.run = function(){
             }
             catch(ex)
             {
-                Debug.assert(ex instanceof LocalEx.UnmarshalOutOfBoundsException);
+                Debug.assert(ex instanceof Ice.UnmarshalOutOfBoundsException);
             }
             is.destroy();
         }());
@@ -152,11 +150,10 @@ StreamTest.run = function(){
         (function()
         {
             var os = new OutputStream(comm);
-            var MyEnumHelper = StreamHelpers.generateEnumHelper(Test.MyEnum);
-            MyEnumHelper.write(os, Test.MyEnum.enum3);
+            os.writeEnum(Test.MyEnum.enum3);
             var data = os.finished();
             var is = new InputStream(comm, data, true);
-            Debug.assert(MyEnumHelper.read(is).equals(Test.MyEnum.enum3));
+            Debug.assert(is.readEnum(Test.MyEnum).equals(Test.MyEnum.enum3));
             os.destroy();
             is.destroy();
         }());
@@ -176,11 +173,10 @@ StreamTest.run = function(){
             s.e = Test.MyEnum.enum2;
             //TODO
             //s.p = Test.MyClassPrx.uncheckedCast(comm.stringToProxy("test:default"));
-            var SmallStructHelper = StreamHelpers.generateStructHelper(Test.SmallStruct);
-            SmallStructHelper.write(os, s);
+            os.writeStruct(s);
             var data = os.finished();
             var is = new InputStream(comm, data, true);
-            Debug.assert(SmallStructHelper.read(is).equals(s));
+            Debug.assert(is.readStruct(Test.SmallStruct).equals(s));
             os.destroy();
             is.destroy();
         }());
@@ -255,10 +251,10 @@ StreamTest.run = function(){
             ];
             
             var os = new OutputStream(comm);
-            StreamHelpers.SequenceHelper.write(os, arr, [StreamHelpers.BoolHelper]);
+            Ice.BoolSeqHelper.write(os, arr);
             var data = os.finished();
             var is = new InputStream(comm, data, true);
-            var arr2 = StreamHelpers.SequenceHelper.read(is, [StreamHelpers.BoolHelper]);
+            var arr2 = Ice.BoolSeqHelper.read(is);
             Debug.assert(ArrayUtil.equals(arr2, arr, function(v1, v2){ return v1 === v2; }));
             os.destroy();
             is.destroy();
@@ -271,10 +267,10 @@ StreamTest.run = function(){
             ];
             
             os = new OutputStream(comm);
-            StreamHelpers.SequenceHelper.write(os, arrS, [StreamHelpers.SequenceHelper, StreamHelpers.BoolHelper]);
+            Test.BoolSSHelper.write(os, arrS);
             data = os.finished();
             is = new InputStream(comm, data, true);
-            var arr2S = StreamHelpers.SequenceHelper.read(is, [StreamHelpers.SequenceHelper, StreamHelpers.BoolHelper]);
+            var arr2S = Test.BoolSSHelper.read(is);
             Debug.assert(arr2S.length === arrS.length);
             for(var i = 0; i < arr2S.length; ++i)
             {
@@ -294,10 +290,10 @@ StreamTest.run = function(){
                 0x22
             ];
             os = new OutputStream(comm);
-            StreamHelpers.SequenceHelper.write(os, arr, [StreamHelpers.ByteHelper]);
+            Ice.ByteSeqHelper.write(os, arr, [StreamHelpers.ByteHelper]);
             var data = os.finished();
             var is = new InputStream(comm, data, true);
-            var arr2 = StreamHelpers.SequenceHelper.read(is, [StreamHelpers.ByteHelper]);
+            var arr2 = Ice.ByteSeqHelper.read(is);
             Debug.assert(ArrayUtil.equals(arr2, arr));
             os.destroy();
             is.destroy();
@@ -309,10 +305,10 @@ StreamTest.run = function(){
                 arr
             ];
             os = new OutputStream(comm);
-            StreamHelpers.SequenceHelper.write(os, arrS, [StreamHelpers.SequenceHelper, StreamHelpers.ByteHelper]);
+            Test.ByteSSHelper.write(os, arrS);
             data = os.finished();
             is = new InputStream(comm, data, true);
-            var arr2S = StreamHelpers.SequenceHelper.read(is, [StreamHelpers.SequenceHelper, StreamHelpers.ByteHelper]);
+            var arr2S = Test.ByteSSHelper.read(is);
             Debug.assert(arr2S.length === arrS.length);
             for(var i = 0; i < arr2S.length; ++i)
             {

@@ -7,6 +7,8 @@
 //
 // **********************************************************************
 
+module.exports.Ice = {};
+
 //
 // Ice.Exception
 //
@@ -28,7 +30,7 @@ Exception.prototype.toString = function()
     return this.ice_name();
 };
 
-module.exports.Exception = Exception;
+module.exports.Ice.Exception = Exception;
 
 //
 // Ice.LocalException
@@ -47,7 +49,7 @@ LocalException.prototype.ice_name = function()
     return "Ice::LocalException";
 };
 
-module.exports.LocalException = LocalException;
+module.exports.Ice.LocalException = LocalException;
 
 //
 // Ice.UserException
@@ -66,4 +68,4 @@ UserException.prototype.ice_name = function()
     return "Ice::UserException";
 };
 
-module.exports.UserException = UserException;
+module.exports.Ice.UserException = UserException;

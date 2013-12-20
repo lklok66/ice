@@ -7,10 +7,10 @@
 //
 // **********************************************************************
 
-var Debug = require("./Debug");
-var OpaqueEndpointI = require("./OpaqueEndpointI");
-var BasicStream = require("./BasicStream");
-var LocalEx = require("./LocalException").Ice;
+var Debug = require("./Debug").Ice.Debug;
+var OpaqueEndpointI = require("./OpaqueEndpointI").Ice.OpaqueEndpointI;
+var BasicStream = require("./BasicStream").Ice.BasicStream;
+var EndpointParseException = require("./LocalException").Ice.EndpointParseException;
 
 var EndpointFactoryManager = function(instance)
 {
@@ -45,7 +45,7 @@ EndpointFactoryManager.prototype.create = function(str, oaEndpoint)
     var s = str.trim();
     if(s.length === 0)
     {
-        throw new LocalEx.EndpointParseException("value has no non-whitespace characters");
+        throw new EndpointParseException("value has no non-whitespace characters");
     }
 
     var protocol;
@@ -131,4 +131,5 @@ EndpointFactoryManager.prototype.destroy = function()
     this._factories = [];
 };
 
-module.exports = EndpointFactoryManager;
+module.exports.Ice = {};
+module.exports.Ice.EndpointFactoryManager = EndpointFactoryManager;

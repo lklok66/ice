@@ -390,4 +390,5 @@ HashMap.prototype.isEqual = function(k1, k2)
     return this._comparator.call(this._comparator, k1, k2);
 };
 
-module.exports = HashMap;
+module.exports.Ice = {};
+module.exports.Ice.HashMap = HashMap;

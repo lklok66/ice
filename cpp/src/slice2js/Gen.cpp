@@ -1144,14 +1144,14 @@ Slice::Gen::generate(const UnitPtr& p)
 {
     JsGenerator::validateMetaData(p);
 
-    RequireVisitor requireVisitor(_out);
+    RequireVisitor requireVisitor(_out, _includePaths);
     p->visit(&requireVisitor, false);
-    requireVisitor.writeRequires();
+    vector<string> seenModules = requireVisitor.writeRequires(p);
 
     //CompactIdVisitor compactIdVisitor(_out);
     //p->visit(&compactIdVisitor, false);
 
-    TypesVisitor typesVisitor(_out);
+    TypesVisitor typesVisitor(_out, seenModules);
     p->visit(&typesVisitor, false);
 
     //
@@ -1159,7 +1159,6 @@ Slice::Gen::generate(const UnitPtr& p)
     //
     ExportVisitor exportVisitor(_out);
     p->visit(&exportVisitor, false);
-    exportVisitor.writeExports();
 }
 
 void
@@ -1236,9 +1235,20 @@ Slice::Gen::printHeader()
     _out << "//\n";
 }
 
-Slice::Gen::RequireVisitor::RequireVisitor(IceUtilInternal::Output& out)
-    : JsVisitor(out), _seenClass(false), _seenUserException(false), _seenLocalException(false), _seenEnum(false)
+Slice::Gen::RequireVisitor::RequireVisitor(IceUtilInternal::Output& out, vector<string> includePaths)
+    : JsVisitor(out), 
+    _seenClass(false), 
+    _seenUserException(false), 
+    _seenLocalException(false), 
+    _seenEnum(false),
+    _seenObjectSeq(false),
+    _seenObjectDict(false),
+    _includePaths(includePaths)
 {
+    for(vector<string>::iterator p = _includePaths.begin(); p != _includePaths.end(); ++p)
+    {
+        *p = fullPath(*p);
+    }
 }
 
 bool
@@ -1264,48 +1274,89 @@ Slice::Gen::RequireVisitor::visitExceptionStart(const ExceptionPtr& p)
 }
 
 void
+Slice::Gen::RequireVisitor::visitSequence(const SequencePtr& seq)
+{
+    BuiltinPtr builtin = BuiltinPtr::dynamicCast(seq->type());
+    if(builtin && builtin->kind() == Builtin::KindObject)
+    {
+        _seenObjectSeq = true;
+    }
+}
+
+void
+Slice::Gen::RequireVisitor::visitDictionary(const DictionaryPtr& dict)
+{
+    BuiltinPtr builtin = BuiltinPtr::dynamicCast(dict->valueType());
+    if(builtin && builtin->kind() == Builtin::KindObject)
+    {
+        _seenObjectDict = true;
+    }
+}
+
+void
 Slice::Gen::RequireVisitor::visitEnum(const EnumPtr& p)
 {
     _seenEnum = true;
 }
 
-void
-Slice::Gen::RequireVisitor::writeRequires()
+vector<string>
+Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
 {
+    vector<string> seenModules;
     //
     // Generate require() statements for all of the run-time code needed by the generated code.
     //
-
+    _out << nl << "var _merge = require(\"Ice/Util\").merge;";
+    _out << nl;
+    _out << nl << "var Ice = {};";
+    seenModules.push_back("Ice");
+    
+    if(_seenClass || _seenObjectSeq || _seenObjectDict)
+    {
+        _out << nl << "_merge(Ice, require(\"Ice/Object\").Ice);";
+    }
     if(_seenClass)
     {
-        _out << nl << "var __ice_Object = require(\"Ice/Object\");";
-        _out << nl << "var __ice_ObjectPrx = require(\"Ice/ObjectPrx\");";
-        _out << nl << "var __ice_ClassRegistry = require(\"Ice/TypeRegistry\").ClassRegistry;";
+        _out << nl << "_merge(Ice, require(\"Ice/ObjectPrx\").Ice);";
     }
 
     if(_seenLocalException || _seenUserException)
     {
-        _out << nl << "var __ice_Ex = require(\"Ice/Exception\");";
+        _out << nl << "_merge(Ice, require(\"Ice/Exception\").Ice);";
     }
-    if(_seenLocalException)
+    if(_seenClass || _seenUserException)
     {
-        _out << nl << "var __ice_LocalException = __ice_Ex.LocalException;";
-    }
-    if(_seenUserException)
-    {
-        _out << nl << "var __ice_UserException = __ice_Ex.UserException;";
-        _out << nl << "var __ice_ExceptionRegistry = require(\"Ice/TypeRegistry\").ExceptionRegistry;";
+        _out << nl << "_merge(Ice, require(\"Ice/TypeRegistry\").Ice);";
     }
 
     if(_seenEnum)
     {
-        _out << nl << "var __ice_EnumBase = require(\"Ice/EnumBase\");";
+        _out << nl << "_merge(Ice, require(\"Ice/EnumBase\").Ice);";
     }
-
-    _out << nl << "var __ice_HashMap = require(\"Ice/HashMap\");";
-    _out << nl << "var __ice_HashUtil = require(\"Ice/HashUtil\");";
-    _out << nl << "var __ice_ArrayUtil = require(\"Ice/ArrayUtil\");";
-    _out << nl << "var __ice_StreamHelpers = require(\"Ice/StreamHelpers\");";
+    
+    _out << nl << "_merge(Ice, require(\"Ice/HashMap\").Ice);";
+    _out << nl << "_merge(Ice, require(\"Ice/HashUtil\").Ice);";
+    _out << nl << "_merge(Ice, require(\"Ice/ArrayUtil\").Ice);";
+    _out << nl << "_merge(Ice, require(\"Ice/StreamHelpers\").Ice);";
+    
+    StringList includes = p->includeFiles();
+    for(StringList::const_iterator i = includes.begin(); i != includes.end(); ++i)
+    {
+        set<string> modules = p->getTopLevelModules(*i);
+        for(set<string>::const_iterator j = modules.begin(); j != modules.end(); ++j)
+        {
+            vector<string>::const_iterator k = find(seenModules.begin(), seenModules.end(), *j);
+            if(k == seenModules.end())
+            {
+                seenModules.push_back(*j);
+                _out << nl;
+                _out << nl << "var " << (*j) << " = {};";
+            }
+            _out << nl << "_merge(" << (*j) << ", require(\"" 
+                 << changeInclude(*i, _includePaths) << "\")." << (*j) << ");";
+        }
+    }
+    return seenModules;
 }
 
 Slice::Gen::CompactIdVisitor::CompactIdVisitor(IceUtilInternal::Output& out) :
@@ -1344,74 +1395,49 @@ Slice::Gen::CompactIdVisitor::visitClassDefStart(const ClassDefPtr& p)
     return false;
 }
 
-Slice::Gen::TypesVisitor::TypesVisitor(IceUtilInternal::Output& out)
-    : JsVisitor(out)
+Slice::Gen::TypesVisitor::TypesVisitor(IceUtilInternal::Output& out, const vector<string>& seenModules)
+    : JsVisitor(out), _seenModules(seenModules)
 {
 }
 
 bool
 Slice::Gen::TypesVisitor::visitModuleStart(const ModulePtr& p)
 {
-    const bool topLevel = UnitPtr::dynamicCast(p->container());
-
     //
     // For a top-level module we write the following:
     //
-    // var Foo = (function(_mod_Foo, undefined)
-    // {
-    //     // ...
-    //     return _mod_Foo;
-    // }(Foo || {}));
+    // var Foo = {};
     //
-    // A nested module is generated like this:
+    // For an inner module we  write
     //
-    // var Foo = (function(_mod_Foo, undefined)
-    // {
-    //     _mod_Foo.SubModule = function(_mod_Foo_SubModule, undefined)
-    //     {
-    //         // ...
-    //     }(_mod_Foo.SubModule || {}));
+    // Foo.Bar = {};
     //
-    //     return _mod_Foo;
-    // }(Foo || {}));
-    //
-    // The trailing "undefined" argument to the function is NOT passed a value, so by
-    // default it takes on the native value of undefined. This avoids situations where
-    // user code redefines the meaning of undefined.
-    //
-    // The argument to the inline invocation of the function either passes the existing
-    // value of Foo (if present) or a new object ({}). This allows a module to be reopened.
-    //
+    
+    const string scoped = getLocalScope(p->scoped());
+    
+    const bool topLevel = UnitPtr::dynamicCast(p->container());
 
-    _out << sp << nl;
-    if(topLevel)
+    vector<string>::const_iterator i = find(_seenModules.begin(), _seenModules.end(), scoped);
+    if(i == _seenModules.end())
     {
-        _out << "var ";
+        _out << nl;
+        if(topLevel)
+        {
+            _out << nl << "var " << scoped << " = {};";
+        }
+        else
+        {
+            _out << nl << scoped << " = {};";
+        }
+        _seenModules.push_back(scoped);
     }
-    else
-    {
-        _out << getLocalScope(p->scope()) << '.';
-    }
-    _out << fixId(p->name()) << " = (function(" << getLocalScope(p->scoped()) << ", undefined)";
-    _out << nl << "{";
-    _out.inc();
-
+    
     return true;
 }
 
 void
 Slice::Gen::TypesVisitor::visitModuleEnd(const ModulePtr& p)
 {
-    const bool topLevel = UnitPtr::dynamicCast(p->container());
-
-    _out << sp << nl << "return " << getLocalScope(p->scoped()) << ';';
-    _out.dec();
-    _out << nl << "}(";
-    if(!topLevel)
-    {
-        _out << getLocalScope(p->scope()) << '.';
-    }
-    _out << fixId(p->name()) << " || {}));";
 }
 
 bool
@@ -1421,8 +1447,8 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
     const string localScope = getLocalScope(scope);
     const string name = fixId(p->name());
     const string prxName = p->name() + "Prx";
-    const string objectRef = "__ice_Object";
-    const string prxRef = "__ice_ObjectPrx";
+    const string objectRef = "Ice.Object";
+    const string prxRef = "Ice.ObjectPrx";
 
     ClassList bases = p->bases();
     ClassDefPtr base;
@@ -1669,8 +1695,10 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         //
         // Register the class prototype in the ClassRegistry
         //
-        _out << nl << "__ice_ClassRegistry.register(" << localScope << "." << name << ".ice_staticId(), " 
+        _out << nl;
+        _out << nl << "Ice.ClassRegistry.register(" << localScope << "." << name << ".ice_staticId(), " 
              << localScope << "." << name << ");";
+        _out << nl;
     }
 
     return false;
@@ -1797,7 +1825,21 @@ Slice::Gen::TypesVisitor::visitOperation(const OperationPtr& p)
 void
 Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
 {
-    // TODO
+    const string name = getLocalScope(p->scope()) + "." + fixId(p->name());
+    
+    const TypePtr type = p->type();
+    
+    if(isClassType(type))
+    {
+        _out << nl << name << "Helper = Ice.StreamHelpers.generateObjectSeqHelper(" << typeToString(type) << ");";
+    }
+    else
+    {
+        _out << nl << name << "Helper = Ice.StreamHelpers.generateSeqHelper(";
+        _out.inc();
+        _out << nl << getHelper(type) << ");"; 
+        _out.dec();
+    }
 }
 
 bool
@@ -1814,7 +1856,7 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     }
     else
     {
-        baseRef = p->isLocal() ? "__ice_LocalException" : "__ice_UserException";
+        baseRef = p->isLocal() ? "Ice.LocalException" : "Ice.UserException";
     }
 
     const DataMemberList allDataMembers = p->allDataMembers();
@@ -1934,14 +1976,14 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         }
         _out << ';';
     }
-    _out << eb;
+    _out << eb << ";";
 
     _out << sp;
     _out << nl << localScope << '.' << name << ".prototype.toString = function()";
     _out << sb;
     // TODO
     _out << nl << "return \"\";";
-    _out << eb;
+    _out << eb << ";";
 
     _out << sp;
     _out << nl << localScope << '.' << name << ".prototype.clone = function()";
@@ -1953,7 +1995,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         writeMemberClone("__r." + memberName, "this." + memberName, (*q)->type(), 0);
     }
     _out << nl << "return __r;";
-    _out << eb;
+    _out << eb << ";";
 
     _out << sp;
     _out << nl << localScope << '.' << name << ".prototype.equals = function(rhs)";
@@ -1972,7 +2014,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         writeMemberEquals("this." + memberName, "rhs." + memberName, (*q)->type(), 0);
     }
     _out << sp << nl << "return true;";
-    _out << eb;
+    _out << eb << ";";
 
     _out << sp;
     _out << nl << localScope << '.' << name << ".prototype.hashCode = function()";
@@ -1984,7 +2026,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         writeMemberHashCode("this." + memberName, (*q)->type(), 0);
     }
     _out << nl << "return __h;";
-    _out << eb;
+    _out << eb << ";";
 
     if(!p->isLocal())
     {
@@ -1995,7 +2037,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         {
             writeMarshalDataMember(*q);
         }
-        _out << eb;
+        _out << eb << ";";
 
         _out << sp;
         _out << nl << localScope << '.' << name << ".prototype.__read = function(__is)";
@@ -2004,7 +2046,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         {
             writeUnmarshalDataMember(*q);
         }
-        _out << eb;
+        _out << eb << ";";
     }
 
 #if 0
@@ -2029,56 +2071,28 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
 void
 Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
 {
-#if 0
-    if(!p->hasMetaData("clr:collection"))
+    const string name = getLocalScope(p->scope()) + "." + fixId(p->name());
+    
+    const TypePtr keyType = p->keyType();
+    const TypePtr valueType = p->valueType();
+    
+    if(isClassType(valueType))
     {
-        return;
+        StructPtr st = StructPtr::dynamicCast(keyType);
+        _out << nl << name << "Helper = Ice.StreamHelpers.generateObjectDictHelper(";
+        _out.inc();
+        _out << nl << getHelper(keyType) << ", ";
+        _out << nl << typeToString(valueType) << ");";
+        _out.dec();
     }
-
-    string name = fixId(p->name());
-    string ks = typeToString(p->keyType());
-    string vs = typeToString(p->valueType());
-
-    _out << sp;
-    _out << nl << "public class " << name
-         << " : Ice.DictionaryBase<" << ks << ", " << vs << ">, _System.ICloneable";
-    _out << sb;
-
-    _out << sp << nl << "#region " << name << " members";
-
-    _out << sp << nl << "public void AddRange(" << name << " d__)";
-    _out << sb;
-    _out << nl << "foreach(_System.Collections.Generic.KeyValuePair<" << ks << ", " << vs << "> e in d__.dict_)";
-    _out << sb;
-    _out << nl << "try";
-    _out << sb;
-    _out << nl << "dict_.Add(e.Key, e.Value);";
-    _out << eb;
-    _out << nl << "catch(_System.ArgumentException)";
-    _out << sb;
-    _out << nl << "// ignore";
-    _out << eb;
-    _out << eb;
-    _out << eb;
-
-    _out << sp << nl << "#endregion"; // <name> members
-
-    _out << sp << nl << "#region ICloneable members";
-
-    _out << sp << nl << "public object Clone()";
-    _out << sb;
-    _out << nl << name << " d = new " << name << "();";
-    _out << nl << "foreach(_System.Collections.Generic.KeyValuePair<" << ks << ", " << vs <<"> e in dict_)";
-    _out << sb;
-    _out << nl << "d.dict_.Add(e.Key, e.Value);";
-    _out << eb;
-    _out << nl << "return d;";
-    _out << eb;
-
-    _out << sp << nl << "#endregion"; // ICloneable members
-
-    _out << eb;
-#endif
+    else
+    {
+        _out << nl << name << "Helper = Ice.StreamHelpers.generateDictHelper(";
+        _out.inc();
+        _out << nl << getHelper(keyType) << ", ";
+        _out << nl << getHelper(valueType) << ");";
+        _out.dec();
+    }
 }
 
 void
@@ -2087,14 +2101,14 @@ Slice::Gen::TypesVisitor::visitEnum(const EnumPtr& p)
     const string scope = p->scope();
     const string localScope = getLocalScope(scope);
     const string name = fixId(p->name());
-    const string baseRef = "__ice_EnumBase";
+    const string baseRef = "Ice.EnumBase";
 
     _out << sp;
     writeDocComment(p, getDeprecateReason(p, 0, "type"));
     _out << nl << localScope << '.' << name << " = function(_n, _v)";
     _out << sb;
     _out << nl << baseRef << ".call" << spar << "this" << "_n" << "_v" << epar << ';';
-    _out << eb;
+    _out << eb << ";";
     _out << nl << localScope << '.' << name << ".prototype = new " << baseRef << "();";
     _out << nl << localScope << '.' << name << ".prototype.constructor = " << localScope << '.' << name << ';';
     _out << nl << baseRef << ".defineEnum(" << localScope << '.' << name << ", {";
@@ -2155,7 +2169,7 @@ Slice::Gen::TypesVisitor::writeMemberHashCode(const string& m, const TypePtr& ty
         {
             case Builtin::KindBool:
             {
-                _out << nl << "__h = __ice_HashUtil.addBoolean(__h, " << m << ");";
+                _out << nl << "__h = Ice.HashUtil.addBoolean(__h, " << m << ");";
                 break;
             }
             case Builtin::KindByte:
@@ -2165,17 +2179,17 @@ Slice::Gen::TypesVisitor::writeMemberHashCode(const string& m, const TypePtr& ty
             case Builtin::KindFloat:
             case Builtin::KindDouble:
             {
-                _out << nl << "__h = __ice_HashUtil.addNumber(__h, " << m << ");";
+                _out << nl << "__h = Ice.HashUtil.addNumber(__h, " << m << ");";
                 break;
             }
             case Builtin::KindString:
             {
-                _out << nl << "__h = __ice_HashUtil.addString(__h, " << m << ");";
+                _out << nl << "__h = Ice.HashUtil.addString(__h, " << m << ");";
                 break;
             }
             case Builtin::KindObjectProxy:
             {
-                _out << nl << "__h = __ice_HashUtil.addHashable(__h, " << m << ");";
+                _out << nl << "__h = Ice.HashUtil.addHashable(__h, " << m << ");";
                 break;
             }
             case Builtin::KindObject:
@@ -2198,7 +2212,7 @@ Slice::Gen::TypesVisitor::writeMemberHashCode(const string& m, const TypePtr& ty
     if(ProxyPtr::dynamicCast(type) || EnumPtr::dynamicCast(type) || StructPtr::dynamicCast(type) ||
        DictionaryPtr::dynamicCast(type))
     {
-        _out << nl << "__h = __ice_HashUtil.addHashable(__h, " << m << ");";
+        _out << nl << "__h = Ice.HashUtil.addHashable(__h, " << m << ");";
         return;
     }
 
@@ -2214,7 +2228,7 @@ Slice::Gen::TypesVisitor::writeMemberHashCode(const string& m, const TypePtr& ty
         {
             case Builtin::KindBool:
             {
-                _out << nl << "__h = __ice_HashUtil.addBooleanArray(__h, " << m << ");";
+                _out << nl << "__h = Ice.HashUtil.addBooleanArray(__h, " << m << ");";
                 break;
             }
             case Builtin::KindByte:
@@ -2224,17 +2238,17 @@ Slice::Gen::TypesVisitor::writeMemberHashCode(const string& m, const TypePtr& ty
             case Builtin::KindFloat:
             case Builtin::KindDouble:
             {
-                _out << nl << "__h = __ice_HashUtil.addNumberArray(__h, " << m << ");";
+                _out << nl << "__h = Ice.HashUtil.addNumberArray(__h, " << m << ");";
                 break;
             }
             case Builtin::KindString:
             {
-                _out << nl << "__h = __ice_HashUtil.addStringArray(__h, " << m << ");";
+                _out << nl << "__h = Ice.HashUtil.addStringArray(__h, " << m << ");";
                 break;
             }
             case Builtin::KindObjectProxy:
             {
-                _out << nl << "__h = __ice_HashUtil.addHashableArray(__h, " << m << ");";
+                _out << nl << "__h = Ice.HashUtil.addHashableArray(__h, " << m << ");";
                 break;
             }
             case Builtin::KindObject:
@@ -2251,7 +2265,7 @@ Slice::Gen::TypesVisitor::writeMemberHashCode(const string& m, const TypePtr& ty
     if(ProxyPtr::dynamicCast(elemType) || EnumPtr::dynamicCast(elemType) || StructPtr::dynamicCast(elemType) ||
        DictionaryPtr::dynamicCast(elemType))
     {
-        _out << nl << "__h = __ice_HashUtil.addHashableArray(__h, " << m << ");";
+        _out << nl << "__h = Ice.HashUtil.addHashableArray(__h, " << m << ");";
         return;
     }
 
@@ -2322,7 +2336,7 @@ Slice::Gen::TypesVisitor::writeMemberClone(const string& dest, const string& src
 {
     if(SequencePtr::dynamicCast(type))
     {
-        _out << nl << dest << " = __ice_ArrayUtil.clone(" << src << ");";
+        _out << nl << dest << " = Ice.ArrayUtil.clone(" << src << ");";
         return;
     }
 
@@ -2350,31 +2364,78 @@ Slice::Gen::ExportVisitor::ExportVisitor(IceUtilInternal::Output& out)
 bool
 Slice::Gen::ExportVisitor::visitModuleStart(const ModulePtr& p)
 {
-    const string name = fixId(p->name());
+    const string localScope = getLocalScope(p->scope());
+    const string name = localScope.empty() ? fixId(p->name()) : localScope + "." + p->name();
 
-    //
-    // Only consider top-level modules (i.e., a module whose container is a Unit, not another Module).
-    //
-    if(UnitPtr::dynamicCast(p->container()))
-    {
-        if(find(_modules.begin(), _modules.end(), name) == _modules.end())
-        {
-            _modules.push_back(name);
-        }
-    }
+    _out << nl << "exports." << name << " = exports." << name << " || {};";
 
-    return false;
+    return true;
 }
 
 void
-Slice::Gen::ExportVisitor::writeExports()
+Slice::Gen::ExportVisitor::visitModuleEnd(const ModulePtr&)
 {
-    if(!_modules.empty())
-    {
-        _out << sp;
-        for(StringList::const_iterator q = _modules.begin(); q != _modules.end(); ++q)
-        {
-            _out << nl << "module.exports." << *q << " = " << *q << ';';
-        }
-    }
+}
+
+bool
+Slice::Gen::ExportVisitor::visitClassDefStart(const ClassDefPtr& p)
+{    
+    const string className = getLocalScope(p->scope()) + "." + fixId(p->name());
+    const string proxyName = className + "Prx";
+    
+    _out << nl << "exports." << className << " = " << className << ";";
+    _out << nl << "exports." << proxyName << " = " << proxyName << ";";
+    return true;
+}
+
+void
+Slice::Gen::ExportVisitor::visitOperation(const OperationPtr&)
+{
+}
+
+bool
+Slice::Gen::ExportVisitor::visitExceptionStart(const ExceptionPtr& p)
+{
+    const string exceptionName = getLocalScope(p->scope()) + "." + fixId(p->name());
+    _out << nl << "exports." << exceptionName << " = " << exceptionName << ";";
+    return true;
+}
+
+bool
+Slice::Gen::ExportVisitor::visitStructStart(const StructPtr& p)
+{
+    const string structName = getLocalScope(p->scope()) + "." + fixId(p->name());
+    _out << nl << "exports." << structName << " = " << structName << ";";
+    return true;
+}
+
+void
+Slice::Gen::ExportVisitor::visitSequence(const SequencePtr& p)
+{
+    const string helperName = getLocalScope(p->scope()) + "." + fixId(p->name()) + "Helper";
+    _out << nl << "exports." << helperName << " = " << helperName << ";";
+}
+
+void
+Slice::Gen::ExportVisitor::visitDictionary(const DictionaryPtr& p)
+{
+    const string helperName = getLocalScope(p->scope()) + "." + fixId(p->name()) + "Helper";
+    _out << nl << "exports." << helperName << " = " << helperName << ";";
+}
+
+void
+Slice::Gen::ExportVisitor::visitEnum(const EnumPtr& p)
+{
+    const string scope = p->scope();
+    const string localScope = getLocalScope(scope);
+    const string name = fixId(p->name());
+    const string enumName = localScope + "." + name;
+    
+    _out << nl << "exports." << enumName << " = " << enumName << ";";
+}
+
+void
+Slice::Gen::ExportVisitor::visitConst(const ConstPtr&)
+{
+    
 }

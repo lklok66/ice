@@ -7,9 +7,9 @@
 //
 // **********************************************************************
 
-var TcpEndpointI = require("./TcpEndpointI");
+var TcpEndpointI = require("./TcpEndpointI").TcpEndpointI;
 
-var Endp = require("./Endpoint").Ice;
+var TCPEndpointType = require("./Endpoint").Ice.TCPEndpointType;
 
 var TcpEndpointFactory = function(instance)
 {
@@ -18,7 +18,7 @@ var TcpEndpointFactory = function(instance)
 
 TcpEndpointFactory.prototype.type = function()
 {
-    return Endp.TCPEndpointType;
+    return TCPEndpointType;
 }
 
 TcpEndpointFactory.prototype.protocol = function()
@@ -41,4 +41,5 @@ TcpEndpointFactory.prototype.destroy = function()
     this._instance = null;
 }
 
-module.exports = TcpEndpointFactory;
+module.exports.Ice = {};
+module.exports.Ice.TcpEndpointFactory = TcpEndpointFactory;

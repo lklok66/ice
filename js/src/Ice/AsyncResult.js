@@ -7,11 +7,11 @@
 //
 // **********************************************************************
 
-var BasicStream = require("./BasicStream");
-var Debug = require("./Debug");
-var Ex = require("./Exception");
-var Promise = require("./Promise");
-var Protocol = require("./Protocol");
+var Debug = require("./Debug").Ice.Debug;
+var Promise = require("./Promise").Ice.Promise;
+var Protocol = require("./Protocol").Ice.Protocol;
+var UserException = require("./Exception").Ice.UserException;
+var BasicStream = new require("./BasicStream").Ice.BasicStream;
 
 var AsyncResult = function(communicator, op, connection, proxy, adapter, completedFn)
 {
@@ -31,7 +31,7 @@ var AsyncResult = function(communicator, op, connection, proxy, adapter, complet
         this._adapter = adapter;
         this._is = null;
         this._os =
-            communicator !== null ? new BasicStream(this._instance, Protocol.currentProtocolEncoding, false) : null;
+            communicator !== null ? BasicStream(this._instance, Protocol.currentProtocolEncoding, false) : null;
         this._state = 0;
         this._sentSynchronously = false;
         this._exception = null;
@@ -108,7 +108,7 @@ AsyncResult.prototype.__throwUserException = function()
         }
         catch(ex)
         {
-            if(ex instanceof Ex.UserException)
+            if(ex instanceof UserException)
             {
                 this._is.endReadEncaps();
             }
@@ -137,4 +137,5 @@ AsyncResult.prototype.__response = function()
     }
 }
 
-module.exports = AsyncResult;
+module.exports.Ice = {};
+module.exports.Ice.AsyncResult = AsyncResult;

@@ -9,14 +9,21 @@
 
 var Node = { Buffer: global.Buffer};
 
-var StringUtil = require("./StringUtil");
-var LocalEx = require("./LocalException").Ice;
-var Ver = require("./Version").Ice;
+var StringUtil = require("./StringUtil").Ice.StringUtil;
 
-module.exports.Encoding_1_0 = new Ver.EncodingVersion(1, 0);
-module.exports.Encoding_1_1 = new Ver.EncodingVersion(1, 1);
+var _merge = require("Ice/Util").merge;
 
-module.exports.Protocol_1_0 = new Ver.ProtocolVersion(1, 0);
+var Ice = {};
+
+_merge(Ice, require("./LocalException").Ice);
+_merge(Ice, require("./Version").Ice);
+
+var Protocol = {};
+
+Protocol.Encoding_1_0 = new Ice.EncodingVersion(1, 0);
+Protocol.Encoding_1_1 = new Ice.EncodingVersion(1, 1);
+
+Protocol.Protocol_1_0 = new Ice.ProtocolVersion(1, 0);
 
 //
 // Size of the Ice protocol header
@@ -30,118 +37,118 @@ module.exports.Protocol_1_0 = new Ver.ProtocolVersion(1, 0);
 // Compression status (Byte)
 // Message size (Int)
 //
-module.exports.headerSize = 14;
+Protocol.headerSize = 14;
 
 //
 // The magic number at the front of each message
 //
-//module.exports.magic = [ 0x49, 0x63, 0x65, 0x50 ];      // 'I', 'c', 'e', 'P'
-module.exports.magic = new Node.Buffer([ 0x49, 0x63, 0x65, 0x50 ]);      // 'I', 'c', 'e', 'P'
+//Protocol.magic = [ 0x49, 0x63, 0x65, 0x50 ];      // 'I', 'c', 'e', 'P'
+Protocol.magic = new Node.Buffer([ 0x49, 0x63, 0x65, 0x50 ]);      // 'I', 'c', 'e', 'P'
 
 //
 // The current Ice protocol and encoding version
 //
-module.exports.protocolMajor = 1;
-module.exports.protocolMinor = 0;
-module.exports.protocolEncodingMajor = 1;
-module.exports.protocolEncodingMinor = 0;
+Protocol.protocolMajor = 1;
+Protocol.protocolMinor = 0;
+Protocol.protocolEncodingMajor = 1;
+Protocol.protocolEncodingMinor = 0;
 
-module.exports.encodingMajor = 1;
-module.exports.encodingMinor = 1;
+Protocol.encodingMajor = 1;
+Protocol.encodingMinor = 1;
 
 //
 // The Ice protocol message types
 //
-module.exports.requestMsg = 0;
-module.exports.requestBatchMsg = 1;
-module.exports.replyMsg = 2;
-module.exports.validateConnectionMsg = 3;
-module.exports.closeConnectionMsg = 4;
+Protocol.requestMsg = 0;
+Protocol.requestBatchMsg = 1;
+Protocol.replyMsg = 2;
+Protocol.validateConnectionMsg = 3;
+Protocol.closeConnectionMsg = 4;
 
 //
 // Reply status
 //
-module.exports.replyOK = 0;
-module.exports.replyUserException = 1;
-module.exports.replyObjectNotExist = 2;
-module.exports.replyFacetNotExist = 3;
-module.exports.replyOperationNotExist = 4;
-module.exports.replyUnknownLocalException = 5;
-module.exports.replyUnknownUserException = 6;
-module.exports.replyUnknownException = 7;
+Protocol.replyOK = 0;
+Protocol.replyUserException = 1;
+Protocol.replyObjectNotExist = 2;
+Protocol.replyFacetNotExist = 3;
+Protocol.replyOperationNotExist = 4;
+Protocol.replyUnknownLocalException = 5;
+Protocol.replyUnknownUserException = 6;
+Protocol.replyUnknownException = 7;
 
-module.exports.requestHdr = new Node.Buffer([
-    module.exports.magic[0],
-    module.exports.magic[1],
-    module.exports.magic[2],
-    module.exports.magic[3],
-    module.exports.protocolMajor,
-    module.exports.protocolMinor,
-    module.exports.protocolEncodingMajor,
-    module.exports.protocolEncodingMinor,
-    module.exports.requestMsg,
+Protocol.requestHdr = new Node.Buffer([
+    Protocol.magic[0],
+    Protocol.magic[1],
+    Protocol.magic[2],
+    Protocol.magic[3],
+    Protocol.protocolMajor,
+    Protocol.protocolMinor,
+    Protocol.protocolEncodingMajor,
+    Protocol.protocolEncodingMinor,
+    Protocol.requestMsg,
     0, // Compression status.
     0, 0, 0, 0, // Message size (placeholder).
     0, 0, 0, 0  // Request ID (placeholder).
 ]);
 
-module.exports.requestBatchHdr = new Node.Buffer([
-    module.exports.magic[0],
-    module.exports.magic[1],
-    module.exports.magic[2],
-    module.exports.magic[3],
-    module.exports.protocolMajor,
-    module.exports.protocolMinor,
-    module.exports.protocolEncodingMajor,
-    module.exports.protocolEncodingMinor,
-    module.exports.requestBatchMsg,
+Protocol.requestBatchHdr = new Node.Buffer([
+    Protocol.magic[0],
+    Protocol.magic[1],
+    Protocol.magic[2],
+    Protocol.magic[3],
+    Protocol.protocolMajor,
+    Protocol.protocolMinor,
+    Protocol.protocolEncodingMajor,
+    Protocol.protocolEncodingMinor,
+    Protocol.requestBatchMsg,
     0, // Compression status.
     0, 0, 0, 0, // Message size (placeholder).
     0, 0, 0, 0  // Number of requests in batch (placeholder).
 ]);
 
-module.exports.replyHdr = new Node.Buffer([
-    module.exports.magic[0],
-    module.exports.magic[1],
-    module.exports.magic[2],
-    module.exports.magic[3],
-    module.exports.protocolMajor,
-    module.exports.protocolMinor,
-    module.exports.protocolEncodingMajor,
-    module.exports.protocolEncodingMinor,
-    module.exports.replyMsg,
+Protocol.replyHdr = new Node.Buffer([
+    Protocol.magic[0],
+    Protocol.magic[1],
+    Protocol.magic[2],
+    Protocol.magic[3],
+    Protocol.protocolMajor,
+    Protocol.protocolMinor,
+    Protocol.protocolEncodingMajor,
+    Protocol.protocolEncodingMinor,
+    Protocol.replyMsg,
     0, // Compression status.
     0, 0, 0, 0 // Message size (placeholder).
 ]);
 
-module.exports.currentProtocol = new Ver.ProtocolVersion(module.exports.protocolMajor, module.exports.protocolMinor);
-module.exports.currentProtocolEncoding = new Ver.EncodingVersion(module.exports.protocolEncodingMajor, 
-                                                                 module.exports.protocolEncodingMinor);
+Protocol.currentProtocol = new Ice.ProtocolVersion(Protocol.protocolMajor, Protocol.protocolMinor);
+Protocol.currentProtocolEncoding = new Ice.EncodingVersion(Protocol.protocolEncodingMajor, 
+                                                                 Protocol.protocolEncodingMinor);
 
-module.exports.currentEncoding = new Ver.EncodingVersion(module.exports.encodingMajor, module.exports.encodingMinor);
+Protocol.currentEncoding = new Ice.EncodingVersion(Protocol.encodingMajor, Protocol.encodingMinor);
 
-module.exports.checkSupportedProtocol = function(v)
+Protocol.checkSupportedProtocol = function(v)
 {
-    if(v.major !== module.exports.currentProtocol.major || v.minor > module.exports.currentProtocol.minor)
+    if(v.major !== Protocol.currentProtocol.major || v.minor > Protocol.currentProtocol.minor)
     {
-        throw new LocalEx.UnsupportedProtocolException("", v, module.exports.currentProtocol);
+        throw new Ice.UnsupportedProtocolException("", v, Protocol.currentProtocol);
     }
 };
 
-module.exports.checkSupportedProtocolEncoding = function(v)
+Protocol.checkSupportedProtocolEncoding = function(v)
 {
-    if(v.major !== module.exports.currentProtocolEncoding.major ||
-       v.minor > module.exports.currentProtocolEncoding.minor)
+    if(v.major !== Protocol.currentProtocolEncoding.major ||
+       v.minor > Protocol.currentProtocolEncoding.minor)
     {
-        throw new LocalEx.UnsupportedEncodingException("", v, module.exports.currentProtocolEncoding);
+        throw new Ice.UnsupportedEncodingException("", v, Protocol.currentProtocolEncoding);
     }
 };
 
-module.exports.checkSupportedEncoding = function(v)
+Protocol.checkSupportedEncoding = function(v)
 {
-    if(v.major !== module.exports.currentEncoding.major || v.minor > module.exports.currentEncoding.minor)
+    if(v.major !== Protocol.currentEncoding.major || v.minor > Protocol.currentEncoding.minor)
     {
-        throw new LocalEx.UnsupportedEncodingException("", v, module.exports.currentEncoding);
+        throw new Ice.UnsupportedEncodingException("", v, Protocol.currentEncoding);
     }
 };
 
@@ -149,13 +156,13 @@ module.exports.checkSupportedEncoding = function(v)
 // Either return the given protocol if not compatible, or the greatest
 // supported protocol otherwise.
 //
-module.exports.getCompatibleProtocol = function(v)
+Protocol.getCompatibleProtocol = function(v)
 {
-    if(v.major !== module.exports.currentProtocol.major)
+    if(v.major !== Protocol.currentProtocol.major)
     {
         return v; // Unsupported protocol, return as is.
     }
-    else if(v.minor < module.exports.currentProtocol.minor)
+    else if(v.minor < Protocol.currentProtocol.minor)
     {
         return v; // Supported protocol.
     }
@@ -165,7 +172,7 @@ module.exports.getCompatibleProtocol = function(v)
         // Unsupported but compatible, use the currently supported
         // protocol, that's the best we can do.
         //
-        return module.exports.currentProtocol; 
+        return Protocol.currentProtocol; 
     }
 };
 
@@ -173,13 +180,13 @@ module.exports.getCompatibleProtocol = function(v)
 // Either return the given encoding if not compatible, or the greatest
 // supported encoding otherwise.
 //
-module.exports.getCompatibleEncoding = function(v)
+Protocol.getCompatibleEncoding = function(v)
 {
-    if(v.major !== module.exports.currentEncoding.major)
+    if(v.major !== Protocol.currentEncoding.major)
     {
         return v; // Unsupported encoding, return as is.
     }
-    else if(v.minor < module.exports.currentEncoding.minor)
+    else if(v.minor < Protocol.currentEncoding.minor)
     {
         return v; // Supported encoding.
     }
@@ -189,11 +196,11 @@ module.exports.getCompatibleEncoding = function(v)
         // Unsupported but compatible, use the currently supported
         // encoding, that's the best we can do.
         //
-        return module.exports.currentEncoding; 
+        return Protocol.currentEncoding; 
     }
 };
 
-module.exports.isSupported = function(version, supported)
+Protocol.isSupported = function(version, supported)
 {
     return version.major === supported.major && version.minor <= supported.minor;
 };
@@ -205,9 +212,9 @@ module.exports.isSupported = function(version, supported)
  *
  * @return The converted protocol version.
  **/
-module.exports.stringToProtocolVersion = function(version)
+Protocol.stringToProtocolVersion = function(version)
 {
-    return new Ver.ProtocolVersion(stringToMajor(version), stringToMinor(version));
+    return new Ice.ProtocolVersion(stringToMajor(version), stringToMinor(version));
 };
 
 /**
@@ -217,9 +224,9 @@ module.exports.stringToProtocolVersion = function(version)
  *
  * @return The converted object identity.
  **/
-module.exports.stringToEncodingVersion = function(version)
+Protocol.stringToEncodingVersion = function(version)
 {
-    return new Ver.EncodingVersion(stringToMajor(version), stringToMinor(version));
+    return new Ice.EncodingVersion(stringToMajor(version), stringToMinor(version));
 };
 
 /**
@@ -229,7 +236,7 @@ module.exports.stringToEncodingVersion = function(version)
  *
  * @return The converted string.
  **/
-module.exports.protocolVersionToString = function(v)
+Protocol.protocolVersionToString = function(v)
 {
     return majorMinorToString(v.major, v.minor);
 };
@@ -241,17 +248,20 @@ module.exports.protocolVersionToString = function(v)
  *
  * @return The converted string.
  **/
-module.exports.encodingVersionToString = function(v)
+Protocol.encodingVersionToString = function(v)
 {
     return majorMinorToString(v.major, v.minor);
 };
+
+module.exports.Ice = {};
+module.exports.Ice.Protocol = Protocol;
 
 function stringToMajor(str)
 {
     var pos = str.indexOf('.');
     if(pos === -1)
     {
-        throw new LocalEx.VersionParseException("malformed version value `" + str + "'");
+        throw new Ice.VersionParseException("malformed version value `" + str + "'");
     }
         
     var majStr = str.substring(0, pos);
@@ -262,12 +272,12 @@ function stringToMajor(str)
     }
     catch(ex)
     {
-        throw new LocalEx.VersionParseException("invalid version value `" + str + "'");
+        throw new Ice.VersionParseException("invalid version value `" + str + "'");
     }
     
     if(majVersion < 1 || majVersion > 255)
     {
-        throw new LocalEx.VersionParseException("range error in version `" + str + "'");
+        throw new Ice.VersionParseException("range error in version `" + str + "'");
     }
 
     return majVersion;
@@ -278,7 +288,7 @@ function stringToMinor(str)
     var pos = str.indexOf('.');
     if(pos === -1)
     {
-        throw new LocalEx.VersionParseException("malformed version value `" + str + "'");
+        throw new Ice.VersionParseException("malformed version value `" + str + "'");
     }
         
     var minStr = str.substring(pos + 1);
@@ -289,12 +299,12 @@ function stringToMinor(str)
     }
     catch(ex)
     {
-        throw new LocalEx.VersionParseException("invalid version value `" + str + "'");
+        throw new Ice.VersionParseException("invalid version value `" + str + "'");
     }
     
     if(minVersion < 0 || minVersion > 255)
     {
-        throw new LocalEx.VersionParseException("range error in version `" + str + "'");
+        throw new Ice.VersionParseException("range error in version `" + str + "'");
     }
 
     return minVersion;

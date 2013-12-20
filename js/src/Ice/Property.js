@@ -26,4 +26,5 @@ Object.defineProperty(Property.prototype, "deprecatedBy",{
     get: function() { return this._deprecatedBy; }
 });
 
-module.exports = Property;
+module.exports.Ice = {};
+module.exports.Ice.Property = Property;

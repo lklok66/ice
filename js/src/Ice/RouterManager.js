@@ -7,9 +7,8 @@
 //
 // **********************************************************************
 
-var HashMap = require("./HashMap");
-var RouterInfo = require("./RouterInfo");
-
+var HashMap = require("./HashMap").Ice.HashMap;
+var RouterInfo = require("./RouterInfo").Ice.RouterInfo;
 var RouterPrx = require("./Router").Ice.RouterPrx;
 
 var RouterManager = function()
@@ -71,4 +70,5 @@ RouterManager.prototype.erase = function(rtr)
     return info;
 };
 
-module.exports = RouterManager;
+module.exports.Ice = {};
+module.exports.Ice.RouterManager = RouterManager;

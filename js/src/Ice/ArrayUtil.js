@@ -7,7 +7,9 @@
 //
 // **********************************************************************
 
-module.exports.clone = function(arr)
+var ArrayUtil = {};
+
+ArrayUtil.clone = function(arr)
 {
     if(arr === undefined)
     {
@@ -23,7 +25,7 @@ module.exports.clone = function(arr)
     }
 };
 
-module.exports.equals = function(v1, v2, equalFn)
+ArrayUtil.equals = function(v1, v2, equalFn)
 {
     var i, length;
     
@@ -56,7 +58,7 @@ module.exports.equals = function(v1, v2, equalFn)
     return true;
 };
 
-module.exports.shuffle = function(arr)
+ArrayUtil.shuffle = function(arr)
 {
     for(var i = arr.length; i > 1; --i)
     {
@@ -67,7 +69,7 @@ module.exports.shuffle = function(arr)
     }
 };
 
-module.exports.indexOf = function(arr, elem, equalFn)
+ArrayUtil.indexOf = function(arr, elem, equalFn)
 {
     if(equalFn !== undefined && equalFn !== null)
     {
@@ -90,7 +92,7 @@ module.exports.indexOf = function(arr, elem, equalFn)
     return -1;
 };
 
-module.exports.filter = function(arr, includeFn, obj)
+ArrayUtil.filter = function(arr, includeFn, obj)
 {
     obj = obj === undefined ? includeFn : obj;
     var result = [];
@@ -103,3 +105,6 @@ module.exports.filter = function(arr, includeFn, obj)
     }
     return result;
 };
+
+module.exports.Ice = {};
+module.exports.Ice.ArrayUtil = ArrayUtil;

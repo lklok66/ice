@@ -7,20 +7,23 @@
 //
 // **********************************************************************
 
-var Base64 = require("./Base64");
-var Debug = require("./Debug");
-var HashUtil = require("./HashUtil");
-var Protocol = require("./Protocol");
-var StringUtil = require("./StringUtil");
+var Base64 = require("./Base64").Ice.Base64;
+var Debug = require("./Debug").Ice.Debug;
+var HashUtil = require("./HashUtil").Ice.HashUtil;
+var Protocol = require("./Protocol").Ice.Protocol;
+var StringUtil = require("./StringUtil").Ice.StringUtil;
 
-var Endp = require("./Endpoint").Ice;
-var LocalEx = require("./LocalException").Ice;
+var _merge = require("Ice/Util").merge;
+
+var Ice = {};
+_merge(Ice, require("./Endpoint").Ice);
+_merge(Ice, require("./LocalException").Ice);
 
 var OpaqueEndpointI = function()
 {
 }
 
-OpaqueEndpointI.prototype = new Endp.Endpoint();
+OpaqueEndpointI.prototype = new Ice.Endpoint();
 OpaqueEndpointI.prototype.constructor = OpaqueEndpointI;
 
 OpaqueEndpointI.fromString = function(str)
@@ -45,7 +48,7 @@ OpaqueEndpointI.fromString = function(str)
         var option = arr[i++];
         if(option.length != 2 && option.charAt(0) != '-')
         {
-            throw new LocalEx.EndpointParseException("expected an endpoint option but found `" + option +
+            throw new Ice.EndpointParseException("expected an endpoint option but found `" + option +
                                                      "' in endpoint `opaque " + str + "'");
         }
 
@@ -61,7 +64,7 @@ OpaqueEndpointI.fromString = function(str)
             {
                 if(argument === null)
                 {
-                    throw new LocalEx.EndpointParseException("no argument provided for -t option in endpoint `opaque "
+                    throw new Ice.EndpointParseException("no argument provided for -t option in endpoint `opaque "
                                                              + str + "'");
                 }
 
@@ -73,13 +76,13 @@ OpaqueEndpointI.fromString = function(str)
                 }
                 catch(ex)
                 {
-                    throw new LocalEx.EndpointParseException("invalid type value `" + argument +
+                    throw new Ice.EndpointParseException("invalid type value `" + argument +
                                                              "' in endpoint `opaque " + str + "'");
                 }
 
                 if(type < 0 || type > 65535)
                 {
-                    throw new LocalEx.EndpointParseException("type value `" + argument +
+                    throw new Ice.EndpointParseException("type value `" + argument +
                                                              "' out of range in endpoint `opaque " + str + "'");
                 }
 
@@ -87,7 +90,7 @@ OpaqueEndpointI.fromString = function(str)
                 ++topt;
                 if(topt > 1)
                 {
-                    throw new LocalEx.EndpointParseException("multiple -t options in endpoint `opaque " + str + "'");
+                    throw new Ice.EndpointParseException("multiple -t options in endpoint `opaque " + str + "'");
                 }
                 break;
             }
@@ -96,14 +99,14 @@ OpaqueEndpointI.fromString = function(str)
             {
                 if(argument === null || argument.length === 0)
                 {
-                    throw new LocalEx.EndpointParseException("no argument provided for -v option in endpoint `opaque "
+                    throw new Ice.EndpointParseException("no argument provided for -v option in endpoint `opaque "
                                                              + str + "'");
                 }
                 for(var j = 0; j < argument.length; ++j)
                 {
                     if(!Base64.isBase64(argument.charAt(j)))
                     {
-                        throw new LocalEx.EndpointParseException("invalid base64 character `" + argument.charAt(j) +
+                        throw new Ice.EndpointParseException("invalid base64 character `" + argument.charAt(j) +
                                                                  "' (ordinal " + argument.charCodeAt(j) +
                                                                  ") in endpoint `opaque " + str + "'");
                     }
@@ -112,7 +115,7 @@ OpaqueEndpointI.fromString = function(str)
                 ++vopt;
                 if(vopt > 1)
                 {
-                    throw new LocalEx.EndpointParseException("multiple -v options in endpoint `opaque " + str + "'");
+                    throw new Ice.EndpointParseException("multiple -v options in endpoint `opaque " + str + "'");
                 }
                 break;
             }
@@ -121,7 +124,7 @@ OpaqueEndpointI.fromString = function(str)
             {
                 if(argument === null)
                 {
-                    throw new LocalEx.EndpointParseException("no argument provided for -e option in endpoint `opaque "
+                    throw new Ice.EndpointParseException("no argument provided for -e option in endpoint `opaque "
                                                              + str + "'");
                 }
                 try
@@ -130,7 +133,7 @@ OpaqueEndpointI.fromString = function(str)
                 }
                 catch(e)
                 {
-                    throw new LocalEx.EndpointParseException("invalid encoding version `" + argument +
+                    throw new Ice.EndpointParseException("invalid encoding version `" + argument +
                                                              "' in endpoint `opaque " + str + "':\n" + e.str);
                 }
                 break;
@@ -138,7 +141,7 @@ OpaqueEndpointI.fromString = function(str)
 
             default:
             {
-                throw new LocalEx.EndpointParseException("invalid option `" + option + "' in endpoint `opaque " +
+                throw new Ice.EndpointParseException("invalid option `" + option + "' in endpoint `opaque " +
                                                          str + "'");
             }
         }
@@ -146,11 +149,11 @@ OpaqueEndpointI.fromString = function(str)
 
     if(topt != 1)
     {
-        throw new LocalEx.EndpointParseException("no -t option in endpoint `opaque " + str + "'");
+        throw new Ice.EndpointParseException("no -t option in endpoint `opaque " + str + "'");
     }
     if(vopt != 1)
     {
-        throw new LocalEx.EndpointParseException("no -v option in endpoint `opaque " + str + "'");
+        throw new Ice.EndpointParseException("no -v option in endpoint `opaque " + str + "'");
     }
     result.calcHashValue();
     return result;
@@ -439,15 +442,16 @@ OpaqueEndpointI.prototype.calcHashValue = function()
     this._hashCode = h;
 }
 
-module.exports = OpaqueEndpointI;
+module.exports.Ice = {};
+module.exports.Ice.OpaqueEndpointI = OpaqueEndpointI;
 
 var OpaqueEndpointInfoI = function(timeout, compress, rawEncoding, rawBytes, type)
 {
-    Endp.OpaqueEndpointInfo.call(this, -1, false, rawEncoding, rawBytes);
+    Ice.OpaqueEndpointInfo.call(this, -1, false, rawEncoding, rawBytes);
     this._type = type;
 }
 
-OpaqueEndpointInfoI.prototype = new Endp.OpaqueEndpointInfo();
+OpaqueEndpointInfoI.prototype = new Ice.OpaqueEndpointInfo();
 OpaqueEndpointInfoI.prototype.constructor = OpaqueEndpointInfoI();
 
 OpaqueEndpointInfoI.prototype.type = function()

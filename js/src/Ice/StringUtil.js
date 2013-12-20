@@ -7,14 +7,16 @@
 //
 // **********************************************************************
 
-var Debug = require("./Debug");
+var Debug = require("./Debug").Ice.Debug;
+
+var StringUtil = {};
 
 //
 // Return the index of the first character in str to
 // appear in match, starting from start. Returns -1 if none is
 // found.
 //
-module.exports.findFirstOf = function(str, match, start)
+StringUtil.findFirstOf = function(str, match, start)
 {
     start = start === undefined ? 0 : start;
 
@@ -36,7 +38,7 @@ module.exports.findFirstOf = function(str, match, start)
 // not appear in match, starting from start. Returns -1 if none is
 // found.
 //
-module.exports.findFirstNotOf = function(str, match, start)
+StringUtil.findFirstNotOf = function(str, match, start)
 {
     start = start === undefined ? 0 : start;
 
@@ -145,7 +147,7 @@ function encodeChar(b, sb, special)
 // readable in ASCII. Any characters that appear in special are
 // prefixed with a backlash in the returned string.
 //
-module.exports.escapeString = function(s, special)
+StringUtil.escapeString = function(s, special)
 {
     special = special === undefined ? null : special;
 
@@ -348,7 +350,7 @@ function decodeString(s, start, end, arr)
 // Remove escape sequences added by escapeString. Throws Error
 // for an invalid input string.
 //
-module.exports.unescapeString = function(s, start, end)
+StringUtil.unescapeString = function(s, start, end)
 {
     start = start === undefined ? 0 : start;
     end = end === undefined ? s.length : end;
@@ -364,7 +366,7 @@ module.exports.unescapeString = function(s, start, end)
 //
 // Split string helper; returns null for unmatched quotes
 //
-module.exports.splitString = function(str, delim)
+StringUtil.splitString = function(str, delim)
 {
     var v = [];
     var s = "";
@@ -432,7 +434,7 @@ module.exports.splitString = function(str, delim)
 // quotation mark is found at the start position, then 0 is returned.
 // If no matching closing quote is found, then -1 is returned.
 //
-module.exports.checkQuote = function(s, start)
+StringUtil.checkQuote = function(s, start)
 {
     start = start === undefined ? 0 : start;
 
@@ -455,7 +457,7 @@ module.exports.checkQuote = function(s, start)
     return 0; // Not quoted
 };
 
-module.exports.hashCode = function(s)
+StringUtil.hashCode = function(s)
 {
     var hash = 0;
     var n = s.length;
@@ -468,7 +470,7 @@ module.exports.hashCode = function(s)
     return hash;
 };
 
-module.exports.toInt = function(s)
+StringUtil.toInt = function(s)
 {
     var n = parseInt(s, 10);
     if(isNaN(n))
@@ -477,3 +479,6 @@ module.exports.toInt = function(s)
     }
     return n;
 };
+
+module.exports.Ice = {};
+module.exports.Ice.StringUtil = StringUtil;

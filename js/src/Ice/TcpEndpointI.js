@@ -7,13 +7,16 @@
 //
 // **********************************************************************
 
-var Address = require("./Address");
-var HashUtil = require("./HashUtil");
-var StringUtil = require("./StringUtil");
-var TcpTransceiver = require("./TcpTransceiver");
+var Address = require("./Address").Ice.Address;
+var HashUtil = require("./HashUtil").Ice.HashUtil;
+var StringUtil = require("./StringUtil").Ice.StringUtil;
+var TcpTransceiver = require("./TcpTransceiver").Ice.TcpTransceiver;
 
-var Endp = require("./Endpoint").Ice;
-var LocalEx = require("./LocalException").Ice;
+var _merge = require("Ice/Util").merge;
+
+var Ice = {};
+_merge(Ice, require("./Endpoint").Ice);
+_merge(Ice, require("./LocalException").Ice);
 
 var TcpEndpointI = function(instance, ho, po, ti, conId, co)
 {
@@ -26,7 +29,7 @@ var TcpEndpointI = function(instance, ho, po, ti, conId, co)
     this.calcHashValue();
 }
 
-TcpEndpointI.prototype = new Endp.Endpoint();
+TcpEndpointI.prototype = new Ice.Endpoint();
 TcpEndpointI.prototype.constructor = TcpEndpointI;
 
 TcpEndpointI.fromString = function(instance, str, oaEndpoint)
@@ -50,7 +53,7 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
         var option = arr[i++];
         if(option.length != 2 && option.charAt(0) != '-')
         {
-            throw new LocalEx.EndpointParseException("expected an endpoint option but found `" + option +
+            throw new Ice.EndpointParseException("expected an endpoint option but found `" + option +
                                                      "' in endpoint `tcp " + str + "'");
         }
 
@@ -70,7 +73,7 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
             {
                 if(argument == null)
                 {
-                    throw new LocalEx.EndpointParseException("no argument provided for -h option in endpoint `tcp "
+                    throw new Ice.EndpointParseException("no argument provided for -h option in endpoint `tcp "
                                                              + str + "'");
                 }
 
@@ -82,7 +85,7 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
             {
                 if(argument == null)
                 {
-                    throw new LocalEx.EndpointParseException("no argument provided for -p option in endpoint `tcp "
+                    throw new Ice.EndpointParseException("no argument provided for -p option in endpoint `tcp "
                                                              + str + "'");
                 }
 
@@ -92,13 +95,13 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
                 }
                 catch(ex)
                 {
-                    throw new LocalEx.EndpointParseException("invalid port value `" + argument +
+                    throw new Ice.EndpointParseException("invalid port value `" + argument +
                                                              "' in endpoint `tcp " + str + "'");
                 }
 
                 if(port < 0 || port > 65535)
                 {
-                    throw new LocalEx.EndpointParseException("port value `" + argument +
+                    throw new Ice.EndpointParseException("port value `" + argument +
                                                              "' out of range in endpoint `tcp " + str + "'");
                 }
 
@@ -109,7 +112,7 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
             {
                 if(argument == null)
                 {
-                    throw new LocalEx.EndpointParseException("no argument provided for -t option in endpoint `tcp "
+                    throw new Ice.EndpointParseException("no argument provided for -t option in endpoint `tcp "
                                                              + str + "'");
                 }
 
@@ -119,7 +122,7 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
                 }
                 catch(ex)
                 {
-                    throw new LocalEx.EndpointParseException("invalid timeout value `" + argument +
+                    throw new Ice.EndpointParseException("invalid timeout value `" + argument +
                                                              "' in endpoint `tcp " + str + "'");
                 }
 
@@ -130,7 +133,7 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
             {
                 if(argument != null)
                 {
-                    throw new LocalEx.EndpointParseException("unexpected argument `" + argument +
+                    throw new Ice.EndpointParseException("unexpected argument `" + argument +
                                                              "' provided for -z option in `tcp " + str + "'");
                 }
 
@@ -140,7 +143,7 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
 
             default:
             {
-                throw new LocalEx.EndpointParseException("unknown option `" + option + "' in `tcp " + str + "'");
+                throw new Ice.EndpointParseException("unknown option `" + option + "' in `tcp " + str + "'");
             }
         }
     }
@@ -157,7 +160,7 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
         }
         else
         {
-            throw new LocalEx.EndpointParseException("`-h *' not valid for proxy endpoint `tcp " + str + "'");
+            throw new Ice.EndpointParseException("`-h *' not valid for proxy endpoint `tcp " + str + "'");
         }
     }
 
@@ -235,7 +238,7 @@ TcpEndpointI.prototype.getInfo = function()
 //
 TcpEndpointI.prototype.streamWrite = function(s)
 {
-    s.writeShort(Endp.TCPEndpointType);
+    s.writeShort(Ice.TCPEndpointType);
     s.startWriteEncaps();
     s.writeString(this._host);
     s.writeInt(this._port);
@@ -249,7 +252,7 @@ TcpEndpointI.prototype.streamWrite = function(s)
 //
 TcpEndpointI.prototype.type = function()
 {
-    return Endp.TCPEndpointType;
+    return Ice.TCPEndpointType;
 }
 
 //
@@ -496,7 +499,7 @@ TcpEndpointI.prototype.compareTo = function(p)
 TcpEndpointI.prototype.calcHashValue = function()
 {
     var h = 5381;
-    h = HashUtil.addNumber(h, Endp.TCPEndpointType);
+    h = HashUtil.addNumber(h, Ice.TCPEndpointType);
     h = HashUtil.addString(h, this._host);
     h = HashUtil.addNumber(h, this._port);
     h = HashUtil.addNumber(h, this._timeout);
@@ -505,19 +508,20 @@ TcpEndpointI.prototype.calcHashValue = function()
     this._hashCode = h;
 }
 
-module.exports = TcpEndpointI;
+module.exports.Ice = {};
+module.exports.Ice.TcpEndpointI = TcpEndpointI;
 
 var TCPEndpointInfoI = new function(timeout, compress, host, port)
 {
-    Endp.TCPEndpointInfo.call(this, timeout, compress, host, port);
+    Ice.TCPEndpointInfo.call(this, timeout, compress, host, port);
 }
 
-TCPEndpointInfoI.prototype = new Endp.TCPEndpointInfo();
+TCPEndpointInfoI.prototype = new Ice.TCPEndpointInfo();
 TCPEndpointInfoI.prototype.constructor = TCPEndpointInfoI;
 
 TCPEndpointInfoI.prototype.type = function()
 {
-    return Endp.TCPEndpointType;
+    return Ice.TCPEndpointType;
 }
 
 TCPEndpointInfoI.prototype.datagram = function()

@@ -22,12 +22,18 @@ Object.defineProperty(AssertionFailedException.prototype, "name", {
 
 AssertionFailedException.prototype.constructor = AssertionFailedException;
 
-module.exports.AssertionFailedException = AssertionFailedException;
+var Debug = {};
 
-module.exports.assert = function(b, msg)
+Debug.AssertionFailedException = AssertionFailedException;
+
+Debug.assert = function(b, msg)
 {
     if(!b)
     {
         throw new AssertionFailedException(msg === undefined ? "assertion failed" : msg);
     }
 };
+
+
+module.exports.Ice = {};
+module.exports.Ice.Debug = Debug;

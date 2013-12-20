@@ -7,9 +7,9 @@
 //
 // **********************************************************************
 
-var Debug = require("./Debug");
-var ExUtil = require("./ExUtil");
-var TimeUtil = require("./TimeUtil");
+var Debug = require("./Debug").Ice.Debug;
+var ExUtil = require("./ExUtil").Ice.ExUtil;
+var TimeUtil = require("./TimeUtil").Ice.TimeUtil;
 
 var ConnectionMonitor = function(instance, interval)
 {
@@ -106,4 +106,5 @@ ConnectionMonitor.prototype.runTimerTask = function()
     }
 };
 
-module.exports = ConnectionMonitor;
+module.exports.Ice = {}
+module.exports.Ice.ConnectionMonitor = ConnectionMonitor;

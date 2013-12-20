@@ -79,4 +79,4 @@ IceObject.prototype.__read = function(is)
     is.endReadObject(false);
 }
 
-module.exports = IceObject;
+module.exports.Ice = { Object: IceObject};

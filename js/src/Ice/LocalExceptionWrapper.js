@@ -7,10 +7,14 @@
 //
 // **********************************************************************
 
-var Ex = require("./Exception");
-var ExUtil = require("./ExUtil");
-var Debug = require("./Debug");
-var LocalEx = require("./LocalException").Ice;
+var Ex = require("./Exception").Ice.Exception;
+var ExUtil = require("./ExUtil").Ice.ExUtil;
+var Debug = require("./Debug").Ice.Debug;
+
+var _merge = require("./Util").merge;
+
+var Ice = {};
+_merge(Ice, require("./LocalException").Ice);
 
 var LocalExceptionWrapper = function(ex, retry)
 {
@@ -51,23 +55,24 @@ LocalExceptionWrapper.throwWrapper = function(ex)
 {
     if(ex instanceof Ex.UserException)
     {
-        throw new LocalExceptionWrapper(new LocalEx.UnknownUserException(ex.ice_name()), false);
+        throw new LocalExceptionWrapper(new Ice.UnknownUserException(ex.ice_name()), false);
     }
     else if(ex instanceof Ex.LocalException)
     {
-        if(ex instanceof LocalEx.UnknownException ||
-           ex instanceof LocalEx.ObjectNotExistException ||
-           ex instanceof LocalEx.OperationNotExistException ||
-           ex instanceof LocalEx.FacetNotExistException)
+        if(ex instanceof Ice.UnknownException ||
+           ex instanceof Ice.ObjectNotExistException ||
+           ex instanceof Ice.OperationNotExistException ||
+           ex instanceof Ice.FacetNotExistException)
         {
             throw new LocalExceptionWrapper(ex, false);
         }
-        var e = new LocalEx.UnknownLocalException(ex.ice_name(), ex);
+        var e = new Ice.UnknownLocalException(ex.ice_name(), ex);
         throw new LocalExceptionWrapper(e, false);
     }
 
-    var ue = new LocalEx.UnknownException(ExUtil.toString(ex), ex);
+    var ue = new Ice.UnknownException(ExUtil.toString(ex), ex);
     throw new LocalExceptionWrapper(ue, false);
 };
 
-module.exports = LocalExceptionWrapper;
+module.exports.Ice = {};
+module.exports.Ice.LocalExceptionWrapper = LocalExceptionWrapper;

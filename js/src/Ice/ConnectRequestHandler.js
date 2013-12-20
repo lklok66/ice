@@ -7,16 +7,16 @@
 //
 // **********************************************************************
 
-var AsyncStatus = require("./AsyncStatus");
-var BasicStream = require("./BasicStream");
-var ConnectionRequestHandler = require("./ConnectionRequestHandler");
-var Debug = require("./Debug");
-var Ex = require("./Exception");
-var ExUtil = require("./ExUtil");
-var LocalExceptionWrapper = require("./LocalExceptionWrapper");
-var OutgoingAsync = require("./OutgoingAsync");
-var Protocol = require("./Protocol");
-var ReferenceMode = require("./ReferenceMode");
+var AsyncStatus = require("./AsyncStatus").Ice.AsyncStatus;
+var BasicStream = require("./BasicStream").Ice.BasicStream;
+var ConnectionRequestHandler = require("./ConnectionRequestHandler").Ice.ConnectionRequestHandler;
+var Debug = require("./Debug").Ice.Debug;
+var ExUtil = require("./ExUtil").Ice.ExUtil;
+var LocalExceptionWrapper = require("./LocalExceptionWrapper").Ice.LocalExceptionWrapper;
+var OutgoingAsync = require("./OutgoingAsync").Ice.OutgoingAsync;
+var Protocol = require("./Protocol").Ice.Protocol;
+var ReferenceMode = require("./ReferenceMode").Ice.ReferenceMode;
+var LocalException = require("./Exception").Ice.LocalException;
 
 var ConnectRequestHandler = function(ref, proxy)
 {
@@ -326,7 +326,7 @@ ConnectRequestHandler.prototype.flushRequests = function()
             this._exception = ex.inner;
             this.flushRequestsWithExceptionWrapper(ex);
         }
-        else if(ex instanceof Ex.LocalException)
+        else if(ex instanceof LocalException)
         {
             Debug.assert(this._exception === null && this._requests.length > 0);
             this._exception = ex;
@@ -407,7 +407,8 @@ ConnectRequestHandler.prototype.flushRequestsWithExceptionWrapper = function(ex)
     this._requests = [];
 };
 
-module.exports = ConnectRequestHandler;
+module.exports.Ice = {};
+module.exports.Ice.ConnectRequestHandler = ConnectRequestHandler;
 
 var Request = function(arg)
 {

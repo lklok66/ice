@@ -17,7 +17,8 @@
 // that allow us to refer to Ice.Buffer as Buffer in this file.
 //
 var Node = { Buffer: global.Buffer}
-var Long = require("./Long");
+
+var Long = require("Ice/Long").Ice.Long;
 
 var Buffer = function(buffer)
 {
@@ -611,4 +612,5 @@ Buffer.prototype.getString = function(length)
     return s;
 };
 
-module.exports = Buffer;
+module.exports.Ice = {};
+module.exports.Ice.Buffer = Buffer;

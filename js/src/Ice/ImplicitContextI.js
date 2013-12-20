@@ -7,9 +7,8 @@
 //
 // **********************************************************************
 
-var HashMap = require("./HashMap");
-
-var LocalEx = require("./LocalException").Ice;
+var HashMap = require("./HashMap").Ice.HashMap;
+var InitializationException = require("./LocalException").Ice.InitializationException;
 
 //
 // The base class for all ImplicitContext implementations
@@ -31,7 +30,7 @@ ImplicitContextI.create = function(kind)
     }
     else
     {
-        throw new LocalEx.InitializationException("'" + kind + "' is not a valid value for Ice.ImplicitContext");
+        throw new InitializationException("'" + kind + "' is not a valid value for Ice.ImplicitContext");
     }
 };
 
@@ -139,4 +138,5 @@ ImplicitContextI.prototype.write = function(prxContext, os)
     }
 };
 
-module.exports = ImplicitContextI;
+module.exports.Ice = {};
+module.exports.Ice.ImplicitContextI = ImplicitContextI;

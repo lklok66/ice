@@ -72,7 +72,7 @@ EnumBase.defineEnum = function(type, enumerators)
     }
 
     Object.defineProperty(type, 'valueOf', {
-        value: function(v) { 
+        value: function(v) {
             if(v === undefined)
             {
                 return type;
@@ -81,8 +81,13 @@ EnumBase.defineEnum = function(type, enumerators)
     });
     
     Object.defineProperty(type, 'maxValue', {
-        value: function() { return maxValue; }
+        value: maxValue
+    });
+    
+    Object.defineProperty(type.prototype, 'maxValue', {
+        value: maxValue
     });
 };
 
-module.exports = EnumBase;
+module.exports.Ice = {};
+module.exports.Ice.EnumBase = EnumBase;

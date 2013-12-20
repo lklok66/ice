@@ -38,8 +38,6 @@ protected:
     static std::string getReference(const std::string&, const std::string&);
 
     static std::string getHelper(const TypePtr&);
-    static void writeHelpers(::IceUtilInternal::Output&, const TypePtr&, bool);
-    static void writeDictionaryHelper(::IceUtilInternal::Output&, const TypePtr&, const TypePtr&);
     //
     // Generate code to marshal or unmarshal a type
     //

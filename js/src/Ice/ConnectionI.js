@@ -7,22 +7,26 @@
 //
 // **********************************************************************
 
-var AsyncStatus = require("./AsyncStatus");
-var BasicStream = require("./BasicStream");
-var Debug = require("./Debug");
-var Ex = require("./Exception");
-var ExUtil = require("./ExUtil");
-var HashMap = require("./HashMap");
-var LocalExceptionWrapper = require("./LocalExceptionWrapper");
-var Promise = require("./Promise");
-var Protocol = require("./Protocol");
-var SocketOperation = require("./SocketOperation");
-var Timer = require("./Timer");
-var TimeUtil = require("./TimeUtil");
-var TraceUtil = require("./TraceUtil");
+var AsyncStatus = require("./AsyncStatus").Ice.AsyncStatus;
+var BasicStream = require("./BasicStream").Ice.BasicStream;
+var Debug = require("./Debug").Ice.Debug;
+var ExUtil = require("./ExUtil").Ice.ExUtil;
+var HashMap = require("./HashMap").Ice.HashMap;
+var LocalExceptionWrapper = require("./LocalExceptionWrapper").Ice.LocalExceptionWrapper;
+var Promise = require("./Promise").Ice.Promise;
+var Protocol = require("Ice/Protocol").Ice.Protocol;
+var SocketOperation = require("./SocketOperation").Ice.SocketOperation;
+var Timer = require("Ice/Timer").Ice.Timer;
+var TimeUtil = require("./TimeUtil").Ice.TimeUtil;
+var TraceUtil = require("./TraceUtil").Ice.TraceUtil;
+var Version = require("Ice/Version").Ice.Version;
 
-var LocalEx = require("./LocalException").Ice;
-var Ver = require("./Version").Ice;
+var _merge = require("Ice/Util").merge;
+
+var Ice = {};
+
+_merge(Ice, require("Ice/Exception").Ice);
+_merge(Ice, require("Ice/LocalException").Ice);
 
 var StateNotInitialized = 0;
 var StateNotValidated = 1;
@@ -81,8 +85,8 @@ var ConnectionI = function(communicator, instance, reaper, transceiver, endpoint
     this._shutdownInitiated = false;
     this._validated = false;
 
-    this._readProtocol = new Ver.ProtocolVersion();
-    this._readProtocolEncoding = new Ver.EncodingVersion();
+    this._readProtocol = new Version.ProtocolVersion();
+    this._readProtocolEncoding = new Version.EncodingVersion();
 
     this._asyncRequests = new HashMap(); // Map<int, OutgoingAsync>
 
@@ -144,7 +148,7 @@ ConnectionI.prototype.start = function()
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this.exception(ex);
         }
@@ -189,13 +193,13 @@ ConnectionI.prototype.destroy = function(reason)
     {
         case ConnectionI.ObjectAdapterDeactivated:
         {
-            this.setStateEx(StateClosing, new LocalEx.ObjectAdapterDeactivatedException());
+            this.setStateEx(StateClosing, new Ice.ObjectAdapterDeactivatedException());
             break;
         }
 
         case ConnectionI.CommunicatorDestroyed:
         {
-            this.setStateEx(StateClosing, new LocalEx.CommunicatorDestroyedException());
+            this.setStateEx(StateClosing, new Ice.CommunicatorDestroyedException());
             break;
         }
     }
@@ -207,7 +211,7 @@ ConnectionI.prototype.close = function(force)
 
     if(force)
     {
-        this.setStateEx(StateClosed, new LocalEx.ForcedCloseConnectionException());
+        this.setStateEx(StateClosed, new Ice.ForcedCloseConnectionException());
         promise.succeed();
     }
     else
@@ -239,7 +243,7 @@ ConnectionI.prototype.checkClose = function()
     //
     if(this._asyncRequests.length === 0 && this._closePromises !== null)
     {
-        this.setStateEx(StateClosing, new LocalEx.CloseConnectionException());
+        this.setStateEx(StateClosing, new Ice.CloseConnectionException());
         for(var i = 0; i < this._closePromises.length; ++i)
         {
             this._closePromises[i].succeed();
@@ -308,7 +312,7 @@ ConnectionI.prototype.monitor = function(now)
 
     if(now >= this._acmAbsoluteTimeoutMillis)
     {
-        this.setStateEx(StateClosing, new LocalEx.ConnectionTimeoutException());
+        this.setStateEx(StateClosing, new Ice.ConnectionTimeoutException());
     }
 };
 
@@ -362,7 +366,7 @@ ConnectionI.prototype.sendAsyncRequest = function(out, compress, response)
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this.setStateEx(StateClosed, ex);
             Debug.assert(this._exception !== null);
@@ -415,7 +419,7 @@ ConnectionI.prototype.prepareBatchRequest = function(os)
         }
         catch(ex)
         {
-            if(ex instanceof Ex.LocalException)
+            if(ex instanceof Ice.LocalException)
             {
                 this.setStateEx(StateClosed, ex);
             }
@@ -460,7 +464,7 @@ ConnectionI.prototype.finishBatchRequest = function(os, compress)
             }
             catch(ex)
             {
-                if(ex instanceof Ex.LocalException)
+                if(ex instanceof Ice.LocalException)
                 {
                     if(this._batchRequestNum > 0)
                     {
@@ -500,7 +504,7 @@ ConnectionI.prototype.finishBatchRequest = function(os, compress)
             }
             catch(ex)
             {
-                if(ex instanceof Ex.LocalException)
+                if(ex instanceof Ice.LocalException)
                 {
                     this.setStateEx(StateClosed, ex);
                     Debug.assert(this._exception !== null);
@@ -559,7 +563,7 @@ ConnectionI.prototype.finishBatchRequest = function(os, compress)
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this.abortBatchRequest();
         }
@@ -631,7 +635,7 @@ ConnectionI.prototype.flushAsyncBatchRequests = function(outAsync)
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this.setStateEx(StateClosed, ex);
             Debug.assert(this._exception !== null);
@@ -683,7 +687,7 @@ ConnectionI.prototype.sendResponse = function(os, compressFlag)
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this.setStateEx(StateClosed, ex);
         }
@@ -721,7 +725,7 @@ ConnectionI.prototype.sendNoResponse = function()
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this.setStateEx(StateClosed, ex);
         }
@@ -824,7 +828,7 @@ ConnectionI.prototype.message = function(operation)
                         //
                         // This situation is possible for small UDP packets.
                         //
-                        throw new LocalEx.IllegalMessageSizeException();
+                        throw new Ice.IllegalMessageSizeException();
                     }
 
                     this._readStream.pos = 0;
@@ -835,7 +839,7 @@ ConnectionI.prototype.message = function(operation)
                     if(magic0 !== Protocol.magic[0] || magic1 !== Protocol.magic[1] ||
                        magic2 !== Protocol.magic[2] || magic3 !== Protocol.magic[3])
                     {
-                        var bme = new LocalEx.BadMagicException();
+                        var bme = new Ice.BadMagicException();
                         /* TODO: Fix for sequence<byte> mapping
                         const m:flash.utils.ByteArray = new flash.utils.ByteArray();
                         m.endian = flash.utils.Endian.LITTLE_ENDIAN;
@@ -860,7 +864,7 @@ ConnectionI.prototype.message = function(operation)
                     var size = this._readStream.readInt();
                     if(size < Protocol.headerSize)
                     {
-                        throw new LocalEx.IllegalMessageSizeException();
+                        throw new Ice.IllegalMessageSizeException();
                     }
                     if(size > this._instance.messageSizeMax())
                     {
@@ -877,7 +881,7 @@ ConnectionI.prototype.message = function(operation)
                 {
                     if(this._endpoint.datagram())
                     {
-                        throw new LocalEx.DatagramLimitException(); // The message was truncated.
+                        throw new Ice.DatagramLimitException(); // The message was truncated.
                     }
                     else
                     {
@@ -941,7 +945,7 @@ ConnectionI.prototype.message = function(operation)
         }
         catch(ex)
         {
-            if(ex instanceof LocalEx.DatagramLimitException) // Expected.
+            if(ex instanceof Ice.DatagramLimitException) // Expected.
             {
                 if(this._warnUdp)
                 {
@@ -952,12 +956,12 @@ ConnectionI.prototype.message = function(operation)
                 this._readHeader = true;
                 return;
             }
-            else if(ex instanceof LocalEx.SocketException)
+            else if(ex instanceof Ice.SocketException)
             {
                 this.setStateEx(StateClosed, ex);
                 return;
             }
-            else if(ex instanceof Ex.LocalException)
+            else if(ex instanceof Ice.LocalException)
             {
                 if(this._endpoint.datagram())
                 {
@@ -1011,7 +1015,7 @@ ConnectionI.prototype.transceiverBytesWritten = function()
 
 ConnectionI.prototype.transceiverClosed = function()
 {
-    this.setStateEx(StateClosed, new LocalEx.ConnectionLostException());
+    this.setStateEx(StateClosed, new Ice.ConnectionLostException());
 };
 
 ConnectionI.prototype.transceiverError = function(ex)
@@ -1060,7 +1064,7 @@ ConnectionI.prototype.dispatch = function(info)
                 }
                 catch(ex)
                 {
-                    if(ex instanceof Ex.LocalException)
+                    if(ex instanceof Ice.LocalException)
                     {
                         this.setStateEx(StateClosed, ex);
                     }
@@ -1146,15 +1150,15 @@ ConnectionI.prototype.timedOut = function(event)
 {
     if(this._state <= StateNotValidated)
     {
-        this.setStateEx(StateClosed, new LocalEx.ConnectTimeoutException());
+        this.setStateEx(StateClosed, new Ice.ConnectTimeoutException());
     }
     else if(this._state < StateClosing)
     {
-        this.setStateEx(StateClosed, new LocalEx.TimeoutException());
+        this.setStateEx(StateClosed, new Ice.TimeoutException());
     }
     else if(this._state === StateClosing)
     {
-        this.setStateEx(StateClosed, new LocalEx.CloseTimeoutException());
+        this.setStateEx(StateClosed, new Ice.CloseTimeoutException());
     }
 };
 
@@ -1212,7 +1216,7 @@ ConnectionI.prototype.invokeException = function(ex, invokeNum)
 
 ConnectionI.prototype.setStateEx = function(state, ex)
 {
-    Debug.assert(ex instanceof Ex.LocalException);
+    Debug.assert(ex instanceof Ice.LocalException);
 
     //
     // If setState() is called with an exception, then only closed
@@ -1237,12 +1241,12 @@ ConnectionI.prototype.setStateEx = function(state, ex)
             //
             // Don't warn about certain expected exceptions.
             //
-            if(!(this._exception instanceof LocalEx.CloseConnectionException ||
-                 this._exception instanceof LocalEx.ForcedCloseConnectionException ||
-                 this._exception instanceof LocalEx.ConnectionTimeoutException ||
-                 this._exception instanceof LocalEx.CommunicatorDestroyedException ||
-                 this._exception instanceof LocalEx.ObjectAdapterDeactivatedException ||
-                 (this._exception instanceof LocalEx.ConnectionLostException && this._state === StateClosing)))
+            if(!(this._exception instanceof Ice.CloseConnectionException ||
+                 this._exception instanceof Ice.ForcedCloseConnectionException ||
+                 this._exception instanceof Ice.ConnectionTimeoutException ||
+                 this._exception instanceof Ice.CommunicatorDestroyedException ||
+                 this._exception instanceof Ice.ObjectAdapterDeactivatedException ||
+                 (this._exception instanceof Ice.ConnectionLostException && this._state === StateClosing)))
             {
                 this.warning("connection exception", this._exception);
             }
@@ -1382,7 +1386,7 @@ ConnectionI.prototype.setState = function(state)
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             var msg = "unexpected connection exception:\n " + this._desc + "\n" + ExUtil.toString(ex);
             this._instance.initializationData().logger.error(msg);
@@ -1421,7 +1425,7 @@ ConnectionI.prototype.setState = function(state)
         }
         catch(ex)
         {
-            if(ex instanceof Ex.LocalException)
+            if(ex instanceof Ice.LocalException)
             {
                 this.setStateEx(StateClosed, ex);
             }
@@ -1543,7 +1547,7 @@ ConnectionI.prototype.validate = function()
             if(m[0] !== Protocol.magic[0] || m[1] !== Protocol.magic[1] ||
                m[2] !== Protocol.magic[2] || m[3] !== Protocol.magic[3])
             {
-                var bme = new LocalEx.BadMagicException();
+                var bme = new Ice.BadMagicException();
                 bme.badMagic = m;
                 throw bme;
             }
@@ -1557,13 +1561,13 @@ ConnectionI.prototype.validate = function()
             var messageType = this._readStream.readByte();
             if(messageType !== Protocol.validateConnectionMsg)
             {
-                throw new LocalEx.ConnectionNotValidatedException();
+                throw new Ice.ConnectionNotValidatedException();
             }
             this._readStream.readByte(); // Ignore compression status for validate connection.
             var size = this._readStream.readInt();
             if(size !== Protocol.headerSize)
             {
-                throw new LocalEx.IllegalMessageSizeException();
+                throw new Ice.IllegalMessageSizeException();
             }
             TraceUtil.traceRecv(this._readStream, this._logger, this._traceLevels);
 
@@ -1657,7 +1661,7 @@ ConnectionI.prototype.sendNextMessage = function()
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this.setState(StateClosed, ex);
             return callbacks;
@@ -1764,7 +1768,7 @@ ConnectionI.prototype.parseMessage = function()
         info.compress = info.stream.readByte();
         if(info.compress === 2)
         {
-            var ex = new LocalEx.FeatureNotSupportedException();
+            var ex = new Ice.FeatureNotSupportedException();
             ex.unsupportedFeature = "Cannot uncompress compressed message";
             throw ex;
         }
@@ -1785,7 +1789,7 @@ ConnectionI.prototype.parseMessage = function()
                 }
                 else
                 {
-                    this.setStateEx(StateClosed, new LocalEx.CloseConnectionException());
+                    this.setStateEx(StateClosed, new Ice.CloseConnectionException());
                 }
                 break;
             }
@@ -1825,7 +1829,7 @@ ConnectionI.prototype.parseMessage = function()
                     if(info.invokeNum < 0)
                     {
                         info.invokeNum = 0;
-                        throw new LocalEx.UnmarshalOutOfBoundsException();
+                        throw new Ice.UnmarshalOutOfBoundsException();
                     }
                     info.servantManager = this._servantManager;
                     info.adapter = this._adapter;
@@ -1842,7 +1846,7 @@ ConnectionI.prototype.parseMessage = function()
                 this._asyncRequests.delete(info.requestId);
                 if(info.outAsync === undefined)
                 {
-                    throw new LocalEx.UnknownRequestIdException();
+                    throw new Ice.UnknownRequestIdException();
                 }
                 this.checkClose();
                 break;
@@ -1862,13 +1866,13 @@ ConnectionI.prototype.parseMessage = function()
             {
                 TraceUtil.trace("received unknown message\n(invalid, closing connection)",
                                 info.stream, this._logger, this._traceLevels);
-                throw new LocalEx.UnknownMessageException();
+                throw new Ice.UnknownMessageException();
             }
         }
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             if(this._endpoint.datagram())
             {
@@ -1917,7 +1921,7 @@ ConnectionI.prototype.invokeAll = function(stream, invokeNum, requestId, compres
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this.invokeException(ex, invokeNum);
         }
@@ -1925,7 +1929,7 @@ ConnectionI.prototype.invokeAll = function(stream, invokeNum, requestId, compres
         {
             // Upon assertion, we print the stack trace.
             var stackTrace = ""; // TODO: Can we obtain a stack trace?
-            var uex = new LocalEx.UnknownException(stackTrace, ex);
+            var uex = new Ice.UnknownException(stackTrace, ex);
             this._logger.error(uex.unknown);
             this.invokeException(uex, invokeNum);
         }
@@ -2038,7 +2042,8 @@ ConnectionI.prototype.checkState = function()
     }
 };
 
-module.exports = ConnectionI;
+module.exports.Ice = {};
+module.exports.Ice.ConnectionI = ConnectionI;
 
 var OutgoingMessage = function()
 {

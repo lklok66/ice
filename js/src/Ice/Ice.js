@@ -7,120 +7,95 @@
 //
 // **********************************************************************
 
-var Communicator = require("./Communicator");
-var Debug = require("./Debug");
-var Ex = require("./Exception");
-var HashMap = require("./HashMap");
-var IdentityUtil = require("./IdentityUtil");
-var IceObject = require("./Object");
-var Logger = require("./Logger");
-var ProcessLogger = require("./ProcessLogger");
-var ObjectPrx = require("./ObjectPrx");
-var Properties = require("./Properties");
+var _merge = require("./Util").merge;
 
-var Identity = require("./Identity").Ice.Identity;
-var LocalEx = require("./LocalException").Ice;
+var Ice = {};
+_merge(Ice, require("./Communicator").Ice);
+_merge(Ice, require("./HashMap").Ice);
+_merge(Ice, require("./Object").Ice);
+_merge(Ice, require("./Logger").Ice);
+_merge(Ice, require("./ObjectPrx").Ice);
+_merge(Ice, require("./Properties").Ice);
+_merge(Ice, require("./IdentityUtil").Ice);
+_merge(Ice, require("./ProcessLogger").Ice);
+_merge(Ice, require("./Identity").Ice);
+_merge(Ice, require("./Exception").Ice);
+_merge(Ice, require("./LocalException").Ice);
+_merge(Ice, require("./BuiltinSequences").Ice);
 
-var Ice = (function(my, undefined)
+
+//
+// Ice.InitializationData
+//
+Ice.InitializationData = function()
 {
-    my.Communicator = Communicator;
-    my.HashMap = HashMap;
-    my.Identity = Identity;
-    my.LocalException = Ex.LocalException;
-    my.Logger = Logger;
-    my.Object = IceObject;
-    my.ObjectPrx = ObjectPrx;
-    my.Properties = Properties;
-    my.UserException = Ex.UserException;
+    this.properties = null;
+    this.logger = null;
+};
 
-    for(var s in LocalEx)
+Ice.InitializationData.prototype.clone = function()
+{
+    var r = new Ice.InitializationData();
+    r.properties = this.properties;
+    r.logger = this.logger;
+    return r;
+};
+
+//
+// Ice.initialize()
+//
+Ice.initialize = function(arg1, arg2)
+{
+    var args = null;
+    var initData = null;
+
+    if(arg1 instanceof Array)
     {
-        my[s] = LocalEx[s];
+        args = arg1;
+    }
+    else if(arg1 instanceof Ice.InitializationData)
+    {
+        initData = arg1;
+    }
+    else if(arg1 !== undefined && arg1 !== null)
+    {
+        throw new Ice.InitializationException("invalid argument to initialize");
     }
 
-    my.stringToIdentity = IdentityUtil.stringToIdentity;
-    my.identityToString = IdentityUtil.identityToString;
-    my.proxyIdentityCompare = IdentityUtil.proxyIdentityCompare;
-    my.proxyIdentityAndFacetCompare = IdentityUtil.proxyIdentityAndFacetCompare;
-
-    //
-    // Ice.InitializationData
-    //
-    my.InitializationData = function()
+    if(arg2 !== undefined && arg2 !== null)
     {
-        this.properties = null;
-        this.logger = null;
-    };
-
-    my.InitializationData.prototype.clone = function()
-    {
-        var r = new my.InitializationData();
-        r.properties = this.properties;
-        r.logger = this.logger;
-        return r;
-    };
-
-    //
-    // Ice.initialize()
-    //
-    my.initialize = function(arg1, arg2)
-    {
-        var args = null;
-        var initData = null;
-
-        if(arg1 instanceof Array)
+        if(arg2 instanceof Ice.InitializationData && initData === null)
         {
-            args = arg1;
-        }
-        else if(arg1 instanceof my.InitializationData)
-        {
-            initData = arg1;
-        }
-        else if(arg1 !== undefined && arg1 !== null)
-        {
-            throw new LocalEx.InitializationException("invalid argument to initialize");
-        }
-
-        if(arg2 !== undefined && arg2 !== null)
-        {
-            if(arg2 instanceof my.InitializationData && initData === null)
-            {
-                initData = arg2;
-            }
-            else
-            {
-                throw new LocalEx.InitializationException("invalid argument to initialize");
-            }
-
-        }
-
-        if(initData === null)
-        {
-            initData = new my.InitializationData();
+            initData = arg2;
         }
         else
         {
-            initData = initData.clone();
+            throw new Ice.InitializationException("invalid argument to initialize");
         }
-        initData.properties = my.createProperties(args, initData.properties);
 
-        var result = new Communicator(initData);
-        result.finishSetup(null);
-        return result;
-    };
+    }
 
-    //
-    // Ice.createProperties()
-    //
-    my.createProperties = function(args, defaults)
+    if(initData === null)
     {
-        return new Properties(args, defaults);
-    };
-    
-    my.getProcessLogger = ProcessLogger.getProcessLogger;
-    my.setProcessLogger = ProcessLogger.setProcessLogger;
+        initData = new Ice.InitializationData();
+    }
+    else
+    {
+        initData = initData.clone();
+    }
+    initData.properties = Ice.createProperties(args, initData.properties);
 
-    return my;
-}(Ice || {}));
+    var result = new Ice.Communicator(initData);
+    result.finishSetup(null);
+    return result;
+};
+
+//
+// Ice.createProperties()
+//
+Ice.createProperties = function(args, defaults)
+{
+    return new Ice.Properties(args, defaults);
+};
 
 module.exports = Ice;

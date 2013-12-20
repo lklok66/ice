@@ -276,4 +276,5 @@ Promise.fail = function()
     return p;
 };
 
-module.exports = Promise;
+module.exports.Ice = {};
+module.exports.Ice.Promise = Promise;

@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-var HashMap = require("./HashMap");
+var HashMap = require("./HashMap").Ice.HashMap;
 
 function TypeRegistry()
 {
@@ -26,5 +26,6 @@ function TypeRegistry()
     return {register: register, find: find};
 }
 
-module.exports.ClassRegistry = TypeRegistry();
-module.exports.ExceptionRegistry = TypeRegistry();
+module.exports.Ice = {};
+module.exports.Ice.ClassRegistry = TypeRegistry();
+module.exports.Ice.ExceptionRegistry = TypeRegistry();

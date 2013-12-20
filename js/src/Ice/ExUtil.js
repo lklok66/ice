@@ -11,22 +11,25 @@
 // Exception utilities
 //
 
-var LocalEx = require("./LocalException").Ice;
+var ExUtil = {};
 
-module.exports.toString = function(ex)
+ExUtil.toString = function(ex)
 {
     // TODO: Best way to stringify exception?
     return ex.toString();
 };
 
-module.exports.throwUOE = function(expectedType, actualType)
+ExUtil.throwUOE = function(expectedType, actualType)
 {
-    throw new LocalEx.UnexpectedObjectException("expected element of type `" + expectedType + "' but received '" +
-                                                actualType, actualType, expectedType);
+    throw new require("./LocalException").Ice.UnexpectedObjectException("expected element of type `" + expectedType + "' but received '" +
+                                         actualType, actualType, expectedType);
 };
 
-module.exports.throwMemoryLimitException = function(requested, maximum)
+ExUtil.throwMemoryLimitException = function(requested, maximum)
 {
-    throw new LocalEx.MemoryLimitException("requested " + requested + " bytes, maximum allowed is " + maximum +
-                                           " bytes (see Ice.MessageSizeMax)");
+    throw new require("./LocalException").Ice.UnexpectedObjectException("requested " + requested + " bytes, maximum allowed is " + maximum +
+                                   " bytes (see Ice.MessageSizeMax)");
 };
+
+module.exports.Ice = {};
+module.exports.Ice.ExUtil = ExUtil;

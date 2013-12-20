@@ -7,18 +7,21 @@
 //
 // **********************************************************************
 
-var AsyncStatus = require("./AsyncStatus");
-var AsyncResult = require("./AsyncResult");
-var BasicStream = require("./BasicStream");
-var Debug = require("./Debug");
-var Ex = require("./Exception");
-var HashMap = require("./HashMap");
-var LocalExceptionWrapper = require("./LocalExceptionWrapper");
-var Protocol = require("./Protocol");
+var AsyncStatus = require("./AsyncStatus").Ice.AsyncStatus;
+var AsyncResult = require("./AsyncResult").Ice.AsyncResult;
+var BasicStream = require("./BasicStream").Ice.BasicStream;
+var Debug = require("./Debug").Ice.Debug;
+var HashMap = require("./HashMap").Ice.HashMap;
+var LocalExceptionWrapper = require("./LocalExceptionWrapper").Ice.LocalExceptionWrapper;
+var Protocol = require("./Protocol").Ice.Protocol;
+var OperationMode = require("./Current").Ice.Current.OperationMode;
+var Identity = require("./Identity").Ice.Identity;
 
-var Curr = require("./Current").Ice;
-var Ident = require("./Identity").Ice;
-var LocalEx = require("./LocalException").Ice;
+var _merge = require("Ice/Util").merge;
+
+var Ice = {};
+_merge(Ice, require("./LocalException").Ice);
+_merge(Ice, require("./Exception").Ice);
 
 var OutgoingAsync = function(prx, operation, completed)
 {
@@ -198,7 +201,7 @@ OutgoingAsync.prototype.__finishedEx = function(exc, sent)
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this.__exception(ex);
         }
@@ -229,7 +232,7 @@ OutgoingAsync.prototype.__finishedWrapper = function(exc)
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this.__exception(ex);
         }
@@ -276,7 +279,7 @@ OutgoingAsync.prototype.__finished = function(istr)
             case Protocol.replyFacetNotExist:
             case Protocol.replyOperationNotExist:
             {
-                var id = new Ident.Identity();
+                var id = new Identity();
                 id.__read(this._is);
 
                 //
@@ -288,7 +291,7 @@ OutgoingAsync.prototype.__finished = function(istr)
                 {
                     if(facetPath.length > 1)
                     {
-                        throw new LocalEx.MarshalException();
+                        throw new Ice.MarshalException();
                     }
                     facet = facetPath[0];
                 }
@@ -304,19 +307,19 @@ OutgoingAsync.prototype.__finished = function(istr)
                 {
                 case Protocol.replyObjectNotExist:
                 {
-                    rfe = new LocalEx.ObjectNotExistException();
+                    rfe = new Ice.ObjectNotExistException();
                     break;
                 }
 
                 case Protocol.replyFacetNotExist:
                 {
-                    rfe = new LocalEx.FacetNotExistException();
+                    rfe = new Ice.FacetNotExistException();
                     break;
                 }
 
                 case Protocol.replyOperationNotExist:
                 {
-                    rfe = new LocalEx.OperationNotExistException();
+                    rfe = new Ice.OperationNotExistException();
                     break;
                 }
 
@@ -344,19 +347,19 @@ OutgoingAsync.prototype.__finished = function(istr)
                 {
                 case Protocol.replyUnknownException:
                 {
-                    ue = new LocalEx.UnknownException();
+                    ue = new Ice.UnknownException();
                     break;
                 }
 
                 case Protocol.replyUnknownLocalException:
                 {
-                    ue = new LocalEx.UnknownLocalException();
+                    ue = new Ice.UnknownLocalException();
                     break;
                 }
 
                 case Protocol.replyUnknownUserException:
                 {
-                    ue = new LocalEx.UnknownUserException();
+                    ue = new Ice.UnknownUserException();
                     break;
                 }
 
@@ -373,7 +376,7 @@ OutgoingAsync.prototype.__finished = function(istr)
 
             default:
             {
-                throw new LocalEx.UnknownReplyStatusException();
+                throw new Ice.UnknownReplyStatusException();
             }
         }
 
@@ -385,7 +388,7 @@ OutgoingAsync.prototype.__finished = function(istr)
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this.__finishedEx(ex, true);
             return;
@@ -431,7 +434,7 @@ OutgoingAsync.prototype.__send = function()
                 {
                     interval = this.handleExceptionWrapper(ex);
                 }
-                else if(ex instanceof Ex.LocalException)
+                else if(ex instanceof Ice.LocalException)
                 {
                     interval = this.handleException(ex, false);
                 }
@@ -506,7 +509,7 @@ OutgoingAsync.prototype.handleException = function(exc, sent)
         // "at-most-once" (see the implementation of the checkRetryAfterException method of
         // the ProxyFactory class for the reasons why it can be useful).
         //
-        if(!sent || exc instanceof LocalEx.CloseConnectionException || exc instanceof LocalEx.ObjectNotExistException)
+        if(!sent || exc instanceof Ice.CloseConnectionException || exc instanceof Ice.ObjectNotExistException)
         {
             throw exc;
         }
@@ -522,7 +525,7 @@ OutgoingAsync.prototype.handleException = function(exc, sent)
     {
         if(ex instanceof LocalExceptionWrapper)
         {
-            if(this._mode === Curr.OperationMode.Nonmutating || this._mode === Curr.OperationMode.Idempotent)
+            if(this._mode === OperationMode.Nonmutating || this._mode === OperationMode.Idempotent)
             {
                 this._cnt = this._proxy.__handleExceptionWrapperRelaxed(this._handler, ex, interval, this._cnt);
             }
@@ -531,7 +534,7 @@ OutgoingAsync.prototype.handleException = function(exc, sent)
                 this._proxy.__handleExceptionWrapper(this._handler, ex);
             }
         }
-        else if(ex instanceof Ex.LocalException)
+        else if(ex instanceof Ice.LocalException)
         {
             this._cnt = this._proxy.__handleException(this._handler, ex, interval, this._cnt);
         }
@@ -546,7 +549,7 @@ OutgoingAsync.prototype.handleException = function(exc, sent)
 OutgoingAsync.prototype.handleExceptionWrapper = function(ex)
 {
     var interval = { value: 0 };
-    if(this._mode === Curr.OperationMode.Nonmutating || this._mode === Curr.OperationMode.Idempotent)
+    if(this._mode === OperationMode.Nonmutating || this._mode === OperationMode.Idempotent)
     {
         this._cnt = this._proxy.__handleExceptionWrapperRelaxed(this._handler, ex, interval, this._cnt);
     }
@@ -565,8 +568,9 @@ OutgoingAsync.prototype.__runTimerTask = function()
 
     if(connection !== null)
     {
-        connection.exception(new LocalEx.TimeoutException());
+        connection.exception(new Ice.TimeoutException());
     }
 };
 
-module.exports = OutgoingAsync;
+module.exports.Ice = {};
+module.exports.Ice.OutgoingAsync = OutgoingAsync;

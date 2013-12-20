@@ -7,22 +7,23 @@
 //
 // **********************************************************************
 
+var Debug = require("./Debug").Ice.Debug;
+var ExUtil = require("./ExUtil").Ice.ExUtil;
+var FormatType = require("./FormatType").Ice.FormatType;
+var HashMap = require("./HashMap").Ice.HashMap;
+var IceObject = require("./Object").Ice.Object;
+var OptionalFormat = require("./OptionalFormat").Ice.OptionalFormat;
+var Protocol = require("./Protocol").Ice.Protocol;
+var TraceUtil = require("./TraceUtil").Ice.TraceUtil;
+
+var _merge = require("./Util").merge;
+
 var Ice = {};
 
-Ice.Buffer = require("./Buffer");
-
-var Debug = require("./Debug");
-var Ex = require("./Exception");
-var ExUtil = require("./ExUtil");
-var FormatType = require("./FormatType");
-var HashMap = require("./HashMap");
-var IceObject = require("./Object");
-var LocalEx = require("./LocalException").Ice;
-var OptionalFormat = require("./OptionalFormat");
-var OptionalObject = require("./OptionalObject");
-var Protocol = require("./Protocol");
-var TraceUtil = require("./TraceUtil");
-var Version = require("./Version").Ice;
+_merge(Ice, require("./Buffer").Ice);
+_merge(Ice, require("./Exception").Ice);
+_merge(Ice, require("./LocalException").Ice);
+_merge(Ice, require("./Version").Ice);
 
 var SliceType = {};
 SliceType.NoSlice = 0;
@@ -80,7 +81,7 @@ EncapsDecoder.prototype.readTypeId = function(isIndex)
         typeId = this._typeIdMap.get(index);
         if(typeId === undefined)
         {
-            throw new LocalEx.UnmarshalOutOfBoundsException();
+            throw new Ice.UnmarshalOutOfBoundsException();
         }
     }
     else
@@ -216,7 +217,7 @@ EncapsDecoder.prototype.unmarshal = function(index, v)
         catch(ex)
         {
             this._stream.instance.initializationData().logger.warning("exception raised by ice_postUnmarshal:\n" + 
-                                                                        Ex.toString(ex));
+                                                                      ExUtil.toString(ex));
         }
     }
     else
@@ -244,7 +245,7 @@ EncapsDecoder.prototype.unmarshal = function(index, v)
                 catch(ex)
                 {
                     this._stream.instance.initializationData().logger.warning(
-                                                        "exception raised by ice_postUnmarshal:\n" + Ex.toString(ex));
+                                                        "exception raised by ice_postUnmarshal:\n" + ExUtil.toString(ex));
                 }
             }
             this._objectList = [];
@@ -272,7 +273,7 @@ EncapsDecoder10.prototype.readObject = function(patcher)
     var index = this._stream.readInt();
     if(index > 0)
     {
-        throw new LocalEx.MarshalException("invalid object id");
+        throw new Ice.MarshalException("invalid object id");
     }
     index = -index;
 
@@ -369,7 +370,7 @@ EncapsDecoder10.prototype.throwException = function(factory)
             //
             // Set the reason member to a more helpful message.
             //
-            if(ex instanceof LocalEx.UnmarshalOutOfBoundsException)
+            if(ex instanceof Ice.UnmarshalOutOfBoundsException)
             {
                 ex.reason = "unknown exception type `" + mostDerivedId + "'";
             }
@@ -396,7 +397,7 @@ EncapsDecoder10.prototype.endInstance = function(/*preserve*/)
         sz = this._stream.readSize(); // For compatibility with the old AFM.
         if(sz !== 0)
         {
-            throw new LocalEx.MarshalException("invalid Object slice");
+            throw new Ice.MarshalException("invalid Object slice");
         }
         this.endSlice();
     }
@@ -437,7 +438,7 @@ EncapsDecoder10.prototype.startSlice = function()
     this._sliceSize = this._stream.readInt();
     if(this._sliceSize < 4)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 
     return this._typeId;
@@ -484,7 +485,7 @@ EncapsDecoder10.prototype.readPendingObjects = function()
         // If any entries remain in the patch map, the sender has sent an index for an object, but failed
         // to supply the object.
         //
-        throw new LocalEx.MarshalException("index for class received, but no instance");
+        throw new Ice.MarshalException("index for class received, but no instance");
     }
 };
 
@@ -496,7 +497,7 @@ EncapsDecoder10.prototype.readInstance = function()
 
     if(index <= 0)
     {
-        throw new LocalEx.MarshalException("invalid object id");
+        throw new Ice.MarshalException("invalid object id");
     }
 
     this._sliceType = SliceType.ObjectSlice;
@@ -515,7 +516,7 @@ EncapsDecoder10.prototype.readInstance = function()
         //
         if(this._typeId == IceObject.ice_staticId())
         {
-            throw new LocalEx.NoObjectFactoryException("", mostDerivedId);
+            throw new Ice.NoObjectFactoryException("", mostDerivedId);
         }
 
         v = this.newInstance(this._typeId);
@@ -533,7 +534,7 @@ EncapsDecoder10.prototype.readInstance = function()
         //
         if(!this._sliceObjects)
         {
-            throw new LocalEx.NoObjectFactoryException("object slicing is disabled", this._typeId);
+            throw new Ice.NoObjectFactoryException("object slicing is disabled", this._typeId);
         }
 
         //
@@ -592,7 +593,7 @@ EncapsDecoder11.prototype.readObject = function(patcher)
         
     if(index < 0)
     {
-        throw new LocalEx.MarshalException("invalid object id");
+        throw new Ice.MarshalException("invalid object id");
     }
     
     if(index === 0)
@@ -663,7 +664,7 @@ EncapsDecoder11.prototype.throwException = function(factory)
             }
             catch(ex)
             {
-                if(!(ex instanceof Ex.UserException))
+                if(!(ex instanceof Ice.UserException))
                 {
                     throw ex;
                 }
@@ -696,9 +697,9 @@ EncapsDecoder11.prototype.throwException = function(factory)
         {
             if(mostDerivedId.indexOf("::") === 0)
             {
-                throw new LocalEx.UnknownUserException(mostDerivedId.substr(2));
+                throw new Ice.UnknownUserException(mostDerivedId.substr(2));
             }
-            throw new LocalEx.UnknownUserException(mostDerivedId);
+            throw new Ice.UnknownUserException(mostDerivedId);
         }
 
         this.startSlice();
@@ -780,7 +781,7 @@ EncapsDecoder11.prototype.startSlice = function()
         this._current.sliceSize = this._stream.readInt();
         if(this._current.sliceSize < 4)
         {
-            throw new LocalEx.UnmarshalOutOfBoundsException();
+            throw new Ice.UnmarshalOutOfBoundsException();
         }
     }
     else
@@ -824,12 +825,12 @@ EncapsDecoder11.prototype.endSlice = function()
         //
         if(indirectionTable.length === 0)
         {
-            throw new LocalEx.MarshalException("empty indirection table");
+            throw new Ice.MarshalException("empty indirection table");
         }
         if((this._current.indirectPatchList === null || this._current.indirectPatchList.length === 0) &&
            (this._current.sliceFlags & FLAG_HAS_OPTIONAL_MEMBERS) === 0)
         {
-            throw new LocalEx.MarshalException("no references to indirection table");
+            throw new Ice.MarshalException("no references to indirection table");
         }
 
         //
@@ -843,7 +844,7 @@ EncapsDecoder11.prototype.endSlice = function()
                 Debug.assert(e.index >= 0);
                 if(e.index >= indirectionTable.length)
                 {
-                    throw new LocalEx.MarshalException("indirection out of range");
+                    throw new Ice.MarshalException("indirection out of range");
                 }
                 this.addPatchEntry(indirectionTable[e.index], e.patcher);
             }
@@ -885,17 +886,17 @@ EncapsDecoder11.prototype.skipSlice = function()
     {
         if(this._current.sliceType === SliceType.ObjectSlice)
         {
-            throw new LocalEx.NoObjectFactoryException(
+            throw new Ice.NoObjectFactoryException(
                 "compact format prevents slicing (the sender should use the sliced format instead)", 
                 this._current.typeId);
         }
 
         if(this._current.typeId.startsWith("::"))
         {
-            throw new LocalEx.UnknownUserException(this._current.typeId.substring(2));
+            throw new Ice.UnknownUserException(this._current.typeId.substring(2));
         }
 
-        throw new LocalEx.UnknownUserException(this._current.typeId);
+        throw new Ice.UnknownUserException(this._current.typeId);
     }
 
     //
@@ -1017,11 +1018,11 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
                 }
                 catch(ex)
                 {
-                    if(ex instanceof LocalEx.LocalException)
+                    if(ex instanceof Ice.LocalException)
                     {
                         throw ex;
                     }
-                    throw new LocalEx.MarshalException("exception in CompactIdResolver for ID " + 
+                    throw new Ice.MarshalException("exception in CompactIdResolver for ID " + 
                                                        this._current.compactId, ex);
                 }
             }
@@ -1049,7 +1050,7 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
         //
         if(!this._sliceObjects)
         {
-            throw new LocalEx.NoObjectFactoryException("object slicing is disabled", this._current.typeId);
+            throw new Ice.NoObjectFactoryException("object slicing is disabled", this._current.typeId);
         }
 
         //
@@ -1071,7 +1072,7 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
             v = this.newInstance(IceObject.ice_staticId());
             if(v !== null && v !== undefined)
             {
-                v = new LocalEx.UnknownSlicedObject(mostDerivedId);
+                v = new Ice.UnknownSlicedObject(mostDerivedId);
             }
 
             break;
@@ -1091,7 +1092,7 @@ EncapsDecoder11.prototype.readInstance = function(index, patcher)
         // If any entries remain in the patch map, the sender has sent an index for an object, but failed
         // to supply the object.
         //
-        throw new LocalEx.MarshalException("index for class received, but no instance");
+        throw new Ice.MarshalException("index for class received, but no instance");
     }
 
     if(patcher !== null)
@@ -1322,7 +1323,7 @@ EncapsEncoder10.prototype.writePendingObjects = function()
                         catch(ex)
                         {
                             self._stream.instance.initializationData().logger.warning(
-                                "exception raised by ice_preMarshal:\n" + Ex.toString(ex));
+                                "exception raised by ice_preMarshal:\n" + ExUtil.toString(ex));
                         }
 
                         key.__write(self._stream);
@@ -1701,7 +1702,7 @@ EncapsEncoder11.prototype.writeInstance = function(v)
     catch(ex)
     {
         this._stream.instance.initializationData().logger.warning("exception raised by ice_preMarshal:\n" + 
-                                                                    Ex.toString(ex));
+                                                                  ExUtil.toString(ex));
     }
 
     this._stream.writeSize(1); // Object instance marker.
@@ -1778,8 +1779,8 @@ var BasicStream = function(instance, encoding, unlimited, data)
         this._buf = new Ice.Buffer();
     }
     
-    this._classRegistry = require("./TypeRegistry").ClassRegistry;
-    this._exceptionRegistry = require("./TypeRegistry").ExceptionRegistry;
+    this._classRegistry = require("./TypeRegistry").Ice.ClassRegistry;
+    this._exceptionRegistry = require("./TypeRegistry").Ice.ExceptionRegistry;
 };
 
 Object.defineProperty(BasicStream.prototype, "instance", {
@@ -2007,7 +2008,7 @@ BasicStream.prototype.endWriteEncapsChecked = function() // Used by public strea
 {
     if(this._writeEncapsStack === null)
     {
-        throw new LocalEx.EncapsulationException("not in an encapsulation");
+        throw new Ice.EncapsulationException("not in an encapsulation");
     }
     this.endWriteEncaps();
 };
@@ -2023,7 +2024,7 @@ BasicStream.prototype.writeEncaps = function(v)
 {
     if(v.length < 6)
     {
-        throw new LocalEx.EncapsulationException();
+        throw new Ice.EncapsulationException();
     }
     this.expand(v.length);
     this._buf.putArray(v);
@@ -2061,15 +2062,15 @@ BasicStream.prototype.startReadEncaps = function()
     var sz = this.readInt();
     if(sz < 6)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
     if(sz - 4 > this._buf.remaining)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
     this._readEncapsStack.sz = sz;
 
-    var encoding = new Version.EncodingVersion();
+    var encoding = new Ice.EncodingVersion();
     encoding.__read(this);
     Protocol.checkSupportedEncoding(encoding); // Make sure the encoding is supported.
     this._readEncapsStack.setEncoding(encoding);
@@ -2086,14 +2087,14 @@ BasicStream.prototype.endReadEncaps = function()
         this.skipOpts();
         if(this._buf.position !== this._readEncapsStack.start + this._readEncapsStack.sz)
         {
-            throw new LocalEx.EncapsulationException();
+            throw new Ice.EncapsulationException();
         }
     }
     else if(this._buf.position !== this._readEncapsStack.start + this._readEncapsStack.sz)
     {
         if(this._buf.position + 1 !== this._readEncapsStack.start + this._readEncapsStack.sz)
         {
-            throw new LocalEx.EncapsulationException();
+            throw new Ice.EncapsulationException();
         }
         
         //
@@ -2109,7 +2110,7 @@ BasicStream.prototype.endReadEncaps = function()
         }
         catch(ex)
         {
-            throw new LocalEx.UnmarshalOutOfBoundsException();
+            throw new Ice.UnmarshalOutOfBoundsException();
         }
     }
 
@@ -2126,13 +2127,13 @@ BasicStream.prototype.skipEmptyEncaps = function(encoding)
     var sz = this.readInt();
     if(sz !== 6)
     {
-        throw new LocalEx.EncapsulationException();
+        throw new Ice.EncapsulationException();
     }
 
     var pos = this._buf.position;
     if(pos + 2 > this._buf.limit)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 
     if(encoding !== null)
@@ -2149,7 +2150,7 @@ BasicStream.prototype.endReadEncapsChecked = function() // Used by public stream
 {
     if(this._readEncapsStack === null)
     {
-        throw new LocalEx.EncapsulationException("not in an encapsulation");
+        throw new Ice.EncapsulationException("not in an encapsulation");
     }
     this.endReadEncaps();
 };
@@ -2160,12 +2161,12 @@ BasicStream.prototype.readEncaps = function(encoding)
     var sz = this.readInt();
     if(sz < 6)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 
     if(sz - 4 > this._buf.remaining)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 
     if(encoding !== null)
@@ -2184,7 +2185,7 @@ BasicStream.prototype.readEncaps = function(encoding)
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -2204,9 +2205,9 @@ BasicStream.prototype.skipEncaps = function()
     var sz = this.readInt();
     if(sz < 6)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
-    var encoding = new Version.EncodingVersion();
+    var encoding = new Ice.EncodingVersion();
     encoding.__read(this);
     try
     {
@@ -2214,7 +2215,7 @@ BasicStream.prototype.skipEncaps = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
     return encoding;
 };
@@ -2319,7 +2320,7 @@ BasicStream.prototype.readSize = function()
             var v = this._buf.getInt();
             if(v < 0)
             {
-                throw new LocalEx.UnmarshalOutOfBoundsException();
+                throw new Ice.UnmarshalOutOfBoundsException();
             }
             return v;
         }
@@ -2327,7 +2328,7 @@ BasicStream.prototype.readSize = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -2374,7 +2375,7 @@ BasicStream.prototype.readAndCheckSeqSize = function(minSize)
     //
     if(this._startSeq + this._minSeqSize > this._buf.limit)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 
     return sz;
@@ -2407,7 +2408,7 @@ BasicStream.prototype.readBlob = function(sz)
 {
     if(this._buf.remaining < sz)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
     try
     {
@@ -2415,7 +2416,7 @@ BasicStream.prototype.readBlob = function(sz)
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -2495,7 +2496,7 @@ BasicStream.prototype.readByte = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -2520,7 +2521,7 @@ BasicStream.prototype.readByteSeq = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -2596,7 +2597,7 @@ BasicStream.prototype.readBool = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -2627,7 +2628,7 @@ BasicStream.prototype.readBoolSeq = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -2694,7 +2695,7 @@ BasicStream.prototype.readShort = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -2718,7 +2719,7 @@ BasicStream.prototype.readShortSeq = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -2792,7 +2793,7 @@ BasicStream.prototype.readInt = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -2816,7 +2817,7 @@ BasicStream.prototype.readIntSeq = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -2884,7 +2885,7 @@ BasicStream.prototype.readLong = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -2908,7 +2909,7 @@ BasicStream.prototype.readLongSeq = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -2976,7 +2977,7 @@ BasicStream.prototype.readFloat = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -3000,7 +3001,7 @@ BasicStream.prototype.readFloatSeq = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -3068,7 +3069,7 @@ BasicStream.prototype.readDouble = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -3092,7 +3093,7 @@ BasicStream.prototype.readDoubleSeq = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -3178,7 +3179,7 @@ BasicStream.prototype.readString = function()
     //
     if(this._buf.remaining < len)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 
     try
@@ -3187,7 +3188,7 @@ BasicStream.prototype.readString = function()
     }
     catch(ex)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
 };
 
@@ -3264,15 +3265,15 @@ BasicStream.prototype.readOptProxy = function(tag)
     }
 };
 
-BasicStream.prototype.writeEnum = function(v, maxValue)
+BasicStream.prototype.writeEnum = function(v)
 {
     if(this.isWriteEncoding_1_0())
     {
-        if(maxValue < 127)
+        if(v.maxValue < 127)
         {
             this.writeByte(v.value);
         }
-        else if(maxValue < 32767)
+        else if(v.maxValue < 32767)
         {
             this.writeShort(v.value);
         }
@@ -3304,6 +3305,19 @@ BasicStream.prototype.readEnum = function(Type)
     }
     return Type.valueOf(this.readSize());
 };
+
+BasicStream.prototype.writeStruct = function(v)
+{
+    v.__write(this);
+};
+
+BasicStream.prototype.readStruct = function(Type)
+{
+    var v = new Type();
+    v.__read(this);
+    return v;
+};
+
 
 BasicStream.prototype.writeObject = function(v)
 {
@@ -3450,7 +3464,7 @@ BasicStream.prototype.readOptImpl = function(readTag, expectedFormat)
         {
             if(format !== expectedFormat)
             {
-                throw new LocalEx.MarshalException("invalid optional data member `" + tag + "': unexpected format");
+                throw new Ice.MarshalException("invalid optional data member `" + tag + "': unexpected format");
             }
             return true;
         }
@@ -3543,7 +3557,7 @@ BasicStream.prototype.skip = function(size)
 {
     if(size > this._buf.remaining)
     {
-        throw new LocalEx.UnmarshalOutOfBoundsException();
+        throw new Ice.UnmarshalOutOfBoundsException();
     }
     this._buf.position += size;
 };
@@ -3594,7 +3608,7 @@ BasicStream.prototype.createObject = function(id)
     }
     catch(ex)
     {
-        throw new LocalEx.NoObjectFactoryException("no object factory", id, ex);
+        throw new Ice.NoObjectFactoryException("no object factory", id, ex);
     }
 
     return obj;
@@ -3608,12 +3622,12 @@ BasicStream.prototype.getTypeId = function(compactId)
 
 BasicStream.prototype.isReadEncoding_1_0 = function()
 {
-    return this._readEncapsStack !== null ? this._readEncapsStack.encoding_1_0 : this._encoding.equals(Version.Encoding_1_0);
+    return this._readEncapsStack !== null ? this._readEncapsStack.encoding_1_0 : this._encoding.equals(Ice.Encoding_1_0);
 };
 
 BasicStream.prototype.isWriteEncoding_1_0 = function()
 {
-    return this._writeEncapsStack ? this._writeEncapsStack.encoding_1_0 : this._encoding.equals(Version.Encoding_1_0);
+    return this._writeEncapsStack ? this._writeEncapsStack.encoding_1_0 : this._encoding.equals(Ice.Encoding_1_0);
 };
 
 BasicStream.prototype.initReadEncaps = function()
@@ -3695,10 +3709,11 @@ BasicStream.prototype.createUserException = function(id)
     }
     catch(ex)
     {
-        throw new LocalEx.MarshalException(ex);
+        throw new Ice.MarshalException(ex);
     }
 
     return userEx;
 };
 
-module.exports = BasicStream;
+module.exports.Ice = {};
+module.exports.Ice.BasicStream = BasicStream;

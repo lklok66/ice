@@ -7,12 +7,12 @@
 //
 // **********************************************************************
 
-var ExUtil = require("./ExUtil");
-var StringUtil = require("./StringUtil");
-
+var ExUtil = require("./ExUtil").Ice.ExUtil;
+var StringUtil = require("./StringUtil").Ice.StringUtil;
 var Identity = require("./Identity").Ice.Identity;
-var LocalEx = require("./LocalException").Ice;
+var IdentityParseException = require("./LocalException").Ice.IdentityParseException;
 
+var IdentityUtil = {};
 /**
  * Converts a string to an object identity.
  *
@@ -20,7 +20,7 @@ var LocalEx = require("./LocalException").Ice;
  *
  * @return The converted object identity.
  **/
-module.exports.stringToIdentity = function(s)
+IdentityUtil.stringToIdentity = function(s)
 {
     var ident = new Identity();
 
@@ -42,7 +42,7 @@ module.exports.stringToIdentity = function(s)
                 //
                 // Extra unescaped slash found.
                 //
-                var ex = new LocalEx.IdentityParseException();
+                var ex = new IdentityParseException();
                 ex.str = "unescaped backslash in identity `" + s + "'";
                 throw ex;
             }
@@ -59,7 +59,7 @@ module.exports.stringToIdentity = function(s)
         }
         catch(e)
         {
-            var ex = new LocalEx.IdentityParseException();
+            var ex = new IdentityParseException();
             ex.str = "invalid identity name `" + s + "': " + ExUtil.toString(e);
             throw ex;
         }
@@ -72,7 +72,7 @@ module.exports.stringToIdentity = function(s)
         }
         catch(e)
         {
-            var ex = new LocalEx.IdentityParseException();
+            var ex = new IdentityParseException();
             ex.str = "invalid category in identity `" + s + "': " + ExUtil.toString(e);
             throw ex;
         }
@@ -84,7 +84,7 @@ module.exports.stringToIdentity = function(s)
             }
             catch(e)
             {
-                var ex = new LocalEx.IdentityParseException();
+                var ex = new IdentityParseException();
                 ex.str = "invalid name in identity `" + s + "': " + ExUtil.toString(e);
                 throw ex;
             }
@@ -105,7 +105,7 @@ module.exports.stringToIdentity = function(s)
  *
  * @return The string representation of the object identity.
  **/
-module.exports.identityToString = function(ident)
+IdentityUtil.identityToString = function(ident)
 {
     if(ident.category === null || ident.category.length === 0)
     {
@@ -130,7 +130,7 @@ module.exports.identityToString = function(ident)
  * @see ProxyIdentityAndFacetKey
  * @see ProxyIdentityAndFacetCompare
  **/
-module.exports.proxyIdentityCompare = function(lhs, rhs)
+IdentityUtil.proxyIdentityCompare = function(lhs, rhs)
 {
     if(lhs === rhs)
     {
@@ -170,7 +170,7 @@ module.exports.proxyIdentityCompare = function(lhs, rhs)
  * @see ProxyIdentityKey
  * @see ProxyIdentityCompare
  **/
-module.exports.proxyIdentityAndFacetCompare = function(lhs, rhs)
+IdentityUtil.proxyIdentityAndFacetCompare = function(lhs, rhs)
 {
     if(lhs === rhs)
     {
@@ -215,3 +215,6 @@ module.exports.proxyIdentityAndFacetCompare = function(lhs, rhs)
         return lhsFacet.localeCompare(rhsFacet);
     }
 };
+
+module.exports.Ice = {};
+module.exports.Ice.IdentityUtil = IdentityUtil;

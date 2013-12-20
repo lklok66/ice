@@ -58,5 +58,5 @@ var TraceLevels = function(properties)
     };
 };
 
-
-module.exports = TraceLevels;
+module.exports.Ice = {};
+module.exports.Ice.TraceLevels = TraceLevels;

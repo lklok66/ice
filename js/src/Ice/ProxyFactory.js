@@ -7,15 +7,19 @@
 //
 // **********************************************************************
 
-var Debug = require("./Debug");
-var ExUtil = require("./ExUtil");
-var HashMap = require("./HashMap");
-var ObjectPrx = require("./ObjectPrx");
-var Ref = require("./Reference");
-var StringUtil = require("./StringUtil");
+var Debug = require("./Debug").Ice.Debug;
+var ExUtil = require("./ExUtil").Ice.ExUtil;
+var HashMap = require("./HashMap").Ice.HashMap;
+var ObjectPrx = require("./ObjectPrx").Ice.ObjectPrx;
+var StringUtil = require("./StringUtil").Ice.StringUtil;
+var Identity = require("./Identity").Ice.Identity;
 
-var Ident = require("./Identity").Ice;
-var LocalEx = require("./LocalException").Ice;
+var _merge = require("Ice/Util").merge;
+
+var Ice = {};
+
+_merge(Ice, require("./Reference").Ice);
+_merge(Ice, require("./LocalException").Ice);
 
 //
 // Only for use by Instance.
@@ -100,7 +104,7 @@ ProxyFactory.prototype.proxyToProperty = function(proxy, prefix)
 
 ProxyFactory.prototype.streamToProxy = function(s)
 {
-    var ident = new Ident.Identity();
+    var ident = new Identity();
     ident.__read(s);
 
     var ref = this._instance.referenceFactory().createFromStream(ident, s);
@@ -131,7 +135,7 @@ ProxyFactory.prototype.proxyToStream = function(proxy, s)
     }
     else
     {
-        var ident = new Ident.Identity("", "");
+        var ident = new Identity("", "");
         ident.__write(s);
     }
 };
@@ -146,12 +150,12 @@ ProxyFactory.prototype.checkRetryAfterException = function(ex, ref, sleepInterva
     // the all the requests batched with the connection to be aborted and we
     // want the application to be notified.
     //
-    if(ref.getMode() === Ref.Reference.ModeBatchOneway || ref.getMode() === Ref.Reference.ModeBatchDatagram)
+    if(ref.getMode() === Ice.Reference.ModeBatchOneway || ref.getMode() === Ice.Reference.ModeBatchDatagram)
     {
         throw ex;
     }
 
-    if(ex instanceof LocalEx.ObjectNotExistException)
+    if(ex instanceof Ice.ObjectNotExistException)
     {
         var one = ex;
 
@@ -204,7 +208,7 @@ ProxyFactory.prototype.checkRetryAfterException = function(ex, ref, sleepInterva
             throw ex;
         }
     }
-    else if(ex instanceof LocalEx.RequestFailedException)
+    else if(ex instanceof Ice.RequestFailedException)
     {
         //
         // For all other cases, we don't retry ObjectNotExistException
@@ -234,7 +238,7 @@ ProxyFactory.prototype.checkRetryAfterException = function(ex, ref, sleepInterva
     // the client that all of the batched requests were accepted, when
     // in reality only the last few are actually sent.
     //
-    if(ex instanceof LocalEx.MarshalException)
+    if(ex instanceof Ice.MarshalException)
     {
         throw ex;
     }
@@ -243,7 +247,7 @@ ProxyFactory.prototype.checkRetryAfterException = function(ex, ref, sleepInterva
     Debug.assert(cnt > 0);
 
     var interval;
-    if(cnt === (this._retryIntervals.length + 1) && ex instanceof LocalEx.CloseConnectionException)
+    if(cnt === (this._retryIntervals.length + 1) && ex instanceof Ice.CloseConnectionException)
     {
         //
         // A close connection exception is always retried at least once, even if the retry
@@ -282,4 +286,5 @@ ProxyFactory.prototype.checkRetryAfterException = function(ex, ref, sleepInterva
     return cnt;
 };
 
-module.exports = ProxyFactory;
+module.exports.Ice = {};
+module.exports.Ice.ProxyFactory = ProxyFactory;

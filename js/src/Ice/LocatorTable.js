@@ -7,9 +7,9 @@
 //
 // **********************************************************************
 
-var HashMap = require("./HashMap");
-var TimeUtil = require("./TimeUtil");
-var Debug = require("./Debug");
+var HashMap = require("./HashMap").Ice.HashMap;
+var TimeUtil = require("./TimeUtil").Ice.TimeUtil;
+var Debug = require("./Debug").Ice.Debug;
 
 var LocatorTable = function()
 {
@@ -97,7 +97,8 @@ LocatorTable.prototype.checkTTL = function(time, ttl)
     }
 };
 
-module.exports = LocatorTable;
+module.exports.Ice = {};
+module.exports.Ice.LocatorTable = LocatorTable;
 
 var EndpointTableEntry = function(time, endpoints)
 {

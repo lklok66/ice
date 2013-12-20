@@ -7,8 +7,8 @@
 //
 // **********************************************************************
 
-var Promise = require("./Promise");
-var ReferenceMode = require("./ReferenceMode");
+var Promise = require("./Promise").Ice.Promise;
+var ReferenceMode = require("./ReferenceMode").Ice.ReferenceMode;
 
 var ConnectionRequestHandler = function(ref, connection, compress)
 {
@@ -58,4 +58,5 @@ ConnectionRequestHandler.prototype.onConnection = function()
     return Promise.succeed(this._connection);
 };
 
-module.exports = ConnectionRequestHandler;
+module.exports.Ice = {};
+module.exports.Ice.ConnectionRequestHandler = ConnectionRequestHandler;

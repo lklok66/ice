@@ -7,14 +7,16 @@
 //
 // **********************************************************************
 
-var StringUtil = require("./StringUtil");
+var StringUtil = require("./StringUtil").Ice.StringUtil;
 
-module.exports.addBoolean = function(h, b)
+var HashUtil = {};
+
+HashUtil.addBoolean = function(h, b)
 {
     return ((h << 5) + h) ^ (b ? 0 : 1);
 };
 
-module.exports.addBooleanArray = function(h, arr)
+HashUtil.addBooleanArray = function(h, arr)
 {
     var i, length;
     if(arr !== undefined && arr !== null)
@@ -27,7 +29,7 @@ module.exports.addBooleanArray = function(h, arr)
     return h;
 };
 
-module.exports.addString = function(h, str)
+HashUtil.addString = function(h, str)
 {
     if(str !== undefined && str !== null)
     {
@@ -36,38 +38,38 @@ module.exports.addString = function(h, str)
     return h;
 };
 
-module.exports.addStringArray = function(h, arr)
+HashUtil.addStringArray = function(h, arr)
 {
     var i, length;
     if(arr !== undefined && arr !== null)
     {
         for(i = 0, length = arr.length; i < length; ++i)
         {
-            h = module.exports.addString(h, arr[i]);
+            h = HashUtil.addString(h, arr[i]);
         }
     }
     return h;
 };
 
-module.exports.addNumber = function(h, num)
+HashUtil.addNumber = function(h, num)
 {
     return ((h << 5) + h) ^ num;
 };
 
-module.exports.addNumberArray = function(h, arr)
+HashUtil.addNumberArray = function(h, arr)
 {
     var i, length;
     if(arr !== undefined && arr !== null)
     {
         for(i = 0, length = arr.length; i < length; ++i)
         {
-            h = module.exports.addNumber(h, arr[i]);
+            h = HashUtil.addNumber(h, arr[i]);
         }
     }
     return h;
 };
 
-module.exports.addHashable = function(h, obj)
+HashUtil.addHashable = function(h, obj)
 {
     if(obj !== undefined && obj !== null)
     {
@@ -76,14 +78,17 @@ module.exports.addHashable = function(h, obj)
     return h;
 };
 
-module.exports.addHashableArray = function(h, arr)
+HashUtil.addHashableArray = function(h, arr)
 {
     if(arr !== undefined && arr !== null)
     {
         for(var i = 0; i < arr.length; ++i)
         {
-            h = module.exports.addHashable(h, arr[i]);
+            h = HashUtil.addHashable(h, arr[i]);
         }
     }
     return h;
 };
+
+module.exports.Ice = {};
+module.exports.Ice.HashUtil = HashUtil;

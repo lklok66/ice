@@ -7,11 +7,13 @@
 //
 // **********************************************************************
 
+var Base64 = {};
+
 var _codeA = "A".charCodeAt(0);
 var _codea = "a".charCodeAt(0);
 var _code0 = "0".charCodeAt(0);
 
-module.exports.encode = function(buf) // Expects Uint8Array
+Base64.encode = function(buf) // Expects Uint8Array
 {
     if(buf === null || buf.length === 0)
     {
@@ -91,14 +93,14 @@ module.exports.encode = function(buf) // Expects Uint8Array
     return outString.join("");
 };
 
-module.exports.decode = function(str) // Returns Uint8Array
+Base64.decode = function(str) // Returns Uint8Array
 {
     var newStr = [];
 
     for(var j = 0; j < str.length; j++)
     {
         var c = str.charAt(j);
-        if(module.exports.isBase64(c))
+        if(Base64.isBase64(c))
         {
             newStr.push(c);
         }
@@ -176,7 +178,7 @@ module.exports.decode = function(str) // Returns Uint8Array
     return off < retval.length ? retval.subarray(0, off) : retval;
 };
 
-module.exports.isBase64 = function(c)
+Base64.isBase64 = function(c)
 {
     if(c >= 'A' && c <= 'Z')
     {
@@ -260,3 +262,6 @@ function decodeChar(c)
 
     return 63;
 }
+
+module.exports.Ice = {};
+module.exports.Ice.Base64 = Base64;

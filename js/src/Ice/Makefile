@@ -64,7 +64,6 @@ SRCS = Address.js \
         OpaqueEndpointI.js \
         ObjectFactoryManager.js \
         OptionalFormat.js \
-        OutgoingAsyncBase.js \
         OutgoingAsync.js \
         OutgoingConnectionFactory.js \
         Promise.js \

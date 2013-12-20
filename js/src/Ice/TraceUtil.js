@@ -7,15 +7,16 @@
 //
 // **********************************************************************
 
-var Debug = require("./Debug");
-var HashMap = require("./HashMap");
-var Protocol = require("./Protocol");
-var StringUtil = require("./StringUtil");
+var Debug = require("./Debug").Ice.Debug;
+var HashMap = require("./HashMap").Ice.HashMap;
+var Protocol = require("./Protocol").Ice.Protocol;
+var StringUtil = require("./StringUtil").Ice.StringUtil;
+var OperationMode = require("./Current").Ice.Current.OperationMode;
+var Identity = require("./Identity").Ice.Identity;
 
-var Curr = require("./Current").Ice;
-var Ident = require("./Identity").Ice;
+var TraceUtil = {};
 
-module.exports.traceSend = function(stream, logger, traceLevels)
+TraceUtil.traceSend = function(stream, logger, traceLevels)
 {
     if(traceLevels.protocol >= 1)
     {
@@ -31,7 +32,7 @@ module.exports.traceSend = function(stream, logger, traceLevels)
     }
 };
 
-module.exports.traceRecv = function(stream, logger, traceLevels)
+TraceUtil.traceRecv = function(stream, logger, traceLevels)
 {
     if(traceLevels.protocol >= 1)
     {
@@ -47,7 +48,7 @@ module.exports.traceRecv = function(stream, logger, traceLevels)
     }
 };
 
-module.exports.trace = function(heading, stream, logger, traceLevels)
+TraceUtil.trace = function(heading, stream, logger, traceLevels)
 {
     if(traceLevels.protocol >= 1)
     {
@@ -75,7 +76,7 @@ function traceSlicing(kind, typeId, slicingCat, logger)
     }
 };
 
-module.exports.dumpStream = function(stream)
+TraceUtil.dumpStream = function(stream)
 {
     var pos = stream.pos();
     stream.pos(0);
@@ -86,7 +87,7 @@ module.exports.dumpStream = function(stream)
     stream.pos(pos);
 };
 
-module.exports.dumpOctets = function(data)
+TraceUtil.dumpOctets = function(data)
 {
     var inc = 8;
     var buf = [];
@@ -143,9 +144,12 @@ module.exports.dumpOctets = function(data)
     console.log(buf.join(""));
 };
 
+module.exports.Ice = {};
+module.exports.Ice.TraceUtil = TraceUtil;
+
 function printIdentityFacetOperation(s, stream)
 {
-    var identity = new Ident.Identity();
+    var identity = new Identity();
     identity.__read(stream);
     s.push("\nidentity = " + stream.instance().identityToString(identity));
 
@@ -291,21 +295,21 @@ function printRequestHeader(s, stream)
 
     var mode = stream.readByte();
     s.push("\nmode = " + mode + ' ');
-    switch(Curr.OperationMode.valueOf(mode))
+    switch(OperationMode.valueOf(mode))
     {
-        case Curr.OperationMode.Normal:
+        case OperationMode.Normal:
         {
             s.push("(normal)");
             break;
         }
 
-        case Curr.OperationMode.Nonmutating:
+        case OperationMode.Nonmutating:
         {
             s.push("(nonmutating)");
             break;
         }
 
-        case Curr.OperationMode.Idempotent:
+        case OperationMode.Idempotent:
         {
             s.push("(idempotent)");
             break;

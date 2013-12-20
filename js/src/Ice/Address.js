@@ -13,4 +13,5 @@ var Address = function(host, port)
     this.port = port;
 };
 
-module.exports = Address;
+module.exports.Ice = {}
+module.exports.Ice.Address = Address;

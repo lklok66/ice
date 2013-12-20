@@ -118,7 +118,7 @@ namespace IceInternal
 """
 
 jsPreamble = commonPreamble + """
-var Property = require("./Property");
+var Property = require("./Property").Ice.Property;
 
 var %(classname)s = {};
 """
@@ -552,7 +552,8 @@ class JSPropertyHandler(PropertyHandler):
             self.srcFile.write("    \"%s\",\n" % s)
         self.srcFile.write("];\n\n")
         
-        self.srcFile.write("module.exports = %s;\n" % (self.className));
+        self.srcFile.write("module.exports.Ice = {};\n");
+        self.srcFile.write("module.exports.Ice.%s = %s;\n" % (self.className, self.className));
         self.srcFile.close()
 
     def fix(self, propertyName):

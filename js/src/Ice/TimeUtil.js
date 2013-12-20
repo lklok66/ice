@@ -7,7 +7,12 @@
 //
 // **********************************************************************
 
-module.exports.now = function()
+var TimeUtil = {};
+
+TimeUtil.now = function()
 {
     return new Date().getTime();
 };
+
+module.exports.Ice = {};
+module.exports.Ice.TimeUtil = TimeUtil;

@@ -9,14 +9,12 @@
 
 var net = require("net");
 
-var Debug = require("./Debug");
-var Ex = require("./Exception");
-var ExUtil = require("./ExUtil");
-var Network = require("./Network");
-var SocketOperation = require("./SocketOperation");
-
-var Conn = require("./Connection").Ice;
-var LocalEx = require("./LocalException").Ice;
+var Debug = require("./Debug").Ice.Debug;
+var ExUtil = require("./ExUtil").Ice.ExUtil;
+var Network = require("./Network").Ice.Network;
+var SocketOperation = require("./SocketOperation").Ice.SocketOperation;
+var Conn = require("./Connection").Ice.Connection;
+var SocketException = require("./LocalException").Ice.SocketException;
 
 var StateNeedConnect = 0;
 var StateConnectPending = 1;
@@ -440,7 +438,8 @@ function fdToString(fd, proxy, targetAddr)
 function translateError(ex)
 {
     // TODO: Search the exception's error message for symbols like ECONNREFUSED ?
-    return new LocalEx.SocketException(0, ex);
+    return new SocketException(0, ex);
 }
 
-module.exports = TcpTransceiver;
+module.exports.Ice = {};
+module.exports.Ice.TcpTransceiver = TcpTransceiver;

@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-var BasicStream = require("./BasicStream");
+var BasicStream = require("./BasicStream").Ice.BasicStream;
 
 var InputStream = function(communicator, data, copyData, encodingVersion)
 {
@@ -146,6 +146,11 @@ InputStream.prototype.readEnum = function(type)
     return this._is.readEnum(type);
 };
 
+InputStream.prototype.readStruct = function(type)
+{
+    return this._is.readStruct(type);
+};
+
 InputStream.prototype.throwException = function()
 {
     this._is.throwException();
@@ -246,4 +251,5 @@ InputStream.prototype.destroy = function()
     }
 };
 
-module.exports = InputStream;
+module.exports.Ice = {};
+module.exports.Ice.InputStream = InputStream;

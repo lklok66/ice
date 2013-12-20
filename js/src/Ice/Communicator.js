@@ -7,8 +7,8 @@
 //
 // **********************************************************************
 
-var Instance = require("./Instance");
-var Promise = require("./Promise");
+var Instance = require("./Instance").Ice.Instance;
+var Promise = require("./Promise").Ice.Promise;
 
 //
 // Ice.Communicator
@@ -140,4 +140,5 @@ Communicator.prototype.flushBatchRequests = function()
     // TODO
 };
 
-module.exports = Communicator;
+module.exports.Ice = {};
+module.exports.Ice.Communicator = Communicator;

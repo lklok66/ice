@@ -7,8 +7,10 @@
 //
 // **********************************************************************
 
-var HashMap = require("./HashMap"),
-    LocalEx = require("./LocalException").Ice;
+var HashMap = require("./HashMap").Ice.HashMap;
+
+var AlreadyRegisteredException = require("./LocalException").Ice.AlreadyRegisteredException;
+var NotRegisteredException = require("./LocalException").Ice.NotRegisteredException;
 
 //
 // Only for use by Instance
@@ -24,7 +26,7 @@ ObjectFactoryManager.prototype.add = function(factory, id)
     o = this._factoryMap.get(id);
     if(o !== undefined)
     {
-        ex = new LocalEx.AlreadyRegisteredException();
+        ex = new AlreadyRegisteredException();
         ex.id = id;
         ex.kindOfObject = "object factory";
         throw ex;
@@ -38,13 +40,13 @@ ObjectFactoryManager.prototype.remove = function(id)
     factory = this._factoryMap.get(id);
     if(factory === undefined)
     {
-        ex = new LocalEx.NotRegisteredException();
+        ex = new NotRegisteredException();
         ex.id = id;
         ex.kindOfObject = "object factory";
         throw ex;
     }
     this._factoryMap.delete(id);
-    factory.destroy();   
+    factory.destroy();
 };
 
 ObjectFactoryManager.prototype.find = function(id)
@@ -65,4 +67,5 @@ ObjectFactoryManager.prototype.destroy = function()
     }
 };
 
-module.exports = ObjectFactoryManager;
+module.exports.Ice = {};
+module.exports.Ice.ObjectFactoryManager = ObjectFactoryManager;

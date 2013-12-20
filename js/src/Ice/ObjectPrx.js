@@ -7,18 +7,22 @@
 //
 // **********************************************************************
 
-var ArrayUtil = require("./ArrayUtil");
-var AsyncResult = require("./AsyncResult");
-var ConnectRequestHandler = require("./ConnectRequestHandler");
-var Debug = require("./Debug");
-var Ex = require("./Exception");
-var FormatType = require("./FormatType");
-var HashMap = require("./HashMap");
-var OutgoingAsync = require("./OutgoingAsync");
-var RefMode = require("./ReferenceMode");
+var ArrayUtil = require("./ArrayUtil").Ice.ArrayUtil;
+var AsyncResult = require("./AsyncResult").Ice.AsyncResult;
+var ConnectRequestHandler = require("./ConnectRequestHandler").Ice.ConnectRequestHandler;
+var Debug = require("./Debug").Ice.Debug;
+var FormatType = require("./FormatType").Ice.FormatType;
+var HashMap = require("./HashMap").Ice.HashMap;
+var OutgoingAsync = require("./OutgoingAsync").Ice.OutgoingAsync;
+var RefMode = require("./ReferenceMode").Ice.ReferenceMode;
+var OperationMode = require("./Current").Ice.OperationMode;
 
-var Curr = require("./Current").Ice;
-var LocalEx = require("./LocalException").Ice;
+var _merge = require("Ice/Util").merge;
+
+var Ice = {};
+
+_merge(Ice, require("./Exception").Ice);
+_merge(Ice, require("./LocalException").Ice);
 
 //
 // Ice.ObjectPrx
@@ -51,7 +55,7 @@ ObjectPrx.prototype.ice_isA = function(__id, __context)
     var __promise = new OutgoingAsync(this, __ice_isA_name, ObjectPrx.__completed_bool);
     try
     {
-        __promise.__prepare(__ice_isA_name, Curr.OperationMode.Nonmutating, __context);
+        __promise.__prepare(__ice_isA_name, OperationMode.Nonmutating, __context);
         var __os = __promise.__startWriteParams(FormatType.DefaultFormat);
         __os.writeString(__id);
         __os.endWriteEncaps();
@@ -70,7 +74,7 @@ ObjectPrx.prototype.ice_ping = function(__context)
     var __promise = new OutgoingAsync(this, __ice_ping_name, ObjectPrx.__completed);
     try
     {
-        __promise.__prepare(__ice_ping_name, Curr.OperationMode.Nonmutating, __context);
+        __promise.__prepare(__ice_ping_name, OperationMode.Nonmutating, __context);
         __promise.__writeEmptyParams();
         __promise.__send();
     }
@@ -88,7 +92,7 @@ ObjectPrx.prototype.ice_ids = function(__context)
     var __promise = new OutgoingAsync(this, __ice_ids_name, this._ice_ids_completed);
     try
     {
-        __promise.__prepare(__ice_ids_name, Curr.OperationMode.Nonmutating, __context);
+        __promise.__prepare(__ice_ids_name, OperationMode.Nonmutating, __context);
         __promise.__writeEmptyParams();
         __promise.__send();
     }
@@ -128,7 +132,7 @@ ObjectPrx.prototype.ice_id = function(__context)
     var __promise = new OutgoingAsync(this, __ice_id_name, ObjectPrx.__completed_string);
     try
     {
-        __promise.__prepare(__ice_id_name, Curr.OperationMode.Nonmutating, __context);
+        __promise.__prepare(__ice_id_name, OperationMode.Nonmutating, __context);
         __promise.__writeEmptyParams();
         __promise.__send();
     }
@@ -148,7 +152,7 @@ ObjectPrx.prototype.ice_identity = function(newIdentity)
 {
     if(newIdentity === undefined || newIdentity === null || newIdentity.name.length === 0)
     {
-        throw new LocalEx.IllegalIdentityException();
+        throw new Ice.IllegalIdentityException();
     }
     if(newIdentity.equals(this._reference.getIdentity()))
     {
@@ -581,7 +585,7 @@ ObjectPrx.prototype.__handleException = function(handler, ex, interval, cnt)
     }
     catch(e)
     {
-        if(e instanceof LocalEx.CommunicatorDestroyedException)
+        if(e instanceof Ice.CommunicatorDestroyedException)
         {
             //
             // The communicator is already destroyed, so we cannot
@@ -910,12 +914,12 @@ ObjectPrx.__check = function(__r)
     }
     catch(ex)
     {
-        if(ex instanceof Ex.UserException)
+        if(ex instanceof Ice.UserException)
         {
-            __r.fail(new LocalEx.UnknownUserException(ex.ice_name()));
+            __r.fail(new Ice.UnknownUserException(ex.ice_name()));
             return false;
         }
-        else if(ex instanceof Ex.LocalException)
+        else if(ex instanceof Ice.LocalException)
         {
             __r.fail(ex);
             return false;
@@ -980,7 +984,7 @@ ObjectPrx.prototype.__newInstance = function(ref)
 
 ObjectPrx.prototype.__handleLocalException = function(__r, __ex)
 {
-    if(__ex instanceof Ex.LocalException)
+    if(__ex instanceof Ice.LocalException)
     {
         __r.__exception(__ex);
     }
@@ -992,7 +996,7 @@ ObjectPrx.prototype.__handleLocalException = function(__r, __ex)
 
 ObjectPrx.__dispatchLocalException = function(__r, __ex)
 {
-    if(__ex instanceof Ex.LocalException)
+    if(__ex instanceof Ice.LocalException)
     {
         __r.fail(__ex);
     }
@@ -1033,7 +1037,7 @@ ObjectPrx.checkedCast = function(prx, facet, ctx)
                 },
                 function(__r, __ex)
                 {
-                    if(__ex instanceof LocalEx.FacetNotExistException)
+                    if(__ex instanceof Ice.FacetNotExistException)
                     {
                         __promise.succeed(__promise, null);
                     }
@@ -1063,4 +1067,5 @@ ObjectPrx.uncheckedCast = function(prx, facet)
     return r;
 };
 
-module.exports = ObjectPrx;
+module.exports.Ice = {};
+module.exports.Ice.ObjectPrx = ObjectPrx;

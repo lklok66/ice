@@ -11,9 +11,14 @@
 // Using a separate module for these constants so that ObjectPrx does
 // not need to include Reference.
 //
-module.exports.ModeTwoway = 0;
-module.exports.ModeOneway = 1;
-module.exports.ModeBatchOneway = 2;
-module.exports.ModeDatagram = 3;
-module.exports.ModeBatchDatagram = 4;
-module.exports.ModeLast = module.exports.ModeBatchDatagram;
+var ReferenceMode = {};
+
+ReferenceMode.ModeTwoway = 0;
+ReferenceMode.ModeOneway = 1;
+ReferenceMode.ModeBatchOneway = 2;
+ReferenceMode.ModeDatagram = 3;
+ReferenceMode.ModeBatchDatagram = 4;
+ReferenceMode.ModeLast = ReferenceMode.ModeBatchDatagram;
+
+module.exports.Ice = {};
+module.exports.Ice.ReferenceMode = ReferenceMode;

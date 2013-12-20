@@ -7,30 +7,34 @@
 //
 // **********************************************************************
 
-var ConnectionMonitor = require("./ConnectionMonitor");
-var Debug = require("./Debug");
-var DefaultsAndOverrides = require("./DefaultsAndOverrides");
-var EndpointFactoryManager = require("./EndpointFactoryManager");
-var Ex = require("./Exception");
-var HashMap = require("./HashMap");
-var ImplicitContextI = require("./ImplicitContextI");
-var IdentityUtil = require("./IdentityUtil");
-var LocatorManager = require("./LocatorManager");
-var Logger = require("./Logger");
-var Network = require("./Network");
-var ObjectFactoryManager = require("./ObjectFactoryManager");
-var OutgoingConnectionFactory = require("./OutgoingConnectionFactory");
-var ProcessLogger = require("./ProcessLogger");
-var Promise = require("./Promise");
-var Properties = require("./Properties");
-var ProxyFactory = require("./ProxyFactory");
-var Ref = require("./Reference");
-var RouterManager = require("./RouterManager");
-var TcpEndpointFactory = require("./TcpEndpointFactory");
-var Timer = require("./Timer");
-var TraceLevels = require("./TraceLevels");
+var ConnectionMonitor = require("./ConnectionMonitor").Ice.ConnectionMonitor;
+var Debug = require("./Debug").Ice.Debug;
+var DefaultsAndOverrides = require("./DefaultsAndOverrides").Ice.DefaultsAndOverrides;
+var EndpointFactoryManager = require("./EndpointFactoryManager").Ice.EndpointFactoryManager;
+var HashMap = require("./HashMap").Ice.HashMap;
+var ImplicitContextI = require("./ImplicitContextI").Ice.ImplicitContextI;
+var IdentityUtil = require("./IdentityUtil").Ice.IdentityUtil;
+var LocatorManager = require("./LocatorManager").Ice.LocatorManager;
+var Logger = require("./Logger").Ice.Logger;
+var Network = require("./Network").Ice.Network;
+var ObjectFactoryManager = require("./ObjectFactoryManager").Ice.ObjectFactoryManager;
+var OutgoingConnectionFactory = require("./OutgoingConnectionFactory").Ice.OutgoingConnectionFactory;
+var Promise = require("./Promise").Ice.Promise;
+var Properties = require("./Properties").Ice.Properties;
+var ProxyFactory = require("./ProxyFactory").Ice.ProxyFactory;
+var RouterManager = require("./RouterManager").Ice.RouterManager;
+var TcpEndpointFactory = require("./TcpEndpointFactory").Ice.TcpEndpointFactory;
+var Timer = require("./Timer").Ice.Timer;
+var TraceLevels = require("./TraceLevels").Ice.TraceLevels;
+var ReferenceFactory = require("./Reference").Ice.ReferenceFactory;
 
-var LocalEx = require("./LocalException").Ice;
+var _merge = require("Ice/Util").merge;
+
+var Ice = {};
+
+_merge(Ice, require("./LocalException").Ice);
+_merge(Ice, require("./Exception").Ice);
+_merge(Ice, require("./ProcessLogger").Ice);
 
 var StateActive = 0;
 var StateDestroyInProgress = 1;
@@ -99,7 +103,7 @@ Instance.prototype.routerManager = function()
 {
     if(this._state === StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     Debug.assert(this._routerManager !== null);
@@ -110,7 +114,7 @@ Instance.prototype.locatorManager = function()
 {
     if(this._state === StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     Debug.assert(this._locatorManager !== null);
@@ -121,7 +125,7 @@ Instance.prototype.referenceFactory = function()
 {
     if(this._state === StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     Debug.assert(this._referenceFactory !== null);
@@ -132,7 +136,7 @@ Instance.prototype.proxyFactory = function()
 {
     if(this._state === StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     Debug.assert(this._proxyFactory !== null);
@@ -143,7 +147,7 @@ Instance.prototype.outgoingConnectionFactory = function()
 {
     if(this._state === StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     Debug.assert(this._outgoingConnectionFactory !== null);
@@ -164,7 +168,7 @@ Instance.prototype.connectionMonitor = function()
 {
     if(this._state === StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     Debug.assert(this._connectionMonitor !== null);
@@ -175,7 +179,7 @@ Instance.prototype.servantFactoryManager = function()
 {
     if(this._state === StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     Debug.assert(this._servantFactoryManager !== null);
@@ -187,7 +191,7 @@ Instance.prototype.objectAdapterFactory = function()
 {
     if(this._state === StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     Debug.assert(this._objectAdapterFactory !== null);
@@ -198,7 +202,7 @@ Instance.prototype.protocolSupport = function()
 {
     if(this._state == StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     return this._protocolSupport;
@@ -209,7 +213,7 @@ Instance.prototype.endpointHostResolver = function()
 {
     if(this._state === StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     Debug.assert(this._endpointHostResolver !== null);
@@ -220,7 +224,7 @@ Instance.prototype.retryQueue = function()
 {
     if(this._state === StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     Debug.assert(this._retryQueue !== null);
@@ -232,7 +236,7 @@ Instance.prototype.timer = function()
 {
     if(this._state === StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     Debug.assert(this._timer !== null);
@@ -243,7 +247,7 @@ Instance.prototype.endpointFactoryManager = function()
 {
     if(this._state === StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     Debug.assert(this._endpointFactoryManager !== null);
@@ -255,7 +259,7 @@ Instance.prototype.pluginManager = function()
 {
     if(this._state === StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     Debug.assert(this._pluginManager !== null);
@@ -300,7 +304,7 @@ Instance.prototype.setDefaultLocator = function(locator)
 {
     if(this._state == StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     this._referenceFactory = this._referenceFactory.setDefaultLocator(locator);
@@ -310,7 +314,7 @@ Instance.prototype.setDefaultRouter = function(router)
 {
     if(this._state == StateDestroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     this._referenceFactory = this._referenceFactory.setDefaultRouter(router);
@@ -339,7 +343,7 @@ Instance.prototype.finishSetup = function(communicator, promise)
 
         if(this._initData.logger === null)
         {
-            this._initData.logger = ProcessLogger.getProcessLogger();
+            this._initData.logger = Ice.getProcessLogger();
         }
 
         this._traceLevels = new TraceLevels(this._initData.properties);
@@ -373,7 +377,7 @@ Instance.prototype.finishSetup = function(communicator, promise)
 
         this._locatorManager = new LocatorManager(this._initData.properties);
 
-        this._referenceFactory = new Ref.ReferenceFactory(this, communicator);
+        this._referenceFactory = new ReferenceFactory(this, communicator);
 
         this._proxyFactory = new ProxyFactory(this);
 
@@ -384,7 +388,7 @@ Instance.prototype.finishSetup = function(communicator, promise)
         var ipv6 = this._initData.properties.getPropertyAsIntWithDefault("Ice.IPv6", 0) > 0;
         if(!ipv4 && !ipv6)
         {
-            throw new LocalEx.InitializationException("Both IPV4 and IPv6 support cannot be disabled");
+            throw new Ice.InitializationException("Both IPV4 and IPv6 support cannot be disabled");
         }
         else if(ipv4 && ipv6)
         {
@@ -536,7 +540,7 @@ Instance.prototype.finishSetup = function(communicator, promise)
     {
         if(promise !== null)
         {
-            if(ex instanceof Ex.LocalException)
+            if(ex instanceof Ice.LocalException)
             {
                 this.destroy().then(
                     function()
@@ -555,7 +559,7 @@ Instance.prototype.finishSetup = function(communicator, promise)
         }
         else
         {
-            if(ex instanceof Ex.LocalException)
+            if(ex instanceof Ice.LocalException)
             {
                 this.destroy();
             }
@@ -640,7 +644,7 @@ Instance.prototype.destroy = function()
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             promise.fail(ex);
         }
@@ -749,7 +753,7 @@ Instance.prototype.outgoingConnectionFactoryFinished = function(promise)
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             promise.fail(ex);
         }
@@ -760,4 +764,5 @@ Instance.prototype.outgoingConnectionFactoryFinished = function(promise)
     }
 };
 
-module.exports = Instance;
+module.exports.Ice = {};
+module.exports.Ice.Instance = Instance;

@@ -7,7 +7,12 @@
 //
 // **********************************************************************
 
-module.exports.None = 0;
-module.exports.Read = 1;
-module.exports.Write = 2;
-module.exports.Connect = 2; // Same as Write
+var SocketOperation = {};
+
+SocketOperation.None = 0;
+SocketOperation.Read = 1;
+SocketOperation.Write = 2;
+SocketOperation.Connect = 2; // Same as Write
+
+module.exports.Ice = {};
+module.exports.Ice.SocketOperation = SocketOperation;

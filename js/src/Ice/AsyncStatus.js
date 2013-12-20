@@ -7,6 +7,11 @@
 //
 // **********************************************************************
 
-module.exports.Queued = 0;
-module.exports.Sent = 1;
-module.exports.InvokeSentCallback = 2;
+var AsyncStatus = {};
+
+AsyncStatus.Queued = 0;
+AsyncStatus.Sent = 1;
+AsyncStatus.InvokeSentCallback = 2;
+
+module.exports.Ice = {};
+module.exports.Ice.AsyncStatus = AsyncStatus;

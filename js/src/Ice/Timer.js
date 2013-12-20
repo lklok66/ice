@@ -7,10 +7,9 @@
 //
 // **********************************************************************
 
-var HashMap = require("./HashMap");
-var TimeUtil = require("./TimeUtil");
-
-var LocalEx = require("./LocalException").Ice;
+var HashMap = require("./HashMap").Ice.HashMap;
+var TimeUtil = require("./TimeUtil").Ice.TimeUtil;
+var CommunicatorDestroyedException = require("./LocalException").Ice.CommunicatorDestroyedException;
 
 var Timer = function(instance)
 {
@@ -30,7 +29,7 @@ Timer.prototype.schedule = function(callback, delay)
 {
     if(this._destroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new CommunicatorDestroyedException();
     }
 
     var token = this._tokenId++;
@@ -47,7 +46,7 @@ Timer.prototype.scheduleRepeated = function(callback, period)
 {
     if(this._destroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new CommunicatorDestroyedException();
     }
 
     var token = this._tokenId++;
@@ -115,4 +114,5 @@ Timer.prototype.handleInterval = function(id)
     }
 }
 
-module.exports = Timer;
+module.exports.Ice = {};
+module.exports.Ice.Timer = Timer;

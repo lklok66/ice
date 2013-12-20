@@ -7,13 +7,14 @@
 //
 // **********************************************************************
 
-var StringUtil = require("./StringUtil");
-var HashMap = require("./HashMap");
-var LocalEx = require("./LocalException").Ice;
-var Promise = require("./Promise");
-var PropertyNames = require("./PropertyNames");
-var Debug = require("./Debug");
-var ProcessLogger = require("./ProcessLogger");
+var StringUtil = require("./StringUtil").Ice.StringUtil;
+var HashMap = require("./HashMap").Ice.HashMap;
+var Promise = require("./Promise").Ice.Promise;
+var PropertyNames = require("./PropertyNames").Ice.PropertyNames;
+var Debug = require("./Debug").Ice.Debug;
+var ProcessLogger = require("./ProcessLogger").Ice.ProcessLogger;
+var InitializationException = require("./LocalException").Ice.InitializationException;
+
 var fs = require("fs");
 
 //
@@ -151,7 +152,7 @@ Properties.prototype.setProperty = function(key, value)
     var logger = ProcessLogger.getProcessLogger(); 
     if(key === null || key === undefined || key.length === 0)
     {
-        throw new LocalEx.InitializationException("Attempt to set property with empty key");
+        throw new InitializationException("Attempt to set property with empty key");
     }
 
     var dotPos = key.indexOf(".");
@@ -508,4 +509,5 @@ Properties.createProperties = function(args, defaults)
     return new Properties(args, defaults);
 };
 
-module.exports = Properties;
+module.exports.Ice = {};
+module.exports.Ice.Properties = Properties;

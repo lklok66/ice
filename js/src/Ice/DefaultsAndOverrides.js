@@ -8,15 +8,14 @@
 // **********************************************************************
 
 var FormatType = require("./FormatType");
-var Protocol = require("./Protocol");
 
 var EndpointSelectionType = require("./EndpointTypes").Ice.EndpointSelectionType;
-var LocalEx = require("./LocalException").Ice;
 
 var DefaultsAndOverrides = function(properties)
 {
     var value;
-
+    var Protocol = require("./Protocol").Ice.Protocol;
+    
     this.defaultProtocol = properties.getPropertyWithDefault("Ice.Default.Protocol", "tcp");
 
     value = properties.getProperty("Ice.Default.Host");
@@ -72,7 +71,7 @@ var DefaultsAndOverrides = function(properties)
     }
     else
     {
-        var ex = new LocalEx.EndpointSelectionTypeParseException();
+        var ex = new require("./LocalException").Ice.EndpointSelectionTypeParseException();
         ex.str = "illegal value `" + value + "'; expected `Random' or `Ordered'";
         throw ex;
     }
@@ -90,4 +89,5 @@ var DefaultsAndOverrides = function(properties)
     this.defaultFormat = slicedFormat ? FormatType.SlicedFormat : FormatType.CompactFormat;
 };
 
-module.exports = DefaultsAndOverrides;
+module.exports.Ice = {};
+module.exports.Ice.DefaultsAndOverrides = DefaultsAndOverrides;

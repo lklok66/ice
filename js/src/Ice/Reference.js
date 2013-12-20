@@ -7,25 +7,28 @@
 //
 // **********************************************************************
 
-var ArrayUtil = require("./ArrayUtil");
-var Debug = require("./Debug");
-var HashMap = require("./HashMap");
-var HashUtil = require("./HashUtil");
-var ExUtil = require("./ExUtil");
-var OpaqueEndpointI = require("./OpaqueEndpointI");
-var Promise = require("./Promise");
-var Protocol = require("./Protocol");
-var RefMode = require("./ReferenceMode");
-var StringUtil = require("./StringUtil");
+var ArrayUtil = require("./ArrayUtil").Ice.ArrayUtil;
+var Debug = require("./Debug").Ice.Debug;
+var HashMap = require("./HashMap").Ice.HashMap;
+var HashUtil = require("./HashUtil").Ice.HashUtil;
+var ExUtil = require("./ExUtil").Ice.ExUtil;
+var OpaqueEndpointI = require("./OpaqueEndpointI").Ice.OpaqueEndpointI;
+var Promise = require("./Promise").Ice.Promise;
+var Protocol = require("./Protocol").Ice.Protocol;
+var RefMode = require("./ReferenceMode").Ice.ReferenceMode;
+var StringUtil = require("./StringUtil").Ice.StringUtil;
 
-var EndpointTypes = require("./EndpointTypes").Ice;
-var Id = require("./Identity").Ice;
-var LocalEx = require("./LocalException").Ice;
+var EndpointTypes = require("./EndpointTypes").Ice.EndpointTypes;
+var Identity = require("./Identity").Ice.Identity;
 
 var RouterPrx = require("./Router").Ice.RouterPrx;
 var LocatorPrx = require("./Locator").Ice.LocatorPrx;
+var Ver = require("./Version").Ice.Version;
 
-var Ver = require("./Version").Ice;
+var _merge = require("Ice/Util").merge;
+
+var Ice = {};
+_merge(Ice, require("./LocalException").Ice);
 
 //
 // Only for use by Instance
@@ -107,7 +110,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
     beg = StringUtil.findFirstNotOf(s, delim, end);
     if(beg == -1)
     {
-        throw new LocalEx.ProxyParseException("no non-whitespace characters found in `" + s + "'");
+        throw new Ice.ProxyParseException("no non-whitespace characters found in `" + s + "'");
     }
 
     //
@@ -118,7 +121,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
     end = StringUtil.checkQuote(s, beg);
     if(end === -1)
     {
-        throw new LocalEx.ProxyParseException("mismatched quotes around identity in `" + s + "'");
+        throw new Ice.ProxyParseException("mismatched quotes around identity in `" + s + "'");
     }
     else if(end === 0)
     {
@@ -138,7 +141,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
 
     if(beg === end)
     {
-        throw new LocalEx.ProxyParseException("no identity in `" + s + "'");
+        throw new Ice.ProxyParseException("no identity in `" + s + "'");
     }
 
     //
@@ -154,7 +157,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
         //
         if(ident.category.length > 0)
         {
-            throw new LocalEx.IllegalIdentityException(ident);
+            throw new Ice.IllegalIdentityException(ident);
         }
         //
         // Treat a stringified proxy containing two double
@@ -164,7 +167,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
         //
         else if(StringUtil.findFirstNotOf(s, delim, end) != -1)
         {
-            throw new LocalEx.ProxyParseException("invalid characters after identity in `" + s + "'");
+            throw new Ice.ProxyParseException("invalid characters after identity in `" + s + "'");
         }
         else
         {
@@ -206,7 +209,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
         var option = s.substring(beg, end);
         if(option.length != 2 || option.charAt(0) != '-')
         {
-            throw new LocalEx.ProxyParseException("expected a proxy option but found `" + option + "' in `" + s + "'");
+            throw new Ice.ProxyParseException("expected a proxy option but found `" + option + "' in `" + s + "'");
         }
 
         //
@@ -225,7 +228,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
                 end = StringUtil.checkQuote(s, beg);
                 if(end == -1)
                 {
-                    throw new LocalEx.ProxyParseException("mismatched quotes around value for " + option +
+                    throw new Ice.ProxyParseException("mismatched quotes around value for " + option +
                                                       " option in `" + s + "'");
                 }
                 else if(end === 0)
@@ -256,7 +259,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
             {
                 if(argument === null)
                 {
-                    throw new LocalEx.ProxyParseException("no argument provided for -f option in `" + s + "'");
+                    throw new Ice.ProxyParseException("no argument provided for -f option in `" + s + "'");
                 }
 
                 try
@@ -265,7 +268,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
                 }
                 catch(ex)
                 {
-                    throw new LocalEx.ProxyParseException("invalid facet in `" + s + "': " + ex.message);
+                    throw new Ice.ProxyParseException("invalid facet in `" + s + "': " + ex.message);
                 }
 
                 break;
@@ -275,7 +278,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
             {
                 if(argument !== null)
                 {
-                    throw new LocalEx.ProxyParseException("unexpected argument `" + argument +
+                    throw new Ice.ProxyParseException("unexpected argument `" + argument +
                                                           "' provided for -t option in `" + s + "'");
                 }
                 mode = RefMode.ModeTwoway;
@@ -286,7 +289,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
             {
                 if(argument !== null)
                 {
-                    throw new LocalEx.ProxyParseException("unexpected argument `" + argument +
+                    throw new Ice.ProxyParseException("unexpected argument `" + argument +
                                                           "' provided for -o option in `" + s + "'");
                 }
                 mode = RefMode.ModeOneway;
@@ -297,7 +300,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
             {
                 if(argument !== null)
                 {
-                    throw new LocalEx.ProxyParseException("unexpected argument `" + argument +
+                    throw new Ice.ProxyParseException("unexpected argument `" + argument +
                                                           "' provided for -O option in `" + s + "'");
                 }
                 mode = RefMode.ModeBatchOneway;
@@ -308,7 +311,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
             {
                 if(argument !== null)
                 {
-                    throw new LocalEx.ProxyParseException("unexpected argument `" + argument +
+                    throw new Ice.ProxyParseException("unexpected argument `" + argument +
                                                           "' provided for -d option in `" + s + "'");
                 }
                 mode = RefMode.ModeDatagram;
@@ -319,7 +322,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
             {
                 if(argument !== null)
                 {
-                    throw new LocalEx.ProxyParseException("unexpected argument `" + argument +
+                    throw new Ice.ProxyParseException("unexpected argument `" + argument +
                                                           "' provided for -D option in `" + s + "'");
                 }
                 mode = RefMode.ModeBatchDatagram;
@@ -330,7 +333,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
             {
                 if(argument !== null)
                 {
-                    throw new LocalEx.ProxyParseException("unexpected argument `" + argument +
+                    throw new Ice.ProxyParseException("unexpected argument `" + argument +
                                                           "' provided for -s option in `" + s + "'");
                 }
                 secure = true;
@@ -341,7 +344,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
             {
                 if(argument === null)
                 {
-                    throw new LocalEx.ProxyParseException("no argument provided for -e option in `" + s + "'");
+                    throw new Ice.ProxyParseException("no argument provided for -e option in `" + s + "'");
                 }
 
                 try
@@ -350,7 +353,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
                 }
                 catch(e) // VersionParseException
                 {
-                    throw new LocalEx.ProxyParseException("invalid encoding version `" + argument + "' in `" + s +
+                    throw new Ice.ProxyParseException("invalid encoding version `" + argument + "' in `" + s +
                                                           "':\n" + e.str);
                 }
                 break;
@@ -360,7 +363,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
             {
                 if(argument === null)
                 {
-                    throw new LocalEx.ProxyParseException("no argument provided for -p option in `" + s + "'");
+                    throw new Ice.ProxyParseException("no argument provided for -p option in `" + s + "'");
                 }
 
                 try
@@ -369,7 +372,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
                 }
                 catch(e) // VersionParseException
                 {
-                    throw new LocalEx.ProxyParseException("invalid protocol version `" + argument + "' in `" + s +
+                    throw new Ice.ProxyParseException("invalid protocol version `" + argument + "' in `" + s +
                                                           "':\n" + e.str);
                 }
                 break;
@@ -377,7 +380,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
 
             default:
             {
-                throw new LocalEx.ProxyParseException("unknown option `" + option + "' in `" + s + "'");
+                throw new Ice.ProxyParseException("unknown option `" + option + "' in `" + s + "'");
             }
         }
     }
@@ -455,7 +458,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
         if(endpoints.length === 0)
         {
             Debug.assert(unknownEndpoints.length > 0);
-            throw new LocalEx.EndpointParseException("invalid endpoint `" + unknownEndpoints[0] + "' in `" + s + "'");
+            throw new Ice.EndpointParseException("invalid endpoint `" + unknownEndpoints[0] + "' in `" + s + "'");
         }
         else if(unknownEndpoints.length !== 0 &&
             this._instance.initializationData().properties.getPropertyAsIntWithDefault("Ice.Warn.Endpoints", 1) > 0)
@@ -478,14 +481,14 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
         beg = StringUtil.findFirstNotOf(s, delim, beg + 1);
         if(beg == -1)
         {
-            throw new LocalEx.ProxyParseException("missing adapter id in `" + s + "'");
+            throw new Ice.ProxyParseException("missing adapter id in `" + s + "'");
         }
 
         var adapterstr = null;
         end = StringUtil.checkQuote(s, beg);
         if(end === -1)
         {
-            throw new LocalEx.ProxyParseException("mismatched quotes around adapter id in `" + s + "'");
+            throw new Ice.ProxyParseException("mismatched quotes around adapter id in `" + s + "'");
         }
         else if(end === 0)
         {
@@ -505,7 +508,7 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
 
         if(end !== s.length && StringUtil.findFirstNotOf(s, delim, end) !== -1)
         {
-            throw new LocalEx.ProxyParseException("invalid trailing characters after `" + s.substring(0, end + 1) +
+            throw new Ice.ProxyParseException("invalid trailing characters after `" + s.substring(0, end + 1) +
                                                   "' in `" + s + "'");
         }
 
@@ -515,16 +518,16 @@ ReferenceFactory.prototype.createFromString = function(s, propertyPrefix)
         }
         catch(ex)
         {
-            throw new LocalEx.ProxyParseException("invalid adapter id in `" + s + "': " + ex.message);
+            throw new Ice.ProxyParseException("invalid adapter id in `" + s + "': " + ex.message);
         }
         if(adapter.length === 0)
         {
-            throw new LocalEx.ProxyParseException("empty adapter id in `" + s + "'");
+            throw new Ice.ProxyParseException("empty adapter id in `" + s + "'");
         }
         return this.createImpl(ident, facet, mode, secure, protocol, encoding, null, adapter, propertyPrefix);
     }
 
-    throw new LocalEx.ProxyParseException("malformed proxy `" + s + "'");
+    throw new Ice.ProxyParseException("malformed proxy `" + s + "'");
 };
 
 
@@ -549,7 +552,7 @@ ReferenceFactory.prototype.createFromStream = function(ident, s)
     {
         if(facetPath.length > 1)
         {
-            throw new LocalEx.ProxyUnmarshalException();
+            throw new Ice.ProxyUnmarshalException();
         }
         facet = facetPath[0];
     }
@@ -561,7 +564,7 @@ ReferenceFactory.prototype.createFromStream = function(ident, s)
     var mode = s.readByte();
     if(mode < 0 || mode > RefMode.ModeLast)
     {
-        throw new LocalEx.ProxyUnmarshalException();
+        throw new Ice.ProxyUnmarshalException();
     }
 
     var secure = s.readBool();
@@ -793,7 +796,7 @@ ReferenceFactory.prototype.createImpl = function(ident, facet, mode, secure, pro
             }
             else
             {
-                throw new LocalEx.EndpointSelectionTypeParseException("illegal value `" + type +
+                throw new Ice.EndpointSelectionTypeParseException("illegal value `" + type +
                                                                       "'; expected `Random' or `Ordered'");
             }
         }
@@ -823,7 +826,8 @@ ReferenceFactory.prototype.createImpl = function(ident, facet, mode, secure, pro
                                  locatorCacheTimeout);
 };
 
-module.exports.ReferenceFactory = ReferenceFactory;
+module.exports.Ice = {};
+module.exports.Ice.ReferenceFactory = ReferenceFactory;
 
 var Reference = function(instance, communicator, identity, facet, mode, secure, protocol, encoding)
 {
@@ -1010,7 +1014,7 @@ Reference.prototype.changeIdentity = function(newIdentity)
         return this;
     }
     var r = this._instance.referenceFactory().copy(this);
-    r._identity = new Id.Identity(newIdentity.name, newIdentity.category);
+    r._identity = new Identity(newIdentity.name, newIdentity.category);
     return r;
 };
 
@@ -1401,7 +1405,7 @@ Reference.prototype.copyMembers = function(r)
 
 Reference._emptyEndpoints = [];
 
-module.exports.Reference = Reference;
+module.exports.Ice.Reference = Reference;
 
 var FixedReference = function(instance, communicator, identity, facet, mode, secure, encoding, connection)
 {
@@ -1459,52 +1463,52 @@ FixedReference.prototype.getConnectionId = function()
 
 FixedReference.prototype.changeAdapterId = function(newAdapterId)
 {
-    throw new LocalEx.FixedProxyException();
+    throw new Ice.FixedProxyException();
 };
 
 FixedReference.prototype.changeEndpoints = function(newEndpoints)
 {
-    throw new LocalEx.FixedProxyException();
+    throw new Ice.FixedProxyException();
 };
 
 FixedReference.prototype.changeLocator = function(newLocator)
 {
-    throw new LocalEx.FixedProxyException();
+    throw new Ice.FixedProxyException();
 };
 
 FixedReference.prototype.changeRouter = function(newRouter)
 {
-    throw new LocalEx.FixedProxyException();
+    throw new Ice.FixedProxyException();
 };
 
 FixedReference.prototype.changeCacheConnection = function(newCache)
 {
-    throw new LocalEx.FixedProxyException();
+    throw new Ice.FixedProxyException();
 };
 
 FixedReference.prototype.changePreferSecure = function(prefSec)
 {
-    throw new LocalEx.FixedProxyException();
+    throw new Ice.FixedProxyException();
 };
 
 FixedReference.prototype.changeEndpointSelection = function(newType)
 {
-    throw new LocalEx.FixedProxyException();
+    throw new Ice.FixedProxyException();
 };
 
 FixedReference.prototype.changeLocatorCacheTimeout = function(newTimeout)
 {
-    throw new LocalEx.FixedProxyException();
+    throw new Ice.FixedProxyException();
 };
 
 FixedReference.prototype.changeTimeout = function(newTimeout)
 {
-    throw new LocalEx.FixedProxyException();
+    throw new Ice.FixedProxyException();
 };
 
 FixedReference.prototype.changeConnectionId = function(connectionId)
 {
-    throw new LocalEx.FixedProxyException();
+    throw new Ice.FixedProxyException();
 };
 
 FixedReference.prototype.isIndirect = function()
@@ -1519,17 +1523,17 @@ FixedReference.prototype.isWellKnown = function()
 
 FixedReference.prototype.streamWrite = function(s)
 {
-    throw new LocalEx.FixedProxyException();
+    throw new Ice.FixedProxyException();
 };
 
 FixedReference.prototype.toString = function()
 {
-    throw new LocalEx.FixedProxyException();
+    throw new Ice.FixedProxyException();
 };
 
 FixedReference.prototype.toProperty = function(prefix)
 {
-    throw new LocalEx.FixedProxyException();
+    throw new Ice.FixedProxyException();
 };
 
 FixedReference.prototype.clone = function()
@@ -1550,7 +1554,7 @@ FixedReference.prototype.getConnectionInternal = function(compress)
         {
             if(this._fixedConnection.endpoint().datagram())
             {
-                throw new LocalEx.NoEndpointException("");
+                throw new Ice.NoEndpointException("");
             }
             break;
         }
@@ -1560,7 +1564,7 @@ FixedReference.prototype.getConnectionInternal = function(compress)
         {
             if(!this._fixedConnection.endpoint().datagram())
             {
-                throw new LocalEx.NoEndpointException("");
+                throw new Ice.NoEndpointException("");
             }
             break;
         }
@@ -1582,7 +1586,7 @@ FixedReference.prototype.getConnectionInternal = function(compress)
     }
     if(secure && !this._fixedConnection.endpoint().secure())
     {
-        throw new LocalEx.NoEndpointException("");
+        throw new Ice.NoEndpointException("");
     }
 
     this._fixedConnection.throwException(); // Throw in case our connection is already destroyed.
@@ -1613,7 +1617,7 @@ FixedReference.prototype.getConnection = function()
     }
     catch(ex)
     {
-        if(ex instanceof LocalEx.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             promise.fail(ex);
         }
@@ -1642,7 +1646,7 @@ FixedReference.prototype.equals = function(rhs)
     return this._fixedConnection.equals(rhs._fixedConnection);
 };
 
-module.exports.FixedReference = FixedReference;
+module.exports.Ice.FixedReference = FixedReference;
 
 var RoutableReference = function(instance, communicator, identity, facet, mode, secure, protocol, encoding, endpoints,
                                  adapterId, locatorInfo, routerInfo, cacheConnection, preferSecure, endpointSelection,
@@ -2137,7 +2141,7 @@ RoutableReference.prototype.getConnectionNoRouterInfo = function(promise)
             {
                 if(endpoints.length === 0)
                 {
-                    promise.fail(new LocalEx.NoEndpointException(self.toString()));
+                    promise.fail(new Ice.NoEndpointException(self.toString()));
                     return;
                 }
 
@@ -2149,7 +2153,7 @@ RoutableReference.prototype.getConnectionNoRouterInfo = function(promise)
                     },
                     function(ex)
                     {
-                        if(ex instanceof LocalEx.NoEndpointException)
+                        if(ex instanceof Ice.NoEndpointException)
                         {
                             //
                             // No need to retry if there's no endpoints.
@@ -2184,7 +2188,7 @@ RoutableReference.prototype.getConnectionNoRouterInfo = function(promise)
     }
     else
     {
-        promise.fail(new LocalEx.NoEndpointException(this.toString()));
+        promise.fail(new Ice.NoEndpointException(this.toString()));
     }
 };
 
@@ -2338,7 +2342,7 @@ RoutableReference.prototype.createConnection = function(allEndpoints)
     var endpoints = this.filterEndpoints(allEndpoints);
     if(endpoints.length === 0)
     {
-        return Promise.fail(new LocalEx.NoEndpointException(this.toString()));
+        return Promise.fail(new Ice.NoEndpointException(this.toString()));
     }
 
     //
@@ -2389,7 +2393,7 @@ RoutableReference.prototype.createConnection = function(allEndpoints)
     return promise;
 };
 
-module.exports.RoutableReference = RoutableReference;
+module.exports.Ice.RoutableReference = RoutableReference;
 
 var CreateConnectionCallback = function(r, endpoints, promise)
 {

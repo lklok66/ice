@@ -8,24 +8,26 @@
 //
 // **********************************************************************
 
-var Logger = require("./Logger");
-
 var processLogger = null;
 
-module.exports.getProcessLogger = function()
+var getProcessLogger = function()
 {
     if(processLogger === null)
     {
         //
         // TODO: Would be nice to be able to use process name as prefix by default.
         //
-        processLogger = new Logger("", "");
+        processLogger = new require("./Logger").Ice.Logger("", "");
     }
 
     return processLogger;
 };
 
-module.exports.setProcessLogger = function(logger)
+var setProcessLogger = function(logger)
 {
     processLogger = logger;
 };
+
+module.exports.Ice = {};
+module.exports.Ice.getProcessLogger = getProcessLogger;
+module.exports.Ice.setProcessLogger = setProcessLogger;

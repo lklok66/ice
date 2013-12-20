@@ -7,17 +7,20 @@
 //
 // **********************************************************************
 
-var ArrayUtil = require("./ArrayUtil");
-var ConnectionI = require("./ConnectionI");
-var ConnectionReaper = require("./ConnectionReaper");
-var Debug = require("./Debug");
-var Ex = require("./Exception");
-var ExUtil = require("./ExUtil");
-var HashMap = require("./HashMap");
-var Promise = require("./Promise");
+var ArrayUtil = require("./ArrayUtil").Ice.ArrayUtil;
+var ConnectionI = require("./ConnectionI").Ice.ConnectionI;
+var ConnectionReaper = require("./ConnectionReaper").Ice.ConnectionReaper;
+var Debug = require("./Debug").Ice.Debug;
+var ExUtil = require("./ExUtil").Ice.ExUtil;
+var HashMap = require("./HashMap").Ice.HashMap;
+var Promise = require("./Promise").Ice.Promise;
+var EndpointSelectionType = require("./EndpointTypes").Ice.EndpointSelectionType;
 
-var Endpt = require("./EndpointTypes").Ice;
-var LocalEx = require("./LocalException").Ice;
+var _merge = require("Ice/Util").merge;
+
+var Ice = {};
+_merge(Ice, require("./LocalException").Ice);
+_merge(Ice, require("./Exception").Ice);
 
 //
 // Only for use by Instance.
@@ -92,7 +95,7 @@ OutgoingConnectionFactory.prototype.create = function(endpts, hasMore, selType)
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             return Promise.fail(ex);
         }
@@ -112,7 +115,7 @@ OutgoingConnectionFactory.prototype.setRouterInfo = function(routerInfo)
 
     if(this._destroyed)
     {
-        promise.fail(new LocalEx.CommunicatorDestroyedException());
+        promise.fail(new Ice.CommunicatorDestroyedException());
         return promise;
     }
 
@@ -228,7 +231,7 @@ OutgoingConnectionFactory.prototype.flushAsyncBatchRequests = function(outAsync)
         }
         catch(ex)
         {
-            if(ex instanceof Ex.LocalException)
+            if(ex instanceof Ice.LocalException)
             {
                 // Ignore.
             }
@@ -268,7 +271,7 @@ OutgoingConnectionFactory.prototype.findConnectionByEndpoint = function(endpoint
 {
     if(this._destroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     var defaultsAndOverrides = this._instance.defaultsAndOverrides();
@@ -321,7 +324,7 @@ OutgoingConnectionFactory.prototype.incPendingConnectCount = function()
 
     if(this._destroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
     ++this._pendingConnectCount;
 };
@@ -340,7 +343,7 @@ OutgoingConnectionFactory.prototype.getConnection = function(endpoints, cb, comp
 {
     if(this._destroyed)
     {
-        throw new LocalEx.CommunicatorDestroyedException();
+        throw new Ice.CommunicatorDestroyedException();
     }
 
     //
@@ -364,7 +367,7 @@ OutgoingConnectionFactory.prototype.getConnection = function(endpoints, cb, comp
     {
         if(this._destroyed)
         {
-            throw new LocalEx.CommunicatorDestroyedException();
+            throw new Ice.CommunicatorDestroyedException();
         }
 
         //
@@ -419,7 +422,7 @@ OutgoingConnectionFactory.prototype.createConnection = function(transceiver, end
     {
         if(this._destroyed)
         {
-            throw new LocalEx.CommunicatorDestroyedException();
+            throw new Ice.CommunicatorDestroyedException();
         }
 
         connection = new ConnectionI(this._communicator, this._instance, this._reaper, transceiver,
@@ -427,7 +430,7 @@ OutgoingConnectionFactory.prototype.createConnection = function(transceiver, end
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             try
             {
@@ -658,7 +661,7 @@ OutgoingConnectionFactory.prototype.handleConnectionException = function(ex, has
     {
         var s = [];
         s.push("connection to endpoint failed");
-        if(ex instanceof LocalEx.CommunicatorDestroyedException)
+        if(ex instanceof Ice.CommunicatorDestroyedException)
         {
             s.push("\n");
         }
@@ -685,7 +688,7 @@ OutgoingConnectionFactory.prototype.handleException = function(ex, hasMore)
     {
         var s = [];
         s.push("couldn't resolve endpoint host");
-        if(ex instanceof LocalEx.CommunicatorDestroyedException)
+        if(ex instanceof Ice.CommunicatorDestroyedException)
         {
             s.push("\n");
         }
@@ -787,8 +790,8 @@ OutgoingConnectionFactory.prototype.connectionsFinished = function()
     Debug.assert(this._waitPromise !== null);
     this._waitPromise.succeed();
 };
-
-module.exports = OutgoingConnectionFactory;
+module.exports.Ice = {};
+module.exports.Ice.OutgoingConnectionFactory = OutgoingConnectionFactory;
 
 //
 // Value is a Vector<Ice.ConnectionI>
@@ -841,7 +844,7 @@ var ConnectCallback = function(f, endpoints, more, selType)
     //
     // Shuffle endpoints if endpoint selection type is Random.
     //
-    if(this._selType === Endpt.EndpointSelectionType.Random)
+    if(this._selType === EndpointSelectionType.Random)
     {
         ArrayUtil.shuffle(this._endpoints);
     }
@@ -861,7 +864,7 @@ ConnectCallback.prototype.connectionStartFailed = function(connection, ex)
     Debug.assert(this._current !== null);
 
     this._factory.handleConnectionException(ex, this._hasMore || this._index < this._endpoints.length);
-    if(ex instanceof LocalEx.CommunicatorDestroyedException) // No need to continue.
+    if(ex instanceof Ice.CommunicatorDestroyedException) // No need to continue.
     {
         this._factory.finishGetConnectionEx(this._endpoints, ex, this);
     }
@@ -943,7 +946,7 @@ ConnectCallback.prototype.start = function()
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this._promise.fail(ex);
             return;
@@ -983,7 +986,7 @@ ConnectCallback.prototype.getConnection = function()
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this._promise.fail(ex);
             this._factory.decPendingConnectCount(); // Must be called last.
@@ -1017,7 +1020,7 @@ ConnectCallback.prototype.nextEndpoint = function()
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof Ice.LocalException)
         {
             this.connectionStartFailed(connection, ex);
         }

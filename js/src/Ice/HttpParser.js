@@ -719,4 +719,5 @@ HttpParser.prototype.parse = function(buffer, begin)
 };
 /* jshint +W086 */
 
-module.exports = HttpParser;
+module.exports.Ice = {};
+module.exports.Ice.HttpParser = HttpParser;

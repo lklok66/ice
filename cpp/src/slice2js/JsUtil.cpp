@@ -307,7 +307,7 @@ Slice::JsGenerator::typeToString(const TypePtr& type, bool optional)
     DictionaryPtr d = DictionaryPtr::dynamicCast(type);
     if(d)
     {
-        return "__ice_HashMap";
+        return "Ice.HashMap";
     }
 
     ContainedPtr contained = ContainedPtr::dynamicCast(type);
@@ -337,17 +337,23 @@ Slice::JsGenerator::getLocalScope(const string& scope)
     {
         fixedScope = scope;
     }
-
+    if(fixedScope.empty())
+    {
+        return "";
+    }
     const StringList ids = fixIds(splitScopedName(fixedScope));
 
     //
-    // Return local scope for "::A::B::C" as _mod_A_B_C
+    // Return local scope for "::A::B::C" as A.B.C
     //
     stringstream result;
-    result << "_mod";
     for(StringList::const_iterator i = ids.begin(); i != ids.end(); ++i)
     {
-        result << '_' << *i;
+        if(i != ids.begin())
+        {
+            result << '.';
+        }
+        result << *i;
     }
     return result.str();
 }
@@ -567,15 +573,11 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-            out << nl << "__ice_StreamHelpers.writeStruct(" << stream << ", " << param << ");";
+            out << nl << stream << ".writeStruct(" << param << ");";
         }
         else
         {
-            out << nl << "if(" << param << " == null)";
-            out << sb;
-            out << nl << param << " = new " << typeToString(type) << "();"; // TODO: Fix reference to type
-            out << eb;
-            out << nl << param << ".__read(" << stream << ");";
+            out << nl << param << " = " << stream << ".readStruct(" << typeToString(type) << ");";
         }
         return;
     }
@@ -585,7 +587,7 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-            out << nl << stream << ".writeEnum(" << param << ", " << en->maxValue() << ");";
+            out << nl << stream << ".writeEnum(" << param << ");";
         }
         else
         {
@@ -947,14 +949,6 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
 #endif
 }
 
-bool
-isObjectType(const TypePtr& type)
-{
-    BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
-
-    return (builtin && builtin == Builtin::KindObject) || ClassDeclPtr::dynamicCast(type);
-}
-
 std::string
 Slice::JsGenerator::getHelper(const TypePtr& type)
 {
@@ -965,44 +959,44 @@ Slice::JsGenerator::getHelper(const TypePtr& type)
         {
             case Builtin::KindByte:
             {
-                return "StreamHelpers.ByteHelper";
+                return "Ice.StreamHelpers.ByteHelper";
             }
             case Builtin::KindBool:
             {
-                return "StreamHelpers.BoolHelper";
+                return "Ice.StreamHelpers.BoolHelper";
             }
             case Builtin::KindShort:
             {
-                return "StreamHelpers.ShortHelper";
+                return "Ice.StreamHelpers.ShortHelper";
             }
             case Builtin::KindInt:
             {
-                return "StreamHelpers.IntHelper";
+                return "Ice.StreamHelpers.IntHelper";
             }
             case Builtin::KindLong:
             {
-                return "StreamHelpers.LongHelper";
+                return "Ice.StreamHelpers.LongHelper";
             }
             case Builtin::KindFloat:
             {
-                return "StreamHelpers.FloatHelper";
+                return "Ice.StreamHelpers.FloatHelper";
             }
             case Builtin::KindDouble:
             {
-                return "StreamHelpers.DoubleHelper";
+                return "Ice.StreamHelpers.DoubleHelper";
             }
             case Builtin::KindString:
             {
-                return "StreamHelpers.StringHelper";
+                return "Ice.StreamHelpers.StringHelper";
             }
             case Builtin::KindObject:
             {
-                // Uses generateObjectSequenceHelper bellow
+                // Uses SequenceHelper/DictionaryHelper bellow
                 break;
             }
             case Builtin::KindObjectProxy:
             {
-                return "StreamHelpers.ProxyHelper";
+                return "Ice.StreamHelpers.ProxyHelper";
             }
             case Builtin::KindLocalObject:
             {
@@ -1012,117 +1006,43 @@ Slice::JsGenerator::getHelper(const TypePtr& type)
         }
     }
     
-    EnumPtr en = EnumPtr::dynamicCast(type);
-    if(en)
+    if(ProxyPtr::dynamicCast(type))
+    {
+        return "Ice.StreamHelpers.ProxyHelper";
+    }
+    
+    StructPtr st = StructPtr::dynamicCast(type);
+    if(st)
     {
         stringstream os;
-        os << "StreamHelpers.generateEnumHelper(" << typeToString(type) << ")";
+        os << "Ice.StreamHelpers.generateStructHelper(" << typeToString(type) << ", " << st->minWireSize() << ")"; 
         return os.str();
     }
     
-    ClassDeclPtr cls = ClassDeclPtr::dynamicCast(type);
-    if(cls || (builtin && builtin == Builtin::KindLocalObject))
+    else if(EnumPtr::dynamicCast(type))
     {
         stringstream os;
-        os << "StreamHelpers.generateObjectSequenceHelper(" << typeToString(type) <<")";
+        os << "Ice.StreamHelpers.generateEnumHelper(" << typeToString(type) << ")";
         return os.str();
-    }
-    
-    ProxyPtr prx = ProxyPtr::dynamicCast(type);
-    if(prx)
-    {
-        return "StreamHelpers.ProxyHelper";
     }
     
     SequencePtr seq = SequencePtr::dynamicCast(type);
     if(seq)
     {
-        if(isObjectType(seq->type()))
-        {
-            stringstream os;
-            os << "StreamHelpers.generateObjectSequenceHelper(" << typeToString(seq->type()) <<")";
-            return os.str();
-        }
-        else
-        {
-            return "StreamHelpers.SequenceHelper";
-        }
+        stringstream s;
+        s << getLocalScope(seq->scoped()) << "Helper";
+        return s.str();
     }
     
-    DictionaryPtr d = DictionaryPtr::dynamicCast(type);
-    if(d)
+    DictionaryPtr dict = DictionaryPtr::dynamicCast(type);
+    if(dict)
     {
-        if(isObjectType(d->valueType()))
-        {
-            stringstream os;
-            os << "StreamHelpers.generateObjectDictionaryHelper("
-               << getHelper(d->keyType())
-               << typeToString(d->valueType()) << ")";
-            return os.str();
-        }
-        else
-        {
-            return "StreamHelpers.DictionaryHelper";
-        }
+        stringstream s;
+        s << getLocalScope(dict->scoped()) << "Helper";
+        return s.str();
     }
     assert(false);
     return "???";
-}
-
-void
-Slice::JsGenerator::writeDictionaryHelper(Output& out, const TypePtr& keyType, const TypePtr& valueType)
-{
-    out << ",";
-    out << nl << "{";
-    out.inc();
-    out << nl << "key:" << getHelper(keyType) << ", "
-        << nl << "value:" << getHelper(valueType);
-    out.dec();
-    out << nl << "}";
-    
-    SequencePtr seq = SequencePtr::dynamicCast(valueType);
-    if(seq)
-    {
-        writeHelpers(out, seq->type(), false);
-        return;
-    }
-    
-    DictionaryPtr dict = DictionaryPtr::dynamicCast(valueType);
-    if(dict)
-    {
-        writeHelpers(out, dict->valueType(), false);
-        return;
-    }
-}
-
-void
-Slice::JsGenerator::writeHelpers(Output& out, const TypePtr& type, bool first)
-{
-    if(!first)
-    {
-        out << ",";
-    }
-    out << nl << getHelper(type);
-    
-    SequencePtr seq = SequencePtr::dynamicCast(type);
-    if(seq)
-    {
-        if(!isObjectType(seq->type()))
-        {
-            writeHelpers(out, seq->type(), false);
-        }
-        return;
-    }
-    
-    DictionaryPtr d = DictionaryPtr::dynamicCast(type);
-    if(d)
-    {
-        if(!isObjectType(d->valueType()))
-        {
-            writeDictionaryHelper(out, d->keyType(), d->valueType());
-        }
-        return;
-    }
 }
 
 void
@@ -1130,40 +1050,13 @@ Slice::JsGenerator::writeSequenceMarshalUnmarshalCode(Output& out, const Sequenc
                                                       bool marshal)
 {
     string stream = marshal ? "__os" : "__is";
-
-    if(isObjectType(seq->type()))
+    if(marshal)
     {
-        // Use ObjectSequenceHelper
-        if(marshal)
-        {
-            out << nl << "StreamHelpers.generateObjectSequenceHelper(" << typeToString(seq->type()) <<" ).write(" 
-                << stream << ", " << param << ");";
-        }
-        else
-        {
-            out << nl << param << " = " << "StreamHelpers.generateObjectSequenceHelper(" << typeToString(seq->type()) 
-                << ").read(" << stream << ");";
-        }
+        out << nl << getHelper(seq) <<".write(" << stream << ", " << param << ");";
     }
     else
     {
-        // Use SequenceHelper
-        if(marshal)
-        {
-            out << nl << "StreamHelpers.SequenceHelper.write(" << stream << ", " << param << ", [";
-            out.inc();
-            writeHelpers(out, seq->type(), true);
-            out.dec();
-            out << nl << "]);";
-        }
-        else
-        {
-            out << nl << param << " = " << "StreamHelpers.SequenceHelper.read(" << stream << ", [";
-            out.inc();
-            writeHelpers(out, seq->type(), true);
-            out.dec();
-            out << nl << "]);";
-        }
+        out << nl << param << " = " << getHelper(seq) << ".read(" << stream << ");";
     }
 }
 
@@ -1172,44 +1065,13 @@ Slice::JsGenerator::writeDictionaryMarshalUnmarshalCode(Output& out, const Dicti
                                                       bool marshal)
 {
     string stream = marshal ? "__os" : "__is";
-    if(isObjectType(dict->valueType()))
+    if(marshal)
     {
-        // Use ObjectDictionaryHelper
-        if(marshal)
-        {
-            out << nl << "StreamHelpers.generateObjectDictionaryHelper(" 
-                << getHelper(dict->keyType()) << ", "    
-                << typeToString(dict->valueType()) 
-                <<" ).write(" 
-                << stream << ", " << param << ");";
-        }
-        else
-        {
-            out << nl << param << " = " << "StreamHelpers.generateObjectDictionaryHelper(" 
-                << getHelper(dict->keyType()) << ", "
-                << typeToString(dict->valueType()) 
-                << ").read(" << stream << ");";
-        }
+        out << nl << getHelper(dict) <<".write(" << stream << ", " << param << ");";
     }
     else
     {
-        // Use DictionaryHelper
-        if(marshal)
-        {
-            out << nl << "StreamHelpers.DictionaryHelper.write(" << stream << ", " << param << ", [";
-            out.inc();
-            writeDictionaryHelper(out, dict->keyType(), dict->valueType());
-            out.dec();
-            out << nl << "]);";
-        }
-        else
-        {
-            out << nl << param << " = " << "StreamHelpers.DictionaryHelper.read(" << stream << ", [";
-            out.inc();
-            writeDictionaryHelper(out, dict->keyType(), dict->valueType());
-            out.dec();
-            out << nl << "]);";
-        }
+        out << nl << param << " = " << getHelper(dict) << ".read(" << stream << ");";
     }
 }
 

@@ -7,15 +7,18 @@
 //
 // **********************************************************************
 
-var Debug = require("./Debug");
-var Ex = require("./Exception");
-var ExUtil = require("./ExUtil");
-var HashMap = require("./HashMap");
-var Promise = require("./Promise");
-var Protocol = require("./Protocol");
-
-var LocalEx = require("./LocalException").Ice;
+var Debug = require("./Debug").Ice.Debug;
+var ExUtil = require("./ExUtil").Ice.ExUtil;
+var HashMap = require("./HashMap").Ice.HashMap;
+var Promise = require("./Promise").Ice.Promise;
+var Protocol = require("./Protocol").Ice.Protocol;
 var LocatorRegistryPrx = require("./Locator").Ice.LocatorRegisterPrx;
+
+var _merge = require("Ice/Util").merge;
+
+var Ice = {};
+_merge(Ice, require("./LocalException").Ice);
+_merge(Ice, require("./Exception").Ice);
 
 var LocatorInfo = function(locator, table, background)
 {
@@ -218,7 +221,7 @@ LocatorInfo.prototype.getEndpointsException = function(ref, exc)
     }
     catch(ex)
     {
-        if(ex instanceof LocalEx.AdapterNotFoundException)
+        if(ex instanceof Ice.AdapterNotFoundException)
         {
             if(instance.traceLevels().location >= 1)
             {
@@ -229,12 +232,12 @@ LocatorInfo.prototype.getEndpointsException = function(ref, exc)
                 instance.initializationData().logger.trace(instance.traceLevels().locationCat, s.join(""));
             }
 
-            e = new LocalEx.NotRegisteredException();
+            e = new Ice.NotRegisteredException();
             e.kindOfObject = "object adapter";
             e.id = ref.getAdapterId();
             throw e;
         }
-        else if(ex instanceof LocalEx.ObjectNotFoundException)
+        else if(ex instanceof Ice.ObjectNotFoundException)
         {
             if(instance.traceLevels().location >= 1)
             {
@@ -245,16 +248,16 @@ LocatorInfo.prototype.getEndpointsException = function(ref, exc)
                 instance.initializationData().logger.trace(instance.traceLevels().locationCat, s.join(""));
             }
 
-            e = new LocalEx.NotRegisteredException();
+            e = new Ice.NotRegisteredException();
             e.kindOfObject = "object";
             e.id = instance.identityToString(ref.getIdentity());
             throw e;
         }
-        else if(ex instanceof LocalEx.NotRegisteredException)
+        else if(ex instanceof Ice.NotRegisteredException)
         {
             throw ex;
         }
-        else if(ex instanceof LocalEx.LocalException)
+        else if(ex instanceof Ice.LocalException)
         {
             if(instance.traceLevels().location >= 1)
             {
@@ -410,7 +413,8 @@ LocatorInfo.prototype.finishRequest = function(ref, wellKnownRefs, proxy, notReg
     }
 };
 
-module.exports = LocatorInfo;
+module.exports.Ice = {};
+module.exports.Ice.LocatorInfo = LocatorInfo;
 
 var RequestCallback = function(ref, ttl, promise)
 {
@@ -542,7 +546,7 @@ Request.prototype.response = function(proxy)
 
 Request.prototype.exception = function(ex)
 {
-    this._locatorInfo.finishRequest(this._ref, this._wellKnownRefs, null, ex instanceof Ex.UserException);
+    this._locatorInfo.finishRequest(this._ref, this._wellKnownRefs, null, ex instanceof Ice.UserException);
     this._exception = ex;
     for(var i = 0; i < this._callbacks.length; ++i)
     {

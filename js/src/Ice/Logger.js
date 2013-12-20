@@ -95,4 +95,5 @@ Logger.prototype.timestamp = function()
     return mon + "-" + day + "-" + d.getFullYear() + " " + d.toLocaleTimeString();
 };
 
-module.exports = Logger;
+module.exports.Ice = {};
+module.exports.Ice.Logger = Logger;

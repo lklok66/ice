@@ -7,9 +7,9 @@
 //
 // **********************************************************************
 
-var HashMap = require("./HashMap");
-var LocatorInfo = require("./LocatorInfo");
-var LocatorTable = require("./LocatorTable");
+var HashMap = require("./HashMap").Ice.HashMap;
+var LocatorInfo = require("./LocatorInfo").Ice.LocatorInfo;
+var LocatorTable = require("./LocatorTable").Ice.LocatorTable;
 var LocatorPrx = require("./Locator").Ice.LocatorPrx;
 
 var LocatorManager = function(properties)
@@ -74,4 +74,5 @@ LocatorManager.prototype.find = function(loc)
     return info;
 };
 
-module.exports = LocatorManager;
+module.exports.Ice = {};
+module.exports.Ice.LocatorManager = LocatorManager;

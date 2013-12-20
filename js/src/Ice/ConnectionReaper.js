@@ -28,4 +28,5 @@ ConnectionReaper.prototype.swapConnections = function()
     return connections;
 };
 
-module.exports = ConnectionReaper;
+module.exports.Ice = {};
+module.exports.Ice.ConnectionReaper = ConnectionReaper;

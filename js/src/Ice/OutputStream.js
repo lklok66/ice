@@ -7,8 +7,8 @@
 //
 // **********************************************************************
 
-var BasicStream = require("./BasicStream");
-var LocaEx = require("./LocalException");
+var BasicStream = require("./BasicStream").Ice.BasicStream;
+var MarshalException = require("./LocalException").Ice.MarshalException;
 
 var OutputStream = function(communicator, encoding)
 {
@@ -57,9 +57,6 @@ OutputStream.prototype.writeInt = function(v)
 {
     this._os.writeInt(v);
 };
-
-module.exports = OutputStream;
-
 
 OutputStream.prototype.writeIntSeq = function(v)
 {
@@ -110,7 +107,7 @@ OutputStream.prototype.writeSize = function(sz)
 {
     if(sz < 0)
     {
-        throw new LocaEx.MarshalException();
+        throw new MarshalException();
     }
     this._os.writeSize(sz);
 };
@@ -125,9 +122,14 @@ OutputStream.prototype.writeObject = function(v)
     this._os.writeObject(v);
 };
 
-OutputStream.prototype.writeEnum = function(v, maxValue)
+OutputStream.prototype.writeEnum = function(v)
 {
-    this._os.writeEnum(v, maxValue);
+    this._os.writeEnum(v);
+};
+
+OutputStream.prototype.writeStruct = function(v)
+{
+    this._os.writeStruct(v);
 };
 
 OutputStream.prototype.writeException = function(v)
@@ -245,3 +247,5 @@ OutputStream.prototype.destroy = function()
         this._os = null;
     }
 };
+module.exports.Ice = {};
+module.exports.Ice.OutputStream = OutputStream;

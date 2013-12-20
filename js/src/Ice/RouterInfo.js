@@ -7,13 +7,16 @@
 //
 // **********************************************************************
 
-var ArrayUtil = require("./ArrayUtil");
-var Debug = require("./Debug");
-var Ex = require("./Exception");
-var HashMap = require("./HashMap");
-var Promise = require("./Promise");
+var ArrayUtil = require("./ArrayUtil").Ice.ArrayUtil;
+var Debug = require("./Debug").Ice.Debug;
+var HashMap = require("./HashMap").Ice.HashMap;
+var Promise = require("./Promise").Ice.Promise;
 
-var LocalEx = require("./LocalException").Ice;
+var _merge = require("Ice/Util").merge;
+
+var Ice = {};
+_merge(Ice, require("Ice/LocalException").Ice);
+_merge(Ice, require("Ice/Exception").Ice);
 
 var RouterInfo = function(router)
 {
@@ -83,7 +86,7 @@ RouterInfo.prototype.getClientEndpoints = function()
             },
             function(ex)
             {
-                Debug.assert(ex instanceof Ex.LocalException);
+                Debug.assert(ex instanceof Ice.LocalException);
                 promise.fail(ex);
             });
     }
@@ -107,7 +110,7 @@ RouterInfo.prototype.getServerEndpoints = function()
             },
             function(ex)
             {
-                Debug.assert(ex instanceof Ex.LocalException);
+                Debug.assert(ex instanceof Ice.LocalException);
                 throw ex;
             });
     }
@@ -134,7 +137,7 @@ RouterInfo.prototype.addProxy = function(proxy)
             },
             function(ex)
             {
-                Debug.assert(ex instanceof Ex.LocalException);
+                Debug.assert(ex instanceof Ice.LocalException);
                 throw ex;
             });
     }
@@ -186,7 +189,7 @@ RouterInfo.prototype.setClientEndpoints = function(clientProxy, promise)
                 },
                 function(ex)
                 {
-                    Debug.assert(ex instanceof Ex.LocalException);
+                    Debug.assert(ex instanceof Ice.LocalException);
                     promise.fail(ex);
                 });
         }
@@ -201,7 +204,7 @@ RouterInfo.prototype.setServerEndpoints = function(serverProxy)
 {
     if(serverProxy === null)
     {
-        throw new LocalEx.NoEndpointException();
+        throw new Ice.NoEndpointException();
     }
 
     serverProxy = serverProxy.ice_router(null); // The server proxy cannot be routed.
@@ -240,4 +243,5 @@ RouterInfo.prototype.addAndEvictProxies = function(proxy, evictedProxies)
     }
 };
 
-module.exports = RouterInfo;
+module.exports.Ice = {};
+module.exports.Ice.RouterInfo = RouterInfo;

@@ -81,13 +81,15 @@ private:
     {
     public:
 
-        RequireVisitor(::IceUtilInternal::Output&);
+        RequireVisitor(::IceUtilInternal::Output&, std::vector<std::string>);
 
         virtual bool visitClassDefStart(const ClassDefPtr&);
         virtual bool visitExceptionStart(const ExceptionPtr&);
+        virtual void visitSequence(const SequencePtr&);
+        virtual void visitDictionary(const DictionaryPtr&);
         virtual void visitEnum(const EnumPtr&);
 
-        void writeRequires();
+        std::vector<std::string> writeRequires(const UnitPtr&);
 
     private:
 
@@ -95,6 +97,9 @@ private:
         bool _seenUserException;
         bool _seenLocalException;
         bool _seenEnum;
+        bool _seenObjectSeq;
+        bool _seenObjectDict;
+        std::vector<std::string> _includePaths;
     };
 
     class CompactIdVisitor : public JsVisitor
@@ -112,7 +117,7 @@ private:
     {
     public:
 
-        TypesVisitor(::IceUtilInternal::Output&);
+        TypesVisitor(::IceUtilInternal::Output&, const std::vector<std::string>&);
 
         virtual bool visitModuleStart(const ModulePtr&);
         virtual void visitModuleEnd(const ModulePtr&);
@@ -130,6 +135,8 @@ private:
         void writeMemberHashCode(const std::string&, const TypePtr&, int);
         void writeMemberEquals(const std::string&, const std::string&, const TypePtr&, int);
         void writeMemberClone(const std::string&, const std::string&, const TypePtr&, int);
+        
+        std::vector<std::string> _seenModules;
     };
 
     class ExportVisitor : public JsVisitor
@@ -139,8 +146,15 @@ private:
         ExportVisitor(::IceUtilInternal::Output&);
 
         virtual bool visitModuleStart(const ModulePtr&);
-
-        void writeExports();
+        virtual void visitModuleEnd(const ModulePtr&);
+        virtual bool visitClassDefStart(const ClassDefPtr&);
+        virtual void visitOperation(const OperationPtr&);
+        virtual bool visitExceptionStart(const ExceptionPtr&);
+        virtual bool visitStructStart(const StructPtr&);
+        virtual void visitSequence(const SequencePtr&);
+        virtual void visitDictionary(const DictionaryPtr&);
+        virtual void visitEnum(const EnumPtr&);
+        virtual void visitConst(const ConstPtr&);
 
     private:
 
