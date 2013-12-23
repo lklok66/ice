@@ -27,7 +27,7 @@ var TcpEndpointI = function(instance, ho, po, ti, conId, co)
     this._connectionId = conId;
     this._compress = co;
     this.calcHashValue();
-}
+};
 
 TcpEndpointI.prototype = new Ice.Endpoint();
 TcpEndpointI.prototype.constructor = TcpEndpointI;
@@ -44,7 +44,7 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
     var i = 0;
     while(i < arr.length)
     {
-        if(arr[i].length == 0)
+        if(arr[i].length === 0)
         {
             i++;
             continue;
@@ -71,10 +71,10 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
         {
             case 'h':
             {
-                if(argument == null)
+                if(argument === null)
                 {
-                    throw new Ice.EndpointParseException("no argument provided for -h option in endpoint `tcp "
-                                                             + str + "'");
+                    throw new Ice.EndpointParseException("no argument provided for -h option in endpoint `tcp " +
+                                                         str + "'");
                 }
 
                 host = argument;
@@ -83,10 +83,10 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
 
             case 'p':
             {
-                if(argument == null)
+                if(argument === null)
                 {
-                    throw new Ice.EndpointParseException("no argument provided for -p option in endpoint `tcp "
-                                                             + str + "'");
+                    throw new Ice.EndpointParseException("no argument provided for -p option in endpoint `tcp " +
+                                                         str + "'");
                 }
 
                 try
@@ -96,13 +96,13 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
                 catch(ex)
                 {
                     throw new Ice.EndpointParseException("invalid port value `" + argument +
-                                                             "' in endpoint `tcp " + str + "'");
+                                                         "' in endpoint `tcp " + str + "'");
                 }
 
                 if(port < 0 || port > 65535)
                 {
                     throw new Ice.EndpointParseException("port value `" + argument +
-                                                             "' out of range in endpoint `tcp " + str + "'");
+                                                         "' out of range in endpoint `tcp " + str + "'");
                 }
 
                 break;
@@ -110,10 +110,10 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
 
             case 't':
             {
-                if(argument == null)
+                if(argument === null)
                 {
-                    throw new Ice.EndpointParseException("no argument provided for -t option in endpoint `tcp "
-                                                             + str + "'");
+                    throw new Ice.EndpointParseException("no argument provided for -t option in endpoint `tcp " +
+                                                         str + "'");
                 }
 
                 try
@@ -131,7 +131,7 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
 
             case 'z':
             {
-                if(argument != null)
+                if(argument !== null)
                 {
                     throw new Ice.EndpointParseException("unexpected argument `" + argument +
                                                              "' provided for -z option in `tcp " + str + "'");
@@ -148,7 +148,7 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
         }
     }
 
-    if(host == null)
+    if(host === null)
     {
         host = instance.defaultsAndOverrides().defaultHost;
     }
@@ -164,13 +164,13 @@ TcpEndpointI.fromString = function(instance, str, oaEndpoint)
         }
     }
 
-    if(host == null)
+    if(host === null)
     {
         host = "";
     }
 
-    return new TcpEndpointI(instance, host, port, timeout, "", compress)
-}
+    return new TcpEndpointI(instance, host, port, timeout, "", compress);
+};
 
 TcpEndpointI.fromStream = function(s)
 {
@@ -180,8 +180,8 @@ TcpEndpointI.fromStream = function(s)
     var timeout = s.readInt();
     var compress = s.readBool();
     s.endReadEncaps();
-    return new TcpEndpointI(s.instance(), host, port, timeout, "", compress)
-}
+    return new TcpEndpointI(s.instance(), host, port, timeout, "", compress);
+};
 
 //
 // Convert the endpoint to its string form
@@ -197,7 +197,7 @@ TcpEndpointI.prototype.toString = function()
     //
     var s = "tcp";
 
-    if(this._host != null && this._host.length > 0)
+    if(this._host !== null && this._host.length > 0)
     {
         s += " -h ";
         var addQuote = this._host.indexOf(':') != -1;
@@ -223,7 +223,7 @@ TcpEndpointI.prototype.toString = function()
         s += " -z";
     }
     return s;
-}
+};
 
 //
 // Return the endpoint information.
@@ -231,7 +231,7 @@ TcpEndpointI.prototype.toString = function()
 TcpEndpointI.prototype.getInfo = function()
 {
     return new TCPEndpointInfoI(this._timeout, this._compress, this._host, this._port);
-}
+};
 
 //
 // Marshal the endpoint
@@ -245,7 +245,7 @@ TcpEndpointI.prototype.streamWrite = function(s)
     s.writeInt(this._timeout);
     s.writeBool(this._compress);
     s.endWriteEncaps();
-}
+};
 
 //
 // Return the endpoint type
@@ -253,7 +253,7 @@ TcpEndpointI.prototype.streamWrite = function(s)
 TcpEndpointI.prototype.type = function()
 {
     return Ice.TCPEndpointType;
-}
+};
 
 //
 // Return the timeout for the endpoint in milliseconds. 0 means
@@ -262,7 +262,7 @@ TcpEndpointI.prototype.type = function()
 TcpEndpointI.prototype.timeout = function()
 {
     return this._timeout;
-}
+};
 
 //
 // Return a new endpoint with a different timeout value, provided
@@ -279,7 +279,7 @@ TcpEndpointI.prototype.changeTimeout = function(timeout)
     {
         return new TcpEndpointI(this._instance, this._host, this._port, timeout, this._connectionId, this._compress);
     }
-}
+};
 
 //
 // Return a new endpoint with a different connection id.
@@ -294,7 +294,7 @@ TcpEndpointI.prototype.changeConnectionId = function(connectionId)
     {
         return new TcpEndpointI(this._instance, this._host, this._port, this._timeout, connectionId, this._compress);
     }
-}
+};
 
 //
 // Return true if the endpoints support bzip2 compress, or false
@@ -303,7 +303,7 @@ TcpEndpointI.prototype.changeConnectionId = function(connectionId)
 TcpEndpointI.prototype.compress = function()
 {
     return this._compress;
-}
+};
 
 //
 // Return a new endpoint with a different compression value,
@@ -320,7 +320,7 @@ TcpEndpointI.prototype.changeCompress = function(compress)
     {
         return new TcpEndpointI(this._instance, this._host, this._port, this._timeout, this._connectionId, compress);
     }
-}
+};
 
 //
 // Return true if the endpoint is datagram-based.
@@ -328,7 +328,7 @@ TcpEndpointI.prototype.changeCompress = function(compress)
 TcpEndpointI.prototype.datagram = function()
 {
     return false;
-}
+};
 
 //
 // Return true if the endpoint is secure.
@@ -336,7 +336,7 @@ TcpEndpointI.prototype.datagram = function()
 TcpEndpointI.prototype.secure = function()
 {
     return false;
-}
+};
 
 //
 // Return a server side transceiver for this endpoint, or null if a
@@ -349,7 +349,7 @@ TcpEndpointI.prototype.transceiver = function(endpoint)
 {
     endpoint.value = this;
     return null;
-}
+};
 
 //
 // Return an acceptor for this endpoint, or null if no acceptors
@@ -364,7 +364,7 @@ TcpEndpointI.prototype.acceptor = function(endpoint, adapterName)
     endpoint.value = new TcpEndpointI(this._instance, this._host, p.effectivePort(), this._timeout, this._connectionId,
                                       this._compress);
     return p;
-}
+};
 
 TcpEndpointI.prototype.connect = function()
 {
@@ -375,7 +375,7 @@ TcpEndpointI.prototype.connect = function()
     }
 
     return TcpTransceiver.createOutgoing(this._instance, new Address(this._host, this._port));
-}
+};
 
 //
 // Check whether the endpoint is equivalent to another one.
@@ -386,13 +386,13 @@ TcpEndpointI.prototype.equivalent = function(endpoint)
     {
         return false;
     }
-    return endpoint._host === this._host && endpoint._port === this_port;
-}
+    return endpoint._host === this._host && endpoint._port === this._port;
+};
 
 TcpEndpointI.prototype.hashCode = function()
 {
     return this._hashCode;
-}
+};
 
 //
 // Compare endpoints for sorting purposes
@@ -435,7 +435,7 @@ TcpEndpointI.prototype.equals = function(p)
     }
 
     return true;
-}
+};
 
 TcpEndpointI.prototype.compareTo = function(p)
 {
@@ -494,7 +494,7 @@ TcpEndpointI.prototype.compareTo = function(p)
     {
         return this._host < p._host ? -1 : 1;
     }
-}
+};
 
 TcpEndpointI.prototype.calcHashValue = function()
 {
@@ -506,15 +506,15 @@ TcpEndpointI.prototype.calcHashValue = function()
     h = HashUtil.addString(h, this._connectionId);
     h = HashUtil.addBoolean(h, this._compress);
     this._hashCode = h;
-}
+};
 
 module.exports.Ice = {};
 module.exports.Ice.TcpEndpointI = TcpEndpointI;
 
-var TCPEndpointInfoI = new function(timeout, compress, host, port)
+var TCPEndpointInfoI = function(timeout, compress, host, port)
 {
     Ice.TCPEndpointInfo.call(this, timeout, compress, host, port);
-}
+};
 
 TCPEndpointInfoI.prototype = new Ice.TCPEndpointInfo();
 TCPEndpointInfoI.prototype.constructor = TCPEndpointInfoI;
@@ -522,14 +522,14 @@ TCPEndpointInfoI.prototype.constructor = TCPEndpointInfoI;
 TCPEndpointInfoI.prototype.type = function()
 {
     return Ice.TCPEndpointType;
-}
+};
 
 TCPEndpointInfoI.prototype.datagram = function()
 {
     return false;
-}
+};
 
 TCPEndpointInfoI.prototype.secure = function()
 {
     return false;
-}
+};

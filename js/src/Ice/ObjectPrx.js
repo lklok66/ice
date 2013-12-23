@@ -716,7 +716,7 @@ ObjectPrx.__completed_short = function(__r)
     var __ret;
     try
     {
-        var __ret = __is.readShort();
+        __ret = __is.readShort();
         __r.__endReadParams();
     }
     catch(__ex)

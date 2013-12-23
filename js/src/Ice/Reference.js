@@ -23,12 +23,12 @@ var Identity = require("./Identity").Ice.Identity;
 
 var RouterPrx = require("./Router").Ice.RouterPrx;
 var LocatorPrx = require("./Locator").Ice.LocatorPrx;
-var Ver = require("./Version").Ice.Version;
 
 var _merge = require("Ice/Util").merge;
 
 var Ice = {};
 _merge(Ice, require("./LocalException").Ice);
+_merge(Ice, require("./Version").Ice);
 
 //
 // Only for use by Instance
@@ -573,9 +573,9 @@ ReferenceFactory.prototype.createFromStream = function(ident, s)
     var encoding = null;
     if(!s.getReadEncoding().equals(Protocol.Encoding_1_0))
     {
-        protocol = new Ver.ProtocolVersion();
+        protocol = new Ice.ProtocolVersion();
         protocol.__read(s);
-        encoding = new Ver.EncodingVersion();
+        encoding = new Ice.EncodingVersion();
         encoding.__read(s);
     }
     else

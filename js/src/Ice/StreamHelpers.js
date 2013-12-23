@@ -288,7 +288,7 @@ var ObjectSequenceHelper = function(){};
 
 ObjectSequenceHelper.prototype.read = function(os)
 {
-    var sz = os.readSize();
+    var sz = os.readAndCheckSeqSize(1);
     var v = [];
     v.length = sz;
     var type = this.type;
@@ -338,10 +338,10 @@ StreamHelpers.generateObjectSeqHelper = function(type)
 
 var DictionaryHelper = function(){};
 
-DictionaryHelper.prototype.read = function(os, helpers)
+DictionaryHelper.prototype.read = function(os)
 {
     var v = new HashMap();
-    var sz = this.readSize(1);
+    var sz = os.readSize();
     var keyHelper = this.keyHelper;
     var valueHelper = this.valueHelper;
     for(var i = 0; i < sz; ++i)
@@ -351,7 +351,7 @@ DictionaryHelper.prototype.read = function(os, helpers)
     return v;
 };
 
-DictionaryHelper.prototype.write = function(os, v, helpers)
+DictionaryHelper.prototype.write = function(os, v)
 {
     if(v === null || v.size === 0)
     {

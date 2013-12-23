@@ -51,7 +51,7 @@ var ConnectionI = function(communicator, instance, reaper, transceiver, endpoint
     var initData = instance.initializationData();
     this._logger = initData.logger; // Cached for better performance.
     this._traceLevels = instance.traceLevels(); // Cached for better performance.
-    this_timer = instance.timer();
+    this._timer = instance.timer();
     this._writeTimeoutId = 0;
     this._writeTimeoutScheduled = false;
     this._readTimeoutId = 0;
@@ -611,9 +611,10 @@ ConnectionI.prototype.flushAsyncBatchRequests = function(outAsync)
         throw this._exception;
     }
 
+    var status;
     if(this._batchRequestNum === 0)
     {
-        var status = AsyncStatus.Sent;
+        status = AsyncStatus.Sent;
         if(!outAsync.__sent(this))
         {
             status |= AsyncStatus.InvokeSentCallback;
@@ -629,7 +630,7 @@ ConnectionI.prototype.flushAsyncBatchRequests = function(outAsync)
 
     this._batchStream.swap(outAsync.__os());
 
-    var status;
+    
     try
     {
         status = this.sendMessage(OutgoingMessage.create(outAsync, outAsync.__os(), this._batchRequestCompress, 0));
@@ -792,10 +793,10 @@ ConnectionI.prototype.message = function(operation)
         return;
     }
 
-    if((operation & SocketOperation.Write) != 0)
+    if((operation & SocketOperation.Write) !== 0)
     {
         // TODO: Anything to do here?
-        Debug.assert(this._writeStream.buffer.remaining == 0);
+        Debug.assert(this._writeStream.buffer.remaining === 0);
     }
 
     //
@@ -808,7 +809,7 @@ ConnectionI.prototype.message = function(operation)
 
         try
         {
-            if((operation & SocketOperation.Read) != 0 && !this._readStream.isEmpty())
+            if((operation & SocketOperation.Read) !== 0 && !this._readStream.isEmpty())
             {
                 if(this._readHeader) // Read header if necessary.
                 {
@@ -1038,7 +1039,7 @@ ConnectionI.prototype.dispatch = function(info)
 
     if(info !== null)
     {
-        if(info.outAsync != null)
+        if(info.outAsync !== null)
         {
             info.outAsync.__finished(info.stream);
         }
@@ -1125,7 +1126,7 @@ ConnectionI.prototype.finish = function()
         this._sendStreams = [];
     }
 
-    for(var e = this._asyncRequests.entries; e != null; e = e.next)
+    for(var e = this._asyncRequests.entries; e !== null; e = e.next)
     {
         e.value.__finishedEx(this._exception, true);
     }
@@ -1609,7 +1610,7 @@ ConnectionI.prototype.sendNextMessage = function()
             //
             // If there's nothing left to send, we're done.
             //
-            if(this._sendStreams.length == 0)
+            if(this._sendStreams.length === 0)
             {
                 break;
             }
@@ -1638,7 +1639,7 @@ ConnectionI.prototype.sendNextMessage = function()
             stream.prepareWrite();
             message.prepared = true;
 
-            if(message.outAsync != null)
+            if(message.outAsync !== null)
             {
                 TraceUtil.trace("sending asynchronous request", stream, this._logger, this._traceLevels);
             }
@@ -2013,9 +2014,10 @@ ConnectionI.prototype.checkState = function()
         return;
     }
 
+    var i;
     if(this._holdPromises.length > 0)
     {
-        for(var i = 0; i < this._holdPromises.length; ++i)
+        for(i = 0; i < this._holdPromises.length; ++i)
         {
             this._holdPromises[i].succeed();
         }
@@ -2035,7 +2037,7 @@ ConnectionI.prototype.checkState = function()
         //
         this._adapter = null;
 
-        for(var i = 0; i < this._finishedPromises.length; ++i)
+        for(i = 0; i < this._finishedPromises.length; ++i)
         {
             this._finishedPromises[i].succeed();
         }

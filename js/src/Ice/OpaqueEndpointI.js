@@ -21,7 +21,7 @@ _merge(Ice, require("./LocalException").Ice);
 
 var OpaqueEndpointI = function()
 {
-}
+};
 
 OpaqueEndpointI.prototype = new Ice.Endpoint();
 OpaqueEndpointI.prototype.constructor = OpaqueEndpointI;
@@ -39,7 +39,7 @@ OpaqueEndpointI.fromString = function(str)
     var i = 0;
     while(i < arr.length)
     {
-        if(arr[i].length == 0)
+        if(arr[i].length === 0)
         {
             i++;
             continue;
@@ -49,7 +49,7 @@ OpaqueEndpointI.fromString = function(str)
         if(option.length != 2 && option.charAt(0) != '-')
         {
             throw new Ice.EndpointParseException("expected an endpoint option but found `" + option +
-                                                     "' in endpoint `opaque " + str + "'");
+                                                 "' in endpoint `opaque " + str + "'");
         }
 
         var argument = null;
@@ -64,8 +64,8 @@ OpaqueEndpointI.fromString = function(str)
             {
                 if(argument === null)
                 {
-                    throw new Ice.EndpointParseException("no argument provided for -t option in endpoint `opaque "
-                                                             + str + "'");
+                    throw new Ice.EndpointParseException("no argument provided for -t option in endpoint `opaque " +
+                                                         str + "'");
                 }
 
                 var type;
@@ -77,13 +77,13 @@ OpaqueEndpointI.fromString = function(str)
                 catch(ex)
                 {
                     throw new Ice.EndpointParseException("invalid type value `" + argument +
-                                                             "' in endpoint `opaque " + str + "'");
+                                                         "' in endpoint `opaque " + str + "'");
                 }
 
                 if(type < 0 || type > 65535)
                 {
                     throw new Ice.EndpointParseException("type value `" + argument +
-                                                             "' out of range in endpoint `opaque " + str + "'");
+                                                         "' out of range in endpoint `opaque " + str + "'");
                 }
 
                 result._type = type;
@@ -99,16 +99,16 @@ OpaqueEndpointI.fromString = function(str)
             {
                 if(argument === null || argument.length === 0)
                 {
-                    throw new Ice.EndpointParseException("no argument provided for -v option in endpoint `opaque "
-                                                             + str + "'");
+                    throw new Ice.EndpointParseException("no argument provided for -v option in endpoint `opaque " +
+                                                         str + "'");
                 }
                 for(var j = 0; j < argument.length; ++j)
                 {
                     if(!Base64.isBase64(argument.charAt(j)))
                     {
                         throw new Ice.EndpointParseException("invalid base64 character `" + argument.charAt(j) +
-                                                                 "' (ordinal " + argument.charCodeAt(j) +
-                                                                 ") in endpoint `opaque " + str + "'");
+                                                             "' (ordinal " + argument.charCodeAt(j) +
+                                                             ") in endpoint `opaque " + str + "'");
                     }
                 }
                 result._rawBytes = Base64.decode(argument);
@@ -124,8 +124,8 @@ OpaqueEndpointI.fromString = function(str)
             {
                 if(argument === null)
                 {
-                    throw new Ice.EndpointParseException("no argument provided for -e option in endpoint `opaque "
-                                                             + str + "'");
+                    throw new Ice.EndpointParseException("no argument provided for -e option in endpoint `opaque " +
+                                                         str + "'");
                 }
                 try
                 {
@@ -134,7 +134,7 @@ OpaqueEndpointI.fromString = function(str)
                 catch(e)
                 {
                     throw new Ice.EndpointParseException("invalid encoding version `" + argument +
-                                                             "' in endpoint `opaque " + str + "':\n" + e.str);
+                                                         "' in endpoint `opaque " + str + "':\n" + e.str);
                 }
                 break;
             }
@@ -157,7 +157,7 @@ OpaqueEndpointI.fromString = function(str)
     }
     result.calcHashValue();
     return result;
-}
+};
 
 OpaqueEndpointI.fromStream = function(type, s)
 {
@@ -169,7 +169,7 @@ OpaqueEndpointI.fromStream = function(type, s)
     s.endReadEncaps();
     result.calcHashValue();
     return result;
-}
+};
 
 //
 // Marshal the endpoint
@@ -180,7 +180,7 @@ OpaqueEndpointI.prototype.streamWrite = function(s)
     s.startWriteEncaps(this._rawEncoding, DefaultFormat); // TODO
     s.writeBlob(this._rawBytes);
     s.endWriteEncaps();
-}
+};
 
 //
 // Convert the endpoint to its string form
@@ -189,7 +189,7 @@ OpaqueEndpointI.prototype.toString = function()
 {
     var val = Base64.encode(this._rawBytes);
     return "opaque -t " + this._type + " - e " + Protocol.encodingVersionToString(this._rawEncoding) + " -v " + val;
-}
+};
 
 //
 // Return the endpoint information.
@@ -197,7 +197,7 @@ OpaqueEndpointI.prototype.toString = function()
 OpaqueEndpointI.prototype.getInfo = function()
 {
     return new OpaqueEndpointInfoI(-1, false, this._rawEncoding, this._rawBytes, this._type);
-}
+};
 
 //
 // Return the endpoint type
@@ -205,12 +205,12 @@ OpaqueEndpointI.prototype.getInfo = function()
 OpaqueEndpointI.prototype.type = function()
 {
     return this._type;
-}
+};
 
 OpaqueEndpointI.prototype.protocol = function()
 {
     return "opaque";
-}
+};
 
 //
 // Return the timeout for the endpoint in milliseconds. 0 means
@@ -219,7 +219,7 @@ OpaqueEndpointI.prototype.protocol = function()
 OpaqueEndpointI.prototype.timeout = function()
 {
     return -1;
-}
+};
 
 //
 // Return a new endpoint with a different timeout value, provided
@@ -229,7 +229,7 @@ OpaqueEndpointI.prototype.timeout = function()
 OpaqueEndpointI.prototype.changeTimeout = function(t)
 {
     return this;
-}
+};
 
 //
 // Return a new endpoint with a different connection id.
@@ -237,7 +237,7 @@ OpaqueEndpointI.prototype.changeTimeout = function(t)
 OpaqueEndpointI.prototype.changeConnectionId = function(connectionId)
 {
     return this;
-}
+};
 
 //
 // Return true if the endpoints support bzip2 compress, or false
@@ -246,7 +246,7 @@ OpaqueEndpointI.prototype.changeConnectionId = function(connectionId)
 OpaqueEndpointI.prototype.compress = function()
 {
     return false;
-}
+};
 
 //
 // Return a new endpoint with a different compression value,
@@ -256,7 +256,7 @@ OpaqueEndpointI.prototype.compress = function()
 OpaqueEndpointI.prototype.changeCompress = function(compress)
 {
     return this;
-}
+};
 
 //
 // Return true if the endpoint is datagram-based.
@@ -264,7 +264,7 @@ OpaqueEndpointI.prototype.changeCompress = function(compress)
 OpaqueEndpointI.prototype.datagram = function()
 {
     return false;
-}
+};
 
 //
 // Return true if the endpoint is secure.
@@ -272,7 +272,7 @@ OpaqueEndpointI.prototype.datagram = function()
 OpaqueEndpointI.prototype.secure = function()
 {
     return false;
-}
+};
 
 //
 // Get the encoded endpoint.
@@ -280,7 +280,7 @@ OpaqueEndpointI.prototype.secure = function()
 OpaqueEndpointI.prototype.rawBytes = function()
 {
     return this._rawBytes; // Returns a Uint8Array
-}
+};
 
 //
 // Return a server side transceiver for this endpoint, or null if a
@@ -293,7 +293,7 @@ OpaqueEndpointI.prototype.transceiver = function(endpoint)
 {
     endpoint.value = null;
     return null;
-}
+};
 
 //
 // Return an acceptor for this endpoint, or null if no acceptors
@@ -306,12 +306,12 @@ OpaqueEndpointI.prototype.acceptor = function(endpoint, adapterName)
 {
     endpoint.value = this;
     return null;
-}
+};
 
 OpaqueEndpointI.prototype.connect = function()
 {
     return null;
-}
+};
 
 //
 // Check whether the endpoint is equivalent to another one.
@@ -319,12 +319,12 @@ OpaqueEndpointI.prototype.connect = function()
 OpaqueEndpointI.prototype.equivalent = function(endpoint)
 {
     return false;
-}
+};
 
 OpaqueEndpointI.prototype.hashCode = function()
 {
     return this._hashCode;
-}
+};
 
 //
 // Compare endpoints for sorting purposes
@@ -364,7 +364,7 @@ OpaqueEndpointI.prototype.equals = function(p)
     }
 
     return true;
-}
+};
 
 OpaqueEndpointI.prototype.compareTo = function(p)
 {
@@ -431,7 +431,7 @@ OpaqueEndpointI.prototype.compareTo = function(p)
     }
 
     return 0;
-}
+};
 
 OpaqueEndpointI.prototype.calcHashValue = function()
 {
@@ -440,7 +440,7 @@ OpaqueEndpointI.prototype.calcHashValue = function()
     h = HashUtil.addHashable(h, this._rawEncoding);
     h = HashUtil.addNumberArray(h, this._rawBytes);
     this._hashCode = h;
-}
+};
 
 module.exports.Ice = {};
 module.exports.Ice.OpaqueEndpointI = OpaqueEndpointI;
@@ -449,7 +449,7 @@ var OpaqueEndpointInfoI = function(timeout, compress, rawEncoding, rawBytes, typ
 {
     Ice.OpaqueEndpointInfo.call(this, -1, false, rawEncoding, rawBytes);
     this._type = type;
-}
+};
 
 OpaqueEndpointInfoI.prototype = new Ice.OpaqueEndpointInfo();
 OpaqueEndpointInfoI.prototype.constructor = OpaqueEndpointInfoI();
@@ -457,14 +457,14 @@ OpaqueEndpointInfoI.prototype.constructor = OpaqueEndpointInfoI();
 OpaqueEndpointInfoI.prototype.type = function()
 {
     return this._type;
-}
+};
 
 OpaqueEndpointInfoI.prototype.datagram = function()
 {
     return false;
-}
+};
 
 OpaqueEndpointInfoI.prototype.secure = function()
 {
     return false;
-}
+};

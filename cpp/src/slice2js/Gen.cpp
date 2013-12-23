@@ -1831,9 +1831,11 @@ Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
     const string scope = getLocalScope(p->scope());
     const string name = fixId(p->name());
     const string propertyName = name + "Helper";
-    const string helperName = scope + ".__" + propertyName;
+    string propertyPrefix = scope;
+    std::replace(propertyPrefix.begin(), propertyPrefix.end(), '.', '_');
+    const string helperName = "__" + propertyPrefix + "_" + propertyName;
     _out << nl;
-    _out << nl << helperName << " = null;";
+    _out << nl << "var " << helperName << " = null;";
     _out << nl << "Object.defineProperty(" << scope << ", \"" << propertyName << "\", ";
     _out << sb;
     _out << nl << "get: function()";
@@ -1901,9 +1903,14 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     }
 
     vector<string> paramNames;
+    bool hasClassMembers = false;
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
         paramNames.push_back(fixId((*q)->name()));
+        if(!hasClassMembers && ClassDeclPtr::dynamicCast((*q)->type()))
+        {
+            hasClassMembers = true;
+        }
     }
 
     vector<string> baseParamNames;
@@ -1971,6 +1978,51 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     _out << eb << ";";
 
     // TODO: equals?
+    
+    if(!p->isLocal())
+    {
+        _out << sp;
+        _out << nl << localScope << '.' << name << ".prototype.__writeImpl = function(__os)";
+        _out << sb;
+        _out << nl << "__os.startWriteSlice(\"" << p->scoped() << "\", -1, " << (!base ? "true" : "false") << ");"; 
+        for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+        {
+            writeMarshalDataMember(*q);
+        }
+        _out << nl << "__os.endWriteSlice();";
+        if(base)
+        {
+            _out << nl << baseRef << ".prototype.__writeImpl.call(this, __os);";
+        }
+        _out << eb << ";";
+
+        _out << sp;
+        _out << nl << localScope << '.' << name << ".prototype.__readImpl = function(__is)";
+        _out << sb;
+        _out << nl << "__is.startReadSlice();";
+        if(hasClassMembers)
+        {
+            _out << nl << "var self = this;";
+        }
+        for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+        {
+            writeUnmarshalDataMember(*q);
+        }
+        _out << nl << "__is.endReadSlice();";
+        if(base)
+        {
+            _out << nl << baseRef << ".prototype.__readImpl.call(this, __is);";
+        }
+        _out << eb << ";";
+        
+        //
+        // Register the class prototype in the ClassRegistry
+        //
+        _out << nl;
+        _out << nl << "Ice.ExceptionRegistry.register(\"" << p->scoped()  << "\", " 
+             << localScope << "." << name << ");";
+        _out << nl;
+    }
 
     return false;
 }
@@ -2116,10 +2168,12 @@ Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
     const string scope = getLocalScope(p->scope());
     const string name = fixId(p->name());
     const string propertyName = name + "Helper";
-    const string helperName = scope + ".__" + propertyName;
-
+    string propertyPrefix = scope;
+    std::replace(propertyPrefix.begin(), propertyPrefix.end(), '.', '_');
+    const string helperName = "__" + propertyPrefix + "_" + propertyName;
+    
     _out << nl;
-    _out << nl << helperName << " = null;";
+    _out << nl << "var " << helperName << " = null;";
     _out << nl << "Object.defineProperty(" << scope << ", \"" << propertyName << "\", ";
     _out << sb;
     _out << nl << "get: function()";

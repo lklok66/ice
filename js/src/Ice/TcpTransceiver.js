@@ -14,6 +14,7 @@ var ExUtil = require("./ExUtil").Ice.ExUtil;
 var Network = require("./Network").Ice.Network;
 var SocketOperation = require("./SocketOperation").Ice.SocketOperation;
 var Conn = require("./Connection").Ice.Connection;
+var LocalException = require("./Exception").Ice.LocalException;
 var SocketException = require("./LocalException").Ice.SocketException;
 
 var StateNeedConnect = 0;
@@ -30,7 +31,7 @@ var TcpTransceiver = function(instance)
     this._logger = instance.initializationData().logger;
     this._readBuffers = [];
     this._readPosition = 0;
-}
+};
 
 TcpTransceiver.createOutgoing = function(instance, addr)
 {
@@ -44,7 +45,7 @@ TcpTransceiver.createOutgoing = function(instance, addr)
     transceiver._state = StateNeedConnect;
 
     return transceiver;
-}
+};
 
 TcpTransceiver.createIncoming = function(instance, fd)
 {
@@ -58,7 +59,7 @@ TcpTransceiver.createIncoming = function(instance, fd)
     transceiver._state = StateConnected;
 
     return transceiver;
-}
+};
 
 TcpTransceiver.prototype.setCallbacks = function(
     connectedCallback,      // function()
@@ -83,7 +84,7 @@ TcpTransceiver.prototype.setCallbacks = function(
     // Don't register for incoming data right away.
     //
     //this._fd.on("data", function(buf) { self.socketBytesAvailable(buf); });
-}
+};
 
 //
 // Returns SocketOperation.None when initialization is complete.
@@ -176,7 +177,7 @@ TcpTransceiver.prototype.initialize = function(readBuffer, writeBuffer)
     }
     catch(ex)
     {
-        if(ex instanceof Ex.LocalException)
+        if(ex instanceof LocalException)
         {
             if(this._traceLevels.network >= 2)
             {
@@ -197,7 +198,7 @@ TcpTransceiver.prototype.initialize = function(readBuffer, writeBuffer)
     }
 
     return SocketOperation.None;
-}
+};
 
 TcpTransceiver.prototype.register = function()
 {
@@ -206,7 +207,7 @@ TcpTransceiver.prototype.register = function()
     //
     var self = this;
     this._fd.on("data", function(buf) { self.socketBytesAvailable(buf); });
-}
+};
 
 TcpTransceiver.prototype.unregister = function()
 {
@@ -214,7 +215,7 @@ TcpTransceiver.prototype.unregister = function()
     // Unregister the socket data listener.
     //
     this._fd.removeAllListeners("data");
-}
+};
 
 TcpTransceiver.prototype.close = function()
 {
@@ -236,7 +237,7 @@ TcpTransceiver.prototype.close = function()
     {
         this._fd = null;
     }
-}
+};
 
 //
 // Returns true if all of the data was flushed to the kernel buffer.
@@ -269,7 +270,7 @@ TcpTransceiver.prototype.write = function(byteBuffer)
             });
 
     return sync;
-}
+};
 
 TcpTransceiver.prototype.read = function(byteBuffer, moreData)
 {
@@ -323,12 +324,12 @@ TcpTransceiver.prototype.read = function(byteBuffer, moreData)
     moreData.value = this._readBuffers.length > 0;
 
     return byteBuffer.remaining === 0;
-}
+};
 
 TcpTransceiver.prototype.type = function()
 {
     return "tcp";
-}
+};
 
 TcpTransceiver.prototype.getInfo = function()
 {
@@ -339,12 +340,12 @@ TcpTransceiver.prototype.getInfo = function()
     info.remoteAddress = this._fd.remoteAddress;
     info.remotePort = this._fd.remotePort;
     return info;
-}
+};
 
 TcpTransceiver.prototype.createInfo = function()
 {
     return new Conn.TCPConnectionInfo();
-}
+};
 
 TcpTransceiver.prototype.checkSendSize = function(stream, messageSizeMax)
 {
@@ -352,12 +353,12 @@ TcpTransceiver.prototype.checkSendSize = function(stream, messageSizeMax)
     {
         ExUtil.throwMemoryLimitException(stream.size, messageSizeMax);
     }
-}
+};
 
 TcpTransceiver.prototype.toString = function()
 {
     return this._desc;
-}
+};
 
 TcpTransceiver.prototype.socketConnected = function()
 {
@@ -371,7 +372,7 @@ TcpTransceiver.prototype.socketConnected = function()
 
     Debug.assert(this._connectedCallback !== null);
     this._connectedCallback();
-}
+};
 
 TcpTransceiver.prototype.socketBytesAvailable = function(buf)
 {
@@ -385,7 +386,7 @@ TcpTransceiver.prototype.socketBytesAvailable = function(buf)
         this._readBuffers.push(buf);
         this._bytesAvailableCallback();
     }
-}
+};
 
 TcpTransceiver.prototype.socketBytesWritten = function(n, sync)
 {
@@ -403,7 +404,7 @@ TcpTransceiver.prototype.socketBytesWritten = function(n, sync)
         Debug.assert(this._bytesWrittenCallback !== null);
         this._bytesWrittenCallback();
     }
-}
+};
 
 TcpTransceiver.prototype.socketClosed = function(err)
 {
@@ -416,13 +417,13 @@ TcpTransceiver.prototype.socketClosed = function(err)
         Debug.assert(this._closedCallback !== null);
         this._closedCallback();
     }
-}
+};
 
 TcpTransceiver.prototype.socketError = function(err)
 {
     Debug.assert(this._errorCallback !== null);
     this._errorCallback(translateError(err));
-}
+};
 
 function fdToString(fd, proxy, targetAddr)
 {

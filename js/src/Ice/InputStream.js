@@ -153,7 +153,7 @@ InputStream.prototype.readStruct = function(type)
 
 InputStream.prototype.throwException = function()
 {
-    this._is.throwException();
+    this._is.throwException(null);
 };
 
 InputStream.prototype.startObject = function()

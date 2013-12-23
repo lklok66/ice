@@ -68,4 +68,18 @@ UserException.prototype.ice_name = function()
     return "Ice::UserException";
 };
 
+UserException.prototype.__write = function(os)
+{
+    os.startWriteException(null);
+    this.__writeImpl(os);
+    os.endWriteException();
+};
+
+UserException.prototype.__read = function(is)
+{
+    is.startReadException();
+    this.__readImpl(is);
+    is.endReadException(false);
+};
+
 module.exports.Ice.UserException = UserException;

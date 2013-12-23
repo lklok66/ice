@@ -19,6 +19,11 @@ var Long = function(high, low)
     this.low = low;
 };
 
+Long.prototype.hashCode = function()
+{
+    return this.low;
+};
+
 Long.prototype.equals = function(rhs)
 {
     if(this === rhs)
@@ -31,6 +36,11 @@ Long.prototype.equals = function(rhs)
     }
     
     return this.high === rhs.high && this.low == rhs.low;
+};
+
+Long.prototype.toString = function()
+{
+    return this.high + ":" + this.low;
 };
 
 module.exports.Ice = {};

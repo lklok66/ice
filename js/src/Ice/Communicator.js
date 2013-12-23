@@ -86,8 +86,7 @@ Communicator.prototype.identityToString = function(ident)
 
 Communicator.prototype.addObjectFactory = function(factory, id)
 {
-    // TODO
-    //this._instance.servantFactoryManager().add(factory, id);
+    this._instance.servantFactoryManager().add(factory, id);
 };
 
 Communicator.prototype.findObjectFactory = function(id)

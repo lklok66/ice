@@ -15,16 +15,42 @@ var os;
 var data;
 StreamTest = {}
 
-var comm = Ice.initialize();
-
 function test(v)
 {
     Debug.assert(v);
 }
 
-StreamTest.run = function(){
+var MyInterfaceI = function()
+{
+};
+
+MyInterfaceI.prototype = new Test.MyInterface();
+MyInterfaceI.constructor = MyInterfaceI;
+
+var MyInterfaceFactory = function()
+{
+};
+
+MyInterfaceFactory.prototype = new Ice.ObjectFactory();
+MyInterfaceFactory.constructor = MyInterfaceFactory;
+
+MyInterfaceFactory.prototype.create = function(type)
+{
+    test(type == Test.MyInterface.ice_staticId());
+    return new MyInterfaceI();
+}
+
+MyInterfaceFactory.prototype.destroy = function()
+{
+};
+
+StreamTest.run = function()
+{
+    var comm = Ice.initialize();
     try
     {
+        comm.addObjectFactory(new MyInterfaceFactory(), Test.MyInterface.ice_staticId());
+        
         process.stdout.write("testing primitive types... ");
         (function()
         {
@@ -659,20 +685,157 @@ StreamTest.run = function(){
             is.destroy();
         }());
         
-        /*os = new OutputStream(comm);
-        os.writeObject(new Test.Derived(1, 2, 3, 4));
-        os.writePendingObjects();
-        data = os.finished();
-        is = new InputStream(comm, data, true);
+        (function()
+        {
+            var i = new MyInterfaceI();
+            var os = new OutputStream(comm);
+            os.writeObject(i);
+            os.writePendingObjects();
+            var data = os.finished();
+            is = new InputStream(comm, data, true);
+            var j = null;
+            is.readObject(function(obj){ j = obj; }, Test.MyInterface);
+            is.readPendingObjects();
+            Debug.assert(j !== null);
+        }());
         
-        o2 = null;
-        is.readObject(function(obj) { o2 = obj;}, Test.Derived );
-        is.readPendingObjects();
+        (function()
+        {
+            var os = new OutputStream(comm);
+            var ex = new Test.MyException();
+
+            var c = new Test.MyClass();
+            c.c = c;
+            c.o = c;
+            c.s = new Test.SmallStruct();
+            c.s.e = Test.MyEnum.enum2;
+            c.seq1 = [true, false, true, false];
+            c.seq2 = [1, 2, 3, 4];
+            c.seq3 = [1, 2, 3, 4];
+            c.seq4 = [1, 2, 3, 4];
+            c.seq5 = [new Ice.Long(0, 1), new Ice.Long(0, 2), new Ice.Long(0, 3), new Ice.Long(0, 4)];
+            c.seq6 = [1, 2, 3, 4];
+            c.seq7 = [1, 2, 3, 4];
+            c.seq8 = ["string1", "string2", "string3", "string4"];
+            c.seq9 = [Test.MyEnum.enum3, Test.MyEnum.enum2, Test.MyEnum.enum1];
+            c.seq10 = [null, null, null, null]; // null elements.
+            c.d = new Ice.HashMap(); // HashMap<String, MyClass>
+            c.d.set("hi", c);
+
+            ex.c = c;
         
-        Debug.assert(o2.a === 1);
-        Debug.assert(o2.b === 2);
-        Debug.assert(o2.c === 3);
-        Debug.assert(o2.d === 4);*/
+            os.writeException(ex);
+            var data = os.finished();
+ 
+            var is = new InputStream(comm, data, true);
+            try
+            {
+                is.throwException();
+                test(false);
+            }
+            catch(ex1)
+            {
+                test(ex instanceof Test.MyException);
+                test(ex1.c.s.e == c.s.e);
+                test(ArrayUtil.equals(ex1.c.seq1, c.seq1));
+                test(ArrayUtil.equals(ex1.c.seq2, c.seq2));
+                test(ArrayUtil.equals(ex1.c.seq3, c.seq3));
+                test(ArrayUtil.equals(ex1.c.seq4, c.seq4));
+                test(ArrayUtil.equals(ex1.c.seq5, c.seq5, function(v1, v2){ return v1.equals(v2); }));
+                test(ArrayUtil.equals(ex1.c.seq6, c.seq6));
+                test(ArrayUtil.equals(ex1.c.seq7, c.seq7));
+                test(ArrayUtil.equals(ex1.c.seq8, c.seq8));
+                test(ArrayUtil.equals(ex1.c.seq9, c.seq9));
+            }
+        }());
+        
+        (function()
+        {
+            var dict = new Ice.HashMap(); //HashMap<Byte, Boolean>();
+            dict.set(4, true);
+            dict.set(1, false);
+            var os = new OutputStream(comm);
+            Test.ByteBoolDHelper.write(os, dict);
+            var data = os.finished();
+            var is = new InputStream(comm, data, true);
+            var dict2 = Test.ByteBoolDHelper.read(is);
+            test(dict2.equals(dict));
+        }());
+
+        (function()
+        {
+            var dict = new Ice.HashMap(); //HashMap<Short, Integer>();
+            dict.set(1, 9);
+            dict.set(4, 8);
+            var os = new OutputStream(comm);
+            Test.ShortIntDHelper.write(os, dict);
+            var data = os.finished();
+            var is = new InputStream(comm, data, true);
+            var dict2 = Test.ShortIntDHelper.read(is);
+            test(dict2.equals(dict));
+        }());
+
+
+        (function()
+        {
+            var comparator = function(v1, v2){
+                if(v1 instanceof Ice.Long)
+                {
+                    return v1.equals(v2);
+                }
+                else
+                {
+                    return Math.round(v1 * 100) === Math.round(v2 * 100);
+                }
+            };
+            var dict = new Ice.HashMap(); // HashMap<Long, Float>();
+            dict.comparator = comparator;
+            dict.set(new Ice.Long(0, 123809828), 0.51);
+            dict.set(new Ice.Long(0, 123809829), 0.56);
+            var os = new OutputStream(comm);
+            Test.LongFloatDHelper.write(os, dict);
+            var data = os.finished();
+            var is = new InputStream(comm, data, true);
+            var dict2 = Test.LongFloatDHelper.read(is);
+            dict2.comparator = comparator;
+            test(dict2.equals(dict));
+        }());
+
+        (function()
+        {
+            var dict = new Ice.HashMap(); // HashMap<String, String>();
+            dict.set("key1", "value1");
+            dict.set("key2", "value2");
+            var os = new OutputStream(comm);
+            Test.StringStringDHelper.write(os, dict);
+            var data = os.finished();
+            var is = new InputStream(comm, data, true);
+            var dict2 = Test.StringStringDHelper.read(is);
+            test(dict2.equals(dict));
+        }());
+
+        (function()
+        {
+            var dict = new Ice.HashMap(); // HashMap<String, MyClass>();
+            var c = new Test.MyClass();
+            c.s = new Test.SmallStruct();
+            c.s.e = Test.MyEnum.enum2;
+            dict.set("key1", c);
+            c = new Test.MyClass();
+            c.s = new Test.SmallStruct();
+            c.s.e = Test.MyEnum.enum3;
+            dict.set("key2", c);
+            var os = new OutputStream(comm);
+            Test.StringMyClassDHelper.write(os, dict);
+            os.writePendingObjects();
+            var data = os.finished();
+            var is = new InputStream(comm, data, true);
+            var dict2 = Test.StringMyClassDHelper.read(is);
+            is.readPendingObjects();
+            test(dict2.size === dict.size);
+            test(dict2.get("key1").s.e == Test.MyEnum.enum2);
+            test(dict2.get("key2").s.e == Test.MyEnum.enum3);
+        }());
         
         console.log("ok");
     }

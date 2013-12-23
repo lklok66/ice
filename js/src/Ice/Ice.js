@@ -30,6 +30,7 @@ _merge(Ice, require("./EndpointTypes").Ice);
 _merge(Ice, require("./Locator").Ice);
 _merge(Ice, require("./Router").Ice);
 _merge(Ice, require("./Version").Ice);
+_merge(Ice, require("./ObjectFactory").Ice);
 
 var Protocol = require("./Protocol").Ice.Protocol;
 
