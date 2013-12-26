@@ -23,7 +23,7 @@
         {
             for(var e = this._table.entries; e !== null; e = e.next)
             {
-                e.destroy();
+                e.value.destroy();
             }
             this._table.clear();
         };
