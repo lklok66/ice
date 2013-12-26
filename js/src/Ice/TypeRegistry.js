@@ -7,25 +7,30 @@
 //
 // **********************************************************************
 
-var HashMap = require("./HashMap").Ice.HashMap;
+(function(module, name){
+    var __m = function(module, exports, require){
+        var HashMap = require("Ice/HashMap").Ice.HashMap;
 
-function TypeRegistry()
-{
-    var __TypeRegistry__ = new HashMap();
-    
-    var register = function(typeId, type)
-    {
-        __TypeRegistry__.set(typeId, type);
-    };
-    
-    var find = function(typeId)
-    {
-        return __TypeRegistry__.get(typeId);
-    };
-    
-    return {register: register, find: find};
-}
+        function TypeRegistry()
+        {
+            var __TypeRegistry__ = new HashMap();
+            
+            var register = function(typeId, type)
+            {
+                __TypeRegistry__.set(typeId, type);
+            };
+            
+            var find = function(typeId)
+            {
+                return __TypeRegistry__.get(typeId);
+            };
+            
+            return {register: register, find: find};
+        }
 
-module.exports.Ice = {};
-module.exports.Ice.ClassRegistry = TypeRegistry();
-module.exports.Ice.ExceptionRegistry = TypeRegistry();
+        module.exports.Ice = module.exports.Ice || {};
+        module.exports.Ice.ClassRegistry = TypeRegistry();
+        module.exports.Ice.ExceptionRegistry = TypeRegistry();
+    };
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+}(typeof module !== "undefined" ? module : undefined, "Ice/TypeRegistry"));

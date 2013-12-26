@@ -7,112 +7,117 @@
 //
 // **********************************************************************
 
-var HashMap = require("./HashMap").Ice.HashMap;
-var TimeUtil = require("./TimeUtil").Ice.TimeUtil;
-var CommunicatorDestroyedException = require("./LocalException").Ice.CommunicatorDestroyedException;
+(function(module, name){
+    var __m = function(module, exports, require){
+        var HashMap = require("Ice/HashMap").Ice.HashMap;
+        var TimeUtil = require("Ice/TimeUtil").Ice.TimeUtil;
+        var CommunicatorDestroyedException = require("Ice/LocalException").Ice.CommunicatorDestroyedException;
 
-var Timer = function(instance)
-{
-    this._instance = instance;
-    this._destroyed = false;
-    this._tokenId = 0;
-    this._tokens = new HashMap();
-}
+        var Timer = function(instance)
+        {
+            this._instance = instance;
+            this._destroyed = false;
+            this._tokenId = 0;
+            this._tokens = new HashMap();
+        }
 
-Timer.prototype.destroy = function()
-{
-    this._destroyed = true;
-    this._tokens.clear();
-}
+        Timer.prototype.destroy = function()
+        {
+            this._destroyed = true;
+            this._tokens.clear();
+        }
 
-Timer.prototype.schedule = function(callback, delay)
-{
-    if(this._destroyed)
-    {
-        throw new CommunicatorDestroyedException();
-    }
+        Timer.prototype.schedule = function(callback, delay)
+        {
+            if(this._destroyed)
+            {
+                throw new CommunicatorDestroyedException();
+            }
 
-    var token = this._tokenId++;
-    var self = this;
+            var token = this._tokenId++;
+            var self = this;
 
-    // TODO: Need portability fixes for browsers?
-    var id = setTimeout(function() { self.handleTimeout(token); }, delay);
-    this._tokens.set(token, { callback: callback, id: id, isInterval: false });
+            // TODO: Need portability fixes for browsers?
+            var id = setTimeout(function() { self.handleTimeout(token); }, delay);
+            this._tokens.set(token, { callback: callback, id: id, isInterval: false });
 
-    return token;
-}
+            return token;
+        }
 
-Timer.prototype.scheduleRepeated = function(callback, period)
-{
-    if(this._destroyed)
-    {
-        throw new CommunicatorDestroyedException();
-    }
+        Timer.prototype.scheduleRepeated = function(callback, period)
+        {
+            if(this._destroyed)
+            {
+                throw new CommunicatorDestroyedException();
+            }
 
-    var token = this._tokenId++;
-    var self = this;
+            var token = this._tokenId++;
+            var self = this;
 
-    // TODO: Need portability fixes for browsers?
-    var id = setInterval(function() { self.handleInterval(token); }, period);
-    this._tokens.set(token, { callback: callback, id: id, isInterval: true });
+            // TODO: Need portability fixes for browsers?
+            var id = setInterval(function() { self.handleInterval(token); }, period);
+            this._tokens.set(token, { callback: callback, id: id, isInterval: true });
 
-    return token;
-}
+            return token;
+        }
 
-Timer.prototype.cancel = function(id)
-{
-    if(this._destroyed)
-    {
-        return false;
-    }
+        Timer.prototype.cancel = function(id)
+        {
+            if(this._destroyed)
+            {
+                return false;
+            }
 
-    var token = this._tokens.get(id);
-    if(token === undefined)
-    {
-        return false;
-    }
+            var token = this._tokens.get(id);
+            if(token === undefined)
+            {
+                return false;
+            }
 
-    this._tokens.delete(id);
-    if(token.isInterval)
-    {
-        clearInterval(token.id);
-    }
-    else
-    {
-        clearTimeout(token.id);
-    }
+            this._tokens.delete(id);
+            if(token.isInterval)
+            {
+                clearInterval(token.id);
+            }
+            else
+            {
+                clearTimeout(token.id);
+            }
 
-    return true;
-}
+            return true;
+        }
 
-Timer.prototype.handleTimeout = function(id)
-{
-    if(this._destroyed)
-    {
-        return;
-    }
+        Timer.prototype.handleTimeout = function(id)
+        {
+            if(this._destroyed)
+            {
+                return;
+            }
 
-    var token = this._tokens.get(id);
-    if(token !== undefined)
-    {
-        this._tokens.delete(id);
-        token.callback();
-    }
-}
+            var token = this._tokens.get(id);
+            if(token !== undefined)
+            {
+                this._tokens.delete(id);
+                token.callback();
+            }
+        }
 
-Timer.prototype.handleInterval = function(id)
-{
-    if(this._destroyed)
-    {
-        return;
-    }
+        Timer.prototype.handleInterval = function(id)
+        {
+            if(this._destroyed)
+            {
+                return;
+            }
 
-    var token = this._tokens.get(id);
-    if(token !== undefined)
-    {
-        token.callback();
-    }
-}
+            var token = this._tokens.get(id);
+            if(token !== undefined)
+            {
+                token.callback();
+            }
+        }
 
-module.exports.Ice = {};
-module.exports.Ice.Timer = Timer;
+        module.exports.Ice = module.exports.Ice || {};
+        module.exports.Ice.Timer = Timer;
+    };
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+}(typeof module !== "undefined" ? module : undefined, "Ice/Timer"));

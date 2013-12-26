@@ -7,38 +7,43 @@
 //
 // **********************************************************************
 
-var TcpEndpointI = require("./TcpEndpointI").Ice.TcpEndpointI;
-var TCPEndpointType = require("./Endpoint").Ice.TCPEndpointType;
+(function(module, name){
+    var __m = function(module, exports, require){
+        var TcpEndpointI = require("Ice/TcpEndpointI").Ice.TcpEndpointI;
+        var TCPEndpointType = require("Ice/Endpoint").Ice.TCPEndpointType;
 
-var TcpEndpointFactory = function(instance)
-{
-    this._instance = instance;
-};
+        var TcpEndpointFactory = function(instance)
+        {
+            this._instance = instance;
+        };
 
-TcpEndpointFactory.prototype.type = function()
-{
-    return TCPEndpointType;
-};
+        TcpEndpointFactory.prototype.type = function()
+        {
+            return TCPEndpointType;
+        };
 
-TcpEndpointFactory.prototype.protocol = function()
-{
-    return "tcp";
-};
+        TcpEndpointFactory.prototype.protocol = function()
+        {
+            return "tcp";
+        };
 
-TcpEndpointFactory.prototype.create = function(str, oaEndpoint)
-{
-    return TcpEndpointI.fromString(this._instance, str, oaEndpoint);
-};
+        TcpEndpointFactory.prototype.create = function(str, oaEndpoint)
+        {
+            return TcpEndpointI.fromString(this._instance, str, oaEndpoint);
+        };
 
-TcpEndpointFactory.prototype.read = function(s)
-{
-    return TcpEndpointI.fromStream(s);
-};
+        TcpEndpointFactory.prototype.read = function(s)
+        {
+            return TcpEndpointI.fromStream(s);
+        };
 
-TcpEndpointFactory.prototype.destroy = function()
-{
-    this._instance = null;
-};
+        TcpEndpointFactory.prototype.destroy = function()
+        {
+            this._instance = null;
+        };
 
-module.exports.Ice = {};
-module.exports.Ice.TcpEndpointFactory = TcpEndpointFactory;
+        module.exports.Ice = module.exports.Ice || {};
+        module.exports.Ice.TcpEndpointFactory = TcpEndpointFactory;
+    };
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+}(typeof module !== "undefined" ? module : undefined, "Ice/TcpEndpointFactory"));

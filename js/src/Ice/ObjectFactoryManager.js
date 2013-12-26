@@ -7,65 +7,70 @@
 //
 // **********************************************************************
 
-var HashMap = require("./HashMap").Ice.HashMap;
+(function(module, name){
+    var __m = function(module, exports, require){
+        var HashMap = require("Ice/HashMap").Ice.HashMap;
 
-var AlreadyRegisteredException = require("./LocalException").Ice.AlreadyRegisteredException;
-var NotRegisteredException = require("./LocalException").Ice.NotRegisteredException;
+        var AlreadyRegisteredException = require("Ice/LocalException").Ice.AlreadyRegisteredException;
+        var NotRegisteredException = require("Ice/LocalException").Ice.NotRegisteredException;
 
-//
-// Only for use by Instance
-//
-var ObjectFactoryManager = function()
-{
-    this._factoryMap = new HashMap(); // Map<String, ObjectFactory>
-};
+        //
+        // Only for use by Instance
+        //
+        var ObjectFactoryManager = function()
+        {
+            this._factoryMap = new HashMap(); // Map<String, ObjectFactory>
+        };
 
-ObjectFactoryManager.prototype.add = function(factory, id)
-{
-    var o, ex;
-    o = this._factoryMap.get(id);
-    if(o !== undefined)
-    {
-        ex = new AlreadyRegisteredException();
-        ex.id = id;
-        ex.kindOfObject = "object factory";
-        throw ex;
-    }
-    this._factoryMap.set(id, factory);
-};
+        ObjectFactoryManager.prototype.add = function(factory, id)
+        {
+            var o, ex;
+            o = this._factoryMap.get(id);
+            if(o !== undefined)
+            {
+                ex = new AlreadyRegisteredException();
+                ex.id = id;
+                ex.kindOfObject = "object factory";
+                throw ex;
+            }
+            this._factoryMap.set(id, factory);
+        };
 
-ObjectFactoryManager.prototype.remove = function(id)
-{
-    var factory, ex;
-    factory = this._factoryMap.get(id);
-    if(factory === undefined)
-    {
-        ex = new NotRegisteredException();
-        ex.id = id;
-        ex.kindOfObject = "object factory";
-        throw ex;
-    }
-    this._factoryMap.delete(id);
-    factory.destroy();
-};
+        ObjectFactoryManager.prototype.remove = function(id)
+        {
+            var factory, ex;
+            factory = this._factoryMap.get(id);
+            if(factory === undefined)
+            {
+                ex = new NotRegisteredException();
+                ex.id = id;
+                ex.kindOfObject = "object factory";
+                throw ex;
+            }
+            this._factoryMap.delete(id);
+            factory.destroy();
+        };
 
-ObjectFactoryManager.prototype.find = function(id)
-{
-    return this._factoryMap.get(id);
-};
+        ObjectFactoryManager.prototype.find = function(id)
+        {
+            return this._factoryMap.get(id);
+        };
 
-ObjectFactoryManager.prototype.destroy = function()
-{
-    var oldMap = this._factoryMap,
-        e = oldMap.entries;
-    this._factoryMap = new HashMap(); // Map<String, ObjectFactory>
+        ObjectFactoryManager.prototype.destroy = function()
+        {
+            var oldMap = this._factoryMap,
+                e = oldMap.entries;
+            this._factoryMap = new HashMap(); // Map<String, ObjectFactory>
 
-    while(e !== null)
-    {
-        e.value.destroy();
-        e = e.next;
-    }
-};
+            while(e !== null)
+            {
+                e.value.destroy();
+                e = e.next;
+            }
+        };
 
-module.exports.Ice = {};
-module.exports.Ice.ObjectFactoryManager = ObjectFactoryManager;
+        module.exports.Ice = module.exports.Ice || {};
+        module.exports.Ice.ObjectFactoryManager = ObjectFactoryManager;
+    };
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+}(typeof module !== "undefined" ? module : undefined, "Ice/ObjectFactoryManager"));

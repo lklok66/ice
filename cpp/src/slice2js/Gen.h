@@ -61,6 +61,7 @@ class Gen : public JsGenerator
 public:
 
     Gen(const std::string&,
+        const std::string&,
         const std::vector<std::string>&,
         const std::string&);
     ~Gen();
@@ -73,8 +74,10 @@ private:
 
     IceUtilInternal::Output _out;
 
+    std::string _include;
     std::vector<std::string> _includePaths;
-
+    std::string _fileBase;
+    
     void printHeader();
 
     class RequireVisitor : public JsVisitor

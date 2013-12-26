@@ -7,88 +7,93 @@
 //
 // **********************************************************************
 
-var StringUtil = require("./StringUtil").Ice.StringUtil;
+(function(module, name){
+    var __m = function(module, exports, require){
+        var StringUtil = require("Ice/StringUtil").Ice.StringUtil;
 
-var HashUtil = {};
+        var HashUtil = {};
 
-HashUtil.addBoolean = function(h, b)
-{
-    return ((h << 5) + h) ^ (b ? 0 : 1);
-};
-
-HashUtil.addBooleanArray = function(h, arr)
-{
-    var i, length;
-    if(arr !== undefined && arr !== null)
-    {
-        for(i = 0, length = arr.length; i < length; ++i)
+        HashUtil.addBoolean = function(h, b)
         {
-            h = ((h << 5) + h) ^ (arr[i] ? 0 : 1);
-        }
-    }
-    return h;
-};
+            return ((h << 5) + h) ^ (b ? 0 : 1);
+        };
 
-HashUtil.addString = function(h, str)
-{
-    if(str !== undefined && str !== null)
-    {
-        h = ((h << 5) + h) ^ StringUtil.hashCode(str);
-    }
-    return h;
-};
-
-HashUtil.addStringArray = function(h, arr)
-{
-    var i, length;
-    if(arr !== undefined && arr !== null)
-    {
-        for(i = 0, length = arr.length; i < length; ++i)
+        HashUtil.addBooleanArray = function(h, arr)
         {
-            h = HashUtil.addString(h, arr[i]);
-        }
-    }
-    return h;
-};
+            var i, length;
+            if(arr !== undefined && arr !== null)
+            {
+                for(i = 0, length = arr.length; i < length; ++i)
+                {
+                    h = ((h << 5) + h) ^ (arr[i] ? 0 : 1);
+                }
+            }
+            return h;
+        };
 
-HashUtil.addNumber = function(h, num)
-{
-    return ((h << 5) + h) ^ num;
-};
-
-HashUtil.addNumberArray = function(h, arr)
-{
-    var i, length;
-    if(arr !== undefined && arr !== null)
-    {
-        for(i = 0, length = arr.length; i < length; ++i)
+        HashUtil.addString = function(h, str)
         {
-            h = HashUtil.addNumber(h, arr[i]);
-        }
-    }
-    return h;
-};
+            if(str !== undefined && str !== null)
+            {
+                h = ((h << 5) + h) ^ StringUtil.hashCode(str);
+            }
+            return h;
+        };
 
-HashUtil.addHashable = function(h, obj)
-{
-    if(obj !== undefined && obj !== null)
-    {
-        h = ((h << 5) + h) ^ obj.hashCode();
-    }
-    return h;
-};
-
-HashUtil.addHashableArray = function(h, arr)
-{
-    if(arr !== undefined && arr !== null)
-    {
-        for(var i = 0; i < arr.length; ++i)
+        HashUtil.addStringArray = function(h, arr)
         {
-            h = HashUtil.addHashable(h, arr[i]);
-        }
-    }
-    return h;
-};
+            var i, length;
+            if(arr !== undefined && arr !== null)
+            {
+                for(i = 0, length = arr.length; i < length; ++i)
+                {
+                    h = HashUtil.addString(h, arr[i]);
+                }
+            }
+            return h;
+        };
 
-module.exports.Ice = {};
-module.exports.Ice.HashUtil = HashUtil;
+        HashUtil.addNumber = function(h, num)
+        {
+            return ((h << 5) + h) ^ num;
+        };
+
+        HashUtil.addNumberArray = function(h, arr)
+        {
+            var i, length;
+            if(arr !== undefined && arr !== null)
+            {
+                for(i = 0, length = arr.length; i < length; ++i)
+                {
+                    h = HashUtil.addNumber(h, arr[i]);
+                }
+            }
+            return h;
+        };
+
+        HashUtil.addHashable = function(h, obj)
+        {
+            if(obj !== undefined && obj !== null)
+            {
+                h = ((h << 5) + h) ^ obj.hashCode();
+            }
+            return h;
+        };
+
+        HashUtil.addHashableArray = function(h, arr)
+        {
+            if(arr !== undefined && arr !== null)
+            {
+                for(var i = 0; i < arr.length; ++i)
+                {
+                    h = HashUtil.addHashable(h, arr[i]);
+                }
+            }
+            return h;
+        };
+
+        module.exports.Ice = module.exports.Ice || {};
+        module.exports.Ice.HashUtil = HashUtil;
+    };
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+}(typeof module !== "undefined" ? module : undefined, "Ice/HashUtil"));

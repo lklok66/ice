@@ -7,87 +7,92 @@
 //
 // **********************************************************************
 
-//
-// Ice.EnumBase
-//
-var EnumBase = function(name, value)
-{
-    this._name = name;
-    this._value = value;
-};
-
-Object.defineProperty(EnumBase.prototype, 'name', {
-    enumerable: true,
-    get: function() { return this._name; }
-});
-
-Object.defineProperty(EnumBase.prototype, 'value', {
-    enumerable: true,
-    get: function() { return this._value; }
-});
-
-EnumBase.prototype.equals = function(rhs)
-{
-    if(this === rhs)
-    {
-        return true;
-    }
-
-    var proto = Object.getPrototypeOf(this);
-    if(!(rhs instanceof proto.constructor))
-    {
-        return false;
-    }
-
-    return this._value == rhs._value;
-};
-
-EnumBase.prototype.hashCode = function()
-{
-    return this._value;
-};
-
-EnumBase.prototype.toString = function()
-{
-    return this._name;
-};
-
-EnumBase.defineEnum = function(type, enumerators)
-{
-    var enums = [];
-    var maxValue = 0;
-    for(var e in enumerators)
-    {
-        var value = enumerators[e];
-        var enumerator = new type(e, value);
-        enums[value] = enumerator;
-        Object.defineProperty(type, e, {
-            enumerable: true,
-            value: enumerator
-        });
-        if(value > maxValue)
+(function(module, name){
+    var __m = function(module, exports, require){
+        //
+        // Ice.EnumBase
+        //
+        var EnumBase = function(name, value)
         {
-            maxValue = value;
-        }
-    }
+            this._name = name;
+            this._value = value;
+        };
 
-    Object.defineProperty(type, 'valueOf', {
-        value: function(v) {
-            if(v === undefined)
+        Object.defineProperty(EnumBase.prototype, 'name', {
+            enumerable: true,
+            get: function() { return this._name; }
+        });
+
+        Object.defineProperty(EnumBase.prototype, 'value', {
+            enumerable: true,
+            get: function() { return this._value; }
+        });
+
+        EnumBase.prototype.equals = function(rhs)
+        {
+            if(this === rhs)
             {
-                return type;
+                return true;
             }
-            return enums[v]; }
-    });
-    
-    Object.defineProperty(type, 'maxValue', {
-        value: maxValue
-    });
-    
-    Object.defineProperty(type.prototype, 'maxValue', {
-        value: maxValue
-    });
-};
 
-module.exports.Ice = {};
-module.exports.Ice.EnumBase = EnumBase;
+            var proto = Object.getPrototypeOf(this);
+            if(!(rhs instanceof proto.constructor))
+            {
+                return false;
+            }
+
+            return this._value == rhs._value;
+        };
+
+        EnumBase.prototype.hashCode = function()
+        {
+            return this._value;
+        };
+
+        EnumBase.prototype.toString = function()
+        {
+            return this._name;
+        };
+
+        EnumBase.defineEnum = function(type, enumerators)
+        {
+            var enums = [];
+            var maxValue = 0;
+            for(var e in enumerators)
+            {
+                var value = enumerators[e];
+                var enumerator = new type(e, value);
+                enums[value] = enumerator;
+                Object.defineProperty(type, e, {
+                    enumerable: true,
+                    value: enumerator
+                });
+                if(value > maxValue)
+                {
+                    maxValue = value;
+                }
+            }
+
+            Object.defineProperty(type, 'valueOf', {
+                value: function(v) {
+                    if(v === undefined)
+                    {
+                        return type;
+                    }
+                    return enums[v]; }
+            });
+            
+            Object.defineProperty(type, 'maxValue', {
+                value: maxValue
+            });
+            
+            Object.defineProperty(type.prototype, 'maxValue', {
+                value: maxValue
+            });
+        };
+
+        module.exports.Ice = module.exports.Ice || {};
+        module.exports.Ice.EnumBase = EnumBase;
+    };
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+}(typeof module !== "undefined" ? module : undefined, "Ice/EnumBase"));

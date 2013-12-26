@@ -9,20 +9,22 @@
 
 (function(module, name){
     var __m = function(module, exports, require){
-        var EnumBase = require("Ice/EnumBase").Ice.EnumBase;
-
-        var FormatType = function(_n, _v)
+        var ObjectFactory = function()
         {
-            EnumBase.call(this, _n, _v);
         };
 
-        FormatType.prototype = new EnumBase();
-        FormatType.prototype.constructor = FormatType;
+        ObjectFactory.prototype.create = function(type)
+        {
+            throw new Error("not implemented");
+        };
 
-        EnumBase.defineEnum(FormatType, {'DefaultFormat':0, 'CompactFormat':1, 'SlicedFormat':2});
+        ObjectFactory.prototype.destroy = function()
+        {
+            throw new Error("not implemented");
+        };
 
         module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.FormatType = FormatType;
+        module.exports.Ice.ObjectFactory = ObjectFactory;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/FormatType"));
+}(typeof module !== "undefined" ? module : undefined, "Ice/ObjectFactory"));

@@ -66,6 +66,7 @@ usage(const char* n)
         "-UNAME                  Remove any definition for NAME.\n"
         "-IDIR                   Put DIR in the include file search path.\n"
         "-E                      Print preprocessor output on stdout.\n"
+        "--include-dir DIR       Use DIR as the require include directory in source files.\n"
         "--output-dir DIR        Create files in the directory DIR.\n"
         "--depend                Generate Makefile dependencies.\n"
         "-d, --debug             Print debug messages.\n"
@@ -85,6 +86,7 @@ compile(int argc, char* argv[])
     opts.addOpt("U", "", IceUtilInternal::Options::NeedArg, "", IceUtilInternal::Options::Repeat);
     opts.addOpt("I", "", IceUtilInternal::Options::NeedArg, "", IceUtilInternal::Options::Repeat);
     opts.addOpt("E");
+    opts.addOpt("", "include-dir", IceUtilInternal::Options::NeedArg);
     opts.addOpt("", "output-dir", IceUtilInternal::Options::NeedArg);
     opts.addOpt("", "depend");
     opts.addOpt("d", "debug");
@@ -136,6 +138,8 @@ compile(int argc, char* argv[])
     }
 
     bool preprocess = opts.isSet("E");
+    
+    string include = opts.optArg("include-dir");
 
     string output = opts.optArg("output-dir");
 
@@ -246,7 +250,7 @@ compile(int argc, char* argv[])
                 {
                     try
                     {
-                        Gen gen(icecpp->getBaseName(), includePaths, output);
+                        Gen gen(icecpp->getBaseName(), include, includePaths, output);
                         gen.generate(p);
                         if(checksum)
                         {

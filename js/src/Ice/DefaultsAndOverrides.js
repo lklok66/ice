@@ -7,87 +7,92 @@
 //
 // **********************************************************************
 
-var FormatType = require("./FormatType");
+(function(module, name){
+    var __m = function(module, exports, require){
+        var FormatType = require("Ice/FormatType");
 
-var EndpointSelectionType = require("./EndpointTypes").Ice.EndpointSelectionType;
-var Protocol = require("./Protocol").Ice.Protocol;
+        var EndpointSelectionType = require("Ice/EndpointTypes").Ice.EndpointSelectionType;
+        var Protocol = require("Ice/Protocol").Ice.Protocol;
 
-var DefaultsAndOverrides = function(properties)
-{
-    var value;
-    
-    this.defaultProtocol = properties.getPropertyWithDefault("Ice.Default.Protocol", "tcp");
+        var DefaultsAndOverrides = function(properties)
+        {
+            var value;
+            
+            this.defaultProtocol = properties.getPropertyWithDefault("Ice.Default.Protocol", "tcp");
 
-    value = properties.getProperty("Ice.Default.Host");
-    this.defaultHost = value.length > 0 ? value : null;
+            value = properties.getProperty("Ice.Default.Host");
+            this.defaultHost = value.length > 0 ? value : null;
 
-    value = properties.getProperty("Ice.Override.Timeout");
-    if(value.length > 0)
-    {
-        this.overrideTimeout = true;
-        this.overrideTimeoutValue = properties.getPropertyAsInt("Ice.Override.Timeout");
-    }
-    else
-    {
-        this.overrideTimeout = false;
-        this.overrideTimeoutValue = -1;
-    }
+            value = properties.getProperty("Ice.Override.Timeout");
+            if(value.length > 0)
+            {
+                this.overrideTimeout = true;
+                this.overrideTimeoutValue = properties.getPropertyAsInt("Ice.Override.Timeout");
+            }
+            else
+            {
+                this.overrideTimeout = false;
+                this.overrideTimeoutValue = -1;
+            }
 
-    value = properties.getProperty("Ice.Override.ConnectTimeout");
-    if(value.length > 0)
-    {
-        this.overrideConnectTimeout = true;
-        this.overrideConnectTimeoutValue = properties.getPropertyAsInt("Ice.Override.ConnectTimeout");
-    }
-    else
-    {
-        this.overrideConnectTimeout = false;
-        this.overrideConnectTimeoutValue = -1;
-    }
+            value = properties.getProperty("Ice.Override.ConnectTimeout");
+            if(value.length > 0)
+            {
+                this.overrideConnectTimeout = true;
+                this.overrideConnectTimeoutValue = properties.getPropertyAsInt("Ice.Override.ConnectTimeout");
+            }
+            else
+            {
+                this.overrideConnectTimeout = false;
+                this.overrideConnectTimeoutValue = -1;
+            }
 
-    value = properties.getProperty("Ice.Override.CloseTimeout");
-    if(value.length > 0)
-    {
-        this.overrideCloseTimeout = true;
-        this.overrideCloseTimeoutValue = properties.getPropertyAsInt("Ice.Override.CloseTimeout");
-    }
-    else
-    {
-        this.overrideCloseTimeout = false;
-        this.overrideCloseTimeoutValue = -1;
-    }
+            value = properties.getProperty("Ice.Override.CloseTimeout");
+            if(value.length > 0)
+            {
+                this.overrideCloseTimeout = true;
+                this.overrideCloseTimeoutValue = properties.getPropertyAsInt("Ice.Override.CloseTimeout");
+            }
+            else
+            {
+                this.overrideCloseTimeout = false;
+                this.overrideCloseTimeoutValue = -1;
+            }
 
-    this.overrideCompress = false;
-    this.overrideSecure = false;
+            this.overrideCompress = false;
+            this.overrideSecure = false;
 
-    value = properties.getPropertyWithDefault("Ice.Default.EndpointSelection", "Random");
-    if(value === "Random")
-    {
-        this.defaultEndpointSelection = EndpointSelectionType.Random;
-    }
-    else if(value === "Ordered")
-    {
-        this.defaultEndpointSelection = EndpointSelectionType.Ordered;
-    }
-    else
-    {
-        var ex = new require("./LocalException").Ice.EndpointSelectionTypeParseException();
-        ex.str = "illegal value `" + value + "'; expected `Random' or `Ordered'";
-        throw ex;
-    }
+            value = properties.getPropertyWithDefault("Ice.Default.EndpointSelection", "Random");
+            if(value === "Random")
+            {
+                this.defaultEndpointSelection = EndpointSelectionType.Random;
+            }
+            else if(value === "Ordered")
+            {
+                this.defaultEndpointSelection = EndpointSelectionType.Ordered;
+            }
+            else
+            {
+                var ex = new require("./LocalException").Ice.EndpointSelectionTypeParseException();
+                ex.str = "illegal value `" + value + "'; expected `Random' or `Ordered'";
+                throw ex;
+            }
 
-    this.defaultLocatorCacheTimeout = properties.getPropertyAsIntWithDefault("Ice.Default.LocatorCacheTimeout", -1);
+            this.defaultLocatorCacheTimeout = properties.getPropertyAsIntWithDefault("Ice.Default.LocatorCacheTimeout", -1);
 
-    this.defaultPreferSecure = false;
+            this.defaultPreferSecure = false;
 
-    value = properties.getPropertyWithDefault("Ice.Default.EncodingVersion",
-                                              Protocol.encodingVersionToString(Protocol.currentEncoding));
-    this.defaultEncoding = Protocol.stringToEncodingVersion(value);
-    Protocol.checkSupportedEncoding(this.defaultEncoding);
+            value = properties.getPropertyWithDefault("Ice.Default.EncodingVersion",
+                                                    Protocol.encodingVersionToString(Protocol.currentEncoding));
+            this.defaultEncoding = Protocol.stringToEncodingVersion(value);
+            Protocol.checkSupportedEncoding(this.defaultEncoding);
 
-    var slicedFormat = properties.getPropertyAsIntWithDefault("Ice.Default.SlicedFormat", 0) > 0;
-    this.defaultFormat = slicedFormat ? FormatType.SlicedFormat : FormatType.CompactFormat;
-};
+            var slicedFormat = properties.getPropertyAsIntWithDefault("Ice.Default.SlicedFormat", 0) > 0;
+            this.defaultFormat = slicedFormat ? FormatType.SlicedFormat : FormatType.CompactFormat;
+        };
 
-module.exports.Ice = {};
-module.exports.Ice.DefaultsAndOverrides = DefaultsAndOverrides;
+        module.exports.Ice = module.exports.Ice || {};
+        module.exports.Ice.DefaultsAndOverrides = DefaultsAndOverrides;
+    };
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+}(typeof module !== "undefined" ? module : undefined, "Ice/DefaultsAndOverrides"));

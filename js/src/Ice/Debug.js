@@ -7,33 +7,38 @@
 //
 // **********************************************************************
 
-var AssertionFailedException = function(message)
-{
-    Error.call(this);
-    Error.captureStackTrace(this, this.constructor);
-    this.message = message;
-};
+(function(module, name){
+    var __m = function(module, exports, require){
+        var AssertionFailedException = function(message)
+        {
+            Error.call(this);
+            Error.captureStackTrace(this, this.constructor);
+            this.message = message;
+        };
 
-AssertionFailedException.prototype = new Error();
+        AssertionFailedException.prototype = new Error();
 
-Object.defineProperty(AssertionFailedException.prototype, "name", {
-    get: function() { return "AssertionFailedException"; }
-});
+        Object.defineProperty(AssertionFailedException.prototype, "name", {
+            get: function() { return "AssertionFailedException"; }
+        });
 
-AssertionFailedException.prototype.constructor = AssertionFailedException;
+        AssertionFailedException.prototype.constructor = AssertionFailedException;
 
-var Debug = {};
+        var Debug = {};
 
-Debug.AssertionFailedException = AssertionFailedException;
+        Debug.AssertionFailedException = AssertionFailedException;
 
-Debug.assert = function(b, msg)
-{
-    if(!b)
-    {
-        throw new AssertionFailedException(msg === undefined ? "assertion failed" : msg);
-    }
-};
+        Debug.assert = function(b, msg)
+        {
+            if(!b)
+            {
+                throw new AssertionFailedException(msg === undefined ? "assertion failed" : msg);
+            }
+        };
 
 
-module.exports.Ice = {};
-module.exports.Ice.Debug = Debug;
+        module.exports.Ice = module.exports.Ice || {};
+        module.exports.Ice.Debug = Debug;
+    };
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+}(typeof module !== "undefined" ? module : undefined, "Ice/Debug"));

@@ -7,26 +7,21 @@
 //
 // **********************************************************************
 
-var IceModule = function()
+var global = this;
+
+global.Ice = {};
+global.Ice.__modules = {};
+global.Ice.__require = function(name)
 {
-    this.exports = {};
-    this.__filename = file;
-}
+    var m =  global.Ice.__modules[name];
+    return m !== undefined ? m.exports : {};
+};
 
-IceModule.modules = {};
-
-IceModule.require = function(path)
+global.Ice.__defineModule = function(m, name)
 {
-    var m = Module.modules[path];
-    return m ? m.exports : {};
-}
-
-IceModule.define = function(file, fn)
-{
-    var m = new Module(file);
-    Module.modules[file] = m;
-    fn.call(null, m, m.exports);
-}
-
-//Global require
-var require = IceModule.require;
+    var module = {};
+    module.exports = global;
+    module.require = global.Ice.__require;
+    global.Ice.__modules[name] = module;
+    m.call(m, module, module.exports, module.require);
+};

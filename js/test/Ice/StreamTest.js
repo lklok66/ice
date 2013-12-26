@@ -18,834 +18,838 @@
 // </auto-generated>
 //
 
-var _merge = require("Ice/Util").merge;
-
-var Ice = {};
-_merge(Ice, require("Ice/Object").Ice);
-_merge(Ice, require("Ice/ObjectPrx").Ice);
-_merge(Ice, require("Ice/Exception").Ice);
-_merge(Ice, require("Ice/TypeRegistry").Ice);
-_merge(Ice, require("Ice/EnumBase").Ice);
-_merge(Ice, require("Ice/HashMap").Ice);
-_merge(Ice, require("Ice/HashUtil").Ice);
-_merge(Ice, require("Ice/ArrayUtil").Ice);
-_merge(Ice, require("Ice/StreamHelpers").Ice);
-_merge(Ice, require("Ice/BuiltinSequences").Ice);
-
-var Foo = {};
-_merge(Foo, require("Foo").Foo);
-
-var Test = {};
-
-Test.MyEnum = function(_n, _v)
+(function(module, name)
 {
-    Ice.EnumBase.call(this, _n, _v);
-};
-Test.MyEnum.prototype = new Ice.EnumBase();
-Test.MyEnum.prototype.constructor = Test.MyEnum;
-Ice.EnumBase.defineEnum(Test.MyEnum, {
-    'enum1':0, 'enum2':1, 'enum3':2});
-
-Test.SmallStruct = function(bo, by, sh, i, l, f, d, str, e, p)
-{
-    this.bo = bo !== undefined ? bo : false;
-    this.by = by !== undefined ? by : 0;
-    this.sh = sh !== undefined ? sh : 0;
-    this.i = i !== undefined ? i : 0;
-    this.l = l !== undefined ? l : 0;
-    this.f = f !== undefined ? f : 0.0;
-    this.d = d !== undefined ? d : 0.0;
-    this.str = str !== undefined ? str : null;
-    this.e = e !== undefined ? e : Test.enum1;
-    this.p = p !== undefined ? p : null;
-};
-
-Test.SmallStruct.prototype.toString = function()
-{
-    return "";
-};
-
-Test.SmallStruct.prototype.clone = function()
-{
-    var __r = new Test.SmallStruct();
-    __r.bo = this.bo;
-    __r.by = this.by;
-    __r.sh = this.sh;
-    __r.i = this.i;
-    __r.l = this.l;
-    __r.f = this.f;
-    __r.d = this.d;
-    __r.str = this.str;
-    __r.e = this.e;
-    __r.p = this.p;
-    return __r;
-};
-
-Test.SmallStruct.prototype.equals = function(rhs)
-{
-    if(this === rhs)
+    var __m = function(module, exports, require)
     {
-        return true;
-    }
-    if(!(rhs instanceof Test.SmallStruct))
-    {
-        return false;
-    }
-    if(this.bo !== rhs.bo)
-    {
-        return false;
-    }
-    if(this.by !== rhs.by)
-    {
-        return false;
-    }
-    if(this.sh !== rhs.sh)
-    {
-        return false;
-    }
-    if(this.i !== rhs.i)
-    {
-        return false;
-    }
-    if(this.l !== rhs.l && !this.l.equals(rhs.l))
-    {
-        return false;
-    }
-    if(this.f !== rhs.f)
-    {
-        return false;
-    }
-    if(this.d !== rhs.d)
-    {
-        return false;
-    }
-    if(this.str !== rhs.str)
-    {
-        return false;
-    }
-    if(this.e !== rhs.e && !this.e.equals(rhs.e))
-    {
-        return false;
-    }
-    if(this.p !== rhs.p && !this.p.equals(rhs.p))
-    {
-        console.log("proxy not equals");
-        return false;
-    }
+        var _merge = require("Ice/Util").merge;
+        
+        var Ice = module.exports.Ice || {};
+        _merge(Ice, require("Ice/Object").Ice);
+        _merge(Ice, require("Ice/ObjectPrx").Ice);
+        _merge(Ice, require("Ice/Exception").Ice);
+        _merge(Ice, require("Ice/TypeRegistry").Ice);
+        _merge(Ice, require("Ice/EnumBase").Ice);
+        _merge(Ice, require("Ice/HashMap").Ice);
+        _merge(Ice, require("Ice/HashUtil").Ice);
+        _merge(Ice, require("Ice/ArrayUtil").Ice);
+        _merge(Ice, require("Ice/StreamHelpers").Ice);
+        _merge(Ice, require("Ice/BuiltinSequences").Ice);
+        
+        var Test = module.exports.Test ||  {};
 
-    return true;
-};
-
-Test.SmallStruct.prototype.hashCode = function()
-{
-    var __h = 5381;
-    __h = Ice.HashUtil.addBoolean(__h, this.bo);
-    __h = Ice.HashUtil.addNumber(__h, this.by);
-    __h = Ice.HashUtil.addNumber(__h, this.sh);
-    __h = Ice.HashUtil.addNumber(__h, this.i);
-    __h = Ice.HashUtil.addNumber(__h, this.l);
-    __h = Ice.HashUtil.addNumber(__h, this.f);
-    __h = Ice.HashUtil.addNumber(__h, this.d);
-    __h = Ice.HashUtil.addString(__h, this.str);
-    __h = Ice.HashUtil.addHashable(__h, this.e);
-    __h = Ice.HashUtil.addHashable(__h, this.p);
-    return __h;
-};
-
-Test.SmallStruct.prototype.__write = function(__os)
-{
-    __os.writeBool(this.bo);
-    __os.writeByte(this.by);
-    __os.writeShort(this.sh);
-    __os.writeInt(this.i);
-    __os.writeLong(this.l);
-    __os.writeFloat(this.f);
-    __os.writeDouble(this.d);
-    __os.writeString(this.str);
-    __os.writeEnum(this.e);
-    __os.writeProxy(this.p);
-};
-
-Test.SmallStruct.prototype.__read = function(__is)
-{
-    this.bo = __is.readBool();
-    this.by = __is.readByte();
-    this.sh = __is.readShort();
-    this.i = __is.readInt();
-    this.l = __is.readLong();
-    this.f = __is.readFloat();
-    this.d = __is.readDouble();
-    this.str = __is.readString();
-    this.e = __is.readEnum(Test.MyEnum);
-    this.p = __is.readProxy();
-};
-
-Test.OptionalClassPrx = function()
-{
-    Ice.ObjectPrx.call(this);
-};
-Test.OptionalClassPrx.prototype = new Ice.ObjectPrx();
-Test.OptionalClassPrx.prototype.constructor = Test.OptionalClassPrx;
-Test.OptionalClassPrx.checkedCast = function(__prx, __facet, __ctx)
-{
-    return Ice.ObjectPrx.checkedCastImpl(Test.OptionalClassPrx, Test.OptionalClass.ice_staticId(), __prx, __facet, __ctx);
-};
-Test.OptionalClassPrx.uncheckedCast = function(__prx, __facet)
-{
-    return Ice.ObjectPrx.uncheckedCastImpl(Test.OptionalClassPrx, __prx, __facet);
-};
-
-Test.OptionalClass = function(bo, by, sh, i)
-{
-    Ice.Object.call(this);
-    this.bo = bo !== undefined ? bo : false;
-    this.by = by !== undefined ? by : 0;
-    this.sh = sh;
-    this.i = i;
-};
-Test.OptionalClass.prototype = new Ice.Object();
-Test.OptionalClass.prototype.constructor = Test.OptionalClass;
-Test.OptionalClass.__ids = [
-    "::Ice::Object",
-    "::Test::OptionalClass"
-];
-Test.OptionalClass.prototype.ice_ids = function(current)
-{
-    return Test.OptionalClass.__ids;
-};
-
-Test.OptionalClass.ice_staticId = function()
-{
-    return Test.OptionalClass.__ids[1];
-};
-
-Test.OptionalClass.prototype.toString = function()
-{
-    return "[object Test::OptionalClass]";
-};
-
-Test.OptionalClass.prototype.__writeImpl = function(__os)
-{
-    __os.startWriteSlice(Test.OptionalClass.ice_staticId(), -1, true);
-    __os.writeBool(this.bo);
-    __os.writeByte(this.by);
-    __os.writeOptShort(1, this.sh);
-    __os.writeOptInt(2, this.i);
-    __os.endWriteSlice();
-};
-
-Test.OptionalClass.prototype.__readImpl = function(__is)
-{
-    __is.startReadSlice();
-    this.bo = __is.readBool();
-    this.by = __is.readByte();
-    this.sh = __is.readOptShort(1);
-    this.i = __is.readOptInt(2);
-    __is.endReadSlice();
-};
-
-Ice.ClassRegistry.register(Test.OptionalClass.ice_staticId(), Test.OptionalClass);
-
-
-Test.BasePrx = function()
-{
-    Ice.ObjectPrx.call(this);
-};
-Test.BasePrx.prototype = new Ice.ObjectPrx();
-Test.BasePrx.prototype.constructor = Test.BasePrx;
-Test.BasePrx.checkedCast = function(__prx, __facet, __ctx)
-{
-    return Ice.ObjectPrx.checkedCastImpl(Test.BasePrx, Test.Base.ice_staticId(), __prx, __facet, __ctx);
-};
-Test.BasePrx.uncheckedCast = function(__prx, __facet)
-{
-    return Ice.ObjectPrx.uncheckedCastImpl(Test.BasePrx, __prx, __facet);
-};
-
-Test.Base = function(a, b)
-{
-    Ice.Object.call(this);
-    this.a = a !== undefined ? a : 0;
-    this.b = b !== undefined ? b : 0;
-};
-Test.Base.prototype = new Ice.Object();
-Test.Base.prototype.constructor = Test.Base;
-Test.Base.__ids = [
-    "::Ice::Object",
-    "::Test::Base"
-];
-Test.Base.prototype.ice_ids = function(current)
-{
-    return Test.Base.__ids;
-};
-
-Test.Base.ice_staticId = function()
-{
-    return Test.Base.__ids[1];
-};
-
-Test.Base.prototype.toString = function()
-{
-    return "[object Test::Base]";
-};
-
-Test.Base.prototype.__writeImpl = function(__os)
-{
-    __os.startWriteSlice(Test.Base.ice_staticId(), -1, true);
-    __os.writeInt(this.a);
-    __os.writeInt(this.b);
-    __os.endWriteSlice();
-};
-
-Test.Base.prototype.__readImpl = function(__is)
-{
-    __is.startReadSlice();
-    this.a = __is.readInt();
-    this.b = __is.readInt();
-    __is.endReadSlice();
-};
-
-Ice.ClassRegistry.register(Test.Base.ice_staticId(), Test.Base);
-
-
-Test.DerivedPrx = function()
-{
-    Test.BasePrx.call(this);
-};
-Test.DerivedPrx.prototype = new Test.BasePrx();
-Test.DerivedPrx.prototype.constructor = Test.DerivedPrx;
-Test.DerivedPrx.checkedCast = function(__prx, __facet, __ctx)
-{
-    return Ice.ObjectPrx.checkedCastImpl(Test.DerivedPrx, Test.Derived.ice_staticId(), __prx, __facet, __ctx);
-};
-Test.DerivedPrx.uncheckedCast = function(__prx, __facet)
-{
-    return Ice.ObjectPrx.uncheckedCastImpl(Test.DerivedPrx, __prx, __facet);
-};
-
-Test.Derived = function(a, b, c, d)
-{
-    Test.Base.call(this, a, b);
-    this.c = c !== undefined ? c : 0;
-    this.d = d !== undefined ? d : 0;
-};
-Test.Derived.prototype = new Test.Base();
-Test.Derived.prototype.constructor = Test.Derived;
-Test.Derived.__ids = [
-    "::Ice::Object",
-    "::Test::Base",
-    "::Test::Derived"
-];
-Test.Derived.prototype.ice_ids = function(current)
-{
-    return Test.Derived.__ids;
-};
-
-Test.Derived.ice_staticId = function()
-{
-    return Test.Derived.__ids[2];
-};
-
-Test.Derived.prototype.toString = function()
-{
-    return "[object Test::Derived]";
-};
-
-Test.Derived.prototype.__writeImpl = function(__os)
-{
-    __os.startWriteSlice(Test.Derived.ice_staticId(), -1, false);
-    __os.writeInt(this.c);
-    __os.writeInt(this.d);
-    __os.endWriteSlice();
-    Test.Base.prototype.__writeImpl.call(this, __os);
-};
-
-Test.Derived.prototype.__readImpl = function(__is)
-{
-    __is.startReadSlice();
-    this.c = __is.readInt();
-    this.d = __is.readInt();
-    __is.endReadSlice();
-    Test.Base.prototype.__readImpl.call(this, __is);
-};
-
-Ice.ClassRegistry.register(Test.Derived.ice_staticId(), Test.Derived);
-
-
-var __Test_MyEnumSHelper = null;
-Object.defineProperty(Test, "MyEnumSHelper", 
-{
-    get: function()
+        Test.MyEnum = function(_n, _v)
         {
-            if(__Test_MyEnumSHelper === null)
-            {
-                __Test_MyEnumSHelper = Ice.StreamHelpers.generateSeqHelper(
-                    Ice.StreamHelpers.generateEnumHelper(Test.MyEnum));
-            }
-            return __Test_MyEnumSHelper;
-        }
-});
+            Ice.EnumBase.call(this, _n, _v);
+        };
+        Test.MyEnum.prototype = new Ice.EnumBase();
+        Test.MyEnum.prototype.constructor = Test.MyEnum;
+        Ice.EnumBase.defineEnum(Test.MyEnum, {
+            'enum1':0, 'enum2':1, 'enum3':2});
 
-var __Test_MyClassSHelper = null;
-Object.defineProperty(Test, "MyClassSHelper", 
-{
-    get: function()
+        Test.SmallStruct = function(bo, by, sh, i, l, f, d, str, e, p)
         {
-            if(__Test_MyClassSHelper === null)
-            {
-                __Test_MyClassSHelper = Ice.StreamHelpers.generateObjectSeqHelper(
-                    Ice.ClassRegistry.find("::Test::MyClass"));
-            }
-            return __Test_MyClassSHelper;
-        }
-});
+            this.bo = bo !== undefined ? bo : false;
+            this.by = by !== undefined ? by : 0;
+            this.sh = sh !== undefined ? sh : 0;
+            this.i = i !== undefined ? i : 0;
+            this.l = l !== undefined ? l : 0;
+            this.f = f !== undefined ? f : 0.0;
+            this.d = d !== undefined ? d : 0.0;
+            this.str = str !== undefined ? str : null;
+            this.e = e !== undefined ? e : Test.enum1;
+            this.p = p !== undefined ? p : null;
+        };
 
-var __Test_BoolSSHelper = null;
-Object.defineProperty(Test, "BoolSSHelper", 
-{
-    get: function()
+        Test.SmallStruct.prototype.toString = function()
         {
-            if(__Test_BoolSSHelper === null)
-            {
-                __Test_BoolSSHelper = Ice.StreamHelpers.generateSeqHelper(
-                    Ice.BoolSeqHelper);
-            }
-            return __Test_BoolSSHelper;
-        }
-});
+            return "";
+        };
 
-var __Test_ByteSSHelper = null;
-Object.defineProperty(Test, "ByteSSHelper", 
-{
-    get: function()
+        Test.SmallStruct.prototype.clone = function()
         {
-            if(__Test_ByteSSHelper === null)
-            {
-                __Test_ByteSSHelper = Ice.StreamHelpers.generateSeqHelper(
-                    Ice.ByteSeqHelper);
-            }
-            return __Test_ByteSSHelper;
-        }
-});
+            var __r = new Test.SmallStruct();
+            __r.bo = this.bo;
+            __r.by = this.by;
+            __r.sh = this.sh;
+            __r.i = this.i;
+            __r.l = this.l;
+            __r.f = this.f;
+            __r.d = this.d;
+            __r.str = this.str;
+            __r.e = this.e;
+            __r.p = this.p;
+            return __r;
+        };
 
-var __Test_ShortSSHelper = null;
-Object.defineProperty(Test, "ShortSSHelper", 
-{
-    get: function()
+        Test.SmallStruct.prototype.equals = function(rhs)
         {
-            if(__Test_ShortSSHelper === null)
+            if(this === rhs)
             {
-                __Test_ShortSSHelper = Ice.StreamHelpers.generateSeqHelper(
-                    Ice.ShortSeqHelper);
+                return true;
             }
-            return __Test_ShortSSHelper;
-        }
-});
+            if(!(rhs instanceof Test.SmallStruct))
+            {
+                return false;
+            }
+            if(this.bo !== rhs.bo)
+            {
+                return false;
+            }
+            if(this.by !== rhs.by)
+            {
+                return false;
+            }
+            if(this.sh !== rhs.sh)
+            {
+                return false;
+            }
+            if(this.i !== rhs.i)
+            {
+                return false;
+            }
+            if(this.l !== rhs.l && !this.l.equals(rhs.l))
+            {
+                return false;
+            }
+            if(this.f !== rhs.f)
+            {
+                return false;
+            }
+            if(this.d !== rhs.d)
+            {
+                return false;
+            }
+            if(this.str !== rhs.str)
+            {
+                return false;
+            }
+            if(this.e !== rhs.e && !this.e.equals(rhs.e))
+            {
+                return false;
+            }
+            if(this.p !== rhs.p && !this.p.equals(rhs.p))
+            {
+                return false;
+            }
 
-var __Test_IntSSHelper = null;
-Object.defineProperty(Test, "IntSSHelper", 
-{
-    get: function()
+            return true;
+        };
+
+        Test.SmallStruct.prototype.hashCode = function()
         {
-            if(__Test_IntSSHelper === null)
-            {
-                __Test_IntSSHelper = Ice.StreamHelpers.generateSeqHelper(
-                    Ice.IntSeqHelper);
-            }
-            return __Test_IntSSHelper;
-        }
-});
+            var __h = 5381;
+            __h = Ice.HashUtil.addBoolean(__h, this.bo);
+            __h = Ice.HashUtil.addNumber(__h, this.by);
+            __h = Ice.HashUtil.addNumber(__h, this.sh);
+            __h = Ice.HashUtil.addNumber(__h, this.i);
+            __h = Ice.HashUtil.addNumber(__h, this.l);
+            __h = Ice.HashUtil.addNumber(__h, this.f);
+            __h = Ice.HashUtil.addNumber(__h, this.d);
+            __h = Ice.HashUtil.addString(__h, this.str);
+            __h = Ice.HashUtil.addHashable(__h, this.e);
+            __h = Ice.HashUtil.addHashable(__h, this.p);
+            return __h;
+        };
 
-var __Test_LongSSHelper = null;
-Object.defineProperty(Test, "LongSSHelper", 
-{
-    get: function()
+        Test.SmallStruct.prototype.__write = function(__os)
         {
-            if(__Test_LongSSHelper === null)
-            {
-                __Test_LongSSHelper = Ice.StreamHelpers.generateSeqHelper(
-                    Ice.LongSeqHelper);
-            }
-            return __Test_LongSSHelper;
-        }
-});
+            __os.writeBool(this.bo);
+            __os.writeByte(this.by);
+            __os.writeShort(this.sh);
+            __os.writeInt(this.i);
+            __os.writeLong(this.l);
+            __os.writeFloat(this.f);
+            __os.writeDouble(this.d);
+            __os.writeString(this.str);
+            __os.writeEnum(this.e);
+            __os.writeProxy(this.p);
+        };
 
-var __Test_FloatSSHelper = null;
-Object.defineProperty(Test, "FloatSSHelper", 
-{
-    get: function()
+        Test.SmallStruct.prototype.__read = function(__is)
         {
-            if(__Test_FloatSSHelper === null)
-            {
-                __Test_FloatSSHelper = Ice.StreamHelpers.generateSeqHelper(
-                    Ice.FloatSeqHelper);
-            }
-            return __Test_FloatSSHelper;
-        }
-});
+            this.bo = __is.readBool();
+            this.by = __is.readByte();
+            this.sh = __is.readShort();
+            this.i = __is.readInt();
+            this.l = __is.readLong();
+            this.f = __is.readFloat();
+            this.d = __is.readDouble();
+            this.str = __is.readString();
+            this.e = __is.readEnum(Test.MyEnum);
+            this.p = __is.readProxy();
+        };
 
-var __Test_DoubleSSHelper = null;
-Object.defineProperty(Test, "DoubleSSHelper", 
-{
-    get: function()
+        Test.OptionalClassPrx = function()
         {
-            if(__Test_DoubleSSHelper === null)
-            {
-                __Test_DoubleSSHelper = Ice.StreamHelpers.generateSeqHelper(
-                    Ice.DoubleSeqHelper);
-            }
-            return __Test_DoubleSSHelper;
-        }
-});
-
-var __Test_StringSSHelper = null;
-Object.defineProperty(Test, "StringSSHelper", 
-{
-    get: function()
+            Ice.ObjectPrx.call(this);
+        };
+        Test.OptionalClassPrx.prototype = new Ice.ObjectPrx();
+        Test.OptionalClassPrx.prototype.constructor = Test.OptionalClassPrx;
+        Test.OptionalClassPrx.checkedCast = function(__prx, __facet, __ctx)
         {
-            if(__Test_StringSSHelper === null)
-            {
-                __Test_StringSSHelper = Ice.StreamHelpers.generateSeqHelper(
-                    Ice.StringSeqHelper);
-            }
-            return __Test_StringSSHelper;
-        }
-});
-
-var __Test_MyEnumSSHelper = null;
-Object.defineProperty(Test, "MyEnumSSHelper", 
-{
-    get: function()
+            return Ice.ObjectPrx.checkedCastImpl(Test.OptionalClassPrx, Test.OptionalClass.ice_staticId(), __prx, __facet, __ctx);
+        };
+        Test.OptionalClassPrx.uncheckedCast = function(__prx, __facet)
         {
-            if(__Test_MyEnumSSHelper === null)
-            {
-                __Test_MyEnumSSHelper = Ice.StreamHelpers.generateSeqHelper(
-                    Test.MyEnumSHelper);
-            }
-            return __Test_MyEnumSSHelper;
-        }
-});
+            return Ice.ObjectPrx.uncheckedCastImpl(Test.OptionalClassPrx, __prx, __facet);
+        };
 
-var __Test_MyClassSSHelper = null;
-Object.defineProperty(Test, "MyClassSSHelper", 
-{
-    get: function()
+        Test.OptionalClass = function(bo, by, sh, i)
         {
-            if(__Test_MyClassSSHelper === null)
-            {
-                __Test_MyClassSSHelper = Ice.StreamHelpers.generateSeqHelper(
-                    Test.MyClassSHelper);
-            }
-            return __Test_MyClassSSHelper;
-        }
-});
-
-var __Test_SmallStructSHelper = null;
-Object.defineProperty(Test, "SmallStructSHelper", 
-{
-    get: function()
+            Ice.Object.call(this);
+            this.bo = bo !== undefined ? bo : false;
+            this.by = by !== undefined ? by : 0;
+            this.sh = sh;
+            this.i = i;
+        };
+        Test.OptionalClass.prototype = new Ice.Object();
+        Test.OptionalClass.prototype.constructor = Test.OptionalClass;
+        Test.OptionalClass.__ids = [
+            "::Ice::Object",
+            "::Test::OptionalClass"
+        ];
+        Test.OptionalClass.prototype.ice_ids = function(current)
         {
-            if(__Test_SmallStructSHelper === null)
-            {
-                __Test_SmallStructSHelper = Ice.StreamHelpers.generateSeqHelper(
-                    Ice.StreamHelpers.generateStructHelper(Test.SmallStruct, 32));
-            }
-            return __Test_SmallStructSHelper;
-        }
-});
+            return Test.OptionalClass.__ids;
+        };
 
-var __Test_ByteBoolDHelper = null;
-Object.defineProperty(Test, "ByteBoolDHelper", 
-{
-    get: function()
+        Test.OptionalClass.ice_staticId = function()
         {
-            if(__Test_ByteBoolDHelper === null)
-            {
-                __Test_ByteBoolDHelper = Ice.StreamHelpers.generateDictHelper(
-                    Ice.StreamHelpers.ByteHelper, 
-                    Ice.StreamHelpers.BoolHelper);
-            }
-            return __Test_ByteBoolDHelper;
-        }
-});
+            return Test.OptionalClass.__ids[1];
+        };
 
-var __Test_ShortIntDHelper = null;
-Object.defineProperty(Test, "ShortIntDHelper", 
-{
-    get: function()
+        Test.OptionalClass.prototype.toString = function()
         {
-            if(__Test_ShortIntDHelper === null)
-            {
-                __Test_ShortIntDHelper = Ice.StreamHelpers.generateDictHelper(
-                    Ice.StreamHelpers.ShortHelper, 
-                    Ice.StreamHelpers.IntHelper);
-            }
-            return __Test_ShortIntDHelper;
-        }
-});
+            return "[object Test::OptionalClass]";
+        };
 
-var __Test_LongFloatDHelper = null;
-Object.defineProperty(Test, "LongFloatDHelper", 
-{
-    get: function()
+        Test.OptionalClass.prototype.__writeImpl = function(__os)
         {
-            if(__Test_LongFloatDHelper === null)
-            {
-                __Test_LongFloatDHelper = Ice.StreamHelpers.generateDictHelper(
-                    Ice.StreamHelpers.LongHelper, 
-                    Ice.StreamHelpers.FloatHelper);
-            }
-            return __Test_LongFloatDHelper;
-        }
-});
+            __os.startWriteSlice(Test.OptionalClass.ice_staticId(), -1, true);
+            __os.writeBool(this.bo);
+            __os.writeByte(this.by);
+            __os.writeOptShort(1, this.sh);
+            __os.writeOptInt(2, this.i);
+            __os.endWriteSlice();
+        };
 
-var __Test_StringStringDHelper = null;
-Object.defineProperty(Test, "StringStringDHelper", 
-{
-    get: function()
+        Test.OptionalClass.prototype.__readImpl = function(__is)
         {
-            if(__Test_StringStringDHelper === null)
-            {
-                __Test_StringStringDHelper = Ice.StreamHelpers.generateDictHelper(
-                    Ice.StreamHelpers.StringHelper, 
-                    Ice.StreamHelpers.StringHelper);
-            }
-            return __Test_StringStringDHelper;
-        }
-});
+            __is.startReadSlice();
+            this.bo = __is.readBool();
+            this.by = __is.readByte();
+            this.sh = __is.readOptShort(1);
+            this.i = __is.readOptInt(2);
+            __is.endReadSlice();
+        };
+        
+        Ice.ClassRegistry.register(Test.OptionalClass.ice_staticId(), Test.OptionalClass);
+        
 
-var __Test_StringMyClassDHelper = null;
-Object.defineProperty(Test, "StringMyClassDHelper", 
-{
-    get: function()
+        Test.BasePrx = function()
         {
-            if(__Test_StringMyClassDHelper === null)
-            {
-                __Test_StringMyClassDHelper = Ice.StreamHelpers.generateObjectDictHelper(
-                    Ice.StreamHelpers.StringHelper, 
-                    Ice.ClassRegistry.find("::Test::MyClass"));
-            }
-            return __Test_StringMyClassDHelper;
-        }
-});
+            Ice.ObjectPrx.call(this);
+        };
+        Test.BasePrx.prototype = new Ice.ObjectPrx();
+        Test.BasePrx.prototype.constructor = Test.BasePrx;
+        Test.BasePrx.checkedCast = function(__prx, __facet, __ctx)
+        {
+            return Ice.ObjectPrx.checkedCastImpl(Test.BasePrx, Test.Base.ice_staticId(), __prx, __facet, __ctx);
+        };
+        Test.BasePrx.uncheckedCast = function(__prx, __facet)
+        {
+            return Ice.ObjectPrx.uncheckedCastImpl(Test.BasePrx, __prx, __facet);
+        };
 
-Test.MyClassPrx = function()
-{
-    Ice.ObjectPrx.call(this);
-};
-Test.MyClassPrx.prototype = new Ice.ObjectPrx();
-Test.MyClassPrx.prototype.constructor = Test.MyClassPrx;
-Test.MyClassPrx.checkedCast = function(__prx, __facet, __ctx)
-{
-    return Ice.ObjectPrx.checkedCastImpl(Test.MyClassPrx, Test.MyClass.ice_staticId(), __prx, __facet, __ctx);
-};
-Test.MyClassPrx.uncheckedCast = function(__prx, __facet)
-{
-    return Ice.ObjectPrx.uncheckedCastImpl(Test.MyClassPrx, __prx, __facet);
-};
+        Test.Base = function(a, b)
+        {
+            Ice.Object.call(this);
+            this.a = a !== undefined ? a : 0;
+            this.b = b !== undefined ? b : 0;
+        };
+        Test.Base.prototype = new Ice.Object();
+        Test.Base.prototype.constructor = Test.Base;
+        Test.Base.__ids = [
+            "::Ice::Object",
+            "::Test::Base"
+        ];
+        Test.Base.prototype.ice_ids = function(current)
+        {
+            return Test.Base.__ids;
+        };
 
-Test.MyClass = function(c, o, s, seq1, seq2, seq3, seq4, seq5, seq6, seq7, seq8, seq9, seq10, d)
-{
-    Ice.Object.call(this);
-    this.c = c !== undefined ? c : null;
-    this.o = o !== undefined ? o : null;
-    this.s = s !== undefined ? s : null;
-    this.seq1 = seq1 !== undefined ? seq1 : null;
-    this.seq2 = seq2 !== undefined ? seq2 : null;
-    this.seq3 = seq3 !== undefined ? seq3 : null;
-    this.seq4 = seq4 !== undefined ? seq4 : null;
-    this.seq5 = seq5 !== undefined ? seq5 : null;
-    this.seq6 = seq6 !== undefined ? seq6 : null;
-    this.seq7 = seq7 !== undefined ? seq7 : null;
-    this.seq8 = seq8 !== undefined ? seq8 : null;
-    this.seq9 = seq9 !== undefined ? seq9 : null;
-    this.seq10 = seq10 !== undefined ? seq10 : null;
-    this.d = d !== undefined ? d : null;
-};
-Test.MyClass.prototype = new Ice.Object();
-Test.MyClass.prototype.constructor = Test.MyClass;
-Test.MyClass.__ids = [
-    "::Ice::Object",
-    "::Test::MyClass"
-];
-Test.MyClass.prototype.ice_ids = function(current)
-{
-    return Test.MyClass.__ids;
-};
+        Test.Base.ice_staticId = function()
+        {
+            return Test.Base.__ids[1];
+        };
 
-Test.MyClass.ice_staticId = function()
-{
-    return Test.MyClass.__ids[1];
-};
+        Test.Base.prototype.toString = function()
+        {
+            return "[object Test::Base]";
+        };
 
-Test.MyClass.prototype.toString = function()
-{
-    return "[object Test::MyClass]";
-};
+        Test.Base.prototype.__writeImpl = function(__os)
+        {
+            __os.startWriteSlice(Test.Base.ice_staticId(), -1, true);
+            __os.writeInt(this.a);
+            __os.writeInt(this.b);
+            __os.endWriteSlice();
+        };
 
-Test.MyClass.prototype.__writeImpl = function(__os)
-{
-    __os.startWriteSlice(Test.MyClass.ice_staticId(), -1, true);
-    __os.writeObject(this.c);
-    __os.writeObject(this.o);
-    __os.writeStruct(this.s);
-    Ice.BoolSeqHelper.write(__os, this.seq1);
-    Ice.ByteSeqHelper.write(__os, this.seq2);
-    Ice.ShortSeqHelper.write(__os, this.seq3);
-    Ice.IntSeqHelper.write(__os, this.seq4);
-    Ice.LongSeqHelper.write(__os, this.seq5);
-    Ice.FloatSeqHelper.write(__os, this.seq6);
-    Ice.DoubleSeqHelper.write(__os, this.seq7);
-    Ice.StringSeqHelper.write(__os, this.seq8);
-    Test.MyEnumSHelper.write(__os, this.seq9);
-    Test.MyClassSHelper.write(__os, this.seq10);
-    Test.StringMyClassDHelper.write(__os, this.d);
-    __os.endWriteSlice();
-};
+        Test.Base.prototype.__readImpl = function(__is)
+        {
+            __is.startReadSlice();
+            this.a = __is.readInt();
+            this.b = __is.readInt();
+            __is.endReadSlice();
+        };
+        
+        Ice.ClassRegistry.register(Test.Base.ice_staticId(), Test.Base);
+        
 
-Test.MyClass.prototype.__readImpl = function(__is)
-{
-    __is.startReadSlice();
-    var self = this;
-    __is.readObject(function(obj){ self.c = obj; }, Test.MyClass);
-    __is.readObject(function(obj){ self.o = obj; }, Ice.Object);
-    this.s = __is.readStruct(Test.SmallStruct);
-    this.seq1 = Ice.BoolSeqHelper.read(__is);
-    this.seq2 = Ice.ByteSeqHelper.read(__is);
-    this.seq3 = Ice.ShortSeqHelper.read(__is);
-    this.seq4 = Ice.IntSeqHelper.read(__is);
-    this.seq5 = Ice.LongSeqHelper.read(__is);
-    this.seq6 = Ice.FloatSeqHelper.read(__is);
-    this.seq7 = Ice.DoubleSeqHelper.read(__is);
-    this.seq8 = Ice.StringSeqHelper.read(__is);
-    this.seq9 = Test.MyEnumSHelper.read(__is);
-    this.seq10 = Test.MyClassSHelper.read(__is);
-    this.d = Test.StringMyClassDHelper.read(__is);
-    __is.endReadSlice();
-};
+        Test.DerivedPrx = function()
+        {
+            Test.BasePrx.call(this);
+        };
+        Test.DerivedPrx.prototype = new Test.BasePrx();
+        Test.DerivedPrx.prototype.constructor = Test.DerivedPrx;
+        Test.DerivedPrx.checkedCast = function(__prx, __facet, __ctx)
+        {
+            return Ice.ObjectPrx.checkedCastImpl(Test.DerivedPrx, Test.Derived.ice_staticId(), __prx, __facet, __ctx);
+        };
+        Test.DerivedPrx.uncheckedCast = function(__prx, __facet)
+        {
+            return Ice.ObjectPrx.uncheckedCastImpl(Test.DerivedPrx, __prx, __facet);
+        };
 
-Ice.ClassRegistry.register(Test.MyClass.ice_staticId(), Test.MyClass);
+        Test.Derived = function(a, b, c, d)
+        {
+            Test.Base.call(this, a, b);
+            this.c = c !== undefined ? c : 0;
+            this.d = d !== undefined ? d : 0;
+        };
+        Test.Derived.prototype = new Test.Base();
+        Test.Derived.prototype.constructor = Test.Derived;
+        Test.Derived.__ids = [
+            "::Ice::Object",
+            "::Test::Base",
+            "::Test::Derived"
+        ];
+        Test.Derived.prototype.ice_ids = function(current)
+        {
+            return Test.Derived.__ids;
+        };
 
+        Test.Derived.ice_staticId = function()
+        {
+            return Test.Derived.__ids[2];
+        };
 
-Test.MyInterfacePrx = function()
-{
-    Ice.ObjectPrx.call(this);
-};
-Test.MyInterfacePrx.prototype = new Ice.ObjectPrx();
-Test.MyInterfacePrx.prototype.constructor = Test.MyInterfacePrx;
-Test.MyInterfacePrx.checkedCast = function(__prx, __facet, __ctx)
-{
-    return Ice.ObjectPrx.checkedCastImpl(Test.MyInterfacePrx, Test.MyInterface.ice_staticId(), __prx, __facet, __ctx);
-};
-Test.MyInterfacePrx.uncheckedCast = function(__prx, __facet)
-{
-    return Ice.ObjectPrx.uncheckedCastImpl(Test.MyInterfacePrx, __prx, __facet);
-};
+        Test.Derived.prototype.toString = function()
+        {
+            return "[object Test::Derived]";
+        };
 
-Test.MyInterface = function()
-{
-    Ice.Object.call(this);
-};
-Test.MyInterface.prototype = new Ice.Object();
-Test.MyInterface.prototype.constructor = Test.MyInterface;
-Test.MyInterface.__ids = [
-    "::Ice::Object",
-    "::Test::MyInterface"
-];
-Test.MyInterface.prototype.ice_ids = function(current)
-{
-    return Test.MyInterface.__ids;
-};
+        Test.Derived.prototype.__writeImpl = function(__os)
+        {
+            __os.startWriteSlice(Test.Derived.ice_staticId(), -1, false);
+            __os.writeInt(this.c);
+            __os.writeInt(this.d);
+            __os.endWriteSlice();
+            Test.Base.prototype.__writeImpl.call(this, __os);
+        };
 
-Test.MyInterface.ice_staticId = function()
-{
-    return Test.MyInterface.__ids[1];
-};
+        Test.Derived.prototype.__readImpl = function(__is)
+        {
+            __is.startReadSlice();
+            this.c = __is.readInt();
+            this.d = __is.readInt();
+            __is.endReadSlice();
+            Test.Base.prototype.__readImpl.call(this, __is);
+        };
+        
+        Ice.ClassRegistry.register(Test.Derived.ice_staticId(), Test.Derived);
+        
+        
+        var __Test_MyEnumSHelper = null;
+        Object.defineProperty(Test, "MyEnumSHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_MyEnumSHelper === null)
+                    {
+                        __Test_MyEnumSHelper = Ice.StreamHelpers.generateSeqHelper(
+                            Ice.StreamHelpers.generateEnumHelper(Test.MyEnum));
+                    }
+                    return __Test_MyEnumSHelper;
+                }
+        });
+        
+        var __Test_MyClassSHelper = null;
+        Object.defineProperty(Test, "MyClassSHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_MyClassSHelper === null)
+                    {
+                        __Test_MyClassSHelper = Ice.StreamHelpers.generateObjectSeqHelper(
+                            Ice.ClassRegistry.find("::Test::MyClass"));
+                    }
+                    return __Test_MyClassSHelper;
+                }
+        });
+        
+        var __Test_BoolSSHelper = null;
+        Object.defineProperty(Test, "BoolSSHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_BoolSSHelper === null)
+                    {
+                        __Test_BoolSSHelper = Ice.StreamHelpers.generateSeqHelper(
+                            Ice.BoolSeqHelper);
+                    }
+                    return __Test_BoolSSHelper;
+                }
+        });
+        
+        var __Test_ByteSSHelper = null;
+        Object.defineProperty(Test, "ByteSSHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_ByteSSHelper === null)
+                    {
+                        __Test_ByteSSHelper = Ice.StreamHelpers.generateSeqHelper(
+                            Ice.ByteSeqHelper);
+                    }
+                    return __Test_ByteSSHelper;
+                }
+        });
+        
+        var __Test_ShortSSHelper = null;
+        Object.defineProperty(Test, "ShortSSHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_ShortSSHelper === null)
+                    {
+                        __Test_ShortSSHelper = Ice.StreamHelpers.generateSeqHelper(
+                            Ice.ShortSeqHelper);
+                    }
+                    return __Test_ShortSSHelper;
+                }
+        });
+        
+        var __Test_IntSSHelper = null;
+        Object.defineProperty(Test, "IntSSHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_IntSSHelper === null)
+                    {
+                        __Test_IntSSHelper = Ice.StreamHelpers.generateSeqHelper(
+                            Ice.IntSeqHelper);
+                    }
+                    return __Test_IntSSHelper;
+                }
+        });
+        
+        var __Test_LongSSHelper = null;
+        Object.defineProperty(Test, "LongSSHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_LongSSHelper === null)
+                    {
+                        __Test_LongSSHelper = Ice.StreamHelpers.generateSeqHelper(
+                            Ice.LongSeqHelper);
+                    }
+                    return __Test_LongSSHelper;
+                }
+        });
+        
+        var __Test_FloatSSHelper = null;
+        Object.defineProperty(Test, "FloatSSHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_FloatSSHelper === null)
+                    {
+                        __Test_FloatSSHelper = Ice.StreamHelpers.generateSeqHelper(
+                            Ice.FloatSeqHelper);
+                    }
+                    return __Test_FloatSSHelper;
+                }
+        });
+        
+        var __Test_DoubleSSHelper = null;
+        Object.defineProperty(Test, "DoubleSSHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_DoubleSSHelper === null)
+                    {
+                        __Test_DoubleSSHelper = Ice.StreamHelpers.generateSeqHelper(
+                            Ice.DoubleSeqHelper);
+                    }
+                    return __Test_DoubleSSHelper;
+                }
+        });
+        
+        var __Test_StringSSHelper = null;
+        Object.defineProperty(Test, "StringSSHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_StringSSHelper === null)
+                    {
+                        __Test_StringSSHelper = Ice.StreamHelpers.generateSeqHelper(
+                            Ice.StringSeqHelper);
+                    }
+                    return __Test_StringSSHelper;
+                }
+        });
+        
+        var __Test_MyEnumSSHelper = null;
+        Object.defineProperty(Test, "MyEnumSSHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_MyEnumSSHelper === null)
+                    {
+                        __Test_MyEnumSSHelper = Ice.StreamHelpers.generateSeqHelper(
+                            Test.MyEnumSHelper);
+                    }
+                    return __Test_MyEnumSSHelper;
+                }
+        });
+        
+        var __Test_MyClassSSHelper = null;
+        Object.defineProperty(Test, "MyClassSSHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_MyClassSSHelper === null)
+                    {
+                        __Test_MyClassSSHelper = Ice.StreamHelpers.generateSeqHelper(
+                            Test.MyClassSHelper);
+                    }
+                    return __Test_MyClassSSHelper;
+                }
+        });
+        
+        var __Test_SmallStructSHelper = null;
+        Object.defineProperty(Test, "SmallStructSHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_SmallStructSHelper === null)
+                    {
+                        __Test_SmallStructSHelper = Ice.StreamHelpers.generateSeqHelper(
+                            Ice.StreamHelpers.generateStructHelper(Test.SmallStruct, 32));
+                    }
+                    return __Test_SmallStructSHelper;
+                }
+        });
+        
+        var __Test_ByteBoolDHelper = null;
+        Object.defineProperty(Test, "ByteBoolDHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_ByteBoolDHelper === null)
+                    {
+                        __Test_ByteBoolDHelper = Ice.StreamHelpers.generateDictHelper(
+                            Ice.StreamHelpers.ByteHelper, 
+                            Ice.StreamHelpers.BoolHelper);
+                    }
+                    return __Test_ByteBoolDHelper;
+                }
+        });
+        
+        var __Test_ShortIntDHelper = null;
+        Object.defineProperty(Test, "ShortIntDHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_ShortIntDHelper === null)
+                    {
+                        __Test_ShortIntDHelper = Ice.StreamHelpers.generateDictHelper(
+                            Ice.StreamHelpers.ShortHelper, 
+                            Ice.StreamHelpers.IntHelper);
+                    }
+                    return __Test_ShortIntDHelper;
+                }
+        });
+        
+        var __Test_LongFloatDHelper = null;
+        Object.defineProperty(Test, "LongFloatDHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_LongFloatDHelper === null)
+                    {
+                        __Test_LongFloatDHelper = Ice.StreamHelpers.generateDictHelper(
+                            Ice.StreamHelpers.LongHelper, 
+                            Ice.StreamHelpers.FloatHelper);
+                    }
+                    return __Test_LongFloatDHelper;
+                }
+        });
+        
+        var __Test_StringStringDHelper = null;
+        Object.defineProperty(Test, "StringStringDHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_StringStringDHelper === null)
+                    {
+                        __Test_StringStringDHelper = Ice.StreamHelpers.generateDictHelper(
+                            Ice.StreamHelpers.StringHelper, 
+                            Ice.StreamHelpers.StringHelper);
+                    }
+                    return __Test_StringStringDHelper;
+                }
+        });
+        
+        var __Test_StringMyClassDHelper = null;
+        Object.defineProperty(Test, "StringMyClassDHelper", 
+        {
+            get: function()
+                {
+                    if(__Test_StringMyClassDHelper === null)
+                    {
+                        __Test_StringMyClassDHelper = Ice.StreamHelpers.generateObjectDictHelper(
+                            Ice.StreamHelpers.StringHelper, 
+                            Ice.ClassRegistry.find("::Test::MyClass"));
+                    }
+                    return __Test_StringMyClassDHelper;
+                }
+        });
 
-Test.MyInterface.prototype.toString = function()
-{
-    return "[object Test::MyInterface]";
-};
+        Test.MyClassPrx = function()
+        {
+            Ice.ObjectPrx.call(this);
+        };
+        Test.MyClassPrx.prototype = new Ice.ObjectPrx();
+        Test.MyClassPrx.prototype.constructor = Test.MyClassPrx;
+        Test.MyClassPrx.checkedCast = function(__prx, __facet, __ctx)
+        {
+            return Ice.ObjectPrx.checkedCastImpl(Test.MyClassPrx, Test.MyClass.ice_staticId(), __prx, __facet, __ctx);
+        };
+        Test.MyClassPrx.uncheckedCast = function(__prx, __facet)
+        {
+            return Ice.ObjectPrx.uncheckedCastImpl(Test.MyClassPrx, __prx, __facet);
+        };
 
-Test.MyInterface.prototype.__writeImpl = function(__os)
-{
-    __os.startWriteSlice(Test.MyInterface.ice_staticId(), -1, true);
-    __os.endWriteSlice();
-};
+        Test.MyClass = function(c, o, s, seq1, seq2, seq3, seq4, seq5, seq6, seq7, seq8, seq9, seq10, d)
+        {
+            Ice.Object.call(this);
+            this.c = c !== undefined ? c : null;
+            this.o = o !== undefined ? o : null;
+            this.s = s !== undefined ? s : null;
+            this.seq1 = seq1 !== undefined ? seq1 : null;
+            this.seq2 = seq2 !== undefined ? seq2 : null;
+            this.seq3 = seq3 !== undefined ? seq3 : null;
+            this.seq4 = seq4 !== undefined ? seq4 : null;
+            this.seq5 = seq5 !== undefined ? seq5 : null;
+            this.seq6 = seq6 !== undefined ? seq6 : null;
+            this.seq7 = seq7 !== undefined ? seq7 : null;
+            this.seq8 = seq8 !== undefined ? seq8 : null;
+            this.seq9 = seq9 !== undefined ? seq9 : null;
+            this.seq10 = seq10 !== undefined ? seq10 : null;
+            this.d = d !== undefined ? d : null;
+        };
+        Test.MyClass.prototype = new Ice.Object();
+        Test.MyClass.prototype.constructor = Test.MyClass;
+        Test.MyClass.__ids = [
+            "::Ice::Object",
+            "::Test::MyClass"
+        ];
+        Test.MyClass.prototype.ice_ids = function(current)
+        {
+            return Test.MyClass.__ids;
+        };
 
-Test.MyInterface.prototype.__readImpl = function(__is)
-{
-    __is.startReadSlice();
-    __is.endReadSlice();
-};
+        Test.MyClass.ice_staticId = function()
+        {
+            return Test.MyClass.__ids[1];
+        };
 
-Ice.ClassRegistry.register(Test.MyInterface.ice_staticId(), Test.MyInterface);
+        Test.MyClass.prototype.toString = function()
+        {
+            return "[object Test::MyClass]";
+        };
 
+        Test.MyClass.prototype.__writeImpl = function(__os)
+        {
+            __os.startWriteSlice(Test.MyClass.ice_staticId(), -1, true);
+            __os.writeObject(this.c);
+            __os.writeObject(this.o);
+            __os.writeStruct(this.s);
+            Ice.BoolSeqHelper.write(__os, this.seq1);
+            Ice.ByteSeqHelper.write(__os, this.seq2);
+            Ice.ShortSeqHelper.write(__os, this.seq3);
+            Ice.IntSeqHelper.write(__os, this.seq4);
+            Ice.LongSeqHelper.write(__os, this.seq5);
+            Ice.FloatSeqHelper.write(__os, this.seq6);
+            Ice.DoubleSeqHelper.write(__os, this.seq7);
+            Ice.StringSeqHelper.write(__os, this.seq8);
+            Test.MyEnumSHelper.write(__os, this.seq9);
+            Test.MyClassSHelper.write(__os, this.seq10);
+            Test.StringMyClassDHelper.write(__os, this.d);
+            __os.endWriteSlice();
+        };
 
-Test.MyException = function(c, _cause)
-{
-    Ice.UserException.call(this, _cause);
-    this.c = c !== undefined ? c : null;
-};
-Test.MyException.prototype = new Ice.UserException();
-Test.MyException.prototype.constructor = Test.MyException;
+        Test.MyClass.prototype.__readImpl = function(__is)
+        {
+            __is.startReadSlice();
+            var self = this;
+            __is.readObject(function(obj){ self.c = obj; }, Test.MyClass);
+            __is.readObject(function(obj){ self.o = obj; }, Ice.Object);
+            this.s = __is.readStruct(Test.SmallStruct);
+            this.seq1 = Ice.BoolSeqHelper.read(__is);
+            this.seq2 = Ice.ByteSeqHelper.read(__is);
+            this.seq3 = Ice.ShortSeqHelper.read(__is);
+            this.seq4 = Ice.IntSeqHelper.read(__is);
+            this.seq5 = Ice.LongSeqHelper.read(__is);
+            this.seq6 = Ice.FloatSeqHelper.read(__is);
+            this.seq7 = Ice.DoubleSeqHelper.read(__is);
+            this.seq8 = Ice.StringSeqHelper.read(__is);
+            this.seq9 = Test.MyEnumSHelper.read(__is);
+            this.seq10 = Test.MyClassSHelper.read(__is);
+            this.d = Test.StringMyClassDHelper.read(__is);
+            __is.endReadSlice();
+        };
+        
+        Ice.ClassRegistry.register(Test.MyClass.ice_staticId(), Test.MyClass);
+        
 
-Test.MyException.prototype.ice_name = function()
-{
-    return "Test::MyException";
-};
+        Test.MyInterfacePrx = function()
+        {
+            Ice.ObjectPrx.call(this);
+        };
+        Test.MyInterfacePrx.prototype = new Ice.ObjectPrx();
+        Test.MyInterfacePrx.prototype.constructor = Test.MyInterfacePrx;
+        Test.MyInterfacePrx.checkedCast = function(__prx, __facet, __ctx)
+        {
+            return Ice.ObjectPrx.checkedCastImpl(Test.MyInterfacePrx, Test.MyInterface.ice_staticId(), __prx, __facet, __ctx);
+        };
+        Test.MyInterfacePrx.uncheckedCast = function(__prx, __facet)
+        {
+            return Ice.ObjectPrx.uncheckedCastImpl(Test.MyInterfacePrx, __prx, __facet);
+        };
 
-Test.MyException.prototype.toString = function()
-{
-    return this.ice_name();
-};
+        Test.MyInterface = function()
+        {
+            Ice.Object.call(this);
+        };
+        Test.MyInterface.prototype = new Ice.Object();
+        Test.MyInterface.prototype.constructor = Test.MyInterface;
+        Test.MyInterface.__ids = [
+            "::Ice::Object",
+            "::Test::MyInterface"
+        ];
+        Test.MyInterface.prototype.ice_ids = function(current)
+        {
+            return Test.MyInterface.__ids;
+        };
 
-Test.MyException.prototype.__writeImpl = function(__os)
-{
-    __os.startWriteSlice("::Test::MyException", -1, true);
-    __os.writeObject(this.c);
-    __os.endWriteSlice();
-};
+        Test.MyInterface.ice_staticId = function()
+        {
+            return Test.MyInterface.__ids[1];
+        };
 
-Test.MyException.prototype.__readImpl = function(__is)
-{
-    __is.startReadSlice();
-    var self = this;
-    __is.readObject(function(obj){ self.c = obj; }, Test.MyClass);
-    __is.endReadSlice();
-};
+        Test.MyInterface.prototype.toString = function()
+        {
+            return "[object Test::MyInterface]";
+        };
 
-Ice.ExceptionRegistry.register("::Test::MyException", Test.MyException);
+        Test.MyInterface.prototype.__writeImpl = function(__os)
+        {
+            __os.startWriteSlice(Test.MyInterface.ice_staticId(), -1, true);
+            __os.endWriteSlice();
+        };
 
-exports.Test = exports.Test || {};
-exports.Test.MyEnum = Test.MyEnum;
-exports.Test.SmallStruct = Test.SmallStruct;
-exports.Test.OptionalClass = Test.OptionalClass;
-exports.Test.OptionalClassPrx = Test.OptionalClassPrx;
-exports.Test.Base = Test.Base;
-exports.Test.BasePrx = Test.BasePrx;
-exports.Test.Derived = Test.Derived;
-exports.Test.DerivedPrx = Test.DerivedPrx;
-exports.Test.MyEnumSHelper = Test.MyEnumSHelper;
-exports.Test.MyClassSHelper = Test.MyClassSHelper;
-exports.Test.BoolSSHelper = Test.BoolSSHelper;
-exports.Test.ByteSSHelper = Test.ByteSSHelper;
-exports.Test.ShortSSHelper = Test.ShortSSHelper;
-exports.Test.IntSSHelper = Test.IntSSHelper;
-exports.Test.LongSSHelper = Test.LongSSHelper;
-exports.Test.FloatSSHelper = Test.FloatSSHelper;
-exports.Test.DoubleSSHelper = Test.DoubleSSHelper;
-exports.Test.StringSSHelper = Test.StringSSHelper;
-exports.Test.MyEnumSSHelper = Test.MyEnumSSHelper;
-exports.Test.MyClassSSHelper = Test.MyClassSSHelper;
-exports.Test.SmallStructSHelper = Test.SmallStructSHelper;
-exports.Test.ByteBoolDHelper = Test.ByteBoolDHelper;
-exports.Test.ShortIntDHelper = Test.ShortIntDHelper;
-exports.Test.LongFloatDHelper = Test.LongFloatDHelper;
-exports.Test.StringStringDHelper = Test.StringStringDHelper;
-exports.Test.StringMyClassDHelper = Test.StringMyClassDHelper;
-exports.Test.MyClass = Test.MyClass;
-exports.Test.MyClassPrx = Test.MyClassPrx;
-exports.Test.MyInterface = Test.MyInterface;
-exports.Test.MyInterfacePrx = Test.MyInterfacePrx;
-exports.Test.MyException = Test.MyException;
+        Test.MyInterface.prototype.__readImpl = function(__is)
+        {
+            __is.startReadSlice();
+            __is.endReadSlice();
+        };
+        
+        Ice.ClassRegistry.register(Test.MyInterface.ice_staticId(), Test.MyInterface);
+        
+
+        Test.MyException = function(c, _cause)
+        {
+            Ice.UserException.call(this, _cause);
+            this.c = c !== undefined ? c : null;
+        };
+        Test.MyException.prototype = new Ice.UserException();
+        Test.MyException.prototype.constructor = Test.MyException;
+
+        Test.MyException.prototype.ice_name = function()
+        {
+            return "Test::MyException";
+        };
+
+        Test.MyException.prototype.toString = function()
+        {
+            return this.ice_name();
+        };
+
+        Test.MyException.prototype.__writeImpl = function(__os)
+        {
+            __os.startWriteSlice("::Test::MyException", -1, true);
+            __os.writeObject(this.c);
+            __os.endWriteSlice();
+        };
+
+        Test.MyException.prototype.__readImpl = function(__is)
+        {
+            __is.startReadSlice();
+            var self = this;
+            __is.readObject(function(obj){ self.c = obj; }, Test.MyClass);
+            __is.endReadSlice();
+        };
+        
+        Ice.ExceptionRegistry.register("::Test::MyException", Test.MyException);
+        
+        exports.Test = exports.Test || {};
+        exports.Test.MyEnum = Test.MyEnum;
+        exports.Test.SmallStruct = Test.SmallStruct;
+        exports.Test.OptionalClass = Test.OptionalClass;
+        exports.Test.OptionalClassPrx = Test.OptionalClassPrx;
+        exports.Test.Base = Test.Base;
+        exports.Test.BasePrx = Test.BasePrx;
+        exports.Test.Derived = Test.Derived;
+        exports.Test.DerivedPrx = Test.DerivedPrx;
+        exports.Test.MyEnumSHelper = Test.MyEnumSHelper;
+        exports.Test.MyClassSHelper = Test.MyClassSHelper;
+        exports.Test.BoolSSHelper = Test.BoolSSHelper;
+        exports.Test.ByteSSHelper = Test.ByteSSHelper;
+        exports.Test.ShortSSHelper = Test.ShortSSHelper;
+        exports.Test.IntSSHelper = Test.IntSSHelper;
+        exports.Test.LongSSHelper = Test.LongSSHelper;
+        exports.Test.FloatSSHelper = Test.FloatSSHelper;
+        exports.Test.DoubleSSHelper = Test.DoubleSSHelper;
+        exports.Test.StringSSHelper = Test.StringSSHelper;
+        exports.Test.MyEnumSSHelper = Test.MyEnumSSHelper;
+        exports.Test.MyClassSSHelper = Test.MyClassSSHelper;
+        exports.Test.SmallStructSHelper = Test.SmallStructSHelper;
+        exports.Test.ByteBoolDHelper = Test.ByteBoolDHelper;
+        exports.Test.ShortIntDHelper = Test.ShortIntDHelper;
+        exports.Test.LongFloatDHelper = Test.LongFloatDHelper;
+        exports.Test.StringStringDHelper = Test.StringStringDHelper;
+        exports.Test.StringMyClassDHelper = Test.StringMyClassDHelper;
+        exports.Test.MyClass = Test.MyClass;
+        exports.Test.MyClassPrx = Test.MyClassPrx;
+        exports.Test.MyInterface = Test.MyInterface;
+        exports.Test.MyInterfacePrx = Test.MyInterfacePrx;
+        exports.Test.MyException = Test.MyException;
+    };
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+}
+(typeof module !== "undefined" ? module : undefined, "StreamTest"));

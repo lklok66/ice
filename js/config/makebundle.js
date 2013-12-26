@@ -100,7 +100,6 @@ Depends.prototype.sort = function()
                 var tmp = objects[j];
                 objects[j] = objects[i];
                 objects[i] = tmp;
-                j++;
             }
         }
     }
@@ -122,9 +121,14 @@ Parser.traverse = function(object, depend, file, basedir)
             {
                 if(value.callee.name === "require")
                 {
-                    if(value.arguments[0].value.indexOf(".") === 0)
+                    var includedFile = value.arguments[0].value;
+                    if(includedFile.indexOf(".") === 0 || includedFile.indexOf("Ice/") === 0)
                     {
-                        depend.depends.push(path.join(basedir, path.basename(value.arguments[0].value)) + ".js");
+                        var p = path.join(basedir, path.basename(includedFile)) + ".js";
+                        if(depend.depends.indexOf(p) === -1)
+                        {
+                            depend.depends.push(p);
+                        }
                     }
                 }
             }
@@ -147,15 +151,14 @@ Parser.dir = function(baseDir)
             {
                 var dirname = path.basename(path.dirname(file));
                 var basename = path.basename(file);
-                var depend = { file: basename, depends: []};
+                var depend = { file: dirname + "/" + basename, depends: []};
                 d.depends.push(depend);
                 var ast = esprima.parse(fs.readFileSync(file, 'utf-8'));
                 Parser.traverse(ast, depend, basename, dirname);
             }
             catch(e)
             {
-                //console.log("Error parsing: " + file);
-                //throw e;
+                throw e;
             }
         }
     }
@@ -166,35 +169,44 @@ var d = Parser.dir(baseDir);
 d.depends = d.expand().sort();
 
 //
+// Define all modules inside an anonymous function we don't want
+// that all variables become global in the browser.
+//
+process.stdout.write("(function()\n");
+process.stdout.write("{\n");
+
+//
 // Now write a bundle to stdout.
 //
 
-var moduleHeader = 
-"Module.define(\n" +
-"    \"%MODULE_NAME%\",\n" +
-"    function(module, exports)\n" +
-"    {";
+var data = fs.readFileSync(path.join(__dirname, "module.js"));
+var lines = data.toString().split("\n");
+var j;
 
-var moduleFooter = "    });\n";
-
-process.stdout.write(fs.readFileSync(path.join(__dirname, "module.js")));
+for(j in lines)
+{
+    process.stdout.write("    " + lines[j] + "\n");
+}
 process.stdout.write("\n");
 
-var file, i, length = d.depends.length, data, lines;
+var file, i, length = d.depends.length, fullPath;
 
 for(i = 0;  i < length; ++i)
 {
     file = d.depends[i].file;
-    process.stdout.write(moduleHeader.replace("%MODULE_NAME%","./" + path.basename(file, ".js")));
-    process.stdout.write("\n");
     
-    data = fs.readFileSync(path.join(baseDir, file)); 
-    lines = data.toString().split("\n");
-    for(var j in lines)
+    fullPath = path.join(path.dirname(baseDir), path.dirname(file), "browser",  path.basename(file));
+    if(!fs.existsSync(fullPath))
     {
-        process.stdout.write("        " + lines[j]);
-        process.stdout.write("\n");
+        fullPath = path.join(path.dirname(baseDir), file)
     }
-    process.stdout.write(moduleFooter);
-    process.stdout.write("\n");
+    
+    data = fs.readFileSync(fullPath); 
+    lines = data.toString().split("\n");
+    for(j in lines)
+    {
+        process.stdout.write("    " + lines[j] + "\n");
+    }
 }
+
+process.stdout.write("}());");

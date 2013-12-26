@@ -1095,16 +1095,17 @@ Slice::JsVisitor::writeDocCommentParam(const OperationPtr& p, ParamDir paramType
     }
 }
 
-Slice::Gen::Gen(const string& base, const vector<string>& includePaths, const string& dir)
-    : _includePaths(includePaths)
+Slice::Gen::Gen(const string& base, const string& include, const vector<string>& includePaths, const string& dir) : 
+    _include(include),
+    _includePaths(includePaths)
 {
-    string fileBase = base;
+    _fileBase = base;
     string::size_type pos = base.find_last_of("/\\");
     if(pos != string::npos)
     {
-        fileBase = base.substr(pos + 1);
+        _fileBase = base.substr(pos + 1);
     }
-    string file = fileBase + ".js";
+    string file = _fileBase + ".js";
 
     if(!dir.empty())
     {
@@ -1121,7 +1122,7 @@ Slice::Gen::Gen(const string& base, const vector<string>& includePaths, const st
     FileTracker::instance()->addFile(file);
     printHeader();
 
-    printGeneratedHeader(_out, fileBase + ".ice");
+    printGeneratedHeader(_out, _fileBase + ".ice");
 }
 
 Slice::Gen::~Gen()
@@ -1136,6 +1137,11 @@ void
 Slice::Gen::generate(const UnitPtr& p)
 {
     JsGenerator::validateMetaData(p);
+
+    _out << nl << "(function(module, name)";
+    _out << sb;
+    _out << nl << "var __m = function(module, exports, require)";
+    _out << sb;
 
     RequireVisitor requireVisitor(_out, _includePaths);
     p->visit(&requireVisitor, false);
@@ -1152,6 +1158,16 @@ Slice::Gen::generate(const UnitPtr& p)
     //
     ExportVisitor exportVisitor(_out);
     p->visit(&exportVisitor, false);
+    
+    _out << eb << ";";
+    _out << nl << "return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);";
+    _out << eb;
+    _out << nl << "(typeof module !== \"undefined\" ? module : undefined, \"";
+    if(!_include.empty())
+    {
+        _out << _include << "/";
+    }
+    _out << _fileBase << "\"));";
 }
 
 void
@@ -1301,7 +1317,7 @@ Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
     //
     _out << nl << "var _merge = require(\"Ice/Util\").merge;";
     _out << nl;
-    _out << nl << "var Ice = {};";
+    _out << nl << "var Ice = module.exports.Ice || {};";
     seenModules.push_back("Ice");
     
     if(_seenClass || _seenObjectSeq || _seenObjectDict)
@@ -1399,11 +1415,11 @@ Slice::Gen::TypesVisitor::visitModuleStart(const ModulePtr& p)
     //
     // For a top-level module we write the following:
     //
-    // var Foo = {};
+    // var Foo = module.exports.Foo || {};
     //
     // For an inner module we  write
     //
-    // Foo.Bar = {};
+    // Foo.Bar = module.exports.Foo.Bar || {};
     //
     
     const string scoped = getLocalScope(p->scoped());
@@ -1416,11 +1432,11 @@ Slice::Gen::TypesVisitor::visitModuleStart(const ModulePtr& p)
         _out << nl;
         if(topLevel)
         {
-            _out << nl << "var " << scoped << " = {};";
+            _out << nl << "var " << scoped << " = module.exports." << scoped << " ||  {};";
         }
         else
         {
-            _out << nl << scoped << " = {};";
+            _out << nl << scoped << " = module.exports." << scoped << " ||  {};";
         }
         _seenModules.push_back(scoped);
     }

@@ -10,7 +10,7 @@
 #pragma once
 
 #include <Ice/BuiltinSequences.ice>
-#include <Foo.ice>
+
 module Test
 {
 

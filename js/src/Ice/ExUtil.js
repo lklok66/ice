@@ -7,31 +7,36 @@
 //
 // **********************************************************************
 
-//
-// Exception utilities
-//
+(function(module, name){
+    var __m = function(module, exports, require){
+        //
+        // Exception utilities
+        //
 
-var UnexpectedObjectException = require("./LocalException").Ice.UnexpectedObjectException;
-var UnexpectedObjectException = require("./LocalException").Ice.UnexpectedObjectException;
-var ExUtil = {};
+        var UnexpectedObjectException = require("Ice/LocalException").Ice.UnexpectedObjectException;
+        var MemoryLimitException = require("Ice/LocalException").Ice.MemoryLimitException;
+        var ExUtil = {};
 
-ExUtil.toString = function(ex)
-{
-    // TODO: Best way to stringify exception?
-    return ex.toString();
-};
+        ExUtil.toString = function(ex)
+        {
+            // TODO: Best way to stringify exception?
+            return ex.toString();
+        };
 
-ExUtil.throwUOE = function(expectedType, actualType)
-{
-    throw new UnexpectedObjectException("expected element of type `" + expectedType + "' but received '" +
-                                         actualType, actualType, expectedType);
-};
+        ExUtil.throwUOE = function(expectedType, actualType)
+        {
+            throw new UnexpectedObjectException("expected element of type `" + expectedType + "' but received '" +
+                                                actualType, actualType, expectedType);
+        };
 
-ExUtil.throwMemoryLimitException = function(requested, maximum)
-{
-    throw new UnexpectedObjectException("requested " + requested + " bytes, maximum allowed is " + maximum +
-                                        " bytes (see Ice.MessageSizeMax)");
-};
+        ExUtil.throwMemoryLimitException = function(requested, maximum)
+        {
+            throw new MemoryLimitException("requested " + requested + " bytes, maximum allowed is " + maximum +
+                                           " bytes (see Ice.MessageSizeMax)");
+        };
 
-module.exports.Ice = {};
-module.exports.Ice.ExUtil = ExUtil;
+        module.exports.Ice = module.exports.Ice || {};
+        module.exports.Ice.ExUtil = ExUtil;
+    };
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+}(typeof module !== "undefined" ? module : undefined, "Ice/ExUtil"));
