@@ -137,7 +137,6 @@
             return promise;
         };
 
-        // TODO i is used in both loops?
         OutgoingConnectionFactory.prototype.gotClientEndpoints = function(endpoints, routerInfo, promise)
         {
             //
@@ -174,11 +173,11 @@
                 for(var e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
                 {
                     var connectionList = e.value;
-                    for(var i = 0; i < connectionList.length; ++i)
+                    for(var j = 0; j < connectionList.length; ++j)
                     {
-                        if(connectionList[i].endpoint().equals(endpoint))
+                        if(connectionList[j].endpoint().equals(endpoint))
                         {
-                            connectionList[i].setAdapter(adapter);
+                            connectionList[j].setAdapter(adapter);
                         }
                     }
                 }

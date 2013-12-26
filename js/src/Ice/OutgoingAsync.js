@@ -15,15 +15,16 @@
         var Debug = require("Ice/Debug").Ice.Debug;
         var HashMap = require("Ice/HashMap").Ice.HashMap;
         var LocalExceptionWrapper = require("Ice/LocalExceptionWrapper").Ice.LocalExceptionWrapper;
-        var Protocol = require("Ice/Protocol").Ice.Protocol;
         var OperationMode = require("Ice/Current").Ice.Current.OperationMode;
-        var Identity = require("Ice/Identity").Ice.Identity;
+        var Protocol = require("Ice/Protocol").Ice.Protocol;
 
         var _merge = require("Ice/Util").merge;
 
         var Ice = {};
-        _merge(Ice, require("Ice/LocalException").Ice);
+        _merge(Ice, require("Ice/BuiltinSequences").Ice);
         _merge(Ice, require("Ice/Exception").Ice);
+        _merge(Ice, require("Ice/LocalException").Ice);
+        _merge(Ice, require("Ice/Identity").Ice);
 
         var OutgoingAsync = function(prx, operation, completed)
         {
@@ -111,11 +112,11 @@
             var facet = ref.getFacet();
             if(facet === null || facet.length === 0)
             {
-                this._os.writeStringSeq(null);
+                Ice.StringSeqHelper.write(this._os, null);
             }
             else
             {
-                this._os.writeStringSeq([ facet ]);
+                Ice.StringSeqHelper.write(this._os, [ facet ]);
             }
 
             this._os.writeString(this._operation);
@@ -287,7 +288,7 @@
                         //
                         // For compatibility with the old FacetPath.
                         //
-                        var facetPath = this._is.readStringSeq();
+                        var facetPath = Ice.StringSeqHelper.read(this._is);
                         var facet;
                         if(facetPath.length > 0)
                         {
