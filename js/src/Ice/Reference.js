@@ -19,7 +19,7 @@
         var Protocol = require("Ice/Protocol").Ice.Protocol;
         var RefMode = require("Ice/ReferenceMode").Ice.ReferenceMode;
         var StringUtil = require("Ice/StringUtil").Ice.StringUtil;
-
+        var StringSeqHelper = require("Ice/BuiltinSequences.js").Ice.StringSeqHelper;
         var EndpointSelectionType = require("Ice/EndpointTypes").Ice.EndpointSelectionType;
         var Identity = require("Ice/Identity").Ice.Identity;
 
@@ -548,7 +548,7 @@
             //
             // For compatibility with the old FacetPath.
             //
-            var facetPath = s.readStringSeq(); // String[]
+            var facetPath = StringSeqHelper.read(s); // String[]
             var facet;
             if(facetPath.length > 0)
             {

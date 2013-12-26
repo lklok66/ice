@@ -1,0 +1,145 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stream Test | Ice for JavaScript</title>
+    <style type="text/css">
+        .console ul
+        { 
+            max-height: 300px; 
+            min-height: 300px; 
+            overflow-y: auto; 
+            overflow-x: none;
+            word-wrap:break-word;
+        }
+        ul {list-style-type: none;}
+        nav h4 { margin-top: 10px; }
+        .side-nav li.current a { color:orange; font-weight: bold; font-style:italic;}
+    </style>
+    <link rel="stylesheet" href="foundation/css/foundation.css" />
+    <script src="foundation/js/modernizr.js"></script>
+    <script src="../../lib/Ice.js"></script>
+    <script src="TestSuite.js"></script>
+    <!-- Promise Test -->
+    <script src="../Ice/promise/Client.js"></script>
+    <!-- Stream Test -->
+    <script src="../Ice/stream/Test.js"></script>
+    <script src="../Ice/stream/Client.js"></script>
+    
+  </head>
+  <body>
+    
+    <nav class="top-bar" data-topbar>
+        <ul class="title-area">
+            <li class="name">
+                <h1><a href="#">Ice for JavaScript</a></h1>
+            </li>
+        </ul>
+    </nav>
+    
+    <section role="main">
+        <div class="row">
+            <div class="large-2 medium-3 columns">
+                <div class="sidebar">
+                    <nav>
+                        <h4>Test:</h4>
+                        <ul class="side-nav tests">
+                        </ul>
+                        <input id="loop" type="checkbox"><label for="loop">Loop</label>
+                    </nav>
+                </div>
+            </div>
+            <div class="large-10 medium-9 columns">
+                <h3 id="grid">Output</h3>
+                <hr>
+                <div class="panel console">
+                    <ul>
+                        <li></li>
+                    </ul>
+                </div>
+                <a href="#" class="button" id="run">Run</a>
+            </div>
+        </div>
+    </section>
+    <script src="foundation/js/jquery.js"></script>
+    <script src="foundation/js/foundation.min.js"></script>
+    <script>
+        $(document).foundation();
+      
+        $(document).ready(function(){
+            var names = test.Common.TestSuite.names();
+            for(var i = 0; i < names.length; ++i)
+            {
+                $(".tests").append("<li><a href=\"#\">" + names[i] + "</a></li>");
+            }
+            $(".tests li:first-child").addClass("current");
+            $(".tests li:last-child").attr("last", "yes");
+        
+            var panel = $(".console ul");
+            var out = {};
+            
+            out.write = function(msg){
+                var str = $( ".console ul li:last-child" ).text() + msg;
+                $(".console ul li:last-child").html(str);
+                panel.scrollTop(panel.get(0).scrollHeight);
+            };
+            
+            out.writeLine = function(msg){
+                this.write(msg);
+                panel.append("<li></li>");
+                panel.scrollTop(panel.get(0).scrollHeight);
+            };
+            
+            var enabled = true;
+            var runButton = $("#run");
+            
+            var runCurrentTest = function(){
+                    
+                var current = $(".tests li.current");
+                var cb = test.Common.TestSuite.get(current.children("a").text());
+                cb(out).then(function()
+                    {
+                        var next = null;
+                        if(current.attr("last") == "yes")
+                        {
+                            next = $(".tests li:first-child");
+                        }
+                        else
+                        {
+                            next = current.next();
+                        }
+                        next.addClass("current");
+                        current.removeClass("current");
+                        if($("#loop").is(":checked"))
+                        {
+                            runCurrentTest();
+                        }
+                        else
+                        {
+                            runButton.removeClass("disabled");
+                        }
+                    },
+                    function(ex)
+                    {
+                        out.writeLine("");
+                        var lines = ex.stack.toString().split("\n");
+                        for(var i in lines)
+                        {
+                            out.writeLine(lines[i]);
+                        }
+                        runButton.removeClass("disabled");
+                    });
+            }; 
+            runButton.click(function(){
+                if(!runButton.hasClass("disabled"))
+                {
+                    $(".console ul").html("<li></li>");
+                    runButton.addClass("disabled");
+                    runCurrentTest();
+                }
+            });
+        });
+    </script>
+  </body>
+</html>

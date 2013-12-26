@@ -75,6 +75,10 @@ endif
 	rm -f $(*F).js
 	$(SLICE2JS) $(SLICE2JSFLAGS) $<
 
+%.js: %.ice $(SLICE2JS) $(SLICEPARSERLIB)
+	rm -f $(*F).js
+	$(SLICE2JS) $(SLICE2JSFLAGS) $<
+        
 lint: $(TARGETS)
 	jshint $(LINTFLAGS) $(TARGETS)
         

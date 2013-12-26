@@ -208,6 +208,8 @@ def dumpenv(env, lang):
         vars.append("PYTHONPATH")
     elif lang ==  "rb":
         vars.append("RUBYLIB")
+    elif lang ==  "js":
+        vars.append("NODE_PATH")
     for i in vars:
         if i in env:
             print("%s=%s" % (i, env[i]))
@@ -721,7 +723,7 @@ def getDefaultMapping():
     here = os.getcwd().split(os.sep)
     here.reverse()
     for i in range(0, len(here)):
-        if here[i] in ["cpp", "cs", "java", "php", "py", "rb", "cppe", "javae", "tmp"]:
+        if here[i] in ["cpp", "cs", "java", "js", "php", "py", "rb", "cppe", "javae", "tmp"]:
             return here[i]
     raise RuntimeError("cannot determine mapping")
 
@@ -954,6 +956,8 @@ def getCommandLine(exe, config, options = ""):
         output.write(sys.executable + ' "%s" ' % exe)
     elif config.lang == "php" and config.type == "client":
         output.write(phpCmd + " -c tmp.ini -f \""+ exe +"\" -- ")
+    elif config.lang == "js":
+        output.write('node "%s" ' % exe)
     elif config.lang == "cpp" and config.valgrind:
         # --child-silent-after-fork=yes is required for the IceGrid/activator test where the node
         # forks a process with execv failing (invalid exe name).
@@ -1029,6 +1033,8 @@ def getDefaultClientFile(lang = None):
         if len(pkg) > 0:
             pkg = pkg + "."
         return pkg + "Client"
+    if lang == "js":
+        return "run.js"
     raise RuntimeError("unknown language")
 
 def getDefaultCollocatedFile():
@@ -1552,6 +1558,10 @@ def getTestEnv(lang, testdir):
 
     if lang == "rb":
         addPathToEnv("RUBYLIB", os.path.join(getIceDir("rb", testdir), "ruby"), env)
+        
+    if lang == "js":
+        addPathToEnv("NODE_PATH", os.path.join(getIceDir("js", testdir), "src"), env)
+        addPathToEnv("NODE_PATH", os.path.join(testdir), env)
 
     return env;
 

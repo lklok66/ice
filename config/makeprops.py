@@ -126,7 +126,7 @@ jsPreamble = commonPreamble + """
 
 jsEpilogue = \
 """    };
-    return (module === undefined) ? Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/%(classname)s"));
 """
 
