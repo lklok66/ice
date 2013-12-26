@@ -11,7 +11,8 @@ top_srcdir	= ../..
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= stream
+SUBDIRS		= stream \
+		proxy
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \

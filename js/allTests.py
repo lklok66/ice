@@ -27,6 +27,7 @@ import TestUtil
 tests = [
     ("Ice/promise", ["once"]),
     ("Ice/stream", ["once"]),
+    ("Ice/proxy", ["once"]),
     ]
 
 if __name__ == "__main__":
