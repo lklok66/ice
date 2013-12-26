@@ -1006,7 +1006,7 @@ def directoryToPackage():
 
 def getDefaultServerFile():
     lang = getDefaultMapping()
-    if lang in ["rb", "php", "cpp", "cs", "cppe"]:
+    if lang in ["js", "rb", "php", "cpp", "cs", "cppe"]:
         return "server"
     if lang == "py":
         return "Server.py"
@@ -1255,7 +1255,7 @@ def clientServerTest(additionalServerOptions = "", additionalClientOptions = "",
     testdir = os.getcwd()
 
     # Setup the server.
-    if lang in ["rb", "php"]:
+    if lang in ["rb", "php", "js"]:
         serverdir = getMirrorDir(testdir, "cpp")
     else:
         serverdir = testdir
@@ -1263,7 +1263,7 @@ def clientServerTest(additionalServerOptions = "", additionalClientOptions = "",
         server = os.path.join(serverdir, server)
 
     if serverenv is None:
-        if lang in ["rb", "php"]:
+        if lang in ["rb", "php", "js"]:
             serverenv = getTestEnv("cpp", serverdir)
         else:
             serverenv = getTestEnv(lang, serverdir)
@@ -1317,7 +1317,7 @@ def clientServerTest(additionalServerOptions = "", additionalClientOptions = "",
         sys.stdout.write("starting " + serverDesc + "... ")
         sys.stdout.flush()
         serverCfg = DriverConfig("server")
-        if lang in ["rb", "php"]:
+        if lang in ["rb", "php", "js"]:
             serverCfg.lang = "cpp"
         server = getCommandLine(server, serverCfg, additionalServerOptions)
         serverProc = spawnServer(server, env = serverenv, lang=serverCfg.lang, mx=serverCfg.mx)
