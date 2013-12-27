@@ -85,12 +85,11 @@
                     function(clientProxy)
                     {
                         self.setClientEndpoints(clientProxy, promise);
-                    },
-                    function(ex)
-                    {
-                        Debug.assert(ex instanceof Ice.LocalException);
-                        promise.fail(ex);
-                    });
+                    }).exception(
+                        function(ex)
+                        {
+                            promise.fail(ex);
+                        });
             }
 
             return promise;
@@ -109,11 +108,6 @@
                     function(proxy)
                     {
                         return self.setServerEndpoints(proxy);
-                    },
-                    function(ex)
-                    {
-                        Debug.assert(ex instanceof Ice.LocalException);
-                        throw ex;
                     });
             }
         };
@@ -136,11 +130,6 @@
                     function(evictedProxies)
                     {
                         self.addAndEvictProxies(proxy, evictedProxies);
-                    },
-                    function(ex)
-                    {
-                        Debug.assert(ex instanceof Ice.LocalException);
-                        throw ex;
                     });
             }
         };
@@ -188,12 +177,11 @@
                             var proxy = clientProxy.ice_timeout(con.timeout());
                             self._clientEndpoints = proxy.__reference().getEndpoints();
                             promise.succeed(self._clientEndpoints);
-                        },
-                        function(ex)
-                        {
-                            Debug.assert(ex instanceof Ice.LocalException);
-                            promise.fail(ex);
-                        });
+                        }).exception(
+                            function(ex)
+                            {
+                                promise.fail(ex);
+                            });
                 }
             }
             else

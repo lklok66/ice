@@ -921,14 +921,10 @@
                     __r.fail(new Ice.UnknownUserException(ex.ice_name()));
                     return false;
                 }
-                else if(ex instanceof Ice.LocalException)
+                else
                 {
                     __r.fail(ex);
                     return false;
-                }
-                else
-                {
-                    throw ex;
                 }
             }
 
@@ -998,14 +994,7 @@
 
         ObjectPrx.__dispatchLocalException = function(__r, __ex)
         {
-            if(__ex instanceof Ice.LocalException)
-            {
-                __r.fail(__ex);
-            }
-            else
-            {
-                throw __ex;
-            }
+            __r.fail(__ex);
         };
 
         //
@@ -1042,18 +1031,18 @@
                     function(__r, __ret)
                     {
                         __promise.succeed(__promise, __ret ? __h : null);
-                    },
-                    function(__r, __ex)
-                    {
-                        if(__ex instanceof Ice.FacetNotExistException)
+                    }).exception(
+                        function(__r, __ex)
                         {
-                            __promise.succeed(__promise, null);
-                        }
-                        else
-                        {
-                            __promise.fail(__promise, __ex);
-                        }
-                    });
+                            if(__ex instanceof Ice.FacetNotExistException)
+                            {
+                                __promise.succeed(__promise, null);
+                            }
+                            else
+                            {
+                                __promise.fail(__promise, __ex);
+                            }
+                        });
             }
 
             return __promise;

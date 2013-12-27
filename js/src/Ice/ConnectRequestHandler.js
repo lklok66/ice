@@ -32,7 +32,8 @@
             this._flushing = false;
             this._batchRequestInProgress = false;
             this._batchRequestsSize = Protocol.requestBatchHdr.length;
-            this._batchStream = new BasicStream(ref.getInstance(), Protocol.currentProtocolEncoding, this._batchAutoFlush);
+            this._batchStream =
+                new BasicStream(ref.getInstance(), Protocol.currentProtocolEncoding, this._batchAutoFlush);
             this._updateRequestHandler = false;
 
             this._connection = null;
@@ -50,11 +51,11 @@
                 function(connection, compress)
                 {
                     self.setConnection(connection, compress);
-                },
-                function(ex)
-                {
-                    self.setException(ex);
-                });
+                }).exception(
+                    function(ex)
+                    {
+                        self.setException(ex);
+                    });
 
             if(this.initialized())
             {
@@ -63,7 +64,8 @@
             }
             else
             {
-                this._updateRequestHandler = true; // The proxy request handler will be updated when the connection is set.
+                // The proxy request handler will be updated when the connection is set.
+                this._updateRequestHandler = true;
                 return this;
             }
         };
@@ -208,11 +210,11 @@
                         // queued requests.
                         //
                         self.flushRequests();
-                    },
-                    function(ex)
-                    {
-                        self.setException(ex);
-                    });
+                    }).exception(
+                        function(ex)
+                        {
+                            self.setException(ex);
+                        });
 
                 if(!promise.completed())
                 {

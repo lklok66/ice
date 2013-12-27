@@ -210,7 +210,7 @@
                 }
                 else
                 {
-                    throw ex;
+                    this.fail(ex);
                 }
             }
         };
@@ -241,7 +241,7 @@
                 }
                 else
                 {
-                    throw ex;
+                    this.fail(ex);
                 }
             }
         };
@@ -398,7 +398,8 @@
                 }
                 else
                 {
-                    throw ex;
+                    this.fail(ex);
+                    return;
                 }
             }
 

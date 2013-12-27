@@ -97,14 +97,7 @@
             }
             catch(ex)
             {
-                if(ex instanceof Ice.LocalException)
-                {
-                    return Promise.fail(ex);
-                }
-                else
-                {
-                    throw ex;
-                }
+                return Promise.fail(ex);
             }
 
             var cb = new ConnectCallback(this, endpoints, hasMore, selType);
@@ -128,11 +121,11 @@
                 function(endpoints)
                 {
                     self.gotClientEndpoints(endpoints, routerInfo, promise);
-                },
-                function(ex)
-                {
-                    promise.fail(ex);
-                });
+                }).exception(
+                    function(ex)
+                    {
+                        promise.fail(ex);
+                    });
 
             return promise;
         };
@@ -294,9 +287,9 @@
                     continue;
                 }
 
-                for(var i = 0; i < connectionList.length; ++i)
+                for(var j = 0; j < connectionList.length; ++j)
                 {
-                    if(connectionList[i].isActiveOrHolding()) // Don't return destroyed or un-validated connections
+                    if(connectionList[j].isActiveOrHolding()) // Don't return destroyed or un-validated connections
                     {
                         if(defaultsAndOverrides.overrideCompress)
                         {
@@ -306,7 +299,7 @@
                         {
                             compress.value = endpoint.compress();
                         }
-                        return connectionList[i];
+                        return connectionList[j];
                     }
                 }
             }
@@ -875,14 +868,21 @@
         {
             Debug.assert(this._current !== null);
 
-            this._factory.handleConnectionException(ex, this._hasMore || this._index < this._endpoints.length);
-            if(ex instanceof Ice.CommunicatorDestroyedException) // No need to continue.
+            if(ex instanceof Ice.LocalException)
             {
-                this._factory.finishGetConnectionEx(this._endpoints, ex, this);
-            }
-            else if(this._index < this._endpoints.length) // Try the next endpoint.
-            {
-                this.nextEndpoint();
+                this._factory.handleConnectionException(ex, this._hasMore || this._index < this._endpoints.length);
+                if(ex instanceof Ice.CommunicatorDestroyedException) // No need to continue.
+                {
+                    this._factory.finishGetConnectionEx(this._endpoints, ex, this);
+                }
+                else if(this._index < this._endpoints.length) // Try the next endpoint.
+                {
+                    this.nextEndpoint();
+                }
+                else
+                {
+                    this._factory.finishGetConnectionEx(this._endpoints, ex, this);
+                }
             }
             else
             {
@@ -958,15 +958,8 @@
             }
             catch(ex)
             {
-                if(ex instanceof Ice.LocalException)
-                {
-                    this._promise.fail(ex);
-                    return;
-                }
-                else
-                {
-                    throw ex;
-                }
+                this._promise.fail(ex);
+                return;
             }
 
             this.getConnection();
@@ -998,16 +991,8 @@
             }
             catch(ex)
             {
-                if(ex instanceof Ice.LocalException)
-                {
-                    this._promise.fail(ex);
-                    this._factory.decPendingConnectCount(); // Must be called last.
-                }
-                else
-                {
-                    this._factory.decPendingConnectCount(); // Must be called last.
-                    throw ex;
-                }
+                this._promise.fail(ex);
+                this._factory.decPendingConnectCount(); // Must be called last.
             }
         };
 
@@ -1024,22 +1009,15 @@
                     function()
                     {
                         self.connectionStartCompleted(connection);
-                    },
-                    function(ex)
-                    {
-                        self.connectionStartFailed(connection, ex);
-                    });
+                    }).exception(
+                        function(ex)
+                        {
+                            self.connectionStartFailed(connection, ex);
+                        });
             }
             catch(ex)
             {
-                if(ex instanceof Ice.LocalException)
-                {
-                    this.connectionStartFailed(connection, ex);
-                }
-                else
-                {
-                    throw ex;
-                }
+                this.connectionStartFailed(connection, ex);
             }
         };
 

@@ -503,7 +503,8 @@
                         this._batchStream.pos = Protocol.headerSize;
                         this._batchStream.writeInt(this._batchRequestNum);
 
-                        this.sendMessage(OutgoingMessage.createForStream(this._batchStream, this._batchRequestCompress, true));
+                        this.sendMessage(OutgoingMessage.createForStream(this._batchStream,
+                                                                         this._batchRequestCompress, true));
                     }
                     catch(ex)
                     {
@@ -635,7 +636,8 @@
             
             try
             {
-                status = this.sendMessage(OutgoingMessage.create(outAsync, outAsync.__os(), this._batchRequestCompress, 0));
+                status = this.sendMessage(OutgoingMessage.create(outAsync, outAsync.__os(), this._batchRequestCompress,
+                                                                 0));
             }
             catch(ex)
             {
@@ -785,7 +787,8 @@
             // Create a reference and return a reverse proxy for this
             // reference.
             //
-            return this._instance.proxyFactory().referenceToProxy(this._instance.referenceFactory().createFixed(ident, this));
+            return this._instance.proxyFactory().referenceToProxy(
+                this._instance.referenceFactory().createFixed(ident, this));
         };
 
         ConnectionI.prototype.message = function(operation)

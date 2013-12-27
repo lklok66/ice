@@ -515,19 +515,19 @@
                             function(admin)
                             {
                                 promise.succeed(communicator);
-                            },
-                            function(ex)
-                            {
-                                this.destroy().then(
-                                    function()
-                                    {
-                                        promise.fail(ex);
-                                    },
-                                    function(e)
-                                    {
-                                        promise.fail(ex);
-                                    });
-                            });
+                            }).exception(
+                                function(ex)
+                                {
+                                    this.destroy().then(
+                                        function()
+                                        {
+                                            promise.fail(ex);
+                                        }).exception(
+                                            function(e)
+                                            {
+                                                promise.fail(ex);
+                                            });
+                                });
                         return;
                     }
                 }
@@ -548,11 +548,11 @@
                             function()
                             {
                                 promise.fail(ex);
-                            },
-                            function(e)
-                            {
-                                promise.fail(ex);
-                            });
+                            }).exception(
+                                function(e)
+                                {
+                                    promise.fail(ex);
+                                });
                     }
                     else
                     {
@@ -633,11 +633,11 @@
                         function()
                         {
                             self.outgoingConnectionFactoryFinished(promise);
-                        },
-                        function(ex)
-                        {
-                            promise.fail(ex);
-                        });
+                        }).exception(
+                            function(ex)
+                            {
+                                promise.fail(ex);
+                            });
                 }
                 else
                 {
@@ -646,14 +646,7 @@
             }
             catch(ex)
             {
-                if(ex instanceof Ice.LocalException)
-                {
-                    promise.fail(ex);
-                }
-                else
-                {
-                    throw ex;
-                }
+                promise.fail(ex);
             }
 
             return promise;
@@ -661,109 +654,95 @@
 
         Instance.prototype.outgoingConnectionFactoryFinished = function(promise)
         {
-            try
+            /* TODO
+            if(this._retryQueue)
             {
-                /* TODO
-                if(this._retryQueue)
+                this._retryQueue.destroy();
+            }
+
+            this._endpointHostResolver = null;
+            this._objectAdapterFactory = null;
+            this._outgoingConnectionFactory = null;
+            this._retryQueue = null;
+            */
+
+            if(this._connectionMonitor)
+            {
+                this._connectionMonitor.destroy();
+                this._connectionMonitor = null;
+            }
+
+            if(this._timer)
+            {
+                this._timer.destroy();
+                this._timer = null;
+            }
+
+            if(this._servantFactoryManager)
+            {
+                this._servantFactoryManager.destroy();
+                this._servantFactoryManager = null;
+            }
+
+            if(this._referenceFactory)
+            {
+                //this._referenceFactory.destroy(); // No destroy function defined.
+                this._referenceFactory = null;
+            }
+
+            // this._proxyFactory.destroy(); // No destroy function defined.
+            this._proxyFactory = null;
+
+            if(this._routerManager)
+            {
+                this._routerManager.destroy();
+                this._routerManager = null;
+            }
+
+            if(this._locatorManager)
+            {
+                this._locatorManager.destroy();
+                this._locatorManager = null;
+            }
+
+            if(this._endpointFactoryManager)
+            {
+                this._endpointFactoryManager.destroy();
+                this._endpointFactoryManager = null;
+            }
+
+            /*
+            if(this._exceptionFactoryMap)
+            {
+                this._exceptionFactoryMap.clear();
+                this._exceptionFactoryMap = null;
+            }
+
+            this._adminAdapter = null;
+            this._adminFacets.clear();
+            */
+
+            this._state = StateDestroyed;
+
+            /* TODO
+            if(_initData.properties.getPropertyAsInt("Ice.Warn.UnusedProperties") > 0)
+            {
+                var unusedProperties:Vector.<String> = (_initData.properties as Ice.PropertiesI).getUnusedProperties();
+                if(unusedProperties.length > 0)
                 {
-                    this._retryQueue.destroy();
-                }
-
-                this._endpointHostResolver = null;
-                this._objectAdapterFactory = null;
-                this._outgoingConnectionFactory = null;
-                this._retryQueue = null;
-                */
-
-                if(this._connectionMonitor)
-                {
-                    this._connectionMonitor.destroy();
-                    this._connectionMonitor = null;
-                }
-
-                if(this._timer)
-                {
-                    this._timer.destroy();
-                    this._timer = null;
-                }
-
-                if(this._servantFactoryManager)
-                {
-                    this._servantFactoryManager.destroy();
-                    this._servantFactoryManager = null;
-                }
-
-                if(this._referenceFactory)
-                {
-                    //this._referenceFactory.destroy(); // No destroy function defined.
-                    this._referenceFactory = null;
-                }
-
-                // this._proxyFactory.destroy(); // No destroy function defined.
-                this._proxyFactory = null;
-
-                if(this._routerManager)
-                {
-                    this._routerManager.destroy();
-                    this._routerManager = null;
-                }
-
-                if(this._locatorManager)
-                {
-                    this._locatorManager.destroy();
-                    this._locatorManager = null;
-                }
-
-                if(this._endpointFactoryManager)
-                {
-                    this._endpointFactoryManager.destroy();
-                    this._endpointFactoryManager = null;
-                }
-
-                /*
-                if(this._exceptionFactoryMap)
-                {
-                    this._exceptionFactoryMap.clear();
-                    this._exceptionFactoryMap = null;
-                }
-
-                this._adminAdapter = null;
-                this._adminFacets.clear();
-                */
-
-                this._state = StateDestroyed;
-
-                /* TODO
-                if(_initData.properties.getPropertyAsInt("Ice.Warn.UnusedProperties") > 0)
-                {
-                    var unusedProperties:Vector.<String> = (_initData.properties as Ice.PropertiesI).getUnusedProperties();
-                    if(unusedProperties.length > 0)
+                    var message:Vector.<String> = new Vector.<String>();
+                    message.push("The following properties were set but never read:");
+                    for each(var p:String in unusedProperties)
                     {
-                        var message:Vector.<String> = new Vector.<String>();
-                        message.push("The following properties were set but never read:");
-                        for each(var p:String in unusedProperties)
-                        {
-                            message.push("\n    ");
-                            message.push(p);
-                        }
-                        _initData.logger.warning(message.join(""));
+                        message.push("\n    ");
+                        message.push(p);
                     }
+                    _initData.logger.warning(message.join(""));
                 }
-                */
+            }
+            */
 
-                promise.succeed();
-            }
-            catch(ex)
-            {
-                if(ex instanceof Ice.LocalException)
-                {
-                    promise.fail(ex);
-                }
-                else
-                {
-                    throw ex;
-                }
-            }
+            promise.succeed();
         };
 
         module.exports.Ice = module.exports.Ice || {};

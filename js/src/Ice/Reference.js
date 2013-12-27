@@ -1619,14 +1619,7 @@
             }
             catch(ex)
             {
-                if(ex instanceof Ice.LocalException)
-                {
-                    promise.fail(ex);
-                }
-                else
-                {
-                    throw ex;
-                }
+                promise.fail(ex);
             }
             return promise;
         };
@@ -2105,11 +2098,11 @@
                         {
                             self.getConnectionNoRouterInfo(promise);
                         }
-                    },
-                    function(ex)
-                    {
-                        promise.fail(ex);
-                    });
+                    }).exception(
+                        function(ex)
+                        {
+                            promise.fail(ex);
+                        });
             }
             else
             {
@@ -2127,11 +2120,11 @@
                     function(connection, compress)
                     {
                         promise.succeed(connection, compress);
-                    },
-                    function(ex)
-                    {
-                        promise.fail(ex);
-                    });
+                    }).exception(
+                        function(ex)
+                        {
+                            promise.fail(ex);
+                        });
                 return;
             }
 
@@ -2174,7 +2167,8 @@
                                             var s = "connection to cached endpoints failed\n" +
                                                 "removing endpoints from cache and trying one more time\n" +
                                                 ExUtil.toString(ex);
-                                            self.getInstance().initializationData().logger.trace(traceLevels.retryCat, s);
+                                            self.getInstance().initializationData().logger.trace(
+                                                traceLevels.retryCat, s);
                                         }
                                         self.getConnectionNoRouterInfo(promise); // Retry.
                                         return;
@@ -2182,11 +2176,11 @@
                                     promise.fail(ex);
                                 }
                             });
-                    },
-                    function(ex)
-                    {
-                        promise.fail(ex);
-                    });
+                    }).exception(
+                        function(ex)
+                        {
+                            promise.fail(ex);
+                        });
             }
             else
             {
@@ -2364,11 +2358,11 @@
                     function(connection, compress)
                     {
                         cb.setConnection(connection, compress);
-                    },
-                    function(ex)
-                    {
-                        cb.setException(ex);
-                    });
+                    }).exception(
+                        function(ex)
+                        {
+                            cb.setException(ex);
+                        });
             }
             else
             {
@@ -2385,11 +2379,11 @@
                     function(connection, compress)
                     {
                         cb.setConnection(connection, compress);
-                    },
-                    function(ex)
-                    {
-                        cb.setException(ex);
-                    });
+                    }).exception(
+                        function(ex)
+                        {
+                            cb.setException(ex);
+                        });
             }
 
             return promise;
@@ -2440,11 +2434,11 @@
                 function(connection, compress)
                 {
                     self.setConnection(connection, compress);
-                },
-                function(ex)
-                {
-                    self.setException(ex);
-                });
+                }).exception(
+                    function(ex)
+                    {
+                        self.setException(ex);
+                    });
         };
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);

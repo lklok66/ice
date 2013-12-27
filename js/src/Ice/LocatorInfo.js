@@ -458,14 +458,14 @@
                             {
                                 self._promise.succeed(endpts, b);
                             }
-                        },
-                        function(ex)
-                        {
-                            if(self._promise !== null)
+                        }).exception(
+                            function(ex)
                             {
-                                self._promise.fail(ex);
-                            }
-                        });
+                                if(self._promise !== null)
+                                {
+                                    self._promise.fail(ex);
+                                }
+                            });
                     return;
                 }
             }
@@ -582,11 +582,11 @@
                     function(proxy)
                     {
                         self.response(proxy);
-                    },
-                    function(ex)
-                    {
-                        self.exception(ex);
-                    });
+                    }).exception(
+                        function(ex)
+                        {
+                            self.exception(ex);
+                        });
             }
             catch(ex)
             {
@@ -612,11 +612,11 @@
                     function(proxy)
                     {
                         self.response(proxy);
-                    },
-                    function(ex)
-                    {
-                        self.exception(ex);
-                    });
+                    }).exception(
+                        function(ex)
+                        {
+                            self.exception(ex);
+                        });
             }
             catch(ex)
             {
