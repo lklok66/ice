@@ -105,17 +105,6 @@ private:
         std::vector<std::string> _includePaths;
     };
 
-    class CompactIdVisitor : public JsVisitor
-    {
-    public:
-
-        CompactIdVisitor(IceUtilInternal::Output&);
-
-        virtual bool visitUnitStart(const UnitPtr&);
-        virtual void visitUnitEnd(const UnitPtr&);
-        virtual bool visitClassDefStart(const ClassDefPtr&);
-    };
-
     class TypesVisitor : public JsVisitor
     {
     public:

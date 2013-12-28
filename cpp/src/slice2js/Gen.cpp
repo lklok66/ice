@@ -36,31 +36,19 @@ namespace
 string
 sliceModeToIceMode(Operation::Mode opMode)
 {
-    string mode;
     switch(opMode)
     {
-        case Operation::Normal:
-        {
-            mode = "Ice.OperationMode.Normal";
-            break;
-        }
-        case Operation::Nonmutating:
-        {
-            mode = "Ice.OperationMode.Nonmutating";
-            break;
-        }
-        case Operation::Idempotent:
-        {
-            mode = "Ice.OperationMode.Idempotent";
-            break;
-        }
-        default:
-        {
-            assert(false);
-            break;
-        }
+    case Operation::Normal:
+        return "0";
+    case Operation::Nonmutating:
+        return "1";
+    case Operation::Idempotent:
+        return "2";
+    default:
+        assert(false);
     }
-    return mode;
+
+    return "???";
 }
 
 string
@@ -69,11 +57,11 @@ opFormatTypeToString(const OperationPtr& op)
     switch(op->format())
     {
     case DefaultFormat:
-        return "Ice.FormatType.DefaultFormat";
+        return "0";
     case CompactFormat:
-        return "Ice.FormatType.CompactFormat";
+        return "1";
     case SlicedFormat:
-        return "Ice.FormatType.SlicedFormat";
+        return "2";
     default:
         assert(false);
     }
@@ -150,7 +138,7 @@ Slice::JsVisitor::writeMarshalUnmarshalParams(const ParamDeclList& params, const
     {
         ret = op->returnType();
 
-        string param = "ret__";
+        string param = "__ret";
         if(!marshal && isClassType(ret))
         {
             param += "PP";
@@ -255,7 +243,7 @@ Slice::JsVisitor::writeUnmarshalDataMember(const DataMemberPtr& member)
 {
     if(member->optional())
     {
-        writeOptionalMarshalUnmarshalCode(_out, member->type(), "this." + fixId(member->name()), 
+        writeOptionalMarshalUnmarshalCode(_out, member->type(), "this." + fixId(member->name()),
                                           member->tag(), false);
     }
     else
@@ -1095,7 +1083,7 @@ Slice::JsVisitor::writeDocCommentParam(const OperationPtr& p, ParamDir paramType
     }
 }
 
-Slice::Gen::Gen(const string& base, const string& include, const vector<string>& includePaths, const string& dir) : 
+Slice::Gen::Gen(const string& base, const string& include, const vector<string>& includePaths, const string& dir) :
     _include(include),
     _includePaths(includePaths)
 {
@@ -1147,9 +1135,6 @@ Slice::Gen::generate(const UnitPtr& p)
     p->visit(&requireVisitor, false);
     vector<string> seenModules = requireVisitor.writeRequires(p);
 
-    //CompactIdVisitor compactIdVisitor(_out);
-    //p->visit(&compactIdVisitor, false);
-
     TypesVisitor typesVisitor(_out, seenModules);
     p->visit(&typesVisitor, false);
 
@@ -1158,7 +1143,7 @@ Slice::Gen::generate(const UnitPtr& p)
     //
     ExportVisitor exportVisitor(_out);
     p->visit(&exportVisitor, false);
-    
+
     _out << eb << ";";
     _out << nl << "return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);";
     _out << eb;
@@ -1245,10 +1230,10 @@ Slice::Gen::printHeader()
 }
 
 Slice::Gen::RequireVisitor::RequireVisitor(IceUtilInternal::Output& out, vector<string> includePaths)
-    : JsVisitor(out), 
-    _seenClass(false), 
-    _seenUserException(false), 
-    _seenLocalException(false), 
+    : JsVisitor(out),
+    _seenClass(false),
+    _seenUserException(false),
+    _seenLocalException(false),
     _seenEnum(false),
     _seenObjectSeq(false),
     _seenObjectDict(false),
@@ -1319,7 +1304,7 @@ Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
     _out << nl;
     _out << nl << "var Ice = module.exports.Ice || {};";
     seenModules.push_back("Ice");
-    
+
     if(_seenClass || _seenObjectSeq || _seenObjectDict)
     {
         _out << nl << "_merge(Ice, require(\"Ice/Object\").Ice);";
@@ -1342,12 +1327,12 @@ Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
     {
         _out << nl << "_merge(Ice, require(\"Ice/EnumBase\").Ice);";
     }
-    
+
     _out << nl << "_merge(Ice, require(\"Ice/HashMap\").Ice);";
     _out << nl << "_merge(Ice, require(\"Ice/HashUtil\").Ice);";
     _out << nl << "_merge(Ice, require(\"Ice/ArrayUtil\").Ice);";
     _out << nl << "_merge(Ice, require(\"Ice/StreamHelpers\").Ice);";
-    
+
     StringList includes = p->includeFiles();
     for(StringList::const_iterator i = includes.begin(); i != includes.end(); ++i)
     {
@@ -1361,47 +1346,11 @@ Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
                 _out << nl;
                 _out << nl << "var " << (*j) << " = {};";
             }
-            _out << nl << "_merge(" << (*j) << ", require(\"" 
+            _out << nl << "_merge(" << (*j) << ", require(\""
                  << changeInclude(*i, _includePaths) << "\")." << (*j) << ");";
         }
     }
     return seenModules;
-}
-
-Slice::Gen::CompactIdVisitor::CompactIdVisitor(IceUtilInternal::Output& out) :
-    JsVisitor(out)
-{
-}
-
-bool
-Slice::Gen::CompactIdVisitor::visitUnitStart(const UnitPtr&)
-{
-    // TODO
-    //_out << sp << nl << "namespace IceCompactId";
-    //_out << sb;
-    return true;
-}
-
-void
-Slice::Gen::CompactIdVisitor::visitUnitEnd(const UnitPtr&)
-{
-    //_out << eb;
-}
-
-bool
-Slice::Gen::CompactIdVisitor::visitClassDefStart(const ClassDefPtr& p)
-{
-    if(p->compactId() >= 0)
-    {
-#if 0 // TODO
-        _out << sp;
-        _out << nl << "public sealed class TypeId_" << p->compactId();
-        _out << sb;
-        _out << nl << "public readonly static string typeId = \"" << p->scoped() << "\";";
-        _out << eb;
-#endif
-    }
-    return false;
 }
 
 Slice::Gen::TypesVisitor::TypesVisitor(IceUtilInternal::Output& out, const vector<string>& seenModules)
@@ -1421,9 +1370,9 @@ Slice::Gen::TypesVisitor::visitModuleStart(const ModulePtr& p)
     //
     // Foo.Bar = module.exports.Foo.Bar || {};
     //
-    
+
     const string scoped = getLocalScope(p->scoped());
-    
+
     const bool topLevel = UnitPtr::dynamicCast(p->container());
 
     vector<string>::const_iterator i = find(_seenModules.begin(), _seenModules.end(), scoped);
@@ -1440,7 +1389,7 @@ Slice::Gen::TypesVisitor::visitModuleStart(const ModulePtr& p)
         }
         _seenModules.push_back(scoped);
     }
-    
+
     return true;
 }
 
@@ -1655,14 +1604,14 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
     _out << eb << ";";
 
     // TODO: equals?
-    
+
     if(!p->isLocal())
     {
         _out << sp;
         _out << nl << localScope << '.' << name << ".prototype.__writeImpl = function(__os)";
         _out << sb;
-        _out << nl << "__os.startWriteSlice(" << localScope << "." << name << ".ice_staticId(), " << p->compactId() << ", "
-             << (!base ? "true" : "false") << ");"; 
+        _out << nl << "__os.startWriteSlice(" << localScope << "." << name << ".ice_staticId(), " << p->compactId()
+             << ", " << (!base ? "true" : "false") << ");";
         for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
         {
             writeMarshalDataMember(*q);
@@ -1695,20 +1644,259 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
 
         for(OperationList::const_iterator q = ops.begin(); q != ops.end(); ++q)
         {
-            _out << sp << nl << localScope << '.' << prxName << ".prototype." << fixId((*q)->name()) << " = function"
-                 << spar << getParams(*q) << "__ctx" << epar;
+            OperationPtr op = *q;
+
+            const TypePtr ret = op->returnType();
+
+            ExceptionList throws = op->throws();
+            throws.sort();
+            throws.unique();
+
+            const ParamDeclList paramList = op->parameters();
+            ParamDeclList inParams, outParams;
+            for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
+            {
+                if((*pli)->isOutParam())
+                {
+                    outParams.push_back(*pli);
+                }
+                else
+                {
+                    inParams.push_back(*pli);
+                }
+            }
+
+            _out << sp << nl << localScope << '.' << prxName << ".__op_" << op->name() << " = function"
+                 << spar << "__p" << getParams(op) << "__ctx" << epar;
             _out << sb;
-            // TODO
+
+            bool needCompletedCallback = true;
+            string completedCallback;
+            if(throws.empty())
+            {
+                if(op->returnsData())
+                {
+                    //
+                    // Select a completion callback. We provide generic callbacks for an operation that
+                    // throws no user exceptions and returns a built-in type. Otherwise, we have to
+                    // generate a callback.
+                    //
+                    TypePtr t;
+                    if((ret && outParams.empty()) || (!ret && outParams.size() == 1))
+                    {
+                        if(ret)
+                        {
+                            assert(outParams.size() == 0);
+                            t = ret;
+                        }
+                        else
+                        {
+                            assert(outParams.size() == 1);
+                            t = outParams.front()->type();
+                        }
+                    }
+
+                    if(t)
+                    {
+                        BuiltinPtr b = BuiltinPtr::dynamicCast(t);
+                        if(b)
+                        {
+                            needCompletedCallback = false;
+                            if(b->kind() == Builtin::KindObject)
+                            {
+                                completedCallback = "Ice.ObjectPrx.__completed_Object";
+                            }
+                            else if(b->kind() == Builtin::KindObjectProxy)
+                            {
+                                completedCallback = "Ice.ObjectPrx.__completed_ObjectPrx";
+                            }
+                            else
+                            {
+                                assert(b->kind() != Builtin::KindLocalObject);
+                                completedCallback = "Ice.ObjectPrx.__completed_" + b->typeId();
+                            }
+                        }
+                        else
+                        {
+                            t = 0;
+                        }
+                    }
+
+                    if(!t)
+                    {
+                        completedCallback = localScope + "." + prxName + ".__" + op->name() + "_completed";
+                    }
+                }
+                else
+                {
+                    //
+                    // Use a generic callback for an operation that returns nothing and declares no user exceptions.
+                    //
+                    completedCallback = "null"; // null === Ice.ObjectPrx.__completed
+                    needCompletedCallback = false;
+                }
+            }
+            else
+            {
+                completedCallback = localScope + "." + prxName + ".__" + op->name() + "_completed";
+            }
+
+            //
+            // If there are no input parameters, we use a generic method provided by ObjectPrx.
+            //
+            if(inParams.empty())
+            {
+                _out << nl << "return Ice.ObjectPrx.__invokeNoArgs(__p, \"" << op->name() << "\", "
+                     << (op->returnsData() ? "true" : "false") << ", " << completedCallback << ", "
+                     << sliceModeToIceMode(op->sendMode()) << ", __ctx);";
+            }
+            else
+            {
+                _out << nl << "return Ice.ObjectPrx.__invoke(__p, \"" << op->name() << "\", "
+                     << (op->returnsData() ? "true" : "false") << ", " << completedCallback << ", "
+                     << sliceModeToIceMode(op->sendMode()) << ", " << opFormatTypeToString(op)
+                     << ", __ctx, function(__os)";
+                _out << sb;
+                writeMarshalUnmarshalParams(inParams, 0, true);
+                if(op->sendsClasses(false))
+                {
+                    _out << nl << "__os.writePendingObjects();";
+                }
+                _out << eb << ");";
+            }
             _out << eb << ";";
+
+            if(needCompletedCallback)
+            {
+                _out << sp << nl << localScope << '.' << prxName << ".__" << op->name() << "_completed = function(__r)";
+                _out << sb;
+
+                if(throws.empty())
+                {
+                    _out << nl << "if(!Ice.ObjectPrx.__check(__r))";
+                    _out << sb;
+                    _out << nl << "return;";
+                    _out << eb;
+                }
+                else
+                {
+                    //
+                    // Arrange exceptions into most-derived to least-derived order. If we don't
+                    // do this, a base exception handler can appear before a derived exception
+                    // handler, causing compiler warnings and resulting in the base exception
+                    // being marshaled instead of the derived exception.
+                    //
+#if defined(__SUNPRO_CC)
+                    throws.sort(Slice::derivedToBaseCompare);
+#else
+                    throws.sort(Slice::DerivedToBaseCompare());
+#endif
+
+                    _out << nl << "var __uex = [";
+                    for(ExceptionList::const_iterator eli = throws.begin(); eli != throws.end(); ++eli)
+                    {
+                        if(eli != throws.begin())
+                        {
+                            _out << ", ";
+                        }
+                        _out << getLocalScope((*eli)->scoped());
+                    }
+                    _out << "];";
+                    _out << nl << "if(!Ice.ObjectPrx.__check(__r, __uex))";
+                    _out << sb;
+                    _out << nl << "return;";
+                    _out << eb;
+                }
+
+                string outArgs;
+                if(ret || !outParams.empty())
+                {
+                    _out << nl << "var __is = __r.__startReadParams();";
+                    if(ret)
+                    {
+                        _out << nl << "var __ret;";
+                    }
+                    if(!outParams.empty())
+                    {
+                        for(ParamDeclList::const_iterator pli = outParams.begin(); pli != outParams.end(); ++pli)
+                        {
+                            if(pli != outParams.begin())
+                            {
+                                outArgs += ", ";
+                            }
+                            outArgs += fixId((*pli)->name());
+                        }
+                        _out << nl << "var " << outArgs << ';';
+                    }
+                    _out << nl << "try";
+                    _out << sb;
+                    writeMarshalUnmarshalParams(outParams, op, false);
+                    if(op->returnsClasses(false))
+                    {
+                        _out << nl << "__is.readPendingObjects();";
+                    }
+                    _out << nl << "__r.__endReadParams();";
+                    _out << eb;
+                    _out << nl << "catch(__ex)";
+                    _out << sb;
+                    _out << nl << "Ice.ObjectPrx.__dispatchLocalException(__r, __ex);";
+                    _out << nl << "return;";
+                    _out << eb;
+                }
+                else
+                {
+                    _out << nl << "__r.__readEmptyParams();";
+                }
+
+                _out << nl << "__r.succeed(__r";
+                if(ret)
+                {
+                    _out << ", __ret";
+                }
+                if(!outArgs.empty())
+                {
+                    _out << ", " << outArgs;
+                }
+                _out << ");";
+
+                _out << eb << ';';
+            }
         }
-        
+
+        const OperationList allOps = p->allOperations();
+        for(OperationList::const_iterator q = allOps.begin(); q != allOps.end(); ++q)
+        {
+            OperationPtr op = *q;
+
+            vector<string> paramNames = getParams(op);
+            _out << sp << nl << localScope << '.' << prxName << ".prototype." << fixId(op->name()) << " = function"
+                 << spar << paramNames << "__ctx" << epar;
+            _out << sb;
+            const ClassDefPtr cont = ClassDefPtr::dynamicCast(op->container());
+            assert(cont);
+            const string contLocalScope = getLocalScope(cont->scope());
+            const string contPrxName = cont->name() + "Prx";
+            _out << nl << "return " << contLocalScope << '.' << contPrxName << ".__op_" << op->name()
+                 << spar << "this" << paramNames << "__ctx" << epar << ';';
+            _out << eb << ';';
+        }
+
         //
         // Register the class prototype in the ClassRegistry
         //
         _out << nl;
-        _out << nl << "Ice.ClassRegistry.register(" << localScope << "." << name << ".ice_staticId(), " 
+        _out << nl << "Ice.ClassRegistry.register(" << localScope << "." << name << ".ice_staticId(), "
              << localScope << "." << name << ");";
         _out << nl;
+
+        if(p->compactId() >= 0)
+        {
+            //
+            // Also register the type using the stringified compact ID.
+            //
+            _out << nl << "Ice.ClassRegistry.register(\"" << p->compactId() << "\", " << localScope << "."
+                 << name << ");";
+        }
     }
 
     return false;
@@ -1836,12 +2024,12 @@ void
 Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
 {
     const TypePtr type = p->type();
-    
+
     //
-    // Stream helpers for sequences are lazy initialized as the required 
+    // Stream helpers for sequences are lazy initialized as the required
     // types might not be available until later.
     //
-    // We need to access classes through the class registry as classes may 
+    // We need to access classes through the class registry as classes may
     // have been defined in a separate unit.
     //
     const string scope = getLocalScope(p->scope());
@@ -1994,13 +2182,13 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     _out << eb << ";";
 
     // TODO: equals?
-    
+
     if(!p->isLocal())
     {
         _out << sp;
         _out << nl << localScope << '.' << name << ".prototype.__writeImpl = function(__os)";
         _out << sb;
-        _out << nl << "__os.startWriteSlice(\"" << p->scoped() << "\", -1, " << (!base ? "true" : "false") << ");"; 
+        _out << nl << "__os.startWriteSlice(\"" << p->scoped() << "\", -1, " << (!base ? "true" : "false") << ");";
         for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
         {
             writeMarshalDataMember(*q);
@@ -2030,12 +2218,12 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
             _out << nl << baseRef << ".prototype.__readImpl.call(this, __is);";
         }
         _out << eb << ";";
-        
+
         //
         // Register the class prototype in the ClassRegistry
         //
         _out << nl;
-        _out << nl << "Ice.ExceptionRegistry.register(\"" << p->scoped()  << "\", " 
+        _out << nl << "Ice.ExceptionRegistry.register(\"" << p->scoped()  << "\", "
              << localScope << "." << name << ");";
         _out << nl;
     }
@@ -2173,12 +2361,12 @@ Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
 {
     const TypePtr keyType = p->keyType();
     const TypePtr valueType = p->valueType();
-    
+
     //
-    // Stream helpers for dictionaries of objects are lazy initialized 
+    // Stream helpers for dictionaries of objects are lazy initialized
     // as the required object type might not be available until later.
     //
-    // We need to access the type through the class registry as it may 
+    // We need to access the type through the class registry as it may
     // have been defined in a separate unit.
     //
     const string scope = getLocalScope(p->scope());
@@ -2187,7 +2375,7 @@ Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
     string propertyPrefix = scope;
     std::replace(propertyPrefix.begin(), propertyPrefix.end(), '.', '_');
     const string helperName = "__" + propertyPrefix + "_" + propertyName;
-    
+
     _out << nl;
     _out << nl << "var " << helperName << " = null;";
     _out << nl << "Object.defineProperty(" << scope << ", \"" << propertyName << "\", ";
@@ -2516,10 +2704,10 @@ Slice::Gen::ExportVisitor::visitModuleEnd(const ModulePtr&)
 
 bool
 Slice::Gen::ExportVisitor::visitClassDefStart(const ClassDefPtr& p)
-{    
+{
     const string className = getLocalScope(p->scope()) + "." + fixId(p->name());
     const string proxyName = className + "Prx";
-    
+
     _out << nl << "exports." << className << " = " << className << ";";
     _out << nl << "exports." << proxyName << " = " << proxyName << ";";
     return true;
@@ -2567,12 +2755,12 @@ Slice::Gen::ExportVisitor::visitEnum(const EnumPtr& p)
     const string localScope = getLocalScope(scope);
     const string name = fixId(p->name());
     const string enumName = localScope + "." + name;
-    
+
     _out << nl << "exports." << enumName << " = " << enumName << ";";
 }
 
 void
 Slice::Gen::ExportVisitor::visitConst(const ConstPtr&)
 {
-    
+
 }

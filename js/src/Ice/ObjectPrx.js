@@ -23,6 +23,7 @@
 
         var Ice = {};
 
+        _merge(Ice, require("Ice/BuiltinSequences").Ice);
         _merge(Ice, require("Ice/Exception").Ice);
         _merge(Ice, require("Ice/LocalException").Ice);
 
@@ -50,62 +51,25 @@
             return this._reference.toString();
         };
 
-        ObjectPrx.prototype.ice_isA = function(__id, __context)
+        ObjectPrx.prototype.ice_isA = function(__id, __ctx)
         {
-            var __ice_isA_name = "ice_isA";
-            this.__checkAsyncTwowayOnly(__ice_isA_name);
-            var __promise = new OutgoingAsync(this, __ice_isA_name, ObjectPrx.__completed_bool);
-            try
-            {
-                __promise.__prepare(__ice_isA_name, OperationMode.Nonmutating, __context);
-                var __os = __promise.__startWriteParams(FormatType.DefaultFormat);
-                __os.writeString(__id);
-                __os.endWriteEncaps();
-                __promise.__send();
-            }
-            catch(__ex)
-            {
-                this.__handleLocalException(__promise, __ex);
-            }
-            return __promise;
+            return ObjectPrx.__invoke(this, "ice_isA", true, ObjectPrx.__completed_bool, 1, 0, __ctx, function(__os)
+                {
+                    __os.writeString(__id);
+                });
         };
 
-        ObjectPrx.prototype.ice_ping = function(__context)
+        ObjectPrx.prototype.ice_ping = function(__ctx)
         {
-            var __ice_ping_name = "ice_ping";
-            var __promise = new OutgoingAsync(this, __ice_ping_name, ObjectPrx.__completed);
-            try
-            {
-                __promise.__prepare(__ice_ping_name, OperationMode.Nonmutating, __context);
-                __promise.__writeEmptyParams();
-                __promise.__send();
-            }
-            catch(__ex)
-            {
-                this.__handleLocalException(__promise, __ex);
-            }
-            return __promise;
+            return ObjectPrx.__invokeNoArgs(this, "ice_ping", false, null, 1, __ctx);
         };
 
-        ObjectPrx.prototype.ice_ids = function(__context)
+        ObjectPrx.prototype.ice_ids = function(__ctx)
         {
-            var __ice_ids_name = "ice_ids";
-            this.__checkAsyncTwowayOnly(__ice_ids_name);
-            var __promise = new OutgoingAsync(this, __ice_ids_name, this._ice_ids_completed);
-            try
-            {
-                __promise.__prepare(__ice_ids_name, OperationMode.Nonmutating, __context);
-                __promise.__writeEmptyParams();
-                __promise.__send();
-            }
-            catch(__ex)
-            {
-                this.__handleLocalException(__promise, __ex);
-            }
-            return __promise;
+            return ObjectPrx.__invokeNoArgs(this, "ice_ids", true, ObjectPrx._ice_ids_completed, 1, __ctx);
         };
 
-        ObjectPrx.prototype._ice_ids_completed = function(__r)
+        ObjectPrx._ice_ids_completed = function(__r)
         {
             if(!ObjectPrx.__check(__r))
             {
@@ -116,7 +80,7 @@
             var __ret;
             try
             {
-                __ret = __is.readStringSeq();
+                __ret = Ice.StringSeqHelper.read(__is);
                 __r.__endReadParams();
             }
             catch(__ex)
@@ -127,22 +91,9 @@
             __r.succeed(__r, __ret);
         };
 
-        ObjectPrx.prototype.ice_id = function(__context)
+        ObjectPrx.prototype.ice_id = function(__ctx)
         {
-            var __ice_id_name = "ice_id";
-            this.__checkAsyncTwowayOnly(__ice_id_name);
-            var __promise = new OutgoingAsync(this, __ice_id_name, ObjectPrx.__completed_string);
-            try
-            {
-                __promise.__prepare(__ice_id_name, OperationMode.Nonmutating, __context);
-                __promise.__writeEmptyParams();
-                __promise.__send();
-            }
-            catch(__ex)
-            {
-                this.__handleLocalException(__promise, __ex);
-            }
-            return __promise;
+            return ObjectPrx.__invokeNoArgs(this, "ice_id", true, ObjectPrx.__completed_string, 1, __ctx);
         };
 
         ObjectPrx.prototype.ice_getIdentity = function()
@@ -641,7 +592,58 @@
         };
 
         //
-        // Completed callback for operations that have no return value or out parameters.
+        // Generic invocation for operations that have no input parameters.
+        //
+        ObjectPrx.__invokeNoArgs = function(__p, __name, __twoway, __fn, __modeNum, __ctx)
+        {
+            var __mode = OperationMode.valueOf(__modeNum);
+            if(__twoway)
+            {
+                __p.__checkAsyncTwowayOnly(__name);
+            }
+            var __r = new OutgoingAsync(__p, __name, __fn === null ? ObjectPrx.__completed : __fn);
+            try
+            {
+                __r.__prepare(__name, __mode, __ctx);
+                __r.__writeEmptyParams();
+                __r.__send();
+            }
+            catch(__ex)
+            {
+                __p.__handleLocalException(__r, __ex);
+            }
+            return __r;
+        };
+
+        //
+        // Generic invocation for operations that have input parameters.
+        //
+        ObjectPrx.__invoke = function(__p, __name, __twoway, __completedFn, __modeNum, __fmtNum, __ctx, __marshalFn)
+        {
+            var __mode = OperationMode.valueOf(__modeNum);
+            var __fmt = FormatType.valueOf(__fmtNum);
+            if(__twoway)
+            {
+                __p.__checkAsyncTwowayOnly(__name);
+            }
+            var __r = new OutgoingAsync(__p, __name, __completedFn === null ? ObjectPrx.__completed : __completedFn);
+            try
+            {
+                __r.__prepare(__name, __mode, __ctx);
+                var __os = __r.__startWriteParams(__fmt);
+                __marshalFn(__os);
+                __r.__endWriteParams();
+                __r.__send();
+            }
+            catch(__ex)
+            {
+                __p.__handleLocalException(__r, __ex);
+            }
+            return __r;
+        };
+
+        //
+        // Completed callback for operations that have no return value, out parameters, or user exceptions.
         //
         ObjectPrx.__completed = function(__r)
         {
@@ -906,10 +908,13 @@
         };
 
         //
-        // Check function for operations that declare no user exceptions.
+        // Handles user exceptions.
         //
-        ObjectPrx.__check = function(__r)
+        ObjectPrx.__check = function(__r, __uex)
         {
+            //
+            // If __uex is present, it must be an array of exception types.
+            //
             try
             {
                 __r.__throwUserException();
@@ -918,12 +923,23 @@
             {
                 if(ex instanceof Ice.UserException)
                 {
-                    __r.fail(new Ice.UnknownUserException(ex.ice_name()));
+                    if(__uex !== undefined)
+                    {
+                        for(var i = 0; i < __uex.length; ++i)
+                        {
+                            if(ex instanceof __uex[i])
+                            {
+                                __r.fail(__r, ex);
+                                return false;
+                            }
+                        }
+                    }
+                    __r.fail(__r, new Ice.UnknownUserException(ex.ice_name()));
                     return false;
                 }
                 else
                 {
-                    __r.fail(ex);
+                    __r.fail(__r, ex);
                     return false;
                 }
             }

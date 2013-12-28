@@ -90,12 +90,45 @@
             __is.endReadSlice();
         };
 
-        Test.MyClassPrx.prototype.shutdown = function(__ctx)
+        Test.MyClassPrx.__op_shutdown = function(__p, __ctx)
         {
+            return Ice.ObjectPrx.__invokeNoArgs(__p, "shutdown", false, null, 0, __ctx);
+        };
+
+        Test.MyClassPrx.__op_getContext = function(__p, __ctx)
+        {
+            return Ice.ObjectPrx.__invokeNoArgs(__p, "getContext", true, Test.MyClassPrx.__getContext_completed, 0, __ctx);
+        };
+
+        Test.MyClassPrx.__getContext_completed = function(__r)
+        {
+            if(!Ice.ObjectPrx.__check(__r))
+            {
+                return;
+            }
+            var __is = __r.__startReadParams();
+            var __ret;
+            try
+            {
+                __ret = Ice.ContextHelper.read(__is);
+                __r.__endReadParams();
+            }
+            catch(__ex)
+            {
+                Ice.ObjectPrx.__dispatchLocalException(__r, __ex);
+                return;
+            }
+            __r.succeed(__r, __ret);
         };
 
         Test.MyClassPrx.prototype.getContext = function(__ctx)
         {
+            return Test.MyClassPrx.__op_getContext(this, __ctx);
+        };
+
+        Test.MyClassPrx.prototype.shutdown = function(__ctx)
+        {
+            return Test.MyClassPrx.__op_shutdown(this, __ctx);
         };
         
         Ice.ClassRegistry.register(Test.MyClass.ice_staticId(), Test.MyClass);
@@ -157,8 +190,27 @@
             Test.MyClass.prototype.__readImpl.call(this, __is);
         };
 
+        Test.MyDerivedClassPrx.__op_echo = function(__p, obj, __ctx)
+        {
+            return Ice.ObjectPrx.__invoke(__p, "echo", true, Ice.ObjectPrx.__completed_ObjectPrx, 0, 0, __ctx, function(__os)
+            {
+                __os.writeProxy(obj);
+            });
+        };
+
+        Test.MyDerivedClassPrx.prototype.getContext = function(__ctx)
+        {
+            return Test.MyClassPrx.__op_getContext(this, __ctx);
+        };
+
+        Test.MyDerivedClassPrx.prototype.shutdown = function(__ctx)
+        {
+            return Test.MyClassPrx.__op_shutdown(this, __ctx);
+        };
+
         Test.MyDerivedClassPrx.prototype.echo = function(obj, __ctx)
         {
+            return Test.MyDerivedClassPrx.__op_echo(this, obj, __ctx);
         };
         
         Ice.ClassRegistry.register(Test.MyDerivedClass.ice_staticId(), Test.MyDerivedClass);
