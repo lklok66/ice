@@ -761,7 +761,7 @@
         AllTests.prototype.exception = function(r, ex)
         {
             this._log.write("exception occurred in call to " + r.operation + "\n");
-            if(typeof(ex.stack) !== undefined)
+            if(typeof(ex.stack) !== "undefined")
             {
                 this._log.writeLine(ex.stack + "\n");
             }

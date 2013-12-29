@@ -92,33 +92,18 @@
 
         Test.MyClassPrx.__op_shutdown = function(__p, __ctx)
         {
-            return Ice.ObjectPrx.__invokeNoArgs(__p, "shutdown", false, null, 0, __ctx);
+            return Ice.ObjectPrx.__invoke(__p, "shutdown", 0, 0, __ctx, null, null, null);
         };
 
         Test.MyClassPrx.__op_getContext = function(__p, __ctx)
         {
-            return Ice.ObjectPrx.__invokeNoArgs(__p, "getContext", true, Test.MyClassPrx.__getContext_completed, 0, __ctx);
-        };
-
-        Test.MyClassPrx.__getContext_completed = function(__r)
-        {
-            if(!Ice.ObjectPrx.__check(__r))
-            {
-                return;
-            }
-            var __is = __r.__startReadParams();
-            var __ret;
-            try
-            {
-                __ret = Ice.ContextHelper.read(__is);
-                __r.__endReadParams();
-            }
-            catch(__ex)
-            {
-                Ice.ObjectPrx.__dispatchLocalException(__r, __ex);
-                return;
-            }
-            __r.succeed(__r, __ret);
+            return Ice.ObjectPrx.__invoke(__p, "getContext", 0, 0, __ctx, null,
+                function(__is, __results)
+                {
+                    var __ret;
+                    __ret = Ice.ContextHelper.read(__is);
+                    __results.push(__ret);
+                }, null);
         };
 
         Test.MyClassPrx.prototype.getContext = function(__ctx)
@@ -192,10 +177,11 @@
 
         Test.MyDerivedClassPrx.__op_echo = function(__p, obj, __ctx)
         {
-            return Ice.ObjectPrx.__invoke(__p, "echo", true, Ice.ObjectPrx.__completed_ObjectPrx, 0, 0, __ctx, function(__os)
-            {
-                __os.writeProxy(obj);
-            });
+            return Ice.ObjectPrx.__invoke(__p, "echo", 0, 0, __ctx,
+                function(__os)
+                {
+                    __os.writeProxy(obj);
+                }, Ice.ObjectPrx.__returns_ObjectPrx, null);
         };
 
         Test.MyDerivedClassPrx.prototype.getContext = function(__ctx)

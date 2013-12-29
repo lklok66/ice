@@ -53,47 +53,31 @@
 
         ObjectPrx.prototype.ice_isA = function(__id, __ctx)
         {
-            return ObjectPrx.__invoke(this, "ice_isA", true, ObjectPrx.__completed_bool, 1, 0, __ctx, function(__os)
+            return ObjectPrx.__invoke(this, "ice_isA", 1, 0, __ctx,
+                function(__os)
                 {
                     __os.writeString(__id);
-                });
+                },
+                ObjectPrx.__returns_bool, null);
         };
 
         ObjectPrx.prototype.ice_ping = function(__ctx)
         {
-            return ObjectPrx.__invokeNoArgs(this, "ice_ping", false, null, 1, __ctx);
+            return ObjectPrx.__invoke(this, "ice_ping", 1, 0, __ctx, null, null, null);
         };
 
         ObjectPrx.prototype.ice_ids = function(__ctx)
         {
-            return ObjectPrx.__invokeNoArgs(this, "ice_ids", true, ObjectPrx._ice_ids_completed, 1, __ctx);
-        };
-
-        ObjectPrx._ice_ids_completed = function(__r)
-        {
-            if(!ObjectPrx.__check(__r))
-            {
-                return;
-            }
-
-            var __is = __r.__startReadParams();
-            var __ret;
-            try
-            {
-                __ret = Ice.StringSeqHelper.read(__is);
-                __r.__endReadParams();
-            }
-            catch(__ex)
-            {
-                ObjectPrx.__dispatchLocalException(__r, __ex);
-                return;
-            }
-            __r.succeed(__r, __ret);
+            return ObjectPrx.__invokeNoArgs(this, "ice_ids", 1, 0, __ctx, null,
+                function(__is, __results)
+                {
+                    __results.push(Ice.StringSeqHelper.read(__is));
+                }, null);
         };
 
         ObjectPrx.prototype.ice_id = function(__ctx)
         {
-            return ObjectPrx.__invokeNoArgs(this, "ice_id", true, ObjectPrx.__completed_string, 1, __ctx);
+            return ObjectPrx.__invoke(this, "ice_id", 1, 0, __ctx, null, ObjectPrx.__returns_string, null);
         };
 
         ObjectPrx.prototype.ice_getIdentity = function()
@@ -592,319 +576,160 @@
         };
 
         //
-        // Generic invocation for operations that have no input parameters.
-        //
-        ObjectPrx.__invokeNoArgs = function(__p, __name, __twoway, __fn, __modeNum, __ctx)
-        {
-            var __mode = OperationMode.valueOf(__modeNum);
-            if(__twoway)
-            {
-                __p.__checkAsyncTwowayOnly(__name);
-            }
-            var __r = new OutgoingAsync(__p, __name, __fn === null ? ObjectPrx.__completed : __fn);
-            try
-            {
-                __r.__prepare(__name, __mode, __ctx);
-                __r.__writeEmptyParams();
-                __r.__send();
-            }
-            catch(__ex)
-            {
-                __p.__handleLocalException(__r, __ex);
-            }
-            return __r;
-        };
-
-        //
         // Generic invocation for operations that have input parameters.
         //
-        ObjectPrx.__invoke = function(__p, __name, __twoway, __completedFn, __modeNum, __fmtNum, __ctx, __marshalFn)
+        ObjectPrx.__invoke = function(p, name, modeNum, fmtNum, ctx, marshalFn, unmarshalFn, userEx)
         {
-            var __mode = OperationMode.valueOf(__modeNum);
-            var __fmt = FormatType.valueOf(__fmtNum);
-            if(__twoway)
+            var mode = OperationMode.valueOf(modeNum);
+            var fmt = FormatType.valueOf(fmtNum);
+
+            if(unmarshalFn !== null || userEx !== null)
             {
-                __p.__checkAsyncTwowayOnly(__name);
+                p.__checkAsyncTwowayOnly(name);
             }
-            var __r = new OutgoingAsync(__p, __name, __completedFn === null ? ObjectPrx.__completed : __completedFn);
+
+            var __r = new OutgoingAsync(p, name,
+                function(__res)
+                {
+                    ObjectPrx.__completed(__res, unmarshalFn, userEx);
+                });
+
             try
             {
-                __r.__prepare(__name, __mode, __ctx);
-                var __os = __r.__startWriteParams(__fmt);
-                __marshalFn(__os);
-                __r.__endWriteParams();
+                __r.__prepare(name, mode, ctx);
+                if(marshalFn === null)
+                {
+                    __r.__writeEmptyParams();
+                }
+                else
+                {
+                    var __os = __r.__startWriteParams(fmt);
+                    marshalFn(__os);
+                    __r.__endWriteParams();
+                }
                 __r.__send();
             }
-            catch(__ex)
+            catch(ex)
             {
-                __p.__handleLocalException(__r, __ex);
+                p.__handleLocalException(__r, ex);
             }
             return __r;
         };
 
         //
-        // Completed callback for operations that have no return value, out parameters, or user exceptions.
+        // Handles the completion of an invocation.
         //
-        ObjectPrx.__completed = function(__r)
+        ObjectPrx.__completed = function(__r, unmarshalFn, userEx)
         {
-            if(!ObjectPrx.__check(__r))
+            if(!ObjectPrx.__check(__r, userEx))
             {
                 return;
             }
 
-            __r.__readEmptyParams();
-            __r.succeed(__r);
-        };
-
-        //
-        // Completed callback for operations that return a bool as the only result.
-        //
-        ObjectPrx.__completed_bool = function(__r)
-        {
-            if(!ObjectPrx.__check(__r))
-            {
-                return;
-            }
-
-            var __is = __r.__startReadParams();
-            var __ret;
             try
             {
-                __ret = __is.readBool();
-                __r.__endReadParams();
+                if(unmarshalFn === null)
+                {
+                    __r.__readEmptyParams();
+                    __r.succeed(__r);
+                }
+                else
+                {
+                    var __is = __r.__startReadParams();
+                    var results = [__r];
+                    unmarshalFn(__is, results);
+                    __r.__endReadParams();
+                    __r.succeed.apply(__r, results);
+                }
             }
-            catch(__ex)
+            catch(ex)
             {
-                ObjectPrx.__dispatchLocalException(__r, __ex);
+                ObjectPrx.__dispatchLocalException(__r, ex);
                 return;
             }
-            __r.succeed(__r, __ret);
         };
 
         //
-        // Completed callback for operations that return a byte as the only result.
+        // Unmarshal callback for operations that return a bool as the only result.
         //
-        ObjectPrx.__completed_byte = function(__r)
+        ObjectPrx.__returns_bool = function(__is, __results)
         {
-            if(!ObjectPrx.__check(__r))
-            {
-                return;
-            }
-
-            var __is = __r.__startReadParams();
-            var __ret;
-            try
-            {
-                __ret = __is.readByte();
-                __r.__endReadParams();
-            }
-            catch(__ex)
-            {
-                ObjectPrx.__dispatchLocalException(__r, __ex);
-                return;
-            }
-            __r.succeed(__r, __ret);
+            __results.push(__is.readBool());
         };
 
         //
-        // Completed callback for operations that return a short as the only result.
+        // Unmarshal callback for operations that return a byte as the only result.
         //
-        ObjectPrx.__completed_short = function(__r)
+        ObjectPrx.__returns_byte = function(__is, __results)
         {
-            if(!ObjectPrx.__check(__r))
-            {
-                return;
-            }
-
-            var __is = __r.__startReadParams();
-            var __ret;
-            try
-            {
-                __ret = __is.readShort();
-                __r.__endReadParams();
-            }
-            catch(__ex)
-            {
-                ObjectPrx.__dispatchLocalException(__r, __ex);
-                return;
-            }
-            __r.succeed(__r, __ret);
+            __results.push(__is.readByte());
         };
 
         //
-        // Completed callback for operations that return an int as the only result.
+        // Unmarshal callback for operations that return a short as the only result.
         //
-        ObjectPrx.__completed_int = function(__r)
+        ObjectPrx.__returns_short = function(__is, __results)
         {
-            if(!ObjectPrx.__check(__r))
-            {
-                return;
-            }
-
-            var __is = __r.__startReadParams();
-            var __ret;
-            try
-            {
-                __ret = __is.readInt();
-                __r.__endReadParams();
-            }
-            catch(__ex)
-            {
-                ObjectPrx.__dispatchLocalException(__r, __ex);
-                return;
-            }
-            __r.succeed(__r, __ret);
+            __results.push(__is.readShort());
         };
 
         //
-        // Completed callback for operations that return a long as the only result.
+        // Unmarshal callback for operations that return an int as the only result.
         //
-        ObjectPrx.__completed_long = function(__r)
+        ObjectPrx.__returns_int = function(__is, __results)
         {
-            if(!ObjectPrx.__check(__r))
-            {
-                return;
-            }
-
-            var __is = __r.__startReadParams();
-            var __ret;
-            try
-            {
-                __ret = __is.readLong();
-                __r.__endReadParams();
-            }
-            catch(__ex)
-            {
-                ObjectPrx.__dispatchLocalException(__r, __ex);
-                return;
-            }
-            __r.succeed(__r, __ret);
+            __results.push(__is.readInt());
         };
 
         //
-        // Completed callback for operations that return a float as the only result.
+        // Unmarshal callback for operations that return a long as the only result.
         //
-        ObjectPrx.__completed_float = function(__r)
+        ObjectPrx.__returns_long = function(__is, __results)
         {
-            if(!ObjectPrx.__check(__r))
-            {
-                return;
-            }
-
-            var __is = __r.__startReadParams();
-            var __ret;
-            try
-            {
-                __ret = __is.readFloat();
-                __r.__endReadParams();
-            }
-            catch(__ex)
-            {
-                ObjectPrx.__dispatchLocalException(__r, __ex);
-                return;
-            }
-            __r.succeed(__r, __ret);
+            __results.push(__is.readLong());
         };
 
         //
-        // Completed callback for operations that return a double as the only result.
+        // Unmarshal callback for operations that return a float as the only result.
         //
-        ObjectPrx.__completed_double = function(__r)
+        ObjectPrx.__returns_float = function(__is, __results)
         {
-            if(!ObjectPrx.__check(__r))
-            {
-                return;
-            }
-
-            var __is = __r.__startReadParams();
-            var __ret;
-            try
-            {
-                __ret = __is.readDouble();
-                __r.__endReadParams();
-            }
-            catch(__ex)
-            {
-                ObjectPrx.__dispatchLocalException(__r, __ex);
-                return;
-            }
-            __r.succeed(__r, __ret);
+            __results.push(__is.readFloat());
         };
 
         //
-        // Completed callback for operations that return a string as the only result.
+        // Unmarshal callback for operations that return a double as the only result.
         //
-        ObjectPrx.__completed_string = function(__r)
+        ObjectPrx.__returns_double = function(__is, __results)
         {
-            if(!ObjectPrx.__check(__r))
-            {
-                return;
-            }
-
-            var __is = __r.__startReadParams();
-            var __ret;
-            try
-            {
-                __ret = __is.readString();
-                __r.__endReadParams();
-            }
-            catch(__ex)
-            {
-                ObjectPrx.__dispatchLocalException(__r, __ex);
-                return;
-            }
-            __r.succeed(__r, __ret);
+            __results.push(__is.readDouble());
         };
 
         //
-        // Completed callback for operations that return a proxy as the only result.
+        // Unmarshal callback for operations that return a string as the only result.
         //
-        ObjectPrx.__completed_ObjectPrx = function(__r)
+        ObjectPrx.__returns_string = function(__is, __results)
         {
-            if(!ObjectPrx.__check(__r))
-            {
-                return;
-            }
-
-            var __is = __r.__startReadParams();
-            var __ret;
-            try
-            {
-                __ret = __is.readProxy();
-                __r.__endReadParams();
-            }
-            catch(__ex)
-            {
-                ObjectPrx.__dispatchLocalException(__r, __ex);
-                return;
-            }
-            __r.succeed(__r, __ret);
+            __results.push(__is.readString());
         };
 
         //
-        // Completed callback for operations that return an object as the only result.
+        // Unmarshal callback for operations that return a proxy as the only result.
         //
-        ObjectPrx.__completed_Object = function(__r)
+        ObjectPrx.__returns_ObjectPrx = function(__is, __results)
         {
-            if(!ObjectPrx.__check(__r))
-            {
-                return;
-            }
+            __results.push(__is.readProxy());
+        };
 
-            var __is = __r.__startReadParams();
+        //
+        // Unmarshal callback for operations that return an object as the only result.
+        //
+        ObjectPrx.__returns_Object = function(__is, __results)
+        {
             var __ret = { value: null };
-            try
-            {
-                __ret = __is.readObject(__ret);
-                __is.readPendingObjects();
-                __r.__endReadParams();
-            }
-            catch(__ex)
-            {
-                ObjectPrx.__dispatchLocalException(__r, __ex);
-                return;
-            }
-            __r.succeed(__r, __ret.value);
+            __is.readObject(__ret);
+            __is.readPendingObjects();
+            __results.push(__ret.value);
         };
 
         //
@@ -913,7 +738,7 @@
         ObjectPrx.__check = function(__r, __uex)
         {
             //
-            // If __uex is present, it must be an array of exception types.
+            // If __uex is non-null, it must be an array of exception types.
             //
             try
             {
@@ -923,7 +748,7 @@
             {
                 if(ex instanceof Ice.UserException)
                 {
-                    if(__uex !== undefined)
+                    if(__uex !== null)
                     {
                         for(var i = 0; i < __uex.length; ++i)
                         {

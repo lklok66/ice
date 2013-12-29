@@ -1670,197 +1670,160 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
                  << spar << "__p" << getParams(op) << "__ctx" << epar;
             _out << sb;
 
-            bool needCompletedCallback = true;
-            string completedCallback;
-            if(throws.empty())
+            string unmarshalCallback;
+            if(ret || !outParams.empty())
             {
-                if(op->returnsData())
+                //
+                // Select an unmarshal callback. We provide generic callbacks for operations that
+                // return one value of built-in type. Otherwise, we have to generate a callback.
+                //
+                TypePtr t;
+                if((ret && outParams.empty()) || (!ret && outParams.size() == 1))
                 {
-                    //
-                    // Select a completion callback. We provide generic callbacks for an operation that
-                    // throws no user exceptions and returns a built-in type. Otherwise, we have to
-                    // generate a callback.
-                    //
-                    TypePtr t;
-                    if((ret && outParams.empty()) || (!ret && outParams.size() == 1))
+                    if(ret)
                     {
-                        if(ret)
-                        {
-                            assert(outParams.size() == 0);
-                            t = ret;
-                        }
-                        else
-                        {
-                            assert(outParams.size() == 1);
-                            t = outParams.front()->type();
-                        }
+                        assert(outParams.size() == 0);
+                        t = ret;
                     }
-
-                    if(t)
+                    else
                     {
-                        BuiltinPtr b = BuiltinPtr::dynamicCast(t);
-                        if(b)
-                        {
-                            needCompletedCallback = false;
-                            if(b->kind() == Builtin::KindObject)
-                            {
-                                completedCallback = "Ice.ObjectPrx.__completed_Object";
-                            }
-                            else if(b->kind() == Builtin::KindObjectProxy)
-                            {
-                                completedCallback = "Ice.ObjectPrx.__completed_ObjectPrx";
-                            }
-                            else
-                            {
-                                assert(b->kind() != Builtin::KindLocalObject);
-                                completedCallback = "Ice.ObjectPrx.__completed_" + b->typeId();
-                            }
-                        }
-                        else
-                        {
-                            t = 0;
-                        }
-                    }
-
-                    if(!t)
-                    {
-                        completedCallback = localScope + "." + prxName + ".__" + op->name() + "_completed";
+                        assert(outParams.size() == 1);
+                        t = outParams.front()->type();
                     }
                 }
-                else
+
+                BuiltinPtr b = BuiltinPtr::dynamicCast(t);
+                if(b)
                 {
-                    //
-                    // Use a generic callback for an operation that returns nothing and declares no user exceptions.
-                    //
-                    completedCallback = "null"; // null === Ice.ObjectPrx.__completed
-                    needCompletedCallback = false;
+                    if(b->kind() == Builtin::KindObject)
+                    {
+                        unmarshalCallback = "Ice.ObjectPrx.__returns_Object";
+                    }
+                    else if(b->kind() == Builtin::KindObjectProxy)
+                    {
+                        unmarshalCallback = "Ice.ObjectPrx.__returns_ObjectPrx";
+                    }
+                    else
+                    {
+                        assert(b->kind() != Builtin::KindLocalObject);
+                        unmarshalCallback = "Ice.ObjectPrx.__returns_" + b->typeId();
+                    }
                 }
             }
             else
             {
-                completedCallback = localScope + "." + prxName + ".__" + op->name() + "_completed";
+                //
+                // Nothing to unmarshal.
+                //
+                unmarshalCallback = "null";
             }
 
+            _out << nl << "return Ice.ObjectPrx.__invoke(__p, \"" << op->name() << "\", "
+                 << sliceModeToIceMode(op->sendMode()) << ", " << opFormatTypeToString(op)
+                 << ", __ctx,";
             //
-            // If there are no input parameters, we use a generic method provided by ObjectPrx.
+            // Function to marshal in-params.
             //
             if(inParams.empty())
             {
-                _out << nl << "return Ice.ObjectPrx.__invokeNoArgs(__p, \"" << op->name() << "\", "
-                     << (op->returnsData() ? "true" : "false") << ", " << completedCallback << ", "
-                     << sliceModeToIceMode(op->sendMode()) << ", __ctx);";
+                _out << " null,";
             }
             else
             {
-                _out << nl << "return Ice.ObjectPrx.__invoke(__p, \"" << op->name() << "\", "
-                     << (op->returnsData() ? "true" : "false") << ", " << completedCallback << ", "
-                     << sliceModeToIceMode(op->sendMode()) << ", " << opFormatTypeToString(op)
-                     << ", __ctx, function(__os)";
+                _out.inc();
+                _out << nl << "function(__os)";
                 _out << sb;
                 writeMarshalUnmarshalParams(inParams, 0, true);
                 if(op->sendsClasses(false))
                 {
                     _out << nl << "__os.writePendingObjects();";
                 }
-                _out << eb << ");";
+                _out << eb << ',';
+                _out.dec();
             }
-            _out << eb << ";";
-
-            if(needCompletedCallback)
+            //
+            // Function to unmarshal out-params.
+            //
+            if(!unmarshalCallback.empty())
             {
-                _out << sp << nl << localScope << '.' << prxName << ".__" << op->name() << "_completed = function(__r)";
+                _out << ' ' << unmarshalCallback << ',';
+            }
+            else
+            {
+                assert(ret || !outParams.empty());
+                _out.inc();
+                _out << nl << "function(__is, __results)";
                 _out << sb;
-
-                if(throws.empty())
+                vector<string> outArgs;
+                if(ret)
                 {
-                    _out << nl << "if(!Ice.ObjectPrx.__check(__r))";
-                    _out << sb;
-                    _out << nl << "return;";
-                    _out << eb;
+                    _out << nl << "var __ret;";
                 }
-                else
+                if(!outParams.empty())
                 {
-                    //
-                    // Arrange exceptions into most-derived to least-derived order. If we don't
-                    // do this, a base exception handler can appear before a derived exception
-                    // handler, causing compiler warnings and resulting in the base exception
-                    // being marshaled instead of the derived exception.
-                    //
-#if defined(__SUNPRO_CC)
-                    throws.sort(Slice::derivedToBaseCompare);
-#else
-                    throws.sort(Slice::DerivedToBaseCompare());
-#endif
-
-                    _out << nl << "var __uex = [";
-                    for(ExceptionList::const_iterator eli = throws.begin(); eli != throws.end(); ++eli)
+                    _out << nl << "var ";
+                    for(ParamDeclList::const_iterator pli = outParams.begin(); pli != outParams.end(); ++pli)
                     {
-                        if(eli != throws.begin())
+                        if(pli != outParams.begin())
                         {
                             _out << ", ";
                         }
-                        _out << getLocalScope((*eli)->scoped());
+                        string s = fixId((*pli)->name());
+                        _out << s;
+                        outArgs.push_back(s);
                     }
-                    _out << "];";
-                    _out << nl << "if(!Ice.ObjectPrx.__check(__r, __uex))";
-                    _out << sb;
-                    _out << nl << "return;";
-                    _out << eb;
+                    _out << ';';
                 }
-
-                string outArgs;
-                if(ret || !outParams.empty())
+                writeMarshalUnmarshalParams(outParams, op, false);
+                if(op->returnsClasses(false))
                 {
-                    _out << nl << "var __is = __r.__startReadParams();";
-                    if(ret)
-                    {
-                        _out << nl << "var __ret;";
-                    }
-                    if(!outParams.empty())
-                    {
-                        for(ParamDeclList::const_iterator pli = outParams.begin(); pli != outParams.end(); ++pli)
-                        {
-                            if(pli != outParams.begin())
-                            {
-                                outArgs += ", ";
-                            }
-                            outArgs += fixId((*pli)->name());
-                        }
-                        _out << nl << "var " << outArgs << ';';
-                    }
-                    _out << nl << "try";
-                    _out << sb;
-                    writeMarshalUnmarshalParams(outParams, op, false);
-                    if(op->returnsClasses(false))
-                    {
-                        _out << nl << "__is.readPendingObjects();";
-                    }
-                    _out << nl << "__r.__endReadParams();";
-                    _out << eb;
-                    _out << nl << "catch(__ex)";
-                    _out << sb;
-                    _out << nl << "Ice.ObjectPrx.__dispatchLocalException(__r, __ex);";
-                    _out << nl << "return;";
-                    _out << eb;
+                    _out << nl << "__is.readPendingObjects();";
                 }
-                else
-                {
-                    _out << nl << "__r.__readEmptyParams();";
-                }
-
-                _out << nl << "__r.succeed(__r";
+                _out << nl << "__results.push" << spar;
                 if(ret)
                 {
-                    _out << ", __ret";
+                    _out << "__ret";
                 }
-                if(!outArgs.empty())
-                {
-                    _out << ", " << outArgs;
-                }
-                _out << ");";
-
-                _out << eb << ';';
+                _out << outArgs << epar << ';';
+                _out << eb << ',';
+                _out.dec();
             }
+            //
+            // User exceptions.
+            //
+            if(throws.empty())
+            {
+                _out << " null";
+            }
+            else
+            {
+                //
+                // Arrange exceptions into most-derived to least-derived order. If we don't
+                // do this, a base exception handler can appear before a derived exception
+                // handler, causing compiler warnings and resulting in the base exception
+                // being marshaled instead of the derived exception.
+                //
+#if defined(__SUNPRO_CC)
+                throws.sort(Slice::derivedToBaseCompare);
+#else
+                throws.sort(Slice::DerivedToBaseCompare());
+#endif
+
+                _out.inc();
+                _out << nl << '[';
+                for(ExceptionList::const_iterator eli = throws.begin(); eli != throws.end(); ++eli)
+                {
+                    if(eli != throws.begin())
+                    {
+                        _out << ", ";
+                    }
+                    _out << getLocalScope((*eli)->scoped());
+                }
+                _out << ']';
+                _out.dec();
+            }
+            _out << ");";
+            _out << eb << ";";
         }
 
         const OperationList allOps = p->allOperations();
