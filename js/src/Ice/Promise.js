@@ -91,7 +91,7 @@
             }
             catch(e)
             {
-                listener.promise.fail(e);
+                listener.promise.unhandledException(e);
             }
         };
 
@@ -177,6 +177,18 @@
         };
 
         Promise.prototype.fail = function()
+        {
+            if(this.__state === State.Pending)
+            {
+                var args = arguments;
+                this.setState(State.Failed, args);
+            }
+        };
+        
+        //
+        // Sub classes can override this for convenience.
+        //
+        Promise.prototype.unhandledException = function()
         {
             if(this.__state === State.Pending)
             {
