@@ -799,11 +799,11 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-            out << nl << stream << ".writeEnum(" << param << ");";
+            out << nl << stream << ".writeOptEnum(" << tag << ", " << param << ");";
         }
         else
         {
-            out << nl << param << " = " << stream << ".readEnum(" << typeToString(en) << ");";
+            out << nl << param << " = " << stream << ".readOptEnum(" << tag << ", " << typeToString(en) << ");";
         }
         return;
     }

@@ -2852,23 +2852,46 @@
                 this.writeSize(v.value);
             }
         };
+        
+        BasicStream.prototype.writeOptEnum = function(tag, v)
+        {
+            if(v !== undefined)
+            {
+                if(this.writeOpt(tag, OptionalFormat.Size))
+                {
+                    this.writeEnum(v);
+                }
+            }
+        };
 
-        BasicStream.prototype.readEnum = function(Type)
+        BasicStream.prototype.readEnum = function(T)
         {
             if(this.getReadEncoding().equals(Protocol.Encoding_1_0))
             {
-                if(Type.maxValue < 127)
+                if(T.maxValue < 127)
                 {
-                    return Type.valueOf(this.readByte());
+                    return T.valueOf(this.readByte());
                 }
                 
-                if(Type.maxValue < 32767)
+                if(T.maxValue < 32767)
                 {
-                    return Type.valueOf(this.readShort());
+                    return T.valueOf(this.readShort());
                 }
-                return Type.valueOf(this.readInt());
+                return T.valueOf(this.readInt());
             }
-            return Type.valueOf(this.readSize());
+            return T.valueOf(this.readSize());
+        };
+        
+        BasicStream.prototype.readEnum = function(tag, T)
+        {
+            if(this.readOpt(tag, OptionalFormat.Size))
+            {
+                return this.readEnum(T);
+            }
+            else
+            {
+                return undefined;
+            }
         };
 
         BasicStream.prototype.writeStruct = function(v)
@@ -2900,7 +2923,7 @@
             }
         };
 
-        BasicStream.prototype.readObject = function(patcher, Type)
+        BasicStream.prototype.readObject = function(patcher, T)
         {
             this.initReadEncaps();
             //
@@ -2912,19 +2935,19 @@
             this._readEncapsStack.decoder.readObject.call(
                 this._readEncapsStack.decoder,
                 function(obj){
-                    if(obj !== null && !(obj instanceof Type))
+                    if(obj !== null && !(obj instanceof T))
                     {
-                        throw new TypeError("expected element of type " + Type.__ids[0] + " but received " + obj);
+                        throw new TypeError("expected element of type " + T.__ids[0] + " but received " + obj);
                     }
                     patcher(obj);
                 });
         };
 
-        BasicStream.prototype.readOptObject = function(tag, patcher, Type)
+        BasicStream.prototype.readOptObject = function(tag, patcher, T)
         {
             if(this.readOpt(tag, OptionalFormat.Class))
             {
-                this.readObject(patcher, Type);
+                this.readObject(patcher, T);
             }
             else
             {
