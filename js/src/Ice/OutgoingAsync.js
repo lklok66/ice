@@ -142,7 +142,7 @@
                 //
                 // Explicit context
                 //
-                //this._os.writeStringMap(ctx); // TODO: How to write a dictionary?
+                Ice.ContextHelper.write(os, ctx);
                 this._os.writeSize(0);
             }
             else
@@ -155,7 +155,7 @@
 
                 if(implicitContext === null)
                 {
-                    //this._os.writeStringMap(prxContext); // TODO: How to write a dictionary?
+                    Ice.ContextHelper.write(os, ctx);
                     this._os.writeSize(0);
                 }
                 else
