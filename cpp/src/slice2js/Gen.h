@@ -92,7 +92,7 @@ private:
         virtual void visitDictionary(const DictionaryPtr&);
         virtual void visitEnum(const EnumPtr&);
 
-        std::vector<std::string> writeRequires(const UnitPtr&);
+        std::vector< std::string> writeRequires(const UnitPtr&);
 
     private:
 
@@ -109,7 +109,7 @@ private:
     {
     public:
 
-        TypesVisitor(::IceUtilInternal::Output&, const std::vector<std::string>&);
+        TypesVisitor(::IceUtilInternal::Output&, std::vector< std::string>);
 
         virtual bool visitModuleStart(const ModulePtr&);
         virtual void visitModuleEnd(const ModulePtr&);
@@ -130,7 +130,7 @@ private:
         
         std::vector<std::string> _seenModules;
     };
-
+    
     class ExportVisitor : public JsVisitor
     {
     public:
@@ -138,19 +138,6 @@ private:
         ExportVisitor(::IceUtilInternal::Output&);
 
         virtual bool visitModuleStart(const ModulePtr&);
-        virtual void visitModuleEnd(const ModulePtr&);
-        virtual bool visitClassDefStart(const ClassDefPtr&);
-        virtual void visitOperation(const OperationPtr&);
-        virtual bool visitExceptionStart(const ExceptionPtr&);
-        virtual bool visitStructStart(const StructPtr&);
-        virtual void visitSequence(const SequencePtr&);
-        virtual void visitDictionary(const DictionaryPtr&);
-        virtual void visitEnum(const EnumPtr&);
-        virtual void visitConst(const ConstPtr&);
-
-    private:
-
-        StringList _modules;
     };
 
 #if 0

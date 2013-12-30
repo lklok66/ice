@@ -8,13 +8,18 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
+    var __m = function(global, module, exports, require){
         //
         // Exception utilities
         //
 
-        var UnexpectedObjectException = require("Ice/LocalException").Ice.UnexpectedObjectException;
-        var MemoryLimitException = require("Ice/LocalException").Ice.MemoryLimitException;
+        require("Ice/LocalException");
+        
+        //
+        // Local aliases.
+        //
+        var UnexpectedObjectException = Ice.UnexpectedObjectException;
+        var MemoryLimitException = Ice.MemoryLimitException;
         var ExUtil = {};
 
         ExUtil.toString = function(ex)
@@ -35,8 +40,9 @@
                                            " bytes (see Ice.MessageSizeMax)");
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.ExUtil = ExUtil;
+        global.Ice = global.Ice || {};
+        global.Ice.ExUtil = ExUtil;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/ExUtil"));

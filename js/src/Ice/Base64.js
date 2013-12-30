@@ -8,7 +8,9 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
+    var __m = function(global, module, exports, require){
+        
+        var Ice = global.Ice || {};
         var Base64 = {};
 
         var _codeA = "A".charCodeAt(0);
@@ -265,8 +267,9 @@
             return 63;
         }
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.Base64 = Base64;
+        Ice.Base64 = Base64;
+        global.Ice = Ice;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Base64"));

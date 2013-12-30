@@ -8,11 +8,15 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var FormatType = require("Ice/FormatType");
-
-        var EndpointSelectionType = require("Ice/EndpointTypes").Ice.EndpointSelectionType;
-        var Protocol = require("Ice/Protocol").Ice.Protocol;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/FormatType");
+        require("Ice/EndpointTypes");
+        require("Ice/Protocol");
+        
+        var FormatType = Ice.FormatType;
+        var EndpointSelectionType = Ice.EndpointSelectionType;
+        var Protocol = Ice.Protocol;
 
         var DefaultsAndOverrides = function(properties)
         {
@@ -91,8 +95,9 @@
             this.defaultFormat = slicedFormat ? FormatType.SlicedFormat : FormatType.CompactFormat;
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.DefaultsAndOverrides = DefaultsAndOverrides;
+        global.Ice = global.Ice || {};
+        global.Ice.DefaultsAndOverrides = DefaultsAndOverrides;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/DefaultsAndOverrides"));

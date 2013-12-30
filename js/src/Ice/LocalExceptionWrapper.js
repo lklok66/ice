@@ -8,21 +8,21 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Ex = require("Ice/Exception").Ice.Exception;
-        var ExUtil = require("Ice/ExUtil").Ice.ExUtil;
-        var Debug = require("Ice/Debug").Ice.Debug;
-
-        var _merge = require("Ice/Util").merge;
-
-        var Ice = {};
-        _merge(Ice, require("Ice/LocalException").Ice);
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/Exception");
+        require("Ice/ExUtil");
+        require("Ice/Debug");
+        require("Ice/LocalException");
+        
+        var ExUtil = Ice.ExUtil;
+        var Debug = Ice.Debug;
 
         var LocalExceptionWrapper = function(ex, retry)
         {
             retry = retry === undefined ? false : retry;
 
-            if(ex instanceof Ex.LocalException)
+            if(ex instanceof Ice.LocalException)
             {
                 this._ex = ex;
                 this._retry = retry;
@@ -55,11 +55,11 @@
 
         LocalExceptionWrapper.throwWrapper = function(ex)
         {
-            if(ex instanceof Ex.UserException)
+            if(ex instanceof Ice.UserException)
             {
                 throw new LocalExceptionWrapper(new Ice.UnknownUserException(ex.ice_name()), false);
             }
-            else if(ex instanceof Ex.LocalException)
+            else if(ex instanceof Ice.LocalException)
             {
                 if(ex instanceof Ice.UnknownException ||
                 ex instanceof Ice.ObjectNotExistException ||
@@ -76,8 +76,9 @@
             throw new LocalExceptionWrapper(ue, false);
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.LocalExceptionWrapper = LocalExceptionWrapper;
+        global.Ice = global.Ice || {};
+        global.Ice.LocalExceptionWrapper = LocalExceptionWrapper;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/LocalExceptionWrapper"));

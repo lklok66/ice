@@ -8,23 +8,29 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var AsyncStatus = require("Ice/AsyncStatus").Ice.AsyncStatus;
-        var AsyncResult = require("Ice/AsyncResult").Ice.AsyncResult;
-        var BasicStream = require("Ice/BasicStream").Ice.BasicStream;
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var LocalExceptionWrapper = require("Ice/LocalExceptionWrapper").Ice.LocalExceptionWrapper;
-        var OperationMode = require("Ice/Current").Ice.Current.OperationMode;
-        var Protocol = require("Ice/Protocol").Ice.Protocol;
-
-        var _merge = require("Ice/Util").merge;
-
-        var Ice = {};
-        _merge(Ice, require("Ice/BuiltinSequences").Ice);
-        _merge(Ice, require("Ice/Exception").Ice);
-        _merge(Ice, require("Ice/LocalException").Ice);
-        _merge(Ice, require("Ice/Identity").Ice);
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/AsyncStatus");
+        require("Ice/AsyncResult");
+        require("Ice/BasicStream");
+        require("Ice/Debug");
+        require("Ice/HashMap");
+        require("Ice/LocalExceptionWrapper");
+        require("Ice/Current");
+        require("Ice/Protocol");
+        require("Ice/BuiltinSequences");
+        require("Ice/Exception");
+        require("Ice/LocalException");
+        require("Ice/Identity");
+        
+        var AsyncStatus = Ice.AsyncStatus;
+        var AsyncResult = Ice.AsyncResult;
+        var BasicStream = Ice.BasicStream;
+        var Debug = Ice.Debug;
+        var HashMap = Ice.HashMap;
+        var LocalExceptionWrapper = Ice.LocalExceptionWrapper;
+        var OperationMode = Ice.Current.OperationMode;
+        var Protocol = Ice.Protocol;
 
         var OutgoingAsync = function(prx, operation, completed)
         {
@@ -576,8 +582,9 @@
             }
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.OutgoingAsync = OutgoingAsync;
+        global.Ice = global.Ice || {};
+        global.Ice.OutgoingAsync = OutgoingAsync;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/OutgoingAsync"));

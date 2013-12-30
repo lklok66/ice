@@ -8,20 +8,23 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var ExUtil = require("Ice/ExUtil").Ice.ExUtil;
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var ObjectPrx = require("Ice/ObjectPrx").Ice.ObjectPrx;
-        var StringUtil = require("Ice/StringUtil").Ice.StringUtil;
-        var Identity = require("Ice/Identity").Ice.Identity;
-
-        var _merge = require("Ice/Util").merge;
-
-        var Ice = {};
-
-        _merge(Ice, require("Ice/Reference").Ice);
-        _merge(Ice, require("Ice/LocalException").Ice);
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/Debug");
+        require("Ice/ExUtil");
+        require("Ice/HashMap");
+        require("Ice/ObjectPrx");
+        require("Ice/StringUtil");
+        require("Ice/Identity");
+        require("Ice/Reference");
+        require("Ice/LocalException");
+        
+        var Debug = Ice.Debug;
+        var ExUtil = Ice.ExUtil;
+        var HashMap = Ice.HashMap;
+        var ObjectPrx = Ice.ObjectPrx;
+        var StringUtil = Ice.StringUtil;
+        var Identity = Ice.Identity;
 
         //
         // Only for use by Instance.
@@ -288,8 +291,9 @@
             return cnt;
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.ProxyFactory = ProxyFactory;
+        global.Ice = global.Ice || {};
+        global.Ice.ProxyFactory = ProxyFactory;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/ProxyFactory"));

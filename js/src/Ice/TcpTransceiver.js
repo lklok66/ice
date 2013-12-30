@@ -8,16 +8,24 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
+    var __m = function(global, module, exports, require){
         var net = require("net");
 
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var ExUtil = require("Ice/ExUtil").Ice.ExUtil;
-        var Network = require("Ice/Network").Ice.Network;
-        var SocketOperation = require("Ice/SocketOperation").Ice.SocketOperation;
-        var Conn = require("Ice/Connection").Ice.Connection;
-        var LocalException = require("Ice/Exception").Ice.LocalException;
-        var SocketException = require("Ice/LocalException").Ice.SocketException;
+        require("Ice/Debug");
+        require("Ice/ExUtil");
+        require("Ice/Network");
+        require("Ice/SocketOperation");
+        require("Ice/Connection");
+        require("Ice/Exception");
+        require("Ice/LocalException");
+        
+        var Debug = Ice.Debug;
+        var ExUtil = Ice.ExUtil;
+        var Network = Ice.Network;
+        var SocketOperation = Ice.SocketOperation;
+        var Conn = Ice.Connection;
+        var LocalException = Ice.LocalException;
+        var SocketException = Ice.SocketException;
 
         var StateNeedConnect = 0;
         var StateConnectPending = 1;
@@ -444,8 +452,9 @@
             return new SocketException(0, ex);
         }
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.TcpTransceiver = TcpTransceiver;
+        global.Ice = global.Ice || {};
+        global.Ice.TcpTransceiver = TcpTransceiver;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/TcpTransceiver"));

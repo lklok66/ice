@@ -8,13 +8,19 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var ExUtil = require("Ice/ExUtil").Ice.ExUtil;
-        var StringUtil = require("Ice/StringUtil").Ice.StringUtil;
-        var Identity = require("Ice/Identity").Ice.Identity;
-        var IdentityParseException = require("Ice/LocalException").Ice.IdentityParseException;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/ExUtil");
+        require("Ice/StringUtil");
+        require("Ice/Identity");
+        require("Ice/LocalException");
+        
+        var ExUtil = Ice.ExUtil;
+        var StringUtil = Ice.StringUtil;
+        var Identity = Ice.Identity;
+        var IdentityParseException = Ice.IdentityParseException;
 
-        var IdentityUtil = {};
+        global.Ice = global.Ice || {};
         /**
         * Converts a string to an object identity.
         *
@@ -22,7 +28,7 @@
         *
         * @return The converted object identity.
         **/
-        IdentityUtil.stringToIdentity = function(s)
+        global.Ice.stringToIdentity = function(s)
         {
             var ident = new Identity();
 
@@ -107,7 +113,7 @@
         *
         * @return The string representation of the object identity.
         **/
-        IdentityUtil.identityToString = function(ident)
+        global.Ice.identityToString = function(ident)
         {
             if(ident.category === null || ident.category.length === 0)
             {
@@ -132,7 +138,7 @@
         * @see ProxyIdentityAndFacetKey
         * @see ProxyIdentityAndFacetCompare
         **/
-        IdentityUtil.proxyIdentityCompare = function(lhs, rhs)
+        global.Ice.proxyIdentityCompare = function(lhs, rhs)
         {
             if(lhs === rhs)
             {
@@ -172,7 +178,7 @@
         * @see ProxyIdentityKey
         * @see ProxyIdentityCompare
         **/
-        IdentityUtil.proxyIdentityAndFacetCompare = function(lhs, rhs)
+        global.Ice.proxyIdentityAndFacetCompare = function(lhs, rhs)
         {
             if(lhs === rhs)
             {
@@ -217,9 +223,7 @@
                 return lhsFacet.localeCompare(rhsFacet);
             }
         };
-
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.IdentityUtil = IdentityUtil;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/IdentityUtil"));

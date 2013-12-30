@@ -8,8 +8,7 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        module.exports.Ice = module.exports.Ice || {};
-    };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    var __m = function(global, module, exports, require){};
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/EndpointF"));

@@ -8,7 +8,7 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
+    var __m = function(global, module, exports, require){
         //
         // Ice.EnumBase
         //
@@ -91,8 +91,9 @@
             });
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.EnumBase = EnumBase;
+        global.Ice = global.Ice || {};
+        global.Ice.EnumBase = EnumBase;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/EnumBase"));

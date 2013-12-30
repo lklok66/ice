@@ -95,7 +95,6 @@
             var runButton = $("#run");
             
             var runCurrentTest = function(){
-                    
                 var current = $(".tests li.current");
                 var cb = test.Common.TestSuite.get(current.children("a").text());
                 cb(out).then(function()
@@ -130,7 +129,16 @@
                         }
                         runButton.removeClass("disabled");
                     });
-            }; 
+            };
+            
+            $(".tests li").click(function(){
+                if(!runButton.hasClass("disabled"))
+                {
+                    $(".tests li.current").removeClass("current")
+                    $(this).addClass("current");
+                }
+            });
+            
             runButton.click(function(){
                 if(!runButton.hasClass("disabled"))
                 {

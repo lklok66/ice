@@ -8,11 +8,17 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var LocatorInfo = require("Ice/LocatorInfo").Ice.LocatorInfo;
-        var LocatorTable = require("Ice/LocatorTable").Ice.LocatorTable;
-        var LocatorPrx = require("Ice/Locator").Ice.LocatorPrx;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/HashMap");
+        require("Ice/LocatorInfo");
+        require("Ice/LocatorTable");
+        require("Ice/Locator");
+        
+        var HashMap = Ice.HashMap;
+        var LocatorInfo = Ice.LocatorInfo;
+        var LocatorTable = Ice.LocatorTable;
+        var LocatorPrx = Ice.LocatorPrx;
 
         var LocatorManager = function(properties)
         {
@@ -76,8 +82,9 @@
             return info;
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.LocatorManager = LocatorManager;
+        global.Ice = global.Ice || {};
+        global.Ice.LocatorManager = LocatorManager;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/LocatorManager"));

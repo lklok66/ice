@@ -8,8 +8,10 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
+    var __m = function(global, module, exports, require){
+        require("Ice/HashMap");
+        var Ice = global.Ice || {};
+        var HashMap = Ice.HashMap;
 
         function TypeRegistry()
         {
@@ -27,10 +29,10 @@
             
             return {register: register, find: find};
         }
-
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.ClassRegistry = TypeRegistry();
-        module.exports.Ice.ExceptionRegistry = TypeRegistry();
+        
+        Ice.CompactIdRegistry = TypeRegistry();
+        global.Ice = Ice;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/TypeRegistry"));

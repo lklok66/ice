@@ -8,25 +8,33 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var ExUtil = require("Ice/ExUtil").Ice.ExUtil;
-        var FormatType = require("Ice/FormatType").Ice.FormatType;
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var IceObject = require("Ice/Object").Ice.Object;
-        var OptionalFormat = require("Ice/OptionalFormat").Ice.OptionalFormat;
-        var Protocol = require("Ice/Protocol").Ice.Protocol;
-        var TraceUtil = require("Ice/TraceUtil").Ice.TraceUtil;
-
-        var _merge = require("Ice/Util").merge;
-
-        var Ice = {};
-
-        _merge(Ice, require("Ice/Buffer").Ice);
-        _merge(Ice, require("Ice/Exception").Ice);
-        _merge(Ice, require("Ice/LocalException").Ice);
-        _merge(Ice, require("Ice/Version").Ice);
-
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/Debug");
+        require("Ice/ExUtil");
+        require("Ice/FormatType");
+        require("Ice/HashMap");
+        require("Ice/Object");
+        require("Ice/OptionalFormat");
+        require("Ice/Protocol");
+        require("Ice/TraceUtil");
+        require("Ice/Buffer");
+        require("Ice/Exception");
+        require("Ice/LocalException");
+        require("Ice/Version");
+        require("Ice/TypeRegistry");
+        
+        var Ice = global.Ice || {};
+        
+        var Debug = Ice.Debug;
+        var ExUtil = Ice.ExUtil;
+        var FormatType = Ice.FormatType;
+        var HashMap = Ice.HashMap;
+        var IceObject = Ice.Object;
+        var OptionalFormat = Ice.OptionalFormat;
+        var Protocol = Ice.Protocol;
+        var TraceUtil = Ice.TraceUtil;
+        
         var SliceType = {};
         SliceType.NoSlice = 0;
         SliceType.ObjectSlice = 1;
@@ -977,8 +985,7 @@
             Debug.assert(index > 0);
             
             var mostDerivedId,
-                v = null,
-                compactIdResolver;
+                v = null;
             
             if(index > 1)
             {
@@ -1003,7 +1010,6 @@
             //
             this.startSlice();
             mostDerivedId = this._current.typeId;
-            compactIdResolver = this._stream.instance.initializationData().compactIdResolver;
             while(true)
             {
                 if(this._current.compactId >= 0)
@@ -1012,22 +1018,6 @@
                     // Translate a compact (numeric) type ID into a string type ID.
                     //
                     this._current.typeId = "";
-                    if(compactIdResolver)
-                    {
-                        try
-                        {
-                            this._current.typeId = compactIdResolver.resolve(this._current.compactId);
-                        }
-                        catch(ex)
-                        {
-                            if(ex instanceof Ice.LocalException)
-                            {
-                                throw ex;
-                            }
-                            throw new Ice.MarshalException("exception in CompactIdResolver for ID " + 
-                                                            this._current.compactId, ex);
-                        }
-                    }
                     if(this._current.typeId.length === 0)
                     {
                         this._current.typeId = this._stream.getTypeId(this._current.compactId);
@@ -1780,9 +1770,6 @@
             {
                 this._buf = new Ice.Buffer();
             }
-            
-            this._classRegistry = require("Ice/TypeRegistry").Ice.ClassRegistry;
-            this._exceptionRegistry = require("Ice/TypeRegistry").Ice.ExceptionRegistry;
         };
 
         Object.defineProperty(BasicStream.prototype, "instance", {
@@ -2888,13 +2875,12 @@
             v.__write(this);
         };
 
-        BasicStream.prototype.readStruct = function(Type)
+        BasicStream.prototype.readStruct = function(T)
         {
-            var v = new Type();
+            var v = new T();
             v.__read(this);
             return v;
         };
-
 
         BasicStream.prototype.writeObject = function(v)
         {
@@ -2916,7 +2902,14 @@
         BasicStream.prototype.readObject = function(patcher, Type)
         {
             this.initReadEncaps();
-            this._readEncapsStack.decoder.readObject(
+            //
+            // BUGFIX:
+            // With Chrome linux the invokation of readObject on the decoder some times
+            // calls BasicStream.readObject with the decoder object as this param.
+            // Use call instead of directly invoke the method to workaround this bug.
+            //
+            this._readEncapsStack.decoder.readObject.call(
+                this._readEncapsStack.decoder,
                 function(obj){
                     if(obj !== null && !(obj instanceof Type))
                     {
@@ -2926,7 +2919,7 @@
                 });
         };
 
-        BasicStream.prototype.readOptionalObject = function(tag, patcher, Type)
+        BasicStream.prototype.readOptObject = function(tag, patcher, Type)
         {
             if(this.readOpt(tag, OptionalFormat.Class))
             {
@@ -3137,7 +3130,8 @@
 
             try
             {
-                Class = this._classRegistry.find(id);
+                var typeId = id.length > 2 ? id.substr(2).replace("::", ".") : "";
+                Class = eval(typeId);
                 if(Class !== undefined)
                 {
                     obj = new Class();
@@ -3153,8 +3147,8 @@
 
         BasicStream.prototype.getTypeId = function(compactId)
         {
-            var Class = this._classRegistry.find("IceCompactId.TypeId_" + compactId);
-            return Class !== undefined ? Class.typeId : ""; 
+            var typeId = Ice.CompactIdRegistry.find(compactId);
+            return typeId === undefined ? "" : typeId;
         };
 
         BasicStream.prototype.isReadEncoding_1_0 = function()
@@ -3238,7 +3232,8 @@
 
             try
             {
-                Class = this._exceptionRegistry.find(id);
+                var typeId = id.length > 2 ? id.substr(2).replace("::", ".") : "";
+                Class = eval(typeId);
                 if(Class !== undefined)
                 {
                     userEx = new Class();
@@ -3252,8 +3247,9 @@
             return userEx;
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.BasicStream = BasicStream;
+        Ice.BasicStream = BasicStream;
+        global.Ice = Ice;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/BasicStream"));

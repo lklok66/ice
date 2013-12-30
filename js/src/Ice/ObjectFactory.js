@@ -8,7 +8,7 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
+    var __m = function(global, module, exports, require){
         var ObjectFactory = function()
         {
         };
@@ -23,8 +23,9 @@
             throw new Error("not implemented");
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.ObjectFactory = ObjectFactory;
+        global.Ice = global.Ice || {};
+        global.Ice.ObjectFactory = ObjectFactory;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/ObjectFactory"));

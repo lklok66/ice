@@ -8,8 +8,8 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        module.exports.test = module.exports.test || {};
+    var __m = function(global, module, exports, require){
+        global.test = global.test || {};
         
         var tests = {};
         
@@ -30,8 +30,9 @@
             return Object.keys(tests);
         };
         
-        module.exports.test.Common = module.exports.test.Common || {};
-        module.exports.test.Common.TestSuite = TestSuite;
+        global.test.Common = global.test.Common || {};
+        global.test.Common.TestSuite = TestSuite;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "test/Common/TestSuite"));

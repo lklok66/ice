@@ -8,10 +8,13 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
+    var __m = function(global, module, exports, require){
 
-        var BasicStream = require("Ice/BasicStream").Ice.BasicStream;
-        var Buffer = require("Ice/Buffer").Ice.Buffer;
+        require("Ice/BasicStream");
+        require("Ice/Buffer");
+        
+        var BasicStream = Ice.BasicStream;
+        var Buffer = Ice.Buffer;
 
         var InputStream = function(communicator, data, copyData, encodingVersion)
         {
@@ -138,7 +141,6 @@
             return this._is.readProxy();
         };
 
-
         InputStream.prototype.readObject = function(cb, type)
         {
             return this._is.readObject(cb, type);
@@ -254,8 +256,9 @@
             }
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.InputStream = InputStream;
+        global.Ice = global.Ice || {};
+        global.Ice.InputStream = InputStream;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/InputStream"));

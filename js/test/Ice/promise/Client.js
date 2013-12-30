@@ -8,10 +8,14 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
+    var __m = function(global, module, exports, require){
         
-        var Ice = require("Ice/Ice");
-        var Debug = require("Ice/Debug").Ice.Debug;
+        require("Ice/Ice");
+        require("Ice/Debug");
+        
+        var Ice = global.Ice || {};
+        
+        var Debug = Ice.Debug;
         var Promise = Ice.Promise;
         
         var run = function(out)
@@ -548,17 +552,17 @@
             return p;
         };
         
-        module.exports.test = module.exports.test || {};
-        module.exports.test.Common = module.exports.test.Common || {};
+        global.test = global.test || {};
+        global.test.Common = global.test.Common || {};
         
-        if(module.exports.test.Common.TestSuite !== undefined)
+        if(global.test.Common.TestSuite !== undefined)
         {
-            module.exports.test.Common.TestSuite.add("Ice/promise", run);
+            global.test.Common.TestSuite.add("Ice/promise", run);
         }
         
-        module.exports.test.Ice = module.exports.test.Ice || {};
-        module.exports.test.Ice.promise = {run: run};
-        
+        global.test.Ice = global.test.Ice || {};
+        global.test.Ice.promise = {run: run};
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "test/Ice/promise"));

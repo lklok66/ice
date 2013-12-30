@@ -8,10 +8,15 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var RouterInfo = require("Ice/RouterInfo").Ice.RouterInfo;
-        var RouterPrx = require("Ice/Router").Ice.RouterPrx;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/HashMap");
+        require("Ice/RouterInfo");
+        require("Ice/Router");
+        
+        var HashMap = Ice.HashMap;
+        var RouterInfo = Ice.RouterInfo;
+        var RouterPrx = Ice.RouterPrx;
 
         var RouterManager = function()
         {
@@ -68,8 +73,9 @@
             return info;
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.RouterManager = RouterManager;
+        global.Ice = global.Ice || {};
+        global.Ice.RouterManager = RouterManager;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/RouterManager"));

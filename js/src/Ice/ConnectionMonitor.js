@@ -8,10 +8,15 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var ExUtil = require("Ice/ExUtil").Ice.ExUtil;
-        var TimeUtil = require("Ice/TimeUtil").Ice.TimeUtil;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/Debug");
+        require("Ice/ExUtil");
+        require("Ice/TimeUtil");
+        
+        var Debug = Ice.Debug;
+        var ExUtil = Ice.ExUtil;
+        var TimeUtil = Ice.TimeUtil;
 
         var ConnectionMonitor = function(instance, interval)
         {
@@ -108,8 +113,9 @@
             }
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.ConnectionMonitor = ConnectionMonitor;
+        global.Ice = global.Ice || {};
+        global.Ice.ConnectionMonitor = ConnectionMonitor;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/ConnectionMonitor"));

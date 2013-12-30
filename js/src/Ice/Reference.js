@@ -8,29 +8,41 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var ArrayUtil = require("Ice/ArrayUtil").Ice.ArrayUtil;
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var HashUtil = require("Ice/HashUtil").Ice.HashUtil;
-        var ExUtil = require("Ice/ExUtil").Ice.ExUtil;
-        var OpaqueEndpointI = require("Ice/OpaqueEndpointI").Ice.OpaqueEndpointI;
-        var Promise = require("Ice/Promise").Ice.Promise;
-        var Protocol = require("Ice/Protocol").Ice.Protocol;
-        var RefMode = require("Ice/ReferenceMode").Ice.ReferenceMode;
-        var StringUtil = require("Ice/StringUtil").Ice.StringUtil;
-        var StringSeqHelper = require("Ice/BuiltinSequences.js").Ice.StringSeqHelper;
-        var EndpointSelectionType = require("Ice/EndpointTypes").Ice.EndpointSelectionType;
-        var Identity = require("Ice/Identity").Ice.Identity;
-
-        var RouterPrx = require("Ice/Router").Ice.RouterPrx;
-        var LocatorPrx = require("Ice/Locator").Ice.LocatorPrx;
-
-        var _merge = require("Ice/Util").merge;
-
-        var Ice = {};
-        _merge(Ice, require("Ice/LocalException").Ice);
-        _merge(Ice, require("Ice/Version").Ice);
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/ArrayUtil");
+        require("Ice/Debug");
+        require("Ice/HashMap");
+        require("Ice/HashUtil");
+        require("Ice/ExUtil");
+        require("Ice/OpaqueEndpointI");
+        require("Ice/Promise");
+        require("Ice/Protocol");
+        require("Ice/ReferenceMode");
+        require("Ice/StringUtil");
+        require("Ice/BuiltinSequences");
+        require("Ice/EndpointTypes");
+        require("Ice/Identity");
+        require("Ice/Router");
+        require("Ice/Locator");
+        require("Ice/LocalException");
+        require("Ice/Version");
+        
+        var ArrayUtil = Ice.ArrayUtil;
+        var Debug = Ice.Debug;
+        var HashMap = Ice.HashMap;
+        var HashUtil = Ice.HashUtil;
+        var ExUtil = Ice.ExUtil;
+        var OpaqueEndpointI = Ice.OpaqueEndpointI;
+        var Promise = Ice.Promise;
+        var Protocol = Ice.Protocol;
+        var RefMode = Ice.ReferenceMode;
+        var StringUtil = Ice.StringUtil;
+        var StringSeqHelper = Ice.StringSeqHelper;
+        var EndpointSelectionType = Ice.EndpointSelectionType;
+        var Identity = Ice.Identity;
+        var RouterPrx = Ice.RouterPrx;
+        var LocatorPrx = Ice.LocatorPrx;
 
         //
         // Only for use by Instance
@@ -828,8 +840,8 @@
                                         locatorCacheTimeout);
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.ReferenceFactory = ReferenceFactory;
+        global.Ice = global.Ice || {};
+        global.Ice.ReferenceFactory = ReferenceFactory;
 
         var Reference = function(instance, communicator, identity, facet, mode, secure, protocol, encoding)
         {
@@ -1407,7 +1419,7 @@
 
         Reference._emptyEndpoints = [];
 
-        module.exports.Ice.Reference = Reference;
+        global.Ice.Reference = Reference;
 
         var FixedReference = function(instance, communicator, identity, facet, mode, secure, encoding, connection)
         {
@@ -1641,7 +1653,7 @@
             return this._fixedConnection.equals(rhs._fixedConnection);
         };
 
-        module.exports.Ice.FixedReference = FixedReference;
+        global.Ice.FixedReference = FixedReference;
 
         var RoutableReference = function(instance, communicator, identity, facet, mode, secure, protocol, encoding, endpoints,
                                         adapterId, locatorInfo, routerInfo, cacheConnection, preferSecure, endpointSelection,
@@ -2389,7 +2401,7 @@
             return promise;
         };
 
-        module.exports.Ice.RoutableReference = RoutableReference;
+        global.Ice.RoutableReference = RoutableReference;
 
         var CreateConnectionCallback = function(r, endpoints, promise)
         {
@@ -2441,5 +2453,7 @@
                     });
         };
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Reference"));
+

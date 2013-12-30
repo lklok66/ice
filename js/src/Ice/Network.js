@@ -8,8 +8,11 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Address = require("Ice/Address").Ice.Address;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/Address");
+        
+        var Address = Ice.Address;
 
         var Network = {};
 
@@ -117,8 +120,9 @@
             return s.join("");
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.Network = Network;
+        global.Ice = global.Ice || {};
+        global.Ice.Network = Network;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Network"));

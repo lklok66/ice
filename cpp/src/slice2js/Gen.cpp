@@ -1128,7 +1128,7 @@ Slice::Gen::generate(const UnitPtr& p)
 
     _out << nl << "(function(module, name)";
     _out << sb;
-    _out << nl << "var __m = function(module, exports, require)";
+    _out << nl << "var __m = function(global, module, exports, require)";
     _out << sb;
 
     RequireVisitor requireVisitor(_out, _includePaths);
@@ -1137,7 +1137,7 @@ Slice::Gen::generate(const UnitPtr& p)
 
     TypesVisitor typesVisitor(_out, seenModules);
     p->visit(&typesVisitor, false);
-
+    
     //
     // Export the top-level modules.
     //
@@ -1145,7 +1145,10 @@ Slice::Gen::generate(const UnitPtr& p)
     p->visit(&exportVisitor, false);
 
     _out << eb << ";";
-    _out << nl << "return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);";
+    _out << nl << "return (module === undefined) ? this.Ice.__defineModule(__m, name) : ";
+    _out.inc();
+    _out << nl << "__m(global, module, module.exports, module.require);";
+    _out.dec();
     _out << eb;
     _out << nl << "(typeof module !== \"undefined\" ? module : undefined, \"";
     if(!_include.empty())
@@ -1297,45 +1300,43 @@ vector<string>
 Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
 {
     vector<string> seenModules;
+    
     //
     // Generate require() statements for all of the run-time code needed by the generated code.
     //
-    _out << nl << "var _merge = require(\"Ice/Util\").merge;";
-    _out << nl;
-    _out << nl << "var Ice = module.exports.Ice || {};";
-    seenModules.push_back("Ice");
-
     if(_seenClass || _seenObjectSeq || _seenObjectDict)
     {
-        _out << nl << "_merge(Ice, require(\"Ice/Object\").Ice);";
+        _out << nl << "require(\"Ice/Object\");";
     }
     if(_seenClass)
     {
-        _out << nl << "_merge(Ice, require(\"Ice/ObjectPrx\").Ice);";
+        _out << nl << "require(\"Ice/ObjectPrx\");";
     }
 
     if(_seenLocalException || _seenUserException)
     {
-        _out << nl << "_merge(Ice, require(\"Ice/Exception\").Ice);";
-    }
-    if(_seenClass || _seenUserException)
-    {
-        _out << nl << "_merge(Ice, require(\"Ice/TypeRegistry\").Ice);";
+        _out << nl << "require(\"Ice/Exception\");";
     }
 
     if(_seenEnum)
     {
-        _out << nl << "_merge(Ice, require(\"Ice/EnumBase\").Ice);";
+        _out << nl << "require(\"Ice/EnumBase\");";
     }
-
-    _out << nl << "_merge(Ice, require(\"Ice/HashMap\").Ice);";
-    _out << nl << "_merge(Ice, require(\"Ice/HashUtil\").Ice);";
-    _out << nl << "_merge(Ice, require(\"Ice/ArrayUtil\").Ice);";
-    _out << nl << "_merge(Ice, require(\"Ice/StreamHelpers\").Ice);";
-
+    
+    _out << nl << "require(\"Ice/TypeRegistry\");";
+    _out << nl << "require(\"Ice/HashMap\");";
+    _out << nl << "require(\"Ice/HashUtil\");";
+    _out << nl << "require(\"Ice/ArrayUtil\");";
+    _out << nl << "require(\"Ice/StreamHelpers\");";
+    _out << nl;
+    _out << nl << "var Ice = global.Ice || {};";
+    seenModules.push_back("Ice");
+    
     StringList includes = p->includeFiles();
     for(StringList::const_iterator i = includes.begin(); i != includes.end(); ++i)
     {
+        _out << nl << "require(\""  << changeInclude(*i, _includePaths) << "\");";
+        
         set<string> modules = p->getTopLevelModules(*i);
         for(set<string>::const_iterator j = modules.begin(); j != modules.end(); ++j)
         {
@@ -1344,17 +1345,16 @@ Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
             {
                 seenModules.push_back(*j);
                 _out << nl;
-                _out << nl << "var " << (*j) << " = {};";
+                _out << nl << "var " << (*j) << " = global." << (*j) << " || {};";
             }
-            _out << nl << "_merge(" << (*j) << ", require(\""
-                 << changeInclude(*i, _includePaths) << "\")." << (*j) << ");";
         }
     }
     return seenModules;
 }
 
-Slice::Gen::TypesVisitor::TypesVisitor(IceUtilInternal::Output& out, const vector<string>& seenModules)
-    : JsVisitor(out), _seenModules(seenModules)
+Slice::Gen::TypesVisitor::TypesVisitor(IceUtilInternal::Output& out, vector<string> seenModules) : 
+    JsVisitor(out),
+    _seenModules(seenModules)
 {
 }
 
@@ -1364,32 +1364,20 @@ Slice::Gen::TypesVisitor::visitModuleStart(const ModulePtr& p)
     //
     // For a top-level module we write the following:
     //
-    // var Foo = module.exports.Foo || {};
+    // var Foo = global.Foo || {};
     //
     // For an inner module we  write
     //
-    // Foo.Bar = module.exports.Foo.Bar || {};
+    // var Foo.Bar = global.Foo.Bar || {};
     //
 
     const string scoped = getLocalScope(p->scoped());
-
-    const bool topLevel = UnitPtr::dynamicCast(p->container());
-
     vector<string>::const_iterator i = find(_seenModules.begin(), _seenModules.end(), scoped);
     if(i == _seenModules.end())
     {
-        _out << nl;
-        if(topLevel)
-        {
-            _out << nl << "var " << scoped << " = module.exports." << scoped << " ||  {};";
-        }
-        else
-        {
-            _out << nl << scoped << " = module.exports." << scoped << " ||  {};";
-        }
         _seenModules.push_back(scoped);
+        _out << nl << "var " << scoped << " = global." << scoped << " ||  {};";
     }
-
     return true;
 }
 
@@ -1441,7 +1429,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
         paramNames.push_back(fixId((*q)->name()));
-        if(!hasClassMembers && ClassDeclPtr::dynamicCast((*q)->type()))
+        if(!hasClassMembers && isClassType((*q)->type()))
         {
             hasClassMembers = true;
         }
@@ -1478,6 +1466,9 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         _out << sb;
         _out << nl << "return Ice.ObjectPrx.uncheckedCastImpl(" << localScope << '.' << prxName << ", __prx, __facet);";
         _out << eb << ';';
+        
+        _out << sp;
+        _out << nl << "Ice.StreamHelpers.ProxyHelper(" << localScope << '.' << prxName << ");";
     }
 
     _out << sp;
@@ -1845,20 +1836,15 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         }
 
         //
-        // Register the class prototype in the ClassRegistry
+        // Register the compact id
         //
-        _out << nl;
-        _out << nl << "Ice.ClassRegistry.register(" << localScope << "." << name << ".ice_staticId(), "
-             << localScope << "." << name << ");";
-        _out << nl;
-
         if(p->compactId() >= 0)
         {
             //
             // Also register the type using the stringified compact ID.
             //
-            _out << nl << "Ice.ClassRegistry.register(\"" << p->compactId() << "\", " << localScope << "."
-                 << name << ");";
+            _out << nl << "Ice.CompactIdRegistry.register(\"" << p->compactId() << "\", " << localScope << "."
+                 << name << ".ice_staticId());";
         }
     }
 
@@ -2014,26 +2000,14 @@ Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
     {
         _out << nl << helperName << " = Ice.StreamHelpers.generateObjectSeqHelper(";
         _out.inc();
-        ContainedPtr contained = ContainedPtr::dynamicCast(type);
-        if(contained)
-        {
-            _out << nl << "Ice.ClassRegistry.find(\"" << contained->scoped() << "\"));";
-        }
-        else
-        {
-            //
-            // Ice.Object should be always available, so we don't need to go through
-            // the class registry.
-            //
-            _out << nl << typeToString(type) << ");";
-        }
+        _out << nl << typeToString(type) << ", " << getOptionalFormat(p) << ");";
         _out.dec();
     }
     else
     {
         _out << nl << helperName << " = Ice.StreamHelpers.generateSeqHelper(";
         _out.inc();
-        _out << nl << getHelper(type) << ");";
+        _out << nl << getHelper(type) << ", " << getOptionalFormat(p) << ");";
         _out.dec();
     }
     _out << eb;
@@ -2181,13 +2155,6 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
             _out << nl << baseRef << ".prototype.__readImpl.call(this, __is);";
         }
         _out << eb << ";";
-
-        //
-        // Register the class prototype in the ClassRegistry
-        //
-        _out << nl;
-        _out << nl << "Ice.ExceptionRegistry.register(\"" << p->scoped()  << "\", "
-             << localScope << "." << name << ");";
         _out << nl;
     }
 
@@ -2202,7 +2169,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
     const string name = fixId(p->name());
 
     const DataMemberList dataMembers = p->dataMembers();
-
+    
     vector<string> paramNames;
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
@@ -2298,24 +2265,11 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
             writeUnmarshalDataMember(*q);
         }
         _out << eb << ";";
+        
+        _out << sp;
+        _out << nl << "Ice.StreamHelpers.StructOptHelper(" << localScope << '.' << name << ", " 
+             << p->minWireSize() << ", " << getOptionalFormat(p) << ");";
     }
-
-#if 0
-    _out << sp << nl << "public java.lang.Object" << nl << "clone()";
-    _out << sb;
-    _out << nl << "java.lang.Object o = null;";
-    _out << nl << "try";
-    _out << sb;
-    _out << nl << "o = super.clone();";
-    _out << eb;
-    _out << nl << "catch(CloneNotSupportedException ex)";
-    _out << sb;
-    _out << nl << "assert false; // impossible";
-    _out << eb;
-    _out << nl << "return o;";
-    _out << eb;
-#endif
-
     return false;
 }
 
@@ -2353,19 +2307,8 @@ Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
         _out << nl << helperName << " = Ice.StreamHelpers.generateObjectDictHelper(";
         _out.inc();
         _out << nl << getHelper(keyType) << ", ";
-        ContainedPtr contained = ContainedPtr::dynamicCast(valueType);
-        if(contained)
-        {
-            _out << nl << "Ice.ClassRegistry.find(\"" << contained->scoped() << "\"));";
-        }
-        else
-        {
-            //
-            // Ice.Object should be always available, so we don't need to go through
-            // the class registry.
-            //
-            _out << nl << typeToString(valueType) << ");";
-        }
+        _out << nl << typeToString(valueType) << ", ";
+        _out << nl << getOptionalFormat(p) << ");";
         _out.dec();
     }
     else
@@ -2373,7 +2316,8 @@ Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
         _out << nl << helperName << " = Ice.StreamHelpers.generateDictHelper(";
         _out.inc();
         _out << nl << getHelper(keyType) << ", ";
-        _out << nl << getHelper(valueType) << ");";
+        _out << nl << getHelper(valueType) << ", ";
+        _out << nl << getOptionalFormat(p) << ");";
         _out.dec();
     }
     _out << eb;
@@ -2652,78 +2596,12 @@ Slice::Gen::ExportVisitor::ExportVisitor(IceUtilInternal::Output& out)
 bool
 Slice::Gen::ExportVisitor::visitModuleStart(const ModulePtr& p)
 {
-    const string localScope = getLocalScope(p->scope());
-    const string name = localScope.empty() ? fixId(p->name()) : localScope + "." + p->name();
-
-    _out << nl << "exports." << name << " = exports." << name << " || {};";
-
-    return true;
-}
-
-void
-Slice::Gen::ExportVisitor::visitModuleEnd(const ModulePtr&)
-{
-}
-
-bool
-Slice::Gen::ExportVisitor::visitClassDefStart(const ClassDefPtr& p)
-{
-    const string className = getLocalScope(p->scope()) + "." + fixId(p->name());
-    const string proxyName = className + "Prx";
-
-    _out << nl << "exports." << className << " = " << className << ";";
-    _out << nl << "exports." << proxyName << " = " << proxyName << ";";
-    return true;
-}
-
-void
-Slice::Gen::ExportVisitor::visitOperation(const OperationPtr&)
-{
-}
-
-bool
-Slice::Gen::ExportVisitor::visitExceptionStart(const ExceptionPtr& p)
-{
-    const string exceptionName = getLocalScope(p->scope()) + "." + fixId(p->name());
-    _out << nl << "exports." << exceptionName << " = " << exceptionName << ";";
-    return true;
-}
-
-bool
-Slice::Gen::ExportVisitor::visitStructStart(const StructPtr& p)
-{
-    const string structName = getLocalScope(p->scope()) + "." + fixId(p->name());
-    _out << nl << "exports." << structName << " = " << structName << ";";
-    return true;
-}
-
-void
-Slice::Gen::ExportVisitor::visitSequence(const SequencePtr& p)
-{
-    const string helperName = getLocalScope(p->scope()) + "." + fixId(p->name()) + "Helper";
-    _out << nl << "exports." << helperName << " = " << helperName << ";";
-}
-
-void
-Slice::Gen::ExportVisitor::visitDictionary(const DictionaryPtr& p)
-{
-    const string helperName = getLocalScope(p->scope()) + "." + fixId(p->name()) + "Helper";
-    _out << nl << "exports." << helperName << " = " << helperName << ";";
-}
-
-void
-Slice::Gen::ExportVisitor::visitEnum(const EnumPtr& p)
-{
-    const string scope = p->scope();
-    const string localScope = getLocalScope(scope);
-    const string name = fixId(p->name());
-    const string enumName = localScope + "." + name;
-
-    _out << nl << "exports." << enumName << " = " << enumName << ";";
-}
-
-void
-Slice::Gen::ExportVisitor::visitConst(const ConstPtr&)
-{
-
+    const bool topLevel = UnitPtr::dynamicCast(p->container());
+    if(topLevel)
+    {
+        const string localScope = getLocalScope(p->scope());
+        const string name = localScope.empty() ? fixId(p->name()) : localScope + "." + p->name();
+        _out << nl << "global." << name << " = " << name << ";";
+    }
+    return false;
 }

@@ -8,13 +8,24 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var Protocol = require("Ice/Protocol").Ice.Protocol;
-        var StringUtil = require("Ice/StringUtil").Ice.StringUtil;
-        var OperationMode = require("Ice/Current").Ice.Current.OperationMode;
-        var Identity = require("Ice/Identity").Ice.Identity;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/Debug");
+        require("Ice/HashMap");
+        require("Ice/Protocol");
+        require("Ice/StringUtil");
+        require("Ice/Current");
+        require("Ice/Identity");
+        
+        //
+        // Local aliases.
+        //
+        var Debug = Ice.Debug;
+        var HashMap = Ice.HashMap;
+        var Protocol = Ice.Protocol;
+        var StringUtil = Ice.StringUtil;
+        var OperationMode = Ice.Current.OperationMode;
+        var Identity = Ice.Identity;
 
         var TraceUtil = {};
 
@@ -146,8 +157,8 @@
             console.log(buf.join(""));
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.TraceUtil = TraceUtil;
+        global.Ice = global.Ice || {};
+        global.Ice.TraceUtil = TraceUtil;
 
         function printIdentityFacetOperation(s, stream)
         {
@@ -460,5 +471,6 @@
             }
         };
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/TraceUtil"));

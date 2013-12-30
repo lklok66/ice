@@ -8,10 +8,15 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var TimeUtil = require("Ice/TimeUtil").Ice.TimeUtil;
-        var Debug = require("Ice/Debug").Ice.Debug;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/HashMap");
+        require("Ice/TimeUtil");
+        require("Ice/Debug");
+        
+        var HashMap = Ice.HashMap;
+        var TimeUtil = Ice.TimeUtil;
+        var Debug = Ice.Debug;
 
         var LocatorTable = function()
         {
@@ -99,8 +104,8 @@
             }
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.LocatorTable = LocatorTable;
+        global.Ice = global.Ice || {};
+        global.Ice.LocatorTable = LocatorTable;
 
         var EndpointTableEntry = function(time, endpoints)
         {
@@ -114,5 +119,6 @@
             this.reference = reference;
         };
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/LocatorTable"));

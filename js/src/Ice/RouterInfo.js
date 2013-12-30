@@ -8,17 +8,19 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var ArrayUtil = require("Ice/ArrayUtil").Ice.ArrayUtil;
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var Promise = require("Ice/Promise").Ice.Promise;
-
-        var _merge = require("Ice/Util").merge;
-
-        var Ice = {};
-        _merge(Ice, require("Ice/LocalException").Ice);
-        _merge(Ice, require("Ice/Exception").Ice);
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/ArrayUtil");
+        require("Ice/Debug");
+        require("Ice/HashMap");
+        require("Ice/Promise");
+        require("Ice/LocalException");
+        require("Ice/Exception");
+        
+        var ArrayUtil = Ice.ArrayUtil;
+        var Debug = Ice.Debug;
+        var HashMap = Ice.HashMap;
+        var Promise = Ice.Promise;
 
         var RouterInfo = function(router)
         {
@@ -233,8 +235,9 @@
             }
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.RouterInfo = RouterInfo;
+        global.Ice = global.Ice || {};
+        global.Ice.RouterInfo = RouterInfo;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/RouterInfo"));

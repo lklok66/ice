@@ -8,9 +8,13 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Instance = require("Ice/Instance").Ice.Instance;
-        var Promise = require("Ice/Promise").Ice.Promise;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/Instance");
+        require("Ice/Promise");
+        
+        var Instance = Ice.Instance;
+        var Promise = Ice.Promise;
 
         //
         // Ice.Communicator
@@ -141,8 +145,9 @@
             // TODO
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.Communicator = Communicator;
+        global.Ice = global.Ice || {};
+        global.Ice.Communicator = Communicator;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Communicator"));

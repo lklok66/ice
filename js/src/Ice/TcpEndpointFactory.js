@@ -8,9 +8,13 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var TcpEndpointI = require("Ice/TcpEndpointI").Ice.TcpEndpointI;
-        var TCPEndpointType = require("Ice/Endpoint").Ice.TCPEndpointType;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/TcpEndpointI");
+        require("Ice/Endpoint");
+        
+        var TcpEndpointI = Ice.TcpEndpointI;
+        var TCPEndpointType = Ice.TCPEndpointType;
 
         var TcpEndpointFactory = function(instance)
         {
@@ -42,8 +46,9 @@
             this._instance = null;
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.TcpEndpointFactory = TcpEndpointFactory;
+        global.Ice = global.Ice || {};
+        global.Ice.TcpEndpointFactory = TcpEndpointFactory;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/TcpEndpointFactory"));

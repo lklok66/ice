@@ -8,11 +8,14 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-
-        var AlreadyRegisteredException = require("Ice/LocalException").Ice.AlreadyRegisteredException;
-        var NotRegisteredException = require("Ice/LocalException").Ice.NotRegisteredException;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/HashMap");
+        require("Ice/LocalException");
+        
+        var HashMap = Ice.HashMap;
+        var AlreadyRegisteredException = Ice.AlreadyRegisteredException;
+        var NotRegisteredException = Ice.NotRegisteredException;
 
         //
         // Only for use by Instance
@@ -69,8 +72,9 @@
             }
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.ObjectFactoryManager = ObjectFactoryManager;
+        global.Ice = global.Ice || {};
+        global.Ice.ObjectFactoryManager = ObjectFactoryManager;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/ObjectFactoryManager"));

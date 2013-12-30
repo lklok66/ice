@@ -8,38 +8,34 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
+    var __m = function(global, module, exports, require){
         
-        var _merge = require("Ice/Util").merge;
+        require("Ice/Communicator");
+        require("Ice/HashMap");
+        require("Ice/Object");
+        require("Ice/Long");
+        require("Ice/Logger");
+        require("Ice/ObjectPrx");
+        require("Ice/Properties");
+        require("Ice/IdentityUtil");
+        require("Ice/ProcessLogger");
+        require("Ice/Protocol");
+        require("Ice/Identity");
+        require("Ice/Exception");
+        require("Ice/LocalException");
+        require("Ice/BuiltinSequences");
+        require("Ice/StreamHelpers");
+        require("Ice/Promise");
+        require("Ice/EndpointTypes");
+        require("Ice/Locator");
+        require("Ice/Router");
+        require("Ice/Version");
+        require("Ice/ObjectFactory");
+        require("Ice/Buffer");
 
-        var Ice = module.exports.Ice || {};
-        
-        _merge(Ice, require("Ice/Communicator").Ice);
-        _merge(Ice, require("Ice/HashMap").Ice);
-        _merge(Ice, require("Ice/Object").Ice);
-        _merge(Ice, require("Ice/Long").Ice);
-        _merge(Ice, require("Ice/Logger").Ice);
-        _merge(Ice, require("Ice/ObjectPrx").Ice);
-        _merge(Ice, require("Ice/Properties").Ice);
-        _merge(Ice, require("Ice/IdentityUtil").Ice);
-        _merge(Ice, require("Ice/ProcessLogger").Ice);
-        _merge(Ice, require("Ice/Protocol").Ice);
-        _merge(Ice, require("Ice/Identity").Ice);
-        _merge(Ice, require("Ice/Exception").Ice);
-        _merge(Ice, require("Ice/LocalException").Ice);
-        _merge(Ice, require("Ice/BuiltinSequences").Ice);
-        _merge(Ice, require("Ice/StreamHelpers").Ice);
-        _merge(Ice, require("Ice/Promise").Ice);
-        _merge(Ice, require("Ice/EndpointTypes").Ice);
-        _merge(Ice, require("Ice/Locator").Ice);
-        _merge(Ice, require("Ice/Router").Ice);
-        _merge(Ice, require("Ice/Version").Ice);
-        _merge(Ice, require("Ice/ObjectFactory").Ice);
-        _merge(Ice, require("Ice/Buffer").Ice);
-        _merge(Ice, require("Ice/TypeRegistry").Ice);
-
-        var Protocol = require("Ice/Protocol").Ice.Protocol;
-
+        var Ice = global.Ice || {};
+        var Protocol = Ice.Protocol;
+         
         //
         // Ice.InitializationData
         //
@@ -132,8 +128,7 @@
         Ice.Protocol_1_0 = Protocol.Protocol_1_0;
         Ice.Encoding_1_0 = Protocol.Encoding_1_0;
         Ice.Encoding_1_1 = Protocol.Encoding_1_1;
-
-        module.exports = Ice;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Ice"));

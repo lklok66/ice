@@ -8,9 +8,13 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var BasicStream = require("Ice/BasicStream").Ice.BasicStream;
-        var MarshalException = require("Ice/LocalException").Ice.MarshalException;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/BasicStream");
+        require("Ice/LocalException");
+        
+        var BasicStream = Ice.BasicStream;
+        var MarshalException = Ice.MarshalException;
 
         var OutputStream = function(communicator, encoding)
         {
@@ -249,8 +253,9 @@
                 this._os = null;
             }
         };
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.OutputStream = OutputStream;
+        global.Ice = global.Ice || {};
+        global.Ice.OutputStream = OutputStream;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/OutputStream"));

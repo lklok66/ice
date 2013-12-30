@@ -10,4 +10,13 @@
 require("./Client").test.Ice.stream.run({
     write: function(msg){ process.stdout.write(msg); },
     writeLine: function(msg){ this.write(msg + "\n"); }
+}).exception(function(ex){
+    if(ex.stack)
+    {
+        console.log(ex.stack);
+    }
+    else
+    {
+        console.log(ex);
+    }
 });

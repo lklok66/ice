@@ -8,8 +8,13 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/HashMap");
+        require("Ice/OptionalFormat");
+        
+        var HashMap = Ice.HashMap;
+        var OptionalFormat = Ice.OptionalFormat;
 
         var StreamHelpers = {};
 
@@ -20,9 +25,9 @@
             os.writeBool(v);
         };
 
-        StreamHelpers.BoolHelper.read = function(os)
+        StreamHelpers.BoolHelper.read = function(is)
         {
-            return os.readBool();
+            return is.readBool();
         };
 
         Object.defineProperty(StreamHelpers.BoolHelper, "minWireSize", {
@@ -36,9 +41,9 @@
             os.writeByte(v);
         };
 
-        StreamHelpers.ByteHelper.read = function(os)
+        StreamHelpers.ByteHelper.read = function(is)
         {
-            return os.readByte();
+            return is.readByte();
         };
 
         Object.defineProperty(StreamHelpers.ByteHelper, "minWireSize", {
@@ -52,16 +57,15 @@
             os.writeShort(v);
         };
 
-        StreamHelpers.ShortHelper.read = function(os)
+        StreamHelpers.ShortHelper.read = function(is)
         {
-            return os.readShort();
+            return is.readShort();
         };
 
         Object.defineProperty(StreamHelpers.ShortHelper, "minWireSize", {
             get: function(){ return 2; }
         });
-
-
+        
         StreamHelpers.IntHelper = {};
 
         StreamHelpers.IntHelper.write = function(os, v)
@@ -69,9 +73,9 @@
             os.writeInt(v);
         };
 
-        StreamHelpers.IntHelper.read = function(os)
+        StreamHelpers.IntHelper.read = function(is)
         {
-            return os.readInt();
+            return is.readInt();
         };
 
         Object.defineProperty(StreamHelpers.IntHelper, "minWireSize", {
@@ -85,9 +89,9 @@
             os.writeLong(v);
         };
 
-        StreamHelpers.LongHelper.read = function(os)
+        StreamHelpers.LongHelper.read = function(is)
         {
-            return os.readLong();
+            return is.readLong();
         };
 
         Object.defineProperty(StreamHelpers.LongHelper, "minWireSize", {
@@ -101,9 +105,9 @@
             os.writeFloat(v);
         };
 
-        StreamHelpers.FloatHelper.read = function(os)
+        StreamHelpers.FloatHelper.read = function(is)
         {
-            return os.readFloat();
+            return is.readFloat();
         };
 
         Object.defineProperty(StreamHelpers.FloatHelper, "minWireSize", {
@@ -117,9 +121,9 @@
             os.writeDouble(v);
         };
 
-        StreamHelpers.DoubleHelper.read = function(os)
+        StreamHelpers.DoubleHelper.read = function(is)
         {
-            return os.readDouble();
+            return is.readDouble();
         };
 
         Object.defineProperty(StreamHelpers.DoubleHelper, "minWireSize", {
@@ -133,52 +137,124 @@
             os.writeString(v);
         };
 
-        StreamHelpers.StringHelper.read = function(os)
+        StreamHelpers.StringHelper.read = function(is)
         {
-            return os.readString();
+            return is.readString();
         };
 
         Object.defineProperty(StreamHelpers.StringHelper, "minWireSize", {
             get: function(){ return 1; }
         });
-
-        StreamHelpers.ProxyHelper = {};
-
-        StreamHelpers.ProxyHelper.write = function(os, v)
+        
+        //
+        // Functional mixin to add __read/__write __readOpt/__writeOpt methods to
+        // proxy types.
+        //
+        
+        StreamHelpers.ProxyHelper = function(T)
         {
-            os.writeProxy(v);
+            T.__write = function(os, v)
+            {
+                os.writeProxy(v);
+            };
+            
+            T.__read = function(is)
+            {
+                var v = is.readProxy();
+                if(v !== null)
+                {
+                    v = T.uncheckedCast(v);
+                }
+                return v;
+            };
+            
+            T.__writeOpt = function(os, tag, v)
+            {
+                os.writeOptProxy(tag, v);
+            };
+            
+            T.__readOpt = function(is, tag)
+            {
+                var v = is.readOptProxy();
+                if(v !== null)
+                {
+                    v = T.uncheckedCast(v);
+                }
+                return v;
+            };
         };
-
-        StreamHelpers.ProxyHelper.read = function(os)
-        {
-            return os.readProxy();
-        };
-
-        Object.defineProperty(StreamHelpers.ProxyHelper, "minWireSize", {
-            get: function(){ return 2; }
-        });
-
-        var EnumHelper = function(){};
-
-        EnumHelper.prototype.read = function(os)
-        {
-            return os.readEnum(this.type);
-        };
-
-        EnumHelper.prototype.write = function(os, v)
-        {
-            os.writeEnum(v);
-        };
-
-        StreamHelpers.generateEnumHelper = function(type, minWireSize)
+        
+        StreamHelpers.generateProxyHelper = function(T)
         {
             //
             // If we have already generated a helper for this
             // type return that.
             //
-            if(type.__helper !== undefined)
+            if(T.__helper !== undefined)
             {
-                return type.__helper;
+                return T.__helper;
+            }
+            
+            var Helper = {};
+
+            Helper.write = function(os, v)
+            {
+                T.__write(os, v);
+            };
+
+            Helper.read = function(is)
+            {
+                return T.__read(is);
+            };
+
+            Object.defineProperty(Helper, "minWireSize", {
+                get: function(){ return 2; }
+            });
+            
+            //
+            // Cache the helper with the type.
+            //
+            T.__helper = Helper;
+            return Helper;
+        };
+        
+        StreamHelpers.ObjectProxyHelper = {};
+
+        StreamHelpers.ObjectProxyHelper.write = function(os, v)
+        {
+            os.writeProxy(v);
+        };
+
+        StreamHelpers.ObjectProxyHelper.read = function(os)
+        {
+            return os.readProxy();
+        };
+
+        Object.defineProperty(StreamHelpers.ObjectProxyHelper, "minWireSize", {
+            get: function(){ return 2; }
+        });
+
+        var EnumHelper = function(){};
+
+        EnumHelper.prototype.write = function(os, v)
+        {
+            os.writeEnum(v);
+        };
+        
+        EnumHelper.prototype.read = function(is)
+        {
+            return is.readEnum(this.T);
+        };
+
+        StreamHelpers.generateEnumHelper = function(T, minWireSize)
+        {
+            //
+            // If we have already generated a helper for this
+            // type return that.
+            //
+            if(T.__helper !== undefined)
+            {
+                return T.__helper;
             }
             
             var Helper = new EnumHelper();
@@ -187,72 +263,196 @@
                 get: function(){ return 1; }
             });
             
-            Object.defineProperty(Helper, "type", {
-                get: function(){ return type; }
+            Object.defineProperty(Helper, "T", {
+                get: function(){ return T; }
             });
             
             //
             // Cache the helper with the type.
             //
-            type.__helper = Helper;
+            T.__helper = Helper;
             return Helper;
         };
-
-        var StructHelper = function(){};
-
-        StructHelper.prototype.read = function(os)
+        
+        var FSizeOptHelper = function()
         {
-            return os.readStruct(this.type);
+            this.writeOpt = function(os, tag, v)
+            {
+                if(v !== undefined && os.writeOpt(tag, OptionalFormat.FSize))
+                {
+                    var pos = os.startSize();
+                    this.write(os, v);
+                    os.endSize(pos);
+                }
+            };
+            
+            this.readOpt = function(is, tag)
+            {
+                var v;
+                if(is.readOpt(tag, OptionalFormat.FSize))
+                {
+                    is.skip(4);
+                    v = this.read(is);
+                }
+                return v;
+            };
+        };
+        
+        var VSizeOptHelper = function()
+        {
+            this.writeOpt = function(os, tag, v)
+            {
+                if(v !== undefined && os.writeOpt(tag, OptionalFormat.VSize))
+                {
+                    var sz = this.size(v);
+                    os.writeSize(sz > 254 ? sz * this.minWireSize + 5 : sz * this.minWireSize + 1);
+                    this.write(os, v);
+                }
+            };
+            
+            this.readOpt = function(is, tag)
+            {
+                var v;
+                if(is.readOpt(tag, OptionalFormat.VSize))
+                {
+                    is.skipSize();
+                    v = this.read(is);
+                }
+                return v;
+            };
+        };
+        
+        var VSize1OptHelper = function()
+        {
+            this.writeOpt = function(os, tag, v)
+            {
+                if(v !== undefined && os.writeOpt(tag, OptionalFormat.VSize))
+                {
+                    this.write(os, v);
+                }
+            };
+            
+            this.readOpt = function(is, tag)
+            {
+                var v;
+                if(is.readOpt(tag, OptionalFormat.VSize))
+                {
+                    v = this.read(is);
+                }
+                return v;
+            };
+        };
+        
+        var VSizeHelper = function(minWireSize)
+        {
+            this.writeOpt = function(os, tag, v)
+            {
+                if(v !== undefined && os.writeOpt(tag, OptionalFormat.VSize))
+                {
+                    os.writeSize(minWireSize);
+                    this.write(os, v);
+                }
+            };
+            
+            this.readOpt = function(is, tag)
+            {
+                var v;
+                if(is.readOpt(tag, OptionalFormat.VSize))
+                {
+                    is.skipSize();
+                    v = this.read(is);
+                }
+                return v;
+            };
+        };
+        
+        //
+        // Functional mixin to add __readOpt/__writeOpt to structs.
+        //
+        StreamHelpers.StructOptHelper = function(T, minWireSize, optionalFormat)
+        {
+            if(optionalFormat === OptionalFormat.FSize)
+            {
+                T.__writeOpt = function(os, tag, v)
+                {
+                    if(v !== undefined && os.writeOpt(tag, OptionalFormat.FSize))
+                    {
+                        var pos = os.startSize();
+                        os.writeStruct(v);
+                        os.endSize(pos);
+                    }
+                };
+                
+                T.__readOpt = function(is, tag)
+                {
+                    var v;
+                    if(is.readOpt(tag, OptionalFormat.FSize))
+                    {
+                        is.skip(4);
+                        v = is.readStruct(T);
+                    }
+                    return v;
+                }
+            }
+            else if(optionalFormat === OptionalFormat.VSize)
+            {
+                T.__writeOpt = function(os, tag, v)
+                {
+                    if(v !== undefined && os.writeOpt(tag, OptionalFormat.VSize))
+                    {
+                        os.writeSize(minWireSize);
+                        os.writeStruct(v);
+                    }
+                };
+                
+                T.__readOpt = function(is, tag)
+                {
+                    var v;
+                    if(is.readOpt(tag, OptionalFormat.VSize))
+                    {
+                        is.skipSize();
+                        v = is.readStruct(T);
+                    }
+                    return v;
+                };
+            }
         };
 
-        StructHelper.prototype.write = function(os, v)
-        {
-            os.writeStruct(v);
-        };
-
-        StreamHelpers.generateStructHelper = function(type, minWireSize)
+        StreamHelpers.generateStructHelper = function(T, minWireSize, optionalFormat)
         {
             //
             // If we have already generated a helper for this
             // type return that.
             //
-            if(type.__helper !== undefined)
+            if(T.__helper !== undefined)
             {
-                return type.__helper;
+                return T.__helper;
             }
             
-            var Helper = new StructHelper();
+            var Helper = {};
+
+            Helper.write = function(os, v)
+            {
+                os.writeStruct(v);
+            };
+            
+            Helper.read = function(is)
+            {
+                return is.readStruct(T);
+            };
             
             Object.defineProperty(Helper, "minWireSize", {
                 get: function(){ return minWireSize; }
             });
             
-            Object.defineProperty(Helper, "type", {
-                get: function(){ return type; }
-            });
-            
             //
             // Cache the helper with the type.
             //
-            type.__helper = Helper;
+            T.__helper = Helper;
             return Helper;
         };
-
+        
         var SequenceHelper = function(){};
-
-        SequenceHelper.prototype.read = function(os)
-        {
-            // Cache the element helper.
-            var helper = this.elementHelper;
-            var sz = os.readAndCheckSeqSize(helper.minWireSize);
-            var v = [];
-            v.length = sz;
-            for(var i = 0; i < sz; ++i)
-            {
-                v[i] = helper.read(os);
-            }
-            return v;
-        };
 
         SequenceHelper.prototype.write = function(os, v)
         {
@@ -270,14 +470,49 @@
                 }
             }
         };
+        
+        SequenceHelper.prototype.read = function(is)
+        {
+            // Cache the element helper.
+            var helper = this.elementHelper;
+            var sz = is.readAndCheckSeqSize(helper.minWireSize);
+            var v = [];
+            v.length = sz;
+            for(var i = 0; i < sz; ++i)
+            {
+                v[i] = helper.read(is);
+            }
+            return v;
+        };
+        
+        SequenceHelper.prototype.size = function(v)
+        {
+            return (v === null || v === undefined) ? 0 : v.length; 
+        };
 
         Object.defineProperty(SequenceHelper.prototype, "minWireSize", {
             get: function(){ return 1; }
         });
 
-        StreamHelpers.generateSeqHelper = function(elementHelper)
+        StreamHelpers.generateSeqHelper = function(elementHelper, optionalFormat)
         {
             var Helper = new SequenceHelper();
+            
+            if(optionalFormat == OptionalFormat.FSize)
+            {
+                FSizeOptHelper.call(Helper);
+            }
+            if(optionalFormat == OptionalFormat.VSize)
+            {
+                if(elementHelper === StreamHelpers.BoolHelper || elementHelper === StreamHelpers.ByteHelper)
+                {
+                    VSize1OptHelper.call(Helper);
+                }
+                else
+                {
+                    VSizeOptHelper.call(Helper);
+                }
+            }
             
             Object.defineProperty(Helper, "elementHelper", {
                 get: function(){ return elementHelper; }
@@ -287,28 +522,10 @@
         };
 
         var ObjectSequenceHelper = function(){};
-
-        ObjectSequenceHelper.prototype.read = function(os)
-        {
-            var sz = os.readAndCheckSeqSize(1);
-            var v = [];
-            v.length = sz;
-            var type = this.type;
-            var readObjectAtIndex = function(idx)
-            {
-                os.readObject(function(obj) { v[idx] = obj; }, type);
-            };
-            
-            for(var i = 0; i < sz; ++i)
-            {
-                readObjectAtIndex(i);
-            }
-            return v;
-        };
-
+        
         ObjectSequenceHelper.prototype.write = function(os, v)
         {
-            if(v === null || v.size === 0)
+            if(v === null || v.length === 0)
             {
                 os.writeSize(0);
             }
@@ -322,36 +539,41 @@
                 }
             }
         };
+        
+        ObjectSequenceHelper.prototype.read = function(is)
+        {
+            var sz = is.readAndCheckSeqSize(1);
+            var v = [];
+            v.length = sz;
+            var T = this.T;
+            var readObjectAtIndex = function(idx)
+            {
+                is.readObject(function(obj) { v[idx] = obj; }, T);
+            };
+            
+            for(var i = 0; i < sz; ++i)
+            {
+                readObjectAtIndex(i);
+            }
+            return v;
+        };
 
         Object.defineProperty(ObjectSequenceHelper.prototype, "minWireSize", {
             get: function(){ return 1; }
         });
+        
+        FSizeOptHelper.call(ObjectSequenceHelper.prototype);
 
-        StreamHelpers.generateObjectSeqHelper = function(type)
+        StreamHelpers.generateObjectSeqHelper = function(T)
         {
             var Helper = new ObjectSequenceHelper();
-            
-            Object.defineProperty(Helper, "type", {
-                get: function(){ return type; }
+            Object.defineProperty(Helper, "T", {
+                get: function(){ return T; }
             });
-            
             return Helper;
         };
 
         var DictionaryHelper = function(){};
-
-        DictionaryHelper.prototype.read = function(os)
-        {
-            var v = new HashMap();
-            var sz = os.readSize();
-            var keyHelper = this.keyHelper;
-            var valueHelper = this.valueHelper;
-            for(var i = 0; i < sz; ++i)
-            {
-                v.set(keyHelper.read(os), valueHelper.read(os));
-            }
-            return v;
-        };
 
         DictionaryHelper.prototype.write = function(os, v)
         {
@@ -371,14 +593,41 @@
                 }
             }
         };
+        
+        DictionaryHelper.prototype.read = function(is)
+        {
+            var v = new HashMap();
+            var sz = is.readSize();
+            var keyHelper = this.keyHelper;
+            var valueHelper = this.valueHelper;
+            for(var i = 0; i < sz; ++i)
+            {
+                v.set(keyHelper.read(is), valueHelper.read(is));
+            }
+            return v;
+        };
+        
+        DictionaryHelper.prototype.size = function(v)
+        {
+            return (v === null || v === undefined) ? 0 : v.size; 
+        };
 
         Object.defineProperty(DictionaryHelper.prototype, "minWireSize", {
             get: function(){ return 1; }
         });
 
-        StreamHelpers.generateDictHelper = function(keyHelper, valueHelper)
+        StreamHelpers.generateDictHelper = function(keyHelper, valueHelper, optionalFormat)
         {
             var Helper = new DictionaryHelper();
+            
+            if(optionalFormat == OptionalFormat.FSize)
+            {
+                FSizeOptHelper.call(Helper);
+            }
+            if(optionalFormat == OptionalFormat.VSize)
+            {
+                VSizeOptHelper.call(Helper);
+            }
             
             Object.defineProperty(Helper, "keyHelper", {
                 get: function(){ return keyHelper; }
@@ -392,26 +641,6 @@
         };
 
         var ObjectDictionaryHelper = function(){};
-
-        ObjectDictionaryHelper.prototype.read = function(os)
-        {
-            var sz = os.readSize();
-            var v = new HashMap();
-
-            var type = this.type;
-            
-            var readObjectForKey = function(key)
-            {
-                os.readObject(function(obj) { v.set(key, obj); }, type);
-            };
-            
-            var keyHelper = this.keyHelper;
-            for(var i = 0; i < sz; ++i)
-            {
-                readObjectForKey(keyHelper.read(os));
-            }
-            return v;
-        };
 
         ObjectDictionaryHelper.prototype.write = function(os, v)
         {
@@ -430,12 +659,34 @@
                 }
             }
         };
+        
+        ObjectDictionaryHelper.prototype.read = function(is)
+        {
+            var sz = is.readSize();
+            var v = new HashMap();
+
+            var T = this.T;
+            
+            var readObjectForKey = function(key)
+            {
+                is.readObject(function(obj) { v.set(key, obj); }, T);
+            };
+            
+            var keyHelper = this.keyHelper;
+            for(var i = 0; i < sz; ++i)
+            {
+                readObjectForKey(keyHelper.read(is));
+            }
+            return v;
+        };
 
         Object.defineProperty(ObjectDictionaryHelper.prototype, "minWireSize", {
             get: function(){ return 1; }
         });
+        
+        FSizeOptHelper.call(ObjectDictionaryHelper.prototype);
 
-        StreamHelpers.generateObjectDictHelper = function(keyHelper, type)
+        StreamHelpers.generateObjectDictHelper = function(keyHelper, T)
         {
             var Helper = new ObjectDictionaryHelper();
             
@@ -443,15 +694,16 @@
                 get: function(){ return keyHelper; }
             });
             
-            Object.defineProperty(Helper, "type", {
-                get: function(){ return type; }
+            Object.defineProperty(Helper, "T", {
+                get: function(){ return T; }
             });
             
             return Helper;
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.StreamHelpers = StreamHelpers;
+        global.Ice = global.Ice || {};
+        global.Ice.StreamHelpers = StreamHelpers;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/StreamHelpers"));

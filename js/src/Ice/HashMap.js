@@ -8,7 +8,7 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
+    var __m = function(global, module, exports, require){
         var HashMap = function(h)
         {
             this._size = 0;
@@ -392,8 +392,9 @@
             return this._comparator.call(this._comparator, k1, k2);
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.HashMap = HashMap;
+        global.Ice = global.Ice || {};
+        global.Ice.HashMap = HashMap;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/HashMap"));

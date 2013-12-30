@@ -8,10 +8,15 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var TimeUtil = require("Ice/TimeUtil").Ice.TimeUtil;
-        var CommunicatorDestroyedException = require("Ice/LocalException").Ice.CommunicatorDestroyedException;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/HashMap");
+        require("Ice/TimeUtil");
+        require("Ice/LocalException");
+        
+        var HashMap = Ice.HashMap;
+        var TimeUtil = Ice.TimeUtil;
+        var CommunicatorDestroyedException = Ice.CommunicatorDestroyedException;
 
         var Timer = function(instance)
         {
@@ -116,8 +121,9 @@
             }
         }
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.Timer = Timer;
+        global.Ice = global.Ice || {};
+        global.Ice.Timer = Timer;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Timer"));

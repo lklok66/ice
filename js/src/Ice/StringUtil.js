@@ -8,8 +8,11 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Debug = require("Ice/Debug").Ice.Debug;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/Debug");
+        
+        var Debug = Ice.Debug;
 
         var StringUtil = {};
 
@@ -482,8 +485,9 @@
             return n;
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.StringUtil = StringUtil;
+        global.Ice = global.Ice || {};
+        global.Ice.StringUtil = StringUtil;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/StringUtil"));

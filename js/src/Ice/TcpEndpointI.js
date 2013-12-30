@@ -8,17 +8,19 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Address = require("Ice/Address").Ice.Address;
-        var HashUtil = require("Ice/HashUtil").Ice.HashUtil;
-        var StringUtil = require("Ice/StringUtil").Ice.StringUtil;
-        var TcpTransceiver = require("Ice/TcpTransceiver").Ice.TcpTransceiver;
-
-        var _merge = require("Ice/Util").merge;
-
-        var Ice = {};
-        _merge(Ice, require("Ice/Endpoint").Ice);
-        _merge(Ice, require("Ice/LocalException").Ice);
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/Address");
+        require("Ice/HashUtil");
+        require("Ice/StringUtil");
+        require("Ice/TcpTransceiver");
+        require("Ice/Endpoint");
+        require("Ice/LocalException");
+        
+        var Address = Ice.Address;
+        var HashUtil = Ice.HashUtil;
+        var StringUtil = Ice.StringUtil;
+        var TcpTransceiver = Ice.TcpTransceiver;
 
         var TcpEndpointI = function(instance, ho, po, ti, conId, co)
         {
@@ -182,7 +184,7 @@
             var timeout = s.readInt();
             var compress = s.readBool();
             s.endReadEncaps();
-            return new TcpEndpointI(s.instance(), host, port, timeout, "", compress);
+            return new TcpEndpointI(s.instance, host, port, timeout, "", compress);
         };
 
         //
@@ -510,8 +512,8 @@
             this._hashCode = h;
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.TcpEndpointI = TcpEndpointI;
+        global.Ice = global.Ice || {};
+        global.Ice.TcpEndpointI = TcpEndpointI;
 
         var TCPEndpointInfoI = function(timeout, compress, host, port)
         {
@@ -536,5 +538,6 @@
             return false;
         };
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/TcpEndpointI"));

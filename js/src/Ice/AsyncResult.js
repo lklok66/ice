@@ -8,12 +8,21 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var Promise = require("Ice/Promise").Ice.Promise;
-        var Protocol = require("Ice/Protocol").Ice.Protocol;
-        var UserException = require("Ice/Exception").Ice.UserException;
-        var BasicStream = require("Ice/BasicStream").Ice.BasicStream;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/Debug");
+        require("Ice/Promise");
+        require("Ice/Protocol");
+        require("Ice/Exception");
+        require("Ice/BasicStream");
+        
+        var Ice = global.Ice || {};
+        
+        var Debug = Ice.Debug;
+        var Promise = Ice.Promise;
+        var Protocol = Ice.Protocol;
+        var UserException = Ice.UserException;
+        var BasicStream = Ice.BasicStream;
 
         var AsyncResult = function(communicator, op, connection, proxy, adapter, completedFn)
         {
@@ -139,8 +148,10 @@
             }
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.AsyncResult = AsyncResult;
+        Ice.AsyncResult = AsyncResult;
+        
+        global.Ice = Ice;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/AsyncResult"));

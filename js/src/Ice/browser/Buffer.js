@@ -8,13 +8,15 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
+    var __m = function(global, module, exports, require){
         //
         // Buffer implementation to be used by web browsers, it uses ArrayBuffer as
         // the store.
         //
-
-        var Long = require("Ice/Long").Ice.Long;
+        
+        require("Ice/Long");
+        
+        var Long = Ice.Long;
 
         var Buffer = function(buffer)
         {
@@ -404,8 +406,9 @@
             return s;
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.Buffer = Buffer;
+        global.Ice = global.Ice || {};
+        global.Ice.Buffer = Buffer;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Buffer"));

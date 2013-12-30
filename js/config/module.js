@@ -23,5 +23,5 @@ global.Ice.__defineModule = function(m, name)
     module.exports = global;
     module.require = global.Ice.__require;
     global.Ice.__modules[name] = module;
-    m.call(m, module, module.exports, module.require);
+    m.call(m, global, module, module.exports, module.require);
 };

@@ -30,6 +30,7 @@ public:
 protected:
 
     static bool isClassType(const TypePtr&);
+    static std::string localProxyHelper(const TypePtr&);
     static std::string fixId(const std::string&, bool = false);
     static std::string fixId(const ContainedPtr&, bool = false);
     static std::string getOptionalFormat(const TypePtr&);
@@ -48,6 +49,8 @@ protected:
     void writeDictionaryMarshalUnmarshalCode(::IceUtilInternal::Output&, const DictionaryPtr&, const std::string&, bool);
     void writeOptionalSequenceMarshalUnmarshalCode(::IceUtilInternal::Output&, const SequencePtr&, const std::string&,
                                                    int, bool);
+    void writeOptionalDictionaryMarshalUnmarshalCode(::IceUtilInternal::Output&, const DictionaryPtr&, const std::string&, 
+                                                     int, bool);
 
 private:
 
@@ -80,6 +83,8 @@ private:
         std::string _fileName;
         StringSet _history;
     };
+    
+    std::vector< std::string> _seenProxy;
 };
 
 }

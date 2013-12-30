@@ -8,17 +8,25 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Ice = require("Ice/Ice");
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/Ice");
+        require("Ice/Debug");
+        require("Ice/ArrayUtil");
+        require("Ice/InputStream");
+        require("Ice/OutputStream");
+        
+        var Ice = global.Ice;
+        
+        var Debug = Ice.Debug;
+        var ArrayUtil = Ice.ArrayUtil;
+        var InputStream = Ice.InputStream;
+        var OutputStream = Ice.OutputStream;
 
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var ArrayUtil = require("Ice/ArrayUtil").Ice.ArrayUtil;
-
-        var InputStream = require("Ice/InputStream").Ice.InputStream;
-        var OutputStream = require("Ice/OutputStream").Ice.OutputStream;
-
-        var Test = require("Test").Test;
-
+        require("Test");
+        
+        var Test = global.Test;
+        
         var is;
         var os;
         var data;
@@ -211,8 +219,7 @@
                         s.d = 6.0;
                         s.str = "7";
                         s.e = Test.MyEnum.enum2;
-                        //TODO
-                        //s.p = Test.MyClassPrx.uncheckedCast(comm.stringToProxy("test:default"));
+                        s.p = Test.MyClassPrx.uncheckedCast(comm.stringToProxy("test:default"));
                         os.writeStruct(s);
                         var data = os.finished();
                         var is = new InputStream(comm, data, true);
@@ -220,7 +227,6 @@
                         os.destroy();
                         is.destroy();
                     }());
-                    
                     (function()
                     {
                         var os = new OutputStream(comm);
@@ -255,7 +261,6 @@
                         os.destroy();
                         is.destroy();
                     }());
-                    
                     (function()
                     {
                         var os = new OutputStream(comm, Ice.Protocol.Encoding_1_0);
@@ -870,5 +875,6 @@
         module.exports.test.Ice = module.exports.test.Ice || {};
         module.exports.test.Ice.stream = {run: run};
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "test/Ice/stream"));

@@ -8,7 +8,7 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
+    var __m = function(global, module, exports, require){
         //
         // Ice.Object
         //
@@ -81,8 +81,9 @@
             is.endReadObject(false);
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.Object = IceObject;
+        global.Ice = global.Ice || {};
+        global.Ice.Object = IceObject;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Object"));

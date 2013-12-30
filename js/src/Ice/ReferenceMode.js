@@ -8,7 +8,7 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
+    var __m = function(global, module, exports, require){
         //
         // Using a separate module for these constants so that ObjectPrx does
         // not need to include Reference.
@@ -22,8 +22,9 @@
         ReferenceMode.ModeBatchDatagram = 4;
         ReferenceMode.ModeLast = ReferenceMode.ModeBatchDatagram;
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.ReferenceMode = ReferenceMode;
+        global.Ice = global.Ice || {};
+        global.Ice.ReferenceMode = ReferenceMode;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/ReferenceMode"));

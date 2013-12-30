@@ -8,15 +8,25 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var StringUtil = require("Ice/StringUtil").Ice.StringUtil;
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var Promise = require("Ice/Promise").Ice.Promise;
-        var PropertyNames = require("Ice/PropertyNames").Ice.PropertyNames;
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var ProcessLogger = require("Ice/ProcessLogger").Ice.ProcessLogger;
-        var getProcessLogger = require("Ice/ProcessLogger").Ice.getProcessLogger;
-        var InitializationException = require("Ice/LocalException").Ice.InitializationException;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/StringUtil");
+        require("Ice/HashMap");
+        require("Ice/Promise");
+        require("Ice/PropertyNames");
+        require("Ice/Debug");
+        require("Ice/ProcessLogger");
+        require("Ice/ProcessLogger");
+        require("Ice/LocalException");
+        
+        var StringUtil = Ice.StringUtil;
+        var HashMap = Ice.HashMap;
+        var Promise = Ice.Promise;
+        var PropertyNames = Ice.PropertyNames;
+        var Debug = Ice.Debug;
+        var ProcessLogger = Ice.ProcessLogger;
+        var getProcessLogger = Ice.getProcessLogger;
+        var InitializationException = Ice.InitializationException;
 
         var fs = require("fs");
 
@@ -512,8 +522,9 @@
             return new Properties(args, defaults);
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.Properties = Properties;
+        global.Ice = global.Ice || {};
+        global.Ice.Properties = Properties;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Properties"));

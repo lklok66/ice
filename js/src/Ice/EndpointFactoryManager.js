@@ -8,11 +8,20 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var OpaqueEndpointI = require("Ice/OpaqueEndpointI").Ice.OpaqueEndpointI;
-        var BasicStream = require("Ice/BasicStream").Ice.BasicStream;
-        var EndpointParseException = require("Ice/LocalException").Ice.EndpointParseException;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/Debug");
+        require("Ice/OpaqueEndpointI");
+        require("Ice/BasicStream");
+        require("Ice/LocalException");
+        
+        //
+        // Local aliases.
+        //
+        var Debug = Ice.Debug;
+        var OpaqueEndpointI = Ice.OpaqueEndpointI;
+        var BasicStream = Ice.BasicStream;
+        var EndpointParseException = Ice.EndpointParseException;
 
         var EndpointFactoryManager = function(instance)
         {
@@ -133,8 +142,9 @@
             this._factories = [];
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.EndpointFactoryManager = EndpointFactoryManager;
+        global.Ice = global.Ice || {};
+        global.Ice.EndpointFactoryManager = EndpointFactoryManager;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/EndpointFactoryManager"));

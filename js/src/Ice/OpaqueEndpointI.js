@@ -8,18 +8,21 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Base64 = require("Ice/Base64").Ice.Base64;
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var HashUtil = require("Ice/HashUtil").Ice.HashUtil;
-        var Protocol = require("Ice/Protocol").Ice.Protocol;
-        var StringUtil = require("Ice/StringUtil").Ice.StringUtil;
-
-        var _merge = require("Ice/Util").merge;
-
-        var Ice = {};
-        _merge(Ice, require("Ice/Endpoint").Ice);
-        _merge(Ice, require("Ice/LocalException").Ice);
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/Base64");
+        require("Ice/Debug");
+        require("Ice/HashUtil");
+        require("Ice/Protocol");
+        require("Ice/StringUtil");
+        require("Ice/Endpoint");
+        require("Ice/LocalException");
+        
+        var Base64 = Ice.Base64;
+        var Debug = Ice.Debug;
+        var HashUtil = Ice.HashUtil;
+        var Protocol = Ice.Protocol;
+        var StringUtil = Ice.StringUtil;
 
         var OpaqueEndpointI = function()
         {
@@ -444,8 +447,8 @@
             this._hashCode = h;
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.OpaqueEndpointI = OpaqueEndpointI;
+        global.Ice = global.Ice || {};
+        global.Ice.OpaqueEndpointI = OpaqueEndpointI;
 
         var OpaqueEndpointInfoI = function(timeout, compress, rawEncoding, rawBytes, type)
         {
@@ -471,5 +474,6 @@
             return false;
         };
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/OpaqueEndpointI"));

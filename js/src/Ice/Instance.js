@@ -8,35 +8,51 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var ConnectionMonitor = require("Ice/ConnectionMonitor").Ice.ConnectionMonitor;
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var DefaultsAndOverrides = require("Ice/DefaultsAndOverrides").Ice.DefaultsAndOverrides;
-        var EndpointFactoryManager = require("Ice/EndpointFactoryManager").Ice.EndpointFactoryManager;
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var ImplicitContextI = require("Ice/ImplicitContextI").Ice.ImplicitContextI;
-        var IdentityUtil = require("Ice/IdentityUtil").Ice.IdentityUtil;
-        var LocatorManager = require("Ice/LocatorManager").Ice.LocatorManager;
-        var Logger = require("Ice/Logger").Ice.Logger;
-        var Network = require("Ice/Network").Ice.Network;
-        var ObjectFactoryManager = require("Ice/ObjectFactoryManager").Ice.ObjectFactoryManager;
-        var OutgoingConnectionFactory = require("Ice/OutgoingConnectionFactory").Ice.OutgoingConnectionFactory;
-        var Promise = require("Ice/Promise").Ice.Promise;
-        var Properties = require("Ice/Properties").Ice.Properties;
-        var ProxyFactory = require("Ice/ProxyFactory").Ice.ProxyFactory;
-        var RouterManager = require("Ice/RouterManager").Ice.RouterManager;
-        var TcpEndpointFactory = require("Ice/TcpEndpointFactory").Ice.TcpEndpointFactory;
-        var Timer = require("Ice/Timer").Ice.Timer;
-        var TraceLevels = require("Ice/TraceLevels").Ice.TraceLevels;
-        var ReferenceFactory = require("Ice/Reference").Ice.ReferenceFactory;
-
-        var _merge = require("Ice/Util").merge;
-
-        var Ice = {};
-
-        _merge(Ice, require("Ice/LocalException").Ice);
-        _merge(Ice, require("Ice/Exception").Ice);
-        _merge(Ice, require("Ice/ProcessLogger").Ice);
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/ConnectionMonitor");
+        require("Ice/Debug");
+        require("Ice/DefaultsAndOverrides");
+        require("Ice/EndpointFactoryManager");
+        require("Ice/HashMap");
+        require("Ice/ImplicitContextI");
+        require("Ice/IdentityUtil");
+        require("Ice/LocatorManager");
+        require("Ice/Logger");
+        require("Ice/Network");
+        require("Ice/ObjectFactoryManager");
+        require("Ice/OutgoingConnectionFactory");
+        require("Ice/Promise");
+        require("Ice/Properties");
+        require("Ice/ProxyFactory");
+        require("Ice/RouterManager");
+        require("Ice/TcpEndpointFactory");
+        require("Ice/Timer");
+        require("Ice/TraceLevels");
+        require("Ice/Reference");
+        require("Ice/LocalException");
+        require("Ice/Exception");
+        require("Ice/ProcessLogger");
+        
+        var ConnectionMonitor = Ice.ConnectionMonitor;
+        var Debug = Ice.Debug;
+        var DefaultsAndOverrides = Ice.DefaultsAndOverrides;
+        var EndpointFactoryManager = Ice.EndpointFactoryManager;
+        var HashMap = Ice.HashMap;
+        var ImplicitContextI = Ice.ImplicitContextI;
+        var LocatorManager = Ice.LocatorManager;
+        var Logger = Ice.Logger;
+        var Network = Ice.Network;
+        var ObjectFactoryManager = Ice.ObjectFactoryManager;
+        var OutgoingConnectionFactory = Ice.OutgoingConnectionFactory;
+        var Promise = Ice.Promise;
+        var Properties = Ice.Properties;
+        var ProxyFactory = Ice.ProxyFactory;
+        var RouterManager = Ice.RouterManager;
+        var TcpEndpointFactory = Ice.TcpEndpointFactory;
+        var Timer = Ice.Timer;
+        var TraceLevels = Ice.TraceLevels;
+        var ReferenceFactory = Ice.ReferenceFactory;
 
         var StateActive = 0;
         var StateDestroyInProgress = 1;
@@ -294,12 +310,12 @@
 
         Instance.prototype.stringToIdentity = function(s)
         {
-            return IdentityUtil.stringToIdentity(s);
+            return Ice.stringToIdentity(s);
         };
 
         Instance.prototype.identityToString = function(ident)
         {
-            return IdentityUtil.identityToString(ident);
+            return Ice.identityToString(ident);
         };
 
         Instance.prototype.setDefaultLocator = function(locator)
@@ -745,8 +761,9 @@
             promise.succeed();
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.Instance = Instance;
+        global.Ice = global.Ice || {};
+        global.Ice.Instance = Instance;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Instance"));

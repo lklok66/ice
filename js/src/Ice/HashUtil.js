@@ -8,8 +8,11 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var StringUtil = require("Ice/StringUtil").Ice.StringUtil;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/StringUtil");
+        
+        var StringUtil = Ice.StringUtil;
 
         var HashUtil = {};
 
@@ -92,8 +95,9 @@
             return h;
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.HashUtil = HashUtil;
+        global.Ice = global.Ice || {};
+        global.Ice.HashUtil = HashUtil;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/HashUtil"));

@@ -8,15 +8,20 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
+    var __m = function(global, module, exports, require){
+        
+        var Ice = global.Ice || {};
+        
         var Address = function(host, port)
         {
             this.host = host;
             this.port = port;
         };
-
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.Address = Address;
+        
+        Ice.Address = Address;
+        
+        global.Ice = Ice;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Address"));

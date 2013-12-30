@@ -8,9 +8,13 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var InitializationException = require("Ice/LocalException").Ice.InitializationException;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/HashMap");
+        require("Ice/LocalException");
+        
+        var HashMap = Ice.HashMap;
+        var InitializationException = Ice.InitializationException;
 
         //
         // The base class for all ImplicitContext implementations
@@ -140,8 +144,9 @@
             }
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.ImplicitContextI = ImplicitContextI;
+        global.Ice = global.Ice || {};
+        global.Ice.ImplicitContextI = ImplicitContextI;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/ImplicitContextI"));

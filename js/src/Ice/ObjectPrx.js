@@ -8,24 +8,30 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var ArrayUtil = require("Ice/ArrayUtil").Ice.ArrayUtil;
-        var AsyncResult = require("Ice/AsyncResult").Ice.AsyncResult;
-        var ConnectRequestHandler = require("Ice/ConnectRequestHandler").Ice.ConnectRequestHandler;
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var FormatType = require("Ice/FormatType").Ice.FormatType;
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var OutgoingAsync = require("Ice/OutgoingAsync").Ice.OutgoingAsync;
-        var RefMode = require("Ice/ReferenceMode").Ice.ReferenceMode;
-        var OperationMode = require("Ice/Current").Ice.OperationMode;
-
-        var _merge = require("Ice/Util").merge;
-
-        var Ice = {};
-
-        _merge(Ice, require("Ice/BuiltinSequences").Ice);
-        _merge(Ice, require("Ice/Exception").Ice);
-        _merge(Ice, require("Ice/LocalException").Ice);
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/ArrayUtil");
+        require("Ice/AsyncResult");
+        require("Ice/ConnectRequestHandler");
+        require("Ice/Debug");
+        require("Ice/FormatType");
+        require("Ice/HashMap");
+        require("Ice/OutgoingAsync");
+        require("Ice/ReferenceMode");
+        require("Ice/Current");
+        require("Ice/Exception");
+        require("Ice/BuiltinSequences");
+        require("Ice/LocalException");
+        
+        var ArrayUtil = Ice.ArrayUtil;
+        var AsyncResult = Ice.AsyncResult;
+        var ConnectRequestHandler = Ice.ConnectRequestHandler;
+        var Debug = Ice.Debug;
+        var FormatType = Ice.FormatType;
+        var HashMap = Ice.HashMap;
+        var OutgoingAsync = Ice.OutgoingAsync;
+        var RefMode = Ice.ReferenceMode;
+        var OperationMode = Ice.OperationMode;
 
         //
         // Ice.ObjectPrx
@@ -911,8 +917,9 @@
             return r;
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.ObjectPrx = ObjectPrx;
+        global.Ice = global.Ice || {};
+        global.Ice.ObjectPrx = ObjectPrx;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/ObjectPrx"));

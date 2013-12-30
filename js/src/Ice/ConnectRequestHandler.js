@@ -8,18 +8,31 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var AsyncStatus = require("Ice/AsyncStatus").Ice.AsyncStatus;
-        var BasicStream = require("Ice/BasicStream").Ice.BasicStream;
-        var ConnectionRequestHandler = require("Ice/ConnectionRequestHandler").Ice.ConnectionRequestHandler;
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var ExUtil = require("Ice/ExUtil").Ice.ExUtil;
-        var LocalExceptionWrapper = require("Ice/LocalExceptionWrapper").Ice.LocalExceptionWrapper;
-        var OutgoingAsync = require("Ice/OutgoingAsync").Ice.OutgoingAsync;
-        var Protocol = require("Ice/Protocol").Ice.Protocol;
-        var ReferenceMode = require("Ice/ReferenceMode").Ice.ReferenceMode;
-        var LocalException = require("Ice/Exception").Ice.LocalException;
-        var Promise = require("Ice/Promise").Ice.Promise;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/AsyncStatus");
+        require("Ice/BasicStream");
+        require("Ice/ConnectionRequestHandler");
+        require("Ice/Debug");
+        require("Ice/ExUtil");
+        require("Ice/LocalExceptionWrapper");
+        require("Ice/OutgoingAsync");
+        require("Ice/Protocol");
+        require("Ice/ReferenceMode");
+        require("Ice/Exception");
+        require("Ice/Promise");
+        
+        var AsyncStatus = Ice.AsyncStatus;
+        var BasicStream = Ice.BasicStream;
+        var ConnectionRequestHandler = Ice.ConnectionRequestHandler;
+        var Debug = Ice.Debug;
+        var ExUtil = Ice.ExUtil;
+        var LocalExceptionWrapper = Ice.LocalExceptionWrapper;
+        var OutgoingAsync = Ice.OutgoingAsync;
+        var Protocol = Ice.Protocol;
+        var ReferenceMode = Ice.ReferenceMode;
+        var LocalException = Ice.LocalException;
+        var Promise = Ice.Promise;
 
         var ConnectRequestHandler = function(ref, proxy)
         {
@@ -412,8 +425,8 @@
             this._requests = [];
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.ConnectRequestHandler = ConnectRequestHandler;
+        global.Ice = global.Ice || {};
+        global.Ice.ConnectRequestHandler = ConnectRequestHandler;
 
         var Request = function(arg)
         {
@@ -433,5 +446,6 @@
             }
         };
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/ConnectRequestHandler"));

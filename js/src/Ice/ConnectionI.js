@@ -8,28 +8,38 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var AsyncStatus = require("Ice/AsyncStatus").Ice.AsyncStatus;
-        var BasicStream = require("Ice/BasicStream").Ice.BasicStream;
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var ExUtil = require("Ice/ExUtil").Ice.ExUtil;
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var LocalExceptionWrapper = require("Ice/LocalExceptionWrapper").Ice.LocalExceptionWrapper;
-        var Promise = require("Ice/Promise").Ice.Promise;
-        var Protocol = require("Ice/Protocol").Ice.Protocol;
-        var SocketOperation = require("Ice/SocketOperation").Ice.SocketOperation;
-        var Timer = require("Ice/Timer").Ice.Timer;
-        var TimeUtil = require("Ice/TimeUtil").Ice.TimeUtil;
-        var TraceUtil = require("Ice/TraceUtil").Ice.TraceUtil;
-        var ProtocolVersion = require("Ice/Version").Ice.ProtocolVersion;
-        var EncodingVersion = require("Ice/Version").Ice.EncodingVersion;
-
-        var _merge = require("Ice/Util").merge;
-
-        var Ice = {};
-
-        _merge(Ice, require("Ice/Exception").Ice);
-        _merge(Ice, require("Ice/LocalException").Ice);
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/AsyncStatus");
+        require("Ice/BasicStream");
+        require("Ice/Debug");
+        require("Ice/ExUtil");
+        require("Ice/HashMap");
+        require("Ice/LocalExceptionWrapper");
+        require("Ice/Promise");
+        require("Ice/Protocol");
+        require("Ice/SocketOperation");
+        require("Ice/Timer");
+        require("Ice/TimeUtil");
+        require("Ice/TraceUtil");
+        require("Ice/Version");
+        require("Ice/Exception");
+        require("Ice/LocalException");
+        
+        var AsyncStatus = Ice.AsyncStatus;
+        var BasicStream = Ice.BasicStream;
+        var Debug = Ice.Debug;
+        var ExUtil = Ice.ExUtil;
+        var HashMap = Ice.HashMap;
+        var LocalExceptionWrapper = Ice.LocalExceptionWrapper;
+        var Promise = Ice.Promise;
+        var Protocol = Ice.Protocol;
+        var SocketOperation = Ice.SocketOperation;
+        var Timer = Ice.Timer;
+        var TimeUtil = Ice.TimeUtil;
+        var TraceUtil = Ice.TraceUtil;
+        var ProtocolVersion = Ice.ProtocolVersion;
+        var EncodingVersion = Ice.EncodingVersion;
 
         var StateNotInitialized = 0;
         var StateNotValidated = 1;
@@ -2050,8 +2060,8 @@
             }
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.ConnectionI = ConnectionI;
+        global.Ice = global.Ice || {};
+        global.Ice.ConnectionI = ConnectionI;
 
         var OutgoingMessage = function()
         {
@@ -2120,5 +2130,6 @@
             }
         };
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/ConnectionI"));

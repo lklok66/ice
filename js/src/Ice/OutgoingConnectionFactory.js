@@ -8,22 +8,28 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var ArrayUtil = require("Ice/ArrayUtil").Ice.ArrayUtil;
-        var ConnectionI = require("Ice/ConnectionI").Ice.ConnectionI;
-        var ConnectionReaper = require("Ice/ConnectionReaper").Ice.ConnectionReaper;
-        var Debug = require("Ice/Debug").Ice.Debug;
-        var ExUtil = require("Ice/ExUtil").Ice.ExUtil;
-        var HashMap = require("Ice/HashMap").Ice.HashMap;
-        var Promise = require("Ice/Promise").Ice.Promise;
-        var EndpointSelectionType = require("Ice/EndpointTypes").Ice.EndpointSelectionType;
-
-        var _merge = require("Ice/Util").merge;
-
-        var Ice = {};
-        _merge(Ice, require("Ice/LocalException").Ice);
-        _merge(Ice, require("Ice/Exception").Ice);
-
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/ArrayUtil");
+        require("Ice/ConnectionI");
+        require("Ice/ConnectionReaper");
+        require("Ice/Debug");
+        require("Ice/ExUtil");
+        require("Ice/HashMap");
+        require("Ice/Promise");
+        require("Ice/EndpointTypes");
+        require("Ice/LocalException");
+        require("Ice/Exception");
+        
+        var ArrayUtil = Ice.ArrayUtil;
+        var ConnectionI = Ice.ConnectionI;
+        var ConnectionReaper = Ice.ConnectionReaper;
+        var Debug = Ice.Debug;
+        var ExUtil = Ice.ExUtil;
+        var HashMap = Ice.HashMap;
+        var Promise = Ice.Promise;
+        var EndpointSelectionType = Ice.EndpointSelectionType;
+        
         //
         // Only for use by Instance.
         //
@@ -795,8 +801,8 @@
             Debug.assert(this._waitPromise !== null);
             this._waitPromise.succeed();
         };
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.OutgoingConnectionFactory = OutgoingConnectionFactory;
+        global.Ice = global.Ice || {};
+        global.Ice.OutgoingConnectionFactory = OutgoingConnectionFactory;
 
         //
         // Value is a Vector<Ice.ConnectionI>
@@ -1039,5 +1045,6 @@
             }
         };
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/OutgoingConnectionFactory"));

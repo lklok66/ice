@@ -8,17 +8,17 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var StringUtil = require("Ice/StringUtil").Ice.StringUtil;
+    var __m = function(global, module, exports, require){
+        
+        require("Ice/StringUtil");
+        require("Ice/LocalException");
+        require("Ice/Version");
+        require("Ice/Buffer");
 
-        var _merge = require("Ice/Util").merge;
-
-        var Ice = {};
-
-        _merge(Ice, require("Ice/LocalException").Ice);
-        _merge(Ice, require("Ice/Version").Ice);
-        _merge(Ice, require("Ice/Buffer").Ice);
-
+        var Ice = global.Ice || {};
+        
+        var StringUtil = Ice.StringUtil;
+        
         var Protocol = {};
 
         Protocol.Encoding_1_0 = new Ice.EncodingVersion(1, 0);
@@ -254,8 +254,8 @@
             return majorMinorToString(v.major, v.minor);
         };
 
-        module.exports.Ice = module.exports.Ice || {};
-        module.exports.Ice.Protocol = Protocol;
+        global.Ice = global.Ice || {};
+        global.Ice.Protocol = Protocol;
 
         function stringToMajor(str)
         {
@@ -316,5 +316,6 @@
             return major + "." + minor;
         }
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Protocol"));
