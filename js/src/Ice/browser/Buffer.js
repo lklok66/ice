@@ -9,6 +9,26 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
+        
+        //
+        // IE 10 doesn't implement ArrayBuffer.slice
+        //
+        
+         if (!ArrayBuffer.prototype.slice)
+         {
+            ArrayBuffer.prototype.slice = function (start, end)
+            {
+                var b = new Uint8Array(this);
+                end = end === undefined ? b.length : end;
+                var result = new Uint8Array(new ArrayBuffer(end - start));
+                for(var i = 0, length = result.length; i < length; i++)
+                {
+                    result[i] = b[i + start];
+                }
+                return result.buffer;
+            }
+        }
+        
         //
         // Buffer implementation to be used by web browsers, it uses ArrayBuffer as
         // the store.
