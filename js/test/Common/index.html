@@ -121,11 +121,17 @@
                     },
                     function(ex)
                     {
-                        out.writeLine("");
-                        var lines = ex.stack.toString().split("\n");
-                        for(var i in lines)
+                        var lines = ex.stack.split("\n");
+                        for(i = 0; i < lines.length; ++i)
                         {
-                            out.writeLine(lines[i]);
+                            if(i === 0)
+                            {
+                                out.writeLine(lines[i]);
+                            }
+                            else
+                            {
+                                out.writeLine("&nbsp;&nbsp;&nbsp;"  + lines[i]);
+                            }
                         }
                         runButton.removeClass("disabled");
                     });

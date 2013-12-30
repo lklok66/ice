@@ -19,6 +19,46 @@
         {
             this.ice_cause = cause;
         };
+        
+        Exception.captureStackTrace = function(object)
+        {
+            var stack = new Error().stack;
+            
+            var formattedStack;
+            
+            //
+            // In IE 10 and greater the stack will be filled once the Error is throw
+            // we don't need to do anything.
+            //
+            if(stack !== undefined)
+            {
+                Object.defineProperty(object, "stack", {
+                    get: function(){
+                        if(formattedStack === undefined)
+                        {
+                            //
+                            // Format the stack
+                            //
+                            var lines = stack.split("\n");
+                            for(var i = 0; i < lines.length; ++i)
+                            {
+                                if(lines[i].indexOf(object.__name) !== -1)
+                                {
+                                    if(i < lines.length)
+                                    {
+                                        lines = lines.slice(i + 1);
+                                        break;
+                                    }
+                                }
+                            }
+                            formattedStack = object.__name + ": " + object.message + "\n"; 
+                            formattedStack += lines.join("\n");
+                        }
+                        return formattedStack;
+                    }
+                });
+            }
+        };
 
         Exception.prototype = new Error();
         Exception.prototype.constructor = Exception;
@@ -32,6 +72,11 @@
         {
             return this.ice_name();
         };
+        
+        Object.defineProperty(Exception.prototype, "__name", {
+            configurable:true,
+            get:function(){ return "Ice.Exception"; }
+        });
 
         Ice.Exception = Exception;
 
@@ -41,7 +86,7 @@
         var LocalException = function(cause)
         {
             Exception.call(this, cause);
-            Error.captureStackTrace(this, LocalException);
+            Exception.captureStackTrace(this);
         };
 
         LocalException.prototype = new Exception();
@@ -51,6 +96,11 @@
         {
             return "Ice::LocalException";
         };
+        
+        Object.defineProperty(LocalException.prototype, "__name", {
+            configurable:true,
+            get:function(){ return "Ice.LocalException"; }
+        });
 
         Ice.LocalException = LocalException;
 
@@ -60,7 +110,7 @@
         var UserException = function(cause)
         {
             Exception.call(this, cause);
-            Error.captureStackTrace(this, UserException);
+            Exception.captureStackTrace(this);
         };
 
         UserException.prototype = new Exception();
@@ -84,6 +134,12 @@
             this.__readImpl(is);
             is.endReadException(false);
         };
+        
+        Object.defineProperty(UserException.prototype, "__name", {
+            configurable:true,
+            get:function(){ return "Ice.UserException"; }
+        });
+        
         Ice.UserException = UserException;
 
         global.Ice = Ice;

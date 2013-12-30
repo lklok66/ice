@@ -2114,6 +2114,14 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     // TODO
     _out << nl << "return this.ice_name();";
     _out << eb << ";";
+    
+    _out << sp;
+    _out << nl << "Object.defineProperty(" << localScope << "." << name << ".prototype, \"__name\", {";
+    _out.inc();
+    _out << nl << "configurable:true,";
+    _out << nl << "get:function(){ return \"" << localScope << "." << name << "\"; }";
+    _out.dec();
+    _out << nl << "});";
 
     // TODO: equals?
 

@@ -23,11 +23,17 @@
         var UnexpectedObjectException = Ice.UnexpectedObjectException;
         var MemoryLimitException = Ice.MemoryLimitException;
         var ExUtil = {};
-
+        
         ExUtil.toString = function(ex)
         {
-            // TODO: Best way to stringify exception?
-            return ex.toString();
+            if(!ex.stack)
+            {
+                return ex.toString();
+            }
+            else
+            {
+                return ex.stack;
+            }
         };
 
         ExUtil.throwUOE = function(expectedType, actualType)

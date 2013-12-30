@@ -10,18 +10,22 @@
 (function(module, name){
     var __m = function(global, module, exports, require){
         
+        require("Ice/Exception");
+        
         var Ice = global.Ice || {};
+        
+        var Exception = Ice.Exception;
         
         var AssertionFailedException = function(message)
         {
             Error.call(this);
-            Error.captureStackTrace(this, this.constructor);
+            Exception.captureStackTrace(this);
             this.message = message;
         };
 
         AssertionFailedException.prototype = new Error();
 
-        Object.defineProperty(AssertionFailedException.prototype, "name", {
+        Object.defineProperty(AssertionFailedException.prototype, "__name", {
             get: function() { return "AssertionFailedException"; }
         });
 
