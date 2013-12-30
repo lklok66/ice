@@ -142,8 +142,7 @@
                 //
                 // Explicit context
                 //
-                Ice.ContextHelper.write(os, ctx);
-                this._os.writeSize(0);
+                Ice.ContextHelper.write(this._os, ctx);
             }
             else
             {
@@ -155,8 +154,7 @@
 
                 if(implicitContext === null)
                 {
-                    Ice.ContextHelper.write(os, ctx);
-                    this._os.writeSize(0);
+                    Ice.ContextHelper.write(this._os, prxContext);
                 }
                 else
                 {

@@ -41,8 +41,8 @@
                 this._proxy = proxy;
                 this._adapter = adapter;
                 this._is = null;
-                this._os =
-                    communicator !== null ? new BasicStream(this._instance, Protocol.currentProtocolEncoding, false) : null;
+                this._os = communicator !== null ?
+                    new BasicStream(this._instance, Protocol.currentProtocolEncoding, false) : null;
                 this._state = 0;
                 this._sentSynchronously = false;
                 this._exception = null;
@@ -51,6 +51,20 @@
 
         AsyncResult.prototype = new Promise();
         AsyncResult.prototype.constructor = AsyncResult;
+
+        //
+        // Intercept the call to fail() so that we can attach a reference to "this"
+        // to the exception.
+        //
+        AsyncResult.prototype.fail = function()
+        {
+            var args = arguments;
+            if(args.length > 0 && args[0] instanceof Error)
+            {
+                args[0]._asyncResult = this;
+            }
+            Promise.prototype.fail.apply(this, args);
+        };
 
         AsyncResult.OK = 0x1;
         AsyncResult.Done = 0x2;
@@ -131,7 +145,7 @@
         AsyncResult.prototype.__exception = function(ex)
         {
             this._state |= AsyncResult.Done;
-            this.fail(this, ex);
+            this.fail(ex);
         };
 
         AsyncResult.prototype.__response = function()

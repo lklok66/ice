@@ -12,6 +12,7 @@
         
         require("Ice/Base64");
         require("Ice/Debug");
+        require("Ice/FormatType");
         require("Ice/HashUtil");
         require("Ice/Protocol");
         require("Ice/StringUtil");
@@ -184,7 +185,7 @@
         OpaqueEndpointI.prototype.streamWrite = function(s)
         {
             s.writeShort(this._type);
-            s.startWriteEncaps(this._rawEncoding, DefaultFormat); // TODO
+            s.startWriteEncaps(this._rawEncoding, Ice.FormatType.DefaultFormat);
             s.writeBlob(this._rawBytes);
             s.endWriteEncaps();
         };
@@ -195,7 +196,8 @@
         OpaqueEndpointI.prototype.toString = function()
         {
             var val = Base64.encode(this._rawBytes);
-            return "opaque -t " + this._type + " - e " + Protocol.encodingVersionToString(this._rawEncoding) + " -v " + val;
+            return "opaque -t " + this._type + " - e " + Protocol.encodingVersionToString(this._rawEncoding) +
+                " -v " + val;
         };
 
         //

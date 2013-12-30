@@ -762,17 +762,17 @@
                         {
                             if(ex instanceof __uex[i])
                             {
-                                __r.fail(__r, ex);
+                                __r.fail(ex);
                                 return false;
                             }
                         }
                     }
-                    __r.fail(__r, new Ice.UnknownUserException(ex.ice_name()));
+                    __r.fail(new Ice.UnknownUserException(ex.ice_name()));
                     return false;
                 }
                 else
                 {
-                    __r.fail(__r, ex);
+                    __r.fail(ex);
                     return false;
                 }
             }
@@ -889,7 +889,7 @@
                             }
                             else
                             {
-                                __promise.fail(__promise, __ex);
+                                __promise.fail(__ex);
                             }
                         });
             }
