@@ -15,12 +15,14 @@
         require("Ice/Identity");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         var ExUtil = Ice.ExUtil;
         var StringUtil = Ice.StringUtil;
         var Identity = Ice.Identity;
         var IdentityParseException = Ice.IdentityParseException;
 
-        global.Ice = global.Ice || {};
+        Ice = global.Ice || {};
         /**
         * Converts a string to an object identity.
         *
@@ -28,7 +30,7 @@
         *
         * @return The converted object identity.
         **/
-        global.Ice.stringToIdentity = function(s)
+        Ice.stringToIdentity = function(s)
         {
             var ident = new Identity();
 
@@ -113,7 +115,7 @@
         *
         * @return The string representation of the object identity.
         **/
-        global.Ice.identityToString = function(ident)
+        Ice.identityToString = function(ident)
         {
             if(ident.category === null || ident.category.length === 0)
             {
@@ -138,7 +140,7 @@
         * @see ProxyIdentityAndFacetKey
         * @see ProxyIdentityAndFacetCompare
         **/
-        global.Ice.proxyIdentityCompare = function(lhs, rhs)
+        Ice.proxyIdentityCompare = function(lhs, rhs)
         {
             if(lhs === rhs)
             {
@@ -178,7 +180,7 @@
         * @see ProxyIdentityKey
         * @see ProxyIdentityCompare
         **/
-        global.Ice.proxyIdentityAndFacetCompare = function(lhs, rhs)
+        Ice.proxyIdentityAndFacetCompare = function(lhs, rhs)
         {
             if(lhs === rhs)
             {
@@ -223,6 +225,8 @@
                 return lhsFacet.localeCompare(rhsFacet);
             }
         };
+        
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

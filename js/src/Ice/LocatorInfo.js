@@ -19,6 +19,8 @@
         require("Ice/LocalException");
         require("Ice/Exception");
         
+        var Ice = global.Ice || {};
+        
         var Debug = Ice.Debug;
         var ExUtil = Ice.ExUtil;
         var HashMap = Ice.HashMap;
@@ -419,9 +421,9 @@
             }
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.LocatorInfo = LocatorInfo;
-
+        Ice.LocatorInfo = LocatorInfo;
+        global.Ice = Ice;
+        
         var RequestCallback = function(ref, ttl, promise)
         {
             this._ref = ref;

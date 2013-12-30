@@ -9,6 +9,9 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
+        
+        var Ice = global.Ice || {};
+        
         //
         // Ice.EnumBase
         //
@@ -90,9 +93,8 @@
                 value: maxValue
             });
         };
-
-        global.Ice = global.Ice || {};
-        global.Ice.EnumBase = EnumBase;
+        Ice.EnumBase = EnumBase;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

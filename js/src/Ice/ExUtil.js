@@ -15,6 +15,8 @@
 
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         //
         // Local aliases.
         //
@@ -40,8 +42,8 @@
                                            " bytes (see Ice.MessageSizeMax)");
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.ExUtil = ExUtil;
+        Ice.ExUtil = ExUtil;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

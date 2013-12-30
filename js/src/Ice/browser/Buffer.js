@@ -16,6 +16,7 @@
         
         require("Ice/Long");
         
+        var Ice = global.Ice || Ice;
         var Long = Ice.Long;
 
         var Buffer = function(buffer)
@@ -406,8 +407,8 @@
             return s;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.Buffer = Buffer;
+        Ice.Buffer = Buffer;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

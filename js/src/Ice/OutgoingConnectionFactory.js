@@ -21,6 +21,8 @@
         require("Ice/LocalException");
         require("Ice/Exception");
         
+        var Ice = global.Ice || {};
+        
         var ArrayUtil = Ice.ArrayUtil;
         var ConnectionI = Ice.ConnectionI;
         var ConnectionReaper = Ice.ConnectionReaper;
@@ -801,9 +803,10 @@
             Debug.assert(this._waitPromise !== null);
             this._waitPromise.succeed();
         };
-        global.Ice = global.Ice || {};
-        global.Ice.OutgoingConnectionFactory = OutgoingConnectionFactory;
-
+        
+        Ice.OutgoingConnectionFactory = OutgoingConnectionFactory;
+        global.Ice = Ice;
+        
         //
         // Value is a Vector<Ice.ConnectionI>
         //

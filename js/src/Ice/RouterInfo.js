@@ -17,6 +17,8 @@
         require("Ice/LocalException");
         require("Ice/Exception");
         
+        var Ice = global.Ice || {};
+        
         var ArrayUtil = Ice.ArrayUtil;
         var Debug = Ice.Debug;
         var HashMap = Ice.HashMap;
@@ -235,8 +237,8 @@
             }
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.RouterInfo = RouterInfo;
+        Ice.RouterInfo = RouterInfo;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

@@ -13,7 +13,8 @@
         // The Long type represents a signed 64-bit integer as two 32-bit values
         // corresponding to the high and low words.
         //
-
+        var Ice = global.Ice || {};
+        
         var Long = function(high, low)
         {
             this.high = high;
@@ -44,8 +45,8 @@
             return this.high + ":" + this.low;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.Long = Long;
+        Ice.Long = Long;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

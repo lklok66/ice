@@ -11,6 +11,9 @@
     var __m = function(global, module, exports, require){
         
         require("Ice/EnumBase");
+        
+        var Ice = global.Ice || {};
+        
         var EnumBase = Ice.EnumBase;
 
         var OptionalFormat = function(_n, _v)
@@ -23,8 +26,8 @@
 
         EnumBase.defineEnum(OptionalFormat, {'F1':0, 'F2':1, 'F4':2, 'F8':3, 'Size':4, 'VSize':5, 'FSize':6, 'Class':7});
 
-        global.Ice = global.Ice || {};
-        global.Ice.OptionalFormat = OptionalFormat;
+        Ice.OptionalFormat = OptionalFormat;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

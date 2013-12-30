@@ -15,6 +15,8 @@
         require("Ice/LocatorTable");
         require("Ice/Locator");
         
+        var Ice = global.Ice || {};
+        
         var HashMap = Ice.HashMap;
         var LocatorInfo = Ice.LocatorInfo;
         var LocatorTable = Ice.LocatorTable;
@@ -82,8 +84,8 @@
             return info;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.LocatorManager = LocatorManager;
+        Ice.LocatorManager = LocatorManager;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

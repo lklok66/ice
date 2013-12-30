@@ -552,16 +552,16 @@
             return p;
         };
         
-        global.test = global.test || {};
-        global.test.Common = global.test.Common || {};
+        module.exports.test = module.exports.test || {};
+        module.exports.test.Common = module.exports.test.Common || {};
         
-        if(global.test.Common.TestSuite !== undefined)
+        if(module.exports.test.Common.TestSuite !== undefined)
         {
-            global.test.Common.TestSuite.add("Ice/promise", run);
+            module.exports.test.Common.TestSuite.add("Ice/promise", run);
         }
         
-        global.test.Ice = global.test.Ice || {};
-        global.test.Ice.promise = {run: run};
+        module.exports.test.Ice = module.exports.test.Ice || {};
+        module.exports.test.Ice.promise = {run: run};
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

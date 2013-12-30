@@ -17,6 +17,8 @@
         require("Ice/Current");
         require("Ice/Identity");
         
+        var Ice = global.Ice || {};
+        
         //
         // Local aliases.
         //
@@ -157,9 +159,9 @@
             console.log(buf.join(""));
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.TraceUtil = TraceUtil;
-
+        Ice.TraceUtil = TraceUtil;
+        global.Ice = Ice;
+        
         function printIdentityFacetOperation(s, stream)
         {
             var identity = new Identity();

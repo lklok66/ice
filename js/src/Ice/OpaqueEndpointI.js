@@ -18,6 +18,8 @@
         require("Ice/Endpoint");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         var Base64 = Ice.Base64;
         var Debug = Ice.Debug;
         var HashUtil = Ice.HashUtil;
@@ -447,9 +449,9 @@
             this._hashCode = h;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.OpaqueEndpointI = OpaqueEndpointI;
-
+        Ice.OpaqueEndpointI = OpaqueEndpointI;
+        global.Ice = Ice;
+        
         var OpaqueEndpointInfoI = function(timeout, compress, rawEncoding, rawBytes, type)
         {
             Ice.OpaqueEndpointInfo.call(this, -1, false, rawEncoding, rawBytes);

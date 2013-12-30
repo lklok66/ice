@@ -28,6 +28,8 @@
         require("Ice/LocalException");
         require("Ice/Version");
         
+        var Ice = global.Ice || {};
+        
         var ArrayUtil = Ice.ArrayUtil;
         var Debug = Ice.Debug;
         var HashMap = Ice.HashMap;
@@ -840,9 +842,8 @@
                                         locatorCacheTimeout);
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.ReferenceFactory = ReferenceFactory;
-
+        Ice.ReferenceFactory = ReferenceFactory;
+        
         var Reference = function(instance, communicator, identity, facet, mode, secure, protocol, encoding)
         {
             //
@@ -1419,7 +1420,7 @@
 
         Reference._emptyEndpoints = [];
 
-        global.Ice.Reference = Reference;
+        Ice.Reference = Reference;
 
         var FixedReference = function(instance, communicator, identity, facet, mode, secure, encoding, connection)
         {
@@ -1653,7 +1654,7 @@
             return this._fixedConnection.equals(rhs._fixedConnection);
         };
 
-        global.Ice.FixedReference = FixedReference;
+        Ice.FixedReference = FixedReference;
 
         var RoutableReference = function(instance, communicator, identity, facet, mode, secure, protocol, encoding, endpoints,
                                         adapterId, locatorInfo, routerInfo, cacheConnection, preferSecure, endpointSelection,
@@ -2401,8 +2402,9 @@
             return promise;
         };
 
-        global.Ice.RoutableReference = RoutableReference;
-
+        Ice.RoutableReference = RoutableReference;
+        global.Ice = Ice;
+        
         var CreateConnectionCallback = function(r, endpoints, promise)
         {
             this.ref = r;

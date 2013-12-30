@@ -19,6 +19,8 @@
         require("Ice/ProcessLogger");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         var StringUtil = Ice.StringUtil;
         var HashMap = Ice.HashMap;
         var Promise = Ice.Promise;
@@ -522,8 +524,8 @@
             return new Properties(args, defaults);
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.Properties = Properties;
+        Ice.Properties = Properties;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

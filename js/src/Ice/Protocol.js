@@ -254,9 +254,9 @@
             return majorMinorToString(v.major, v.minor);
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.Protocol = Protocol;
-
+        Ice.Protocol = Protocol;
+        global.Ice = Ice;
+        
         function stringToMajor(str)
         {
             var pos = str.indexOf('.');

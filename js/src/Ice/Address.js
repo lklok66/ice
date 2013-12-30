@@ -19,7 +19,6 @@
         };
         
         Ice.Address = Address;
-        
         global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 

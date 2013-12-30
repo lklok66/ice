@@ -13,6 +13,8 @@
         require("Ice/HashMap");
         require("Ice/OptionalFormat");
         
+        var Ice = global.Ice || {};
+        
         var HashMap = Ice.HashMap;
         var OptionalFormat = Ice.OptionalFormat;
 
@@ -701,8 +703,8 @@
             return Helper;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.StreamHelpers = StreamHelpers;
+        Ice.StreamHelpers = StreamHelpers;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

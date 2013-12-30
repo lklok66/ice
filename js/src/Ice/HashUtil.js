@@ -12,6 +12,8 @@
         
         require("Ice/StringUtil");
         
+        var Ice = global.Ice || {};
+        
         var StringUtil = Ice.StringUtil;
 
         var HashUtil = {};
@@ -95,8 +97,8 @@
             return h;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.HashUtil = HashUtil;
+        Ice.HashUtil = HashUtil;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

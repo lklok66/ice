@@ -9,6 +9,9 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
+        
+        var Ice = global.Ice || {};
+        
         var HashMap = function(h)
         {
             this._size = 0;
@@ -392,8 +395,8 @@
             return this._comparator.call(this._comparator, k1, k2);
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.HashMap = HashMap;
+        Ice.HashMap = HashMap;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

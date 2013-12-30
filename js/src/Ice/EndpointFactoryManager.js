@@ -15,6 +15,8 @@
         require("Ice/BasicStream");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         //
         // Local aliases.
         //
@@ -142,8 +144,8 @@
             this._factories = [];
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.EndpointFactoryManager = EndpointFactoryManager;
+        Ice.EndpointFactoryManager = EndpointFactoryManager;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

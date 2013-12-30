@@ -9,6 +9,9 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
+        
+        var Ice = global.Ice || {};
+        
         var ConnectionReaper = function()
         {
             this._connections = [];
@@ -30,8 +33,8 @@
             return connections;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.ConnectionReaper = ConnectionReaper;
+        Ice.ConnectionReaper = ConnectionReaper;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

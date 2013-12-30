@@ -9,7 +9,8 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
-        global.Ice = global.Ice || {};
+        
+        var Ice = global.Ice || {};
 
         //
         // Ice.Exception
@@ -32,7 +33,7 @@
             return this.ice_name();
         };
 
-        global.Ice.Exception = Exception;
+        Ice.Exception = Exception;
 
         //
         // Ice.LocalException
@@ -51,7 +52,7 @@
             return "Ice::LocalException";
         };
 
-        global.Ice.LocalException = LocalException;
+        Ice.LocalException = LocalException;
 
         //
         // Ice.UserException
@@ -83,8 +84,9 @@
             this.__readImpl(is);
             is.endReadException(false);
         };
+        Ice.UserException = UserException;
 
-        global.Ice.UserException = UserException;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

@@ -34,6 +34,8 @@
         require("Ice/Exception");
         require("Ice/ProcessLogger");
         
+        var Ice = global.Ice || {};
+        
         var ConnectionMonitor = Ice.ConnectionMonitor;
         var Debug = Ice.Debug;
         var DefaultsAndOverrides = Ice.DefaultsAndOverrides;
@@ -761,8 +763,8 @@
             promise.succeed();
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.Instance = Instance;
+        Ice.Instance = Instance;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

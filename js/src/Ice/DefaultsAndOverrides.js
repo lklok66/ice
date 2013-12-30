@@ -14,6 +14,8 @@
         require("Ice/EndpointTypes");
         require("Ice/Protocol");
         
+        var Ice = global.Ice || {};
+        
         var FormatType = Ice.FormatType;
         var EndpointSelectionType = Ice.EndpointSelectionType;
         var Protocol = Ice.Protocol;
@@ -95,8 +97,8 @@
             this.defaultFormat = slicedFormat ? FormatType.SlicedFormat : FormatType.CompactFormat;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.DefaultsAndOverrides = DefaultsAndOverrides;
+        Ice.DefaultsAndOverrides = DefaultsAndOverrides;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

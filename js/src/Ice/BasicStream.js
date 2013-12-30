@@ -107,8 +107,9 @@
             //
             // Try to find a factory registered for the specific type.
             //
-            var userFactory = this._servantFactoryManager.find(typeId),
-                v = null;
+            var userFactory = this._servantFactoryManager.find(typeId);
+            var v = null;
+            
             if(userFactory !== undefined)
             {
                 v = userFactory.create(typeId);
@@ -3131,7 +3132,9 @@
             try
             {
                 var typeId = id.length > 2 ? id.substr(2).replace("::", ".") : "";
+                /*jshint -W061 */
                 Class = eval(typeId);
+                /*jshint +W061 */
                 if(Class !== undefined)
                 {
                     obj = new Class();
@@ -3233,7 +3236,9 @@
             try
             {
                 var typeId = id.length > 2 ? id.substr(2).replace("::", ".") : "";
+                /*jshint -W061 */
                 Class = eval(typeId);
+                /*jshint +W061 */
                 if(Class !== undefined)
                 {
                     userEx = new Class();

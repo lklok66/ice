@@ -13,6 +13,8 @@
         require("Ice/BasicStream");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         var BasicStream = Ice.BasicStream;
         var MarshalException = Ice.MarshalException;
 
@@ -253,8 +255,8 @@
                 this._os = null;
             }
         };
-        global.Ice = global.Ice || {};
-        global.Ice.OutputStream = OutputStream;
+        Ice.OutputStream = OutputStream;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

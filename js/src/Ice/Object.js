@@ -15,6 +15,8 @@
         // Using IceObject in this file to avoid collisions with the native Object.
         //
 
+        var Ice = global.Ice || {};
+        
         var nextAddress = 0;
 
         var IceObject = function()
@@ -81,8 +83,8 @@
             is.endReadObject(false);
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.Object = IceObject;
+        Ice.Object = IceObject;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

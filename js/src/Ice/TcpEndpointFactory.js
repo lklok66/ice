@@ -13,6 +13,8 @@
         require("Ice/TcpEndpointI");
         require("Ice/Endpoint");
         
+        var Ice = global.Ice || {};
+        
         var TcpEndpointI = Ice.TcpEndpointI;
         var TCPEndpointType = Ice.TCPEndpointType;
 
@@ -46,8 +48,8 @@
             this._instance = null;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.TcpEndpointFactory = TcpEndpointFactory;
+        Ice.TcpEndpointFactory = TcpEndpointFactory;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

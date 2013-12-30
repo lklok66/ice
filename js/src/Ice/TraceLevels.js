@@ -9,6 +9,9 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
+        
+        var Ice = global.Ice || {};
+        
         var TraceLevels = function(properties)
         {
             var networkCat = "Network";
@@ -60,8 +63,8 @@
             };
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.TraceLevels = TraceLevels;
+        Ice.TraceLevels = TraceLevels;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

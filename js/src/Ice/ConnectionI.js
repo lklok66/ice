@@ -26,6 +26,8 @@
         require("Ice/Exception");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         var AsyncStatus = Ice.AsyncStatus;
         var BasicStream = Ice.BasicStream;
         var Debug = Ice.Debug;
@@ -2060,9 +2062,9 @@
             }
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.ConnectionI = ConnectionI;
-
+        Ice.ConnectionI = ConnectionI;
+        global.Ice = Ice;
+        
         var OutgoingMessage = function()
         {
             this.stream = null;

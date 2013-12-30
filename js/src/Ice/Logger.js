@@ -9,6 +9,9 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
+        
+        var Ice = global.Ice || {};
+        
         var Logger = function(prefix)
         {
             if(prefix !== undefined && prefix.length > 0)
@@ -97,8 +100,8 @@
             return mon + "-" + day + "-" + d.getFullYear() + " " + d.toLocaleTimeString();
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.Logger = Logger;
+        Ice.Logger = Logger;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

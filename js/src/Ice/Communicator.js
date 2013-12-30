@@ -13,6 +13,8 @@
         require("Ice/Instance");
         require("Ice/Promise");
         
+        var Ice = global.Ice || {};
+        
         var Instance = Ice.Instance;
         var Promise = Ice.Promise;
 
@@ -145,8 +147,8 @@
             // TODO
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.Communicator = Communicator;
+        Ice.Communicator = Communicator;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

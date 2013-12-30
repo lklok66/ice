@@ -8,11 +8,13 @@
 // **********************************************************************
 
 (function(module, name){
-    var __m = function(module, exports, require){
-        var Ice = require("Ice/Ice");
+    var __m = function(global, module, exports, require){
+        require("Ice/Ice");
+        var Ice = global.Ice;
         
-        var Test = require("Test").Test;
-
+        require("Test").Test;
+        var Test = global.Test;
+        
         var AllTests = function(communicator, log)
         {
             this._communicator = communicator;
@@ -846,5 +848,6 @@
         module.exports.test.Ice = module.exports.test.Ice || {};
         module.exports.test.Ice.proxy = {run: run};
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : __m(module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+                                    __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "test/Ice/proxy"));

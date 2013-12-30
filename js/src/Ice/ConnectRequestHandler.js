@@ -22,6 +22,8 @@
         require("Ice/Exception");
         require("Ice/Promise");
         
+        var Ice = global.Ice || {};
+        
         var AsyncStatus = Ice.AsyncStatus;
         var BasicStream = Ice.BasicStream;
         var ConnectionRequestHandler = Ice.ConnectionRequestHandler;
@@ -425,9 +427,9 @@
             this._requests = [];
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.ConnectRequestHandler = ConnectRequestHandler;
-
+        Ice.ConnectRequestHandler = ConnectRequestHandler;
+        global.Ice = Ice;
+        
         var Request = function(arg)
         {
             if(arg instanceof BasicStream)

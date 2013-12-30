@@ -9,6 +9,9 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
+        
+        var Ice = global.Ice || {};
+        
         var Property = function Property(pattern, deprecated, deprecatedBy)
         {
             this._pattern = pattern;
@@ -28,8 +31,8 @@
             get: function() { return this._deprecatedBy; }
         });
 
-        global.Ice = global.Ice || {};
-        global.Ice.Property = Property;
+        Ice.Property = Property;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

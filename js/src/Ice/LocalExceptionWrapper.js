@@ -15,6 +15,8 @@
         require("Ice/Debug");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         var ExUtil = Ice.ExUtil;
         var Debug = Ice.Debug;
 
@@ -76,8 +78,8 @@
             throw new LocalExceptionWrapper(ue, false);
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.LocalExceptionWrapper = LocalExceptionWrapper;
+        Ice.LocalExceptionWrapper = LocalExceptionWrapper;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

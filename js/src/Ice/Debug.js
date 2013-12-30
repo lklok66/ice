@@ -9,6 +9,9 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
+        
+        var Ice = global.Ice || {};
+        
         var AssertionFailedException = function(message)
         {
             Error.call(this);
@@ -35,10 +38,8 @@
                 throw new AssertionFailedException(msg === undefined ? "assertion failed" : msg);
             }
         };
-
-
-        global.Ice = global.Ice || {};
-        global.Ice.Debug = Debug;
+        Ice.Debug = Debug;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

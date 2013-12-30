@@ -17,6 +17,8 @@
         require("Ice/Endpoint");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         var Address = Ice.Address;
         var HashUtil = Ice.HashUtil;
         var StringUtil = Ice.StringUtil;
@@ -512,9 +514,9 @@
             this._hashCode = h;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.TcpEndpointI = TcpEndpointI;
-
+        Ice.TcpEndpointI = TcpEndpointI;
+        global.Ice = Ice;
+        
         var TCPEndpointInfoI = function(timeout, compress, host, port)
         {
             Ice.TCPEndpointInfo.call(this, timeout, compress, host, port);

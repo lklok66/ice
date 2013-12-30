@@ -13,6 +13,8 @@
         require("Ice/Promise");
         require("Ice/ReferenceMode");
         
+        var Ice = global.Ice || {};
+        
         var Promise = Ice.Promise;
         var ReferenceMode = Ice.ReferenceMode;
 
@@ -64,8 +66,8 @@
             return Promise.succeed(this._connection);
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.ConnectionRequestHandler = ConnectionRequestHandler;
+        Ice.ConnectionRequestHandler = ConnectionRequestHandler;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

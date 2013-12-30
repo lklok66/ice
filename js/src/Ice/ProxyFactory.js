@@ -19,6 +19,8 @@
         require("Ice/Reference");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         var Debug = Ice.Debug;
         var ExUtil = Ice.ExUtil;
         var HashMap = Ice.HashMap;
@@ -291,8 +293,8 @@
             return cnt;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.ProxyFactory = ProxyFactory;
+        Ice.ProxyFactory = ProxyFactory;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

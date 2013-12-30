@@ -12,6 +12,8 @@
         
         require("Ice/Debug");
         
+        var Ice = global.Ice || {};
+        
         var Debug = Ice.Debug;
 
         var StringUtil = {};
@@ -485,8 +487,8 @@
             return n;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.StringUtil = StringUtil;
+        Ice.StringUtil = StringUtil;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

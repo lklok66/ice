@@ -14,6 +14,8 @@
         require("Ice/ExUtil");
         require("Ice/TimeUtil");
         
+        var Ice = global.Ice || {};
+        
         var Debug = Ice.Debug;
         var ExUtil = Ice.ExUtil;
         var TimeUtil = Ice.TimeUtil;
@@ -113,8 +115,8 @@
             }
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.ConnectionMonitor = ConnectionMonitor;
+        Ice.ConnectionMonitor = ConnectionMonitor;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

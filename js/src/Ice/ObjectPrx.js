@@ -23,6 +23,8 @@
         require("Ice/BuiltinSequences");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         var ArrayUtil = Ice.ArrayUtil;
         var AsyncResult = Ice.AsyncResult;
         var ConnectRequestHandler = Ice.ConnectRequestHandler;
@@ -917,8 +919,8 @@
             return r;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.ObjectPrx = ObjectPrx;
+        Ice.ObjectPrx = ObjectPrx;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

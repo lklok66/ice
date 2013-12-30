@@ -13,6 +13,8 @@
         require("Ice/HashMap");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         var HashMap = Ice.HashMap;
         var InitializationException = Ice.InitializationException;
 
@@ -144,8 +146,8 @@
             }
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.ImplicitContextI = ImplicitContextI;
+        Ice.ImplicitContextI = ImplicitContextI;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

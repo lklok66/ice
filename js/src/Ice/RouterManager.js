@@ -14,6 +14,8 @@
         require("Ice/RouterInfo");
         require("Ice/Router");
         
+        var Ice = global.Ice || {};
+        
         var HashMap = Ice.HashMap;
         var RouterInfo = Ice.RouterInfo;
         var RouterPrx = Ice.RouterPrx;
@@ -73,8 +75,8 @@
             return info;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.RouterManager = RouterManager;
+        Ice.RouterManager = RouterManager;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

@@ -128,6 +128,8 @@
         Ice.Protocol_1_0 = Protocol.Protocol_1_0;
         Ice.Encoding_1_0 = Protocol.Encoding_1_0;
         Ice.Encoding_1_1 = Protocol.Encoding_1_1;
+        
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

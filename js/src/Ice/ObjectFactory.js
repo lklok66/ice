@@ -9,6 +9,9 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
+        
+        var Ice = global.Ice || {};
+        
         var ObjectFactory = function()
         {
         };
@@ -23,8 +26,8 @@
             throw new Error("not implemented");
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.ObjectFactory = ObjectFactory;
+        Ice.ObjectFactory = ObjectFactory;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

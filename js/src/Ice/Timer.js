@@ -14,6 +14,8 @@
         require("Ice/TimeUtil");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         var HashMap = Ice.HashMap;
         var TimeUtil = Ice.TimeUtil;
         var CommunicatorDestroyedException = Ice.CommunicatorDestroyedException;
@@ -121,8 +123,8 @@
             }
         }
 
-        global.Ice = global.Ice || {};
-        global.Ice.Timer = Timer;
+        Ice.Timer = Timer;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

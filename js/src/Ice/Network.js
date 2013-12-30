@@ -12,6 +12,8 @@
         
         require("Ice/Address");
         
+        var Ice = global.Ice || {};
+        
         var Address = Ice.Address;
 
         var Network = {};
@@ -120,8 +122,8 @@
             return s.join("");
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.Network = Network;
+        Ice.Network = Network;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

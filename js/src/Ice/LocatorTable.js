@@ -14,6 +14,8 @@
         require("Ice/TimeUtil");
         require("Ice/Debug");
         
+        var Ice = global.Ice || {};
+        
         var HashMap = Ice.HashMap;
         var TimeUtil = Ice.TimeUtil;
         var Debug = Ice.Debug;
@@ -104,9 +106,9 @@
             }
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.LocatorTable = LocatorTable;
-
+        Ice.LocatorTable = LocatorTable;
+        global.Ice = Ice;
+        
         var EndpointTableEntry = function(time, endpoints)
         {
             this.time = time;

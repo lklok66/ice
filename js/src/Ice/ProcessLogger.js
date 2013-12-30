@@ -12,6 +12,7 @@
     var __m = function(global, module, exports, require){
         
         require("Ice/Logger");
+        var Ice = global.Ice || {};
         var Logger = Ice.Logger;
         
         var processLogger = null;
@@ -34,9 +35,9 @@
             processLogger = logger;
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.getProcessLogger = getProcessLogger;
-        global.Ice.setProcessLogger = setProcessLogger;
+        Ice.getProcessLogger = getProcessLogger;
+        Ice.setProcessLogger = setProcessLogger;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

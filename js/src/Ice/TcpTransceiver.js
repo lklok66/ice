@@ -19,6 +19,8 @@
         require("Ice/Exception");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         var Debug = Ice.Debug;
         var ExUtil = Ice.ExUtil;
         var Network = Ice.Network;
@@ -452,8 +454,8 @@
             return new SocketException(0, ex);
         }
 
-        global.Ice = global.Ice || {};
-        global.Ice.TcpTransceiver = TcpTransceiver;
+        Ice.TcpTransceiver = TcpTransceiver;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

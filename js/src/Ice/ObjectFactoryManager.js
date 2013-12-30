@@ -13,6 +13,8 @@
         require("Ice/HashMap");
         require("Ice/LocalException");
         
+        var Ice = global.Ice || {};
+        
         var HashMap = Ice.HashMap;
         var AlreadyRegisteredException = Ice.AlreadyRegisteredException;
         var NotRegisteredException = Ice.NotRegisteredException;
@@ -72,8 +74,8 @@
             }
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.ObjectFactoryManager = ObjectFactoryManager;
+        Ice.ObjectFactoryManager = ObjectFactoryManager;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

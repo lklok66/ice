@@ -13,6 +13,8 @@
         require("Ice/BasicStream");
         require("Ice/Buffer");
         
+        var Ice = global.Ice || {};
+        
         var BasicStream = Ice.BasicStream;
         var Buffer = Ice.Buffer;
 
@@ -256,8 +258,8 @@
             }
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.InputStream = InputStream;
+        Ice.InputStream = InputStream;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

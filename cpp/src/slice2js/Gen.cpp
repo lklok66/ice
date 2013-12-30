@@ -1978,9 +1978,6 @@ Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
     // Stream helpers for sequences are lazy initialized as the required
     // types might not be available until later.
     //
-    // We need to access classes through the class registry as classes may
-    // have been defined in a separate unit.
-    //
     const string scope = getLocalScope(p->scope());
     const string name = fixId(p->name());
     const string propertyName = name + "Helper";
@@ -2282,9 +2279,6 @@ Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
     //
     // Stream helpers for dictionaries of objects are lazy initialized
     // as the required object type might not be available until later.
-    //
-    // We need to access the type through the class registry as it may
-    // have been defined in a separate unit.
     //
     const string scope = getLocalScope(p->scope());
     const string name = fixId(p->name());

@@ -23,6 +23,8 @@
         require("Ice/LocalException");
         require("Ice/Identity");
         
+        var Ice = global.Ice || {};
+        
         var AsyncStatus = Ice.AsyncStatus;
         var AsyncResult = Ice.AsyncResult;
         var BasicStream = Ice.BasicStream;
@@ -31,6 +33,7 @@
         var LocalExceptionWrapper = Ice.LocalExceptionWrapper;
         var OperationMode = Ice.Current.OperationMode;
         var Protocol = Ice.Protocol;
+        var Identity = Ice.Identity;
 
         var OutgoingAsync = function(prx, operation, completed)
         {
@@ -582,8 +585,8 @@
             }
         };
 
-        global.Ice = global.Ice || {};
-        global.Ice.OutgoingAsync = OutgoingAsync;
+        Ice.OutgoingAsync = OutgoingAsync;
+        global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);
