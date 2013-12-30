@@ -44,7 +44,6 @@
             var token = this._tokenId++;
             var self = this;
 
-            // TODO: Need portability fixes for browsers?
             var id = setTimeout(function() { self.handleTimeout(token); }, delay);
             this._tokens.set(token, { callback: callback, id: id, isInterval: false });
 
@@ -61,7 +60,6 @@
             var token = this._tokenId++;
             var self = this;
 
-            // TODO: Need portability fixes for browsers?
             var id = setInterval(function() { self.handleInterval(token); }, period);
             this._tokens.set(token, { callback: callback, id: id, isInterval: true });
 
