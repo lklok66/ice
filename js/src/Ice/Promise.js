@@ -25,6 +25,8 @@
             this.__state = State.Pending;
             this.__listeners = [];
         };
+        
+        Promise.State = State;
 
         Promise.prototype.then = function(onResponse, onException, onProgress)
         {
@@ -169,20 +171,14 @@
 
         Promise.prototype.succeed = function()
         {
-            if(this.__state === State.Pending)
-            {
-                var args = arguments;
-                this.setState(State.Success, args);
-            }
+            var args = arguments;
+            this.setState(State.Success, args);
         };
 
         Promise.prototype.fail = function()
         {
-            if(this.__state === State.Pending)
-            {
-                var args = arguments;
-                this.setState(State.Failed, args);
-            }
+            var args = arguments;
+            this.setState(State.Failed, args);
         };
         
         //
@@ -190,11 +186,8 @@
         //
         Promise.prototype.unhandledException = function()
         {
-            if(this.__state === State.Pending)
-            {
-                var args = arguments;
-                this.setState(State.Failed, args);
-            }
+            var args = arguments;
+            this.setState(State.Failed, args);
         };
 
         Promise.prototype.succeeded = function()
