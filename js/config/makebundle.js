@@ -121,13 +121,13 @@ Parser.traverse = function(object, depend, file, basedir)
             {
                 if(value.callee.name === "require")
                 {
-                    var includedFile = value.arguments[0].value;
-                    if(includedFile.indexOf(".") === 0 || includedFile.indexOf("Ice/") === 0)
+                    var includedFile = value.arguments[0].value + ".js";
+                    if(includedFile.indexOf("Ice/") === 0 ||
+                       includedFile.indexOf("IceWS/") === 0)
                     {
-                        var p = path.join(basedir, path.basename(includedFile)) + ".js";
-                        if(depend.depends.indexOf(p) === -1)
+                        if(depend.depends.indexOf(includedFile) === -1)
                         {
-                            depend.depends.push(p);
+                            depend.depends.push(includedFile);
                         }
                     }
                 }
@@ -136,11 +136,11 @@ Parser.traverse = function(object, depend, file, basedir)
     }
 };
 
-Parser.dir = function(baseDir)
+Parser.dir = function(baseDir, depends)
 {
     var files = fs.readdirSync(baseDir);
-    var d = new Depends();
-    for(i = 0; i < files.length; ++i)
+    var d = depends || new Depends();
+    for(var i = 0; i < files.length; ++i)
     {
         var file = files[i];
         file = path.join(baseDir, file);
@@ -160,6 +160,10 @@ Parser.dir = function(baseDir)
             {
                 throw e;
             }
+        }
+        else if(path.basename(file) !== "browser" && stats.isDirectory())
+        {
+            Parser.dir(path.join(file), d);
         }
     }
     return d;
@@ -194,11 +198,10 @@ var file, i, length = d.depends.length, fullPath;
 for(i = 0;  i < length; ++i)
 {
     file = d.depends[i].file;
-    
-    fullPath = path.join(path.dirname(baseDir), path.dirname(file), "browser",  path.basename(file));
+    fullPath = path.join(baseDir, path.dirname(file), "browser",  path.basename(file));
     if(!fs.existsSync(fullPath))
     {
-        fullPath = path.join(path.dirname(baseDir), file)
+        fullPath = path.join(baseDir, file)
     }
     
     data = fs.readFileSync(fullPath); 

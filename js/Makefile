@@ -22,3 +22,19 @@ $(EVERYTHING)::
 
 test::
 	@python $(top_srcdir)/allTests.py
+
+ifeq ($(OPTIMIZE),yes)
+bundle: $(GEN_SRCS) $(SRCS)
+	@mkdir -p $(libdir)
+	@rm -f $(libdir)/Ice.js $(libdir)/Ice.js.gz
+	node $(top_srcdir)/config/makebundle.js src > $(libdir)/Ice.tmp.js
+	java -jar $(CLOSURE_PATH)/compiler.jar $(CLOSUREFLAGS) --js $(libdir)/Ice.tmp.js --js_output_file $(libdir)/Ice.js
+	gzip -c9 $(libdir)/Ice.js > $(libdir)/Ice.js.gz
+	rm -f $(libdir)/Ice.tmp.js
+else
+bundle: $(GEN_SRCS) $(SRCS)
+	@mkdir -p $(libdir)
+	@rm -f $(libdir)/Ice.js $(libdir)/Ice.js.gz
+	node $(top_srcdir)/config/makebundle.js src > $(libdir)/Ice.js
+	gzip -c9 $(libdir)/Ice.js > $(libdir)/Ice.js.gz
+endif
