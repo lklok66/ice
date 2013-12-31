@@ -9,21 +9,23 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
-        
+
+        require("Ice/BasicStream");
         require("Ice/Debug");
         require("Ice/OpaqueEndpointI");
-        require("Ice/BasicStream");
+        require("Ice/Protocol");
         require("Ice/LocalException");
-        
+
         var Ice = global.Ice || {};
-        
+
         //
         // Local aliases.
         //
         var Debug = Ice.Debug;
-        var OpaqueEndpointI = Ice.OpaqueEndpointI;
         var BasicStream = Ice.BasicStream;
         var EndpointParseException = Ice.EndpointParseException;
+        var OpaqueEndpointI = Ice.OpaqueEndpointI;
+        var Protocol = Ice.Protocol;
 
         var EndpointFactoryManager = function(instance)
         {
@@ -83,7 +85,6 @@
                 protocol = this._instance.defaultsAndOverrides().defaultProtocol;
             }
 
-            var f;
             for(i = 0, length = this._factories.length; i < length; ++i)
             {
                 if(this._factories[i].protocol() === protocol)
@@ -108,7 +109,7 @@
                         // and ask the factory to read the endpoint data from that stream to create
                         // the actual endpoint.
                         //
-                        var bs = new BasicStream(this._instance, true);
+                        var bs = new BasicStream(this._instance, Protocol.currentProtocolEncoding, true);
                         ue.streamWrite(bs);
                         bs.pos = 0;
                         bs.readShort(); // type
@@ -147,6 +148,6 @@
         Ice.EndpointFactoryManager = EndpointFactoryManager;
         global.Ice = Ice;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/EndpointFactoryManager"));

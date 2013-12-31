@@ -7,17 +7,18 @@
 //
 // **********************************************************************
 
-
 require("./Client").test.Ice.proxy.run({
-    write: function(msg){ process.stdout.write(msg); },
-    writeLine: function(msg){ this.write(msg + "\n"); }
-}).exception(function(ex){
-    if(ex.stack)
+    write: function(msg) { process.stdout.write(msg); },
+    writeLine: function(msg) { this.write(msg + "\n"); }
+}).exception(
+    function(ex)
     {
-        console.log(ex.stack);
-    }
-    else
-    {
-        console.log(ex);
-    }
-});
+        if(ex.stack)
+        {
+            console.log(ex.stack);
+        }
+        else
+        {
+            console.log(ex);
+        }
+    });

@@ -9,15 +9,20 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
-        
+
+        require("Ice/Buffer");
+
         var Ice = global.Ice || {};
+
+        var Buffer = Ice.Buffer;
+
         var Base64 = {};
 
         var _codeA = "A".charCodeAt(0);
         var _codea = "a".charCodeAt(0);
         var _code0 = "0".charCodeAt(0);
 
-        Base64.encode = function(buf) // Expects Uint8Array
+        Base64.encode = function(buf) // Expects native Buffer
         {
             if(buf === null || buf.length === 0)
             {
@@ -97,7 +102,7 @@
             return outString.join("");
         };
 
-        Base64.decode = function(str) // Returns Uint8Array
+        Base64.decode = function(str) // Returns native Buffer
         {
             var newStr = [];
 
@@ -123,7 +128,8 @@
             // Figure out how long the final sequence is going to be.
             var totalBytes = (newStr.length * 3 / 4) + 1;
 
-            var retval = new Uint8Array(totalBytes);
+            var retval = new Buffer();
+            retval.resize(totalBytes);
 
             var by1;
             var by2;
@@ -166,20 +172,20 @@
                 by3 = decodeChar(c3) & 0xff;
                 by4 = decodeChar(c4) & 0xff;
 
-                retval[off++] = (by1 << 2) | (by2 >> 4);
+                retval.put((by1 << 2) | (by2 >> 4));
 
                 if(c3 != "=")
                 {
-                    retval[off++] = ((by2 & 0xf) << 4) | (by3 >> 2);
+                    retval.put(((by2 & 0xf) << 4) | (by3 >> 2));
                 }
 
                 if(c4 != "=")
                 {
-                    retval[off++] = ((by3 & 0x3) << 6) | by4;
+                    retval.put(((by3 & 0x3) << 6) | by4);
                 }
             }
 
-            return off < retval.length ? retval.subarray(0, off) : retval;
+            return retval.remaining > 0 ? retval.b.slice(0, retval.position) : retval.b;
         };
 
         Base64.isBase64 = function(c)
@@ -270,6 +276,6 @@
         Ice.Base64 = Base64;
         global.Ice = Ice;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Base64"));

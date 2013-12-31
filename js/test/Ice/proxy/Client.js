@@ -12,7 +12,7 @@
         require("Ice/Ice");
         var Ice = global.Ice;
         
-        require("Test").Test;
+        require("Test");
         var Test = global.Test;
         
         var AllTests = function(communicator, log)
@@ -563,11 +563,11 @@
                 function(r, prx)
                 {
                     self.cast1(base, prx);
-                },
-                function(r, ex)
-                {
-                    self.exception(r, ex);
-                });
+                }).exception(
+                    function(ex)
+                    {
+                        self.exception(ex);
+                    });
 
             return this._promise;
         };
@@ -580,11 +580,11 @@
                 function(r, prx)
                 {
                     self.cast2(base, cl, prx);
-                },
-                function(r, ex)
-                {
-                    self.exception(r, ex);
-                });
+                }).exception(
+                    function(ex)
+                    {
+                        self.exception(ex);
+                    });
         };
 
         AllTests.prototype.cast2 = function(base, cl, derived)
@@ -595,177 +595,450 @@
             this.test(cl.equals(derived));
             this._log.writeLine("ok");
 
-            this._promise.succeed();
-            console("this promise succeed");
-            /*
-            this._log.print("testing checked cast with context... ");
+            this._log.write("testing checked cast with context... ");
 
-            _cl.getContext().whenCompleted(gotContext1, exception);
-            */
+            var self = this;
+            cl.getContext().then(
+                function(r, c)
+                {
+                    self.gotContext1(base, c);
+                }).exception(
+                    function(ex)
+                    {
+                        self.exception(ex);
+                    });
         };
 
-        /*
-        private function gotContext1(ar:Ice.AsyncResult, c:Ice.HashMap):void
+        AllTests.prototype.gotContext1 = function(base, c)
         {
-            this.test(c.length === 0);
+            this.test(c.size === 0);
 
             c = new Ice.HashMap();
-            c.put("one", "hello");
-            c.put("two", "world");
-            _c = c;
-            MyClassPrx.checkedCast(_base, null, c).whenCompleted(cast3, exception);
-        }
+            c.set("one", "hello");
+            c.set("two", "world");
 
-        private function cast3(ar:Ice.AsyncResult, cl:MyClassPrx):void
+            var self = this;
+            Test.MyClassPrx.checkedCast(base, undefined, c).then(
+                function(r, prx)
+                {
+                    self.cast3(base, prx, c);
+                }).exception(
+                    function(ex)
+                    {
+                        self.exception(ex);
+                    });
+        };
+
+        AllTests.prototype.cast3 = function(base, cl, c)
         {
-            _cl.getContext().whenCompleted(gotContext2, exception);
-        }
+            var self = this;
+            cl.getContext().then(
+                function(r, c2)
+                {
+                    self.gotContext2(c, c2);
+                }).exception(
+                    function(ex)
+                    {
+                        self.exception(ex);
+                    });
+        };
 
-        private function gotContext2(ar:Ice.AsyncResult, c2:Ice.HashMap):void
+        AllTests.prototype.gotContext2 = function(c, c2)
         {
-            this.test(_c.equals(c2));
-            this._log.print("ok\n");
+            this.test(c.equals(c2));
+            this._log.writeLine("ok");
 
-            this._log.print("testing opaque endpoints... ");
+            this._log.write("testing encoding versioning... ");
 
-            var p:Ice.ObjectPrx;
+            var ref20 = "test -e 2.0:default -p 12010";
+            var cl20 = Test.MyClassPrx.uncheckedCast(this._communicator.stringToProxy(ref20));
+            var self = this;
+            cl20.ice_ping().then(
+                function(r)
+                {
+                    self.test(false);
+                }).exception(
+                    function(ex)
+                    {
+                        self.test(ex instanceof Ice.UnsupportedEncodingException);
+                        self.encoding1();
+                    });
+        };
+
+        AllTests.prototype.encoding1 = function()
+        {
+            var ref10 = "test -e 1.0:default -p 12010";
+            var cl10 = Test.MyClassPrx.uncheckedCast(this._communicator.stringToProxy(ref10));
+            var self = this;
+            cl10.ice_ping().then(
+                function(r)
+                {
+                    self.encoding2(cl10);
+                }).exception(
+                    function(ex)
+                    {
+                        self.exception(ex);
+                    });
+        };
+
+        AllTests.prototype.encoding2 = function(cl10)
+        {
+            var self = this;
+            cl10.ice_encodingVersion(Ice.Encoding_1_0).ice_ping().then(
+                function(r)
+                {
+                    self.encoding3();
+                }).exception(
+                    function(ex)
+                    {
+                        self.exception(ex);
+                    });
+        };
+
+        AllTests.prototype.encoding3 = function()
+        {
+            // 1.3 isn't supported but since a 1.3 proxy supports 1.1, the
+            // call will use the 1.1 encoding
+            var ref13 = "test -e 1.3:default -p 12010";
+            var cl13 = Test.MyClassPrx.uncheckedCast(this._communicator.stringToProxy(ref13));
+            var self = this;
+            cl13.ice_ping().then(
+                function(r)
+                {
+                    self.protocol1();
+                }).exception(
+                    function(ex)
+                    {
+                        self.exception(ex);
+                    });
+        };
+
+        AllTests.prototype.protocol1 = function()
+        {
+            // TODO: Port ice_invoke tests?
+
+            this._log.writeLine("ok");
+
+            this._log.write("testing protocol versioning... ");
+
+            var ref20 = "test -p 2.0:default -p 12010";
+            var cl20 = Test.MyClassPrx.uncheckedCast(this._communicator.stringToProxy(ref20));
+            var self = this;
+            cl20.ice_ping().then(
+                function(r)
+                {
+                    self.test(false);
+                }).exception(
+                    function(ex)
+                    {
+                        self.test(ex instanceof Ice.UnsupportedProtocolException);
+                        self.protocol2();
+                    });
+        };
+
+        AllTests.prototype.protocol2 = function()
+        {
+            var ref10 = "test -p 1.0:default -p 12010";
+            var cl10 = Test.MyClassPrx.uncheckedCast(this._communicator.stringToProxy(ref10));
+            var self = this;
+            cl10.ice_ping().then(
+                function(r)
+                {
+                    self.protocol3();
+                }).exception(
+                    function(ex)
+                    {
+                        self.exception(ex);
+                    });
+        };
+
+        AllTests.prototype.protocol3 = function()
+        {
+            // 1.3 isn't supported but since a 1.3 proxy supports 1.1, the
+            // call will use the 1.1 encoding
+            var ref13 = "test -p 1.3:default -p 12010";
+            var cl13 = Test.MyClassPrx.uncheckedCast(this._communicator.stringToProxy(ref13));
+            var self = this;
+            cl13.ice_ping().then(
+                function(r)
+                {
+                    self.opaque();
+                }).exception(
+                    function(ex)
+                    {
+                        self.exception(ex);
+                    });
+        };
+
+        AllTests.prototype.opaque = function()
+        {
+            this._log.writeLine("ok");
+
+            this._log.write("testing opaque endpoints... ");
+
             try
             {
                 // Invalid -x option
-                p = this._communicator.stringToProxy("id:opaque -t 99 -v abc -x abc");
+                this._communicator.stringToProxy("id:opaque -t 99 -v abc -x abc");
                 this.test(false);
             }
-            catch(ex:Ice.EndpointParseException)
+            catch(ex)
             {
+                this.test(ex instanceof Ice.EndpointParseException);
             }
 
             try
             {
                 // Missing -t and -v
-                p = this._communicator.stringToProxy("id:opaque");
+                this._communicator.stringToProxy("id:opaque");
                 this.test(false);
             }
-            catch(ex:Ice.EndpointParseException)
+            catch(ex)
             {
+                this.test(ex instanceof Ice.EndpointParseException);
             }
 
             try
             {
                 // Repeated -t
-                p = this._communicator.stringToProxy("id:opaque -t 1 -t 1 -v abc");
+                this._communicator.stringToProxy("id:opaque -t 1 -t 1 -v abc");
                 this.test(false);
             }
-            catch(ex:Ice.EndpointParseException)
+            catch(ex)
             {
+                this.test(ex instanceof Ice.EndpointParseException);
             }
 
             try
             {
                 // Repeated -v
-                p = this._communicator.stringToProxy("id:opaque -t 1 -v abc -v abc");
+                this._communicator.stringToProxy("id:opaque -t 1 -v abc -v abc");
                 this.test(false);
             }
-            catch(ex:Ice.EndpointParseException)
+            catch(ex)
             {
+                this.test(ex instanceof Ice.EndpointParseException);
             }
 
             try
             {
                 // Missing -t
-                p = this._communicator.stringToProxy("id:opaque -v abc");
+                this._communicator.stringToProxy("id:opaque -v abc");
                 this.test(false);
             }
-            catch(ex:Ice.EndpointParseException)
+            catch(ex)
             {
+                this.test(ex instanceof Ice.EndpointParseException);
             }
 
             try
             {
                 // Missing -v
-                p = this._communicator.stringToProxy("id:opaque -t 1");
+                this._communicator.stringToProxy("id:opaque -t 1");
                 this.test(false);
             }
-            catch(ex:Ice.EndpointParseException)
+            catch(ex)
             {
+                this.test(ex instanceof Ice.EndpointParseException);
             }
 
             try
             {
                 // Missing arg for -t
-                p = this._communicator.stringToProxy("id:opaque -t -v abc");
+                this._communicator.stringToProxy("id:opaque -t -v abc");
                 this.test(false);
             }
-            catch(ex:Ice.EndpointParseException)
+            catch(ex)
             {
+                this.test(ex instanceof Ice.EndpointParseException);
             }
 
             try
             {
                 // Missing arg for -v
-                p = this._communicator.stringToProxy("id:opaque -t 1 -v");
+                this._communicator.stringToProxy("id:opaque -t 1 -v");
                 this.test(false);
             }
-            catch(ex:Ice.EndpointParseException)
+            catch(ex)
             {
+                this.test(ex instanceof Ice.EndpointParseException);
             }
 
             try
             {
                 // Not a number for -t
-                p = this._communicator.stringToProxy("id:opaque -t x -v abc");
+                this._communicator.stringToProxy("id:opaque -t x -v abc");
                 this.test(false);
             }
-            catch(ex:Ice.EndpointParseException)
+            catch(ex)
             {
+                this.test(ex instanceof Ice.EndpointParseException);
             }
 
             try
             {
                 // < 0 for -t
-                p = this._communicator.stringToProxy("id:opaque -t -1 -v abc");
+                this._communicator.stringToProxy("id:opaque -t -1 -v abc");
                 this.test(false);
             }
-            catch(ex:Ice.EndpointParseException)
+            catch(ex)
             {
+                this.test(ex instanceof Ice.EndpointParseException);
             }
 
             try
             {
                 // Invalid char for -v
-                p = this._communicator.stringToProxy("id:opaque -t 99 -v x?c");
+                this._communicator.stringToProxy("id:opaque -t 99 -v x?c");
                 this.test(false);
             }
-            catch(ex:Ice.EndpointParseException)
+            catch(ex)
             {
+                this.test(ex instanceof Ice.EndpointParseException);
             }
 
-            _cl.shutdown().whenCompleted(finished, exception);
-        }
+            // Legal TCP endpoint expressed as opaque endpoint
+            var p1 = this._communicator.stringToProxy("test -e 1.1:opaque -e 1.0 -t 1 -v CTEyNy4wLjAuMeouAAAQJwAAAA==");
+            var pstr = this._communicator.proxyToString(p1);
+            this.test(pstr === "test -t -e 1.1:tcp -h 127.0.0.1 -p 12010 -t 10000");
 
-        private function finished(ar:Ice.AsyncResult):void
-        {
-            this._log.print("ok\n");
-            _complete();
-        }
+            // Opaque endpoint encoded with 1.1 encoding.
+            var p2 = this._communicator.stringToProxy("test:opaque -e 1.1 -t 1 -v CTEyNy4wLjAuMeouAAAQJwAAAA==");
+            this.test(this._communicator.proxyToString(p2) === "test -t -e 1.1:tcp -h 127.0.0.1 -p 12010 -t 10000");
 
-        private function fail(ar:Ice.AsyncResult):void
-        {
-            try
+            if(this._communicator.getProperties().getPropertyAsInt("Ice.IPv6") === 0)
             {
-                this.test(false);
+var ref = "test:default -p 12010";
+var base = this._communicator.stringToProxy(ref);
+
+                var ssl = this._communicator.getProperties().getProperty("Ice.Default.Protocol") === "ssl";
+                /* TODO: p1 contains 127.0.0.1 - OK to invoke?
+                if(!ssl)
+                {
+                    p1.ice_encodingVersion(Ice.Util.Encoding_1_0).ice_ping();
+                }
+                */
+
+                // Two legal TCP endpoints expressed as opaque endpoints
+                p1 = this._communicator.stringToProxy("test -e 1.0:opaque -e 1.0 -t 1 -v CTEyNy4wLjAuMeouAAAQJwAAAA==:opaque -e 1.0 -t 1 -v CTEyNy4wLjAuMusuAAAQJwAAAA==");
+                pstr = this._communicator.proxyToString(p1);
+                this.test(pstr === "test -t -e 1.0:tcp -h 127.0.0.1 -p 12010 -t 10000:tcp -h 127.0.0.2 -p 12011 -t 10000");
+
+                //
+                // Test that an SSL endpoint and a nonsense endpoint get
+                // written back out as an opaque endpoint.
+                //
+                p1 = this._communicator.stringToProxy("test -e 1.0:opaque -e 1.0 -t 2 -v CTEyNy4wLjAuMREnAAD/////AA==:opaque -t 99 -e 1.0 -v abch");
+                pstr = this._communicator.proxyToString(p1);
+                if(!ssl)
+                {
+                    this.test(pstr === "test -t -e 1.0:opaque -t 2 -e 1.0 -v CTEyNy4wLjAuMREnAAD/////AA==:opaque -t 99 -e 1.0 -v abch");
+                }
+                else
+                {
+                    this.test(pstr === "test -t -e 1.0:ssl -h 127.0.0.1 -p 10001:opaque -t 99 -e 1.0 -v abch");
+                }
+
+                //
+                // Try to invoke on the SSL endpoint to verify that we get a
+                // NoEndpointException (or ConnectFailedException when
+                // running with SSL).
+                //
+                var self = this;
+                p1.ice_encodingVersion(Ice.Encoding_1_0).ice_ping().then(
+                    function(r)
+                    {
+                        self.test(false);
+                    }).exception(
+                        function(ex)
+                        {
+                            try
+                            {
+                                if(ex instanceof Ice.NoEndpointException)
+                                {
+                                    self.test(!ssl);
+                                }
+                                else if(ex instanceof Ice.ConnectFailedException)
+                                {
+                                    self.test(ssl);
+                                }
+                                else
+                                {
+                                    self.exception(ex);
+                                    return;
+                                }
+                                self.echo(p1, ssl);
+                            }
+                            catch(e)
+                            {
+                                self.exception(e);
+                            }
+                        });
             }
-            catch(ex:TestFailed)
+            else
             {
+                this.finished();
             }
-        }
-        */
+        };
 
-        AllTests.prototype.exception = function(r, ex)
+        AllTests.prototype.echo = function(p1, ssl)
         {
-            this._log.write("exception occurred in call to " + r.operation + "\n");
-            if(typeof(ex.stack) !== "undefined")
+            //
+            // Test that the proxy with an SSL endpoint and a nonsense
+            // endpoint (which the server doesn't understand either) can
+            // be sent over the wire and returned by the server without
+            // losing the opaque endpoints.
+            //
+            var ref = "test:default -p 12010";
+            var base = this._communicator.stringToProxy(ref);
+            var derived = Test.MyDerivedClassPrx.uncheckedCast(base);
+            var self = this;
+            derived.echo(p1).then(
+                function(r, p2)
+                {
+                    self.echo1(p2, ssl, derived);
+                }).exception(
+                    function(ex)
+                    {
+                        self.exception(ex);
+                    });
+        };
+
+        AllTests.prototype.echo1 = function(p2, ssl, derived)
+        {
+            var pstr = this._communicator.proxyToString(p2);
+            if(!ssl)
             {
-                this._log.writeLine(ex.stack + "\n");
+                this.test(pstr === "test -t -e 1.0:opaque -t 2 -e 1.0 -v CTEyNy4wLjAuMREnAAD/////AA==:opaque -t 99 -e 1.0 -v abch");
+            }
+            else
+            {
+                this.test(pstr === "test -t -e 1.0:ssl -h 127.0.0.1 -p 10001:opaque -t 99 -e 1.0 -v abch");
+            }
+
+            var self = this;
+            derived.shutdown().then(
+                function(r)
+                {
+                    self.finished();
+                }).exception(
+                    function(ex)
+                    {
+                        self.exception(ex);
+                    });
+        };
+
+        AllTests.prototype.finished = function()
+        {
+            this._log.writeLine("ok");
+            this._promise.succeed();
+        };
+
+        AllTests.prototype.exception = function(ex)
+        {
+            if(ex._asyncResult)
+            {
+                this._log.writeLine("\nexception occurred in call to " + ex._asyncResult.operation);
             }
             this._promise.fail(ex);
         };
@@ -776,64 +1049,66 @@
             {
                 var e = new Error();
                 Error.captureStackTrace(e, Error);
-                if(e.stack !== null && e.stack.length > 0)
+                if(e.stack)
                 {
-                    this._log.print("test failed here:\n" + e.stack);
+                    this._log.write("test failed here:\n" + e.stack);
                 }
                 else
                 {
-                    this._log.print("test failed");
+                    this._log.write("test failed");
                 }
-                //_complete();
                 throw new Error("test failed");
             }
         };
 
-        var run = function(out){
+        var run = function(out)
+        {
             var p = new Ice.Promise();
-            setTimeout(function(){
-                var c = null;
-                try
+            setTimeout(
+                function()
                 {
-                    c = Ice.initialize();
-                    var allTests = new AllTests(c, out);
-                    allTests.start().then(
-                        function()
-                        {
-                            cleanup(c);
-                            p.succeed();
-                        },
-                        function(ex)
-                        {
-                            p.fail(ex);
-                        });
-                }
-                catch(ex)
-                {
-                    p.fail(ex);
-                }
-
-                function cleanup(communicator)
-                {
-                    if(communicator !== null)
+                    var c = null;
+                    try
                     {
-                        communicator.destroy().then(
+                        c = Ice.initialize();
+                        var allTests = new AllTests(c, out);
+                        allTests.start().then(
                             function()
                             {
+                                cleanup(c);
                                 p.succeed();
                             },
                             function(ex)
                             {
-                                console.log(ex);
                                 p.fail(ex);
                             });
                     }
-                    else
+                    catch(ex)
                     {
-                        p.succeed();
+                        p.fail(ex);
                     }
-                }
-            });
+
+                    function cleanup(communicator)
+                    {
+                        if(communicator !== null)
+                        {
+                            communicator.destroy().then(
+                                function()
+                                {
+                                    p.succeed();
+                                },
+                                function(ex)
+                                {
+                                    console.log(ex);
+                                    p.fail(ex);
+                                });
+                        }
+                        else
+                        {
+                            p.succeed();
+                        }
+                    }
+                });
             return p;
         };
         module.exports.test = module.exports.test || {};

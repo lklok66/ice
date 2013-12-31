@@ -196,7 +196,7 @@
         OpaqueEndpointI.prototype.toString = function()
         {
             var val = Base64.encode(this._rawBytes);
-            return "opaque -t " + this._type + " - e " + Protocol.encodingVersionToString(this._rawEncoding) +
+            return "opaque -t " + this._type + " -e " + Protocol.encodingVersionToString(this._rawEncoding) +
                 " -v " + val;
         };
 

@@ -124,7 +124,7 @@
 
         Protocol.currentProtocol = new Ice.ProtocolVersion(Protocol.protocolMajor, Protocol.protocolMinor);
         Protocol.currentProtocolEncoding = new Ice.EncodingVersion(Protocol.protocolEncodingMajor, 
-                                                                        Protocol.protocolEncodingMinor);
+                                                                   Protocol.protocolEncodingMinor);
 
         Protocol.currentEncoding = new Ice.EncodingVersion(Protocol.encodingMajor, Protocol.encodingMinor);
 
