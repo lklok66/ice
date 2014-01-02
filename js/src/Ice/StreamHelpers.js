@@ -581,7 +581,7 @@
         {
             if(v === null || v.size === 0)
             {
-                os.writeSize();
+                os.writeSize(0);
             }
             else
             {

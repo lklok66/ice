@@ -25,7 +25,7 @@
             if(copyData)
             {
                 this._is = new BasicStream(this._communicator.instance, encodingVersion, true);
-                this._is.resize(Buffer.nativeSize(data), true);
+                this._is.resize(data.length, true);
                 var buf = this._is.buffer;
                 buf.position = 0;
                 buf.putArray(data);

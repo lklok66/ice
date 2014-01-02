@@ -20,6 +20,7 @@
         
         require("IceWS/ConnectionInfo");
         
+        var Ice = global.Ice || {};
         var IceWS = global.IceWS || {};
         
         var Debug = Ice.Debug;
@@ -49,12 +50,12 @@
             var transceiver = new Transceiver(instance);
 
             var url = secure ? "wss" : "ws";
-            url + "://" addr.host;
+            url += "://" + addr.host;
             if(addr.port !== 80)
             {
                 url += ":" + addr.port;
             }
-            url += encodeURIComponent(resource);
+            url += resource ? encodeURIComponent(resource) : "/";
             transceiver._url = url;
             transceiver._fd = null;
             transceiver._addr = addr;
@@ -66,11 +67,11 @@
         };
 
         Transceiver.prototype.setCallbacks = function(
-            connectedCallback,      // function()
-            bytesAvailableCallback, // function()
-            bytesWrittenCallback,   // function()
-            closedCallback,         // function()
-            errorCallback           // function(ex)
+            connectedCallback,      // function(event)
+            bytesAvailableCallback, // function(event)
+            bytesWrittenCallback,   // function(event)
+            closedCallback,         // function(event)
+            errorCallback           // function(event)
         )
         {
             this._connectedCallback = connectedCallback;
@@ -90,13 +91,18 @@
                 if(this._state === StateNeedConnect)
                 {
                     this._state = StateConnectPending;
-                    this._fd = new WebSocket(this._url, "ice");
-                    
+                    this._fd = new WebSocket(this._url, "ice.zeroc.com");
+                    this._fd.binaryType = "arraybuffer";
                     var self = this;
-                    this._fd.onopen = function(e){ self.socketConnected(e); };
-                    this._fd.onmessage((e) { self.socketBytesAvailable(e.data); });
-                    this._fd.onclose = function(e){ self.socketClosed(e); };
-                    this._fd.onerror = function(e){ self.socketError(e); };
+                    this._fd.onopen = function(e){ 
+                        self.socketConnected(e); };
+                    this._fd.onmessage = function(e) { 
+                        self.socketBytesAvailable(e.data); 
+                    };
+                    this._fd.onclose = function(e){
+                        self.socketClosed(e); };
+                    this._fd.onerror = function(e){ 
+                        self.socketError(e); };
                     return SocketOperation.Connect; // Waiting for connect to complete.
                 }
                 else if(this._state === StateConnectPending)
@@ -104,7 +110,6 @@
                     //
                     // Socket is connected.
                     //
-
                     this._desc = fdToString(this._fd, this._addr);
                     this._state = StateConnected;
                 }
@@ -161,7 +166,6 @@
             {
                 this._logger.trace(this._traceLevels.networkCat, "closing " + this.type() + " connection\n" + this._desc);
             }
-
             Debug.assert(this._fd !== null);
             try
             {
@@ -195,7 +199,6 @@
             //
             byteBuffer.position = byteBuffer.position + remaining;
 
-
             this._fd.send(slice);
             return true;
         };
@@ -209,7 +212,7 @@
                 return false; // No data available.
             }
 
-            var avail = this._readBuffers[0].length - this._readPosition;
+            var avail = this._readBuffers[0].byteLength - this._readPosition;
             Debug.assert(avail > 0);
             var remaining = byteBuffer.remaining;
 
@@ -224,7 +227,7 @@
                 
                 byteBuffer.position += avail;
                 this._readPosition += avail;
-                if(this._readPosition === this._readBuffers[0].length)
+                if(this._readPosition === this._readBuffers[0].byteLength)
                 {
                     //
                     // We've exhausted the current read buffer.
@@ -237,7 +240,7 @@
                     }
                     else
                     {
-                        avail = this._readBuffers[0].length;
+                        avail = this._readBuffers[0].byteLength;
                     }
                 }
             }
@@ -249,7 +252,7 @@
                 this._logger.trace(this._traceLevels.networkCat, msg);
             }
 
-            moreData.value = this._readBuffers.length > 0;
+            moreData.value = this._readBuffers.byteLength > 0;
 
             return byteBuffer.remaining === 0;
         };
@@ -306,7 +309,7 @@
         Transceiver.prototype.socketBytesAvailable = function(buf)
         {
             Debug.assert(this._bytesAvailableCallback !== null);
-            if(buf.length > 0)
+            if(buf.byteLength > 0)
             {
                 this._readBuffers.push(buf);
                 if(this._registered)
@@ -326,7 +329,7 @@
             // Don't call the closed callback if an error occurred; the error callback
             // will be called.
             //
-            if(!err)
+            if(err.code === 1000) // CLOSE_NORMAL
             {
                 Debug.assert(this._closedCallback !== null);
                 this._closedCallback();
@@ -349,7 +352,7 @@
             //TODO
             //return Network.addressesToString(fd.localAddress, fd.localPort, fd.remoteAddress, fd.remotePort, proxy,
             //                                targetAddr);
-            fd.url;
+            return fd.url;
         }
 
         function translateError(ex)

@@ -27,6 +27,7 @@
         require("Ice/ProxyFactory");
         require("Ice/RouterManager");
         require("Ice/TcpEndpointFactory");
+        require("IceWS/EndpointFactory");
         require("Ice/Timer");
         require("Ice/TraceLevels");
         require("Ice/Reference");
@@ -51,7 +52,6 @@
         var Properties = Ice.Properties;
         var ProxyFactory = Ice.ProxyFactory;
         var RouterManager = Ice.RouterManager;
-        var TcpEndpointFactory = Ice.TcpEndpointFactory;
         var Timer = Ice.Timer;
         var TraceLevels = Ice.TraceLevels;
         var ReferenceFactory = Ice.ReferenceFactory;
@@ -425,8 +425,9 @@
                 this._preferIPv6 = this._initData.properties.getPropertyAsInt("Ice.PreferIPv6Address") > 0;
                 
                 this._endpointFactoryManager = new EndpointFactoryManager(this);
-                var tcpEndpointFactory = new TcpEndpointFactory(this);
-                this._endpointFactoryManager.add(tcpEndpointFactory);
+                this._endpointFactoryManager.add(new Ice.TcpEndpointFactory(this));
+                this._endpointFactoryManager.add(new IceWS.EndpointFactory(this, false));
+                this._endpointFactoryManager.add(new IceWS.EndpointFactory(this, true));
 
                 /* TODO
                 //

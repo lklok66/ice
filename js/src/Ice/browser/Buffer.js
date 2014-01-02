@@ -63,17 +63,12 @@
         {
             if(data === undefined)
             {
-                return new Uint8Array(0).buffer;
+                return new Uint8Array(0);
             }
             else
             {
-                return new Uint8Array(data).buffer;
+                return new Uint8Array(data);
             }
-        };
-
-        Buffer.nativeSize = function(data)
-        {
-            return data.byteLength;
         };
 
         Object.defineProperty(Buffer.prototype, "position", {
@@ -225,12 +220,12 @@
         {
             if(v.byteLength > 0)
             {
-                //Expects an ArrayBuffer
+                //Expects an Uint8Array
                 if(this._position + v.length > this._limit)
                 {
                     throw new Error("BufferOverflowException");
-                }
-                new Uint8Array(this.b).set(new Uint8Array(v), this._position);
+                }                
+                new Uint8Array(this.b, 0, this.b.byteLength).set(v, this._position);
                 this._position += v.byteLength;
             }
         };
@@ -347,7 +342,9 @@
             {
                 throw new Error("BufferUnderflowException");
             }
-            return this.b.slice(this._position, this._position + length);
+            var buffer = this.b.slice(this._position, this._position + length);
+            this._position += length;
+            return new Uint8Array(buffer);
         };
 
         Buffer.prototype.getShort = function()

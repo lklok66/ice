@@ -17,7 +17,7 @@
         var Ice = global.Ice || {};
         var IceWS = global.IceWS || {};
         
-        var WsEndpointI = Ice.WsEndpointI;
+        var EndpointI = IceWS.EndpointI;
         var WSEndpointType = Ice.WSEndpointType;
 
         var EndpointFactory = function(instance, secure)
@@ -28,7 +28,7 @@
 
         EndpointFactory.prototype.type = function()
         {
-            return this._secure ? IceWS.WSSEndpointType : IceWS.WSSEndpointType;
+            return this._secure ? IceWS.WSSEndpointType : IceWS.WSEndpointType;
         };
 
         EndpointFactory.prototype.protocol = function()
@@ -38,12 +38,12 @@
 
         EndpointFactory.prototype.create = function(str, oaEndpoint)
         {
-            return WsEndpointI.fromString(this._instance, str, oaEndpoint);
+            return EndpointI.fromString(this._instance, str, oaEndpoint);
         };
 
         EndpointFactory.prototype.read = function(s)
         {
-            return WsEndpointI.fromStream(s);
+            return EndpointI.fromStream(s);
         };
 
         EndpointFactory.prototype.destroy = function()

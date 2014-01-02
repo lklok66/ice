@@ -13,7 +13,7 @@
         require("Ice/Address");
         require("Ice/HashUtil");
         require("Ice/StringUtil");
-        require("Ice/TcpTransceiver");
+        require("IceWS/Transceiver");
         require("Ice/Endpoint");
         require("Ice/LocalException");
         
@@ -25,7 +25,7 @@
         var Address = Ice.Address;
         var HashUtil = Ice.HashUtil;
         var StringUtil = Ice.StringUtil;
-        var TcpTransceiver = Ice.TcpTransceiver;
+        var Transceiver = IceWS.Transceiver;
 
         var EndpointI = function(instance, ho, po, ti, conId, co, re)
         {
@@ -393,7 +393,7 @@
                     this._port);
             }
 
-            return TcpTransceiver.createOutgoing(this._instance, new Address(this._host, this._port));
+            return Transceiver.createOutgoing(this._instance, this._secure, new Address(this._host, this._port), this._resource);
         };
 
         //

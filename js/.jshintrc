@@ -1,6 +1,5 @@
 {
   "node": true,
   "undef": true,
-  "globals": { "__IceExceptionRegistry__" : false,
-               "__IceClassRegistry__" : false }
+  "globals": { "WebSocket" : false }
 }
