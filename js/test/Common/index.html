@@ -24,9 +24,11 @@
     <!-- Promise Test -->
     <script src="../Ice/promise/Client.js"></script>
     <!-- Stream Test -->
-    <script src="../Ice/stream/Test.js"></script>
-    <script src="../Ice/stream/Client.js"></script>
-    
+    <!--<script src="../Ice/stream/Test.js"></script>
+    <script src="../Ice/stream/Client.js"></script>-->
+    <!-- Proxy Test -->
+    <script src="../Ice/proxy/Test.js"></script>
+    <script src="../Ice/proxy/Client.js"></script>
   </head>
   <body>
     
@@ -97,7 +99,13 @@
             var runCurrentTest = function(){
                 var current = $(".tests li.current");
                 var cb = test.Common.TestSuite.get(current.children("a").text());
-                cb(out).then(function()
+                
+                var id = new Ice.InitializationData();
+                id.properties = Ice.createProperties();
+                id.properties.setProperty("Ice.Default.Host", "localhost");
+                id.properties.setProperty("Ice.Default.Protocol", "ws");
+                        
+                cb(out, id).then(function()
                     {
                         var next = null;
                         if(current.attr("last") == "yes")

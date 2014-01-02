@@ -185,7 +185,7 @@
                 }
             }
 
-            return retval.remaining > 0 ? retval.b.slice(0, retval.position) : retval.b;
+            return retval.remaining > 0 ? retval.getArrayAt(0, retval.position) : retval.getArrayAt(0);
         };
 
         Base64.isBase64 = function(c)

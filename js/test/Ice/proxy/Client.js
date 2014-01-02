@@ -901,15 +901,15 @@
             var p1 = this._communicator.stringToProxy("test -e 1.1:opaque -e 1.0 -t 1 -v CTEyNy4wLjAuMeouAAAQJwAAAA==");
             var pstr = this._communicator.proxyToString(p1);
             this.test(pstr === "test -t -e 1.1:tcp -h 127.0.0.1 -p 12010 -t 10000");
-
+            
             // Opaque endpoint encoded with 1.1 encoding.
             var p2 = this._communicator.stringToProxy("test:opaque -e 1.1 -t 1 -v CTEyNy4wLjAuMeouAAAQJwAAAA==");
             this.test(this._communicator.proxyToString(p2) === "test -t -e 1.1:tcp -h 127.0.0.1 -p 12010 -t 10000");
 
             if(this._communicator.getProperties().getPropertyAsInt("Ice.IPv6") === 0)
             {
-var ref = "test:default -p 12010";
-var base = this._communicator.stringToProxy(ref);
+                var ref = "test:default -p 12010";
+                var base = this._communicator.stringToProxy(ref);
 
                 var ssl = this._communicator.getProperties().getProperty("Ice.Default.Protocol") === "ssl";
                 /* TODO: p1 contains 127.0.0.1 - OK to invoke?
@@ -1061,7 +1061,7 @@ var base = this._communicator.stringToProxy(ref);
             }
         };
 
-        var run = function(out)
+        var run = function(out, id)
         {
             var p = new Ice.Promise();
             setTimeout(
@@ -1070,7 +1070,7 @@ var base = this._communicator.stringToProxy(ref);
                     var c = null;
                     try
                     {
-                        c = Ice.initialize();
+                        c = Ice.initialize(id);
                         var allTests = new AllTests(c, out);
                         allTests.start().then(
                             function()
@@ -1116,8 +1116,7 @@ var base = this._communicator.stringToProxy(ref);
         
         if(module.exports.test.Common.TestSuite !== undefined)
         {
-            // TODO not working in browser.
-            //module.exports.test.Common.TestSuite.add("Ice/proxy", run);
+            module.exports.test.Common.TestSuite.add("Ice/proxy", run);
         }
         
         module.exports.test.Ice = module.exports.test.Ice || {};

@@ -346,6 +346,16 @@
             this._position += length;
             return new Uint8Array(buffer);
         };
+        
+        Buffer.prototype.getArrayAt = function(position, length)
+        {
+            if(position + length > this._limit)
+            {
+                throw new Error("BufferUnderflowException");
+            }
+            length = length === undefined ? (this.b.byteLength - position) : length;
+            return new Uint8Array(this.b.slice(position, position + length));
+        };
 
         Buffer.prototype.getShort = function()
         {

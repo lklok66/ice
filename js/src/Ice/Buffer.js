@@ -368,6 +368,18 @@
             this._position += length;
             return buffer;
         };
+        
+        Buffer.prototype.getArrayAt = function(position, length)
+        {
+            if(position + length > this._limit)
+            {
+                throw new Error("BufferUnderflowException");
+            }
+            var buffer = new Node.Buffer(length);
+            length = length === undefined ? (this.b.length - position) : length;
+            this.b.slice(position, position + length).copy(buffer);
+            return buffer;
+        };
 
         Buffer.prototype.getShort = function()
         {
