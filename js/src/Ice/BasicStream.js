@@ -2882,7 +2882,7 @@
             return T.valueOf(this.readSize());
         };
         
-        BasicStream.prototype.readEnum = function(tag, T)
+        BasicStream.prototype.readOptEnum = function(tag, T)
         {
             if(this.readOpt(tag, OptionalFormat.Size))
             {
