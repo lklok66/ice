@@ -45,7 +45,7 @@
 
             this._connectionsByEndpoint = new ConnectionListMap(); // map<EndpointI, Array<Ice.ConnectionI>>
             this._pending = new HashMap(); // map<EndpointI, Array<ConnectCallback>>
-            this._pending.comparator = HashMap.compareEquals;
+            this._pending.keyComparator = HashMap.compareEquals;
             this._pendingConnectCount = 0;
 
             this._waitPromise = null;
@@ -813,7 +813,7 @@
         var ConnectionListMap = function(h)
         {
             HashMap.call(this, h);
-            this.comparator = HashMap.compareEquals;
+            this.keyComparator = HashMap.compareEquals;
         };
 
         ConnectionListMap.prototype = new HashMap();

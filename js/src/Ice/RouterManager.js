@@ -23,7 +23,7 @@
         var RouterManager = function()
         {
             this._table = new HashMap(); // Map<Ice.RouterPrx, RouterInfo>
-            this._table.comparator = HashMap.compareEquals;
+            this._table.keyComparator = HashMap.compareEquals;
         };
 
         RouterManager.prototype.destroy = function()

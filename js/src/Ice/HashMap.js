@@ -9,9 +9,9 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
-        
+
         var Ice = global.Ice || {};
-        
+
         var HashMap = function(h)
         {
             this._size = 0;
@@ -19,7 +19,8 @@
             this._initialCapacity = 32;
             this._loadFactor = 0.75;
             this._table = [];
-            this._comparator = function(k1, k2) { return k1 === k2; };
+            this._keyComparator = function(k1, k2) { return k1 === k2; };
+            this._valueComparator = function(k1, k2) { return k1 === k2; };
 
             var i, length;
             if(h === undefined || h === null || h._size === 0)
@@ -33,7 +34,8 @@
             else
             {
                 this._threshold = h._threshold;
-                this._comparator = h._comparator;
+                this._keyComparator = h._keyComparator;
+                this._valueComparator = h._valueComparator;
                 length = h._table.length;
                 this._table.length = length;
                 for(i = 0; i < length; i++)
@@ -52,13 +54,18 @@
             get: function() { return this._head; }
         });
 
-        Object.defineProperty(HashMap.prototype, "comparator", {
-            get: function() { return this._comparator; },
-            set: function(fn) { this._comparator = fn; }
+        Object.defineProperty(HashMap.prototype, "keyComparator", {
+            get: function() { return this._keyComparator; },
+            set: function(fn) { this._keyComparator = fn; }
+        });
+
+        Object.defineProperty(HashMap.prototype, "valueComparator", {
+            get: function() { return this._valueComparator; },
+            set: function(fn) { this._valueComparator = fn; }
         });
 
         Object.defineProperty(HashMap, "compareEquals", {
-            get: function() { return function(k1, k2) { return k1.equals(k2); }; }
+            get: function() { return function(o1, o2) { return o1.equals(o2); }; }
         });
 
         function setInternal(map, key, value, hash, index)
@@ -68,7 +75,7 @@
             //
             for(var e = map._table[index]; e !== null; e = e._nextInBucket)
             {
-                if(e._hash === hash && map.isEqual(key, e._key))
+                if(e._hash === hash && map.keysEqual(key, e._key))
                 {
                     //
                     // Found a match, update the value.
@@ -86,7 +93,7 @@
         }
 
         HashMap.prototype.set = function(key, value)
-        {    
+        {
             var hash = this.computeHash(key);
 
             var index = this.hashIndex(hash, this._table.length);
@@ -117,7 +124,7 @@
             var prev = null;
             for(var e = this._table[index]; e !== null; e = e._nextInBucket)
             {
-                if(e._hash === hash && this.isEqual(key, e._key))
+                if(e._hash === hash && this.keysEqual(key, e._key))
                 {
                     //
                     // Found a match.
@@ -204,7 +211,7 @@
             for(var e = this._head; e !== null; e = e._next)
             {
                 var oe = other.findEntry(e._key, e._hash);
-                if(oe === undefined || !this.isEqual(e._value, oe._value))
+                if(oe === undefined || !this.valuesEqual(e._value, oe._value))
                 {
                     return false;
                 }
@@ -335,7 +342,7 @@
             //
             for(var e = this._table[index]; e !== null; e = e._nextInBucket)
             {
-                if(e._hash == hash && this.isEqual(key, e._key))
+                if(e._hash === hash && this.keysEqual(key, e._key))
                 {
                     return e;
                 }
@@ -390,14 +397,19 @@
             return hash;
         };
 
-        HashMap.prototype.isEqual = function(k1, k2)
+        HashMap.prototype.keysEqual = function(k1, k2)
         {
-            return this._comparator.call(this._comparator, k1, k2);
+            return this._keyComparator.call(this._keyComparator, k1, k2);
+        };
+
+        HashMap.prototype.valuesEqual = function(v1, v2)
+        {
+            return this._valueComparator.call(this._valueComparator, v1, v2);
         };
 
         Ice.HashMap = HashMap;
         global.Ice = Ice;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+        __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/HashMap"));

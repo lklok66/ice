@@ -171,7 +171,7 @@
                 {
                     b = new Node.Buffer(capacity);
                     this.b.copy(b);
-                    this.b = b.buffer;
+                    this.b = b;
                 }
             }
             else if(n < this.capacity)

@@ -34,7 +34,7 @@
             this._serverEndpoints = null;
             this._adapter = null;
             this._identities = new HashMap(); // Set<Identity> = Map<Identity, 1>
-            this._identities.comparator = HashMap.compareEquals;
+            this._identities.keyComparator = HashMap.compareEquals;
             this._evictedIdentities = [];
         };
 

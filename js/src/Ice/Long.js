@@ -37,7 +37,7 @@
                 return false;
             }
             
-            return this.high === rhs.high && this.low == rhs.low;
+            return this.high === rhs.high && this.low === rhs.low;
         };
 
         Long.prototype.toString = function()

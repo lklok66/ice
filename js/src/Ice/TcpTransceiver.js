@@ -25,7 +25,6 @@
         var ExUtil = Ice.ExUtil;
         var Network = Ice.Network;
         var SocketOperation = Ice.SocketOperation;
-        var Conn = Ice.Connection;
         var LocalException = Ice.LocalException;
         var SocketException = Ice.SocketException;
 
@@ -91,11 +90,7 @@
             this._fd.on("connect", function() { self.socketConnected(); });
             this._fd.on("close", function(err) { self.socketClosed(err); });
             this._fd.on("error", function(err) { self.socketError(err); });
-
-            //
-            // Don't register for incoming data right away.
-            //
-            //this._fd.on("data", function(buf) { self.socketBytesAvailable(buf); });
+            this._fd.on("data", function(buf) { self.socketBytesAvailable(buf); });
         };
 
         //
@@ -214,26 +209,20 @@
 
         TcpTransceiver.prototype.register = function()
         {
-            //
-            // Register the socket data listener.
-            //
-            var self = this;
-            this._fd.on("data", function(buf) { self.socketBytesAvailable(buf); });
+            this._fd.resume();
         };
 
         TcpTransceiver.prototype.unregister = function()
         {
-            //
-            // Unregister the socket data listener.
-            //
-            this._fd.removeAllListeners("data");
+            this._fd.pause();
         };
 
         TcpTransceiver.prototype.close = function()
         {
             if(this._connected && this._traceLevels.network >= 1)
             {
-                this._logger.trace(this._traceLevels.networkCat, "closing " + this.type() + " connection\n" + this._desc);
+                this._logger.trace(this._traceLevels.networkCat, "closing " + this.type() + " connection\n" +
+                                   this._desc);
             }
 
             Debug.assert(this._fd !== null);
@@ -304,7 +293,8 @@
                     avail = byteBuffer.remaining;
                 }
 
-                this._readBuffers[0].copy(byteBuffer.b, byteBuffer.position, this._readPosition, this._readPosition + avail);
+                this._readBuffers[0].copy(byteBuffer.b, byteBuffer.position, this._readPosition,
+                                          this._readPosition + avail);
 
                 byteBuffer.position += avail;
                 this._readPosition += avail;
@@ -356,7 +346,7 @@
 
         TcpTransceiver.prototype.createInfo = function()
         {
-            return new Conn.TCPConnectionInfo();
+            return new Ice.TCPConnectionInfo();
         };
 
         TcpTransceiver.prototype.checkSendSize = function(stream, messageSizeMax)
@@ -379,7 +369,8 @@
 
             if(this._traceLevels.network >= 1)
             {
-                this._logger.trace(this._traceLevels.networkCat, this.type() + " connection established\n" + this._desc);
+                this._logger.trace(this._traceLevels.networkCat, this.type() + " connection established\n" +
+                                   this._desc);
             }
 
             Debug.assert(this._connectedCallback !== null);

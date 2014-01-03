@@ -794,18 +794,13 @@
 
                     (function()
                     {
-                        var comparator = function(v1, v2){
-                            if(v1 instanceof Ice.Long)
-                            {
-                                return v1.equals(v2);
-                            }
-                            else
-                            {
-                                return Math.round(v1 * 100) === Math.round(v2 * 100);
-                            }
+                        var floatComparator = function(v1, v2)
+                        {
+                            return Math.round(v1 * 100) === Math.round(v2 * 100);
                         };
                         var dict = new Ice.HashMap(); // HashMap<Long, Float>();
-                        dict.comparator = comparator;
+                        dict.keyComparator = Ice.HashMap.compareEquals;
+                        dict.valueComparator = floatComparator;
                         dict.set(new Ice.Long(0, 123809828), 0.51);
                         dict.set(new Ice.Long(0, 123809829), 0.56);
                         var os = new OutputStream(comm);
@@ -813,7 +808,8 @@
                         var data = os.finished();
                         var is = new InputStream(comm, data, true);
                         var dict2 = Test.LongFloatDHelper.read(is);
-                        dict2.comparator = comparator;
+                        dict2.keyComparator = Ice.HashMap.compareEquals;
+                        dict2.valueComparator = floatComparator;
                         test(dict2.equals(dict));
                     }());
 

@@ -27,9 +27,9 @@
             this._background = properties.getPropertyAsInt("Ice.BackgroundLocatorCacheUpdates") > 0;
 
             this._table = new HashMap(); // Map<Ice.LocatorPrx, LocatorInfo>
-            this._table.comparator = HashMap.compareEquals;
+            this._table.keyComparator = HashMap.compareEquals;
             this._locatorTables = new HashMap(); // Map<Ice.Identity, LocatorTable>
-            this._locatorTables.comparator = HashMap.compareEquals;
+            this._locatorTables.keyComparator = HashMap.compareEquals;
         };
 
         LocatorManager.prototype.destroy = function()

@@ -24,7 +24,7 @@
         {
             this._adapterEndpointsTable = new HashMap(); // Map<String, EndpointTableEntry>
             this._objectTable = new HashMap(); // Map<Ice.Identity, ReferenceTableEntry>
-            this._objectTable.comparator = HashMap.compareEquals;
+            this._objectTable.keyComparator = HashMap.compareEquals;
         };
 
         LocatorTable.prototype.clear = function()

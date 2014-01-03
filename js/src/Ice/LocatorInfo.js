@@ -37,7 +37,7 @@
 
             this._adapterRequests = new HashMap(); // Map<String, Request>
             this._objectRequests = new HashMap(); // Map<Ice.Identity, Request>
-            this._objectRequests.comparator = HashMap.compareEquals;
+            this._objectRequests.keyComparator = HashMap.compareEquals;
         };
 
         LocatorInfo.prototype.destroy = function()

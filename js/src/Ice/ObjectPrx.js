@@ -76,7 +76,7 @@
 
         ObjectPrx.prototype.ice_ids = function(__ctx)
         {
-            return ObjectPrx.__invokeNoArgs(this, "ice_ids", 1, 0, __ctx, null,
+            return ObjectPrx.__invoke(this, "ice_ids", 1, 0, __ctx, null,
                 function(__is, __results)
                 {
                     __results.push(Ice.StringSeqHelper.read(__is));
