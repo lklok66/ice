@@ -124,6 +124,9 @@ private:
 
     private:
 
+        void writeProxyMixin(const ClassDefPtr&);
+        void writeProxyOperations(const std::string&, const OperationList&);
+    
         void writeMemberHashCode(const std::string&, const TypePtr&, int);
         void writeMemberEquals(const std::string&, const std::string&, const TypePtr&, int);
         void writeMemberClone(const std::string&, const std::string&, const TypePtr&, int);

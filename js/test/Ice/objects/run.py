@@ -8,7 +8,7 @@
 #
 # **********************************************************************
 
-import os, sys, re, getopt
+import os, sys
 
 path = [ ".", "..", "../..", "../../..", "../../../.." ]
 head = os.path.dirname(sys.argv[0])
@@ -17,19 +17,16 @@ if len(head) > 0:
 path = [os.path.abspath(p) for p in path if os.path.exists(os.path.join(p, "scripts", "TestUtil.py")) ]
 if len(path) == 0:
     raise RuntimeError("can't find toplevel directory!")
-
 sys.path.append(os.path.join(path[0], "scripts"))
 import TestUtil
 
-#
-# List of all basic tests.
-#
-tests = [
-    ("Ice/promise", ["once"]),
-    ("Ice/stream", ["once"]),
-    ("Ice/proxy", ["once"]),
-    ("Ice/objects", ["once"]),
-    ]
+print("Running test with compact (default) format.")
+TestUtil.clientServerTest()
 
-if __name__ == "__main__":
-    TestUtil.run(tests)
+print("Running test with sliced format.")
+TestUtil.clientServerTest(additionalClientOptions="--Ice.Default.SlicedFormat", 
+                          additionalServerOptions="--Ice.Default.SlicedFormat")
+
+print("Running test with 1.0 encoding.")
+TestUtil.clientServerTest(additionalClientOptions="--Ice.Default.EncodingVersion=1.0",
+                          additionalServerOptions="--Ice.Default.EncodingVersion=1.0")

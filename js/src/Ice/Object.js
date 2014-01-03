@@ -82,6 +82,23 @@
             this.__readImpl(is);
             is.endReadObject(false);
         };
+        
+        IceObject.prototype.ice_instanceof = function(T)
+        {
+            if(T)
+            {
+                if(this instanceof T)
+                {
+                    return true;
+                }
+                var p = Object.getPrototypeOf(this);
+                if(p !== null && p !== undefined && p.__implements)
+                {
+                    return p.__implements.indexOf(T) !== -1;
+                }
+            }
+            return false;
+        };
 
         Ice.Object = IceObject;
         global.Ice = Ice;

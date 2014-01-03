@@ -194,7 +194,6 @@
             // Read the object.
             //
             v.__read(this._stream);
-
             if(this._patchMap !== null)
             {
                 //
@@ -599,8 +598,7 @@
         EncapsDecoder11.prototype.readObject = function(patcher)
         {
             Debug.assert(patcher !== undefined);
-            var index = this._stream.readSize(),
-                e; // IndirectPatchEntry
+            var index = this._stream.readSize();
                 
             if(index < 0)
             {
@@ -633,7 +631,7 @@
                     {
                         this._current.indirectPatchList = []; // IndirectPatchEntry[]
                     }
-                    e = new IndirectPatchEntry();
+                    var e = new IndirectPatchEntry();
                     e.index = index - 1;
                     e.patcher = patcher;
                     this._current.indirectPatchList.push(e);
@@ -1028,7 +1026,6 @@
                 if(this._current.typeId.length > 0)
                 {
                     v = this.newInstance(this._current.typeId);
-                    
                     //
                     // We found a factory, we get out of this loop.
                     //
@@ -1078,7 +1075,6 @@
             // Un-marshal the object
             //
             this.unmarshal(index, v);
-
             if(this._current === null && this._patchMap !== null && this._patchMap.size !== 0)
             {
                 //
@@ -1100,7 +1096,7 @@
                 {
                     if(v !== null && !(v instanceof Type))
                     {
-                        throw new TypeError("expected element of type " + Type.__ids[0] + " but received " + v);
+                        ExUtil.throwUOE(T.__ids[T.__ids.length - 1], v);
                     }
                     this._seq[index] = v;
                 };
@@ -2305,7 +2301,7 @@
             try
             {
                 var b = this._buf.get();
-                if(b === -1)
+                if(b === 255)
                 {
                     var v = this._buf.getInt();
                     if(v < 0)
@@ -2314,7 +2310,7 @@
                     }
                     return v;
                 }
-                return b < 0 ? b + 256 : b;
+                return b;
             }
             catch(ex)
             {
@@ -2935,9 +2931,9 @@
             this._readEncapsStack.decoder.readObject.call(
                 this._readEncapsStack.decoder,
                 function(obj){
-                    if(obj !== null && !(obj instanceof T))
+                    if(obj !== null && !(obj.ice_instanceof(T)))
                     {
-                        throw new TypeError("expected element of type " + T.__ids[0] + " but received " + obj);
+                        ExUtil.throwUOE(T.__ids[T.__ids.length - 1], obj);
                     }
                     patcher(obj);
                 });
@@ -3151,7 +3147,6 @@
         BasicStream.prototype.createObject = function(id)
         {
             var obj = null, Class;
-
             try
             {
                 var typeId = id.length > 2 ? id.substr(2).replace("::", ".") : "";

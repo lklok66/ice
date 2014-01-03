@@ -284,12 +284,6 @@ Slice::JsGenerator::typeToString(const TypePtr& type, bool optional)
         return "void";
     }
 
-    // TODO
-    if(optional)
-    {
-        return "Ice.Optional<" + typeToString(type, false) + ">";
-    }
-
     static const char* builtinTable[] =
     {
         "Number",           // byte

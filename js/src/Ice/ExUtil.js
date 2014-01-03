@@ -36,10 +36,11 @@
             }
         };
 
-        ExUtil.throwUOE = function(expectedType, actualType)
+        ExUtil.throwUOE = function(expectedType, v)
         {
+            var type = v.ice_id();
             throw new UnexpectedObjectException("expected element of type `" + expectedType + "' but received '" +
-                                                actualType, actualType, expectedType);
+                                                type, type, expectedType);
         };
 
         ExUtil.throwMemoryLimitException = function(requested, maximum)
