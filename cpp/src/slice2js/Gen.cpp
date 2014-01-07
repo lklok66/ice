@@ -1456,8 +1456,6 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         _out << sb;
         _out << nl << "return Ice.ObjectPrx.uncheckedCastImpl(" << localScope << "." << prxName << ", __prx, __facet);";
         _out << eb << ";";
-        _out << sp;
-        _out << nl << "Ice.StreamHelpers.ProxyHelper(" << localScope << '.' << prxName << ");";
     }
 
     _out << sp;
@@ -2281,7 +2279,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         _out << eb << ";";
         
         _out << sp;
-        _out << nl << "Ice.StreamHelpers.StructOptHelper(" << localScope << '.' << name << ", " 
+        _out << nl << "Ice.StreamHelpers.StructHelper(" << localScope << '.' << name << ", " 
              << p->minWireSize() << ", " << getOptionalFormat(p) << ");";
     }
     return false;

@@ -944,6 +944,43 @@
             return r;
         };
         
+        Object.defineProperty(ObjectPrx, "minWireSize", {
+            get: function(){ return 2; }
+        });
+            
+        ObjectPrx.__write = function(os, v)
+        {
+            os.writeProxy(v);
+        };
+        
+        ObjectPrx.write = ObjectPrx.__write;
+            
+        ObjectPrx.__read = function(is)
+        {
+            var v = is.readProxy();
+            if(v !== null)
+            {
+                v = this.uncheckedCast(v);
+            }
+            return v;
+        };
+        ObjectPrx.read = ObjectPrx.__read;
+            
+        ObjectPrx.__writeOpt = function(os, tag, v)
+        {
+            os.writeOptProxy(tag, v);
+        };
+        
+        ObjectPrx.__readOpt = function(is, tag)
+        {
+            var v = is.readOptProxy();
+            if(v !== null)
+            {
+                v = this.uncheckedCast(v);
+            }
+            return v;
+        };
+        
         ObjectPrx.defineProxy = function(staticId, prxInterfaces)
         {
             var type = this;
@@ -980,8 +1017,18 @@
             
             // Copy static methods inherited from ObjectPrx
             prx.checkedCast = ObjectPrx.checkedCast;
+            prx.__write = ObjectPrx.__write;
             prx.write = ObjectPrx.write;
+            prx.__writeOpt = ObjectPrx.__writeOpt;
+            prx.__read = ObjectPrx.__read;
+            prx.read = ObjectPrx.read;
+            prx.__readOpt = ObjectPrx.__readOpt;
             prx.defineProxy = ObjectPrx.defineProxy;
+            
+            //static properties
+            Object.defineProperty(prx, "minWireSize", {
+                get: function(){ return 2; }
+            });
             return prx;
         };
         

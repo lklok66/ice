@@ -542,13 +542,11 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-            out << nl << "Ice.StreamHelpers.generateProxyHelper(" << typeToString(type) << ").write(" << stream
-                << ", " << param << ");";
+            out << nl << typeToString(type) << ".write(" << stream << ", " << param << ");";
         }
         else
         {
-            out << nl << param << " = Ice.StreamHelpers.generateProxyHelper(" << typeToString(type) << ").read("
-                << stream << ");";
+            out << nl << param << " = " << typeToString(type) << ".read(" << stream << ");";
         }
         return;
     }
@@ -866,7 +864,7 @@ Slice::JsGenerator::getHelper(const TypePtr& type)
             }
             case Builtin::KindObjectProxy:
             {
-                return "Ice.StreamHelpers.ObjectProxyHelper";
+                return "Ice.ObjectPrx";
             }
             case Builtin::KindLocalObject:
             {
@@ -878,25 +876,18 @@ Slice::JsGenerator::getHelper(const TypePtr& type)
     
     if(ProxyPtr::dynamicCast(type))
     {
-        stringstream os;
-        os << "Ice.StreamHelpers.generateProxyHelper(" << typeToString(type) << ")";
-        return os.str();
+        return typeToString(type);
     }
     
     StructPtr st = StructPtr::dynamicCast(type);
     if(st)
     {
-        stringstream os;
-        os << "Ice.StreamHelpers.generateStructHelper(" << typeToString(type) << ", " << st->minWireSize() 
-            << ", " << getOptionalFormat(st) << ")"; 
-        return os.str();
+        return typeToString(type);
     }
     
     else if(EnumPtr::dynamicCast(type))
     {
-        stringstream os;
-        os << "Ice.StreamHelpers.generateEnumHelper(" << typeToString(type) << ")";
-        return os.str();
+        return typeToString(type);
     }
     
     SequencePtr seq = SequencePtr::dynamicCast(type);

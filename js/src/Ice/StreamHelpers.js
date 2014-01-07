@@ -148,134 +148,6 @@
             get: function(){ return 1; }
         });
         
-        //
-        // Functional mixin to add __read/__write __readOpt/__writeOpt methods to
-        // proxy types.
-        //
-        
-        StreamHelpers.ProxyHelper = function(T)
-        {
-            T.__write = function(os, v)
-            {
-                os.writeProxy(v);
-            };
-            
-            T.__read = function(is)
-            {
-                var v = is.readProxy();
-                if(v !== null)
-                {
-                    v = T.uncheckedCast(v);
-                }
-                return v;
-            };
-            
-            T.__writeOpt = function(os, tag, v)
-            {
-                os.writeOptProxy(tag, v);
-            };
-            
-            T.__readOpt = function(is, tag)
-            {
-                var v = is.readOptProxy();
-                if(v !== null)
-                {
-                    v = T.uncheckedCast(v);
-                }
-                return v;
-            };
-        };
-        
-        StreamHelpers.generateProxyHelper = function(T)
-        {
-            //
-            // If we have already generated a helper for this
-            // type return that.
-            //
-            if(T.__helper !== undefined)
-            {
-                return T.__helper;
-            }
-            
-            var Helper = {};
-
-            Helper.write = function(os, v)
-            {
-                T.__write(os, v);
-            };
-
-            Helper.read = function(is)
-            {
-                return T.__read(is);
-            };
-
-            Object.defineProperty(Helper, "minWireSize", {
-                get: function(){ return 2; }
-            });
-            
-            //
-            // Cache the helper with the type.
-            //
-            T.__helper = Helper;
-            return Helper;
-        };
-        
-        StreamHelpers.ObjectProxyHelper = {};
-
-        StreamHelpers.ObjectProxyHelper.write = function(os, v)
-        {
-            os.writeProxy(v);
-        };
-
-        StreamHelpers.ObjectProxyHelper.read = function(os)
-        {
-            return os.readProxy();
-        };
-
-        Object.defineProperty(StreamHelpers.ObjectProxyHelper, "minWireSize", {
-            get: function(){ return 2; }
-        });
-
-        var EnumHelper = function(){};
-
-        EnumHelper.prototype.write = function(os, v)
-        {
-            os.writeEnum(v);
-        };
-        
-        EnumHelper.prototype.read = function(is)
-        {
-            return is.readEnum(this.T);
-        };
-
-        StreamHelpers.generateEnumHelper = function(T, minWireSize)
-        {
-            //
-            // If we have already generated a helper for this
-            // type return that.
-            //
-            if(T.__helper !== undefined)
-            {
-                return T.__helper;
-            }
-            
-            var Helper = new EnumHelper();
-            
-            Object.defineProperty(Helper, "minWireSize", {
-                get: function(){ return 1; }
-            });
-            
-            Object.defineProperty(Helper, "T", {
-                get: function(){ return T; }
-            });
-            
-            //
-            // Cache the helper with the type.
-            //
-            T.__helper = Helper;
-            return Helper;
-        };
-        
         var FSizeOptHelper = function()
         {
             this.writeOpt = function(os, tag, v)
@@ -371,8 +243,22 @@
         //
         // Functional mixin to add __readOpt/__writeOpt to structs.
         //
-        StreamHelpers.StructOptHelper = function(T, minWireSize, optionalFormat)
+        StreamHelpers.StructHelper = function(T, minWireSize, optionalFormat)
         {
+            T.write = function(os, v)
+            {
+                os.writeStruct(v);
+            };
+            
+            T.read = function(is)
+            {
+                return is.readStruct(T);
+            };
+            
+            Object.defineProperty(T, "minWireSize", {
+                get: function(){ return minWireSize; }
+            });
+            
             if(optionalFormat === OptionalFormat.FSize)
             {
                 T.__writeOpt = function(os, tag, v)
@@ -418,40 +304,6 @@
                     return v;
                 };
             }
-        };
-
-        StreamHelpers.generateStructHelper = function(T, minWireSize, optionalFormat)
-        {
-            //
-            // If we have already generated a helper for this
-            // type return that.
-            //
-            if(T.__helper !== undefined)
-            {
-                return T.__helper;
-            }
-            
-            var Helper = {};
-
-            Helper.write = function(os, v)
-            {
-                os.writeStruct(v);
-            };
-            
-            Helper.read = function(is)
-            {
-                return is.readStruct(T);
-            };
-            
-            Object.defineProperty(Helper, "minWireSize", {
-                get: function(){ return minWireSize; }
-            });
-            
-            //
-            // Cache the helper with the type.
-            //
-            T.__helper = Helper;
-            return Helper;
         };
         
         var SequenceHelper = function(){};

@@ -56,6 +56,11 @@
         {
             return this._name;
         };
+        
+        var write = function(os, v)
+        {
+            os.writeEnum(v);
+        };
 
         EnumBase.defineEnum = function(type, enumerators)
         {
@@ -75,6 +80,16 @@
                     maxValue = value;
                 }
             }
+            
+            Object.defineProperty(type, "minWireSize", {
+                get: function(){ return 1; }
+            });
+            
+            type.write = write;
+            type.read = function(is)
+            {
+                return is.readEnum(type);
+            };
 
             Object.defineProperty(type, 'valueOf', {
                 value: function(v) {
