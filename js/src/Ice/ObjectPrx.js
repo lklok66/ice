@@ -898,7 +898,7 @@
                     {
                         __promise.succeed(__promise, __ret ? __h : null);
                     }).exception(
-                        function(__r, __ex)
+                        function(__ex)
                         {
                             if(__ex instanceof Ice.FacetNotExistException)
                             {
@@ -912,6 +912,14 @@
             }
 
             return __promise;
+        };
+        
+        //
+        // NOT a prototype function
+        //
+        ObjectPrx.checkedCast = function(prx, facet, ctx)
+        {
+            return ObjectPrx.checkedCastImpl(this, this.ice_staticId(), prx, facet, ctx);
         };
 
         //
@@ -934,6 +942,82 @@
                 r.__copyFrom(prx.ice_facet(facet));
             }
             return r;
+        };
+        
+        ObjectPrx.defineProxy = function(staticId, prxInterfaces)
+        {
+            var type = this;
+
+            var prx = function()
+            { 
+                type.call(this)
+            };
+            prx.__parent = type;
+
+            // All generated proxies inherit from ObjectPrx
+            prx.prototype = new type();
+            prx.prototype.constructor = prx;
+
+            if(prxInterfaces !== undefined)
+            {
+                // Copy methods from super-interfaces
+                prx.__implements = prxInterfaces;
+                for(var intf in prxInterfaces)
+                {
+                    var prxInterface = prxInterfaces[intf].prototype;
+                    for(var f in prxInterface)
+                    {
+                        if(typeof prxInterface[f] == "function" && prx.prototype[f] === undefined)
+                        {
+                            prx.prototype[f] = prxInterface[f];
+                        }
+                    }
+                }
+            }
+            
+            // Static mtehods
+            prx.ice_staticId = function() { return staticId; };
+            
+            // Copy static methods inherited from ObjectPrx
+            prx.checkedCast = ObjectPrx.checkedCast;
+            prx.write = ObjectPrx.write;
+            prx.defineProxy = ObjectPrx.defineProxy;
+            return prx;
+        };
+        
+        ObjectPrx.__instanceof = function(T)
+        {
+            if(T === this)
+            {
+                return true;
+            }
+
+            for(var i in this.__implements)
+            {
+                if(this.__implements[i].__instanceof(T))
+                {
+                    return true;
+                }
+            }
+
+            if(this.__parent)
+            {
+                return this.__parent.__instanceof(T);
+            }
+            return false;
+        }
+
+        ObjectPrx.prototype.ice_instanceof = function(T)
+        {
+            if(T)
+            {
+                if(this instanceof T)
+                {
+                    return true;
+                }
+                this.constructor.__instanceof(T)
+            }
+            return false;
         };
 
         Ice.ObjectPrx = ObjectPrx;

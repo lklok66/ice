@@ -169,7 +169,10 @@
             Debug.assert(this._fd !== null);
             try
             {
-                this._fd.close();
+                if(this._fd.readyState === WebSocket.OPEN)
+                {
+                    this._fd.close();
+                }
             }
             catch(ex)
             {

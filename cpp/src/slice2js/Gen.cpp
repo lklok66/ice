@@ -1356,220 +1356,6 @@ Slice::Gen::TypesVisitor::visitModuleEnd(const ModulePtr& p)
 {
 }
 
-void
-Slice::Gen::TypesVisitor::writeProxyMixin(const ClassDefPtr& p)
-{
-    const string scope = p->scope();
-    const string localScope = getLocalScope(scope);
-    const string prxName = p->name() + "Prx";
-    const string prxMixin = "__" + prxName + "Mixin";
-    const string prxRef = "Ice.ObjectPrx";
-    
-    _out << sp;
-    _out << nl << localScope << "." << prxMixin << " = function()";
-    _out << sb;
-    
-    ClassList bases = p->bases();
-    
-    for(ClassList::const_iterator q = bases.begin(); q != bases.end(); ++q)
-    {
-        ClassDefPtr base = *q;
-        _out << nl << getLocalScope(base->scope()) << ".__" << base->name() << "PrxMixin.call(this);";
-    }
-    writeProxyOperations("this", p->operations());
-    _out << eb << ";";
-    
-    _out << sp;
-    _out << nl << localScope << "." << prxMixin << ".call(" << localScope << "." << prxName << ".prototype);";
-}
-
-void
-Slice::Gen::TypesVisitor::writeProxyOperations(const string& prototype, const OperationList& ops)
-{
-    for(OperationList::const_iterator q = ops.begin(); q != ops.end(); ++q)
-    {
-        OperationPtr op = *q;
-
-        const TypePtr ret = op->returnType();
-
-        ExceptionList throws = op->throws();
-        throws.sort();
-        throws.unique();
-
-        const ParamDeclList paramList = op->parameters();
-        ParamDeclList inParams, outParams;
-        for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
-        {
-            if((*pli)->isOutParam())
-            {
-                outParams.push_back(*pli);
-            }
-            else
-            {
-                inParams.push_back(*pli);
-            }
-        }
-        
-        string unmarshalCallback;
-        if(ret || !outParams.empty())
-        {
-            //
-            // Select an unmarshal callback. We provide generic callbacks for operations that
-            // return one value of built-in type. Otherwise, we have to generate a callback.
-            //
-            TypePtr t;
-            if((ret && outParams.empty()) || (!ret && outParams.size() == 1))
-            {
-                if(ret)
-                {
-                    assert(outParams.size() == 0);
-                    t = ret;
-                }
-                else
-                {
-                    assert(outParams.size() == 1);
-                    t = outParams.front()->type();
-                }
-            }
-
-            BuiltinPtr b = BuiltinPtr::dynamicCast(t);
-            if(b)
-            {
-                if(b->kind() == Builtin::KindObject)
-                {
-                    unmarshalCallback = "Ice.ObjectPrx.__returns_Object";
-                }
-                else if(b->kind() == Builtin::KindObjectProxy)
-                {
-                    unmarshalCallback = "Ice.ObjectPrx.__returns_ObjectPrx";
-                }
-                else
-                {
-                    assert(b->kind() != Builtin::KindLocalObject);
-                    unmarshalCallback = "Ice.ObjectPrx.__returns_" + b->typeId();
-                }
-            }
-        }
-        else
-        {
-            //
-            // Nothing to unmarshal.
-            //
-            unmarshalCallback = "null";
-        }
-        _out << sp;
-        _out << nl << prototype << "." << op->name() << " = function" << spar << getParams(op) << "__ctx" << epar;
-        _out << sb;
-        
-        _out << nl << "return Ice.ObjectPrx.__invoke(this, \"" << op->name() << "\", "
-             << sliceModeToIceMode(op->sendMode()) << ", " << opFormatTypeToString(op)
-             << ", __ctx,";
-        //
-        // Function to marshal in-params.
-        //
-        if(inParams.empty())
-        {
-            _out << " null,";
-        }
-        else
-        {
-            _out.inc();
-            _out << nl << "function(__os)";
-            _out << sb;
-            writeMarshalUnmarshalParams(inParams, 0, true);
-            if(op->sendsClasses(false))
-            {
-                _out << nl << "__os.writePendingObjects();";
-            }
-            _out << eb << ',';
-            _out.dec();
-        }
-        //
-        // Function to unmarshal out-params.
-        //
-        if(!unmarshalCallback.empty())
-        {
-            _out << ' ' << unmarshalCallback << ',';
-        }
-        else
-        {
-            assert(ret || !outParams.empty());
-            _out.inc();
-            _out << nl << "function(__is, __results)";
-            _out << sb;
-            vector<string> outArgs;
-            if(ret)
-            {
-                _out << nl << "var __ret;";
-            }
-            if(!outParams.empty())
-            {
-                _out << nl << "var ";
-                for(ParamDeclList::const_iterator pli = outParams.begin(); pli != outParams.end(); ++pli)
-                {
-                    if(pli != outParams.begin())
-                    {
-                        _out << ", ";
-                    }
-                    string s = fixId((*pli)->name());
-                    _out << s;
-                    outArgs.push_back(s);
-                }
-                _out << ';';
-            }
-            writeMarshalUnmarshalParams(outParams, op, false);
-            if(op->returnsClasses(false))
-            {
-                _out << nl << "__is.readPendingObjects();";
-            }
-            _out << nl << "__results.push" << spar;
-            if(ret)
-            {
-                _out << "__ret";
-            }
-            _out << outArgs << epar << ';';
-            _out << eb << ',';
-            _out.dec();
-        }
-        //
-        // User exceptions.
-        //
-        if(throws.empty())
-        {
-            _out << " null";
-        }
-        else
-        {
-            //
-            // Arrange exceptions into most-derived to least-derived order. If we don't
-            // do this, a base exception handler can appear before a derived exception
-            // handler, causing compiler warnings and resulting in the base exception
-            // being marshaled instead of the derived exception.
-            //
-#if defined(__SUNPRO_CC)
-            throws.sort(Slice::derivedToBaseCompare);
-#else
-            throws.sort(Slice::DerivedToBaseCompare());
-#endif
-
-            _out.inc();
-            _out << nl << '[';
-            for(ExceptionList::const_iterator eli = throws.begin(); eli != throws.end(); ++eli)
-            {
-                if(eli != throws.begin())
-                {
-                    _out << ", ";
-                }
-                _out << getLocalScope((*eli)->scoped());
-            }
-            _out << ']';
-            _out.dec();
-        }
-        _out << ");";
-        _out << eb << ";";
-    }
-}
-
 bool
 Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
 {
@@ -1577,7 +1363,6 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
     const string localScope = getLocalScope(scope);
     const string name = fixId(p->name());
     const string prxName = p->name() + "Prx";
-    const string prxMixin = "_" + prxName + "Mixin";
     const string objectRef = "Ice.Object";
     const string prxRef = "Ice.ObjectPrx";
 
@@ -1634,24 +1419,43 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
 
     if(!p->isLocal())
     {
-        _out << sp;
-        _out << nl << localScope << '.' << prxName << " = function" << spar << epar;
-        _out << sb;
-        _out << nl << basePrxRef << ".call" << spar << "this" << epar << ';';
-        _out << eb << ';';
+        const string staticId = "\"" + localScope + "." + prxName + "\"";
+        const string baseProxy = 
+            !p->isInterface() && base ? (getLocalScope(base->scope()) + "." + base->name() + "Prx") : "Ice.ObjectPrx";
+        _out << nl << localScope << '.' << prxName << " = " << baseProxy << ".defineProxy(" << staticId;
+        if(!bases.empty())
+        {
+            _out << ", [";
+            _out.inc();
+            for(ClassList::const_iterator q = bases.begin(); q != bases.end();)
+            {
+                ClassDefPtr base = *q;
+                if(base->isInterface())
+                {
+                    _out << nl << getLocalScope(base->scope()) << "." << base->name() << "Prx";
+                    if(q++ != bases.end())
+                    {
+                        _out << ", ";
+                    }
+                }
+                else
+                {
+                    q++;
+                }
+            }
+            _out.dec();
+            _out << "]";
+        }
+        _out << ");";
+        
         _out << nl << localScope << '.' << prxName << ".prototype = new " << basePrxRef << "();";
         _out << nl << localScope << '.' << prxName << ".prototype.constructor = " << localScope << '.' << prxName
              << ';';
-        _out << nl << localScope << '.' << prxName << ".checkedCast = function(__prx, __facet, __ctx)";
-        _out << sb;
-        _out << nl << "return Ice.ObjectPrx.checkedCastImpl(" << localScope << '.' << prxName << ", "
-             << localScope << '.' << name << ".ice_staticId(), __prx, __facet, __ctx);";
-        _out << eb << ';';
+        
         _out << nl << localScope << '.' << prxName << ".uncheckedCast = function(__prx, __facet)";
         _out << sb;
-        _out << nl << "return Ice.ObjectPrx.uncheckedCastImpl(" << localScope << '.' << prxName << ", __prx, __facet);";
-        _out << eb << ';';
-        
+        _out << nl << "return Ice.ObjectPrx.uncheckedCastImpl(" << localScope << "." << prxName << ", __prx, __facet);";
+        _out << eb << ";";
         _out << sp;
         _out << nl << "Ice.StreamHelpers.ProxyHelper(" << localScope << '.' << prxName << ");";
     }
@@ -1760,6 +1564,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         _out << sb;
         _out << nl << "return " << localScope << '.' << name << ".__ids[" << scopedPos << "];";
         _out << eb << ";";
+        _out << nl << localScope << "." << prxName << ".ice_staticId = " << localScope << '.' << name << ".ice_staticId;";
     }
 
     const OperationList ops = p->operations();
@@ -1856,25 +1661,187 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             _out.dec();
             _out << nl << "];";
         }
-        if(p->isInterface())
+
+        const string prototype = localScope + "." + prxName + ".prototype";
+        for(OperationList::const_iterator q = ops.begin(); q != ops.end(); ++q)
         {
-            writeProxyMixin(p);
-        }
-        else
-        {
-            stringstream os;
-            os << localScope << "." << prxName << ".prototype";
-            writeProxyOperations(os.str(), ops);
-            for(ClassList::const_iterator q = bases.begin(); q != bases.end(); ++q)
+            OperationPtr op = *q;
+            const TypePtr ret = op->returnType();
+            ExceptionList throws = op->throws();
+            throws.sort();
+            throws.unique();
+
+            const ParamDeclList paramList = op->parameters();
+            ParamDeclList inParams, outParams;
+            for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
             {
-                ClassDefPtr base = *q;
-                if(base->isInterface())
+                if((*pli)->isOutParam())
                 {
-                    _out << sp;
-                    _out << nl << getLocalScope(base->scope()) << ".__" << base->name() << "PrxMixin.call("
-                         << os.str() << ");";
+                    outParams.push_back(*pli);
+                }
+                else
+                {
+                    inParams.push_back(*pli);
                 }
             }
+            
+            string unmarshalCallback;
+            if(ret || !outParams.empty())
+            {
+                //
+                // Select an unmarshal callback. We provide generic callbacks for operations that
+                // return one value of built-in type. Otherwise, we have to generate a callback.
+                //
+                TypePtr t;
+                if((ret && outParams.empty()) || (!ret && outParams.size() == 1))
+                {
+                    if(ret)
+                    {
+                        assert(outParams.size() == 0);
+                        t = ret;
+                    }
+                    else
+                    {
+                        assert(outParams.size() == 1);
+                        t = outParams.front()->type();
+                    }
+                }
+
+                BuiltinPtr b = BuiltinPtr::dynamicCast(t);
+                if(b)
+                {
+                    if(b->kind() == Builtin::KindObject)
+                    {
+                        unmarshalCallback = "Ice.ObjectPrx.__returns_Object";
+                    }
+                    else if(b->kind() == Builtin::KindObjectProxy)
+                    {
+                        unmarshalCallback = "Ice.ObjectPrx.__returns_ObjectPrx";
+                    }
+                    else
+                    {
+                        assert(b->kind() != Builtin::KindLocalObject);
+                        unmarshalCallback = "Ice.ObjectPrx.__returns_" + b->typeId();
+                    }
+                }
+            }
+            else
+            {
+                //
+                // Nothing to unmarshal.
+                //
+                unmarshalCallback = "null";
+            }
+            _out << sp;
+            _out << nl << prototype << "." << op->name() << " = function" << spar << getParams(op) << "__ctx" << epar;
+            _out << sb;
+            
+            _out << nl << "return Ice.ObjectPrx.__invoke(this, \"" << op->name() << "\", "
+                << sliceModeToIceMode(op->sendMode()) << ", " << opFormatTypeToString(op)
+                << ", __ctx,";
+            //
+            // Function to marshal in-params.
+            //
+            if(inParams.empty())
+            {
+                _out << " null,";
+            }
+            else
+            {
+                _out.inc();
+                _out << nl << "function(__os)";
+                _out << sb;
+                writeMarshalUnmarshalParams(inParams, 0, true);
+                if(op->sendsClasses(false))
+                {
+                    _out << nl << "__os.writePendingObjects();";
+                }
+                _out << eb << ',';
+                _out.dec();
+            }
+            //
+            // Function to unmarshal out-params.
+            //
+            if(!unmarshalCallback.empty())
+            {
+                _out << ' ' << unmarshalCallback << ',';
+            }
+            else
+            {
+                assert(ret || !outParams.empty());
+                _out.inc();
+                _out << nl << "function(__is, __results)";
+                _out << sb;
+                vector<string> outArgs;
+                if(ret)
+                {
+                    _out << nl << "var __ret;";
+                }
+                if(!outParams.empty())
+                {
+                    _out << nl << "var ";
+                    for(ParamDeclList::const_iterator pli = outParams.begin(); pli != outParams.end(); ++pli)
+                    {
+                        if(pli != outParams.begin())
+                        {
+                            _out << ", ";
+                        }
+                        string s = fixId((*pli)->name());
+                        _out << s;
+                        outArgs.push_back(s);
+                    }
+                    _out << ';';
+                }
+                writeMarshalUnmarshalParams(outParams, op, false);
+                if(op->returnsClasses(false))
+                {
+                    _out << nl << "__is.readPendingObjects();";
+                }
+                _out << nl << "__results.push" << spar;
+                if(ret)
+                {
+                    _out << "__ret";
+                }
+                _out << outArgs << epar << ';';
+                _out << eb << ',';
+                _out.dec();
+            }
+            //
+            // User exceptions.
+            //
+            if(throws.empty())
+            {
+                _out << " null";
+            }
+            else
+            {
+                //
+                // Arrange exceptions into most-derived to least-derived order. If we don't
+                // do this, a base exception handler can appear before a derived exception
+                // handler, causing compiler warnings and resulting in the base exception
+                // being marshaled instead of the derived exception.
+                //
+#if defined(__SUNPRO_CC)
+                throws.sort(Slice::derivedToBaseCompare);
+#else
+                throws.sort(Slice::DerivedToBaseCompare());
+#endif
+
+                _out.inc();
+                _out << nl << '[';
+                for(ExceptionList::const_iterator eli = throws.begin(); eli != throws.end(); ++eli)
+                {
+                    if(eli != throws.begin())
+                    {
+                        _out << ", ";
+                    }
+                    _out << getLocalScope((*eli)->scoped());
+                }
+                _out << ']';
+                _out.dec();
+            }
+            _out << ");";
+            _out << eb << ";";
         }
 
         //
