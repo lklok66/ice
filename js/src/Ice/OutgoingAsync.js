@@ -468,7 +468,7 @@
 
         OutgoingAsync.prototype.__startWriteParams = function(format)
         {
-            this._os.startWriteEncaps(this._encoding, format);
+            this._os.startWriteEncapsWithEncoding(this._encoding, format);
             return this._os;
         };
 

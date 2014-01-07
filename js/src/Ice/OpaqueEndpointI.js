@@ -185,7 +185,7 @@
         OpaqueEndpointI.prototype.streamWrite = function(s)
         {
             s.writeShort(this._type);
-            s.startWriteEncaps(this._rawEncoding, Ice.FormatType.DefaultFormat);
+            s.startWriteEncapsWithEncoding(this._rawEncoding, Ice.FormatType.DefaultFormat);
             s.writeBlob(this._rawBytes);
             s.endWriteEncaps();
         };

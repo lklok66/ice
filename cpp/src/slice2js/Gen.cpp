@@ -1338,7 +1338,7 @@ Slice::Gen::TypesVisitor::visitModuleStart(const ModulePtr& p)
     //
     // For an inner module we  write
     //
-    // var Foo.Bar = global.Foo.Bar || {};
+    // Foo.Bar = global.Foo ? (global.Foo.Bar || {}) : {};
     //
 
     const string scoped = getLocalScope(p->scoped());
@@ -1346,7 +1346,16 @@ Slice::Gen::TypesVisitor::visitModuleStart(const ModulePtr& p)
     if(i == _seenModules.end())
     {
         _seenModules.push_back(scoped);
-        _out << nl << "var " << scoped << " = global." << scoped << " ||  {};";
+        const bool topLevel = UnitPtr::dynamicCast(p->container());
+        if(topLevel)
+        {
+            _out << nl << "var " << scoped << " = global." << scoped << " ||  {};";
+        }
+        else
+        {
+            _out << nl << scoped << " = global." << getLocalScope(p->scope()) << " ? (global." << scoped 
+                 << " ||  {}) : {};";
+        }
     }
     return true;
 }
@@ -1433,7 +1442,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
                 if(base->isInterface())
                 {
                     _out << nl << getLocalScope(base->scope()) << "." << base->name() << "Prx";
-                    if(q++ != bases.end())
+                    if(++q != bases.end())
                     {
                         _out << ", ";
                     }
@@ -1447,11 +1456,6 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             _out << "]";
         }
         _out << ");";
-        
-        _out << nl << localScope << '.' << prxName << ".prototype = new " << basePrxRef << "();";
-        _out << nl << localScope << '.' << prxName << ".prototype.constructor = " << localScope << '.' << prxName
-             << ';';
-        
         _out << nl << localScope << '.' << prxName << ".uncheckedCast = function(__prx, __facet)";
         _out << sb;
         _out << nl << "return Ice.ObjectPrx.uncheckedCastImpl(" << localScope << "." << prxName << ", __prx, __facet);";
@@ -1636,21 +1640,6 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             {
                 ClassDefPtr base = *q;
                 _out << nl << getLocalScope(base->scope()) << "." << base->name();
-                if(++q !=  allBases.end())
-                {
-                    _out << ", ";
-                }
-            }
-            _out.dec();
-            _out << nl << "];";
-            
-            _out << sp;
-            _out << nl << localScope << "." << prxName << ".prototype.__implements = [";
-            _out.inc();
-            for(ClassList::const_iterator q = allBases.begin(); q != allBases.end();)
-            {
-                ClassDefPtr base = *q;
-                _out << nl << getLocalScope(base->scope()) << "." << base->name() << "Prx";
                 if(++q !=  allBases.end())
                 {
                     _out << ", ";

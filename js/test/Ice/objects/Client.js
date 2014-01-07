@@ -367,6 +367,7 @@
                         {
                             i = obj;
                             test(i);
+                            console.log("getI ok");
                             return initial.getJ();
                         },
                         exceptionCB
