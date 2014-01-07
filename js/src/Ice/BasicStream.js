@@ -2862,20 +2862,33 @@
 
         BasicStream.prototype.readEnum = function(T)
         {
+            var v;
             if(this.getReadEncoding().equals(Protocol.Encoding_1_0))
             {
                 if(T.maxValue < 127)
                 {
-                    return T.valueOf(this.readByte());
+                    v = this.readByte();
                 }
-                
-                if(T.maxValue < 32767)
+                else if(T.maxValue < 32767)
                 {
-                    return T.valueOf(this.readShort());
+                    v = this.readShort();
                 }
-                return T.valueOf(this.readInt());
+                else
+                {
+                    v = this.readInt();
+                }
             }
-            return T.valueOf(this.readSize());
+            else
+            {
+                v = this.readSize();
+            }
+            
+            var e = T.valueOf(v);
+            if(e === undefined)
+            {
+                throw new Ice.MarshalException("enumerator value " + v + " is out of range");
+            }
+            return e;
         };
         
         BasicStream.prototype.readOptEnum = function(tag, T)
