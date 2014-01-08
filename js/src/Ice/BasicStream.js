@@ -646,7 +646,7 @@
         EncapsDecoder11.prototype.throwException = function(factory)
         {
             Debug.assert(this._current === null);
-            Debug.assert(factory !== undefined);
+            Debug.assert(factory !== null);
             
             var mostDerivedId,
                 userEx;
@@ -665,7 +665,7 @@
                 //
                 // Use a factory if one was provided.
                 //
-                if(factory !== null)
+                if(factory !== null && factory !== undefined)
                 {
                     try
                     {
