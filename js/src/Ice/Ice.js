@@ -32,6 +32,7 @@
         require("Ice/Version");
         require("Ice/ObjectFactory");
         require("Ice/Buffer");
+        require("Ice/ArrayUtil");
 
         var Ice = global.Ice || {};
         var Protocol = Ice.Protocol;

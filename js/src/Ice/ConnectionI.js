@@ -256,7 +256,7 @@
             // requests have completed and we can transition to StateClosing.
             // We also complete outstanding promises.
             //
-            if(this._asyncRequests.length === 0 && this._closePromises !== null)
+            if(this._asyncRequests.size === 0 && this._closePromises !== null)
             {
                 this.setStateEx(StateClosing, new Ice.CloseConnectionException());
                 for(var i = 0; i < this._closePromises.length; ++i)
@@ -319,7 +319,7 @@
             // Active connection management for idle connections.
             //
             if(this._acmTimeout <= 0 ||
-            this._asyncRequests.length > 0 || this._dispatchCount > 0 ||
+            this._asyncRequests.size > 0 || this._dispatchCount > 0 ||
             this._readStream.size > Protocol.headerSize || !this._writeStream.isEmpty() || !this._batchStream.isEmpty())
             {
                 return;

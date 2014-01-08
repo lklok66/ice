@@ -431,6 +431,11 @@
 
         function translateError(ex)
         {
+            if(ex.code === "ECONNREFUSED")
+            {
+                return new Ice.ConnectionRefusedException(ex.code, ex);
+                
+            }
             // TODO: Search the exception's error message for symbols like ECONNREFUSED ?
             return new SocketException(0, ex);
         }
