@@ -22,6 +22,7 @@
         require("Ice/Exception");
         require("Ice/BuiltinSequences");
         require("Ice/LocalException");
+        require("Ice/Object");
         
         var Ice = global.Ice || {};
         
@@ -914,6 +915,8 @@
             return __promise;
         };
         
+        ObjectPrx.ice_staticId = Ice.Object.ice_staticId;
+        
         //
         // NOT a prototype function
         //
@@ -939,7 +942,11 @@
             if(prx !== undefined && prx !== null)
             {
                 r = new type();
-                r.__copyFrom(prx.ice_facet(facet));
+                if(facet !== undefined)
+                {
+                    prx = prx.ice_facet(facet)
+                }
+                r.__copyFrom(prx);
             }
             return r;
         };

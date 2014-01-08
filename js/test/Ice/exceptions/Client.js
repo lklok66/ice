@@ -334,8 +334,6 @@
                         {
                             if(!(ex instanceof Ice.MemoryLimitException))
                             {
-                                //console.log(ex.stack);
-                                // TODO
                                 throw ex;
                             }
                             out.writeLine("ok");

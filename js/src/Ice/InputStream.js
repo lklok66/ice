@@ -160,7 +160,7 @@
 
         InputStream.prototype.throwException = function()
         {
-            this._is.throwException(null);
+            this._is.throwException();
         };
 
         InputStream.prototype.startObject = function()
