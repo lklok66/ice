@@ -75,7 +75,7 @@
         TcpTransceiver.prototype.setCallbacks = function(
             connectedCallback,      // function()
             bytesAvailableCallback, // function()
-            bytesWrittenCallback,   // function()
+            bytesWrittenCallback,   // function() TODO: Remove
             closedCallback,         // function()
             errorCallback           // function(ex)
         )
@@ -260,17 +260,16 @@
 
             var self = this;
 
-            var sync = true;
-            sync = this._fd.write(slice, null,
-                    //
-                    // Callback function invoked when data is eventually written.
-                    //
-                    function()
-                    {
-                        self.socketBytesWritten(remaining, sync);
-                    });
+            this._fd.write(slice, null,
+                //
+                // Callback function invoked when data is eventually written.
+                //
+                function()
+                {
+                    self.socketBytesWritten(remaining);
+                });
 
-            return sync;
+            return true;
         };
 
         TcpTransceiver.prototype.read = function(byteBuffer, moreData)
@@ -391,21 +390,12 @@
             }
         };
 
-        TcpTransceiver.prototype.socketBytesWritten = function(n, sync)
+        TcpTransceiver.prototype.socketBytesWritten = function(n)
         {
             if(this._traceLevels.network >= 3)
             {
                 var msg = "sent " + n + " bytes via " + this.type() + "\n" + this._desc;
                 this._logger.trace(this._traceLevels.networkCat, msg);
-            }
-
-            //
-            // Don't invoke the callback if the data was written synchronously.
-            //
-            if(!sync)
-            {
-                Debug.assert(this._bytesWrittenCallback !== null);
-                this._bytesWrittenCallback();
             }
         };
 

@@ -105,7 +105,7 @@
 
         Communicator.prototype.getImplicitContext = function()
         {
-            // TODO
+            return this._instance.getImplicitContext();
         };
 
         Communicator.prototype.getProperties = function()

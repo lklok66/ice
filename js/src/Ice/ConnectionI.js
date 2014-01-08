@@ -9,7 +9,7 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
-        
+
         require("Ice/AsyncStatus");
         require("Ice/BasicStream");
         require("Ice/Debug");
@@ -25,9 +25,9 @@
         require("Ice/Version");
         require("Ice/Exception");
         require("Ice/LocalException");
-        
+
         var Ice = global.Ice || {};
-        
+
         var AsyncStatus = Ice.AsyncStatus;
         var BasicStream = Ice.BasicStream;
         var Debug = Ice.Debug;
@@ -629,12 +629,8 @@
             var status;
             if(this._batchRequestNum === 0)
             {
-                status = AsyncStatus.Sent;
-                if(!outAsync.__sent(this))
-                {
-                    status |= AsyncStatus.InvokeSentCallback;
-                }
-                return status;
+                outAsync.__sent(this);
+                return AsyncStatus.Sent;
             }
 
             //
@@ -645,7 +641,7 @@
 
             this._batchStream.swap(outAsync.__os());
 
-            
+
             try
             {
                 status = this.sendMessage(OutgoingMessage.create(outAsync, outAsync.__os(), this._batchRequestCompress,
@@ -1606,10 +1602,13 @@
 
         ConnectionI.prototype.sendNextMessage = function()
         {
-            Debug.assert(this._sendStreams.length > 0);
+            if(this._sendStreams.length === 0)
+            {
+                return;
+            }
+
             Debug.assert(!this._writeStream.isEmpty() && this._writeStream.pos === this._writeStream.size);
 
-            var callbacks = []; // TODO: Use sent callbacks?
             try
             {
                 while(true)
@@ -1619,10 +1618,7 @@
                     //
                     var message = this._sendStreams.shift();
                     this._writeStream.swap(message.stream);
-                    if(message.sent(this, true))
-                    {
-                        callbacks.push(message);
-                    }
+                    message.sent(this);
 
                     //
                     // If there's nothing left to send, we're done.
@@ -1641,7 +1637,7 @@
                     //
                     if(this._state >= StateClosed)
                     {
-                        return callbacks;
+                        return;
                     }
 
                     //
@@ -1670,11 +1666,11 @@
                     // Send the message.
                     //
                     if(this._writeStream.pos != this._writeStream.size &&
-                    !this._transceiver.write(this._writeStream.buffer))
+                       !this._transceiver.write(this._writeStream.buffer))
                     {
                         Debug.assert(!this._writeStream.isEmpty());
                         this.scheduleTimeout(SocketOperation.Write, this._endpoint.timeout());
-                        return callbacks;
+                        return;
                     }
                 }
             }
@@ -1701,8 +1697,6 @@
             {
                 this.scheduleTimeout(SocketOperation.Write, this.closeTimeout());
             }
-
-            return callbacks;
         };
 
         ConnectionI.prototype.sendMessage = function(message)
@@ -1724,18 +1718,14 @@
                 //
                 // Entire buffer was written immediately.
                 //
-                var status = AsyncStatus.Sent;
-                if(message.sent(this, false))
-                {
-                    status |= AsyncStatus.InvokeSentCallback;
-                }
+                message.sent(this);
                 if(this._acmTimeout > 0)
                 {
                     this._acmAbsoluteTimeoutMillis = TimeUtil.now() + this._acmTimeout * 1000;
                 }
-                return status;
+                return AsyncStatus.Sent;
             }
-            message.adopt();
+            message.doAdopt();
 
             this._writeStream.swap(message.stream);
             this._sendStreams.push(message);
@@ -2064,7 +2054,7 @@
 
         Ice.ConnectionI = ConnectionI;
         global.Ice = Ice;
-        
+
         var OutgoingMessage = function()
         {
             this.stream = null;
@@ -2099,7 +2089,7 @@
             return m;
         };
 
-        OutgoingMessage.prototype.adopt = function()
+        OutgoingMessage.prototype.doAdopt = function()
         {
             if(this.adopt)
             {
@@ -2116,11 +2106,7 @@
 
             if(this.outAsync !== null)
             {
-                return this.outAsync.__sent(connection);
-            }
-            else
-            {
-                return false;
+                this.outAsync.__sent(connection);
             }
         };
 
@@ -2132,6 +2118,6 @@
             }
         };
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+        __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/ConnectionI"));

@@ -31,7 +31,7 @@
         var Debug = Ice.Debug;
         var HashMap = Ice.HashMap;
         var LocalExceptionWrapper = Ice.LocalExceptionWrapper;
-        var OperationMode = Ice.Current.OperationMode;
+        var OperationMode = Ice.OperationMode;
         var Protocol = Ice.Protocol;
         var Identity = Ice.Identity;
 
@@ -165,7 +165,6 @@
 
         OutgoingAsync.prototype.__sent = function(connection)
         {
-            var alreadySent = (this._state & AsyncResult.Sent) !== 0;
             this._state |= AsyncResult.Sent;
 
             if((this._state & AsyncResult.Done) === 0)
@@ -174,6 +173,7 @@
                 {
                     this._state |= AsyncResult.Done | AsyncResult.OK;
                     this._os.resize(0);
+                    this.succeed(this);
                 }
                 else if(connection.timeout() > 0)
                 {
@@ -184,7 +184,6 @@
                         function() { self.__runTimerTask(); }, connection.timeout());
                 }
             }
-            return !alreadySent; // Don't call the sent callback if already sent.
         };
 
         OutgoingAsync.prototype.__finishedEx = function(exc, sent)
@@ -429,14 +428,7 @@
                     try
                     {
                         this._handler = this._proxy.__getRequestHandler();
-                        var status = this._handler.sendAsyncRequest(this);
-                        if((status & AsyncStatus.Sent) > 0)
-                        {
-                            if((status & AsyncStatus.InvokeSentCallback) > 0)
-                            {
-                                this.__sentAsync();
-                            }
-                        }
+                        this._handler.sendAsyncRequest(this);
                         break;
                     }
                     catch(ex)

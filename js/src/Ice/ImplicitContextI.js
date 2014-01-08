@@ -12,6 +12,7 @@
         
         require("Ice/HashMap");
         require("Ice/LocalException");
+        require("Ice/Current");
         
         var Ice = global.Ice || {};
         
@@ -128,7 +129,7 @@
         {
             if(prxContext.size === 0)
             {
-                ContextHelper.write(os, this._context);
+                Ice.ContextHelper.write(os, this._context);
             }
             else
             {
@@ -142,7 +143,7 @@
                     ctx = new HashMap(this._context);
                     ctx.merge(prxContext);
                 }
-                ContextHelper.write(os, ctx);
+                Ice.ContextHelper.write(os, ctx);
             }
         };
 

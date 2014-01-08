@@ -43,12 +43,12 @@
 
         ConnectionRequestHandler.prototype.sendAsyncRequest = function(out)
         {
-            this._connection.sendAsyncRequest(out, this._compress, this._response);
+            return this._connection.sendAsyncRequest(out, this._compress, this._response);
         };
 
         ConnectionRequestHandler.prototype.flushAsyncBatchRequests = function(out)
         {
-            this._connection.flushAsyncBatchRequests(out);
+            return this._connection.flushAsyncBatchRequests(out);
         };
 
         ConnectionRequestHandler.prototype.getReference = function()

@@ -9,7 +9,7 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
-        
+
         require("Ice/AsyncStatus");
         require("Ice/BasicStream");
         require("Ice/ConnectionRequestHandler");
@@ -21,9 +21,9 @@
         require("Ice/ReferenceMode");
         require("Ice/Exception");
         require("Ice/Promise");
-        
+
         var Ice = global.Ice || {};
-        
+
         var AsyncStatus = Ice.AsyncStatus;
         var BasicStream = Ice.BasicStream;
         var ConnectionRequestHandler = Ice.ConnectionRequestHandler;
@@ -107,10 +107,10 @@
                 this._batchStream.swap(os);
 
                 if(!this._batchAutoFlush &&
-                this._batchStream.size + this._batchRequestsSize > this._reference.getInstance().messageSizeMax())
+                   this._batchStream.size + this._batchRequestsSize > this._reference.getInstance().messageSizeMax())
                 {
                     ExUtil.throwMemoryLimitException(this._batchStream.size + this._batchRequestsSize,
-                                                    this._reference.getInstance().messageSizeMax());
+                                                     this._reference.getInstance().messageSizeMax());
                 }
 
                 this._requests.push(new Request(this._batchStream));
@@ -297,7 +297,6 @@
             //
             this._flushing = true;
 
-            var sentCallbacks = [];
             try
             {
                 while(this._requests.length > 0)
@@ -305,19 +304,11 @@
                     var request = this._requests[0];
                     if(request.out !== null)
                     {
-                        if((this._connection.sendAsyncRequest(request.out, this._compress, this._response) &
-                            AsyncStatus.InvokeSentCallback) > 0)
-                        {
-                            sentCallbacks.push(request.out);
-                        }
+                        this._connection.sendAsyncRequest(request.out, this._compress, this._response);
                     }
                     else if(request.batchOut !== null)
                     {
-                        if((this._connection.flushAsyncBatchRequests(request.batchOut) &
-                            AsyncStatus.InvokeSentCallback) > 0)
-                        {
-                            sentCallbacks.push(request.batchOut);
-                        }
+                        this._connection.flushAsyncBatchRequests(request.batchOut);
                     }
                     else
                     {
@@ -356,11 +347,6 @@
                 {
                     throw ex;
                 }
-            }
-
-            // TODO: sentCallbacks
-            if(sentCallbacks.length > 0)
-            {
             }
 
             //
@@ -429,12 +415,12 @@
 
         Ice.ConnectRequestHandler = ConnectRequestHandler;
         global.Ice = Ice;
-        
+
         var Request = function(arg)
         {
             if(arg instanceof BasicStream)
             {
-                this.os = new BasicStream(arg.instance(), Protocol.currentProtocolEncoding);
+                this.os = new BasicStream(arg.instance, Protocol.currentProtocolEncoding);
                 this.os.swap(arg);
             }
             else if(arg instanceof OutgoingAsync)
@@ -448,6 +434,6 @@
             }
         };
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+        __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/ConnectRequestHandler"));
