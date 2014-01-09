@@ -747,10 +747,8 @@
         //
         ObjectPrx.__returns_Object = function(__is, __results)
         {
-            var __ret = { value: null };
-            __is.readObject(__ret);
+            __is.readObject(function(obj){__results.push(obj);}, Ice.Object);
             __is.readPendingObjects();
-            __results.push(__ret.value);
         };
 
         //
@@ -964,7 +962,7 @@
         ObjectPrx.readOpt = function(is, tag)
         {
             var v = is.readOptProxy();
-            if(v !== null)
+            if(v !== null && v !== undefined)
             {
                 v = this.uncheckedCast(v);
             }
