@@ -9,15 +9,17 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
-        
+
+        require("Ice/AsyncResultBase");
         require("Ice/Debug");
         require("Ice/Promise");
         require("Ice/Protocol");
         require("Ice/Exception");
         require("Ice/BasicStream");
-        
+
         var Ice = global.Ice || {};
-        
+
+        var AsyncResultBase = Ice.AsyncResultBase;
         var Debug = Ice.Debug;
         var Promise = Ice.Promise;
         var Protocol = Ice.Protocol;
@@ -30,65 +32,24 @@
             // AsyncResult can be constructed by a sub-type's prototype, in which case the
             // arguments are undefined.
             //
-            Promise.call(this);
+            AsyncResultBase.call(this, communicator, op, connection, proxy, adapter);
             if(communicator !== undefined)
             {
-                this._communicator = communicator;
-                this._instance = communicator !== null ? communicator.instance : null;
-                this._operation = op;
                 this._completed = completedFn;
-                this._connection = connection;
-                this._proxy = proxy;
-                this._adapter = adapter;
                 this._is = null;
                 this._os = communicator !== null ?
                     new BasicStream(this._instance, Protocol.currentProtocolEncoding, false) : null;
                 this._state = 0;
-                this._sentSynchronously = false;
                 this._exception = null;
             }
         };
 
-        AsyncResult.prototype = new Promise();
+        AsyncResult.prototype = new AsyncResultBase();
         AsyncResult.prototype.constructor = AsyncResult;
-
-        //
-        // Intercept the call to fail() so that we can attach a reference to "this"
-        // to the exception.
-        //
-        AsyncResult.prototype.fail = function()
-        {
-            var args = arguments;
-            if(args.length > 0 && args[0] instanceof Error)
-            {
-                args[0]._asyncResult = this;
-            }
-            Promise.prototype.fail.apply(this, args);
-        };
 
         AsyncResult.OK = 0x1;
         AsyncResult.Done = 0x2;
         AsyncResult.Sent = 0x4;
-
-        Object.defineProperty(AsyncResult.prototype, "communicator", {
-            get: function() { return this._communicator; }
-        });
-
-        Object.defineProperty(AsyncResult.prototype, "connection", {
-            get: function() { return this._connection; }
-        });
-
-        Object.defineProperty(AsyncResult.prototype, "proxy", {
-            get: function() { return this._proxy; }
-        });
-
-        Object.defineProperty(AsyncResult.prototype, "adapter", {
-            get: function() { return this._adapter; }
-        });
-
-        Object.defineProperty(AsyncResult.prototype, "operation", {
-            get: function() { return this._operation; }
-        });
 
         AsyncResult.prototype.__os = function()
         {
@@ -163,9 +124,9 @@
         };
 
         Ice.AsyncResult = AsyncResult;
-        
+
         global.Ice = Ice;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+        __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/AsyncResult"));

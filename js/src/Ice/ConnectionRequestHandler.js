@@ -61,9 +61,9 @@
             return this._connection;
         };
 
-        ConnectionRequestHandler.prototype.onConnection = function()
+        ConnectionRequestHandler.prototype.onConnection = function(r)
         {
-            return Promise.succeed(this._connection);
+            r.succeed(r, this._connection);
         };
 
         Ice.ConnectionRequestHandler = ConnectionRequestHandler;

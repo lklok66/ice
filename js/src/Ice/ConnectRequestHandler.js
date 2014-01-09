@@ -10,6 +10,7 @@
 (function(module, name){
     var __m = function(global, module, exports, require){
 
+        require("Ice/AsyncResult");
         require("Ice/AsyncStatus");
         require("Ice/BasicStream");
         require("Ice/ConnectionRequestHandler");
@@ -24,6 +25,7 @@
 
         var Ice = global.Ice || {};
 
+        var AsyncResult = Ice.AsyncResult;
         var AsyncStatus = Ice.AsyncStatus;
         var BasicStream = Ice.BasicStream;
         var ConnectionRequestHandler = Ice.ConnectionRequestHandler;
@@ -174,7 +176,7 @@
             }
         };
 
-        ConnectRequestHandler.prototype.onConnection = function()
+        ConnectRequestHandler.prototype.onConnection = function(r)
         {
             //
             // Called by ObjectPrx.ice_getConnection
@@ -182,18 +184,16 @@
 
             if(this._exception !== null)
             {
-                return Promise.fail(this._exception);
+                r.__exception(this._exception);
             }
             else if(this._connection !== null)
             {
                 Debug.assert(this._initialized);
-                return Promise.succeed(this._connection);
+                r.succeed(r, this._connection);
             }
             else
             {
-                var promise = new Promise();
-                this._pendingPromises.push(promise);
-                return promise;
+                this._pendingPromises.push(r);
             }
         };
 
@@ -312,7 +312,7 @@
                     }
                     else
                     {
-                        var os = new BasicStream(request.os.instance(), Protocol.currentProtocolEncoding);
+                        var os = new BasicStream(request.os.instance, Protocol.currentProtocolEncoding);
                         this._connection.prepareBatchRequest(os);
                         try
                         {
@@ -374,7 +374,7 @@
 
             for(var i = 0; i < this._pendingPromises.length; ++i)
             {
-                this._pendingPromises[i].succeed(this._connection);
+                this._pendingPromises[i].succeed(this._pendingPromises[i], this._connection);
             }
             this._pendingPromises = [];
         };
@@ -418,6 +418,10 @@
 
         var Request = function(arg)
         {
+            this.os = null;
+            this.out = null;
+            this.batchOut = null;
+
             if(arg instanceof BasicStream)
             {
                 this.os = new BasicStream(arg.instance, Protocol.currentProtocolEncoding);

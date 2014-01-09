@@ -72,7 +72,6 @@
             this._handler = null;
             this._cnt = 0;
             this._mode = mode;
-            this._sentSynchronously = false;
 
             Protocol.checkSupportedProtocol(Protocol.getCompatibleProtocol(this._proxy.__reference().getProtocol()));
 
@@ -454,8 +453,6 @@
                     }
                 }
             }
-
-            return this._sentSynchronously;
         };
 
         OutgoingAsync.prototype.__startWriteParams = function(format)

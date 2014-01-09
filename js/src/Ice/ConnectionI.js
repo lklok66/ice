@@ -11,7 +11,9 @@
     var __m = function(global, module, exports, require){
 
         require("Ice/AsyncStatus");
+        require("Ice/AsyncResultBase");
         require("Ice/BasicStream");
+        require("Ice/ConnectionBatchOutgoingAsync");
         require("Ice/Debug");
         require("Ice/ExUtil");
         require("Ice/HashMap");
@@ -29,7 +31,9 @@
         var Ice = global.Ice || {};
 
         var AsyncStatus = Ice.AsyncStatus;
+        var AsyncResultBase = Ice.AsyncResultBase;
         var BasicStream = Ice.BasicStream;
+        var ConnectionBatchOutgoingAsync = Ice.ConnectionBatchOutgoingAsync;
         var Debug = Ice.Debug;
         var ExUtil = Ice.ExUtil;
         var HashMap = Ice.HashMap;
@@ -222,12 +226,12 @@
 
         ConnectionI.prototype.close = function(force)
         {
-            var promise = new Promise();
+            var __r = new AsyncResultBase(this._communicator, "close", this, null, null);
 
             if(force)
             {
                 this.setStateEx(StateClosed, new Ice.ForcedCloseConnectionException());
-                promise.succeed();
+                __r.succeed(__r);
             }
             else
             {
@@ -242,11 +246,11 @@
                 {
                     this._closePromises = [];
                 }
-                this._closePromises.push(promise);
+                this._closePromises.push(__r);
                 this.checkClose();
             }
 
-            return promise;
+            return __r;
         };
 
         ConnectionI.prototype.checkClose = function()
@@ -261,7 +265,7 @@
                 this.setStateEx(StateClosing, new Ice.CloseConnectionException());
                 for(var i = 0; i < this._closePromises.length; ++i)
                 {
-                    this._closePromises[i].succeed();
+                    this._closePromises[i].succeed(this._closePromises[i]);
                 }
                 this._closePromises = null;
             }
@@ -319,8 +323,9 @@
             // Active connection management for idle connections.
             //
             if(this._acmTimeout <= 0 ||
-            this._asyncRequests.size > 0 || this._dispatchCount > 0 ||
-            this._readStream.size > Protocol.headerSize || !this._writeStream.isEmpty() || !this._batchStream.isEmpty())
+               this._asyncRequests.size > 0 || this._dispatchCount > 0 ||
+               this._readStream.size > Protocol.headerSize || !this._writeStream.isEmpty() ||
+               !this._batchStream.isEmpty())
             {
                 return;
             }
@@ -535,7 +540,8 @@
                     //
                     // Reset the batch stream.
                     //
-                    this._batchStream = new BasicStream(this._instance, Protocol.currentProtocolEncoding, this._batchAutoFlush);
+                    this._batchStream =
+                        new BasicStream(this._instance, Protocol.currentProtocolEncoding, this._batchAutoFlush);
                     this._batchRequestNum = 0;
                     this._batchRequestCompress = false;
                     this._batchMarker = 0;
@@ -598,25 +604,18 @@
             this._batchStreamInUse = false;
         };
 
-        var __flushBatchRequests_name = "flushBatchRequests";
-
         ConnectionI.prototype.flushBatchRequests = function()
         {
-            var promise = new Promise();
-            /* TODO: Derive a class from Promise?
-            var result:IceInternal.ConnectionBatchOutgoingAsync =
-                new IceInternal.ConnectionBatchOutgoingAsync(this, this._communicator, this._instance, __flushBatchRequests_name);
+            var result = new ConnectionBatchOutgoingAsync(this, this._communicator, "flushBatchRequests");
             try
             {
                 result.__send();
             }
-            catch(ex:LocalException)
+            catch(ex)
             {
-                result._this._exception(ex);
+                result.__exception(ex);
             }
             return result;
-            */
-            return promise;
         };
 
         ConnectionI.prototype.flushAsyncBatchRequests = function(outAsync)
@@ -640,7 +639,6 @@
             this._batchStream.writeInt(this._batchRequestNum);
 
             this._batchStream.swap(outAsync.__os());
-
 
             try
             {
