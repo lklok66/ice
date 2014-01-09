@@ -59,23 +59,6 @@
         {
             return this._reference.toString();
         };
-        
-        ObjectPrx.prototype.ice_instanceof = function(T)
-        {
-            if(T)
-            {
-                if(this instanceof T)
-                {
-                    return true;
-                }
-                var p = Object.getPrototypeOf(this);
-                if(p !== null && p !== undefined && p.__implements)
-                {
-                    return p.__implements.indexOf(T) !== -1;
-                }
-            }
-            return false;
-        };
 
         ObjectPrx.prototype.ice_isA = function(__id, __ctx)
         {
@@ -867,14 +850,6 @@
         //
         // NOT a prototype function
         //
-        ObjectPrx.checkedCast = function(prx, facet, ctx)
-        {
-            return ObjectPrx.checkedCastImpl(ObjectPrx, "::Ice::Object", prx, facet, ctx);
-        };
-
-        //
-        // NOT a prototype function
-        //
         ObjectPrx.checkedCastImpl = function(type, id, prx, facet, ctx)
         {
             var __promise = null;
@@ -930,7 +905,7 @@
         //
         ObjectPrx.uncheckedCast = function(prx, facet)
         {
-            return ObjectPrx.uncheckedCastImpl(ObjectPrx, prx, facet);
+            return ObjectPrx.uncheckedCastImpl(this, prx, facet);
         };
 
         //
@@ -955,14 +930,12 @@
             get: function(){ return 2; }
         });
             
-        ObjectPrx.__write = function(os, v)
+        ObjectPrx.write = function(os, v)
         {
             os.writeProxy(v);
         };
-        
-        ObjectPrx.write = ObjectPrx.__write;
             
-        ObjectPrx.__read = function(is)
+        ObjectPrx.read = function(is)
         {
             var v = is.readProxy();
             if(v !== null)
@@ -971,14 +944,13 @@
             }
             return v;
         };
-        ObjectPrx.read = ObjectPrx.__read;
             
-        ObjectPrx.__writeOpt = function(os, tag, v)
+        ObjectPrx.writeOpt = function(os, tag, v)
         {
             os.writeOptProxy(tag, v);
         };
         
-        ObjectPrx.__readOpt = function(is, tag)
+        ObjectPrx.readOpt = function(is, tag)
         {
             var v = is.readOptProxy();
             if(v !== null)
@@ -1020,16 +992,15 @@
             }
             
             // Static mtehods
-            prx.ice_staticId = function() { return staticId; };
+            prx.ice_staticId = staticId;
             
             // Copy static methods inherited from ObjectPrx
             prx.checkedCast = ObjectPrx.checkedCast;
-            prx.__write = ObjectPrx.__write;
+            prx.uncheckedCast = ObjectPrx.uncheckedCast;
             prx.write = ObjectPrx.write;
-            prx.__writeOpt = ObjectPrx.__writeOpt;
-            prx.__read = ObjectPrx.__read;
+            prx.writeOpt = ObjectPrx.writeOpt;
             prx.read = ObjectPrx.read;
-            prx.__readOpt = ObjectPrx.__readOpt;
+            prx.readOpt = ObjectPrx.readOpt;
             prx.defineProxy = ObjectPrx.defineProxy;
             
             //static properties
@@ -1069,7 +1040,7 @@
                 {
                     return true;
                 }
-                this.constructor.__instanceof(T)
+                return this.constructor.__instanceof(T);
             }
             return false;
         };

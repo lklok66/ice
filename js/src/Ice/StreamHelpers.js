@@ -241,7 +241,7 @@
         };
         
         //
-        // Functional mixin to add __readOpt/__writeOpt to structs.
+        // Functional mixin to add readOpt/writeOpt to structs.
         //
         StreamHelpers.StructHelper = function(T, minWireSize, optionalFormat)
         {
@@ -261,7 +261,7 @@
             
             if(optionalFormat === OptionalFormat.FSize)
             {
-                T.__writeOpt = function(os, tag, v)
+                T.writeOpt = function(os, tag, v)
                 {
                     if(v !== undefined && os.writeOpt(tag, OptionalFormat.FSize))
                     {
@@ -271,7 +271,7 @@
                     }
                 };
                 
-                T.__readOpt = function(is, tag)
+                T.readOpt = function(is, tag)
                 {
                     var v;
                     if(is.readOpt(tag, OptionalFormat.FSize))
@@ -284,7 +284,7 @@
             }
             else if(optionalFormat === OptionalFormat.VSize)
             {
-                T.__writeOpt = function(os, tag, v)
+                T.writeOpt = function(os, tag, v)
                 {
                     if(v !== undefined && os.writeOpt(tag, OptionalFormat.VSize))
                     {
@@ -293,7 +293,7 @@
                     }
                 };
                 
-                T.__readOpt = function(is, tag)
+                T.readOpt = function(is, tag)
                 {
                     var v;
                     if(is.readOpt(tag, OptionalFormat.VSize))

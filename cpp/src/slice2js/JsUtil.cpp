@@ -726,16 +726,7 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
             }
             case Builtin::KindObjectProxy:
             {
-                string typeS = typeToString(type);
-                if(marshal)
-                {
-                    out << nl << stream << ".writeOptProxy(" << tag << ", " << param << ");";
-                }
-                else
-                {
-                    out << nl << param << " = " << stream << ".readOptProxy(" << tag << ");";
-                }
-                return;
+                break;
             }
             case Builtin::KindLocalObject:
             {
@@ -759,15 +750,15 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
         return;
     }
     
-    if(ProxyPtr::dynamicCast(type))
+    if(ProxyPtr::dynamicCast(type) || (builtin && builtin == Builtin::KindObjectProxy))
     {
         if(marshal)
         {
-            out << nl << typeToString(type) << ".__writeOpt(" << stream << ", " << tag << ", " << param << ");";
+            out << nl << typeToString(type) << ".writeOpt(" << stream << ", " << tag << ", " << param << ");";
         }
         else
         {
-            out << nl << param << " = " << typeToString(type) << ".__readOpt(" << stream << ", " << tag << ");";
+            out << nl << param << " = " << typeToString(type) << ".readOpt(" << stream << ", " << tag << ");";
         }
         return;
     }
@@ -777,11 +768,11 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-            out << nl << typeToString(type) << ".__writeOpt(" << stream << ", " << tag << ", " << param << ");";
+            out << nl << typeToString(type) << ".writeOpt(" << stream << ", " << tag << ", " << param << ");";
         }
         else
         {
-            out << nl << param << " = " << typeToString(type) << ".__readOpt(" << stream << ", " << tag << ");";
+            out << nl << param << " = " << typeToString(type) << ".readOpt(" << stream << ", " << tag << ");";
         }
         return;
     }

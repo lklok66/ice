@@ -1425,43 +1425,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             baseParamNames.push_back(fixId((*q)->name()));
         }
     }
-
-    if(!p->isLocal())
-    {
-        const string staticId = "\"" + localScope + "." + prxName + "\"";
-        const string baseProxy = 
-            !p->isInterface() && base ? (getLocalScope(base->scope()) + "." + base->name() + "Prx") : "Ice.ObjectPrx";
-        _out << nl << localScope << '.' << prxName << " = " << baseProxy << ".defineProxy(" << staticId;
-        if(!bases.empty())
-        {
-            _out << ", [";
-            _out.inc();
-            for(ClassList::const_iterator q = bases.begin(); q != bases.end();)
-            {
-                ClassDefPtr base = *q;
-                if(base->isInterface())
-                {
-                    _out << nl << getLocalScope(base->scope()) << "." << base->name() << "Prx";
-                    if(++q != bases.end())
-                    {
-                        _out << ", ";
-                    }
-                }
-                else
-                {
-                    q++;
-                }
-            }
-            _out.dec();
-            _out << "]";
-        }
-        _out << ");";
-        _out << nl << localScope << '.' << prxName << ".uncheckedCast = function(__prx, __facet)";
-        _out << sb;
-        _out << nl << "return Ice.ObjectPrx.uncheckedCastImpl(" << localScope << "." << prxName << ", __prx, __facet);";
-        _out << eb << ";";
-    }
-
+    
     _out << sp;
     writeDocComment(p, getDeprecateReason(p, 0, "type"));
     _out << nl << localScope << '.' << name << " = function" << spar << allParamNames << epar;
@@ -1470,6 +1434,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
     {
         _out << nl << baseRef << ".call" << spar << "this" << baseParamNames << epar << ';';
     }
+    
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
         const bool isProtected = p->hasMetaData("protected") || (*q)->hasMetaData("protected");
@@ -1503,7 +1468,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         }
     }
     _out << eb << ";";
-
+    
     if(!p->isLocal() || hasBaseClass)
     {
         _out << nl << localScope << '.' << name << ".prototype = new " << baseRef << "();";
@@ -1566,7 +1531,38 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         _out << sb;
         _out << nl << "return " << localScope << '.' << name << ".__ids[" << scopedPos << "];";
         _out << eb << ";";
-        _out << nl << localScope << "." << prxName << ".ice_staticId = " << localScope << '.' << name << ".ice_staticId;";
+    }
+
+    if(!p->isLocal())
+    {
+        const string staticId = localScope + "." + name + ".ice_staticId";
+        const string baseProxy = 
+            !p->isInterface() && base ? (getLocalScope(base->scope()) + "." + base->name() + "Prx") : "Ice.ObjectPrx";
+        _out << nl << localScope << '.' << prxName << " = " << baseProxy << ".defineProxy(" << staticId;
+        if(!bases.empty())
+        {
+            _out << ", [";
+            _out.inc();
+            for(ClassList::const_iterator q = bases.begin(); q != bases.end();)
+            {
+                ClassDefPtr base = *q;
+                if(base->isInterface())
+                {
+                    _out << nl << getLocalScope(base->scope()) << "." << base->name() << "Prx";
+                    if(++q != bases.end())
+                    {
+                        _out << ", ";
+                    }
+                }
+                else
+                {
+                    q++;
+                }
+            }
+            _out.dec();
+            _out << "]";
+        }
+        _out << ");";
     }
 
     const OperationList ops = p->operations();
