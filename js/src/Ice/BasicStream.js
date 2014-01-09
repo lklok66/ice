@@ -2472,6 +2472,25 @@
                 return undefined;
             }
         };
+        
+        BasicStream.prototype.writeByteSeq = function(v)
+        {
+            if(v === null || v.length === 0)
+            {
+                this.writeSize(0);
+            }
+            else
+            {
+                this.writeSize(v.length);
+                this.expand(v.length);
+                this._buf.putArray(v);
+            }
+        };
+        
+        BasicStream.prototype.readByteSeq = function()
+        {
+            return this._buf.getArray(this.readAndCheckSeqSize(1));
+        };
 
         BasicStream.prototype.writeBool = function(v)
         {

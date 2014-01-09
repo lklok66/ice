@@ -327,13 +327,13 @@
                     
                     (function()
                     {
-                        var arr =
+                        var arr = Ice.Buffer.createNative(
                         [
                             0x01,
                             0x11,
                             0x12,
                             0x22
-                        ];
+                        ]);
                         os = new OutputStream(comm);
                         Ice.ByteSeqHelper.write(os, arr);
                         var data = os.finished();
@@ -642,7 +642,7 @@
                             arr[i].s = new Test.SmallStruct();
                             arr[i].s.e = Test.MyEnum.enum2;
                             arr[i].seq1 = [true, false, true, false];
-                            arr[i].seq2 = [1, 2, 3, 4];
+                            arr[i].seq2 = Ice.Buffer.createNative([1, 2, 3, 4]);
                             arr[i].seq3 = [1, 2, 3, 4];
                             arr[i].seq4 = [1, 2, 3, 4];
                             arr[i].seq5 = [new Ice.Long(0, 1), new Ice.Long(0, 2), new Ice.Long(0, 3), new Ice.Long(0, 4)];
@@ -726,7 +726,7 @@
                         c.s = new Test.SmallStruct();
                         c.s.e = Test.MyEnum.enum2;
                         c.seq1 = [true, false, true, false];
-                        c.seq2 = [1, 2, 3, 4];
+                        c.seq2 = Ice.Buffer.createNative([1, 2, 3, 4]);
                         c.seq3 = [1, 2, 3, 4];
                         c.seq4 = [1, 2, 3, 4];
                         c.seq5 = [new Ice.Long(0, 1), new Ice.Long(0, 2), new Ice.Long(0, 3), new Ice.Long(0, 4)];

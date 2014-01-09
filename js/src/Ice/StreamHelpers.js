@@ -347,9 +347,29 @@
         Object.defineProperty(SequenceHelper.prototype, "minWireSize", {
             get: function(){ return 1; }
         });
+        
+        // Speacialization optimized for ByteSeq
+        StreamHelpers.ByteSequenceHelper = {};
+        
+        StreamHelpers.ByteSequenceHelper.write = function(os, v)
+        {
+            return os.writeByteSeq(v);
+        };
+        
+        StreamHelpers.ByteSequenceHelper.read = function(is)
+        {
+            return is.readByteSeq();
+        };
+        
+        VSize1OptHelper.call(StreamHelpers.ByteSequenceHelper);
 
         StreamHelpers.generateSeqHelper = function(elementHelper, optionalFormat)
         {
+            if(elementHelper === StreamHelpers.ByteHelper)
+            {
+                return StreamHelpers.ByteSequenceHelper;
+            }
+            
             var Helper = new SequenceHelper();
             
             if(optionalFormat == OptionalFormat.FSize)
@@ -358,7 +378,7 @@
             }
             if(optionalFormat == OptionalFormat.VSize)
             {
-                if(elementHelper === StreamHelpers.BoolHelper || elementHelper === StreamHelpers.ByteHelper)
+                if(elementHelper === StreamHelpers.BoolHelper)
                 {
                     VSize1OptHelper.call(Helper);
                 }
