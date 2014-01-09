@@ -211,11 +211,6 @@
         //
         Promise.all = function()
         {
-            if(arguments.length === 1)
-            {
-                return arguments[0];
-            }
-
             var promise = new Promise();
             var promises = Array.prototype.slice.call(arguments);
             var results = new Array(arguments.length);

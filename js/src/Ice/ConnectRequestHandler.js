@@ -171,7 +171,6 @@
             }
             else
             {
-                Debug.assert(this._initialized);
                 return this._connection;
             }
         };
