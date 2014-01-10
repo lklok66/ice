@@ -7,16 +7,4 @@
 //
 // **********************************************************************
 
-require("./Client").test.Ice.inheritance.run({
-    write: function(msg) { process.stdout.write(msg); },
-    writeLine: function(msg) { this.write(msg + "\n"); }
-}).exception(function(ex){
-    if(ex.stack)
-    {
-        console.log(ex.stack);
-    }
-    else
-    {
-        console.log(ex);
-    }
-});
+require("../../Common/Common")(require("./Client").test.Ice.inheritance.run);

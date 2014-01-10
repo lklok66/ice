@@ -480,6 +480,7 @@
                     var c = null;
                     try
                     {
+                        id.properties.setProperty("Ice.MessageSizeMax", "10");
                         c = Ice.initialize(id);
                         allTests(out, c).then(function(){ 
                                 return c.destroy();

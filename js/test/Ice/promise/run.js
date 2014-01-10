@@ -7,7 +7,4 @@
 //
 // **********************************************************************
 
-require("./Client").test.Ice.promise.run({
-    write: function(msg){ process.stdout.write(msg); },
-    writeLine: function(msg){ this.write(msg + "\n"); }
-});
+require("../../Common/Common")(require("./Client").test.Ice.promise.run);

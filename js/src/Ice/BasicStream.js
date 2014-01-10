@@ -142,7 +142,6 @@
         EncapsDecoder.prototype.addPatchEntry = function(index, patcher)
         {
             Debug.assert(index > 0);
-
             //
             // Check if already un-marshalled the object. If that's the case,
             // just patch the object smart pointer and we're done.
@@ -218,7 +217,7 @@
                 }
             }
             
-            if((this._patchMap === null || this._patchMap.size === 0) && this._objectList !== null)
+            if((this._patchMap === null || this._patchMap.size === 0) && this._objectList === null)
             {
                 try
                 {
@@ -297,10 +296,9 @@
             }
         };
 
-        EncapsDecoder10.prototype.throwException = function(factory)
+        EncapsDecoder10.prototype.throwException = function()
         {
             Debug.assert(this._sliceType === SliceType.NoSlice);
-            Debug.assert(factory !== undefined);
 
             //
             // User exception with the 1.0 encoding start with a boolean flag
@@ -309,9 +307,7 @@
             // This allows reading the pending objects even if some part of
             // the exception was sliced.
             //
-            var usesClasses = this._stream.readBool(),
-                mostDerivedId,
-                userEx;
+            var usesClasses = this._stream.readBool();
             this._sliceType = SliceType.ExceptionSlice;
             this._skipFirstSlice = false;
 
@@ -319,33 +315,10 @@
             // Read the first slice header.
             //
             this.startSlice();
-            mostDerivedId = this._typeId;
+            var mostDerivedId = this._typeId;
             while(true)
             {
-                userEx = null;
-                //
-                // Use a factory if one was provided.
-                //
-                if(factory !== null)
-                {
-                    try
-                    {
-                        factory.createAndThrow(this._typeId);
-                    }
-                    catch(ex)
-                    {
-                        if(!(ex instanceof Ice.UserException))
-                        {
-                            throw ex;
-                        }
-                        userEx = ex;
-                    }
-                }
-
-                if(userEx === null)
-                {
-                    userEx = this._stream.createUserException(this._typeId);
-                }
+                var userEx = this._stream.createUserException(this._typeId);
 
                 //
                 // We found the exception.
@@ -643,48 +616,20 @@
             }
         };
 
-        EncapsDecoder11.prototype.throwException = function(factory)
+        EncapsDecoder11.prototype.throwException = function()
         {
             Debug.assert(this._current === null);
-            Debug.assert(factory !== null);
-            
-            var mostDerivedId,
-                userEx;
-
             this.push(SliceType.ExceptionSlice);
 
             //
             // Read the first slice header.
             //
             this.startSlice();
-            mostDerivedId = this._current.typeId;
+            var mostDerivedId = this._current.typeId;
             while(true)
             {
-                userEx = null;
-
-                //
-                // Use a factory if one was provided.
-                //
-                if(factory !== null && factory !== undefined)
-                {
-                    try
-                    {
-                        factory.createAndThrow(this._current.typeId);
-                    }
-                    catch(ex)
-                    {
-                        if(!(ex instanceof Ice.UserException))
-                        {
-                            throw ex;
-                        }
-                        userEx = ex;
-                    }
-                }
-
-                if(userEx === null)
-                {
-                    userEx = this._stream.createUserException(this._current.typeId);
-                }
+                
+                var userEx = this._stream.createUserException(this._current.typeId);
 
                 //
                 // We found the exception.
@@ -1424,7 +1369,7 @@
                 // unknown).
                 // 
                 index = this._current.indirectionMap.get(v);
-                if(index !== undefined)
+                if(index === undefined)
                 {
                     this._current.indirectionTable.push(v);
                     idx = this._current.indirectionTable.length; // Position + 1 (0 is reserved for nil)
@@ -2989,10 +2934,10 @@
             this._writeEncapsStack.encoder.writeUserException(e);
         };
 
-        BasicStream.prototype.throwException = function(factory)
+        BasicStream.prototype.throwException = function()
         {
             this.initReadEncaps();
-            this._readEncapsStack.decoder.throwException(factory);
+            this._readEncapsStack.decoder.throwException();
         };
 
         BasicStream.prototype.sliceObjects = function(b)
