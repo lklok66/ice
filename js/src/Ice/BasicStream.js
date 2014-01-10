@@ -844,8 +844,8 @@
                         "compact format prevents slicing (the sender should use the sliced format instead)", 
                         this._current.typeId);
                 }
-
-                if(this._current.typeId.startsWith("::"))
+                
+                if(this._current.typeId.indexOf("::") === 0)
                 {
                     throw new Ice.UnknownUserException(this._current.typeId.substring(2));
                 }

@@ -30,6 +30,10 @@
 
         Timer.prototype.destroy = function()
         {
+            var self = this;
+            this._tokens.forEach(function(key, value){
+                self.cancel(key);
+            });
             this._destroyed = true;
             this._tokens.clear();
         }

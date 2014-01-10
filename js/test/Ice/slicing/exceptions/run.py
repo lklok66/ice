@@ -8,36 +8,21 @@
 #
 # **********************************************************************
 
-import os, sys, re, getopt
+import os, sys
 
-path = [ ".", "..", "../..", "../../..", "../../../.." ]
+path = [ ".", "..", "../..", "../../..", "../../../..", "../../../../.." ]
 head = os.path.dirname(sys.argv[0])
 if len(head) > 0:
     path = [os.path.join(head, p) for p in path]
 path = [os.path.abspath(p) for p in path if os.path.exists(os.path.join(p, "scripts", "TestUtil.py")) ]
 if len(path) == 0:
     raise RuntimeError("can't find toplevel directory!")
-
 sys.path.append(os.path.join(path[0], "scripts"))
 import TestUtil
 
-#
-# List of all basic tests.
-#
-tests = [
-    ("Ice/binding", ["once"]),
-    ("Ice/defaultValue", ["once"]),
-    ("Ice/enums", ["once"]),
-    ("Ice/exceptions", ["once"]),
-    ("Ice/facets", ["once"]),
-    ("Ice/inheritance", ["once"]),
-    ("Ice/objects", ["once"]),
-    ("Ice/optional", ["once"]),
-    ("Ice/promise", ["once"]),
-    ("Ice/proxy", ["once"]),
-    ("Ice/slicing/exceptions", ["once"]),
-    ("Ice/stream", ["once"]),
-    ]
+print("Running test with sliced format.")
+TestUtil.clientServerTest()
 
-if __name__ == "__main__":
-    TestUtil.run(tests)
+print("Running test with 1.0 encoding.")
+TestUtil.clientServerTest(additionalClientOptions="--Ice.Default.EncodingVersion=1.0", 
+                          additionalServerOptions="--Ice.Default.EncodingVersion=1.0")

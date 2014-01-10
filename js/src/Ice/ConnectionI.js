@@ -1957,12 +1957,12 @@
             var self = this;
             if((op & SocketOperation.Read) !== 0)
             {
-                this._readTimeoutId = this._timer.schedule(timeout, function() { self.timedOut(); });
+                this._readTimeoutId = this._timer.schedule(function() { self.timedOut(); }, timeout);
                 this._readTimeoutScheduled = true;
             }
             if((op & (SocketOperation.Write | SocketOperation.Connect)) !== 0)
             {
-                this._writeTimeoutId = this._timer.schedule(timeout, function() { self.timedOut(); });
+                this._writeTimeoutId = this._timer.schedule(function() { self.timedOut(); }, timeout);
                 this._writeTimeoutScheduled = true;
             }
         };

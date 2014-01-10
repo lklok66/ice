@@ -7,21 +7,11 @@
 #
 # **********************************************************************
 
-top_srcdir	= ../..
+top_srcdir	= ../../..
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= binding \
-		defaultValue \
-		enums \
-		exceptions \
-		facets \
-		inheritance \
-		objects \
-		optional \
-		proxy \
-		slicing \
-		stream
+SUBDIRS		= exceptions
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
