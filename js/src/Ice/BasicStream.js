@@ -2286,7 +2286,7 @@
             if(v > 254)
             {
                 this.expand(5);
-                this._buf.put(-1);
+                this._buf.put(255);
                 this._buf.putInt(v);
             }
             else
@@ -3003,7 +3003,7 @@
         BasicStream.prototype.readOptImpl = function(readTag, expectedFormat)
         {
             var b, v, format, tag, offset;
-            
+
             if(this.isReadEncoding_1_0())
             {
                 return false; // Optional members aren't supported with the 1.0 encoding.
@@ -3016,8 +3016,8 @@
                     return false; // End of encapsulation also indicates end of optionals.
                 }
 
-                b = this.readByte();
-                v = b < 0 ? b + 256 : b;
+                v = this.readByte();
+
                 if(v === OPTIONAL_END_MARKER)
                 {
                     this._buf.position -= 1; // Rewind.
@@ -3101,7 +3101,7 @@
                     this.skip(this.readInt());
                     break;
                 case OptionalFormat.Class:
-                    this.readObject(null);
+                    this.readObject(null, Ice.Object);
                     break;
             }
         };
@@ -3147,7 +3147,7 @@
         BasicStream.prototype.skipSize = function()
         {
             var b = this.readByte();
-            if(b === -1)
+            if(b === 255)
             {
                 this.skip(4);
             }

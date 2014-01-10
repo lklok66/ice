@@ -18,6 +18,7 @@ SUBDIRS		= binding \
 		facets \
 		inheritance \
 		objects \
+		optional \
 		proxy \
 		stream
 

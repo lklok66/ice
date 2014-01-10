@@ -153,26 +153,19 @@ Slice::JsVisitor::writeMarshalUnmarshalParams(const ParamDeclList& params, const
     {
         if(checkReturnType && op->returnTag() < (*pli)->tag())
         {
-            const string param = !marshal && isClassType(ret) ? "ret__PP" : "ret__";
-            writeOptionalMarshalUnmarshalCode(_out, ret, param, op->returnTag(), marshal);
+            writeOptionalMarshalUnmarshalCode(_out, ret, "__ret", op->returnTag(), marshal);
             checkReturnType = false;
         }
 
         string param = fixId((*pli)->name());
         TypePtr type = (*pli)->type();
 
-        if(!marshal && isClassType(type))
-        {
-            param = (*pli)->name() + "__PP";
-        }
-
         writeOptionalMarshalUnmarshalCode(_out, type, param, (*pli)->tag(), marshal);
     }
 
     if(checkReturnType)
     {
-        const string param = !marshal && isClassType(ret) ? "ret__PP" : "ret__";
-        writeOptionalMarshalUnmarshalCode(_out, ret, param, op->returnTag(), marshal);
+        writeOptionalMarshalUnmarshalCode(_out, ret, "__ret", op->returnTag(), marshal);
     }
 }
 
