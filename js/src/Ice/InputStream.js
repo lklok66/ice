@@ -18,8 +18,12 @@
         var BasicStream = Ice.BasicStream;
         var Buffer = Ice.Buffer;
 
-        var InputStream = function(communicator, data, copyData, encodingVersion)
+        var InputStream = function(communicator, data, encodingVersion, copyData)
         {
+            if(typeof(encodingVersion) === "boolean")
+            {
+                throw new Error();
+            }
             this._communicator = communicator;
             encodingVersion = encodingVersion || this._communicator.instance.defaultsAndOverrides().defaultEncoding;
             if(copyData)
@@ -33,7 +37,7 @@
             }
             else
             {
-                this._is = new BasicStream(this._communicator.instance, encodingVersion, data);
+                this._is = new BasicStream(this._communicator.instance, encodingVersion, false, data);
             }
             this._is.closure = this;
         };

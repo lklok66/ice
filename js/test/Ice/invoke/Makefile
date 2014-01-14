@@ -9,14 +9,12 @@
 
 top_srcdir	= ../../..
 
+SLICES = Test.ice
+
+GEN_SRCS = $(patsubst 	%.ice, %.js,  $(SLICES))
+
+SRCS = Client.js
+
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= exceptions objects
-
-$(EVERYTHING)::
-	@for subdir in $(SUBDIRS); \
-	do \
-	    echo "making $@ in $$subdir"; \
-	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
-	done
-
+SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) -I$(slicedir)

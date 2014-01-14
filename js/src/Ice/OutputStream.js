@@ -30,7 +30,6 @@
             get: function() { return this._communicator; }
         });
 
-
         OutputStream.prototype.writeBool = function(v)
         {
             this._os.writeBool(v);
@@ -175,14 +174,9 @@
             this._os.endWriteSlice();
         };
 
-        OutputStream.prototype.startEncapsulationWithEncoding = function(encoding, format)
+        OutputStream.prototype.startEncapsulation = function(encoding, format)
         {
-            this._os.startWriteEncapsWithEncoding(encoding, format);
-        };
-
-        OutputStream.prototype.startEncapsulation = function()
-        {
-            this._os.startWriteEncaps();
+            this._os.startWriteEncaps(encoding, format);
         };
 
         OutputStream.prototype.endEncapsulation = function()
@@ -200,12 +194,10 @@
             this._os.writePendingObjects();
         };
 
-        /*public boolean
-        writeOptional(int tag, Ice.OptionalFormat format)
+        OutputStream.prototype.writeOptional = function(tag, format)
         {
-            return _os.writeOpt(tag, format);
-        }*/
-
+            return this._os.writeOpt(tag, format);
+        };
 
         Object.defineProperty(OutputStream.prototype, "pos", {
             get: function() { return this._os.pos; }

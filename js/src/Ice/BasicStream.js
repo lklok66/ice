@@ -1861,7 +1861,7 @@
             return this._readEncapsStack.decoder.endInstance(preserve);
         };
 
-        BasicStream.prototype.startWriteEncaps = function()
+        BasicStream.prototype.startWriteEncaps = function(encoding, format)
         {
             //
             // If no encoding version is specified, use the current write
@@ -1869,18 +1869,20 @@
             // encapsulation, otherwise, use the stream encoding version.
             //
 
-            if(this._writeEncapsStack !== null)
+            if(encoding === undefined)
             {
-                this.startWriteEncapsWithEncoding(this._writeEncapsStack.encoding, this._writeEncapsStack.format);
+                if(this._writeEncapsStack !== null)
+                {
+                    encoding = this._writeEncapsStack.encoding;
+                    format = this._writeEncapsStack.format;
+                }
+                else
+                {
+                    encoding = this._encoding
+                    format = FormatType.DefaultFormat;
+                }
             }
-            else
-            {
-                this.startWriteEncapsWithEncoding(this._encoding, FormatType.DefaultFormat);
-            }
-        };
 
-        BasicStream.prototype.startWriteEncapsWithEncoding = function(encoding, format)
-        {
             Protocol.checkSupportedEncoding(encoding);
 
             var curr = this._writeEncapsCache;
@@ -2428,7 +2430,6 @@
             this.expand(1);
             this._buf.put(v ? 1 : 0);
         };
-
 
         BasicStream.prototype.writeOptBool = function(tag, v)
         {

@@ -74,26 +74,26 @@
                     (function()
                     {
                         var data = Ice.Buffer.createNative();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         is.destroy();
                     }());
 
                     (function()
                     {
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         os.startEncapsulation();
                         os.writeBool(true);
                         os.endEncapsulation();
                         var data = os.finished();
                         os.destroy();
 
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         is.startEncapsulation();
                         Debug.assert(is.readBool());
                         is.endEncapsulation();
                         is.destroy();
 
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         is.startEncapsulation();
                         Debug.assert(is.readBool());
                         is.endEncapsulation();
@@ -103,7 +103,7 @@
                     (function()
                     {
                         var data = new Ice.Buffer.createNative();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         try
                         {
                             is.readBool();
@@ -118,10 +118,10 @@
                     
                     (function()
                     {
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         os.writeBool(true);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         Debug.assert(is.readBool());
                         os.destroy();
                         is.destroy();
@@ -129,10 +129,10 @@
                     
                     (function()
                     {
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         os.writeByte(1);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         Debug.assert(is.readByte() === 1);
                         os.destroy();
                         is.destroy();
@@ -140,10 +140,10 @@
                     
                     (function()
                     {
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         os.writeShort(2);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         Debug.assert(is.readShort() === 2);
                         os.destroy();
                         is.destroy();
@@ -151,10 +151,10 @@
                     
                     (function()
                     {
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         os.writeInt(3);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         Debug.assert(is.readInt() === 3);
                         os.destroy();
                         is.destroy();
@@ -162,10 +162,10 @@
                     
                     (function()
                     {
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         os.writeFloat(5.0);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         Debug.assert(is.readFloat() === 5.0);
                         os.destroy();
                         is.destroy();
@@ -173,10 +173,10 @@
                     
                     (function()
                     {
-                        os = new OutputStream(comm);
+                        os = Ice.createOutputStream(comm);
                         os.writeDouble(6.0);
                         data = os.finished();
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         Debug.assert(is.readDouble() === 6.0);
                         os.destroy();
                         is.destroy();
@@ -184,10 +184,10 @@
                     
                     /*(function()
                     {
-                        os = new OutputStream(comm);
+                        os = Ice.createOutputStream(comm);
                         os.writeString("hello world");
                         data = os.finished();
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         Debug.assert(is.readString() == "hello world");
                         os.destroy();
                         is.destroy();
@@ -197,10 +197,10 @@
                     out.write("testing constructed types... ");
                     (function()
                     {
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm)
                         os.writeEnum(Test.MyEnum.enum3);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         Debug.assert(is.readEnum(Test.MyEnum).equals(Test.MyEnum.enum3));
                         os.destroy();
                         is.destroy();
@@ -208,7 +208,7 @@
                     
                     (function()
                     {
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm)
                         var s = new Test.SmallStruct();
                         s.bo = true;
                         s.by = 1;
@@ -222,14 +222,14 @@
                         s.p = Test.MyClassPrx.uncheckedCast(comm.stringToProxy("test:default"));
                         os.writeStruct(s);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         Debug.assert(is.readStruct(Test.SmallStruct).equals(s));
                         os.destroy();
                         is.destroy();
                     }());
                     (function()
                     {
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm)
                         var o = new Test.OptionalClass();
                         o.bo = true;
                         o.by = 5;
@@ -238,7 +238,7 @@
                         os.writeObject(o);
                         os.writePendingObjects();
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         
                         var o2 = null;
                         is.readObject(function(obj) { o2 = obj;}, Test.OptionalClass );
@@ -263,7 +263,7 @@
                     }());
                     (function()
                     {
-                        var os = new OutputStream(comm, Ice.Protocol.Encoding_1_0);
+                        var os = Ice.createOutputStream(comm, Ice.Encoding_1_0);
                         var o = new Test.OptionalClass();
                         o.bo = true;
                         o.by = 5;
@@ -272,7 +272,7 @@
                         os.writeObject(o);
                         os.writePendingObjects();
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true, Ice.Protocol.Encoding_1_0);
+                        var is = Ice.createInputStream(comm, data, Ice.Encoding_1_0);
                         var o2 = null;
                         is.readObject(function(obj) { o2 = obj;}, Test.OptionalClass );
                         is.readPendingObjects();
@@ -295,10 +295,10 @@
                             false
                         ];
                         
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Ice.BoolSeqHelper.write(os, arr);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var arr2 = Ice.BoolSeqHelper.read(is);
                         Debug.assert(ArrayUtil.equals(arr2, arr, function(v1, v2){ return v1 === v2; }));
                         os.destroy();
@@ -311,10 +311,10 @@
                             arr
                         ];
                         
-                        os = new OutputStream(comm);
+                        os = Ice.createOutputStream(comm);
                         Test.BoolSSHelper.write(os, arrS);
                         data = os.finished();
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         var arr2S = Test.BoolSSHelper.read(is);
                         Debug.assert(arr2S.length === arrS.length);
                         for(var i = 0; i < arr2S.length; ++i)
@@ -334,10 +334,10 @@
                             0x12,
                             0x22
                         ]);
-                        os = new OutputStream(comm);
+                        os = Ice.createOutputStream(comm);
                         Ice.ByteSeqHelper.write(os, arr);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var arr2 = Ice.ByteSeqHelper.read(is);
                         Debug.assert(ArrayUtil.equals(arr2, arr));
                         os.destroy();
@@ -349,10 +349,10 @@
                             [],
                             arr
                         ];
-                        os = new OutputStream(comm);
+                        os = Ice.createOutputStream(comm);
                         Test.ByteSSHelper.write(os, arrS);
                         data = os.finished();
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         var arr2S = Test.ByteSSHelper.read(is);
                         Debug.assert(arr2S.length === arrS.length);
                         for(var i = 0; i < arr2S.length; ++i)
@@ -372,10 +372,10 @@
                             0x12,
                             0x22
                         ];
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Ice.ShortSeqHelper.write(os, arr);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var arr2 = Ice.ShortSeqHelper.read(is);
                         Debug.assert(ArrayUtil.equals(arr2, arr));
                         os.destroy();
@@ -387,10 +387,10 @@
                             [],
                             arr
                         ];
-                        os = new OutputStream(comm);
+                        os = Ice.createOutputStream(comm);
                         Test.ShortSSHelper.write(os, arrS);
                         data = os.finished();
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         var arr2S = Test.ShortSSHelper.read(is);
                         Debug.assert(arr2S.length === arrS.length);
                         for(var i = 0; i < arr2S.length; ++i)
@@ -410,10 +410,10 @@
                             0x12,
                             0x22
                         ];
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Ice.IntSeqHelper.write(os, arr);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var arr2 = Ice.IntSeqHelper.read(is);
                         Debug.assert(ArrayUtil.equals(arr2, arr));
                         os.destroy();
@@ -425,10 +425,10 @@
                             [],
                             arr
                         ];
-                        os = new OutputStream(comm);
+                        os = Ice.createOutputStream(comm);
                         Test.IntSSHelper.write(os, arrS);
                         data = os.finished();
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         var arr2S = Test.IntSSHelper.read(is);
                         Debug.assert(arr2S.length === arrS.length);
                         for(var i = 0; i < arr2S.length; ++i)
@@ -448,10 +448,10 @@
                             new Ice.Long(0x00, 0x12),
                             new Ice.Long(0x00, 0x22),
                         ];
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Ice.LongSeqHelper.write(os, arr);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var arr2 = Ice.LongSeqHelper.read(is);
                         var eq = ArrayUtil.equals(arr2, arr, function(v1, v2) { return v1.equals(v2); });
                         Debug.assert(eq);
@@ -464,10 +464,10 @@
                             [],
                             arr
                         ];
-                        os = new OutputStream(comm);
+                        os = Ice.createOutputStream(comm);
                         Test.LongSSHelper.write(os, arrS);
                         data = os.finished();
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         var arr2S = Test.LongSSHelper.read(is);
                         Debug.assert(arr2S.length === arrS.length);
                         for(var i = 0; i < arr2S.length; ++i)
@@ -487,10 +487,10 @@
                             3,
                             4
                         ];
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Ice.FloatSeqHelper.write(os, arr);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var arr2 = Ice.FloatSeqHelper.read(is);
                         Debug.assert(ArrayUtil.equals(arr2, arr));
                         os.destroy();
@@ -502,10 +502,10 @@
                             [],
                             arr
                         ];
-                        os = new OutputStream(comm);
+                        os = Ice.createOutputStream(comm);
                         Test.FloatSSHelper.write(os, arrS);
                         data = os.finished();
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         var arr2S = Test.FloatSSHelper.read(is);
                         Debug.assert(arr2S.length === arrS.length);
                         for(var i = 0; i < arr2S.length; ++i)
@@ -525,10 +525,10 @@
                             3,
                             4
                         ];
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Ice.DoubleSeqHelper.write(os, arr);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var arr2 = Ice.DoubleSeqHelper.read(is);
                         Debug.assert(ArrayUtil.equals(arr2, arr));
                         os.destroy();
@@ -540,10 +540,10 @@
                             [],
                             arr
                         ];
-                        os = new OutputStream(comm);
+                        os = Ice.createOutputStream(comm);
                         Test.DoubleSSHelper.write(os, arrS);
                         data = os.finished();
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         var arr2S = Test.DoubleSSHelper.read(is);
                         Debug.assert(arr2S.length === arrS.length);
                         for(var i = 0; i < arr2S.length; ++i)
@@ -563,10 +563,10 @@
                             "string3",
                             "string4"
                         ];
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Ice.StringSeqHelper.write(os, arr);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var arr2 = Ice.StringSeqHelper.read(is);
                         Debug.assert(ArrayUtil.equals(arr2, arr));
                         os.destroy();
@@ -578,10 +578,10 @@
                             [],
                             arr
                         ];
-                        os = new OutputStream(comm);
+                        os = Ice.createOutputStream(comm);
                         Test.StringSSHelper.write(os, arrS);
                         data = os.finished();
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         var arr2S = Test.StringSSHelper.read(is);
                         Debug.assert(arr2S.length === arrS.length);
                         for(var i = 0; i < arr2S.length; ++i)
@@ -601,10 +601,10 @@
                             Test.MyEnum.enum1,
                             Test.MyEnum.enum2
                         ];
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Test.MyEnumSHelper.write(os, arr);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var arr2 = Test.MyEnumSHelper.read(is);
                         Debug.assert(ArrayUtil.equals(arr2, arr, function(v1, v2){ return v1.equals(v2); }));
                         os.destroy();
@@ -616,10 +616,10 @@
                             [],
                             arr
                         ];
-                        os = new OutputStream(comm);
+                        os = Ice.createOutputStream(comm);
                         Test.MyEnumSSHelper.write(os, arrS);
                         data = os.finished();
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         var arr2S = Test.MyEnumSSHelper.read(is);
                         Debug.assert(arr2S.length === arrS.length);
                         for(var i = 0; i < arr2S.length; ++i)
@@ -654,11 +654,11 @@
                             arr[i].d = new Ice.HashMap();
                             arr[i].d.set("hi", arr[i]);
                         }
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Test.MyClassSHelper.write(os, arr);
                         os.writePendingObjects();
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var arr2 = Test.MyClassSHelper.read(is);
                         is.readPendingObjects();
                         Debug.assert(arr2.length == arr.length);
@@ -688,10 +688,10 @@
                             [],
                             arr
                         ];
-                        os = new OutputStream(comm);
+                        os = Ice.createOutputStream(comm);
                         Test.MyClassSSHelper.write(os, arrS);
                         data = os.finished();
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         var arr2S = Test.MyClassSSHelper.read(is);
                         test(arr2S.length == arrS.length);
                         test(arr2S[0].length == arrS[0].length);
@@ -704,11 +704,11 @@
                     (function()
                     {
                         var i = new MyInterfaceI();
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         os.writeObject(i);
                         os.writePendingObjects();
                         var data = os.finished();
-                        is = new InputStream(comm, data, true);
+                        is = Ice.createInputStream(comm, data);
                         var j = null;
                         is.readObject(function(obj){ j = obj; }, Test.MyInterface);
                         is.readPendingObjects();
@@ -717,7 +717,7 @@
                     
                     (function()
                     {
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         var ex = new Test.MyException();
 
                         var c = new Test.MyClass();
@@ -743,7 +743,7 @@
                         os.writeException(ex);
                         var data = os.finished();
             
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         try
                         {
                             is.throwException();
@@ -770,10 +770,10 @@
                         var dict = new Ice.HashMap(); //HashMap<Byte, Boolean>();
                         dict.set(4, true);
                         dict.set(1, false);
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Test.ByteBoolDHelper.write(os, dict);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var dict2 = Test.ByteBoolDHelper.read(is);
                         test(dict2.equals(dict));
                     }());
@@ -783,10 +783,10 @@
                         var dict = new Ice.HashMap(); //HashMap<Short, Integer>();
                         dict.set(1, 9);
                         dict.set(4, 8);
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Test.ShortIntDHelper.write(os, dict);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var dict2 = Test.ShortIntDHelper.read(is);
                         test(dict2.equals(dict));
                     }());
@@ -803,10 +803,10 @@
                         dict.valueComparator = floatComparator;
                         dict.set(new Ice.Long(0, 123809828), 0.51);
                         dict.set(new Ice.Long(0, 123809829), 0.56);
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Test.LongFloatDHelper.write(os, dict);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var dict2 = Test.LongFloatDHelper.read(is);
                         dict2.keyComparator = Ice.HashMap.compareEquals;
                         dict2.valueComparator = floatComparator;
@@ -818,10 +818,10 @@
                         var dict = new Ice.HashMap(); // HashMap<String, String>();
                         dict.set("key1", "value1");
                         dict.set("key2", "value2");
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Test.StringStringDHelper.write(os, dict);
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var dict2 = Test.StringStringDHelper.read(is);
                         test(dict2.equals(dict));
                     }());
@@ -837,11 +837,11 @@
                         c.s = new Test.SmallStruct();
                         c.s.e = Test.MyEnum.enum3;
                         dict.set("key2", c);
-                        var os = new OutputStream(comm);
+                        var os = Ice.createOutputStream(comm);
                         Test.StringMyClassDHelper.write(os, dict);
                         os.writePendingObjects();
                         var data = os.finished();
-                        var is = new InputStream(comm, data, true);
+                        var is = Ice.createInputStream(comm, data);
                         var dict2 = Test.StringMyClassDHelper.read(is);
                         is.readPendingObjects();
                         test(dict2.size === dict.size);

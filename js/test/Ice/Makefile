@@ -17,6 +17,7 @@ SUBDIRS		= binding \
 		exceptions \
 		facets \
 		inheritance \
+		invoke \
 		objects \
 		optional \
 		proxy \

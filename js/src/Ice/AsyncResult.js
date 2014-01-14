@@ -26,7 +26,7 @@
         var UserException = Ice.UserException;
         var BasicStream = Ice.BasicStream;
 
-        var AsyncResult = function(communicator, op, connection, proxy, adapter, completedFn)
+        var AsyncResult = function(communicator, op, connection, proxy, adapter, completedFn, sentFn)
         {
             //
             // AsyncResult can be constructed by a sub-type's prototype, in which case the
@@ -36,6 +36,7 @@
             if(communicator !== undefined)
             {
                 this._completed = completedFn;
+                this._sent = sentFn;
                 this._is = null;
                 this._os = communicator !== null ?
                     new BasicStream(this._instance, Protocol.currentProtocolEncoding, false) : null;

@@ -34,6 +34,8 @@
         require("Ice/Buffer");
         require("Ice/ArrayUtil");
         require("Ice/UnknownSlicedObject");
+        require("Ice/OutputStream");
+        require("Ice/InputStream");
 
         var Ice = global.Ice || {};
         var Protocol = Ice.Protocol;
@@ -130,6 +132,16 @@
         Ice.Protocol_1_0 = Protocol.Protocol_1_0;
         Ice.Encoding_1_0 = Protocol.Encoding_1_0;
         Ice.Encoding_1_1 = Protocol.Encoding_1_1;
+        
+        Ice.createOutputStream = function(communicator, encoding)
+        {
+            return new Ice.OutputStream(communicator, encoding);
+        };
+        
+        Ice.createInputStream = function(communicator, bytes, encoding)
+        {
+            return new Ice.InputStream(communicator, bytes, encoding, true);
+        };
         
         global.Ice = Ice;
     };

@@ -11,7 +11,7 @@
     var __m = function(global, module, exports, require){
 
         require("Ice/ArrayUtil");
-        require("Ice/AsyncResultBase");
+        require("Ice/AsyncResult");
         require("Ice/ConnectRequestHandler");
         require("Ice/Debug");
         require("Ice/FormatType");
@@ -29,6 +29,7 @@
 
         var ArrayUtil = Ice.ArrayUtil;
         var AsyncResultBase = Ice.AsyncResultBase;
+        var AsyncResult = Ice.AsyncResult;
         var ConnectRequestHandler = Ice.ConnectRequestHandler;
         var Debug = Ice.Debug;
         var FormatType = Ice.FormatType;
@@ -633,6 +634,56 @@
             catch(ex)
             {
                 p.__handleLocalException(__r, ex);
+            }
+            return __r;
+        };
+        
+        ObjectPrx.prototype.ice_invoke = function(operation, mode, inParams, ctx, explicitCtx)
+        {
+            if(explicitCtx && ctx == null)
+            {
+                ctx = new Ice.HashMap();
+            }
+            
+            var self = this;
+            
+            var completedFn = function(__res)
+                {
+                    try
+                    {
+                        var results = [__res];
+                        if((__r._state & AsyncResult.OK) === 0)
+                        {
+                            results.push(false);
+                        }
+                        else
+                        {
+                            results.push(true);
+                        }
+                        if(self._reference.getMode() === Ice.ReferenceMode.ModeTwoway)
+                        {
+                            results.push(__res._is.readEncaps(null));
+                        }
+                        __res.succeed.apply(__res, results);
+                    }
+                    catch(ex)
+                    {
+                        ObjectPrx.__dispatchLocalException(__res, ex);
+                        return;
+                    }
+                };
+                
+            var __r = new OutgoingAsync(this, operation, completedFn, completedFn);
+            
+            try
+            {
+                __r.__prepare(operation, mode, ctx);
+                __r.__writeParamEncaps(inParams);
+                __r.__send();
+            }
+            catch(ex)
+            {
+                this.__handleLocalException(__r, ex);
             }
             return __r;
         };

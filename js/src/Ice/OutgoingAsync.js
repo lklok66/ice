@@ -35,7 +35,7 @@
         var Protocol = Ice.Protocol;
         var Identity = Ice.Identity;
 
-        var OutgoingAsync = function(prx, operation, completed)
+        var OutgoingAsync = function(prx, operation, completed, sent)
         {
             //
             // OutgoingAsync can be constructed by a sub-type's prototype, in which case the
@@ -43,7 +43,7 @@
             //
             if(prx !== undefined)
             {
-                AsyncResult.call(this, prx.ice_getCommunicator(), operation, null, prx, null, completed);
+                AsyncResult.call(this, prx.ice_getCommunicator(), operation, null, prx, null, completed, sent);
                 this._batch = this._proxy.ice_isBatchOneway() || this._proxy.ice_isBatchDatagram();
 
                 this._batchStarted = false;
@@ -172,7 +172,14 @@
                 {
                     this._state |= AsyncResult.Done | AsyncResult.OK;
                     this._os.resize(0);
-                    this.succeed(this);
+                    if(this._sent)
+                    {
+                        this._sent.call(null, this);
+                    }
+                    else
+                    {
+                        this.succeed(this);
+                    }
                 }
                 else if(connection.timeout() > 0)
                 {
@@ -457,7 +464,7 @@
 
         OutgoingAsync.prototype.__startWriteParams = function(format)
         {
-            this._os.startWriteEncapsWithEncoding(this._encoding, format);
+            this._os.startWriteEncaps(this._encoding, format);
             return this._os;
         };
 

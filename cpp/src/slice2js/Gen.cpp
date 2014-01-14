@@ -99,7 +99,6 @@ Slice::JsVisitor::~JsVisitor()
 void
 Slice::JsVisitor::writeMarshalUnmarshalParams(const ParamDeclList& params, const OperationPtr& op, bool marshal)
 {
-    // TODO
     ParamDeclList optionals;
 
     for(ParamDeclList::const_iterator pli = params.begin(); pli != params.end(); ++pli)
@@ -166,25 +165,6 @@ Slice::JsVisitor::writeMarshalUnmarshalParams(const ParamDeclList& params, const
     if(checkReturnType)
     {
         writeOptionalMarshalUnmarshalCode(_out, ret, "__ret", op->returnTag(), marshal);
-    }
-}
-
-void
-Slice::JsVisitor::writePostUnmarshalParams(const ParamDeclList& params, const OperationPtr& op)
-{
-    // TODO
-    for(ParamDeclList::const_iterator pli = params.begin(); pli != params.end(); ++pli)
-    {
-        if(isClassType((*pli)->type()))
-        {
-            const string tmp = (*pli)->name() + "__PP";
-            _out << nl << fixId((*pli)->name()) << " = " << tmp << ".value;";
-        }
-    }
-
-    if(op && op->returnType() && isClassType(op->returnType()))
-    {
-        _out << nl << "ret__ = ret__PP.value;";
     }
 }
 
