@@ -1619,6 +1619,27 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         }
         _out << eb << ";";
         
+        bool basePreserved = p->inheritsMetaData("preserve-slice");
+        bool preserved = p->hasMetaData("preserve-slice");
+        
+        if(preserved && !basePreserved)
+        {
+            _out << sp;
+            _out << nl << localScope << '.' << name << ".prototype.__write = function(__os)";
+            _out << sb;
+            _out << nl << "__os.startWriteObject(this.__slicedData);";
+            _out << nl << "this.__writeImpl(__os);";
+            _out << nl << "__os.endWriteObject();";
+            _out << eb;
+            _out << sp;
+            _out << nl << localScope << '.' << name << ".prototype.__read = function(__is)";
+            _out << sb;
+            _out << nl << "__is.startReadObject();";
+            _out << nl << "this.__readImpl(__is);";
+            _out << nl << "this.__slicedData = __is.endReadObject(true);";
+            _out << eb;
+        }
+        
         ClassList allBases = p->allBases();
         if(!allBases.empty())
         {
@@ -2146,6 +2167,27 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
         }
         _out << eb << ";";
         _out << nl;
+        
+        bool basePreserved = p->inheritsMetaData("preserve-slice");
+        bool preserved = p->hasMetaData("preserve-slice");
+        
+        if(preserved && !basePreserved)
+        {
+            _out << sp;
+            _out << nl << localScope << '.' << name << ".prototype.__write = function(__os)";
+            _out << sb;
+            _out << nl << "__os.startWriteException(this.__slicedData);";
+            _out << nl << "this.__writeImpl(__os);";
+            _out << nl << "__os.endWriteException();";
+            _out << eb << ";";
+            _out << sp;
+            _out << nl << localScope << '.' << name << ".prototype.__read = function(__is)";
+            _out << sb;
+            _out << nl << "__is.startReadException();";
+            _out << nl << "this.__readImpl(__is);";
+            _out << nl << "this.__slicedData = __is.endReadException(true);";
+            _out << eb << ";";
+        }
     }
 
     return false;
@@ -2170,8 +2212,14 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
     writeDocComment(p, getDeprecateReason(p, 0, "type"));
     _out << nl << localScope << '.' << name << " = function" << spar << paramNames << epar;
     _out << sb;
+    bool hasClassMembers = false;
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
+        if(!hasClassMembers && isClassType((*q)->type()))
+        {
+            hasClassMembers = true;
+        }
+        
         string memberName = fixId((*q)->name());
         _out << nl << "this." << memberName << " = " << memberName << " !== undefined ? " << memberName << " : ";
         if((*q)->defaultValueType())
@@ -2185,7 +2233,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         _out << ';';
     }
     _out << eb << ";";
-
+    
     _out << sp;
     _out << nl << localScope << '.' << name << ".prototype.toString = function()";
     _out << sb;
@@ -2250,6 +2298,10 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         _out << sp;
         _out << nl << localScope << '.' << name << ".prototype.__read = function(__is)";
         _out << sb;
+        if(hasClassMembers)
+        {
+            _out << nl << "var self = this;";
+        }
         for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
         {
             writeUnmarshalDataMember(*q);

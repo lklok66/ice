@@ -23,6 +23,8 @@
         require("Ice/LocalException");
         require("Ice/Version");
         require("Ice/TypeRegistry");
+        require("Ice/ArrayUtil");
+        require("Ice/UnknownSlicedObject");
         
         var Ice = global.Ice || {};
         
@@ -34,6 +36,8 @@
         var OptionalFormat = Ice.OptionalFormat;
         var Protocol = Ice.Protocol;
         var TraceUtil = Ice.TraceUtil;
+        var ArrayUtil = Ice.ArrayUtil;
+        var SlicedData = Ice.SlicedData;
         
         var SliceType = {};
         SliceType.NoSlice = 0;
@@ -188,7 +192,7 @@
             // be done before reading the objects (for circular references).
             //
             this._unmarshaledMap.set(index, v);
-
+            
             //
             // Read the object.
             //
@@ -809,16 +813,10 @@
 
         EncapsDecoder11.prototype.skipSlice = function()
         {
-            var logger,
-                slicingCat,
-                start,
-                info, b, end, dataEnd,
-                i, length, indirectionTable = [];
-            
             if(this._stream.instance.traceLevels().slicing > 0)
             {
-                logger = this._stream.instance.initializationData().logger;
-                slicingCat = this._stream.instance.traceLevels().slicingCat;
+                var logger = this._stream.instance.initializationData().logger;
+                var slicingCat = this._stream.instance.traceLevels().slicingCat;
                 if(this._current.sliceType === SliceType.ExceptionSlice)
                 {
                     TraceUtil.traceSlicing("exception", this._current.typeId, slicingCat, logger);
@@ -829,7 +827,7 @@
                 }
             }
 
-            start = this._stream.pos;
+            var start = this._stream.pos;
 
             if((this._current.sliceFlags & FLAG_HAS_SLICE_SIZE) !== 0)
             {
@@ -856,15 +854,15 @@
             //
             // Preserve this slice.
             //
-            info = {};
+            var info = new Ice.SliceInfo();
             info.typeId = this._current.typeId;
             info.compactId = this._current.compactId;
             info.hasOptionalMembers = (this._current.sliceFlags & FLAG_HAS_OPTIONAL_MEMBERS) !== 0;
             info.isLastSlice = (this._current.sliceFlags & FLAG_IS_LAST_SLICE) !== 0;
             
-            b = this._stream._buf;
-            end = b.position;
-            dataEnd = end;
+            var b = this._stream._buf;
+            var end = b.position;
+            var dataEnd = end;
             if(info.hasOptionalMembers)
             {
                 //
@@ -895,10 +893,11 @@
 
             if((this._current.sliceFlags & FLAG_HAS_INDIRECTION_TABLE) !== 0)
             {
-                length = this._stream.readAndCheckSeqSize(1);
-                for(i = 0; i < length; ++i)
+                var length = this._stream.readAndCheckSeqSize(1);
+                var indirectionTable = [];
+                for(var i = 0; i < length; ++i)
                 {
-                    this.indirectionTable[i] = this.readInstance(this._stream.readSize(), null);
+                    indirectionTable[i] = this.readInstance(this._stream.readSize(), null);
                 }
                 this._current.indirectionTables.push(indirectionTable);
             }
@@ -906,7 +905,6 @@
             {
                 this._current.indirectionTables.push(null);
             }
-
             this._current.slices.push(info);
         };
 
@@ -992,24 +990,13 @@
                 // Slice off what we don't understand.
                 //
                 this.skipSlice();
-
                 //
                 // If this is the last slice, keep the object as an opaque
                 // UnknownSlicedData object.
                 //
                 if((this._current.sliceFlags & FLAG_IS_LAST_SLICE) !== 0)
                 {
-                    //
-                    // Provide a factory with an opportunity to supply the object.
-                    // We pass the "::Ice::Object" ID to indicate that this is the
-                    // last chance to preserve the object.
-                    //
-                    v = this.newInstance(IceObject.ice_staticId());
-                    if(v !== null && v !== undefined)
-                    {
-                        v = new Ice.UnknownSlicedObject(mostDerivedId);
-                    }
-
+                    v = new Ice.UnknownSlicedObject(mostDerivedId);
                     break;
                 }
 
@@ -1043,7 +1030,7 @@
                     {
                         ExUtil.throwUOE(T.__ids[T.__ids.length - 1], v);
                     }
-                    this._seq[index] = v;
+                    seq[index] = v;
                 };
         };
 
@@ -1077,7 +1064,7 @@
                     this.addPatchEntry(table[j], sequencePatcher(info.objects, j, IceObject));
                 }
             }
-            return {slices: this._current.slices};
+            return new SlicedData(ArrayUtil.clone(this._current.slices));
         };
 
         EncapsDecoder11.prototype.push = function(sliceType)
@@ -1400,7 +1387,6 @@
 
         EncapsEncoder11.prototype.startInstance = function(sliceType, data)
         {
-            Debug.assert(data !== undefined);
             if(this._current === null)
             {
                 this._current = new EncapsEncoder11.InstanceData(null);
@@ -1412,7 +1398,7 @@
             this._current.sliceType = sliceType;
             this._current.firstSlice = true;
 
-            if(data !== null)
+            if(data !== null && data != undefined)
             {
                 this.writeSlicedData(data);
             }
@@ -1601,7 +1587,7 @@
                     
                     for(j = 0, jj = info.objects.length; j < jj; ++j)
                     {
-                        this._current.indirectionTable.add(info.objects[j]);
+                        this._current.indirectionTable.push(info.objects[j]);
                     }
                 }
                 

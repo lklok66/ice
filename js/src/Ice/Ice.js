@@ -33,6 +33,7 @@
         require("Ice/ObjectFactory");
         require("Ice/Buffer");
         require("Ice/ArrayUtil");
+        require("Ice/UnknownSlicedObject");
 
         var Ice = global.Ice || {};
         var Protocol = Ice.Protocol;
