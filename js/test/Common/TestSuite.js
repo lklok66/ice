@@ -12,19 +12,19 @@ $(document).foundation();
         function(){
             
                     
-            TestCases.forEach(
-                function(name){
-                    var s;
-                    if(document.location.pathname.indexOf(name) !== -1)
-                    {
-                        s = "<li><b class=\"current\" href=\"#\">" + name + "</b></li>";
-                    }
-                    else
-                    {
-                        s = "<li><a href=\"" + basePath + name + "/index.html\">" + name + "</a></li>";
-                    }
-                    $(".tests").append(s);
-                });
+            for(name in TestCases)
+            {
+                var s;
+                if(document.location.pathname.indexOf(name) !== -1)
+                {
+                    s = "<li><b class=\"current\" href=\"#\">" + name + "</b></li>";
+                }
+                else
+                {
+                    s = "<li><a href=\"" + basePath + name + "/index.html\">" + name + "</a></li>";
+                }
+                $(".tests").append(s);
+            }
 
             var panel = $(".console ul");
             var out = {};
