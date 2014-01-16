@@ -7,28 +7,14 @@
 #
 # **********************************************************************
 
-top_srcdir	= ../..
+top_srcdir	= ../../..
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= binding \
-		defaultValue \
-		enums \
-		exceptions \
-		facets \
-		inheritance \
-		invoke \
-		objects \
-		optional \
-		promise \
-		proxy \
-		slicing \
-		stream
+index.html: $(top_srcdir)/test/Common/index.html
+	cp $(top_srcdir)/test/Common/index.html .
+	
+all:: index.html
 
-$(EVERYTHING)::
-	@for subdir in $(SUBDIRS); \
-	do \
-	    echo "making $@ in $$subdir"; \
-	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
-	done
-
+clean:: 
+	rm index.html

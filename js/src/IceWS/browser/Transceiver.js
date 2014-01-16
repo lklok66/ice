@@ -55,7 +55,7 @@
             {
                 url += ":" + addr.port;
             }
-            url += resource ? encodeURIComponent(resource) : "/";
+            url += resource ? resource : "/";
             transceiver._url = url;
             transceiver._fd = null;
             transceiver._addr = addr;

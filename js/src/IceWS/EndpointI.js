@@ -36,6 +36,10 @@
             this._connectionId = conId;
             this._compress = co;
             this._resource = re;
+            if(re === undefined)
+            {
+                console.log(Error().stack);
+            }
             this.calcHashValue();
         };
 
@@ -237,7 +241,6 @@
             {
                 s += " -z";
             }
-            
             if(this._resource !== null & this._resource.length > 0)
             {
                 s += " -r ";
@@ -299,7 +302,7 @@
             }
             else
             {
-                return new EndpointI(this._instance, this._host, this._port, timeout, this._connectionId, this._compress);
+                return new EndpointI(this._instance, this._host, this._port, timeout, this._connectionId, this._compress, this._resource);
             }
         };
 
@@ -314,7 +317,7 @@
             }
             else
             {
-                return new EndpointI(this._instance, this._host, this._port, this._timeout, connectionId, this._compress);
+                return new EndpointI(this._instance, this._host, this._port, this._timeout, connectionId, this._compress, this._resource);
             }
         };
 
@@ -340,7 +343,7 @@
             }
             else
             {
-                return new EndpointI(this._instance, this._host, this._port, this._timeout, this._connectionId, compress);
+                return new EndpointI(this._instance, this._host, this._port, this._timeout, this._connectionId, compress, this._resource);
             }
         };
 

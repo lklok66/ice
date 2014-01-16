@@ -7,4 +7,4 @@
 //
 // **********************************************************************
 
-require("../../Common/Common")(require("./Client").test.Ice.exceptions.run);
+require("../../Common/Common")(module);

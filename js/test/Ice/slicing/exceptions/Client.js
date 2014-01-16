@@ -301,11 +301,6 @@
                     ).exception(
                         function(ex)
                         {
-                            console.log(ex);
-                            if(ex && ex._asyncResult)
-                            {
-                                out.writeLine("\nexception occurred in call to " + ex._asyncResult.operation);
-                            }
                             p.fail(ex);
                         }
                     );
@@ -344,7 +339,7 @@
             return p;
         };
         
-        module.exports = run;
+        module.exports.run = run;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

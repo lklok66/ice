@@ -138,7 +138,6 @@
                             conn1 = r1[1];
                             conn2 = r2[1];
                             test(conn1 === conn2);
-                            
                             return Promise.all(
                                 test1.ice_ping(),
                                 test2.ice_ping());
@@ -186,7 +185,7 @@
                         failCB,
                         function(ex)
                         {
-                            if(!(ex instanceof Ice.ConnectionRefusedException))
+                            if(!(ex instanceof Ice.ConnectionRefusedException) && !(window && ex instanceof Ice.SocketException))
                             {
                                 throw ex;
                             }
@@ -827,7 +826,7 @@
                         },
                         function(ex)
                         {
-                            if(!(ex instanceof Ice.ConnectionRefusedException))
+                            if(!(ex instanceof Ice.ConnectionRefusedException) && !(window && ex instanceof Ice.SocketException))
                             {
                                 throw ex;
                             }
@@ -951,7 +950,7 @@
                                     },
                                     function(ex)
                                     {
-                                        if(!(ex instanceof Ice.ConnectionRefusedException))
+                                        if(!(ex instanceof Ice.ConnectionRefusedException) && !(window && ex instanceof Ice.SocketException))
                                         {
                                             throw ex;
                                         }
@@ -1176,7 +1175,7 @@
                         },
                         function(ex)
                         {
-                            if(!(ex instanceof Ice.ConnectionRefusedException))
+                            if(!(ex instanceof Ice.ConnectionRefusedException) && !(window && ex instanceof Ice.SocketException))
                             {
                                 throw ex;
                             }
@@ -1252,11 +1251,6 @@
                     ).exception(
                         function(ex)
                         {
-                            console.log(ex);
-                            if(ex && ex._asyncResult)
-                            {
-                                out.writeLine("\nexception occurred in call to " + ex._asyncResult.operation);
-                            }
                             p.fail(ex);
                         }
                     );
@@ -1294,16 +1288,7 @@
                 });
             return p;
         };
-        module.exports.test = module.exports.test || {};
-        module.exports.test.Common = module.exports.test.Common || {};
-        
-        if(module.exports.test.Common.TestSuite !== undefined)
-        {
-            module.exports.test.Common.TestSuite.add("Ice/binding", run);
-        }
-        
-        module.exports.test.Ice = module.exports.test.Ice || {};
-        module.exports.test.Ice.binding = {run: run};
+        module.exports.run = run;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

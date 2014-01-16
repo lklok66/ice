@@ -7,4 +7,4 @@
 //
 // **********************************************************************
 
-require("../../../Common/Common")(require("./Client"));
+require("../../../Common/Common")(module);

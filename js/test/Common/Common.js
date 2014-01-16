@@ -20,18 +20,28 @@ var writeLine = function(msg)
 };
 
 
-var run = function(test)
+var run = function(module)
 {
     var id = new Ice.InitializationData();
     id.properties = Ice.createProperties(process.argv);
     
-    test({write: write, writeLine: writeLine}, id).exception(
+    var run = module.require("./Client").run;
+    
+    run({write: write, writeLine: writeLine}, id).exception(
         function(ex)
         {
             console.log(ex.stack);
             process.exit(1);
         }
-    );
+    ).exception(
+        function(ex)
+        {
+            if(ex && ex._asyncResult)
+            {
+                out.writeLine("\nexception occurred in call to " + ex._asyncResult.operation);
+            }
+            console.log(ex.stack);
+        });
 };
 
 module.exports = run;

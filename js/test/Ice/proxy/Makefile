@@ -18,3 +18,11 @@ SRCS = Client.js
 include $(top_srcdir)/config/Make.rules
 
 SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) -I$(slicedir)
+
+index.html: $(top_srcdir)/test/Common/index.html
+	cp $(top_srcdir)/test/Common/index.html .
+	
+all:: index.html
+
+clean:: 
+	rm index.html

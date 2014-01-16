@@ -248,12 +248,6 @@
                     ).exception(
                         function(ex)
                         {
-                            console.log(ex);
-                            if(ex && ex._asyncResult)
-                            {
-                                out.writeLine("\nexception occurred in call to " + ex._asyncResult.operation);
-                            }
-                            
                             p.fail(ex);
                         }
                     );
@@ -291,16 +285,7 @@
                 });
             return p;
         };
-        module.exports.test = module.exports.test || {};
-        module.exports.test.Common = module.exports.test.Common || {};
-        
-        if(module.exports.test.Common.TestSuite !== undefined)
-        {
-            module.exports.test.Common.TestSuite.add("Ice/facets", run);
-        }
-        
-        module.exports.test.Ice = module.exports.test.Ice || {};
-        module.exports.test.Ice.facets = {run: run};
+        module.exports.run = run;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);

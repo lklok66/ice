@@ -7,32 +7,83 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
-        global.test = global.test || {};
-        
-        var tests = {};
-        
-        var TestSuite = {};
-        
-        TestSuite.add = function(name, cb)
-        {
-            tests[name] = cb;
-        };
-        
-        TestSuite.get = function(name)
-        {
-            return tests[name];
-        };
-        
-        TestSuite.names = function()
-        {
-            return Object.keys(tests);
-        };
-        
-        global.test.Common = global.test.Common || {};
-        global.test.Common.TestSuite = TestSuite;
-    };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "test/Common/TestSuite"));
+$(document).foundation();
+    $(document).ready(
+        function(){
+            
+                    
+            TestCases.forEach(
+                function(name){
+                    var s;
+                    if(document.location.pathname.indexOf(name) !== -1)
+                    {
+                        s = "<li><b class=\"current\" href=\"#\">" + name + "</b></li>";
+                    }
+                    else
+                    {
+                        s = "<li><a href=\"" + basePath + name + "/index.html\">" + name + "</a></li>";
+                    }
+                    $(".tests").append(s);
+                });
+
+            var panel = $(".console ul");
+            var out = {};
+            
+            out.write = function(msg){
+                var str = $( ".console ul li:last-child" ).text() + msg;
+                $(".console ul li:last-child").html(str);
+                panel.scrollTop(panel.get(0).scrollHeight);
+            };
+            
+            out.writeLine = function(msg){
+                this.write(msg);
+                panel.append("<li></li>");
+                panel.scrollTop(panel.get(0).scrollHeight);
+            };
+            
+            var enabled = true;
+            var runButton = $("#run");
+            
+            var runCurrentTest = function(){
+                var current = $(".tests li.current");
+                
+                var id = new Ice.InitializationData();
+                id.properties = Ice.createProperties();
+                id.properties.setProperty("Ice.Default.Host", "localhost");
+                id.properties.setProperty("Ice.Default.Protocol", "ws");
+                        
+                run(out, id).then(function()
+                    {
+                        runButton.removeClass("disabled");
+                    },
+                    function(ex)
+                    {
+                        if(ex && ex._asyncResult)
+                        {
+                            out.writeLine("exception occurred in call to " + ex._asyncResult.operation);
+                        }
+                        var lines = ex.stack.split("\n");
+                        for(i = 0; i < lines.length; ++i)
+                        {
+                            if(i === 0)
+                            {
+                                out.writeLine(lines[i]);
+                            }
+                            else
+                            {
+                                out.writeLine("&nbsp;&nbsp;&nbsp;"  + lines[i]);
+                            }
+                        }
+                        runButton.removeClass("disabled");
+                    });
+            };
+            
+            runButton.click(function(){
+                if(!runButton.hasClass("disabled"))
+                {
+                    $(".console ul").html("<li></li>");
+                    runButton.addClass("disabled");
+                    runCurrentTest();
+                }
+            });
+        });

@@ -551,17 +551,7 @@
             );
             return p;
         };
-        
-        module.exports.test = module.exports.test || {};
-        module.exports.test.Common = module.exports.test.Common || {};
-        
-        if(module.exports.test.Common.TestSuite !== undefined)
-        {
-            module.exports.test.Common.TestSuite.add("Ice/promise", run);
-        }
-        
-        module.exports.test.Ice = module.exports.test.Ice || {};
-        module.exports.test.Ice.promise = {run: run};
+        module.exports.run = run;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
                                     __m(global, module, module.exports, module.require);
