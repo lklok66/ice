@@ -10,6 +10,7 @@
 (function(module, name){
     var __m = function(global, module, exports, require){
         
+        require("Ice/AsyncResultBase");
         require("Ice/ConnectionMonitor");
         require("Ice/Debug");
         require("Ice/DefaultsAndOverrides");
@@ -37,6 +38,7 @@
         
         var Ice = global.Ice || {};
         
+        var AsyncResultBase = Ice.AsyncResultBase;
         var ConnectionMonitor = Ice.ConnectionMonitor;
         var Debug = Ice.Debug;
         var DefaultsAndOverrides = Ice.DefaultsAndOverrides;
@@ -594,7 +596,7 @@
         //
         Instance.prototype.destroy = function()
         {
-            var promise = new Promise();
+            var promise = new AsyncResultBase(null, "destroy", null, this, null);
 
             //
             // If the _state is not StateActive then the instance is
@@ -602,7 +604,7 @@
             //
             if(this._state != StateActive)
             {
-                promise.succeed();
+                promise.succeed(promise);
                 return promise;
             }
 
@@ -761,7 +763,7 @@
             }
             */
 
-            promise.succeed();
+            promise.succeed(promise);
         };
 
         Ice.Instance = Instance;

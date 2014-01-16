@@ -84,10 +84,9 @@
             {
                 while(true)
                 {
-                    this._handler = this._proxy.__getRequestHandler();
-                    Debug.assert(this._handler !== null);
                     try
                     {
+                        this._handler = this._proxy.__getRequestHandler();
                         this._handler.prepareBatchRequest(this._os);
                         this._batchStarted = true;
                         break;
@@ -97,6 +96,10 @@
                         if(ex instanceof LocalExceptionWrapper)
                         {
                             this.handleExceptionWrapper(ex);
+                        }
+                        else if(ex instanceof Ice.LocalException)
+                        {
+                            this.handleException(ex, false);
                         }
                         else
                         {

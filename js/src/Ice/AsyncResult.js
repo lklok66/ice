@@ -107,6 +107,8 @@
         AsyncResult.prototype.__exception = function(ex)
         {
             this._state |= AsyncResult.Done;
+            this._exception = ex;
+            this._os.resize(0);
             this.fail(ex);
         };
 

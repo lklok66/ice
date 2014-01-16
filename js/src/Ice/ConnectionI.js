@@ -242,10 +242,6 @@
                 // requests to be retried, regardless of whether the
                 // server has processed them or not.
                 //
-                if(this._closePromises === null)
-                {
-                    this._closePromises = [];
-                }
                 this._closePromises.push(__r);
                 this.checkClose();
             }
@@ -260,14 +256,14 @@
             // requests have completed and we can transition to StateClosing.
             // We also complete outstanding promises.
             //
-            if(this._asyncRequests.size === 0 && this._closePromises !== null)
+            if(this._asyncRequests.size === 0 && this._closePromises.length > 0)
             {
                 this.setStateEx(StateClosing, new Ice.CloseConnectionException());
                 for(var i = 0; i < this._closePromises.length; ++i)
                 {
                     this._closePromises[i].succeed(this._closePromises[i]);
                 }
-                this._closePromises = null;
+                this._closePromises = [];
             }
         };
 

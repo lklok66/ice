@@ -11,10 +11,10 @@
     var __m = function(global, module, exports, require){
         require("Ice/Ice");
         var Ice = global.Ice;
-        
+
         require("Test");
         var Test = global.Test;
-        
+
         var AllTests = function(communicator, log)
         {
             this._communicator = communicator;
@@ -901,7 +901,7 @@
             var p1 = this._communicator.stringToProxy("test -e 1.1:opaque -e 1.0 -t 1 -v CTEyNy4wLjAuMeouAAAQJwAAAA==");
             var pstr = this._communicator.proxyToString(p1);
             this.test(pstr === "test -t -e 1.1:tcp -h 127.0.0.1 -p 12010 -t 10000");
-            
+
             // Opaque endpoint encoded with 1.1 encoding.
             var p2 = this._communicator.stringToProxy("test:opaque -e 1.1 -t 1 -v CTEyNy4wLjAuMeouAAAQJwAAAA==");
             this.test(this._communicator.proxyToString(p2) === "test -t -e 1.1:tcp -h 127.0.0.1 -p 12010 -t 10000");
@@ -1109,6 +1109,6 @@
         };
         module.exports.run = run;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+        __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "test/Ice/proxy"));

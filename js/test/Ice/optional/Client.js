@@ -11,12 +11,12 @@
     var __m = function(global, module, exports, require){
         require("Ice/Ice");
         var Ice = global.Ice;
-        
+
         require("Test");
         var Test = global.Test;
         var Promise = Ice.Promise;
         var ArrayUtil = Ice.ArrayUtil;
-        
+
         var test = function(b)
         {
             if(!b)
@@ -34,7 +34,7 @@
             //
             var exceptionCB = function(ex){ throw ex; };
             var failCB = function(){ test(false); };
-            
+
             setTimeout(function(){
                 try
                 {
@@ -45,12 +45,12 @@
                     out.writeLine("ok");
 
                     var mo1, mo6, mo8;
-                    
+
                     var oo1 = new Test.OneOptional();
                     oo1.a = 15;
-                    
+
                     var initial, initial2;
-                    
+
                     out.write("testing checked cast... ");
                     Test.InitialPrx.checkedCast(base).then(
                         function(asyncResult, obj)
@@ -115,8 +115,8 @@
                             test(mo4.bos === undefined);
 
                             test(mo4.ser === undefined);
-                            
-                            
+
+
                             mo1 = new Test.MultiOptional();
                             mo1.a = 15;
                             mo1.b = true;
@@ -189,7 +189,7 @@
                             test(mo5.vss[0].equals(new Test.VarStruct("hello")));
                             test(mo5.oos[0].a == 15);
                             test(mo5.oops[0].equals(Test.OneOptionalPrx.uncheckedCast(communicator.stringToProxy("test"))));
-                            
+
                             test(mo5.ied.get(4) == Test.MyEnum.MyEnumMember);
                             test(mo5.ifsd.get(4).equals(new Test.FixedStruct(78)));
                             test(mo5.ivsd.get(5).equals(new Test.VarStruct("hello")));
@@ -197,7 +197,7 @@
                             test(mo5.ioopd.get(5).equals(Test.OneOptionalPrx.uncheckedCast(communicator.stringToProxy("test"))));
 
                             test(ArrayUtil.equals(mo5.bos, [false, true, false]));
-                            
+
                             // Clear the first half of the optional parameters
                             mo6 = new Test.MultiOptional();
                             mo6.b = mo5.b;
@@ -214,7 +214,7 @@
                             mo6.ifsd = mo5.ifsd;
                             mo6.iood = mo5.iood;
                             mo6.bos = mo5.bos;
-                            
+
                             return initial.pingPong(mo6);
                         },
                         exceptionCB
@@ -244,7 +244,7 @@
                             test(mo7.vss === undefined);
                             test(mo7.oos[0].a == 15);
                             test(mo7.oops === undefined);
-                            
+
                             test(mo7.ied === undefined);
                             test(mo7.ifsd.get(4).equals(new Test.FixedStruct(78)));
                             test(mo7.ivsd === undefined);
@@ -252,7 +252,7 @@
                             test(mo7.ioopd === undefined);
 
                             test(ArrayUtil.equals(mo7.bos, [false, true, false]));
-                            
+
                             // Clear the second half of the optional parameters
                             mo8 = new Test.MultiOptional();
                             mo8.a = mo1.a;
@@ -272,7 +272,7 @@
                             mo8.ied = mo1.ied;
                             mo8.ivsd = mo1.ivsd;
                             mo8.ioopd = mo1.ioopd;
-                            
+
                             return initial.pingPong(mo8);
                         },
                         exceptionCB
@@ -311,15 +311,15 @@
                             test(mo9.ioopd.get(5).equals(Test.OneOptionalPrx.uncheckedCast(communicator.stringToProxy("test"))));
 
                             test(mo9.bos === undefined);
-                            
+
                             //
                             // Use the 1.0 encoding with operations whose only class parameters are optional.
                             //
                             initial2 = initial.ice_encodingVersion(Ice.Encoding_1_0);
                             var oo = new Test.OneOptional(53);
-                            
+
                             var p = new Promise();
-                            
+
                             var f1 = function()
                             {
                                 initial.sendOptionalClass(true, oo).then(
@@ -354,9 +354,9 @@
                                         p.fail(ex);
                                     });
                             };
-                            
+
                             setTimeout(f1);
-                            
+
                             return p;
                         },
                         exceptionCB
@@ -392,7 +392,7 @@
                             test(mc.shs.length == 300);
                             test(mc.fss.length == 300);
                             test(mc.ifsd.size == 300);
-                            
+
                             out.writeLine("ok");
                             out.write("testing tag marshaling... ");
                             return initial.pingPong(new Test.B());
@@ -420,10 +420,10 @@
                             test(b.mb == 11);
                             test(b.mc == 12);
                             test(b.md == 13);
-                            
+
                             out.writeLine("ok");
-                            out.write("testing marshalling of objects with optional objects...");
-                            
+                            out.write("testing marshaling of objects with optional objects... ");
+
                             var f = new Test.F();
                             f.af = new Test.A();
                             f.ae = f.af;
@@ -434,10 +434,10 @@
                         function(asyncResult, f)
                         {
                             test(f.ae === f.af);
-                            
+
                             out.writeLine("ok");
                             out.write("testing optional with default values... ");
-                            
+
                             return initial.pingPong(new Test.WD());
                         },
                         exceptionCB
@@ -456,10 +456,10 @@
                         {
                             test(wd.a === undefined);
                             test(wd.s === undefined);
-                            
+
                             out.writeLine("ok");
                             out.write("testing optional parameters... ");
-                            
+
                             return initial.opByte(); // same as initial.opByte(undefined);
                         },
                         exceptionCB
@@ -636,7 +636,7 @@
                         {
                             test(p1.equals(new Test.FixedStruct(56)));
                             test(p2.equals(new Test.FixedStruct(56)));
-                            
+
                             return initial.opVarStruct();
                         },
                         exceptionCB
@@ -972,10 +972,10 @@
                             var data = new Ice.HashMap();
                             data.set("1", 1);
                             data.set("2", 2);
-                            
+
                             out.writeLine("ok");
                             out.write("testing exception optionals... ");
-                            
+
                             return initial.opOptionalException();
                         },
                         exceptionCB
@@ -993,7 +993,7 @@
                             test(ex.a === undefined);
                             test(ex.b === undefined);
                             test(ex.o === undefined);
-                            
+
                             return initial.opOptionalException(30, "test", new Test.OneOptional(53));
                         }
                     ).then(
@@ -1046,7 +1046,7 @@
                             test(ex.o.a === 53);
                             test(ex.ss == "test2");
                             test(ex.o2.a === 53);
-                            
+
                             out.writeLine("ok");
                             return initial.shutdown();
                         }
@@ -1081,7 +1081,7 @@
                     try
                     {
                         c = Ice.initialize(id);
-                        allTests(out, c).then(function(){ 
+                        allTests(out, c).then(function(){
                                 return c.destroy();
                             }).then(function(){
                                 p.succeed();
@@ -1098,8 +1098,6 @@
         };
         module.exports.run = run;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+        __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "test/Ice/optional"));
-
-            

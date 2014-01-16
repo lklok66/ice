@@ -19,7 +19,6 @@ var writeLine = function(msg)
     this.write(msg + "\n");
 };
 
-
 var run = function(module)
 {
     var id = new Ice.InitializationData();

@@ -13,6 +13,7 @@
         require("Ice/AsyncResult");
         require("Ice/AsyncStatus");
         require("Ice/BasicStream");
+        require("Ice/BatchOutgoingAsync");
         require("Ice/ConnectionRequestHandler");
         require("Ice/Debug");
         require("Ice/ExUtil");
@@ -28,6 +29,7 @@
         var AsyncResult = Ice.AsyncResult;
         var AsyncStatus = Ice.AsyncStatus;
         var BasicStream = Ice.BasicStream;
+        var BatchOutgoingAsync = Ice.BatchOutgoingAsync;
         var ConnectionRequestHandler = Ice.ConnectionRequestHandler;
         var Debug = Ice.Debug;
         var ExUtil = Ice.ExUtil;

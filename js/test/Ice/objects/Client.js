@@ -11,11 +11,11 @@
     var __m = function(global, module, exports, require){
         require("Ice/Ice");
         var Ice = global.Ice;
-        
+
         require("Test");
         var Test = global.Test;
         var Promise = Ice.Promise;
-        
+
         var test = function(b)
         {
             if(!b)
@@ -23,13 +23,13 @@
                 throw new Error("test failed");
             }
         };
-        
+
         var BI = function()
         {
             Test.B.call(this);
             this._postUnmarshalInvoked = false;
         };
-        
+
         BI.prototype = new Test.B();
         BI.prototype.constructor = BI;
 
@@ -47,68 +47,68 @@
         {
             this._postUnmarshalInvoked = true;
         };
-        
+
         var CI = function()
         {
             Test.C.call(this);
             this._postUnmarshalInvoked = false;
         };
-        
+
         CI.prototype = new Test.C();
         CI.prototype.constructor = CI;
-        
+
         CI.prototype.postUnmarshalInvoked = function(current)
         {
             return this._postUnmarshalInvoked;
         };
-        
+
         CI.prototype.ice_preMarshal = function()
         {
             this.preMarshalInvoked = true;
         };
-        
+
         CI.prototype.ice_postUnmarshal = function()
         {
             this._postUnmarshalInvoked = true;
         };
-        
+
         var DI = function()
         {
             Test.D.call(this);
             this._postUnmarshalInvoked = false;
         };
-        
+
         DI.prototype = new Test.D();
-        
+
         DI.prototype.postUnmarshalInvoked = function(current)
         {
             return this._postUnmarshalInvoked;
         };
-        
+
         DI.prototype.ice_preMarshal = function()
         {
             this.preMarshalInvoked = true;
         };
-        
+
         DI.prototype.ice_postUnmarshal = function()
         {
             this._postUnmarshalInvoked = true;
         };
-        
+
         var EI = function()
         {
             Test.E.call(this, 1, "hello");
         };
-        
+
         EI.prototype = new Test.E();
-        
+
         EI.prototype.constructor = EI;
 
         EI.prototype.checkValues = function(current)
         {
             return this.i == 1 && this.s == "hello";
         };
-        
+
         var FI = function(e)
         {
             if(e !== undefined)
@@ -116,45 +116,45 @@
                 Test.F.call(this, e, e);
             }
         };
-        
+
         FI.prototype = new Test.F();
-        
+
         FI.prototype.checkValues = function(current)
         {
             return this.e1 != null && this.e1 === this.e2;
         };
-        
+
         var HI = function()
         {
             Test.H.call(this);
         };
-        
+
         HI.prototype = new Test.H();
         HI.prototype.constructor = HI;
-        
+
         var II = function()
         {
             Test.I.call(this);
         };
         II.prototype = new Test.I();
         II.prototype.constructor = II;
-        
+
         var JI = function()
         {
             Test.J.call(this);
         };
         JI.prototype = new Test.J();
         JI.prototype.constructor = JI;
-        
+
         var MyObjectFactory = function()
         {
             Ice.ObjectFactory.call(this);
         };
-        
+
         MyObjectFactory.prototype = new Ice.ObjectFactory();
-        
-        MyObjectFactory.prototype.constructor = MyObjectFactory;        
-        
+
+        MyObjectFactory.prototype.constructor = MyObjectFactory;
+
         MyObjectFactory.prototype.create = function(type)
         {
             switch(type)
@@ -180,7 +180,7 @@
             }
             return null;
         };
-        
+
         MyObjectFactory.prototype.destroy = function()
         {
         };
@@ -188,13 +188,13 @@
         var allTests = function(out, communicator)
         {
             var p = new Promise();
-            
+
             //
             // re-throw exception so it propagates to final exception
             // handler.
             //
             var exceptionCB = function(ex){ throw ex; };
-            
+
             setTimeout(function(){
                 try
                 {
@@ -207,13 +207,13 @@
                     communicator.addObjectFactory(factory, "::Test::I");
                     communicator.addObjectFactory(factory, "::Test::J");
                     communicator.addObjectFactory(factory, "::Test::H");
-                    
+
                     out.write("testing stringToProxy... ");
                     var ref = "initial:default -p 12010";
                     var base = communicator.stringToProxy(ref);
                     test(base !== null);
                     out.writeLine("ok");
-                    
+
                     var initial, b1, b2, c, d, i, j, h;
                     out.write("testing checked cast... ");
                     Test.InitialPrx.checkedCast(base).then(
@@ -230,7 +230,7 @@
                         {
                             out.write("getting B1... ");
                             return initial.getB1();
-                        }, 
+                        },
                         exceptionCB
                     ).then(
                         function(asyncResult, obj)
@@ -301,7 +301,7 @@
                             test(d.theC === null);
                             out.writeLine("ok");
                             out.write("getting B1, B2, C, and D all at once... ");
-                            
+
                             return initial.getAll();
                         },
                         exceptionCB
@@ -313,7 +313,7 @@
                             test(c);
                             test(d);
                             out.writeLine("ok");
-                            
+
                             out.write("checking consistency... ");
                             test(b1 !== b2);
                             //test(b1 != c);
@@ -334,13 +334,13 @@
                             test(d.preMarshalInvoked);
                             test(d.postUnmarshalInvoked(null));
                             test(d.theA.preMarshalInvoked);
-                            test(d.theA.postUnmarshalInvoked(null)); 
+                            test(d.theA.postUnmarshalInvoked(null));
                             test(d.theB.preMarshalInvoked);
                             test(d.theB.postUnmarshalInvoked(null));
                             test(d.theB.theC.preMarshalInvoked);
                             test(d.theB.theC.postUnmarshalInvoked(null));
                             out.writeLine("ok");
-                            
+
                             out.write("testing protected members... ");
                             return initial.getE();
                         },
@@ -367,7 +367,6 @@
                         {
                             i = obj;
                             test(i);
-                            console.log("getI ok");
                             return initial.getJ();
                         },
                         exceptionCB
@@ -376,7 +375,6 @@
                         {
                             j = obj;
                             test(j);
-                            console.log("getJ ok");
                             return initial.getH();
                         },
                         exceptionCB
@@ -405,7 +403,7 @@
                         function(asyncResult)
                         {
                             out.writeLine("ok");
-                            out.write("testing sequences...");
+                            out.write("testing sequences... ");
                             return initial.opBaseSeq([]);
                         },
                         exceptionCB
@@ -420,8 +418,8 @@
                         {
                             test(retS.length === 1 && outS.length === 1);
                             out.writeLine("ok");
-                            out.write("testing compact ID...");
-                            
+                            out.write("testing compact ID... ");
+
                             return initial.getCompact();
                         },
                         exceptionCB
@@ -430,7 +428,7 @@
                         {
                             test(compact !== null);
                             out.writeLine("ok");
-                            out.write("testing UnexpectedObjectException...");
+                            out.write("testing UnexpectedObjectException... ");
                             ref = "uoet:default -p 12010";
                             base = communicator.stringToProxy(ref);
                             test(base !== null);
@@ -489,7 +487,7 @@
                     try
                     {
                         c = Ice.initialize(id);
-                        allTests(out, c).then(function(){ 
+                        allTests(out, c).then(function(){
                                 return c.destroy();
                             }).then(function(){
                                 p.succeed();
@@ -506,6 +504,6 @@
         };
         module.exports.run = run;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+        __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "test/Ice/objects"));
