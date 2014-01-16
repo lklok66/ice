@@ -270,10 +270,13 @@
             Debug.assert(this._fd !== null);
             var info = this.createInfo();
             
-            /*info.localAddress = this._fd.localAddress;
-            info.localPort = this._fd.localPort;
-            info.remoteAddress = this._fd.remoteAddress;
-            info.remotePort = this._fd.remotePort;*/
+            //
+            // The WebSocket API doens't provide this info
+            //
+            info.localAddress = "";
+            info.localPort = -1;
+            info.remoteAddress = this._addr.host;
+            info.remotePort = this._addr.port;
             return info;
         };
 

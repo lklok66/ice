@@ -254,7 +254,7 @@
         //
         EndpointI.prototype.getInfo = function()
         {
-            return new EndpointInfoI(this._timeout, this._compress, this._host, this._port, this._resource);
+            return new EndpointInfoI(this._secure, this._timeout, this._compress, this._host, this._port, this._resource);
         };
 
         //
@@ -552,7 +552,7 @@
         
         var EndpointInfoI = function(secure, timeout, compress, host, port, resource)
         {
-            Ice.TCPEndpointInfo.call(this, timeout, compress, host, port, resource);
+            IceWS.EndpointInfo.call(this, timeout, compress, host, port, resource);
             this.secure = secure;
         };
 

@@ -185,7 +185,8 @@
                         failCB,
                         function(ex)
                         {
-                            if(!(ex instanceof Ice.ConnectionRefusedException) && !(window && ex instanceof Ice.SocketException))
+                            if(!(ex instanceof Ice.ConnectionRefusedException) && 
+                               !(typeof(window) !== 'undefined' && ex instanceof Ice.SocketException))
                             {
                                 throw ex;
                             }
@@ -826,7 +827,8 @@
                         },
                         function(ex)
                         {
-                            if(!(ex instanceof Ice.ConnectionRefusedException) && !(window && ex instanceof Ice.SocketException))
+                            if(!(ex instanceof Ice.ConnectionRefusedException) && 
+                               !(typeof(window) !== 'undefined' && ex instanceof Ice.SocketException))
                             {
                                 throw ex;
                             }
@@ -841,8 +843,15 @@
                             var f1 = function(i, names)
                             {
                                 com.createObjectAdapter(names[0], endpoints[j--].toString()).then(
-                                    function()
+                                    function(asyncResult, obj)
                                     {
+                                        return obj.getTestIntf();
+                                    },
+                                    exceptionCB
+                                ).then(
+                                    function(asyncResult, obj)
+                                    {
+                                        prx = obj;
                                         var f2 = function(i, names)
                                         {
                                             prx.getAdapterName().then(
@@ -950,7 +959,8 @@
                                     },
                                     function(ex)
                                     {
-                                        if(!(ex instanceof Ice.ConnectionRefusedException) && !(window && ex instanceof Ice.SocketException))
+                                        if(!(ex instanceof Ice.ConnectionRefusedException) && 
+                                           !(typeof(window) !== 'undefined' && ex instanceof Ice.SocketException))
                                         {
                                             throw ex;
                                         }
@@ -1175,7 +1185,8 @@
                         },
                         function(ex)
                         {
-                            if(!(ex instanceof Ice.ConnectionRefusedException) && !(window && ex instanceof Ice.SocketException))
+                            if(!(ex instanceof Ice.ConnectionRefusedException) && 
+                               !(typeof(window) !== 'undefined' && ex instanceof Ice.SocketException))
                             {
                                 throw ex;
                             }

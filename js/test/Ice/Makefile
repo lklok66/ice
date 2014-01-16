@@ -15,6 +15,7 @@ SUBDIRS		= binding \
 		defaultValue \
 		enums \
 		exceptions \
+		info \
 		facets \
 		inheritance \
 		invoke \

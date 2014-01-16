@@ -49,9 +49,9 @@ $(document).foundation();
                 
                 var id = new Ice.InitializationData();
                 id.properties = Ice.createProperties();
-                id.properties.setProperty("Ice.Default.Host", "localhost");
+                id.properties.setProperty("Ice.Default.Host", "127.0.0.1");
                 id.properties.setProperty("Ice.Default.Protocol", "ws");
-                        
+                
                 run(out, id).then(function()
                     {
                         runButton.removeClass("disabled");

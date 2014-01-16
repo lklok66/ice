@@ -25,4 +25,4 @@ index.html: $(top_srcdir)/test/Common/index.html
 all:: index.html
 
 clean:: 
-	rm index.html
+	rm -rf index.html
