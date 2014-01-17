@@ -34,6 +34,7 @@ tests = [
     ("Ice/inheritance", ["once"]),
     ("Ice/invoke", ["once"]),
     ("Ice/objects", ["once"]),
+    ("Ice/operations", ["once"]),
     ("Ice/optional", ["once"]),
     ("Ice/promise", ["once"]),
     ("Ice/proxy", ["once"]),
