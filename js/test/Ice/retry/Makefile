@@ -7,31 +7,22 @@
 #
 # **********************************************************************
 
-top_srcdir	= ../..
+top_srcdir	= ../../..
+
+SLICES = Test.ice
+
+GEN_SRCS = $(patsubst 	%.ice, %.js,  $(SLICES))
+
+SRCS = Client.js
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= binding \
-		defaultValue \
-		enums \
-		exceptions \
-		info \
-		facets \
-		inheritance \
-		invoke \
-		objects \
-		operations \
-		optional \
-		promise \
-		proxy \
-		retry \
-		slicing \
-		stream
+SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) -I$(slicedir)
 
-$(EVERYTHING)::
-	@for subdir in $(SUBDIRS); \
-	do \
-	    echo "making $@ in $$subdir"; \
-	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
-	done
+index.html: $(top_srcdir)/test/Common/index.html
+	cp $(top_srcdir)/test/Common/index.html .
 
+all:: index.html
+
+clean::
+	rm -rf index.html
