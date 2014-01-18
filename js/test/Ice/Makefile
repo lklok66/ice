@@ -26,7 +26,8 @@ SUBDIRS		= binding \
 		proxy \
 		retry \
 		slicing \
-		stream
+		stream \
+		timeout
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \

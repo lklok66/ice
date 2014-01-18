@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # **********************************************************************
 #
 # Copyright (c) 2003-2013 ZeroC, Inc. All rights reserved.
@@ -8,7 +9,7 @@
 #
 # **********************************************************************
 
-import os, sys, re, getopt
+import os, sys
 
 path = [ ".", "..", "../..", "../../..", "../../../.." ]
 head = os.path.dirname(sys.argv[0])
@@ -17,33 +18,7 @@ if len(head) > 0:
 path = [os.path.abspath(p) for p in path if os.path.exists(os.path.join(p, "scripts", "TestUtil.py")) ]
 if len(path) == 0:
     raise RuntimeError("can't find toplevel directory!")
-
 sys.path.append(os.path.join(path[0], "scripts"))
 import TestUtil
 
-#
-# List of all basic tests.
-#
-tests = [
-    ("Ice/binding", ["once"]),
-    ("Ice/defaultValue", ["once"]),
-    ("Ice/enums", ["once"]),
-    ("Ice/exceptions", ["once"]),
-    ("Ice/facets", ["once"]),
-    ("Ice/info", ["once"]),
-    ("Ice/inheritance", ["once"]),
-    ("Ice/invoke", ["once"]),
-    ("Ice/objects", ["once"]),
-    ("Ice/operations", ["once"]),
-    ("Ice/optional", ["once"]),
-    ("Ice/promise", ["once"]),
-    ("Ice/proxy", ["once"]),
-    ("Ice/retry", ["once"]),
-    ("Ice/slicing/exceptions", ["once"]),
-    ("Ice/slicing/objects", ["once"]),
-    ("Ice/stream", ["once"]),
-    ("Ice/timeout", ["once"]),
-    ]
-
-if __name__ == "__main__":
-    TestUtil.run(tests)
+TestUtil.clientServerTest()
