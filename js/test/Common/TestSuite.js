@@ -10,20 +10,21 @@
 $(document).foundation();
     $(document).ready(
         function(){
+        
+            var defaultHost = document.location.host;
+            if(defaultHost)
+            {
+                defaultHost = defaultHost.substr(0, defaultHost.indexOf(":"));
+            }
+            else
+            {
+                defaultHost = "127.0.0.1";
+            }
+            $("#default-host").attr("placeholder", defaultHost);
             
-                    
             for(name in TestCases)
             {
-                var s;
-                if(document.location.pathname.indexOf(name) !== -1)
-                {
-                    s = "<li><b class=\"current\" href=\"#\">" + name + "</b></li>";
-                }
-                else
-                {
-                    s = "<li><a href=\"" + basePath + name + "/index.html\">" + name + "</a></li>";
-                }
-                $(".tests").append(s);
+                $(".tests").append("<li><a href=\"" + basePath + name + "/index.html\">" + name + "</a></li>");
             }
 
             var panel = $(".console ul");
@@ -47,9 +48,10 @@ $(document).foundation();
             var runCurrentTest = function(){
                 var current = $(".tests li.current");
                 
+                defaultHost = $("#default-host").val() ? $("#default-host").val() : $("#default-host").attr("placeholder");
                 var id = new Ice.InitializationData();
                 id.properties = Ice.createProperties();
-                id.properties.setProperty("Ice.Default.Host", "127.0.0.1");
+                id.properties.setProperty("Ice.Default.Host", defaultHost);
                 id.properties.setProperty("Ice.Default.Protocol", "ws");
                 
                 run(out, id).then(function()
@@ -58,21 +60,40 @@ $(document).foundation();
                     },
                     function(ex)
                     {
+                        out.writeLine("");
                         if(ex && ex._asyncResult)
                         {
                             out.writeLine("exception occurred in call to " + ex._asyncResult.operation);
                         }
-                        var lines = ex.stack.split("\n");
-                        for(i = 0; i < lines.length; ++i)
+                        if(ex.stack)
                         {
-                            if(i === 0)
+                            var lines = ex.stack.split("\n");
+                            var line;
+                            for(i = 0; i < lines.length; ++i)
                             {
-                                out.writeLine(lines[i]);
+                                line = lines[i];
+                                line = line.replace("<", "&lt;");
+                                if(i === 0)
+                                {
+                                    if(line.indexOf(ex.name) === -1)
+                                    {
+                                        out.writeLine(ex.name + " " + ex.message);
+                                        out.writeLine("&nbsp;&nbsp;&nbsp;"  + line);
+                                    }
+                                    else
+                                    {
+                                        out.writeLine(line);
+                                    }
+                                }
+                                else
+                                {
+                                    out.writeLine("&nbsp;&nbsp;&nbsp;"  + line);
+                                }
                             }
-                            else
-                            {
-                                out.writeLine("&nbsp;&nbsp;&nbsp;"  + lines[i]);
-                            }
+                        }
+                        else
+                        {
+                            out.writeLine(ex.toString());
                         }
                         runButton.removeClass("disabled");
                     });
@@ -84,6 +105,7 @@ $(document).foundation();
                     $(".console ul").html("<li></li>");
                     runButton.addClass("disabled");
                     runCurrentTest();
+                    return false;
                 }
             });
         });

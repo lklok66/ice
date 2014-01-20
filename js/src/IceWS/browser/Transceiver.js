@@ -101,8 +101,8 @@
                     };
                     this._fd.onclose = function(e){
                         self.socketClosed(e); };
-                    this._fd.onerror = function(e){ 
-                        self.socketError(e); };
+                    //this._fd.onerror = function(e){ 
+                    //    self.socketError(e); };
                     return SocketOperation.Connect; // Waiting for connect to complete.
                 }
                 else if(this._state === StateConnectPending)
@@ -116,6 +116,8 @@
             }
             catch(ex)
             {
+                ex = translateError(this._state, ex);
+                this._state = StateError;
                 if(ex instanceof LocalException)
                 {
                     if(this._traceLevels.network >= 2)
@@ -162,25 +164,28 @@
 
         Transceiver.prototype.close = function()
         {
-            if(this._connected && this._traceLevels.network >= 1)
+            if(this._state < StateClosed)
             {
-                this._logger.trace(this._traceLevels.networkCat, "closing " + this.type() + " connection\n" + this._desc);
-            }
-            Debug.assert(this._fd !== null);
-            try
-            {
-                if(this._fd.readyState === WebSocket.OPEN)
+                if(this._connected && this._traceLevels.network >= 1)
                 {
-                    this._fd.close();
+                    this._logger.trace(this._traceLevels.networkCat, "closing " + this.type() + " connection\n" + this._desc);
                 }
-            }
-            catch(ex)
-            {
-                throw translateError(ex);
-            }
-            finally
-            {
-                this._fd = null;
+                Debug.assert(this._fd !== null);
+                try
+                {
+                    if(this._fd.readyState <= WebSocket.OPEN)
+                    {
+                        this._fd.close();
+                    }
+                }
+                catch(ex)
+                {
+                    throw translateError(ex);
+                }
+                finally
+                {
+                    this._fd = null;
+                }
             }
         };
 
@@ -331,14 +336,14 @@
 
         Transceiver.prototype.socketClosed = function(err)
         {
-            //
-            // Don't call the closed callback if an error occurred; the error callback
-            // will be called.
-            //
             if(err.code === 1000) // CLOSE_NORMAL
             {
                 Debug.assert(this._closedCallback !== null);
                 this._closedCallback();
+            }
+            else
+            {
+                this._errorCallback(translateError(this._state, err));
             }
         };
 
@@ -348,23 +353,21 @@
             this._errorCallback(translateError(err));
         };
 
-        function fdToString(fd, targetAddr)
+        function fdToString(fd, remoteAddress, remotePort)
         {
-            if(fd === null || fd.readyState !== WebSocket.OPEN)
-            {
-                return "<closed>";
-            }
-
-            //TODO
-            //return Network.addressesToString(fd.localAddress, fd.localPort, fd.remoteAddress, fd.remotePort, proxy,
-            //                                targetAddr);
-            return fd.url;
+            return remoteAddress + ":" + remotePort;
         }
 
-        function translateError(ex)
+        function translateError(state, err)
         {
-            // TODO: Search the exception's error message for symbols like ECONNREFUSED ?
-            return new SocketException(0, ex);
+            if(state < StateConnected)
+            {
+                return new Ice.ConnectFailedException(err.code, err);
+            }
+            else
+            {
+                return new Ice.SocketException(err.code, err);
+            }
         }
 
         IceWS.Transceiver = Transceiver;

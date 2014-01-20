@@ -83,7 +83,8 @@
                         },
                         function(ex)
                         {
-                            test(ex instanceof Ice.ConnectionLostException);
+                            test((typeof(window) === undefined && ex instanceof Ice.ConnectionLostException) ||
+                                 (typeof(window) !== undefined && ex instanceof Ice.SocketException));
                             out.writeLine("ok");
                             out.write("calling regular operation with first proxy again... ");
                             return retry1.op(false);

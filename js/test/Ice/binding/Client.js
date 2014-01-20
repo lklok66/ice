@@ -24,10 +24,42 @@
                 throw new Error("test failed");
             }
         };
-
-        var allTests = function(out, communicator)
+       
+        var communicator;
+        var com;
+        var allTests = function(out, initData)
         {
             var p = new Promise();
+            
+            var initialize = function()
+            {
+                var p = new Promise();
+                if(communicator)
+                {
+                    communicator.destroy().then(
+                        function(asyncResult)
+                        {
+                            communicator = Ice.initialize(initData);
+                            com = Test.RemoteCommunicatorPrx.uncheckedCast(communicator.stringToProxy("communicator:default -p 12010"));
+                            p.succeed();
+                        },
+                        function(ex)
+                        {
+                            p.fail(ex);
+                        }).exception(
+                            function(ex){
+                                p.fail(ex);
+                            }
+                    );
+                }
+                else
+                {
+                    communicator = Ice.initialize(initData);
+                    p.succeed();
+                }
+                return p;
+            }
+
             //
             // re-throw exception so it propagates to final exception
             // handler.
@@ -40,6 +72,7 @@
                 var p = new Promise();
                 setTimeout(function(){
                     var endpoints = [];
+                    var closePromises = [];
                     var test = null;
                     var promises = adapters.map(function(adapter){ return adapter.getTestIntf(); });
                     
@@ -53,8 +86,32 @@
                                     test = r[1];
                                     endpoints = endpoints.concat(test.ice_getEndpoints());
                                 });
+                            adapters.forEach(
+                                function(adapter)
+                                {
+                                    conn = adapter.ice_getCachedConnection();
+                                    if(conn != null)
+                                    {
+                                        closePromises.push(conn.close(false));
+                                    }
+                                });
                             test = test.ice_endpoints(endpoints);
-                            p.succeed(Test.TestIntfPrx.uncheckedCast(test));
+                            if(closePromises.length > 0)
+                            {
+                                Promise.all.apply(Promise, closePromises).then(
+                                    function()
+                                    {
+                                        p.succeed(Test.TestIntfPrx.uncheckedCast(test));
+                                    },
+                                    function(ex)
+                                    {
+                                        p.fail(ex);
+                                    });
+                            }
+                            else
+                            {
+                                p.succeed(Test.TestIntfPrx.uncheckedCast(test));
+                            }
                         },
                         function(ex)
                         {
@@ -99,19 +156,256 @@
             setTimeout(function(){
                 try
                 {
-                    out.write("testing stringToProxy... ");
-                    var ref = "communicator:default -p 12010";
-                    var com = Test.RemoteCommunicatorPrx.uncheckedCast(communicator.stringToProxy(ref));
-                    test(com !== null);
-                    out.writeLine("ok");
-                    
-                    out.write("testing binding with single endpoint... ");
+                
+                    var ref;
                     var adapter, test1, test2, test3, conn1, conn2, conn3;
-                    var adapters = [];
-                    var names = ["Adapter11", "Adapter12", "Adapter13"];
+                    var adapters;
+                    var names;
                     var prx;
                     
-                    com.createObjectAdapter("Adapter", "default").then(
+                    var multipleRandomEndpoints = function()
+                    {
+                        var testPromise = new Promise();
+                        setTimeout(
+                            function()
+                            {
+                                out.write("testing binding with multiple random endpoints... ");
+                                names = ["AdapterRandom11", "AdapterRandom12", "AdapterRandom13", "AdapterRandom14", "AdapterRandom15"];
+                                Promise.all.apply(Promise, 
+                                    names.map(function(name) { return com.createObjectAdapter(name, "default"); })).then(
+                                function()
+                                {
+                                    adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[1]; });
+                                    var count = 20;
+                                    var adapterCount = adapters.length;
+                                    var proxies = new Array(10);
+                                    var nextInt = function(n) { return Math.floor((Math.random() * n)); };
+                                    var p = new Promise();
+                                    var f1 = function(count, adapterCount, proxies)
+                                    {
+                                        var p1 = count === 10 ? com.deactivateObjectAdapter(adapters[2]) : Promise.succeed();
+                                        p1.then(
+                                            function()
+                                            {
+                                                var p2 = new Promise();
+                                                if(count === 10)
+                                                {
+                                                    adapterCount--;
+                                                }
+                                                var f2 = function(i)
+                                                {
+                                                    var adpts = new Array(nextInt(adapters.length) + 1);
+                                                    for(var j = 0; j < adpts.length; ++j)
+                                                    {
+                                                        adpts[j] = adapters[nextInt(adapters.length)];
+                                                    }
+                                                    createTestIntfPrx(adpts).then(
+                                                        function(prx)
+                                                        {
+                                                            proxies[i] = prx;
+                                                            if(i < 10)
+                                                            {
+                                                                f2(++i);
+                                                            }
+                                                            else
+                                                            {
+                                                                p2.succeed(proxies);
+                                                            }
+                                                        },
+                                                        exceptionCB)
+                                                    .exception(
+                                                        function(ex)
+                                                        {
+                                                            p2.fail(ex);
+                                                        });
+                                                };
+                                                
+                                                setTimeout(
+                                                    function(){
+                                                        f2(0);
+                                                    });
+                                                
+                                                return p2;
+                                            },
+                                            exceptionCB)
+                                        .then(
+                                            function(proxies){
+                                                proxies.forEach(
+                                                    function(p){
+                                                        p.getAdapterName();
+                                                    });
+                                                
+                                                var allPing = [];
+                                                proxies.forEach(
+                                                    function(proxy){
+                                                        var p = new Promise();
+                                                        proxy.ice_ping().then(
+                                                            function(asyncResult){
+                                                                p.succeed();
+                                                            },
+                                                            function(ex){
+                                                                if((ex instanceof Ice.LocalException))
+                                                                {
+                                                                    p.succeed();
+                                                                }
+                                                                else
+                                                                {
+                                                                    p.fail(ex);
+                                                                }
+                                                            });
+                                                        allPing.push(p);
+                                                    });
+                                                
+                                                var f3 = function(p, adapters)
+                                                {
+                                                    adapter = adapters.shift();
+                                                    adapter.getTestIntf().then(
+                                                        function(asyncResult, prx)
+                                                        {
+                                                            return prx.ice_getConnection();
+                                                        },
+                                                        function(ex)
+                                                        {
+                                                            throw ex;
+                                                        }
+                                                    ).then(
+                                                        function(asyncResult, conn)
+                                                        {
+                                                            return conn.close(false);
+                                                        },
+                                                        function(ex)
+                                                        {
+                                                            if(ex instanceof Ice.LocalException)
+                                                            {
+                                                                // Expected if adapter is down.
+                                                                return;
+                                                            }
+                                                            else
+                                                            {
+                                                                throw ex;
+                                                            }
+                                                        }
+                                                    ).then(
+                                                        function()
+                                                        {
+                                                            if(adapters.length > 0)
+                                                            {
+                                                                f3(p, adapters);
+                                                            }
+                                                            else
+                                                            {
+                                                                p.succeed();
+                                                            }
+                                                        },
+                                                        exceptionCB
+                                                    ).exception(
+                                                        function(ex)
+                                                        {
+                                                            p.fail(ex);
+                                                        });
+                                                };
+                                                
+                                                var p4 = new Promise();
+                                                
+                                                Promise.all.apply(Promise, allPing).then(
+                                                    function()
+                                                    {
+                                                        var connections = [];
+                                                        proxies.forEach(
+                                                            function(p){
+                                                                var conn = p.ice_getCachedConnection();
+                                                                if(conn !== null)
+                                                                {
+                                                                    if(connections.indexOf(conn) !== -1)
+                                                                    {
+                                                                        connections.push(conn);
+                                                                    }
+                                                                }
+                                                            });
+                                                        test(connections.length <= adapters.length);
+                                                    },
+                                                    exceptionCB
+                                                ).then(
+                                                    function()
+                                                    {
+                                                        var p5 = new Promise();
+                                                        f3(p5, ArrayUtil.clone(adapters));
+                                                        
+                                                        return p5;
+                                                    },
+                                                    exceptionCB
+                                                ).then(
+                                                    function()
+                                                    {
+                                                        p4.succeed();
+                                                    },
+                                                    exceptionCB
+                                                ).exception(
+                                                    function(ex){
+                                                        p4.fail(ex);
+                                                    });
+                                                return p4;
+                                            }
+                                        ).then(
+                                            function()
+                                            {
+                                                if(count === 0)
+                                                {
+                                                    p.succeed();
+                                                }
+                                                else
+                                                {
+                                                    f1(--count, adapterCount, proxies);
+                                                }
+                                            },
+                                            exceptionCB
+                                        ).exception(
+                                            function(ex){
+                                                p.fail(ex);
+                                            });
+                                    };
+                                    
+                                    setTimeout(function(){
+                                        f1(count, adapterCount, proxies);
+                                    });
+                                    
+                                    return p;
+                                },
+                                exceptionCB
+                            ).then(
+                                function()
+                                {
+                                    out.writeLine("ok");
+                                    return testPromise.succeed();
+                                },
+                                exceptionCB
+                            ).exception(
+                                function(ex)
+                                {
+                                    testPromise.fail()
+                                });
+                        });
+                        return testPromise;
+                    };
+                    
+                    initialize().then(
+                        function()
+                        {
+                            out.write("testing stringToProxy... ");
+                            ref = "communicator:default -p 12010";
+                            com = Test.RemoteCommunicatorPrx.uncheckedCast(communicator.stringToProxy(ref));
+                            test(com !== null);
+                            out.writeLine("ok");
+                            
+                            out.write("testing binding with single endpoint... ");
+                            adapter, test1, test2, test3, conn1, conn2, conn3;
+                            adapters = [];
+                            names = ["Adapter11", "Adapter12", "Adapter13"];
+                        
+                            return com.createObjectAdapter("Adapter", "default");
+                        },
+                        exceptionCB
+                    ).then(
                         function(asyncResult, obj)
                         {
                             adapter = obj;
@@ -185,12 +479,18 @@
                         failCB,
                         function(ex)
                         {
-                            if(!(ex instanceof Ice.ConnectionRefusedException) && 
-                               !(typeof(window) !== 'undefined' && ex instanceof Ice.SocketException))
+                            if(!(typeof(window) == 'undefined' && ex instanceof Ice.ConnectionRefusedException) &&
+                               !(typeof(window) != 'undefined' && ex instanceof Ice.ConnectFailedException))
                             {
                                 throw ex;
                             }
                             out.writeLine("ok");
+                            return initialize();
+                        },
+                        exceptionCB
+                    ).then(
+                        function()
+                        {
                             out.write("testing binding with multiple endpoints... ");
                             
                             return Promise.all(
@@ -456,165 +756,30 @@
                         function()
                         {
                             out.writeLine("ok");
-                            out.write("testing binding with multiple random endpoints... ");
-                            names = ["AdapterRandom11", "AdapterRandom12", "AdapterRandom13", "AdapterRandom14", 
-                                     "AdapterRandom15"];
-                            return Promise.all.apply(Promise, 
-                                    names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
+                            return initialize();
                         },
                         exceptionCB
                     ).then(
                         function()
                         {
-                            adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[1]; });
-                            var count = 20;
-                            var adapterCount = adapters.length;
-                            var proxies = new Array(10);
-                            var nextInt = function(n) { return Math.floor((Math.random() * n)); };
-                            var p = new Promise();
-                            var f1 = function(count, adapterCount, proxies)
+                            //
+                            // Skip this test with IE it open too many connections IE doesn't allow more than 6 connections.
+                            //
+                            if(typeof(navigator) === "undefined" || navigator.userAgent.indexOf("MSIE") === -1)
                             {
-                                var p1 = count === 10 ? com.deactivateObjectAdapter(adapters[4]) : Promise.succeed();
-                                p1.then(
-                                    function()
-                                    {
-                                        var p2 = new Promise();
-                                        if(count === 10)
-                                        {
-                                            adapterCount--;
-                                        }
-                                        var f2 = function(i)
-                                        {
-                                            var adpts = new Array(nextInt(adapters.length) + 1);
-                                            for(var j = 0; j < adpts.length; ++j)
-                                            {
-                                                adpts[j] = adapters[nextInt(adapters.length)];
-                                            }
-                                            createTestIntfPrx(adpts).then(
-                                                function(prx)
-                                                {
-                                                    proxies[i] = prx;
-                                                    if(i < 10)
-                                                    {
-                                                        f2(++i);
-                                                    }
-                                                    else
-                                                    {
-                                                        p2.succeed();
-                                                    }
-                                                },
-                                                exceptionCB)
-                                            .exception(
-                                                function(ex)
-                                                {
-                                                    p2.fail(ex);
-                                                });
-                                        };
-                                        
-                                        setTimeout(
-                                            function(){
-                                                f2(0);
-                                            });
-                                        
-                                        return p2;
-                                    },
-                                    exceptionCB)
-                                .then(
-                                    function(){
-                                        proxies.forEach(
-                                            function(p){
-                                                p.getAdapterName();
-                                            });
-                                        
-                                        proxies.forEach(
-                                            function(p){
-                                                p.ice_ping();
-                                            });
-                                        
-                                        var connections = [];
-                                        proxies.forEach(
-                                            function(p){
-                                                if(p.ice_getCachedConnection() != null)
-                                                {
-                                                    connections.push(p.ice_getCachedConnection());
-                                                }
-                                            });
-                                        test(connections.length <= adapterCount);
-                                        
-                                        var f3 = function(adapter)
-                                        {
-                                            var p3 = new Promise();
-                                            setTimeout(function(){
-                                                adapter.getTestIntf().then(
-                                                    function(asyncResult, prx)
-                                                    {
-                                                        return prx.ice_getConnection();
-                                                    },
-                                                    exceptionCB
-                                                ).then(
-                                                    function(asyncResult, conn)
-                                                    {
-                                                        return conn.close(false);
-                                                    },
-                                                    function(ex)
-                                                    {
-                                                        if(ex instanceof Ice.LocalException)
-                                                        {
-                                                            // Expected if adapter is down.
-                                                            p3.succeed();
-                                                        }
-                                                        else
-                                                        {
-                                                            throw ex;
-                                                        }
-                                                    }
-                                                ).then(
-                                                    function()
-                                                    {
-                                                        p3.succeed();
-                                                    },
-                                                    exceptionCB
-                                                ).exception(
-                                                    function(ex)
-                                                    {
-                                                        p3.fail(ex);
-                                                    });
-                                            });
-                                            return p3;
-                                        };
-                                        return Promise.all.apply(Promise, 
-                                                            adapters.map(function(adapter) { return f3(adapter); }));
-                                    }
-                                ).then(
-                                    function()
-                                    {
-                                        if(count === 0)
-                                        {
-                                            p.succeed();
-                                        }
-                                        else
-                                        {
-                                            f1(--count, adapterCount, proxies);
-                                        }
-                                    },
-                                    exceptionCB
-                                ).exception(
-                                    function(ex){
-                                        p.fail(ex);
-                                    });
-                            };
-                            
-                            setTimeout(function(){
-                                f1(count, adapterCount, proxies);
-                            });
-                            
-                            return p;
+                                return multipleRandomEndpoints();
+                            }
                         },
                         exceptionCB
                     ).then(
                         function()
                         {
-                            out.writeLine("ok");
+                            return initialize();
+                        },
+                        exceptionCB
+                    ).then(
+                        function()
+                        {
                             out.write("testing random endpoint selection... ");
                             names = ["Adapter21", "Adapter22", "Adapter23"];
                             return Promise.all.apply(Promise, 
@@ -740,6 +905,12 @@
                         function()
                         {
                             out.writeLine("ok");
+                            return initialize();
+                        },
+                        exceptionCB
+                    ).then(
+                        function()
+                        {
                             out.write("testing ordered endpoint selection... ");
                             names = ["Adapter31", "Adapter32", "Adapter33"];
                             return Promise.all.apply(Promise, 
@@ -827,8 +998,8 @@
                         },
                         function(ex)
                         {
-                            if(!(ex instanceof Ice.ConnectionRefusedException) && 
-                               !(typeof(window) !== 'undefined' && ex instanceof Ice.SocketException))
+                            if(!(typeof(window) == 'undefined' && ex instanceof Ice.ConnectionRefusedException) &&
+                               !(typeof(window) != 'undefined' && ex instanceof Ice.ConnectFailedException))
                             {
                                 throw ex;
                             }
@@ -904,6 +1075,12 @@
                     ).then(
                         function(){
                             out.writeLine("ok");
+                            return initialize
+                        },
+                        exceptionCB
+                    ).then(
+                        function()
+                        {
                             out.write("testing per request binding with single endpoint... ");
                             return com.createObjectAdapter("Adapter41", "default");
                         },
@@ -959,8 +1136,8 @@
                                     },
                                     function(ex)
                                     {
-                                        if(!(ex instanceof Ice.ConnectionRefusedException) && 
-                                           !(typeof(window) !== 'undefined' && ex instanceof Ice.SocketException))
+                                        if(!(typeof(window) == 'undefined' && ex instanceof Ice.ConnectionRefusedException) &&
+                                           !(typeof(window) != 'undefined' && ex instanceof Ice.ConnectFailedException))
                                         {
                                             throw ex;
                                         }
@@ -979,6 +1156,12 @@
                         function()
                         {
                             out.writeLine("ok");
+                            return initialize();
+                        },
+                        exceptionCB
+                    ).then(
+                        function()
+                        {
                             out.write("testing per request binding with multiple endpoints... ");
                             names = ["Adapter51", "Adapter52", "Adapter53"];
                             return Promise.all.apply(Promise, 
@@ -1095,6 +1278,12 @@
                         function()
                         {
                             out.writeLine("ok");
+                            return initialize();
+                        },
+                        exceptionCB
+                    ).then(
+                        function()
+                        {
                             out.write("testing per request binding and ordered endpoint selection... ");
                             names = ["Adapter61", "Adapter62", "Adapter63"];
                             return Promise.all.apply(Promise, 
@@ -1185,8 +1374,8 @@
                         },
                         function(ex)
                         {
-                            if(!(ex instanceof Ice.ConnectionRefusedException) && 
-                               !(typeof(window) !== 'undefined' && ex instanceof Ice.SocketException))
+                            if(!(typeof(window) == 'undefined' && ex instanceof Ice.ConnectionRefusedException) &&
+                               !(typeof(window) != 'undefined' && ex instanceof Ice.ConnectFailedException))
                             {
                                 throw ex;
                             }
@@ -1280,12 +1469,10 @@
             setTimeout(
                 function()
                 {
-                    var c = null;
                     try
                     {
-                        c = Ice.initialize(id);
-                        allTests(out, c).then(function(){ 
-                                return c.destroy();
+                        allTests(out, id).then(function(){ 
+                                return communicator.destroy();
                             }).then(function(){
                                 p.succeed();
                             }).exception(function(ex){

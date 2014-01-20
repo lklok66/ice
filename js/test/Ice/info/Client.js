@@ -48,7 +48,6 @@
 
 
                     var ipEndpoint = endps[0].getInfo();
-                    console.log(ipEndpoint);
                     test(ipEndpoint.host == "tcphost");
                     test(ipEndpoint.port == 10000);
                     test(ipEndpoint.timeout == 1200);
@@ -91,7 +90,6 @@
                     ).then(
                         function(asyncResult, ctx)
                         {
-                            console.log(ipinfo.host);
                             test(ctx.get("host") == ipinfo.host);
                             test(ctx.get("compress") == "false");
                             test(parseInt(ctx.get("port")) > 0);
@@ -104,7 +102,6 @@
                         function(asyncResult, conn)
                         {
                             info = conn.getInfo();
-                            console.log(info);
                             test(!info.incoming);
                             test(info.adapterName.length == 0);
                             if(typeof(window) == "undefined")

@@ -948,7 +948,7 @@
                     ).then(
                         function()
                         {
-                            console.log("ok");
+                            out.writeLine("ok");
                             return prx.shutdown();
                         },
                         exceptionCB
