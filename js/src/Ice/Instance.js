@@ -369,7 +369,7 @@
                 }
 
                 this._traceLevels = new TraceLevels(this._initData.properties);
-
+                
                 this._defaultsAndOverrides = new DefaultsAndOverrides(this._initData.properties);
 
                 var defMessageSizeMax = 1024;
@@ -487,25 +487,24 @@
                 }
 
                 this._adminFacets.put("Properties", new PropertiesAdminI(_initData.properties));
-                this._adminFacets.put("Process", new ProcessI(communicator));
+                this._adminFacets.put("Process", new ProcessI(communicator));*/
 
                 //
                 // Get default router and locator proxies. Don't move this
                 // initialization before the plug-in initialization!!! The proxies
                 // might depend on endpoint factories to be installed by plug-ins.
                 //
-                var router = my.RouterPrxHelper.uncheckedCast(this._proxyFactory.propertyToProxy("Ice.Default.Router"));
+                var router = Ice.RouterPrx.uncheckedCast(this._proxyFactory.propertyToProxy("Ice.Default.Router"));
                 if(router !== null)
                 {
                     this._referenceFactory = this._referenceFactory.setDefaultRouter(router);
                 }
 
-                var loc = my.LocatorPrxHelper.uncheckedCast(this._proxyFactory.propertyToProxy("Ice.Default.Locator"));
+                var loc = Ice.LocatorPrx.uncheckedCast(this._proxyFactory.propertyToProxy("Ice.Default.Locator"));
                 if(loc !== null)
                 {
                     this._referenceFactory = this._referenceFactory.setDefaultLocator(loc);
                 }
-                */
 
                 //
                 // Create the connection monitor and ensure the interval for

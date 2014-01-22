@@ -120,26 +120,22 @@
 
         Communicator.prototype.getDefaultRouter = function()
         {
-            // TODO
-            //return this._instance.referenceFactory().getDefaultRouter();
+            return this._instance.referenceFactory().getDefaultRouter();
         };
 
         Communicator.prototype.setDefaultRouter = function(router)
         {
-            // TODO
-            //this._instance.setDefaultRouter(router);
+            this._instance.setDefaultRouter(router);
         };
 
         Communicator.prototype.getDefaultLocator = function()
         {
-            // TODO
-            //return this._instance.referenceFactory().getDefaultLocator();
+            return this._instance.referenceFactory().getDefaultLocator();
         };
 
         Communicator.prototype.setDefaultLocator = function(locator)
         {
-            // TODO
-            //this._instance.setDefaultLocator(locator);
+            this._instance.setDefaultLocator(locator);
         };
 
         Communicator.prototype.flushBatchRequests = function()

@@ -29,7 +29,7 @@
             var slicing = properties.getPropertyAsInt(keyBase + slicingCat);
             properties.getPropertyAsInt(keyBase + "ThreadPool"); // Avoid an "unused property" warning.
 
-            return {
+            return Object.create(null, {
                 'network': {
                     get: function() { return network; }
                 },
@@ -60,7 +60,7 @@
                 'slicingCat': {
                     get: function() { return slicingCat; }
                 }
-            };
+            });
         };
 
         Ice.TraceLevels = TraceLevels;

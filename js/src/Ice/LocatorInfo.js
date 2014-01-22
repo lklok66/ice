@@ -90,9 +90,9 @@
                 });
         };
 
-        LocatorInfo.prototype.getEndpoints = function(ref, wellKnownRef, ttl)
+        LocatorInfo.prototype.getEndpoints = function(ref, wellKnownRef, ttl, p)
         {
-            var promise = new Promise(); // success callback receives (endpoints, cached)
+            var promise = p || new Promise(); // success callback receives (endpoints, cached)
 
             Debug.assert(ref.isIndirect());
             var endpoints = null;
@@ -145,7 +145,6 @@
             {
                 this.getEndpointsTrace(ref, endpoints, true);
             }
-
             promise.succeed(endpoints, true);
 
             return promise;
@@ -178,7 +177,7 @@
                     }
                     else if(!r.isWellKnown())
                     {
-                        this.learCache(r);
+                        this.clearCache(r);
                     }
                 }
             }
@@ -585,7 +584,7 @@
             {
                 var self = this;
                 this._locatorInfo.getLocator().findObjectById(this._ref.getIdentity()).then(
-                    function(proxy)
+                    function(asyncResult, proxy)
                     {
                         self.response(proxy);
                     }).exception(
@@ -615,7 +614,7 @@
             {
                 var self = this;
                 this._locatorInfo.getLocator().findAdapterById(this._ref.getAdapterId()).then(
-                    function(proxy)
+                    function(asyncResult, proxy)
                     {
                         self.response(proxy);
                     }).exception(

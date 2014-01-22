@@ -26,7 +26,7 @@
         var HashMap = Ice.HashMap;
         var Protocol = Ice.Protocol;
         var StringUtil = Ice.StringUtil;
-        var OperationMode = Ice.Current.OperationMode;
+        var OperationMode = Ice.OperationMode;
         var Identity = Ice.Identity;
 
         var TraceUtil = {};
@@ -35,15 +35,15 @@
         {
             if(traceLevels.protocol >= 1)
             {
-                var p = stream.pos();
-                stream.pos(0);
+                var p = stream.pos;
+                stream.pos = 0;
 
                 var s = [];
                 var type = printMessage(s, stream);
 
                 logger.trace(traceLevels.protocolCat, "sending " + getMessageTypeAsString(type) + " " + s.join(""));
 
-                stream.pos(p);
+                stream.pos = p;
             }
         };
 
@@ -51,15 +51,15 @@
         {
             if(traceLevels.protocol >= 1)
             {
-                var p = stream.pos();
-                stream.pos(0);
+                var p = stream.pos;
+                stream.pos = 0;
 
                 var s = [];
                 var type = printMessage(s, stream);
 
                 logger.trace(traceLevels.protocolCat, "received " + getMessageTypeAsString(type) + " " + s.join(""));
 
-                stream.pos(p);
+                stream.pos = p;
             }
         };
 
@@ -67,15 +67,15 @@
         {
             if(traceLevels.protocol >= 1)
             {
-                var p = stream.pos();
-                stream.pos(0);
+                var p = stream.pos;
+                stream.pos = 0;
 
                 var s = [];
                 s.push(heading);
                 printMessage(s, stream);
 
                 logger.trace(traceLevels.protocolCat, s.join(""));
-                stream.pos(p);
+                stream.pos = p;
             }
         };
 
@@ -93,13 +93,13 @@
 
         TraceUtil.dumpStream = function(stream)
         {
-            var pos = stream.pos();
-            stream.pos(0);
+            var pos = stream.pos;
+            stream.pos = 0;
 
             var data = stream.readBlob(stream.size());
             dumpOctets(data);
 
-            stream.pos(pos);
+            stream.pos = pos;
         };
 
         TraceUtil.dumpOctets = function(data)
@@ -166,9 +166,9 @@
         {
             var identity = new Identity();
             identity.__read(stream);
-            s.push("\nidentity = " + stream.instance().identityToString(identity));
+            s.push("\nidentity = " + stream.instance.identityToString(identity));
 
-            var facet = stream.readStringSeq();
+            var facet = Ice.StringSeqHelper.read(stream);
             s.push("\nfacet = ");
             if(facet.length > 0)
             {
@@ -256,7 +256,7 @@
                 }
                 }
 
-                printIdentityFacetOperation(s, str);
+                printIdentityFacetOperation(s, stream);
                 break;
             }
 
