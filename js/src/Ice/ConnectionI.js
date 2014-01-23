@@ -1673,7 +1673,7 @@
                 if(ex instanceof Ice.LocalException)
                 {
                     this.setState(StateClosed, ex);
-                    return callbacks;
+                    return;
                 }
                 else
                 {

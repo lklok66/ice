@@ -1023,10 +1023,10 @@
             return index;
         };
 
-        var sequencePatcher = function(seq, index, Type){
+        var sequencePatcher = function(seq, index, T){
             return function(v)
                 {
-                    if(v !== null && !(v instanceof Type))
+                    if(v !== null && !(v instanceof T))
                     {
                         ExUtil.throwUOE(T.__ids[T.__ids.length - 1], v);
                     }
@@ -1398,7 +1398,7 @@
             this._current.sliceType = sliceType;
             this._current.firstSlice = true;
 
-            if(data !== null && data != undefined)
+            if(data !== null && data !== undefined)
             {
                 this.writeSlicedData(data);
             }
@@ -1878,7 +1878,7 @@
                 }
                 else
                 {
-                    encoding = this._encoding
+                    encoding = this._encoding;
                     format = FormatType.DefaultFormat;
                 }
             }
@@ -2897,7 +2897,7 @@
                 function(obj){
                     if(obj !== null && !(obj.ice_instanceof(T)))
                     {
-                        ExUtil.throwUOE(T.__ids[T.__ids.length - 1], obj);
+                        ExUtil.throwUOE(T.ice_staticId(), obj);
                     }
                     patcher(obj);
                 });
@@ -3132,7 +3132,7 @@
 
         BasicStream.prototype.getTypeId = function(compactId)
         {
-            var typeId = Ice.CompactIdRegistry.find(compactId);
+            var typeId = Ice.CompactIdRegistry.get(compactId);
             return typeId === undefined ? "" : typeId;
         };
 

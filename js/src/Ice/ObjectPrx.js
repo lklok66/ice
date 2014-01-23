@@ -26,7 +26,8 @@
         require("Ice/Object");
 
         var Ice = global.Ice || {};
-
+        var Slice = global.Slice || {};
+        
         var ArrayUtil = Ice.ArrayUtil;
         var AsyncResultBase = Ice.AsyncResultBase;
         var AsyncResult = Ice.AsyncResult;
@@ -640,7 +641,7 @@
         
         ObjectPrx.prototype.ice_invoke = function(operation, mode, inParams, ctx, explicitCtx)
         {
-            if(explicitCtx && ctx == null)
+            if(explicitCtx && ctx === null)
             {
                 ctx = new Ice.HashMap();
             }
@@ -917,7 +918,7 @@
             if(prx === undefined || prx === null)
             {
                 __r = new AsyncResultBase(null, "checkedCast", null, null, null);
-                __r.succeed(__promise, null);
+                __r.succeed(__r, null);
             }
             else
             {
@@ -979,7 +980,7 @@
                 r = new type();
                 if(facet !== undefined)
                 {
-                    prx = prx.ice_facet(facet)
+                    prx = prx.ice_facet(facet);
                 }
                 r.__copyFrom(prx);
             }
@@ -1019,57 +1020,7 @@
             }
             return v;
         };
-
-        ObjectPrx.defineProxy = function(staticId, prxInterfaces)
-        {
-            var type = this;
-
-            var prx = function()
-            {
-                type.call(this)
-            };
-            prx.__parent = type;
-
-            // All generated proxies inherit from ObjectPrx
-            prx.prototype = new type();
-            prx.prototype.constructor = prx;
-
-            if(prxInterfaces !== undefined)
-            {
-                // Copy methods from super-interfaces
-                prx.__implements = prxInterfaces;
-                for(var intf in prxInterfaces)
-                {
-                    var prxInterface = prxInterfaces[intf].prototype;
-                    for(var f in prxInterface)
-                    {
-                        if(typeof prxInterface[f] == "function" && prx.prototype[f] === undefined)
-                        {
-                            prx.prototype[f] = prxInterface[f];
-                        }
-                    }
-                }
-            }
-
-            // Static mtehods
-            prx.ice_staticId = staticId;
-
-            // Copy static methods inherited from ObjectPrx
-            prx.checkedCast = ObjectPrx.checkedCast;
-            prx.uncheckedCast = ObjectPrx.uncheckedCast;
-            prx.write = ObjectPrx.write;
-            prx.writeOpt = ObjectPrx.writeOpt;
-            prx.read = ObjectPrx.read;
-            prx.readOpt = ObjectPrx.readOpt;
-            prx.defineProxy = ObjectPrx.defineProxy;
-
-            //static properties
-            Object.defineProperty(prx, "minWireSize", {
-                get: function(){ return 2; }
-            });
-            return prx;
-        };
-
+        
         ObjectPrx.__instanceof = function(T)
         {
             if(T === this)
@@ -1090,7 +1041,7 @@
                 return this.__parent.__instanceof(T);
             }
             return false;
-        }
+        };
 
         ObjectPrx.prototype.ice_instanceof = function(T)
         {
@@ -1105,7 +1056,58 @@
             return false;
         };
 
+        Slice.defineProxy = function(base, staticId, prxInterfaces)
+        {
+            var prx = function()
+            {
+                base.call(this);
+            };
+            prx.__parent = base;
+
+            // All generated proxies inherit from ObjectPrx
+            prx.prototype = new base();
+            prx.prototype.constructor = prx;
+
+            if(prxInterfaces !== undefined)
+            {
+                // Copy methods from super-interfaces
+                prx.__implements = prxInterfaces;
+                for(var intf in prxInterfaces)
+                {
+                    var prxInterface = prxInterfaces[intf].prototype;
+                    for(var f in prxInterface)
+                    {
+                        if(typeof prxInterface[f] == "function" && prx.prototype[f] === undefined)
+                        {
+                            prx.prototype[f] = prxInterface[f];
+                        }
+                    }
+                }
+            }
+
+            // Static methods
+            prx.ice_staticId = staticId;
+
+            // Copy static methods inherited from ObjectPrx
+            prx.checkedCast = ObjectPrx.checkedCast;
+            prx.uncheckedCast = ObjectPrx.uncheckedCast;
+            prx.write = ObjectPrx.write;
+            prx.writeOpt = ObjectPrx.writeOpt;
+            prx.read = ObjectPrx.read;
+            prx.readOpt = ObjectPrx.readOpt;
+            
+            prx.__instanceof = ObjectPrx.__instanceof;
+
+            //static properties
+            Object.defineProperty(prx, "minWireSize", {
+                get: function(){ return 2; }
+            });
+            return prx;
+        };
+
         Ice.ObjectPrx = ObjectPrx;
+        
+        global.Slice = Slice;
         global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :

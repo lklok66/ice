@@ -1,5 +1,5 @@
 {
   "node": true,
   "undef": true,
-  "globals": { "WebSocket" : false }
+  "globals": { "WebSocket" : false, "Ice" : false, "IceWS" : false, "Slice" : false }
 }

@@ -24,11 +24,7 @@
         };
 
         AssertionFailedException.prototype = new Error();
-
-        Object.defineProperty(AssertionFailedException.prototype, "__name", {
-            get: function() { return "AssertionFailedException"; }
-        });
-
+        
         AssertionFailedException.prototype.constructor = AssertionFailedException;
 
         var Debug = {};

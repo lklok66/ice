@@ -16,6 +16,7 @@
         //
 
         var Ice = global.Ice || {};
+        var Slice = global.Slice || {};
         
         var nextAddress = 0;
 
@@ -60,6 +61,11 @@
         {
             return IceObject.__ids[0];
         };
+        
+        IceObject.prototype.toString = function()
+        {
+            return "[object " + this.ice_id() + "]";
+        };
 
         IceObject.prototype.ice_preMarshal = function()
         {
@@ -83,6 +89,42 @@
             is.endReadObject(false);
         };
         
+        Slice.defineLocalObject = function(constructor, base)
+        {
+            var obj = constructor;
+
+            if(base !== undefined)
+            {
+                obj.prototype = new base;
+                obj.__parent = base;
+            }
+            obj.prototype.constructor = constructor;
+            
+            return obj;
+        };
+        
+        IceObject.__instanceof = function(T)
+        {
+            if(T === this)
+            {
+                return true;
+            }
+
+            for(var i in this.__implements)
+            {
+                if(this.__implements[i].__instanceof(T))
+                {
+                    return true;
+                }
+            }
+
+            if(this.__parent)
+            {
+                return this.__parent.__instanceof(T);
+            }
+            return false;
+        };
+
         IceObject.prototype.ice_instanceof = function(T)
         {
             if(T)
@@ -91,16 +133,76 @@
                 {
                     return true;
                 }
-                var p = Object.getPrototypeOf(this);
-                if(p !== null && p !== undefined && p.__implements)
-                {
-                    return p.__implements.indexOf(T) !== -1;
-                }
+                return this.constructor.__instanceof(T);
             }
             return false;
         };
+        
+        Slice.defineObject = function(constructor, base, scope, ids, writeImpl, readImpl, write, read, interfaces)
+        {
+            var obj = constructor;
+
+            obj.prototype = new base;
+            obj.__parent = base;
+            
+            obj.prototype.constructor = obj;
+            
+            obj.prototype.ice_ids = function(current)
+            {
+                return ids;
+            };
+            
+            obj.prototype.ice_id = function(current)
+            {
+                return ids[scope];
+            };
+
+            obj.ice_staticId = function()
+            {
+                return ids[scope];
+            };
+            
+            obj.prototype.__writeImpl = writeImpl;
+            obj.prototype.__readImpl = readImpl;
+            
+            if(write !== undefined)
+            {
+                obj.prototype.__write = write;
+            }
+            
+            if(read !== undefined)
+            {
+                obj.prototype.__read = read;
+            }
+            
+            obj.__instanceof = IceObject.__instanceof;
+            
+            obj.__implements = interfaces;
+            
+            //
+            // Override ice_instanceof so it calls the correct __instanceof,
+            // we cannot use this.constructor.__instanceof as the class
+            // might be subclass and instanciate by a factory in which case
+            // constructor will lack __instanceof method.
+            //
+            obj.prototype.ice_instanceof = function(T)
+            {
+                if(T)
+                {
+                    if(this instanceof T)
+                    {
+                        return true;
+                    }
+                    return obj.__instanceof(T);
+                }
+                return false;
+            };
+            
+            return obj;
+        };
 
         Ice.Object = IceObject;
+        global.Slice = Slice;
         global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 

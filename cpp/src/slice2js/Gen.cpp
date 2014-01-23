@@ -1347,6 +1347,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
     const string prxName = p->name() + "Prx";
     const string objectRef = "Ice.Object";
     const string prxRef = "Ice.ObjectPrx";
+    const string defineObject = p->isLocal() ? "Slice.defineLocalObject" : "Slice.defineObject";
 
     ClassList bases = p->bases();
     ClassDefPtr base;
@@ -1401,7 +1402,10 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
     
     _out << sp;
     writeDocComment(p, getDeprecateReason(p, 0, "type"));
-    _out << nl << localScope << '.' << name << " = function" << spar << allParamNames << epar;
+    _out << nl << localScope << '.' << name << " = " << defineObject << "(";
+    _out.inc();
+    
+    _out << nl << "function" << spar << allParamNames << epar;
     _out << sb;
     if(!p->isLocal() || hasBaseClass)
     {
@@ -1440,14 +1444,13 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             _out << ';';
         }
     }
-    _out << eb << ";";
-    
+    _out << eb;
     if(!p->isLocal() || hasBaseClass)
     {
-        _out << nl << localScope << '.' << name << ".prototype = new " << baseRef << "();";
-        _out << nl << localScope << '.' << name << ".prototype.constructor = " << localScope << '.' << name << ';';
+        _out << ",";
+        _out << nl << baseRef;
     }
-
+    
     if(!p->isLocal())
     {
         string scoped = p->scoped();
@@ -1475,8 +1478,10 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         StringList::const_iterator scopedIter = find(ids.begin(), ids.end(), scoped);
         assert(scopedIter != ids.end());
         StringList::difference_type scopedPos = IceUtilInternal::distance(firstIter, scopedIter);
-
-        _out << nl << localScope << '.' << name << ".__ids = [";
+        
+        _out << ",";
+        _out << nl << scopedPos << ",";
+        _out << nl << "[";
         _out.inc();
         for(StringList::const_iterator q = ids.begin(); q != ids.end(); ++q)
         {
@@ -1487,31 +1492,103 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             _out << nl << '"' << *q << '"';
         }
         _out.dec();
-        _out << nl << "];";
+        _out << nl << "],";
 
-        _out << nl << localScope << '.' << name << ".prototype.ice_ids = function(current)";
+        _out << nl << "function(__os)";
         _out << sb;
-        _out << nl << "return " << localScope << '.' << name << ".__ids;";
-        _out << eb << ";";
+        _out << nl << "__os.startWriteSlice(" << localScope << "." << name << ".ice_staticId(), " << p->compactId()
+             << ", " << (!base ? "true" : "false") << ");";
+        for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+        {
+            writeMarshalDataMember(*q);
+        }
+        _out << nl << "__os.endWriteSlice();";
+        if(base)
+        {
+            _out << nl << baseRef << ".prototype.__writeImpl.call(this, __os);";
+        }
+        _out << eb << ",";
+
+        _out << nl << "function(__is)";
+        _out << sb;
+        _out << nl << "__is.startReadSlice();";
+        if(hasClassMembers)
+        {
+            _out << nl << "var self = this;";
+        }
+        for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+        {
+            writeUnmarshalDataMember(*q);
+        }
+        _out << nl << "__is.endReadSlice();";
+        if(base)
+        {
+            _out << nl << baseRef << ".prototype.__readImpl.call(this, __is);";
+        }
+        _out << eb;
         
-        _out << nl << localScope << '.' << name << ".prototype.ice_id = function(current)";
-        _out << sb;
-        _out << nl << "return " << localScope << '.' << name << ".__ids[" << scopedPos << "];";
-        _out << eb << ";";
-
-        _out << sp;
-        _out << nl << localScope << '.' << name << ".ice_staticId = function()";
-        _out << sb;
-        _out << nl << "return " << localScope << '.' << name << ".__ids[" << scopedPos << "];";
-        _out << eb << ";";
+        bool basePreserved = p->inheritsMetaData("preserve-slice");
+        bool preserved = p->hasMetaData("preserve-slice");
+        
+        if(preserved && !basePreserved)
+        {
+            _out << ",";
+            _out << nl << "function(__os)";
+            _out << sb;
+            _out << nl << "__os.startWriteObject(this.__slicedData);";
+            _out << nl << "this.__writeImpl(__os);";
+            _out << nl << "__os.endWriteObject();";
+            _out << eb << ",";
+            _out << nl << "function(__is)";
+            _out << sb;
+            _out << nl << "__is.startReadObject();";
+            _out << nl << "this.__readImpl(__is);";
+            _out << nl << "this.__slicedData = __is.endReadObject(true);";
+            _out << eb;
+        }
+        else
+        {
+            _out << ",";
+            _out << nl << "undefined,";
+            _out << nl << "undefined";
+        }
+        
+        if(!bases.empty())
+        {
+            _out << ",";
+            _out << nl << "[";
+            _out.inc();
+            for(ClassList::const_iterator q = bases.begin(); q != bases.end();)
+            {
+                ClassDefPtr base = *q;
+                if(base->isInterface())
+                {
+                    _out << nl << getLocalScope(base->scope()) << "." << base->name();
+                    if(++q != bases.end())
+                    {
+                        _out << ", ";
+                    }
+                }
+                else
+                {
+                    q++;
+                }
+            }
+            _out.dec();
+            _out << nl << "]";
+        }
     }
-
+    _out.dec();
+    _out << ");";
+    
     if(!p->isLocal())
     {
         const string staticId = localScope + "." + name + ".ice_staticId";
         const string baseProxy = 
             !p->isInterface() && base ? (getLocalScope(base->scope()) + "." + base->name() + "Prx") : "Ice.ObjectPrx";
-        _out << nl << localScope << '.' << prxName << " = " << baseProxy << ".defineProxy(" << staticId;
+        
+        _out << sp;
+        _out << nl << localScope << '.' << prxName << " = " << "Slice.defineProxy(" << baseProxy << ", " << staticId;
         if(!bases.empty())
         {
             _out << ", [";
@@ -1536,109 +1613,8 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             _out << "]";
         }
         _out << ");";
-    }
 
-    const OperationList ops = p->operations();
-    for(OperationList::const_iterator q = ops.begin(); q != ops.end(); ++q)
-    {
-        //
-        // TODO: This is compact but doesn't show the function's signature. A more verbose alternative
-        // would be to generate a dummy function:
-        //
-        // Foo.prototype.doSomething = function(arg1, arg2)
-        // {
-        //     this.__notImplemented();
-        // }
-        //
-        _out << nl << localScope << '.' << name << ".prototype." << fixId((*q)->name()) << " = " << objectRef
-             << ".prototype.__notImplemented;";
-    }
-
-    _out << sp;
-    _out << nl << localScope << '.' << name << ".prototype.toString = function()";
-    _out << sb;
-    _out << nl << "return \"[object " << p->scoped().substr(2) << "]\";";
-    _out << eb << ";";
-
-    // TODO: equals?
-
-    if(!p->isLocal())
-    {
-        _out << sp;
-        _out << nl << localScope << '.' << name << ".prototype.__writeImpl = function(__os)";
-        _out << sb;
-        _out << nl << "__os.startWriteSlice(" << localScope << "." << name << ".ice_staticId(), " << p->compactId()
-             << ", " << (!base ? "true" : "false") << ");";
-        for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
-        {
-            writeMarshalDataMember(*q);
-        }
-        _out << nl << "__os.endWriteSlice();";
-        if(base)
-        {
-            _out << nl << baseRef << ".prototype.__writeImpl.call(this, __os);";
-        }
-        _out << eb << ";";
-
-        _out << sp;
-        _out << nl << localScope << '.' << name << ".prototype.__readImpl = function(__is)";
-        _out << sb;
-        _out << nl << "__is.startReadSlice();";
-        if(hasClassMembers)
-        {
-            _out << nl << "var self = this;";
-        }
-        for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
-        {
-            writeUnmarshalDataMember(*q);
-        }
-        _out << nl << "__is.endReadSlice();";
-        if(base)
-        {
-            _out << nl << baseRef << ".prototype.__readImpl.call(this, __is);";
-        }
-        _out << eb << ";";
-        
-        bool basePreserved = p->inheritsMetaData("preserve-slice");
-        bool preserved = p->hasMetaData("preserve-slice");
-        
-        if(preserved && !basePreserved)
-        {
-            _out << sp;
-            _out << nl << localScope << '.' << name << ".prototype.__write = function(__os)";
-            _out << sb;
-            _out << nl << "__os.startWriteObject(this.__slicedData);";
-            _out << nl << "this.__writeImpl(__os);";
-            _out << nl << "__os.endWriteObject();";
-            _out << eb;
-            _out << sp;
-            _out << nl << localScope << '.' << name << ".prototype.__read = function(__is)";
-            _out << sb;
-            _out << nl << "__is.startReadObject();";
-            _out << nl << "this.__readImpl(__is);";
-            _out << nl << "this.__slicedData = __is.endReadObject(true);";
-            _out << eb;
-        }
-        
-        ClassList allBases = p->allBases();
-        if(!allBases.empty())
-        {
-            _out << sp;
-            _out << nl << localScope << "." << name << ".prototype.__implements = [";
-            _out.inc();
-            for(ClassList::const_iterator q = allBases.begin(); q != allBases.end();)
-            {
-                ClassDefPtr base = *q;
-                _out << nl << getLocalScope(base->scope()) << "." << base->name();
-                if(++q !=  allBases.end())
-                {
-                    _out << ", ";
-                }
-            }
-            _out.dec();
-            _out << nl << "];";
-        }
-
+        const OperationList ops = p->operations();
         const string prototype = localScope + "." + prxName + ".prototype";
         for(OperationList::const_iterator q = ops.begin(); q != ops.end(); ++q)
         {
@@ -1829,7 +1805,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             //
             // Also register the type using the stringified compact ID.
             //
-            _out << nl << "Ice.CompactIdRegistry.register(" << p->compactId() << ", " << localScope << "."
+            _out << nl << "Ice.CompactIdRegistry.set(" << p->compactId() << ", " << localScope << "."
                  << name << ".ice_staticId());";
         }
     }
@@ -2008,6 +1984,7 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     const string name = fixId(p->name());
     const ExceptionPtr base = p->base();
     string baseRef;
+    string defineException = p->isLocal() ? "Slice.defineLocalException" : "Slice.defineUserException";
     if(base)
     {
         baseRef = getReference(scope, base->scoped());
@@ -2051,7 +2028,10 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
 
     _out << sp;
     writeDocComment(p, getDeprecateReason(p, 0, "type"));
-    _out << nl << localScope << '.' << name << " = function" << spar << allParamNames << "_cause" << epar;
+    _out << nl << localScope << '.' << name << " = " << defineException << "(";
+    _out.inc();
+    
+    _out << nl << "function" << spar << allParamNames << "_cause" << epar;
     _out << sb;
     _out << nl << baseRef << ".call" << spar << "this" << baseParamNames << "_cause" << epar << ';';
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
@@ -2084,37 +2064,16 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
             _out << ';';
         }
     }
-    _out << eb << ";";
-    _out << nl << localScope << '.' << name << ".prototype = new " << baseRef << "();";
-    _out << nl << localScope << '.' << name << ".prototype.constructor = " << localScope << '.' << name << ';';
-
-    _out << sp;
-    _out << nl << localScope << '.' << name << ".prototype.ice_name = function()";
-    _out << sb;
-    _out << nl << "return \"" << p->scoped().substr(2) << "\";";
-    _out << eb << ";";
-
-    _out << sp;
-    _out << nl << localScope << '.' << name << ".prototype.toString = function()";
-    _out << sb;
-    // TODO
-    _out << nl << "return this.ice_name();";
-    _out << eb << ";";
-    
-    _out << sp;
-    _out << nl << "Object.defineProperty(" << localScope << "." << name << ".prototype, \"__name\", {";
-    _out.inc();
-    _out << nl << "configurable:true,";
-    _out << nl << "get:function(){ return \"" << localScope << "." << name << "\"; }";
-    _out.dec();
-    _out << nl << "});";
+    _out << eb << ",";
+    _out << nl << baseRef << ",";
+    _out << nl << "\"" << p->scoped().substr(2) << "\"";
 
     // TODO: equals?
 
     if(!p->isLocal())
     {
-        _out << sp;
-        _out << nl << localScope << '.' << name << ".prototype.__writeImpl = function(__os)";
+        _out << ",";
+        _out << nl << "function(__os)";
         _out << sb;
         _out << nl << "__os.startWriteSlice(\"" << p->scoped() << "\", -1, " << (!base ? "true" : "false") << ");";
         for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
@@ -2126,10 +2085,8 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
         {
             _out << nl << baseRef << ".prototype.__writeImpl.call(this, __os);";
         }
-        _out << eb << ";";
-
-        _out << sp;
-        _out << nl << localScope << '.' << name << ".prototype.__readImpl = function(__is)";
+        _out << eb << ",";
+        _out << nl << "function(__is)";
         _out << sb;
         _out << nl << "__is.startReadSlice();";
         if(hasClassMembers)
@@ -2145,31 +2102,30 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
         {
             _out << nl << baseRef << ".prototype.__readImpl.call(this, __is);";
         }
-        _out << eb << ";";
-        _out << nl;
+        _out << eb;
         
         bool basePreserved = p->inheritsMetaData("preserve-slice");
         bool preserved = p->hasMetaData("preserve-slice");
         
         if(preserved && !basePreserved)
         {
-            _out << sp;
-            _out << nl << localScope << '.' << name << ".prototype.__write = function(__os)";
+            _out << ",";
+            _out << nl << "function(__os)";
             _out << sb;
             _out << nl << "__os.startWriteException(this.__slicedData);";
             _out << nl << "this.__writeImpl(__os);";
             _out << nl << "__os.endWriteException();";
-            _out << eb << ";";
-            _out << sp;
-            _out << nl << localScope << '.' << name << ".prototype.__read = function(__is)";
+            _out << eb << ",";
+            _out << nl << "function(__is)";
             _out << sb;
             _out << nl << "__is.startReadException();";
             _out << nl << "this.__readImpl(__is);";
             _out << nl << "this.__slicedData = __is.endReadException(true);";
-            _out << eb << ";";
+            _out << eb;
         }
     }
-
+    _out << ");";
+    _out.dec();
     return false;
 }
 

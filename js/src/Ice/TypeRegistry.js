@@ -11,26 +11,7 @@
     var __m = function(global, module, exports, require){
         require("Ice/HashMap");
         var Ice = global.Ice || {};
-        var HashMap = Ice.HashMap;
-
-        function TypeRegistry()
-        {
-            var __TypeRegistry__ = new HashMap();
-            
-            var register = function(typeId, type)
-            {
-                __TypeRegistry__.set(typeId, type);
-            };
-            
-            var find = function(typeId)
-            {
-                return __TypeRegistry__.get(typeId);
-            };
-            
-            return {register: register, find: find};
-        }
-        
-        Ice.CompactIdRegistry = TypeRegistry();
+        Ice.CompactIdRegistry = new Ice.HashMap();
         global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 

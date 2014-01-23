@@ -10,6 +10,7 @@
 (function(module, name){
     var __m = function(global, module, exports, require){
         
+        var Slice = global.Slice || {};
         var Ice = global.Ice || {};
 
         //
@@ -32,6 +33,8 @@
             //
             if(stack !== undefined)
             {
+
+                var name =  object.ice_name ? object.ice_name().replace("::", ".") : "";
                 Object.defineProperty(object, "stack", {
                     get: function(){
                         if(formattedStack === undefined)
@@ -42,7 +45,7 @@
                             var lines = stack.split("\n");
                             for(var i = 0; i < lines.length; ++i)
                             {
-                                if(lines[i].indexOf(object.__name) !== -1)
+                                if(lines[i].indexOf(name) !== -1)
                                 {
                                     if(i < lines.length)
                                     {
@@ -51,7 +54,7 @@
                                     }
                                 }
                             }
-                            formattedStack = object.__name + ": " + object.message + "\n"; 
+                            formattedStack = name + ": " + object.message + "\n"; 
                             formattedStack += lines.join("\n");
                         }
                         return formattedStack;
@@ -72,11 +75,6 @@
         {
             return this.ice_name();
         };
-        
-        Object.defineProperty(Exception.prototype, "__name", {
-            configurable:true,
-            get:function(){ return "Ice.Exception"; }
-        });
 
         Ice.Exception = Exception;
 
@@ -96,13 +94,20 @@
         {
             return "Ice::LocalException";
         };
-        
-        Object.defineProperty(LocalException.prototype, "__name", {
-            configurable:true,
-            get:function(){ return "Ice.LocalException"; }
-        });
 
         Ice.LocalException = LocalException;
+        
+        Slice.defineLocalException = function(constructor, base, name)
+        {
+            var ex = constructor;
+            ex.prototype = new base();
+            ex.prototype.constructor = ex;
+            ex.prototype.ice_name = function()
+            {
+                return name;
+            };
+            return ex;
+        };
 
         //
         // Ice.UserException
@@ -135,13 +140,34 @@
             is.endReadException(false);
         };
         
-        Object.defineProperty(UserException.prototype, "__name", {
-            configurable:true,
-            get:function(){ return "Ice.UserException"; }
-        });
-        
         Ice.UserException = UserException;
+        
+        Slice.defineUserException = function(constructor, base, name, writeImpl, readImpl, write, read)
+        {
+            var ex = constructor;
+            ex.prototype = new base();
+            ex.prototype.constructor = ex;
+            ex.prototype.ice_name = function()
+            {
+                return name;
+            };
+            
+            ex.prototype.__writeImpl = writeImpl;
+            ex.prototype.__readImpl = readImpl;
+            
+            if(write !== undefined)
+            {
+                ex.prototype.__write = write;
+            }
+            
+            if(read !== undefined)
+            {
+                ex.prototype.__read = read;
+            }
+            return ex;
+        };
 
+        global.Slice = Slice;
         global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
