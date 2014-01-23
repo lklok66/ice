@@ -1028,7 +1028,7 @@
                 {
                     if(v !== null && !(v instanceof T))
                     {
-                        ExUtil.throwUOE(T.__ids[T.__ids.length - 1], v);
+                        ExUtil.throwUOE(T.ice_staticId(), v);
                     }
                     seq[index] = v;
                 };
