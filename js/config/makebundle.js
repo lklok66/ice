@@ -10,7 +10,26 @@
 var fs = require('fs');
 var path = require('path');
 var esprima = require('esprima');
+
+var usage = function()
+{
+    console.log("usage:");
+    console.log("" + process.argv[0] + " " + path.basename(process.argv[1]) + " <base-dir> <sub-dirs>"); 
+}
+
+if(process.argv.length < 3)
+{
+    usage();
+    process.exit(1);
+}
+
 var baseDir = process.argv[2];
+
+var subDirs = [];
+for(var i = 3; i < process.argv.length; ++i)
+{
+    subDirs.push(path.join(baseDir, process.argv[i]));
+}
 
 var Depends = function()
 {
@@ -123,7 +142,8 @@ Parser.traverse = function(object, depend, file, basedir)
                 {
                     var includedFile = value.arguments[0].value + ".js";
                     if(includedFile.indexOf("Ice/") === 0 ||
-                       includedFile.indexOf("IceWS/") === 0)
+                       includedFile.indexOf("IceWS/") === 0 ||
+                       includedFile.indexOf("Glacier2/"))
                     {
                         if(depend.depends.indexOf(includedFile) === -1)
                         {
@@ -136,14 +156,19 @@ Parser.traverse = function(object, depend, file, basedir)
     }
 };
 
-Parser.dir = function(baseDir, depends)
+Parser.dir = function(base, depends)
 {
-    var files = fs.readdirSync(baseDir);
+    if(base != baseDir && subDirs.indexOf(base) === -1)
+    {
+        return;
+    }
+
+    var files = fs.readdirSync(base);
     var d = depends || new Depends();
     for(var i = 0; i < files.length; ++i)
     {
         var file = files[i];
-        file = path.join(baseDir, file);
+        file = path.join(base, file);
         var stats = fs.statSync(file);
         if(path.extname(file) == ".js" && stats.isFile())
         {
@@ -183,16 +208,18 @@ process.stdout.write("{\n");
 // Now write a bundle to stdout.
 //
 
-var data = fs.readFileSync(path.join(__dirname, "module.js"));
-var lines = data.toString().split("\n");
-var j;
-
-for(j in lines)
+if(subDirs.indexOf("src/Ice") !== -1)
 {
-    process.stdout.write("    " + lines[j] + "\n");
-}
-process.stdout.write("\n");
+    var data = fs.readFileSync(path.join(__dirname, "module.js"));
+    var lines = data.toString().split("\n");
+    var j;
 
+    for(j in lines)
+    {
+        process.stdout.write("    " + lines[j] + "\n");
+    }
+    process.stdout.write("\n");
+}
 var file, i, length = d.depends.length, fullPath;
 
 for(i = 0;  i < length; ++i)

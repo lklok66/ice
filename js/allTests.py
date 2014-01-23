@@ -33,6 +33,7 @@ tests = [
     ("Ice/info", ["once"]),
     ("Ice/inheritance", ["once"]),
     ("Ice/invoke", ["once"]),
+    ("Ice/location", ["once"]),
     ("Ice/objects", ["once"]),
     ("Ice/operations", ["once"]),
     ("Ice/optional", ["once"]),
@@ -43,6 +44,7 @@ tests = [
     ("Ice/slicing/objects", ["once"]),
     ("Ice/stream", ["once"]),
     ("Ice/timeout", ["once"]),
+    ("Glacier2/router", ["once"]),
     ]
 
 if __name__ == "__main__":

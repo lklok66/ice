@@ -87,6 +87,7 @@ private:
         RequireVisitor(::IceUtilInternal::Output&, std::vector<std::string>);
 
         virtual bool visitClassDefStart(const ClassDefPtr&);
+        virtual bool visitStructStart(const StructPtr&);
         virtual bool visitExceptionStart(const ExceptionPtr&);
         virtual void visitSequence(const SequencePtr&);
         virtual void visitDictionary(const DictionaryPtr&);
@@ -97,6 +98,7 @@ private:
     private:
 
         bool _seenClass;
+        bool _seenStruct;
         bool _seenUserException;
         bool _seenLocalException;
         bool _seenEnum;

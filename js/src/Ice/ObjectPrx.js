@@ -528,7 +528,7 @@
 
         ObjectPrx.prototype.__handleException = function(handler, ex, interval, cnt)
         {
-            if(handler === this._handler)
+            if(this._handler !== null && handler._connection === this._handler._connection)
             {
                 this._handler = null;
             }
@@ -562,7 +562,7 @@
 
         ObjectPrx.prototype.__handleExceptionWrapper = function(handler, ex)
         {
-            if(handler === this._handler)
+            if(this._handler !== null && handler._connection === this._handler._connection)
             {
                 this._handler = null;
             }
@@ -581,7 +581,7 @@
             }
             else
             {
-                if(handler === this._handler)
+                if(this._handler !== null && handler._connection === this._handler._connection)
                 {
                     this._handler = null;
                 }
@@ -886,7 +886,7 @@
 
         ObjectPrx.prototype.__newInstance = function(ref)
         {
-            var proxy = new (Object.getPrototypeOf(this)).constructor();
+            var proxy = new this.constructor();
             proxy.__setup(ref);
             return proxy;
         };

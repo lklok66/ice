@@ -1680,6 +1680,7 @@
             {
                 this._adapterId = "";
             }
+            this._connectionId = "";
             Debug.assert(this._adapterId.length === 0 || this._endpoints.length === 0);
         };
 

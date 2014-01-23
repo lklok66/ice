@@ -36,6 +36,7 @@
         require("Ice/UnknownSlicedObject");
         require("Ice/OutputStream");
         require("Ice/InputStream");
+        require("Ice/Process");
 
         var Ice = global.Ice || {};
         var Protocol = Ice.Protocol;

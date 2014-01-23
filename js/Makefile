@@ -26,15 +26,26 @@ test::
 ifeq ($(OPTIMIZE),yes)
 bundle: $(GEN_SRCS) $(SRCS)
 	@mkdir -p $(libdir)
+	
 	@rm -f $(libdir)/Ice.js $(libdir)/Ice.js.gz
-	node $(top_srcdir)/config/makebundle.js src > $(libdir)/Ice.tmp.js
+	node $(top_srcdir)/config/makebundle.js src Ice IceWS > $(libdir)/Ice.tmp.js
 	java -jar $(CLOSURE_PATH)/compiler.jar $(CLOSUREFLAGS) --js $(libdir)/Ice.tmp.js --js_output_file $(libdir)/Ice.js
 	gzip -c9 $(libdir)/Ice.js > $(libdir)/Ice.js.gz
 	rm -f $(libdir)/Ice.tmp.js
+	
+	@rm -f $(libdir)/Glacier2.js $(libdir)/Glacier2.js.gz
+	node $(top_srcdir)/config/makebundle.js src Glacier2 > $(libdir)/Glacier2.tmp.js
+	java -jar $(CLOSURE_PATH)/compiler.jar $(CLOSUREFLAGS) --js $(libdir)/Glacier2.tmp.js --js_output_file $(libdir)/Glacier2.js
+	gzip -c9 $(libdir)/Glacier2.js > $(libdir)/Glacier2.js.gz
+	rm -f $(libdir)/Glacier2.tmp.js
 else
 bundle: $(GEN_SRCS) $(SRCS)
 	@mkdir -p $(libdir)
 	@rm -f $(libdir)/Ice.js $(libdir)/Ice.js.gz
-	node $(top_srcdir)/config/makebundle.js src > $(libdir)/Ice.js
+	node $(top_srcdir)/config/makebundle.js src Ice IceWS > $(libdir)/Ice.js
 	gzip -c9 $(libdir)/Ice.js > $(libdir)/Ice.js.gz
+	
+	@rm -f $(libdir)/Glacier2.js $(libdir)/Glacier2.js.gz
+	node $(top_srcdir)/config/makebundle.js src Glacier2 > $(libdir)/Glacier2.js
+	gzip -c9 $(libdir)/Glacier2.js > $(libdir)/Glacier2.js.gz
 endif

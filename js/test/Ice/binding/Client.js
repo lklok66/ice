@@ -95,6 +95,7 @@
                                         closePromises.push(conn.close(false));
                                     }
                                 });
+                            
                             test = test.ice_endpoints(endpoints);
                             if(closePromises.length > 0)
                             {
@@ -500,6 +501,10 @@
                         },
                        exceptionCB
                     ).then(
+                        //
+                        // Ensure that when a connection is opened it's reused for new
+                        // proxies and that all endpoints are eventually tried.
+                        //
                         function(r1, r2, r3)
                         {
                             adapters.push(r1[1]);
@@ -595,7 +600,13 @@
                     ).then(
                         function()
                         {
+                            //
+                            // Ensure that the proxy correctly caches the connection (we
+                            // always send the request over the same connection.)
+                            //
+                            
                             var p = new Promise();
+                            
                             var f1 = function(adapters)
                             {
                                 var adapter = adapters.shift();
@@ -616,17 +627,116 @@
                                         {
                                             p.succeed();
                                         }
-                                    },
-                                    exceptionCB
+                                    }
                                 ).exception(
                                     function(ex)
                                     {
                                         p.fail(ex);
                                     });
-                            };
-                            setTimeout(function(){
-                                f1(ArrayUtil.clone(adapters));
-                            });
+                            }
+                            setTimeout(
+                                function()
+                                {
+                                    f1(ArrayUtil.clone(adapters))
+                                });
+                            return p;
+                        },
+                        exceptionCB
+                    ).then(
+                        function()
+                        {
+                            var p = new Promise();
+                            createTestIntfPrx(adapters).then(
+                                function(test1)
+                                {
+                                    var i = 0;
+                                    var nRetry = 10;
+                                    var adapterName;
+                                    
+                                    var f1 = function()
+                                    {
+                                        test1.getAdapterName().then(
+                                            function(asyncResult, name)
+                                            {
+                                                test(adapterName === name);
+                                                i++;
+                                                if(i < nRetry)
+                                                {
+                                                    f1();
+                                                }
+                                                else
+                                                {
+                                                    test(i == nRetry);
+                                                    p.succeed();
+                                                }
+                                            },
+                                            exceptionCB
+                                        ).exception(
+                                            function(ex)
+                                            {
+                                                p.fail(ex);
+                                            });
+                                    };
+                                    
+                                    test1.getAdapterName().then(
+                                        function(asyncResult, name)
+                                        {
+                                            adapterName = name;
+                                            f1();
+                                        },
+                                        exceptionCB
+                                    ).exception(
+                                        function(ex)
+                                        {
+                                            p.fail(ex);
+                                        });
+                                });
+                            
+                            return p;
+                        },
+                        exceptionCB
+                    ).then(
+                        function()
+                        {
+                            var p = new Promise();
+                            var f1 = function(adapters)
+                            {
+                                var adapter = adapters.shift();
+                                adapter.getTestIntf().then(
+                                    function(asyncResult, test)
+                                    {
+                                        return test.ice_getConnection();
+                                    },
+                                    exceptionCB
+                                ).then(
+                                    function(asyncResult, conn)
+                                    {
+                                        conn.close(false);
+                                    },
+                                    exceptionCB
+                                ).then(
+                                    function()
+                                    {
+                                        if(adapters.length > 0)
+                                        {
+                                            f1(adapters);
+                                        }
+                                        else
+                                        {
+                                            p.succeed();
+                                        }
+                                    }
+                                ).exception(
+                                    function(ex)
+                                    {
+                                        p.fail(ex);
+                                    });
+                            }
+                            setTimeout(
+                                function()
+                                {
+                                    f1(ArrayUtil.clone(adapters))
+                                });
                             return p;
                         },
                         exceptionCB
@@ -664,24 +774,66 @@
                                     function(obj)
                                     {
                                         test3 = obj;
-                                        return Promise.all(
-                                            test1.ice_getConnection(),
-                                            test2.ice_getConnection());
+                                        
+                                        var p = new Promise();
+                                        var conn1, conn2;
+                                        
+                                        test1.ice_getConnection().then(
+                                            function(asyncResult, conn)
+                                            {
+                                                conn1 = conn
+                                                return test2.ice_getConnection();
+                                            },
+                                            exceptionCB
+                                        ).then(
+                                            function(asyncResult, conn)
+                                            {
+                                                conn2 = conn;
+                                                test(conn1 === conn2);
+                                                p.succeed();
+                                            },
+                                            exceptionCB
+                                        ).exception(
+                                            function(ex)
+                                            {
+                                                p.fail(ex);
+                                            }
+                                        );
+                                        
+                                        return p;
                                     },
                                     exceptionCB
                                 ).then(
-                                    function(r1, r2)
+                                    function()
                                     {
-                                        test(r1[1] === r2[1]);
-                                        return Promise.all(
-                                            test2.ice_getConnection(),
-                                            test3.ice_getConnection());
+                                        var p = new Promise();
+                                        var conn1, conn2;
+                                        test2.ice_getConnection().then(
+                                            function(asyncResult, conn)
+                                            {
+                                                conn1 = conn
+                                                return test3.ice_getConnection();
+                                            },
+                                            exceptionCB
+                                        ).then(
+                                            function(asyncResult, conn)
+                                            {
+                                                conn2 = conn;
+                                                test(conn1 === conn2);
+                                                p.succeed();
+                                            },
+                                            exceptionCB
+                                        ).exception(
+                                            function(ex)
+                                            {
+                                                p.fail(ex);
+                                            });
+                                        return p;
                                     },
                                     exceptionCB
                                 ).then(
-                                    function(r1, r2)
+                                    function()
                                     {
-                                        test(r1[1] === r2[1]);
                                         return test1.getAdapterName();
                                     },
                                     exceptionCB

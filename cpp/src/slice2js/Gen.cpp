@@ -1178,6 +1178,7 @@ Slice::Gen::printHeader()
 Slice::Gen::RequireVisitor::RequireVisitor(IceUtilInternal::Output& out, vector<string> includePaths)
     : JsVisitor(out),
     _seenClass(false),
+    _seenStruct(false),
     _seenUserException(false),
     _seenLocalException(false),
     _seenEnum(false),
@@ -1195,6 +1196,13 @@ bool
 Slice::Gen::RequireVisitor::visitClassDefStart(const ClassDefPtr& p)
 {
     _seenClass = true; // Set regardless of whether p->isLocal()
+    return false;
+}
+
+bool
+Slice::Gen::RequireVisitor::visitStructStart(const StructPtr& p)
+{
+    _seenStruct = true; // Set regardless of whether p->isLocal()
     return false;
 }
 
@@ -1254,6 +1262,10 @@ Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
     if(_seenClass)
     {
         _out << nl << "require(\"Ice/ObjectPrx\");";
+    }
+    if(_seenStruct)
+    {
+        _out << nl << "require(\"Ice/Struct\");";
     }
 
     if(_seenLocalException || _seenUserException)
@@ -2146,7 +2158,9 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
 
     _out << sp;
     writeDocComment(p, getDeprecateReason(p, 0, "type"));
-    _out << nl << localScope << '.' << name << " = function" << spar << paramNames << epar;
+    _out << nl << localScope << '.' << name << " = Slice.defineStruct(";
+    _out.inc();
+    _out << nl << "function" << spar << paramNames << epar;
     _out << sb;
     bool hasClassMembers = false;
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
@@ -2168,17 +2182,9 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         }
         _out << ';';
     }
-    _out << eb << ";";
-    
-    _out << sp;
-    _out << nl << localScope << '.' << name << ".prototype.toString = function()";
-    _out << sb;
-    // TODO
-    _out << nl << "return \"\";";
-    _out << eb << ";";
+    _out << eb << ",";
 
-    _out << sp;
-    _out << nl << localScope << '.' << name << ".prototype.clone = function()";
+    _out << nl << "function()";
     _out << sb;
     _out << nl << "var __r = new " << localScope << '.' << name << "();";
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
@@ -2187,10 +2193,9 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         writeMemberClone("__r." + memberName, "this." + memberName, (*q)->type(), 0);
     }
     _out << nl << "return __r;";
-    _out << eb << ";";
+    _out << eb << ",";
 
-    _out << sp;
-    _out << nl << localScope << '.' << name << ".prototype.equals = function(rhs)";
+    _out << nl << "function(rhs)";
     _out << sb;
     _out << nl << "if(this === rhs)";
     _out << sb;
@@ -2206,10 +2211,9 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         writeMemberEquals("this." + memberName, "rhs." + memberName, (*q)->type(), 0);
     }
     _out << sp << nl << "return true;";
-    _out << eb << ";";
+    _out << eb << ",";
 
-    _out << sp;
-    _out << nl << localScope << '.' << name << ".prototype.hashCode = function()";
+    _out << nl << "function()";
     _out << sb;
     _out << nl << "var __h = 5381;";
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
@@ -2218,21 +2222,20 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         writeMemberHashCode("this." + memberName, (*q)->type(), 0);
     }
     _out << nl << "return __h;";
-    _out << eb << ";";
+    _out << eb;
 
     if(!p->isLocal())
     {
-        _out << sp;
-        _out << nl << localScope << '.' << name << ".prototype.__write = function(__os)";
+        _out << ",";
+        _out << nl << "function(__os)";
         _out << sb;
         for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
         {
             writeMarshalDataMember(*q);
         }
-        _out << eb << ";";
+        _out << eb << ",";
 
-        _out << sp;
-        _out << nl << localScope << '.' << name << ".prototype.__read = function(__is)";
+        _out << nl << "function(__is)";
         _out << sb;
         if(hasClassMembers)
         {
@@ -2242,11 +2245,18 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         {
             writeUnmarshalDataMember(*q);
         }
-        _out << eb << ";";
+        _out << eb;
+        _out.dec();
+        _out << ");";
         
         _out << sp;
         _out << nl << "Ice.StreamHelpers.StructHelper(" << localScope << '.' << name << ", " 
              << p->minWireSize() << ", " << getOptionalFormat(p) << ");";
+    }
+    else
+    {
+        _out.dec();
+        _out << ");";
     }
     return false;
 }

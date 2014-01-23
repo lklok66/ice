@@ -11,24 +11,7 @@ top_srcdir	= ../..
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= binding \
-		defaultValue \
-		enums \
-		exceptions \
-		info \
-		facets \
-		inheritance \
-		invoke \
-		location \
-		objects \
-		operations \
-		optional \
-		promise \
-		proxy \
-		retry \
-		slicing \
-		stream \
-		timeout
+SUBDIRS		= router
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \

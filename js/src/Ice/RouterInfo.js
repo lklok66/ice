@@ -86,7 +86,7 @@
             {
                 var self = this;
                 this._router.getClientProxy().then(
-                    function(clientProxy)
+                    function(asyncResult, clientProxy)
                     {
                         self.setClientEndpoints(clientProxy, promise);
                     }).exception(
@@ -109,7 +109,7 @@
             {
                 var self = this;
                 return this._router.getServerProxy().then(
-                    function(proxy)
+                    function(asyncResult, proxy)
                     {
                         return self.setServerEndpoints(proxy);
                     });
@@ -131,7 +131,7 @@
             {
                 var self = this;
                 return this._router.addProxies([ proxy ]).then(
-                    function(evictedProxies)
+                    function(asyncResult, evictedProxies)
                     {
                         self.addAndEvictProxies(proxy, evictedProxies);
                     });
@@ -176,7 +176,7 @@
                     //
                     var self = this;
                     this._router.ice_getConnection().then(
-                        function(con)
+                        function(asyncResult, con)
                         {
                             var proxy = clientProxy.ice_timeout(con.timeout());
                             self._clientEndpoints = proxy.__reference().getEndpoints();
