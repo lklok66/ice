@@ -9,15 +9,18 @@
 
 top_srcdir	= ../..
 
-SLICES = $(SDIR)/PermissionsVerifierF.ice \
-	$(SDIR)/PermissionsVerifier.ice \
-	$(SDIR)/Router.ice \
-	$(SDIR)/RouterF.ice \
+SLICES = $(SDIR)/Admin.ice \
+	$(SDIR)/Descriptor.ice \
+	$(SDIR)/Exception.ice \
+	$(SDIR)/FileParser.ice \
+	$(SDIR)/Locator.ice \
+	$(SDIR)/Observer.ice \
+	$(SDIR)/Query.ice \
+	$(SDIR)/Registry.ice \
 	$(SDIR)/Session.ice \
-	$(SDIR)/SSLInfo.ice \
-	$(SDIR)/Metrics.ice
+	$(SDIR)/UserAccountMapper.ice
 
-SDIR	= $(slicedir)/Glacier2
+SDIR	= $(slicedir)/IceGrid
 
 GEN_SRCS = $(patsubst 	$(SDIR)/%.ice, %.js,  $(SLICES))
 
@@ -25,4 +28,4 @@ GEN_SRCS = $(patsubst 	$(SDIR)/%.ice, %.js,  $(SLICES))
         
 include $(top_srcdir)/config/Make.rules
 	
-SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --include-dir Glacier2 --ice -I$(slicedir)
+SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --include-dir IceGrid --ice -I$(slicedir)

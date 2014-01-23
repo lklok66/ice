@@ -44,7 +44,7 @@ tests = [
     ("Ice/slicing/objects", ["once"]),
     ("Ice/stream", ["once"]),
     ("Ice/timeout", ["once"]),
-    ("Glacier2/router", ["once"]),
+    ("Glacier2/router", ["service"]),
     ]
 
 if __name__ == "__main__":

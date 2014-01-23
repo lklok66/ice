@@ -416,9 +416,16 @@
                 this._preferIPv6 = this._initData.properties.getPropertyAsInt("Ice.PreferIPv6Address") > 0;
 
                 this._endpointFactoryManager = new EndpointFactoryManager(this);
-                this._endpointFactoryManager.add(new Ice.TcpEndpointFactory(this));
-                this._endpointFactoryManager.add(new IceWS.EndpointFactory(this, false));
-                this._endpointFactoryManager.add(new IceWS.EndpointFactory(this, true));
+                if(Ice.TcpEndpointFactory !== undefined)
+                {
+                    this._endpointFactoryManager.add(new Ice.TcpEndpointFactory(this));
+                }
+                
+                if(IceWS.EndpointFactory !== undefined)
+                {
+                    this._endpointFactoryManager.add(new IceWS.EndpointFactory(this, false));
+                    this._endpointFactoryManager.add(new IceWS.EndpointFactory(this, true));
+                }
 
                 this._outgoingConnectionFactory = new OutgoingConnectionFactory(communicator, this);
                 this._servantFactoryManager = new ObjectFactoryManager();
