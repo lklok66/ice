@@ -9,16 +9,16 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
-        
+
         require("Ice/Address");
         require("Ice/HashUtil");
         require("Ice/StringUtil");
         require("Ice/TcpTransceiver");
         require("Ice/Endpoint");
         require("Ice/LocalException");
-        
+
         var Ice = global.Ice || {};
-        
+
         var Address = Ice.Address;
         var HashUtil = Ice.HashUtil;
         var StringUtil = Ice.StringUtil;
@@ -79,8 +79,8 @@
                     {
                         if(argument === null)
                         {
-                            throw new Ice.EndpointParseException("no argument provided for -h option in endpoint `tcp " +
-                                                                str + "'");
+                            throw new Ice.EndpointParseException(
+                                "no argument provided for -h option in endpoint `tcp " + str + "'");
                         }
 
                         host = argument;
@@ -91,8 +91,8 @@
                     {
                         if(argument === null)
                         {
-                            throw new Ice.EndpointParseException("no argument provided for -p option in endpoint `tcp " +
-                                                                str + "'");
+                            throw new Ice.EndpointParseException(
+                                "no argument provided for -p option in endpoint `tcp " + str + "'");
                         }
 
                         try
@@ -102,13 +102,13 @@
                         catch(ex)
                         {
                             throw new Ice.EndpointParseException("invalid port value `" + argument +
-                                                                "' in endpoint `tcp " + str + "'");
+                                                                 "' in endpoint `tcp " + str + "'");
                         }
 
                         if(port < 0 || port > 65535)
                         {
                             throw new Ice.EndpointParseException("port value `" + argument +
-                                                                "' out of range in endpoint `tcp " + str + "'");
+                                                                 "' out of range in endpoint `tcp " + str + "'");
                         }
 
                         break;
@@ -118,8 +118,8 @@
                     {
                         if(argument === null)
                         {
-                            throw new Ice.EndpointParseException("no argument provided for -t option in endpoint `tcp " +
-                                                                str + "'");
+                            throw new Ice.EndpointParseException(
+                                "no argument provided for -t option in endpoint `tcp " + str + "'");
                         }
 
                         try
@@ -128,8 +128,8 @@
                         }
                         catch(ex)
                         {
-                            throw new Ice.EndpointParseException("invalid timeout value `" + argument +
-                                                                    "' in endpoint `tcp " + str + "'");
+                            throw new Ice.EndpointParseException(
+                                "invalid timeout value `" + argument + "' in endpoint `tcp " + str + "'");
                         }
 
                         break;
@@ -140,7 +140,7 @@
                         if(argument !== null)
                         {
                             throw new Ice.EndpointParseException("unexpected argument `" + argument +
-                                                                    "' provided for -z option in `tcp " + str + "'");
+                                                                 "' provided for -z option in `tcp " + str + "'");
                         }
 
                         compress = true;
@@ -283,7 +283,8 @@
             }
             else
             {
-                return new TcpEndpointI(this._instance, this._host, this._port, timeout, this._connectionId, this._compress);
+                return new TcpEndpointI(this._instance, this._host, this._port, timeout, this._connectionId,
+                                        this._compress);
             }
         };
 
@@ -298,7 +299,8 @@
             }
             else
             {
-                return new TcpEndpointI(this._instance, this._host, this._port, this._timeout, connectionId, this._compress);
+                return new TcpEndpointI(this._instance, this._host, this._port, this._timeout, connectionId,
+                                        this._compress);
             }
         };
 
@@ -324,7 +326,8 @@
             }
             else
             {
-                return new TcpEndpointI(this._instance, this._host, this._port, this._timeout, this._connectionId, compress);
+                return new TcpEndpointI(this._instance, this._host, this._port, this._timeout, this._connectionId,
+                                        compress);
             }
         };
 
@@ -367,8 +370,8 @@
         TcpEndpointI.prototype.acceptor = function(endpoint, adapterName)
         {
             var p = new TcpAcceptor(this._instance, this._host, this._port);
-            endpoint.value = new TcpEndpointI(this._instance, this._host, p.effectivePort(), this._timeout, this._connectionId,
-                                            this._compress);
+            endpoint.value = new TcpEndpointI(this._instance, this._host, p.effectivePort(), this._timeout,
+                                              this._connectionId, this._compress);
             return p;
         };
 
@@ -516,7 +519,7 @@
 
         Ice.TcpEndpointI = TcpEndpointI;
         global.Ice = Ice;
-        
+
         var TCPEndpointInfoI = function(timeout, compress, host, port)
         {
             Ice.TCPEndpointInfo.call(this, timeout, compress, host, port);
@@ -540,6 +543,6 @@
             return false;
         };
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+        __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/TcpEndpointI"));

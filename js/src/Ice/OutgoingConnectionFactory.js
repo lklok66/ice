@@ -9,7 +9,7 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
-        
+
         require("Ice/ArrayUtil");
         require("Ice/ConnectionI");
         require("Ice/ConnectionReaper");
@@ -20,9 +20,9 @@
         require("Ice/EndpointTypes");
         require("Ice/LocalException");
         require("Ice/Exception");
-        
+
         var Ice = global.Ice || {};
-        
+
         var ArrayUtil = Ice.ArrayUtil;
         var ConnectionI = Ice.ConnectionI;
         var ConnectionReaper = Ice.ConnectionReaper;
@@ -31,7 +31,7 @@
         var HashMap = Ice.HashMap;
         var Promise = Ice.Promise;
         var EndpointSelectionType = Ice.EndpointSelectionType;
-        
+
         //
         // Only for use by Instance.
         //
@@ -745,7 +745,7 @@
             {
                 var self = this;
                 var counter = 0;
-                
+
                 var successCB = function()
                     {
                         if(++counter === size)
@@ -753,12 +753,12 @@
                             self.connectionsFinished();
                         }
                     };
-                    
+
                 var exceptionCB = function(ex)
                     {
                         Debug.assert(false);
                     };
-                
+
                 for(e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
                 {
                     connectionList = e.value;
@@ -803,10 +803,10 @@
             Debug.assert(this._waitPromise !== null);
             this._waitPromise.succeed();
         };
-        
+
         Ice.OutgoingConnectionFactory = OutgoingConnectionFactory;
         global.Ice = Ice;
-        
+
         //
         // Value is a Vector<Ice.ConnectionI>
         //
@@ -1049,5 +1049,5 @@
         };
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
-                                    __m(global, module, module.exports, module.require);
+        __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/OutgoingConnectionFactory"));

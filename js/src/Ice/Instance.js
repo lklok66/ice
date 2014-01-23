@@ -9,7 +9,7 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
-        
+
         require("Ice/AsyncResultBase");
         require("Ice/ConnectionMonitor");
         require("Ice/Debug");
@@ -21,11 +21,13 @@
         require("Ice/LocatorManager");
         require("Ice/Logger");
         require("Ice/Network");
+        require("Ice/ObjectAdapterFactory");
         require("Ice/ObjectFactoryManager");
         require("Ice/OutgoingConnectionFactory");
         require("Ice/Promise");
         require("Ice/Properties");
         require("Ice/ProxyFactory");
+        require("Ice/RetryQueue");
         require("Ice/RouterManager");
         require("Ice/TcpEndpointFactory");
         require("IceWS/EndpointFactory");
@@ -35,9 +37,9 @@
         require("Ice/LocalException");
         require("Ice/Exception");
         require("Ice/ProcessLogger");
-        
+
         var Ice = global.Ice || {};
-        
+
         var AsyncResultBase = Ice.AsyncResultBase;
         var ConnectionMonitor = Ice.ConnectionMonitor;
         var Debug = Ice.Debug;
@@ -48,11 +50,13 @@
         var LocatorManager = Ice.LocatorManager;
         var Logger = Ice.Logger;
         var Network = Ice.Network;
+        var ObjectAdapterFactory = Ice.ObjectAdapterFactory;
         var ObjectFactoryManager = Ice.ObjectFactoryManager;
         var OutgoingConnectionFactory = Ice.OutgoingConnectionFactory;
         var Promise = Ice.Promise;
         var Properties = Ice.Properties;
         var ProxyFactory = Ice.ProxyFactory;
+        var RetryQueue = Ice.RetryQueue;
         var RouterManager = Ice.RouterManager;
         var Timer = Ice.Timer;
         var TraceLevels = Ice.TraceLevels;
@@ -88,7 +92,6 @@
             this._retryQueue = null;
             this._endpointHostResolver = null;
             this._endpointFactoryManager = null;
-            this._exceptionFactoryMap = null;
 
             this._adminAdapter = null;
             this._adminFacets = new HashMap();
@@ -208,7 +211,6 @@
             return this._servantFactoryManager;
         };
 
-        /* TODO
         Instance.prototype.objectAdapterFactory = function()
         {
             if(this._state === StateDestroyed)
@@ -218,7 +220,7 @@
 
             Debug.assert(this._objectAdapterFactory !== null);
             return this._objectAdapterFactory;
-        }*/
+        }
 
         Instance.prototype.protocolSupport = function()
         {
@@ -230,18 +232,6 @@
             return this._protocolSupport;
         };
 
-        /*
-        Instance.prototype.endpointHostResolver = function()
-        {
-            if(this._state === StateDestroyed)
-            {
-                throw new Ice.CommunicatorDestroyedException();
-            }
-
-            Debug.assert(this._endpointHostResolver !== null);
-            return this._endpointHostResolver;
-        }
-
         Instance.prototype.retryQueue = function()
         {
             if(this._state === StateDestroyed)
@@ -251,8 +241,7 @@
 
             Debug.assert(this._retryQueue !== null);
             return this._retryQueue;
-        }
-        */
+        };
 
         Instance.prototype.timer = function()
         {
@@ -425,56 +414,18 @@
                     this._protocolSupport = Network.EnableIPv6;
                 }
                 this._preferIPv6 = this._initData.properties.getPropertyAsInt("Ice.PreferIPv6Address") > 0;
-                
+
                 this._endpointFactoryManager = new EndpointFactoryManager(this);
                 this._endpointFactoryManager.add(new Ice.TcpEndpointFactory(this));
                 this._endpointFactoryManager.add(new IceWS.EndpointFactory(this, false));
                 this._endpointFactoryManager.add(new IceWS.EndpointFactory(this, true));
 
-                /* TODO
-                //
-                // DatagramSocket is supported in AIR 2 or later.
-                //
-                if(Capabilities.AIR)
-                {
-                    //
-                    // We still need to make sure the current run time supports it.
-                    //
-                    if(UdpEndpointFactory.isSupported)
-                    {
-                        var udpEndpointFactory:EndpointFactory = new UdpEndpointFactory(this);
-                        _endpointFactoryManager.add(udpEndpointFactory);
-                    }
-                }
-
-                //
-                // Outgoing SSL is supported in AIR 2 or later, and Flash Player 11 or later.
-                //
-                if(Capabilities.AIR || Capabilities.version >= 11)
-                {
-                    //
-                    // We still need to make sure the current run time supports it.
-                    //
-                    if(SslEndpointFactory.isSupported)
-                    {
-                        var sslEndpointFactory:EndpointFactory = new SslEndpointFactory(this);
-                        _endpointFactoryManager.add(sslEndpointFactory);
-                    }
-                }
-                */
-
                 this._outgoingConnectionFactory = new OutgoingConnectionFactory(communicator, this);
                 this._servantFactoryManager = new ObjectFactoryManager();
 
-                /* TODO
                 this._objectAdapterFactory = new ObjectAdapterFactory(this, communicator);
 
-                this._endpointHostResolver = new EndpointHostResolver(this);
-
                 this._retryQueue = new RetryQueue(this);
-
-                this._exceptionFactoryMap = new HashMap();
-                */
 
                 /* TODO
                 //
@@ -617,25 +568,36 @@
                 //
                 this._state = StateDestroyInProgress;
 
-                /* TODO
                 if(this._objectAdapterFactory)
                 {
-                    _objectAdapterFactory.shutdown().whenCompleted(
-                        function(r:Ice.AsyncResult):void
+                    var self = this;
+                    this._objectAdapterFactory.shutdown().then(
+                        function(r)
                         {
-                            objectAdapterFactoryShutdown(ar);
-                        },
-                        function(r:Ice.AsyncResult, ex:Ice.Exception):void
-                        {
-                            ar.__exception(ex);
-                        });
+                            self.objectAdapterFactoryShutdown(promise);
+                        }).exception(
+                            function(ex)
+                            {
+                                promise.fail(ex);
+                            });
                 }
                 else
                 {
-                    objectAdapterFactoryShutdown(ar);
+                    this.objectAdapterFactoryShutdown(promise);
                 }
-                */
+            }
+            catch(ex)
+            {
+                promise.fail(ex);
+            }
 
+            return promise;
+        };
+
+        Instance.prototype.objectAdapterFactoryShutdown = function(promise)
+        {
+            try
+            {
                 if(this._outgoingConnectionFactory !== null)
                 {
                     this._outgoingConnectionFactory.destroy();
@@ -643,9 +605,32 @@
 
                 if(this._objectAdapterFactory !== null)
                 {
-                    this._objectAdapterFactory.destroy();
+                    var self = this;
+                    this._objectAdapterFactory.destroy().then(
+                        function()
+                        {
+                            self.objectAdapterFactoryDestroyed(promise);
+                        }).exception(
+                            function(ex)
+                            {
+                                promise.fail(ex);
+                            });
                 }
+                else
+                {
+                    this.objectAdapterFactoryDestroyed(promise);
+                }
+            }
+            catch(ex)
+            {
+                promise.fail(ex);
+            }
+        };
 
+        Instance.prototype.objectAdapterFactoryDestroyed = function(promise)
+        {
+            try
+            {
                 if(this._outgoingConnectionFactory !== null)
                 {
                     var self = this;
@@ -668,23 +653,19 @@
             {
                 promise.fail(ex);
             }
-
-            return promise;
         };
+
 
         Instance.prototype.outgoingConnectionFactoryFinished = function(promise)
         {
-            /* TODO
             if(this._retryQueue)
             {
                 this._retryQueue.destroy();
             }
 
-            this._endpointHostResolver = null;
             this._objectAdapterFactory = null;
             this._outgoingConnectionFactory = null;
             this._retryQueue = null;
-            */
 
             if(this._connectionMonitor)
             {
@@ -732,12 +713,6 @@
             }
 
             /*
-            if(this._exceptionFactoryMap)
-            {
-                this._exceptionFactoryMap.clear();
-                this._exceptionFactoryMap = null;
-            }
-
             this._adminAdapter = null;
             this._adminFacets.clear();
             */
@@ -768,6 +743,6 @@
         Ice.Instance = Instance;
         global.Ice = Ice;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+        __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Instance"));

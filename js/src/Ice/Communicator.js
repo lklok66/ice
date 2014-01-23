@@ -9,14 +9,16 @@
 
 (function(module, name){
     var __m = function(global, module, exports, require){
-        
+
         require("Ice/Instance");
         require("Ice/Promise");
-        
+        require("Ice/UUID");
+
         var Ice = global.Ice || {};
-        
+
         var Instance = Ice.Instance;
         var Promise = Ice.Promise;
+        var UUID = Ice.UUID;
 
         //
         // Ice.Communicator
@@ -92,6 +94,41 @@
             return this._instance.identityToString(ident);
         };
 
+        Communicator.prototype.createObjectAdapter = function(name)
+        {
+            return this._instance.objectAdapterFactory().createObjectAdapter(name, null);
+        };
+
+        Communicator.prototype.createObjectAdapterWithEndpoints = function(name, endpoints)
+        {
+            if(name.length === 0)
+            {
+                name = UUID.generateUUID();
+            }
+
+            this.getProperties().setProperty(name + ".Endpoints", endpoints);
+            return this._instance.objectAdapterFactory().createObjectAdapter(name, null);
+        };
+
+        Communicator.prototype.createObjectAdapterWithRouter = function(name, router)
+        {
+            if(name.length === 0)
+            {
+                name = UUID.generateUUID();
+            }
+
+            //
+            // We set the proxy properties here, although we still use the proxy supplied.
+            //
+            var properties = this.proxyToProperty(router, name + ".Router");
+            for(var e = properties.entries; e !== null; e = e.next)
+            {
+                this.getProperties().setProperty(e.key, e.value);
+            }
+
+            return this._instance.objectAdapterFactory().createObjectAdapter(name, router);
+        };
+
         Communicator.prototype.addObjectFactory = function(factory, id)
         {
             this._instance.servantFactoryManager().add(factory, id);
@@ -146,6 +183,6 @@
         Ice.Communicator = Communicator;
         global.Ice = Ice;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+        __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "Ice/Communicator"));

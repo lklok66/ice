@@ -1,0 +1,33 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2013 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
+
+(function(module, name){
+    var __m = function(global, module, exports, require){
+
+        var Ice = global.Ice || {};
+
+        var UUID = {};
+
+        UUID.generateUUID = function()
+        {
+            var d = new Date().getTime();
+            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = (d + Math.random() * 16) % 16 | 0;
+                d = Math.floor(d / 16);
+                return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
+            });
+            return uuid;
+        };
+
+        Ice.UUID = UUID;
+        global.Ice = Ice;
+    };
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+        __m(global, module, module.exports, module.require);
+}(typeof module !== "undefined" ? module : undefined, "Ice/UUID"));

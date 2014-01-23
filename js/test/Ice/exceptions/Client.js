@@ -11,11 +11,11 @@
     var __m = function(global, module, exports, require){
         require("Ice/Ice");
         var Ice = global.Ice;
-        
+
         require("Test");
         var Test = global.Test;
         var Promise = Ice.Promise;
-        
+
         var test = function(b)
         {
             if(!b)
@@ -33,7 +33,7 @@
             //
             var exceptionCB = function(ex){ throw ex; };
             var failCB = function(){ test(false); };
-            
+
             var supportsUndeclaredExceptions = function(thrower)
             {
                 var p = new Promise();
@@ -90,7 +90,7 @@
                 });
                 return p;
             };
-            
+
             var supportsAssertException = function(thrower)
             {
                 var p = new Promise();
@@ -127,16 +127,95 @@
                 });
                 return p;
             };
-            
+
             setTimeout(function(){
                 try
                 {
+                    out.write("testing object adapter registration exceptions... ");
+                    try
+                    {
+                        communicator.createObjectAdapter("TestAdapter0");
+                        test(false);
+                    }
+                    catch(ex)
+                    {
+                        test(ex instanceof Ice.InitializationException); // Expected
+                    }
+
+                    try
+                    {
+                        communicator.createObjectAdapterWithEndpoints("TestAdapter0", "default");
+                        test(false);
+                    }
+                    catch(ex)
+                    {
+                        test(ex instanceof Ice.FeatureNotSupportedException); // Expected
+                    }
+                    out.writeLine("ok");
+
+                    out.write("testing servant registration exceptions... ");
+                    var adapter = communicator.createObjectAdapter("");
+                    var obj = new EmptyI();
+                    adapter.add(obj, communicator.stringToIdentity("x"));
+                    try
+                    {
+                        adapter.add(obj, communicator.stringToIdentity("x"));
+                        test(false);
+                    }
+                    catch(ex)
+                    {
+                        test(ex instanceof Ice.AlreadyRegisteredException);
+                    }
+
+                    adapter.remove(communicator.stringToIdentity("x"));
+                    try
+                    {
+                        adapter.remove(communicator.stringToIdentity("x"));
+                        test(false);
+                    }
+                    catch(ex)
+                    {
+                        test(ex instanceof Ice.NotRegisteredException);
+                    }
+                    adapter.deactivate();
+                    out.writeLine("ok");
+
+                    out.write("testing servant locator registration exceptions... ");
+                    var adapter = communicator.createObjectAdapter("");
+                    var loc = new ServantLocatorI();
+                    adapter.addServantLocator(loc, "x");
+                    try
+                    {
+                        adapter.addServantLocator(loc, "x");
+                        test(false);
+                    }
+                    catch(ex)
+                    {
+                        test(ex instanceof Ice.AlreadyRegisteredException);
+                    }
+                    adapter.deactivate();
+                    out.writeLine("ok");
+
+                    out.write("testing object factory registration exception... ");
+                    var of = new ObjectFactoryI();
+                    communicator.addObjectFactory(of, "::x");
+                    try
+                    {
+                        communicator.addObjectFactory(of, "::x");
+                        test(false);
+                    }
+                    catch(ex)
+                    {
+                        test(ex instanceof Ice.AlreadyRegisteredException);
+                    }
+                    out.writeLine("ok");
+
                     out.write("testing stringToProxy... ");
                     var ref = "thrower:default -p 12010";
                     var base = communicator.stringToProxy(ref);
                     test(base !== null);
                     out.writeLine("ok");
-                    
+
                     var thrower;
                     out.write("testing checked cast... ");
                     Test.ThrowerPrx.checkedCast(base).then(
@@ -326,7 +405,7 @@
                                 throw ex;
                             }
                             var data = new Array(20 * 1024);
-                            return thrower.throwMemoryLimitException(data); 
+                            return thrower.throwMemoryLimitException(data);
                         }
                     ).then(
                         failCB,
@@ -465,6 +544,43 @@
             return p;
         };
 
+        var EmptyI = function()
+        {
+        };
+
+        EmptyI.prototype = new Test.Empty();
+        EmptyI.prototype.constructor = EmptyI;
+
+        var ServantLocatorI = function()
+        {
+        };
+
+        ServantLocatorI.prototype.locate = function(curr, cookie)
+        {
+            return null;
+        };
+
+        ServantLocatorI.prototype.finished = function(curr, servant, cookie)
+        {
+        };
+
+        ServantLocatorI.prototype.deactivate = function(category)
+        {
+        };
+
+        var ObjectFactoryI = function()
+        {
+        };
+
+        ObjectFactoryI.prototype.create = function(type)
+        {
+            return null;
+        };
+
+        ObjectFactoryI.prototype.destroy = function()
+        {
+        };
+
         var run = function(out, id)
         {
             var p = new Ice.Promise();
@@ -476,7 +592,7 @@
                     {
                         id.properties.setProperty("Ice.MessageSizeMax", "10");
                         c = Ice.initialize(id);
-                        allTests(out, c).then(function(){ 
+                        allTests(out, c).then(function(){
                                 return c.destroy();
                             }).then(function(){
                                 p.succeed();
@@ -493,6 +609,6 @@
         };
         module.exports.run = run;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
+    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
+        __m(global, module, module.exports, module.require);
 }(typeof module !== "undefined" ? module : undefined, "test/Ice/exceptions"));
