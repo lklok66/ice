@@ -1929,37 +1929,17 @@ Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
     const string scope = getLocalScope(p->scope());
     const string name = fixId(p->name());
     const string propertyName = name + "Helper";
-    string propertyPrefix = scope;
-    std::replace(propertyPrefix.begin(), propertyPrefix.end(), '.', '_');
-    const string helperName = "__" + propertyPrefix + "_" + propertyName;
-    _out << nl;
-    _out << nl << "var " << helperName << " = null;";
-    _out << nl << "Object.defineProperty(" << scope << ", \"" << propertyName << "\", ";
-    _out << sb;
-    _out << nl << "get: function()";
-    _out.inc();
-    _out << sb;
-    _out << nl << "if(" << helperName << " === null)";
-    _out << sb;
+    
     if(isClassType(type))
     {
-        _out << nl << helperName << " = Ice.StreamHelpers.generateObjectSeqHelper(";
-        _out.inc();
-        _out << nl << typeToString(type) << ", " << getOptionalFormat(p) << ");";
-        _out.dec();
+        _out << nl << "Slice.defineObjectSequence(" << scope << ", \"" << propertyName << "\", "
+             << "\"" << typeToString(type) << "\"" << ", " << getOptionalFormat(p) << ");";
     }
     else
     {
-        _out << nl << helperName << " = Ice.StreamHelpers.generateSeqHelper(";
-        _out.inc();
-        _out << nl << getHelper(type) << ", " << getOptionalFormat(p) << ");";
-        _out.dec();
+        _out << nl << "Slice.defineSequence(" << scope << ", \"" << propertyName << "\", "
+             << "\"" << getHelper(type) << "\"" << ", " << getOptionalFormat(p) << ");";
     }
-    _out << eb;
-    _out << nl << "return " << helperName << ";";
-    _out << eb;
-    _out.dec();
-    _out << eb << ");";
 }
 
 bool
@@ -2248,42 +2228,20 @@ Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
     const string scope = getLocalScope(p->scope());
     const string name = fixId(p->name());
     const string propertyName = name + "Helper";
-    string propertyPrefix = scope;
-    std::replace(propertyPrefix.begin(), propertyPrefix.end(), '.', '_');
-    const string helperName = "__" + propertyPrefix + "_" + propertyName;
-
-    _out << nl;
-    _out << nl << "var " << helperName << " = null;";
-    _out << nl << "Object.defineProperty(" << scope << ", \"" << propertyName << "\", ";
-    _out << sb;
-    _out << nl << "get: function()";
-    _out.inc();
-    _out << sb;
-    _out << nl << "if(" << helperName << " === null)";
-    _out << sb;
     if(isClassType(valueType))
     {
-        _out << nl << helperName << " = Ice.StreamHelpers.generateObjectDictHelper(";
-        _out.inc();
-        _out << nl << getHelper(keyType) << ", ";
-        _out << nl << typeToString(valueType) << ", ";
-        _out << nl << getOptionalFormat(p) << ");";
-        _out.dec();
+        _out << nl << "Slice.defineObjectDictionary(" << scope  << ", \"" << propertyName << "\", "
+             << "\"" << getHelper(keyType) << "\" , "
+             << "\"" << typeToString(valueType) << "\", " 
+             << getOptionalFormat(p) << ");";
     }
     else
     {
-        _out << nl << helperName << " = Ice.StreamHelpers.generateDictHelper(";
-        _out.inc();
-        _out << nl << getHelper(keyType) << ", ";
-        _out << nl << getHelper(valueType) << ", ";
-        _out << nl << getOptionalFormat(p) << ");";
-        _out.dec();
+        _out << nl << "Slice.defineDictionary(" << scope  << ", \"" << propertyName << "\", "
+             << "\"" << getHelper(keyType) << "\" , "
+             << "\"" << getHelper(valueType) << "\", " 
+             << getOptionalFormat(p) << ");";
     }
-    _out << eb;
-    _out << nl << "return " << helperName << ";";
-    _out << eb;
-    _out.dec();
-    _out << eb << ");";
 }
 
 void
@@ -2292,17 +2250,10 @@ Slice::Gen::TypesVisitor::visitEnum(const EnumPtr& p)
     const string scope = p->scope();
     const string localScope = getLocalScope(scope);
     const string name = fixId(p->name());
-    const string baseRef = "Ice.EnumBase";
 
     _out << sp;
     writeDocComment(p, getDeprecateReason(p, 0, "type"));
-    _out << nl << localScope << '.' << name << " = function(_n, _v)";
-    _out << sb;
-    _out << nl << baseRef << ".call" << spar << "this" << "_n" << "_v" << epar << ';';
-    _out << eb << ";";
-    _out << nl << localScope << '.' << name << ".prototype = new " << baseRef << "();";
-    _out << nl << localScope << '.' << name << ".prototype.constructor = " << localScope << '.' << name << ';';
-    _out << nl << baseRef << ".defineEnum(" << localScope << '.' << name << ", {";
+    _out << nl << localScope << '.' << name << " = Slice.defineEnum({";
     _out.inc();
     _out << nl;
 

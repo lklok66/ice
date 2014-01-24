@@ -10,6 +10,7 @@
 (function(module, name){
     var __m = function(global, module, exports, require){
 
+        var Slice = global.Slice || {};
         var Ice = global.Ice || {};
 
         var HashMap = function(h)
@@ -406,8 +407,26 @@
         {
             return this._valueComparator.call(this._valueComparator, v1, v2);
         };
+        
+        Slice.defineDictionary = function(module, name, keyHelper, valueHelper, optionalFormat)
+        {
+            var helper = null;
+            Object.defineProperty(module, name, 
+            {
+                get: function()
+                    {
+                        if(helper === null)
+                        {
+                            helper = Ice.StreamHelpers.generateDictHelper(eval(keyHelper), eval(valueHelper), 
+                                                                          optionalFormat);
+                        }
+                        return helper;
+                    }
+            });
+        };
 
         Ice.HashMap = HashMap;
+        global.Slice = Slice;
         global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :

@@ -31,11 +31,6 @@
             return this.__address;
         };
 
-        IceObject.prototype.__notImplemented = function()
-        {
-            throw new Error("not implemented");
-        };
-
         IceObject.prototype.ice_isA = function(s, current)
         {
             return this.ice_ids().indexOf(s) >= 0;
@@ -253,6 +248,39 @@
             obj.prototype.__writeMemberImpl = writeImpl;
             obj.prototype.__readMemberImpl = readImpl;
             return obj;
+        };
+        
+        Slice.defineObjectSequence = function(module, name, valueType, optionalFormat)
+        {
+            var helper = null;
+            Object.defineProperty(module, name, 
+            {
+                get: function()
+                    {
+                        if(helper === null)
+                        {
+                            helper = Ice.StreamHelpers.generateObjectSeqHelper(eval(valueType), optionalFormat);
+                        }
+                        return helper;
+                    }
+            });
+        };
+        
+        Slice.defineObjectDictionary = function(module, name, keyHelper, valueType, optionalFormat)
+        {
+            var helper = null;
+            Object.defineProperty(module, name, 
+            {
+                get: function()
+                    {
+                        if(helper === null)
+                        {
+                            helper = Ice.StreamHelpers.generateObjectDictHelper(eval(keyHelper), eval(valueType), 
+                                                                                optionalFormat);
+                        }
+                        return helper;
+                    }
+            });
         };
 
         Ice.Object = IceObject;

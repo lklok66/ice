@@ -11,6 +11,7 @@
     var __m = function(global, module, exports, require){
         
         var Ice = global.Ice || {};
+        var Slice = global.Slice || {};
         var ArrayUtil = {};
 
         ArrayUtil.clone = function(arr)
@@ -109,8 +110,26 @@
             }
             return result;
         };
+        
+        Slice.defineSequence = function(module, name, valueHelper, optionalFormat)
+        {
+            var helper = null;
+            Object.defineProperty(module, name, 
+            {
+                get: function()
+                    {
+                        if(helper === null)
+                        {
+                            helper = Ice.StreamHelpers.generateSeqHelper(eval(valueHelper), optionalFormat);
+                        }
+                        return helper;
+                    }
+            });
+        };
 
         Ice.ArrayUtil = ArrayUtil;
+        
+        global.Slice = Slice;
         global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) : 

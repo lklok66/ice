@@ -10,6 +10,7 @@
 (function(module, name){
     var __m = function(global, module, exports, require){
         
+        var Slice = global.Slice || {};
         var Ice = global.Ice || {};
         
         //
@@ -62,8 +63,16 @@
             os.writeEnum(v);
         };
 
-        EnumBase.defineEnum = function(type, enumerators)
+        Slice.defineEnum = function(enumerators)
         {
+            var type = function(n, v)
+            {
+                EnumBase.call(this, n, v);
+            };
+            
+            type.prototype = new EnumBase();
+            type.prototype.constructor = type;
+        
             var enums = [];
             var maxValue = 0;
             for(var e in enumerators)
@@ -107,8 +116,13 @@
             Object.defineProperty(type.prototype, 'maxValue', {
                 value: maxValue
             });
+            
+            return type;
         };
+        
         Ice.EnumBase = EnumBase;
+        
+        global.Slice = Slice;
         global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :

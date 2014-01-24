@@ -12,20 +12,9 @@
         require("Ice/EnumBase");
         
         var Ice = global.Ice || {};
-        
-        var EnumBase = Ice.EnumBase;
 
-        var FormatType = function(_n, _v)
-        {
-            EnumBase.call(this, _n, _v);
-        };
+        Ice.FormatType  = Slice.defineEnum({'DefaultFormat':0, 'CompactFormat':1, 'SlicedFormat':2});
 
-        FormatType.prototype = new EnumBase();
-        FormatType.prototype.constructor = FormatType;
-
-        EnumBase.defineEnum(FormatType, {'DefaultFormat':0, 'CompactFormat':1, 'SlicedFormat':2});
-
-        Ice.FormatType = FormatType;
         global.Ice = Ice;
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
