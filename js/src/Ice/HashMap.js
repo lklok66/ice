@@ -10,9 +10,13 @@
 (function(module, name){
     var __m = function(global, module, exports, require){
 
+        require("Ice/StringUtil");
+        
         var Slice = global.Slice || {};
         var Ice = global.Ice || {};
 
+        var StringUtil = Ice.StringUtil;
+        
         var HashMap = function(h)
         {
             this._size = 0;
@@ -189,19 +193,6 @@
             }
         };
 
-        HashMap.prototype.hashCode = function()
-        {
-            var hash = 0;
-
-            for(var e = this._head; e !== null; e = e._next)
-            {
-                hash = hash * 5 + this.computeHash(e._key);
-                hash = hash * 5 + this.computeHash(e._value);
-            }
-
-            return hash;
-        };
-
         HashMap.prototype.equals = function(other)
         {
             if(other === null || !(other instanceof HashMap) || this._size !== other._size)
@@ -368,7 +359,7 @@
             var type = typeof(v);
             if(type === "string" || v instanceof String)
             {
-                hash = this.computeStringHash(v);
+                hash = StringUtil.hashCode(v);
             }
             else if(type === "number" || v instanceof Number)
             {
@@ -382,19 +373,6 @@
             {
                 throw "cannot compute hash for value of type " + type;
             }
-            return hash;
-        };
-
-        HashMap.prototype.computeStringHash = function(s)
-        {
-            var hash = 0;
-            var n = s.length;
-
-            for(var i = 0; i < n; i++)
-            {
-                hash = 31 * hash + s.charCodeAt(i);
-            }
-
             return hash;
         };
 

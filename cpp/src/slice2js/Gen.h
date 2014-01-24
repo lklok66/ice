@@ -126,10 +126,6 @@ private:
 
     private:
         
-        void writeMemberHashCode(const std::string&, const TypePtr&, int);
-        void writeMemberEquals(const std::string&, const std::string&, const TypePtr&, int);
-        void writeMemberClone(const std::string&, const std::string&, const TypePtr&, int);
-        
         std::vector<std::string> _seenModules;
     };
     

@@ -447,7 +447,7 @@
             var h = 5381;
             h = HashUtil.addNumber(h, this._type);
             h = HashUtil.addHashable(h, this._rawEncoding);
-            h = HashUtil.addNumberArray(h, this._rawBytes);
+            h = HashUtil.addArray(h, this._rawBytes, HashUtil.addNumber);
             this._hashCode = h;
         };
 

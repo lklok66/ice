@@ -2109,6 +2109,12 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
     {
         paramNames.push_back(fixId((*q)->name()));
     }
+    
+    //
+    // Only generate hashCode if this structure type is a legal dictionary key type.
+    //
+    bool containsSequence = false;
+    bool legalKeyType = Dictionary::legalKeyType(p, containsSequence);
 
     _out << sp;
     writeDocComment(p, getDeprecateReason(p, 0, "type"));
@@ -2138,45 +2144,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
     }
     _out << eb << ",";
 
-    _out << nl << "function()";
-    _out << sb;
-    _out << nl << "var __r = new " << localScope << '.' << name << "();";
-    for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
-    {
-        const string memberName = fixId((*q)->name());
-        writeMemberClone("__r." + memberName, "this." + memberName, (*q)->type(), 0);
-    }
-    _out << nl << "return __r;";
-    _out << eb << ",";
-
-    _out << nl << "function(rhs)";
-    _out << sb;
-    _out << nl << "if(this === rhs)";
-    _out << sb;
-    _out << nl << "return true;";
-    _out << eb;
-    _out << nl << "if(!(rhs instanceof " << localScope << '.' << name << "))";
-    _out << sb;
-    _out << nl << "return false;";
-    _out << eb;
-    for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
-    {
-        const string memberName = fixId((*q)->name());
-        writeMemberEquals("this." + memberName, "rhs." + memberName, (*q)->type(), 0);
-    }
-    _out << sp << nl << "return true;";
-    _out << eb << ",";
-
-    _out << nl << "function()";
-    _out << sb;
-    _out << nl << "var __h = 5381;";
-    for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
-    {
-        const string memberName = fixId((*q)->name());
-        writeMemberHashCode("this." + memberName, (*q)->type(), 0);
-    }
-    _out << nl << "return __h;";
-    _out << eb;
+    _out << nl << (legalKeyType ? "true" : "false");
 
     if(!p->isLocal())
     {
@@ -2296,206 +2264,6 @@ Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
     writeConstantValue(scope, p->type(), p->valueType(), p->value());
     _out.dec();
     _out << nl << "});";
-}
-
-void
-Slice::Gen::TypesVisitor::writeMemberHashCode(const string& m, const TypePtr& type, int iter)
-{
-    // TODO: Check for optional?
-
-    const BuiltinPtr b = BuiltinPtr::dynamicCast(type);
-
-    if(b)
-    {
-        switch(b->kind())
-        {
-            case Builtin::KindBool:
-            {
-                _out << nl << "__h = Ice.HashUtil.addBoolean(__h, " << m << ");";
-                break;
-            }
-            case Builtin::KindByte:
-            case Builtin::KindShort:
-            case Builtin::KindInt:
-            case Builtin::KindLong:
-            case Builtin::KindFloat:
-            case Builtin::KindDouble:
-            {
-                _out << nl << "__h = Ice.HashUtil.addNumber(__h, " << m << ");";
-                break;
-            }
-            case Builtin::KindString:
-            {
-                _out << nl << "__h = Ice.HashUtil.addString(__h, " << m << ");";
-                break;
-            }
-            case Builtin::KindObjectProxy:
-            {
-                _out << nl << "__h = Ice.HashUtil.addHashable(__h, " << m << ");";
-                break;
-            }
-            case Builtin::KindObject:
-            case Builtin::KindLocalObject:
-            default:
-            {
-                // TODO: Hash objects?
-                break;
-            }
-        }
-        return;
-    }
-
-    if(ClassDeclPtr::dynamicCast(type))
-    {
-        // TODO: Hash objects?
-        return;
-    }
-
-    if(ProxyPtr::dynamicCast(type) || EnumPtr::dynamicCast(type) || StructPtr::dynamicCast(type) ||
-       DictionaryPtr::dynamicCast(type))
-    {
-        _out << nl << "__h = Ice.HashUtil.addHashable(__h, " << m << ");";
-        return;
-    }
-
-    const SequencePtr seq = SequencePtr::dynamicCast(type);
-    assert(seq);
-
-    const TypePtr elemType = seq->type();
-
-    const BuiltinPtr eb = BuiltinPtr::dynamicCast(elemType);
-    if(eb)
-    {
-        switch(eb->kind())
-        {
-            case Builtin::KindBool:
-            {
-                _out << nl << "__h = Ice.HashUtil.addBooleanArray(__h, " << m << ");";
-                break;
-            }
-            case Builtin::KindByte:
-            case Builtin::KindShort:
-            case Builtin::KindInt:
-            case Builtin::KindLong:
-            case Builtin::KindFloat:
-            case Builtin::KindDouble:
-            {
-                _out << nl << "__h = Ice.HashUtil.addNumberArray(__h, " << m << ");";
-                break;
-            }
-            case Builtin::KindString:
-            {
-                _out << nl << "__h = Ice.HashUtil.addStringArray(__h, " << m << ");";
-                break;
-            }
-            case Builtin::KindObjectProxy:
-            {
-                _out << nl << "__h = Ice.HashUtil.addHashableArray(__h, " << m << ");";
-                break;
-            }
-            case Builtin::KindObject:
-            case Builtin::KindLocalObject:
-            default:
-            {
-                // TODO: Hash objects?
-                break;
-            }
-        }
-        return;
-    }
-
-    if(ProxyPtr::dynamicCast(elemType) || EnumPtr::dynamicCast(elemType) || StructPtr::dynamicCast(elemType) ||
-       DictionaryPtr::dynamicCast(elemType))
-    {
-        _out << nl << "__h = Ice.HashUtil.addHashableArray(__h, " << m << ");";
-        return;
-    }
-
-    if(ClassDeclPtr::dynamicCast(elemType))
-    {
-        // TODO: Hash objects?
-        return;
-    }
-
-    _out << nl << "if(" << m << " !== null)";
-    _out << sb;
-    ostringstream ostr;
-    ostr << "__i" << iter;
-    string i = ostr.str();
-    _out << nl << "for(var " << i << " = 0; " << i << " < " << m << ".length; ++" << i << ')';
-    _out << sb;
-    writeMemberHashCode(m + "[" + i + "]", elemType, iter + 1);
-    _out << eb;
-}
-
-void
-Slice::Gen::TypesVisitor::writeMemberEquals(const string& m1, const string& m2, const TypePtr& type, int iter)
-{
-    const BuiltinPtr b = BuiltinPtr::dynamicCast(type);
-    if((b && b->kind() != Builtin::KindObjectProxy && b->kind() != Builtin::KindLong) || ClassDeclPtr::dynamicCast(type))
-    {
-        _out << nl << "if(" << m1 << " !== " << m2 << ')';
-        _out << sb;
-        _out << nl << "return false;";
-        _out << eb;
-        return;
-    }
-
-    if((b && (b->kind() == Builtin::KindObjectProxy || b->kind() == Builtin::KindLong)) || ProxyPtr::dynamicCast(type) ||
-       EnumPtr::dynamicCast(type) || StructPtr::dynamicCast(type) ||
-       DictionaryPtr::dynamicCast(type))
-    {
-        _out << nl << "if(" << m1 << " !== " << m2 << " && !" << m1 << ".equals(" << m2 << "))";
-        _out << sb;
-        _out << nl << "return false;";
-        _out << eb;
-        return;
-    }
-
-    const SequencePtr seq = SequencePtr::dynamicCast(type);
-    assert(seq);
-
-    const TypePtr elemType = seq->type();
-
-    _out << nl << "if(" << m1 << " !== " << m2 << " && " << m1 << " !== null && " << m2 << " !== null)";
-    _out << sb;
-    _out << nl << "if(" << m1 << ".length !== " << m2 << ".length)";
-    _out << sb;
-    _out << "return false;";
-    _out << eb;
-    ostringstream ostr;
-    ostr << "__i" << iter;
-    string i = ostr.str();
-    _out << nl << "for(var " << i << " = 0; " << i << " < " << m1 << ".length; ++" << i << ')';
-    _out << sb;
-    writeMemberEquals(m1 + "[" + i + "]", m2 + "[" + i + "]", elemType, iter + 1);
-    _out << eb;
-    _out << eb;
-}
-
-void
-Slice::Gen::TypesVisitor::writeMemberClone(const string& dest, const string& src, const TypePtr& type, int iter)
-{
-    if(SequencePtr::dynamicCast(type))
-    {
-        _out << nl << dest << " = Ice.ArrayUtil.clone(" << src << ");";
-        return;
-    }
-
-    if(DictionaryPtr::dynamicCast(type))
-    {
-        _out << nl << "if(" << src << " !== undefined && " << src << " !== null)";
-        _out << sb;
-        _out << nl << dest << " = " << src << ".clone();";
-        _out << eb;
-        _out << nl << "else";
-        _out << sb;
-        _out << nl << dest << " = " << src << ';';
-        _out << eb;
-        return;
-    }
-
-    _out << nl << dest << " = " << src << ';';
 }
 
 Slice::Gen::ExportVisitor::ExportVisitor(IceUtilInternal::Output& out)

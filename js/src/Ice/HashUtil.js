@@ -23,19 +23,6 @@
             return ((h << 5) + h) ^ (b ? 0 : 1);
         };
 
-        HashUtil.addBooleanArray = function(h, arr)
-        {
-            var i, length;
-            if(arr !== undefined && arr !== null)
-            {
-                for(i = 0, length = arr.length; i < length; ++i)
-                {
-                    h = ((h << 5) + h) ^ (arr[i] ? 0 : 1);
-                }
-            }
-            return h;
-        };
-
         HashUtil.addString = function(h, str)
         {
             if(str !== undefined && str !== null)
@@ -45,35 +32,9 @@
             return h;
         };
 
-        HashUtil.addStringArray = function(h, arr)
-        {
-            var i, length;
-            if(arr !== undefined && arr !== null)
-            {
-                for(i = 0, length = arr.length; i < length; ++i)
-                {
-                    h = HashUtil.addString(h, arr[i]);
-                }
-            }
-            return h;
-        };
-
         HashUtil.addNumber = function(h, num)
         {
             return ((h << 5) + h) ^ num;
-        };
-
-        HashUtil.addNumberArray = function(h, arr)
-        {
-            var i, length;
-            if(arr !== undefined && arr !== null)
-            {
-                for(i = 0, length = arr.length; i < length; ++i)
-                {
-                    h = HashUtil.addNumber(h, arr[i]);
-                }
-            }
-            return h;
         };
 
         HashUtil.addHashable = function(h, obj)
@@ -84,14 +45,14 @@
             }
             return h;
         };
-
-        HashUtil.addHashableArray = function(h, arr)
+        
+        HashUtil.addArray = function(h, arr, hashCode)
         {
             if(arr !== undefined && arr !== null)
             {
                 for(var i = 0; i < arr.length; ++i)
                 {
-                    h = HashUtil.addHashable(h, arr[i]);
+                    h = hashCode(h, arr[i]);
                 }
             }
             return h;

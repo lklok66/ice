@@ -1148,7 +1148,14 @@
             h = HashUtil.addNumber(h, this._mode);
             h = HashUtil.addBoolean(h, this._secure);
             h = HashUtil.addHashable(h, this._identity);
-            h = HashUtil.addHashable(h, this._context);
+            if(this._context !== null && this._context !== undefined)
+            {
+                for(var e = this._context.entries; e !== null; e = e.next)
+                {
+                    h = HashUtil.addString(h, e.key);
+                    h = HashUtil.addString(h, e.value);
+                }
+            }
             h = HashUtil.addString(h, this._facet);
             h = HashUtil.addBoolean(h, this._overrideCompress);
             if(this._overrideCompress)
