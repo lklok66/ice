@@ -1468,103 +1468,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         string scoped = p->scoped();
         ClassList allBases = p->allBases();
         StringList ids;
-#if defined(__IBMCPP__) && defined(NDEBUG)
-        //
-        // VisualAge C++ 6.0 does not see that ClassDef is a Contained,
-        // when inlining is on. The code below issues a warning: better
-        // than an error!
-        //
-        transform(allBases.begin(), allBases.end(), back_inserter(ids),
-                  ::IceUtil::constMemFun<string,ClassDef>(&Contained::scoped));
-#else
-        transform(allBases.begin(), allBases.end(), back_inserter(ids), ::IceUtil::constMemFun(&Contained::scoped));
-#endif
-        StringList other;
-        other.push_back(p->scoped());
-        other.push_back("::Ice::Object");
-        other.sort();
-        ids.merge(other);
-        ids.unique();
 
-        StringList::const_iterator firstIter = ids.begin();
-        StringList::const_iterator scopedIter = find(ids.begin(), ids.end(), scoped);
-        assert(scopedIter != ids.end());
-        StringList::difference_type scopedPos = IceUtilInternal::distance(firstIter, scopedIter);
-        
-        _out << ",";
-        _out << nl << scopedPos << ",";
-        _out << nl << "[";
-        _out.inc();
-        for(StringList::const_iterator q = ids.begin(); q != ids.end(); ++q)
-        {
-            if(q != ids.begin())
-            {
-                _out << ',';
-            }
-            _out << nl << '"' << *q << '"';
-        }
-        _out.dec();
-        _out << nl << "],";
-
-        _out << nl << "function(__os)";
-        _out << sb;
-        _out << nl << "__os.startWriteSlice(" << localScope << "." << name << ".ice_staticId(), " << p->compactId()
-             << ", " << (!base ? "true" : "false") << ");";
-        for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
-        {
-            writeMarshalDataMember(*q);
-        }
-        _out << nl << "__os.endWriteSlice();";
-        if(base)
-        {
-            _out << nl << baseRef << ".prototype.__writeImpl.call(this, __os);";
-        }
-        _out << eb << ",";
-
-        _out << nl << "function(__is)";
-        _out << sb;
-        _out << nl << "__is.startReadSlice();";
-        if(hasClassMembers)
-        {
-            _out << nl << "var self = this;";
-        }
-        for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
-        {
-            writeUnmarshalDataMember(*q);
-        }
-        _out << nl << "__is.endReadSlice();";
-        if(base)
-        {
-            _out << nl << baseRef << ".prototype.__readImpl.call(this, __is);";
-        }
-        _out << eb;
-        
-        bool basePreserved = p->inheritsMetaData("preserve-slice");
-        bool preserved = p->hasMetaData("preserve-slice");
-        
-        if(preserved && !basePreserved)
-        {
-            _out << ",";
-            _out << nl << "function(__os)";
-            _out << sb;
-            _out << nl << "__os.startWriteObject(this.__slicedData);";
-            _out << nl << "this.__writeImpl(__os);";
-            _out << nl << "__os.endWriteObject();";
-            _out << eb << ",";
-            _out << nl << "function(__is)";
-            _out << sb;
-            _out << nl << "__is.startReadObject();";
-            _out << nl << "this.__readImpl(__is);";
-            _out << nl << "this.__slicedData = __is.endReadObject(true);";
-            _out << eb;
-        }
-        else
-        {
-            _out << ",";
-            _out << nl << "undefined,";
-            _out << nl << "undefined";
-        }
-        
         if(!bases.empty())
         {
             _out << ",";
@@ -1589,6 +1493,76 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             _out.dec();
             _out << nl << "]";
         }
+        else
+        {
+            _out << ", undefined";
+        }
+
+#if defined(__IBMCPP__) && defined(NDEBUG)
+        //
+        // VisualAge C++ 6.0 does not see that ClassDef is a Contained,
+        // when inlining is on. The code below issues a warning: better
+        // than an error!
+        //
+        transform(allBases.begin(), allBases.end(), back_inserter(ids),
+                  ::IceUtil::constMemFun<string,ClassDef>(&Contained::scoped));
+#else
+        transform(allBases.begin(), allBases.end(), back_inserter(ids), ::IceUtil::constMemFun(&Contained::scoped));
+#endif
+        StringList other;
+        other.push_back(p->scoped());
+        other.push_back("::Ice::Object");
+        other.sort();
+        ids.merge(other);
+        ids.unique();
+
+        StringList::const_iterator firstIter = ids.begin();
+        StringList::const_iterator scopedIter = find(ids.begin(), ids.end(), scoped);
+        assert(scopedIter != ids.end());
+        StringList::difference_type scopedPos = IceUtilInternal::distance(firstIter, scopedIter);
+        
+        _out << ", " << scopedPos << ",";
+        _out << nl << "[";
+        _out.inc();
+        for(StringList::const_iterator q = ids.begin(); q != ids.end(); ++q)
+        {
+            if(q != ids.begin())
+            {
+                _out << ',';
+            }
+            _out << nl << '"' << *q << '"';
+        }
+        _out.dec();
+        _out << nl << "],";
+        _out << nl << p->compactId() << ",";
+        if(dataMembers.empty())
+        {
+            _out << " undefined, undefined, ";
+        }
+        else
+        {
+            _out << nl << "function(__os)";
+            _out << sb;
+            for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+            {
+                writeMarshalDataMember(*q);
+            }
+            _out << eb << ",";
+            
+            _out << nl << "function(__is)";
+            _out << sb;
+            if(hasClassMembers)
+            {
+                _out << nl << "var self = this;";
+            }
+            for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+            {
+                writeUnmarshalDataMember(*q);
+            }
+            _out << eb << ",";
+            _out << nl;
+        }
+        _out << (p->hasMetaData("preserve-slice") && !p->inheritsMetaData("preserve-slice") ? "true" : "false");
     }
     _out.dec();
     _out << ");";

@@ -750,7 +750,7 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
         return;
     }
     
-    if(ProxyPtr::dynamicCast(type) || (builtin && builtin == Builtin::KindObjectProxy))
+    if(ProxyPtr::dynamicCast(type) || (builtin && builtin->kind() == Builtin::KindObjectProxy))
     {
         if(marshal)
         {
