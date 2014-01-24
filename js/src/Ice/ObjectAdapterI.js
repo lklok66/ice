@@ -153,7 +153,7 @@
                         var endpoints = this._routerInfo.getServerEndpoints();
                         for(var i = 0; i < endpoints.length; ++i)
                         {
-                            this._routerEndpoints.push(endpoint);
+                            this._routerEndpoints.push(endpoints[i]);
                         }
                         this._routerEndpoints.sort(     // Must be sorted.
                             function(e1, e2)

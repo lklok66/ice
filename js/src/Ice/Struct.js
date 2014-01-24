@@ -30,7 +30,7 @@
             {
                 return false;
             }
-            else if(e1.equals instanceof Ice.HashMap)
+            else if(e1 instanceof Ice.HashMap)
             {
                 var keyComparator = e1.keyComparator;
                 var valueComparator = e1.valueComparator;
@@ -121,7 +121,6 @@
             }
             return other;
         };
-        
         
         var memberHashCode = function(h, e)
         {
