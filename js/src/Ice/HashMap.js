@@ -395,8 +395,10 @@
                     {
                         if(helper === null)
                         {
+                            /*jshint -W061 */
                             helper = Ice.StreamHelpers.generateDictHelper(eval(keyHelper), eval(valueHelper), 
                                                                           optionalFormat);
+                            /*jshint +W061 */
                         }
                         return helper;
                     }

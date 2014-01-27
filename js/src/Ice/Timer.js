@@ -26,7 +26,7 @@
             this._destroyed = false;
             this._tokenId = 0;
             this._tokens = new HashMap();
-        }
+        };
 
         Timer.prototype.destroy = function()
         {
@@ -36,7 +36,7 @@
             });
             this._destroyed = true;
             this._tokens.clear();
-        }
+        };
 
         Timer.prototype.schedule = function(callback, delay)
         {
@@ -52,7 +52,7 @@
             this._tokens.set(token, { callback: callback, id: id, isInterval: false });
 
             return token;
-        }
+        };
 
         Timer.prototype.scheduleRepeated = function(callback, period)
         {
@@ -68,7 +68,7 @@
             this._tokens.set(token, { callback: callback, id: id, isInterval: true });
 
             return token;
-        }
+        };
 
         Timer.prototype.cancel = function(id)
         {
@@ -94,7 +94,7 @@
             }
 
             return true;
-        }
+        };
 
         Timer.prototype.handleTimeout = function(id)
         {
@@ -109,7 +109,7 @@
                 this._tokens.delete(id);
                 token.callback();
             }
-        }
+        };
 
         Timer.prototype.handleInterval = function(id)
         {
@@ -123,7 +123,7 @@
             {
                 token.callback();
             }
-        }
+        };
 
         Ice.Timer = Timer;
         global.Ice = Ice;

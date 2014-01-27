@@ -1,5 +1,6 @@
 
 var http = require("http");
+var https = require("https");
 var url = require("url");
 var crypto = require("crypto");
 var fs = require("fs");
@@ -69,28 +70,41 @@ FileServant.prototype.processRequest = function(req, res)
             });
 };
 
-var HttpServer = function(host, port)
+var HttpServer = function(host, ports)
 {
     this._host = host;
-    this._port = port;
-    this._server = http.createServer();
-    this._controllers = {};
+    this._ports = ports;
 };
 
 HttpServer.prototype.start = function()
 {
+    var baseDir = path.join(__dirname, "../../../certs/winrt");
+    var options = {
+        passphrase: "password",
+        key: fs.readFileSync(path.join(baseDir, "s_rsa1024_priv.pem")),
+        cert: fs.readFileSync(path.join(baseDir, "s_rsa1024_pub.pem"))
+    };
+    
+    var servers = [
+        http.createServer(),
+        https.createServer(options)];
+        
     var self = this;
-    this._defaultController = this._controllers[""];
+
     var requestCB = function(req, res)
         {
             self.processRequest(req, res);
         }
 
-    this._server.on("request", requestCB);
-    this._server.listen(this._port, this._host);
+    servers.forEach(
+        function(server, i)
+        {
+            server.on("request", requestCB);
+            server.listen(self._ports[i], this._host);
+        });
 };
 
-var defaultController = new FileServant("../..");
+var defaultController = new FileServant(path.join(__dirname, "../.."));
 
 HttpServer.prototype.processRequest = function(req, res)
 {
@@ -111,6 +125,6 @@ HttpServer.prototype.processRequest = function(req, res)
     req.on("end", endCB);
 };
 
-var server = new HttpServer("0.0.0.0", 8080);
+var server = new HttpServer("0.0.0.0", [8080, 9090]);
 server.start();
 

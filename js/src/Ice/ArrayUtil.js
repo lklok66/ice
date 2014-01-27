@@ -120,7 +120,9 @@
                     {
                         if(helper === null)
                         {
+                            /*jshint -W061 */
                             helper = Ice.StreamHelpers.generateSeqHelper(eval(valueHelper), optionalFormat);
+                            /*jshint +W061 */
                         }
                         return helper;
                     }

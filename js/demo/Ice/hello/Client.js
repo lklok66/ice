@@ -1,34 +1,229 @@
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
-        
-        var Ice = global.Ice || {};
-        
+(function(){
+    
+        require("Ice/Ice");
         require("Hello");
         
         var Demo = global.Demo || {};
+        
+        var menu = function()
+        {
+            console.log(
+                "usage:\n" +
+                "t: send greeting as twoway\n" +
+                "o: send greeting as oneway\n" +
+                "O: send greeting as batch oneway\n" +
+                "f: flush all batch requests\n" +
+                "T: set a timeout\n" +
+                "P: set a server delay\n" +
+                //"S: switch secure mode on/off\n" +
+                "s: shutdown server\n" +
+                "x: exit\n" +
+                "?: help\n");
+        };
+        
+        var writeException = function(ex)
+        {
+            if(ex && ex._asyncResult)
+            {
+                console.log("exception occurred in call to " + ex._asyncResult.operation);
+            }
+            if(ex.stack)
+            {
+                console.log(ex.stack);
+            }
+            else
+            {
+                console.log(ex);
+            }
+        };
 
         var Client = function()
         {
         };
         
-        Client.prototype.run = function(id)
+        Client.prototype.run = function()
         {
-            this._communicator = Ice.initialize(id);
+            var communicator;
+            var p = new Ice.Promise();
             
-           var hello = Demo.HelloPrx.uncheckedCast(this._communicator.propertyToProxy("Hello.Proxy"));
-           
-           return hello.sayHello(0);
+            var cleanup = function(ex)
+            {
+                if(communicator !== null)
+                {
+                    communicator.destroy().then(
+                        function(asyncResult)
+                        {
+                            if(ex && ex instanceof Error)
+                            {
+                                writeException(ex);
+                                p.fail(ex);
+                            }
+                            else
+                            {
+                                p.succeed();
+                            }
+                        }
+                    ).exception(
+                        function(ex)
+                        {
+                            p.fail(ex);
+                        }
+                    );
+                }
+                else
+                {
+                    p.fail(ex);
+                }
+            }
+            
+            try
+            {
+                var id = new Ice.InitializationData();
+                id.properties = Ice.createProperties();
+                id.properties.setProperty("Hello.Proxy", "hello:tcp -h 127.0.0.1 -p 10000");
+                
+                communicator = Ice.initialize(id);
+                menu();
+
+                var twoway, oneway, batchOneway;
+                twoway = communicator.propertyToProxy("Hello.Proxy").ice_twoway().ice_timeout(-1).ice_secure(false);
+                
+                var secure = false;
+                var timeout = -1;
+                var delay = 0;
+                
+                var printEx = function(ex){ console.log(ex.stack); };
+                Demo.HelloPrx.checkedCast(twoway).then(
+                    function(asyncResult, o)
+                    {
+                        twoway = o;
+                        oneway = twoway.ice_oneway();
+                        batchOneway = twoway.ice_batchOneway();
+                        
+                        process.stdin.setRawMode(true);
+                        process.stdin.resume();
+                        process.stdin.on("data", 
+                            function(key)
+                            {
+                                //
+                                // ctrl-c ( end of text )
+                                //
+                                if(key == "\u0003")
+                                {
+                                    process.exit();
+                                }
+                                
+                                process.stdout.write("==> ");
+                                process.stdout.write(key.toString("utf-8"));
+                                process.stdout.write("\n");
+                                
+                                if(key == "t")
+                                {
+                                    twoway.sayHello(delay).exception(printEx);
+                                }
+                                else if(key == "o")
+                                {
+                                    oneway.sayHello(delay).exception(printEx);
+                                }
+                                else if(key == "O")
+                                {
+                                    batchOneway.sayHello(delay).exception(printEx);
+                                }
+                                else if(key == "f")
+                                {
+                                    //communicator.flushBatchRequests();
+                                    batchOneway.ice_flushBatchRequests().exception(printEx);
+                                }
+                                else if(key == "T")
+                                {
+                                    if(timeout == -1)
+                                    {
+                                        timeout = 2000;
+                                    }
+                                    else
+                                    {
+                                        timeout = -1;
+                                    }
+
+                                    twoway = twoway.ice_timeout(timeout);
+                                    oneway = oneway.ice_timeout(timeout);
+                                    batchOneway = batchOneway.ice_timeout(timeout);
+
+                                    if(timeout == -1)
+                                    {
+                                        console.log("timeout is now switched off");
+                                    }
+                                    else
+                                    {
+                                        console.log("timeout is now set to 2000ms");
+                                    }
+                                }
+                                else if(key == "P")
+                                {
+                                    if(delay == 0)
+                                    {
+                                        delay = 2500;
+                                    }
+                                    else
+                                    {
+                                        delay = 0;
+                                    }
+
+                                    if(delay == 0)
+                                    {
+                                        console.log("server delay is now deactivated");
+                                    }
+                                    else
+                                    {
+                                        console.log("server delay is now set to 2500ms");
+                                    }
+                                }
+                                else if(key == "s")
+                                {
+                                    twoway.shutdown().exception(printEx);
+                                }
+                                else if(key == "x")
+                                {
+                                    process.stdin.pause();
+                                    if(communicator)
+                                    {
+                                        communicator.destroy().then(cleanup).exception(cleanup);
+                                    }
+                                    else
+                                    {
+                                        cleanup();
+                                    }
+                                }
+                                else if(key == "?")
+                                {
+                                    menu();
+                                }
+                                else
+                                {
+                                    console.log("unknown command `" + key + "'");
+                                    menu();
+                                }
+                            });
+                    },
+                    function(ex)
+                    {
+                        console.log("invalid proxy: " + twoway);
+                        cleanup(ex);
+                    }
+                ).exception(
+                    function(ex)
+                    {
+                        cleanup(ex);
+                    });
+            }
+            catch(ex)
+            {
+                cleanup(ex);
+            }
+            return p;
         };
         
-        Client.prototype.destroy = function()
-        {
-            return this._communicator.destroy();
-        };
-        
-        module.exports.Demo = module.exports.Demo || {};
-        module.exports.Demo.Client = Client;
-    };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Hello/Client"));
+        var client = new Client();
+        client.run();
+}());

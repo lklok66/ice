@@ -89,7 +89,7 @@
                 logger.trace(slicingCat, s);
                 slicingIds.set(typeId, 1);
             }
-        };
+        }
 
         TraceUtil.dumpStream = function(stream)
         {
@@ -97,7 +97,7 @@
             stream.pos = 0;
 
             var data = stream.readBlob(stream.size());
-            dumpOctets(data);
+            TraceUtil.dumpOctets(data);
 
             stream.pos = pos;
         };
@@ -109,7 +109,8 @@
 
             for(var i = 0; i < data.length; i += inc)
             {
-                for(var j = i; j - i < inc; j++)
+                var j;
+                for(j = i; j - i < inc; j++)
                 {
                     if(j < data.length)
                     {
@@ -141,7 +142,7 @@
 
                 buf.push('"');
 
-                for(var j = i; j < data.length && j - i < inc; j++)
+                for(j = i; j < data.length && j - i < inc; j++)
                 {
                     if(data[j] >= 32 && data[j] < 127)
                     {
@@ -177,7 +178,7 @@
 
             var operation = stream.readString();
             s.push("\noperation = " + operation);
-        };
+        }
 
         function printRequest(s, stream)
         {
@@ -189,7 +190,7 @@
             }
 
             printRequestHeader(s, stream);
-        };
+        }
 
         function printBatchRequest(s, stream)
         {
@@ -201,7 +202,7 @@
                 s.push("\nrequest #" + i + ':');
                 printRequestHeader(s, stream);
             }
-        };
+        }
 
         function printReply(s, stream)
         {
@@ -302,7 +303,7 @@
                 break;
             }
             }
-        };
+        }
 
         function printRequestHeader(s, stream)
         {
@@ -356,7 +357,7 @@
                 s.push("\nencoding = ");
                 s.push(Protocol.encodingVersionToString(ver));
             }
-        };
+        }
 
         function printHeader(s, stream)
         {
@@ -412,7 +413,7 @@
             var size = stream.readInt();
             s.push("\nmessage size = " + size);
             return type;
-        };
+        }
 
         function printMessage(s, stream)
         {
@@ -452,7 +453,7 @@
             }
 
             return type;
-        };
+        }
 
         function getMessageTypeAsString(type)
         {
@@ -471,7 +472,7 @@
             default:
                 return "unknown";
             }
-        };
+        }
     };
     return (module === undefined) ? this.Ice.__defineModule(__m, name) :
                                     __m(global, module, module.exports, module.require);

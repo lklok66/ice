@@ -27,26 +27,23 @@
         var StringUtil = Ice.StringUtil;
         var Transceiver = IceWS.Transceiver;
 
-        var EndpointI = function(instance, ho, po, ti, conId, co, re)
+        var EndpointI = function(instance, secure, ho, po, ti, conId, co, re)
         {
             this._instance = instance;
+            this._secure = secure;
             this._host = ho;
             this._port = po;
             this._timeout = ti;
             this._connectionId = conId;
             this._compress = co;
             this._resource = re;
-            if(re === undefined)
-            {
-                console.log(Error().stack);
-            }
             this.calcHashValue();
         };
 
         EndpointI.prototype = new Ice.Endpoint();
         EndpointI.prototype.constructor = EndpointI;
 
-        EndpointI.fromString = function(instance, str, oaEndpoint)
+        EndpointI.fromString = function(instance, secure, str, oaEndpoint)
         {
             var host = null;
             var port = 0;
@@ -195,11 +192,10 @@
             {
                 host = "";
             }
-
-            return new EndpointI(instance, host, port, timeout, "", compress, resource);
+            return new EndpointI(instance, secure, host, port, timeout, "", compress, resource);
         };
 
-        EndpointI.fromStream = function(s)
+        EndpointI.fromStream = function(s, secure)
         {
             s.startReadEncaps();
             var host = s.readString();
@@ -208,7 +204,7 @@
             var compress = s.readBool();
             var resource = s.readString();
             s.endReadEncaps();
-            return new EndpointI(s.instance, host, port, timeout, "", compress, resource);
+            return new EndpointI(s.instance, secure, host, port, timeout, "", compress, resource);
         };
 
         //
@@ -241,7 +237,7 @@
             {
                 s += " -z";
             }
-            if(this._resource !== null & this._resource.length > 0)
+            if(this._resource !== null && this._resource.length > 0)
             {
                 s += " -r ";
                 s += (this._resource.indexOf(':') !== -1) ? ("\"" + this._resource + "\"") : this._resource;
@@ -302,7 +298,7 @@
             }
             else
             {
-                return new EndpointI(this._instance, this._host, this._port, timeout, this._connectionId, this._compress, this._resource);
+                return new EndpointI(this._instance, this._secure, this._host, this._port, timeout, this._connectionId, this._compress, this._resource);
             }
         };
 
@@ -317,7 +313,7 @@
             }
             else
             {
-                return new EndpointI(this._instance, this._host, this._port, this._timeout, connectionId, this._compress, this._resource);
+                return new EndpointI(this._instance, this._secure, this._host, this._port, this._timeout, connectionId, this._compress, this._resource);
             }
         };
 
@@ -343,7 +339,7 @@
             }
             else
             {
-                return new EndpointI(this._instance, this._host, this._port, this._timeout, this._connectionId, compress, this._resource);
+                return new EndpointI(this._instance, this._secure, this._host, this._port, this._timeout, this._connectionId, compress, this._resource);
             }
         };
 
@@ -537,7 +533,7 @@
         EndpointI.prototype.calcHashValue = function()
         {
             var h = 5381;
-            h = HashUtil.addNumber(h, Ice.TCPEndpointType);
+            h = HashUtil.addNumber(h, this._secure ? IceWS.WSSEndpointType : IceWS.WSEndpointType);
             h = HashUtil.addString(h, this._host);
             h = HashUtil.addNumber(h, this._port);
             h = HashUtil.addNumber(h, this._timeout);

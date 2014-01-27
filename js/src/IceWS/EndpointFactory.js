@@ -38,12 +38,12 @@
 
         EndpointFactory.prototype.create = function(str, oaEndpoint)
         {
-            return EndpointI.fromString(this._instance, str, oaEndpoint);
+            return EndpointI.fromString(this._instance, this._secure, str, oaEndpoint);
         };
 
         EndpointFactory.prototype.read = function(s)
         {
-            return EndpointI.fromStream(s);
+            return EndpointI.fromStream(s, this._secure);
         };
 
         EndpointFactory.prototype.destroy = function()

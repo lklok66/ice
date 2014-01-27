@@ -24,7 +24,7 @@
             /**
             * The Slice compact type ID for this slice.
             **/
-            this.compactId;
+            this.compactId = -1;
 
             /**
             * The encoded bytes for this slice, including the leading size integer.
@@ -45,7 +45,7 @@
             * Whether or not this is the last slice.
             **/
             this.isLastSlice = false;
-        }
+        };
         
         var SlicedData = function(slices)
         {
@@ -57,7 +57,7 @@
             this._unknownTypeId = unknownTypeId;
         };
         
-        UnknownSlicedObject.prototype = new Ice.Object;
+        UnknownSlicedObject.prototype = new Ice.Object();
         UnknownSlicedObject.prototype.constructor = UnknownSlicedObject;
         
         UnknownSlicedObject.prototype.getUnknownTypeId = function()

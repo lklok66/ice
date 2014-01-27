@@ -101,8 +101,6 @@
                     };
                     this._fd.onclose = function(e){
                         self.socketClosed(e); };
-                    //this._fd.onerror = function(e){ 
-                    //    self.socketError(e); };
                     return SocketOperation.Connect; // Waiting for connect to complete.
                 }
                 else if(this._state === StateConnectPending)
@@ -110,7 +108,7 @@
                     //
                     // Socket is connected.
                     //
-                    this._desc = fdToString(this._fd, this._addr);
+                    this._desc = fdToString(this._addr);
                     this._state = StateConnected;
                 }
             }
@@ -124,7 +122,7 @@
                     {
                         var s = [];
                         s.push("failed to establish " + (this._secure ? "wss" : "ws") + " connection\n");
-                        s.push(fdToString(this._fd, this._addr.host, this._addr.port));
+                        s.push(fdToString(this._addr));
                         this._logger.trace(this._traceLevels.networkCat, s.join(""));
                     }
                 }
@@ -306,7 +304,7 @@
         Transceiver.prototype.socketConnected = function(e)
         {
             this._connected = true;
-            this._desc = fdToString(this._fd, this._addr);
+            this._desc = fdToString(this._addr);
 
             if(this._traceLevels.network >= 1)
             {
@@ -353,9 +351,11 @@
             this._errorCallback(translateError(err));
         };
 
-        function fdToString(fd, remoteAddress, remotePort)
+        function fdToString(address)
         {
-            return remoteAddress + ":" + remotePort;
+            var s = "local address = <not available>\n";
+            s += "remote address = " + address.host + ":" + address.port;
+            return s;
         }
 
         function translateError(state, err)

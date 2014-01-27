@@ -12,6 +12,7 @@
         require("Ice/HashUtil");
         require("Ice/ArrayUtil");
         require("Ice/HashMap");
+        require("Ice/StreamHelpers");
         
         var Slice = global.Slice || {};
         var Ice = global.Ice || {};
@@ -74,7 +75,7 @@
             }
 
             var e1, e2;
-            for(key in this)
+            for(var key in this)
             {
 
                 e1 = this[key];
@@ -95,7 +96,7 @@
         {
             var other = new this.constructor();
             var e;
-            for(key in this)
+            for(var key in this)
             {
                 e = this[key];
                 if(e === undefined || e === null)
@@ -154,7 +155,7 @@
         {
             var __h = 5381;
             var e;
-            for(key in this)
+            for(var key in this)
             {
                 e = this[key];
                 if(e === undefined || e === null || e instanceof Function)
@@ -166,7 +167,7 @@
             return __h;
         }
         
-        Slice.defineStruct = function(constructor, legalKeyType, writeImpl, readImpl)
+        Slice.defineStruct = function(constructor, legalKeyType, writeImpl, readImpl, minWireSize, optionalFormat)
         {
             var obj = constructor;
 
@@ -192,6 +193,10 @@
                 obj.prototype.__read = readImpl;
             }
             
+            if(minWireSize !== undefined && optionalFormat !== undefined)
+            {
+                Ice.StreamHelpers.StructHelper(obj, minWireSize, optionalFormat);
+            }
             return obj;
         };
         

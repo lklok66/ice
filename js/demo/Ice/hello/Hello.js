@@ -33,84 +33,32 @@
         var Ice = global.Ice || {};
         var Demo = global.Demo ||  {};
 
-        Demo.HelloPrx = function()
-        {
-            Ice.ObjectPrx.call(this);
-        };
-        Demo.HelloPrx.prototype = new Ice.ObjectPrx();
-        Demo.HelloPrx.prototype.constructor = Demo.HelloPrx;
-        Demo.HelloPrx.checkedCast = function(__prx, __facet, __ctx)
-        {
-            return Ice.ObjectPrx.checkedCastImpl(Demo.HelloPrx, Demo.Hello.ice_staticId(), __prx, __facet, __ctx);
-        };
-        Demo.HelloPrx.uncheckedCast = function(__prx, __facet)
-        {
-            return Ice.ObjectPrx.uncheckedCastImpl(Demo.HelloPrx, __prx, __facet);
-        };
+        Demo.Hello = Slice.defineObject(
+            function()
+            {
+                Ice.Object.call(this);
+            },
+            Ice.Object, undefined, 0,
+            [
+                "::Demo::Hello",
+                "::Ice::Object"
+            ],
+            -1, undefined, undefined, false);
 
-        Ice.StreamHelpers.ProxyHelper(Demo.HelloPrx);
+        Demo.HelloPrx = Slice.defineProxy(Ice.ObjectPrx, Demo.Hello.ice_staticId);
 
-        Demo.Hello = function()
+        Demo.HelloPrx.prototype.sayHello = function(delay, __ctx)
         {
-            Ice.Object.call(this);
-        };
-        Demo.Hello.prototype = new Ice.Object();
-        Demo.Hello.prototype.constructor = Demo.Hello;
-        Demo.Hello.__ids = [
-            "::Demo::Hello",
-            "::Ice::Object"
-        ];
-        Demo.Hello.prototype.ice_ids = function(current)
-        {
-            return Demo.Hello.__ids;
-        };
-
-        Demo.Hello.ice_staticId = function()
-        {
-            return Demo.Hello.__ids[0];
-        };
-        Demo.Hello.prototype.sayHello = Ice.Object.prototype.__notImplemented;
-        Demo.Hello.prototype.shutdown = Ice.Object.prototype.__notImplemented;
-
-        Demo.Hello.prototype.toString = function()
-        {
-            return "[object Demo::Hello]";
-        };
-
-        Demo.Hello.prototype.__writeImpl = function(__os)
-        {
-            __os.startWriteSlice(Demo.Hello.ice_staticId(), -1, true);
-            __os.endWriteSlice();
-        };
-
-        Demo.Hello.prototype.__readImpl = function(__is)
-        {
-            __is.startReadSlice();
-            __is.endReadSlice();
-        };
-
-        Demo.HelloPrx.__op_sayHello = function(__p, delay, __ctx)
-        {
-            return Ice.ObjectPrx.__invoke(__p, "sayHello", 2, 0, __ctx,
+            return Ice.ObjectPrx.__invoke(this, "sayHello", 2, 0, __ctx,
                 function(__os)
                 {
                     __os.writeInt(delay);
                 }, null, null);
         };
 
-        Demo.HelloPrx.__op_shutdown = function(__p, __ctx)
-        {
-            return Ice.ObjectPrx.__invoke(__p, "shutdown", 0, 0, __ctx, null, null, null);
-        };
-
-        Demo.HelloPrx.prototype.sayHello = function(delay, __ctx)
-        {
-            return Demo.HelloPrx.__op_sayHello(this, delay, __ctx);
-        };
-
         Demo.HelloPrx.prototype.shutdown = function(__ctx)
         {
-            return Demo.HelloPrx.__op_shutdown(this, __ctx);
+            return Ice.ObjectPrx.__invoke(this, "shutdown", 0, 0, __ctx, null, null, null);
         };
         global.Demo = Demo;
     };

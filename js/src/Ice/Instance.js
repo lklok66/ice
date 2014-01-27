@@ -220,7 +220,7 @@
 
             Debug.assert(this._objectAdapterFactory !== null);
             return this._objectAdapterFactory;
-        }
+        };
 
         Instance.prototype.protocolSupport = function()
         {

@@ -280,7 +280,7 @@
                         v = is.readStruct(T);
                     }
                     return v;
-                }
+                };
             }
             else if(optionalFormat === OptionalFormat.VSize)
             {

@@ -213,6 +213,9 @@ os.system(cmd)
 shutil.copyfile(os.path.join(caHome, "cakey.pem"), caKey)
 shutil.copyfile(os.path.join(caHome, "cacert.pem"), caCert)
 
+cmd = "openssl x509 -in " + caCert + " -outform DER -out " + os.path.join(certs, "cacert.der")
+os.system(cmd)
+
 #
 # C++ server RSA certificate and key.
 #

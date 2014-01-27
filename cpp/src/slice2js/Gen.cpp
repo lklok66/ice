@@ -2167,13 +2167,11 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         {
             writeUnmarshalDataMember(*q);
         }
-        _out << eb;
+        _out << eb << ","
+             << nl << p->minWireSize() << ", " 
+             << nl << getOptionalFormat(p);
         _out.dec();
         _out << ");";
-        
-        _out << sp;
-        _out << nl << "Ice.StreamHelpers.StructHelper(" << localScope << '.' << name << ", " 
-             << p->minWireSize() << ", " << getOptionalFormat(p) << ");";
     }
     else
     {

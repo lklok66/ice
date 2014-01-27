@@ -37,9 +37,16 @@ var run = function(module)
         {
             if(ex && ex._asyncResult)
             {
-                out.writeLine("\nexception occurred in call to " + ex._asyncResult.operation);
+                console.log("\nexception occurred in call to " + ex._asyncResult.operation);
             }
-            console.log(ex.stack);
+            if(ex.stack)
+            {
+                console.log(ex.stack);
+            }
+            else
+            {
+                console.log(ex);
+            }
         });
 };
 

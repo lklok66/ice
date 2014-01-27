@@ -136,7 +136,7 @@
         IceObject.prototype.__mostDerivedType = function()
         {
             return IceObject;
-        }
+        };
 
         //
         // Private methods
@@ -214,7 +214,7 @@
 
             if(base !== undefined)
             {
-                obj.prototype = new base;
+                obj.prototype = new base();
                 obj.__parent = base;
             }
             obj.prototype.constructor = constructor;
@@ -226,7 +226,7 @@
         {
             var obj = constructor;
 
-            obj.prototype = new base;
+            obj.prototype = new base();
             obj.__parent = base;
             obj.__ids = ids;
             obj.__id = ids[scope];
@@ -236,10 +236,10 @@
             obj.ice_staticId = function()
             {
                 return ids[scope];
-            }
+            };
 
             obj.prototype.constructor = obj;
-            obj.prototype.__mostDerivedType = function() { return obj; }
+            obj.prototype.__mostDerivedType = function() { return obj; };
             if(preserved)
             {
                 obj.prototype.__write = __writePreserved;
@@ -259,7 +259,9 @@
                     {
                         if(helper === null)
                         {
+                            /*jshint -W061 */
                             helper = Ice.StreamHelpers.generateObjectSeqHelper(eval(valueType), optionalFormat);
+                            /*jshint +W061 */
                         }
                         return helper;
                     }
@@ -275,8 +277,10 @@
                     {
                         if(helper === null)
                         {
+                            /*jshint -W061 */
                             helper = Ice.StreamHelpers.generateObjectDictHelper(eval(keyHelper), eval(valueType), 
                                                                                 optionalFormat);
+                            /*jshint +W061 */
                         }
                         return helper;
                     }
