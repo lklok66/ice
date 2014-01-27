@@ -11,7 +11,6 @@
     <script src="foundation/js/modernizr.js"></script>
     <script src="../../../lib/Ice.js"></script>
     <script src="Hello.js"></script>
-    <script src="Client.js"></script>
     
     <style type="text/css">
         .noUiSlider
@@ -156,8 +155,6 @@
                     {
                         var twoway = communicator.propertyToProxy("Hello.Proxy").ice_twoway().ice_timeout(-1).ice_secure(false);
                         
-                        console.log("mode: " + $("#mode").val());
-                        
                         Demo.HelloPrx.checkedCast(twoway).then(
                             function(asyncResult, o)
                             {
@@ -181,8 +178,6 @@
                                     oneway = oneway.ice_timeout(-1);
                                     batchOneway = batchOneway.ice_timeout(-1);
                                 }
-                                
-                                
                                 
                                 if(mode == "twoway")
                                 {

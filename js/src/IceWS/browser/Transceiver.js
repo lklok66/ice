@@ -62,7 +62,8 @@
             transceiver._connected = false;
             transceiver._desc = "remote address: " + Network.addrToString(addr.host, addr.port) + " <not connected>";
             transceiver._state = StateNeedConnect;
-
+            transceiver._secure = secure;
+            
             return transceiver;
         };
 
@@ -121,7 +122,7 @@
                     if(this._traceLevels.network >= 2)
                     {
                         var s = [];
-                        s.push("failed to establish " + (this._secure ? "wss" : "ws") + " connection\n");
+                        s.push("failed to establish " + this.type() + " connection\n");
                         s.push(fdToString(this._addr));
                         this._logger.trace(this._traceLevels.networkCat, s.join(""));
                     }
@@ -132,7 +133,7 @@
             Debug.assert(this._state === StateConnected);
             if(this._traceLevels.network >= 1)
             {
-                var s = (this._secure ? "wss" : "ws") + " connection established\n" + this._desc;
+                var s = this.type() + " connection established\n" + this._desc;
                 this._logger.trace(this._traceLevels.networkCat, s);
             }
 
