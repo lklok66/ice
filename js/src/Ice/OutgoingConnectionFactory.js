@@ -11,6 +11,7 @@
     var __m = function(global, module, exports, require){
 
         require("Ice/ArrayUtil");
+        require("Ice/AsyncResultBase");
         require("Ice/ConnectionI");
         require("Ice/ConnectionReaper");
         require("Ice/Debug");
@@ -24,6 +25,7 @@
         var Ice = global.Ice || {};
 
         var ArrayUtil = Ice.ArrayUtil;
+        var AsyncResultBase = Ice.AsyncResultBase;
         var ConnectionI = Ice.ConnectionI;
         var ConnectionReaper = Ice.ConnectionReaper;
         var Debug = Ice.Debug;
@@ -207,16 +209,17 @@
             }
         };
 
-        OutgoingConnectionFactory.prototype.flushAsyncBatchRequests = function(outAsync)
+        OutgoingConnectionFactory.prototype.flushAsyncBatchRequests = function()
         {
+            var promise = new AsyncResultBase(this._communicator, "flushBatchRequests", null, null, null);
+
             var c = [];
-            var e, i;
             if(!this._destroyed)
             {
-                for(e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
+                for(var e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
                 {
                     var connectionList = e.value;
-                    for(i = 0; i < connectionList.length; ++i)
+                    for(var i = 0; i < connectionList.length; ++i)
                     {
                         if(connectionList[i].isActiveOrHolding())
                         {
@@ -226,24 +229,45 @@
                 }
             }
 
-            for(i = 0; i < c.length; ++i)
+            var count = c.length;
+            if(count > 0)
             {
-                try
+                for(var i = 0; i < c.length; ++i)
                 {
-                    outAsync.flushConnection(c[i]);
-                }
-                catch(ex)
-                {
-                    if(ex instanceof Ice.LocalException)
-                    {
-                        // Ignore.
-                    }
-                    else
-                    {
-                        throw ex;
-                    }
+                    c[i].flushBatchRequests().then(
+                        function(r)
+                        {
+                            if(--count === 0)
+                            {
+                                promise.succeed(promise);
+                            }
+                        },
+                        function(ex)
+                        {
+                            if(ex instanceof Ice.LocalException)
+                            {
+                                //
+                                // Ignore errors
+                                //
+
+                                if(--count === 0)
+                                {
+                                    promise.succeed(promise);
+                                }
+                            }
+                            else
+                            {
+                                promise.fail(ex);
+                            }
+                        });
                 }
             }
+            else
+            {
+                promise.succeed(promise);
+            }
+
+            return promise;
         };
 
         OutgoingConnectionFactory.prototype.applyOverrides = function(endpts)

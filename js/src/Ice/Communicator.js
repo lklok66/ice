@@ -177,7 +177,7 @@
 
         Communicator.prototype.flushBatchRequests = function()
         {
-            // TODO
+            return this._instance.outgoingConnectionFactory().flushAsyncBatchRequests();
         };
 
         Ice.Communicator = Communicator;
