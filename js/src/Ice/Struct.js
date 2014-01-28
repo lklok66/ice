@@ -17,6 +17,8 @@
         var Slice = global.Slice || {};
         var Ice = global.Ice || {};
         
+        var ArrayUtil = Ice.ArrayUtil;
+        
         var eq = function(e1, e2)
         {
             if(e1 === e2)
@@ -149,7 +151,7 @@
                     return Ice.HashUtil.addBoolean(h, e);
                 }
             }
-        }
+        };
         
         var hashCode = function()
         {
@@ -165,7 +167,7 @@
                 __h = memberHashCode(__h, e);
             }
             return __h;
-        }
+        };
         
         Slice.defineStruct = function(constructor, legalKeyType, writeImpl, readImpl, minWireSize, optionalFormat)
         {

@@ -120,4 +120,6 @@ Logger.js:
 	
 ServantLocator.js:
 	
+ObjectFactory.js:
+	
 SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --include-dir Ice --ice -I$(slicedir)

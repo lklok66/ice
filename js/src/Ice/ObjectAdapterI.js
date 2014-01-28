@@ -75,7 +75,7 @@
                 var message = ["found unknown properties for object adapter `" + name + "':"];
                 for(var i = 0; i < unknownProps.length; ++i)
                 {
-                    message.push("\n    " + p);
+                    message.push("\n    " + unknownProps[i]);
                 }
                 this._instance.initializationData().logger.warning(message.join(""));
             }
@@ -829,7 +829,7 @@
 
                 if(!valid && addUnknown)
                 {
-                    unknownProps.push(prop);
+                    unknownProps.push(e.key);
                 }
             }
 

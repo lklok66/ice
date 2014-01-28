@@ -232,34 +232,35 @@
             var count = c.length;
             if(count > 0)
             {
+                var successCB = function(r)
+                {
+                    if(--count === 0)
+                    {
+                        promise.succeed(promise);
+                    }
+                };
+                var exceptionCB = function(ex)
+                {
+                    if(ex instanceof Ice.LocalException)
+                    {
+                        //
+                        // Ignore errors
+                        //
+
+                        if(--count === 0)
+                        {
+                            promise.succeed(promise);
+                        }
+                    }
+                    else
+                    {
+                        promise.fail(ex);
+                    }
+                };
+                
                 for(var i = 0; i < c.length; ++i)
                 {
-                    c[i].flushBatchRequests().then(
-                        function(r)
-                        {
-                            if(--count === 0)
-                            {
-                                promise.succeed(promise);
-                            }
-                        },
-                        function(ex)
-                        {
-                            if(ex instanceof Ice.LocalException)
-                            {
-                                //
-                                // Ignore errors
-                                //
-
-                                if(--count === 0)
-                                {
-                                    promise.succeed(promise);
-                                }
-                            }
-                            else
-                            {
-                                promise.fail(ex);
-                            }
-                        });
+                    c[i].flushBatchRequests().then(successCB, exceptionCB);
                 }
             }
             else
