@@ -73,6 +73,7 @@
                 }
                 else
                 {
+                    writeException(ex);
                     p.fail(ex);
                 }
             }
@@ -81,11 +82,11 @@
             {
                 var id = new Ice.InitializationData();
                 id.properties = Ice.createProperties();
-                id.properties.setProperty("Hello.Proxy", "hello:tcp -h 127.0.0.1 -p 10000");
+                id.properties.setProperty("Hello.Proxy", "hello:default -p 10000");
                 
                 communicator = Ice.initialize(id);
                 menu();
-
+                process.stdout.write("==>");
                 var twoway, oneway, batchOneway;
                 twoway = communicator.propertyToProxy("Hello.Proxy").ice_twoway().ice_timeout(-1).ice_secure(false);
                 
@@ -101,109 +102,113 @@
                         oneway = twoway.ice_oneway();
                         batchOneway = twoway.ice_batchOneway();
                         
-                        process.stdin.setRawMode(true);
+                        //process.stdin.setRawMode(true);
                         process.stdin.resume();
+                        data = [];
                         process.stdin.on("data", 
-                            function(key)
+                            function(buffer)
                             {
-                                //
-                                // ctrl-c ( end of text )
-                                //
-                                if(key == "\u0003")
-                                {
-                                    process.exit();
-                                }
-                                
-                                process.stdout.write("==> ");
-                                process.stdout.write(key.toString("utf-8"));
+                                data = buffer.toString("utf-8").trim().split("");
                                 process.stdout.write("\n");
-                                
-                                if(key == "t")
-                                {
-                                    twoway.sayHello(delay).exception(printEx);
-                                }
-                                else if(key == "o")
-                                {
-                                    oneway.sayHello(delay).exception(printEx);
-                                }
-                                else if(key == "O")
-                                {
-                                    batchOneway.sayHello(delay).exception(printEx);
-                                }
-                                else if(key == "f")
-                                {
-                                    //communicator.flushBatchRequests();
-                                    batchOneway.ice_flushBatchRequests().exception(printEx);
-                                }
-                                else if(key == "T")
-                                {
-                                    if(timeout == -1)
+                                data.forEach(
+                                    function(key)
                                     {
-                                        timeout = 2000;
-                                    }
-                                    else
-                                    {
-                                        timeout = -1;
-                                    }
+                                        if(key == "x")
+                                        {
+                                            process.stdin.pause();
+                                            if(communicator)
+                                            {
+                                                communicator.destroy().then(cleanup).exception(cleanup);
+                                            }
+                                            else
+                                            {
+                                                cleanup();
+                                            }
+                                            return;
+                                        }
+                                        process.stdout.write("==> ");
+                                        
+                                        if(key == "t")
+                                        {
+                                            twoway.sayHello(delay).exception(printEx);
+                                        }
+                                        else if(key == "o")
+                                        {
+                                            oneway.sayHello(delay).exception(printEx);
+                                        }
+                                        else if(key == "O")
+                                        {
+                                            batchOneway.sayHello(delay).exception(printEx);
+                                        }
+                                        else if(key == "f")
+                                        {
+                                            communicator.flushBatchRequests().exception(printEx);
+                                        }
+                                        else if(key == "T")
+                                        {
+                                            if(timeout == -1)
+                                            {
+                                                timeout = 2000;
+                                            }
+                                            else
+                                            {
+                                                timeout = -1;
+                                            }
 
-                                    twoway = twoway.ice_timeout(timeout);
-                                    oneway = oneway.ice_timeout(timeout);
-                                    batchOneway = batchOneway.ice_timeout(timeout);
+                                            twoway = twoway.ice_timeout(timeout);
+                                            oneway = oneway.ice_timeout(timeout);
+                                            batchOneway = batchOneway.ice_timeout(timeout);
 
-                                    if(timeout == -1)
-                                    {
-                                        console.log("timeout is now switched off");
-                                    }
-                                    else
-                                    {
-                                        console.log("timeout is now set to 2000ms");
-                                    }
-                                }
-                                else if(key == "P")
-                                {
-                                    if(delay == 0)
-                                    {
-                                        delay = 2500;
-                                    }
-                                    else
-                                    {
-                                        delay = 0;
-                                    }
+                                            if(timeout == -1)
+                                            {
+                                                console.log("timeout is now switched off");
+                                            }
+                                            else
+                                            {
+                                                console.log("timeout is now set to 2000ms");
+                                            }
+                                            process.stdout.write("==> ");
+                                        }
+                                        else if(key == "P")
+                                        {
+                                            if(delay == 0)
+                                            {
+                                                delay = 2500;
+                                            }
+                                            else
+                                            {
+                                                delay = 0;
+                                            }
 
-                                    if(delay == 0)
-                                    {
-                                        console.log("server delay is now deactivated");
-                                    }
-                                    else
-                                    {
-                                        console.log("server delay is now set to 2500ms");
-                                    }
-                                }
-                                else if(key == "s")
-                                {
-                                    twoway.shutdown().exception(printEx);
-                                }
-                                else if(key == "x")
-                                {
-                                    process.stdin.pause();
-                                    if(communicator)
-                                    {
-                                        communicator.destroy().then(cleanup).exception(cleanup);
-                                    }
-                                    else
-                                    {
-                                        cleanup();
-                                    }
-                                }
-                                else if(key == "?")
-                                {
-                                    menu();
-                                }
-                                else
-                                {
-                                    console.log("unknown command `" + key + "'");
-                                    menu();
-                                }
+                                            if(delay == 0)
+                                            {
+                                                console.log("server delay is now deactivated");
+                                            }
+                                            else
+                                            {
+                                                console.log("server delay is now set to 2500ms");
+                                            }
+                                            process.stdout.write("==> ");
+                                        }
+                                        else if(key == "s")
+                                        {
+                                            twoway.shutdown().exception(printEx);
+                                        }
+                                        else if(key == "?")
+                                        {
+                                            process.stdout.write("\n");
+                                            menu();
+                                            process.stdout.write("==> ");
+                                        }
+                                        else
+                                        {
+                                            console.log("unknown command `" + key + "'");
+                                            process.stdout.write("\n");
+                                            menu();
+                                            process.stdout.write("==> ");
+                                        }
+                                    });
+                                data = [];
                             });
                     },
                     function(ex)
@@ -211,11 +216,7 @@
                         console.log("invalid proxy: " + twoway);
                         cleanup(ex);
                     }
-                ).exception(
-                    function(ex)
-                    {
-                        cleanup(ex);
-                    });
+                ).exception(cleanup);
             }
             catch(ex)
             {
@@ -225,5 +226,15 @@
         };
         
         var client = new Client();
-        client.run();
+        client.run().then(
+            function()
+            {
+                process.exit(0)
+            }
+        ).exception(
+            function(ex)
+            {
+                process.exit(1);
+            }
+        );
 }());

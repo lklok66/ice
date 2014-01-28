@@ -122,4 +122,13 @@ ServantLocator.js:
 	
 ObjectFactory.js:
 	
+ConnectionF.js:
+	
+EndpointF.js:
+	
+ObjectAdapterF.js:
+	
+ProcessF.js:
+	
+
 SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --include-dir Ice --ice -I$(slicedir)

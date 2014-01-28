@@ -1,0 +1,198 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Latency Demo | Ice for JavaScript</title>
+    <link rel="stylesheet" href="foundation/css/foundation.css" />
+    
+    <script src="foundation/js/modernizr.js"></script>
+    <script src="../../../lib/Ice.js"></script>
+    <script src="Latency.js"></script>
+    
+    <style type="text/css">
+        #ssl
+        {
+            margin-top:10px;
+        }
+    </style>
+  </head>
+  <body>
+    <nav class="top-bar" data-topbar>
+        <ul class="title-area">
+            <li class="name">
+                <h1><a href="#">Ice for JavaScript</a></h1>
+            </li>
+        </ul>
+    </nav>
+    <section role="main">
+        <div class="row">
+            <div class="large-12 medium-12 columns">
+                <form>
+                    <br/>
+                    <div class="row">
+                        <div class="small-3 columns">
+                            <label class="right inline" for="hostname">Hostname:</label>
+                        </div>
+                        <div class="small-9 columns">
+                            <input type="text" id="hostname"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="small-3 columns">
+                            <label class="right inline" for="ssl">SSL:</label>
+                        </div>
+                        <div class="small-9 columns">
+                            <input id="ssl" type="checkbox">
+                        </div>
+                    </div>
+                </form>
+                <a href="#" class="button small" id="run">Run</a>
+                <form>
+                    <textarea id="console" class="disabled" readonly></textarea>
+                </form>
+            </div>
+        </div>
+    </section>
+    <script src="foundation/js/jquery.js"></script>
+    <script src="foundation/js/foundation.min.js"></script>
+    <script>
+        $(document).foundation();
+      
+        $(document).ready(function(){
+            var hostname = document.location.host;
+            if(hostname)
+            {
+                hostname = hostname.indexOf(":") !== -1 ? hostname.substr(0, hostname.indexOf(":")) : hostname;
+            }
+            else
+            {
+                hostname = "127.0.0.1";
+            }
+            $("#hostname").attr("placeholder", hostname);
+            
+            var out = {};
+            
+            out.write = function(msg){
+                var text = $("#console").val();
+                $("#console").val((text == "") ? msg : (text + "\n" + msg));
+            };
+            
+            out.writeLine = function(msg){
+                this.write(msg);
+                $("#console").scrollTop($("#console").get(0).scrollHeight);
+            };
+            
+            out.writeException = function(ex){
+                if(ex && ex._asyncResult)
+                {
+                    this.writeLine("exception occurred in call to " + ex._asyncResult.operation);
+                }
+                if(ex.stack)
+                {
+                    this.writeLine(ex.stack);
+                }
+            };
+            
+            var writeException = function(ex)
+            {
+                out.writeException(ex);
+            };
+            
+            var exceptionCB = function(ex)
+            {
+                throw ex;
+            };
+            
+            var id = new Ice.InitializationData();
+            id.properties = Ice.createProperties();
+            //id.properties.setProperty("Ice.Trace.Network", "3");
+            
+            communicator = Ice.initialize(id);
+            
+            $("#run").click(
+                function()
+                {
+                    if(!$(this).hasClass("disabled"))
+                    {
+                        $("#console").val("");
+                        try
+                        {
+                            var secure = $("#ssl").is(":checked");
+                            $(this).addClass("disabled");
+                            var hostname = $("#hostname").val() ? $("#hostname").val() : $("#hostname").attr("placeholder");
+                            var s = "ping:ws -h " + hostname + " -p 10000:wss -h " + hostname + " -p 10001";
+                            var proxy = communicator.stringToProxy(s).ice_twoway().ice_timeout(-1).ice_secure(secure);
+                            
+                            var start, total;
+                            var repetitions = 10000;
+                    
+                            Demo.PingPrx.checkedCast(proxy).then(
+                                function(asyncResult, obj)
+                                {
+                                    start = new Date().getTime();
+                                    out.writeLine("pinging server " + repetitions + " times (this may take a while)");
+                                    
+                                    var p = new Ice.Promise();
+                                    var j = 0;
+                                    var succeedCB = function()
+                                    {
+                                        j++;
+                                        if(j == repetitions)
+                                        {
+                                            p.succeed();
+                                        }
+                                    };
+                                    
+                                    var exceptionCB = function(ex)
+                                    {
+                                        p.fail(ex);
+                                    };
+                                    
+                                    for(var i = 0; i < repetitions; ++i)
+                                    {
+                                        obj.ice_ping().then(succeedCB).exception(exceptionCB);
+                                    }
+
+                                    return p;
+                                },
+                                function(ex)
+                                {
+                                    out.writeLine("invalid proxy");
+                                    throw ex;
+                                }
+                            ).then(
+                                function()
+                                {
+                                    total = new Date().getTime() - start;
+                                    var perPing = total / repetitions;
+
+                                    out.writeLine("time for " + repetitions + " pings: " + total + "ms");
+                                    out.writeLine("time per ping: " + perPing + "ms");
+                                    $("#run").removeClass("disabled");
+                                },
+                                function(ex)
+                                {
+                                    throw ex;
+                                }
+                            ).exception(
+                                function(ex)
+                                {
+                                    $("#run").removeClass("disabled");
+                                    writeException(ex);
+                                }
+                            );
+                        }
+                        catch(ex)
+                        {
+                            $("#run").removeClass("disabled");
+                            out.writeException(ex);
+                        }
+                    }
+                    
+                    return false;
+                });
+        });
+    </script>
+  </body>
+</html>
