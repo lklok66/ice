@@ -2032,6 +2032,7 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     }
     _out << eb << ",";
     _out << nl << baseRef << ",";
+    _out << nl << "\"" << p->scoped() << "\",";
     _out << nl << "\"" << p->scoped().substr(2) << "\"";
 
     // TODO: equals?
@@ -2041,20 +2042,13 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
         _out << ",";
         _out << nl << "function(__os)";
         _out << sb;
-        _out << nl << "__os.startWriteSlice(\"" << p->scoped() << "\", -1, " << (!base ? "true" : "false") << ");";
         for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
         {
             writeMarshalDataMember(*q);
         }
-        _out << nl << "__os.endWriteSlice();";
-        if(base)
-        {
-            _out << nl << baseRef << ".prototype.__writeImpl.call(this, __os);";
-        }
         _out << eb << ",";
         _out << nl << "function(__is)";
         _out << sb;
-        _out << nl << "__is.startReadSlice();";
         if(hasClassMembers)
         {
             _out << nl << "var self = this;";
@@ -2063,31 +2057,19 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
         {
             writeUnmarshalDataMember(*q);
         }
-        _out << nl << "__is.endReadSlice();";
-        if(base)
-        {
-            _out << nl << baseRef << ".prototype.__readImpl.call(this, __is);";
-        }
         _out << eb;
         
         bool basePreserved = p->inheritsMetaData("preserve-slice");
         bool preserved = p->hasMetaData("preserve-slice");
         
+        _out << ",";
         if(preserved && !basePreserved)
         {
-            _out << ",";
-            _out << nl << "function(__os)";
-            _out << sb;
-            _out << nl << "__os.startWriteException(this.__slicedData);";
-            _out << nl << "this.__writeImpl(__os);";
-            _out << nl << "__os.endWriteException();";
-            _out << eb << ",";
-            _out << nl << "function(__is)";
-            _out << sb;
-            _out << nl << "__is.startReadException();";
-            _out << nl << "this.__readImpl(__is);";
-            _out << nl << "this.__slicedData = __is.endReadException(true);";
-            _out << eb;
+            _out << nl << "true";
+        }
+        else
+        {
+            _out << nl << "false";
         }
     }
     _out << ");";

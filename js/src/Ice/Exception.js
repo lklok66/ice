@@ -129,41 +129,109 @@
         UserException.prototype.__write = function(os)
         {
             os.startWriteException(null);
-            this.__writeImpl(os);
+            __writeImpl(this, os, this.__mostDerivedType());
             os.endWriteException();
         };
 
         UserException.prototype.__read = function(is)
         {
             is.startReadException();
-            this.__readImpl(is);
+            __readImpl(this, is, this.__mostDerivedType());
             is.endReadException(false);
         };
         
         Ice.UserException = UserException;
         
-        Slice.defineUserException = function(constructor, base, name, writeImpl, readImpl, write, read)
+        //
+        // Private methods
+        //
+
+        var __writeImpl = function(obj, os, type)
+        {
+            //
+            // The __writeImpl method is a recursive method that goes down the
+            // class hierarchy to marshal each slice of the class using the 
+            // generated __writeMemberImpl method.
+            //
+
+            if(type === undefined || type === UserException)
+            {
+                return; // Don't marshal anything for Ice.UserException
+            }
+
+            os.startWriteSlice(type.__id, -1, type.__parent === UserException);
+            if(type.prototype.__writeMemberImpl)
+            {
+                type.prototype.__writeMemberImpl.call(obj, os);
+            }
+            os.endWriteSlice();
+            __writeImpl(obj, os, type.__parent);
+        };
+
+        var __readImpl = function(obj, is, type)
+        {
+            //
+            // The __readImpl method is a recursive method that goes down the
+            // class hierarchy to marshal each slice of the class using the 
+            // generated __readMemberImpl method.
+            //
+
+            if(type === undefined || type === UserException)
+            {
+                return; // Don't marshal anything for UserException
+            }
+
+            is.startReadSlice();
+            if(type.prototype.__readMemberImpl)
+            {
+                type.prototype.__readMemberImpl.call(obj, is);
+            }
+            is.endReadSlice();
+            __readImpl(obj, is, type.__parent);
+        };
+        
+        var __writePreserved = function(os)
+        {
+            //
+            // For Slice exceptions which are marked "preserved", the implementation of this method
+            // replaces the Ice.Object.prototype.__write method.
+            //
+            os.startWriteException(this.__slicedData);
+            __writeImpl(this, os, this.__mostDerivedType());
+            os.endWriteException();
+        };
+
+        var __readPreserved = function(is)
+        {
+            //
+            // For Slice exceptions which are marked "preserved", the implementation of this method
+            // replaces the Ice.Object.prototype.__read method.
+            //
+            is.startReadException();
+            __readImpl(this, is, this.__mostDerivedType());
+            this.__slicedData = is.endReadException(true);
+        };
+        
+        Slice.defineUserException = function(constructor, base, id, name, writeImpl, readImpl, preserved)
         {
             var ex = constructor;
+            ex.__parent = base;
             ex.prototype = new base();
-            ex.prototype.constructor = ex;
+            ex.__id = id;
             ex.prototype.ice_name = function()
             {
                 return name;
             };
             
-            ex.prototype.__writeImpl = writeImpl;
-            ex.prototype.__readImpl = readImpl;
-            
-            if(write !== undefined)
+            ex.prototype.constructor = ex;
+            ex.prototype.__mostDerivedType = function() { return ex; };
+            if(preserved)
             {
-                ex.prototype.__write = write;
+                ex.prototype.__write = __writePreserved;
+                ex.prototype.__read = __readPreserved;
             }
-            
-            if(read !== undefined)
-            {
-                ex.prototype.__read = read;
-            }
+            ex.prototype.__writeMemberImpl = writeImpl;
+            ex.prototype.__readMemberImpl = readImpl;
             return ex;
         };
 
