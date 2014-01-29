@@ -8,7 +8,7 @@
         
         var menu = function()
         {
-            console.log(
+            process.stdout.write(
                 "usage:\n" +
                 "t: send greeting as twoway\n" +
                 "o: send greeting as oneway\n" +
@@ -19,7 +19,9 @@
                 //"S: switch secure mode on/off\n" +
                 "s: shutdown server\n" +
                 "x: exit\n" +
-                "?: help\n");
+                "?: help\n" +
+                "\n" +
+                "==> ");
         };
         
         var writeException = function(ex)
@@ -85,26 +87,21 @@
                 id.properties.setProperty("Hello.Proxy", "hello:default -p 10000");
                 
                 communicator = Ice.initialize(id);
-                menu();
-                process.stdout.write("==>");
-                var twoway, oneway, batchOneway;
-                twoway = communicator.propertyToProxy("Hello.Proxy").ice_twoway().ice_timeout(-1).ice_secure(false);
+                var proxy = communicator.propertyToProxy("Hello.Proxy").ice_twoway().ice_timeout(-1).ice_secure(false);
                 
                 var secure = false;
                 var timeout = -1;
                 var delay = 0;
                 
                 var printEx = function(ex){ console.log(ex.stack); };
-                Demo.HelloPrx.checkedCast(twoway).then(
-                    function(asyncResult, o)
+                Demo.HelloPrx.checkedCast(proxy).then(
+                    function(asyncResult, twoway)
                     {
-                        twoway = o;
-                        oneway = twoway.ice_oneway();
-                        batchOneway = twoway.ice_batchOneway();
-                        
-                        //process.stdin.setRawMode(true);
+                        var oneway = twoway.ice_oneway();
+                        var batchOneway = twoway.ice_batchOneway();
+                        menu();
                         process.stdin.resume();
-                        data = [];
+                        var data = [];
                         process.stdin.on("data", 
                             function(buffer)
                             {
@@ -198,14 +195,12 @@
                                         {
                                             process.stdout.write("\n");
                                             menu();
-                                            process.stdout.write("==> ");
                                         }
                                         else
                                         {
                                             console.log("unknown command `" + key + "'");
                                             process.stdout.write("\n");
                                             menu();
-                                            process.stdout.write("==> ");
                                         }
                                     });
                                 data = [];

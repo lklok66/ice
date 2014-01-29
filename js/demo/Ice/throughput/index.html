@@ -1,0 +1,388 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hello Demo | Ice for JavaScript</title>
+
+    <link rel="stylesheet" href="foundation/css/foundation.css" />
+    
+    <script src="foundation/js/modernizr.js"></script>
+    <script src="../../../lib/Ice.js"></script>
+    <script src="Throughput.js"></script>
+  </head>
+  <body>
+    <nav class="top-bar" data-topbar>
+        <ul class="title-area">
+            <li class="name">
+                <h1><a href="#">Ice for JavaScript</a></h1>
+            </li>
+        </ul>
+    </nav>
+    <section role="main">
+        <div class="large-12 medium-12 columns">
+            <form>
+                <br/>
+                <div class="row">
+                    <div class="small-3 columns">
+                        <label class="right inline" for="hostname">Hostname:</label>
+                    </div>
+                    <div class="small-9 columns">
+                        <input type="text" id="hostname"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="small-3 columns">
+                        <label class="right inline" for="mode">Data:</label>
+                    </div>
+                    <div class="small-9 columns">
+                        <select id="data">
+                            <option value="byte-seq">sequence of bytes (default)</option>
+                            <option value="string-seq">sequence of strings ("hello")</option>
+                            <option value="struct-seq">sequence of structs with a string ("hello") and a double</option>
+                            <option value="fixed-seq">sequence of structs with two ints and a double</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="small-3 columns">
+                        <label class="right inline" for="mode">Test:</label>
+                    </div>
+                    <div class="small-9 columns">
+                        <select id="test">
+                            <option value="twoway">Send sequence as twoway</option>
+                            <option value="oneway">Send sequence as oneway</option>
+                            <option value="receive">Receive sequence</option>
+                            <option value="echo">Echo (send and receive) sequence</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="small-12 columns">
+                        <a href="#" class="button small" id="run">Run</a>
+                        <a href="#" class="button small" id="shutdown">Shutdown</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="small-12 columns">
+                        <textarea id="console" class="disabled" readonly></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <script src="foundation/js/jquery.js"></script>
+    <script src="foundation/js/foundation.min.js"></script>
+    <script>
+        $(document).foundation();
+      
+        $(document).ready(function(){
+            $("#console").val("");
+            $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
+            
+            var exceptionCB = function(ex) { throw ex; };
+            
+            var out =
+            {
+                write: function(msg){ $("#console").val($("#console").val() + msg); },
+                writeLine: function(msg){ this.write(msg + "\n"); }
+            };
+
+            var writeException = function(ex) { out.writeLine(ex.stack); };
+            
+            var byteSeq = [];
+            for(var i = 0; i < Demo.ByteSeqSize; ++i)
+            {
+                byteSeq[i] = 0;
+            }
+            byteSeq = Ice.Buffer.createNative(byteSeq);
+            
+            var stringSeq = [];
+            for(var i = 0; i < Demo.StringSeqSize; ++i)
+            {
+                stringSeq[i] = "hello";
+            }
+
+            var structSeq = [];
+            for(var i = 0; i < Demo.StringDoubleSeqSize; ++i)
+            {
+                structSeq[i] = new Demo.StringDouble();
+                structSeq[i].s = "hello";
+                structSeq[i].d = 3.14;
+            }
+
+            var fixedSeq = [];
+            for(var i = 0; i < Demo.FixedSeqSize; ++i)
+            {
+                fixedSeq[i] = new Demo.Fixed();
+                fixedSeq[i].i = 0;
+                fixedSeq[i].j = 0;
+                fixedSeq[i].d = 0;
+            }
+            
+            var communicator = Ice.initialize();
+
+            var run = $("#run");
+            
+            run.click(
+                function()
+                {
+                    if(!run.hasClass("disabled"))
+                    {
+                        run.addClass("disabled");
+                        try
+                        {
+                            $("#console").val("");
+                            var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
+                            
+                            Demo.ThroughputPrx.checkedCast(communicator.stringToProxy("throughput:ws -h " + hostname + " -p 10000")).then(
+                                function(asyncResult, twoway)
+                                {
+                                    oneway = twoway.ice_oneway();
+                                    
+                                    var data = $("#data").val();
+                                    var test = $("#test").val();
+                                    
+                                    var seq;
+                                    var seqSize
+                                    var wireSize;
+                                    var proxy;
+                                    var operation;
+                                    var repetitions = 100;
+                                    
+                                    if(data == "byte-seq")
+                                    {
+                                        seq = byteSeq;
+                                        seqSize = Demo.ByteSeqSize;
+                                        seq = byteSeq;
+                                        wireSize = 1;
+                                    }
+                                    else if(data == "string-seq")
+                                    {
+                                        seq = stringSeq;
+                                        seqSize = Demo.StringSeqSize;
+                                        seq = stringSeq;
+                                        wireSize = seq[0].length;
+                                    }
+                                    else if(data == "struct-seq")
+                                    {
+                                        seq = structSeq;
+                                        seqSize = Demo.StringDoubleSeqSize;
+                                        seq = structSeq;
+                                        wireSize = seq[0].s.length;
+                                        wireSize += 8; // Size of double on the wire.
+                                    }
+                                    else if(data == "fixed-seq")
+                                    {
+                                        seq = fixedSeq;
+                                        seqSize = Demo.FixedSeqSize;
+                                        seq = fixedSeq;
+                                        wireSize = 16; // Size of two ints and a double on the wire.
+                                    }
+                                    
+                                    if(test == "twoway" || test == "oneway")
+                                    {
+                                        proxy = test == "twoway" ? twoway : oneway;
+                                        if(data == "byte-seq")
+                                        {
+                                            operation = proxy.sendByteSeq;
+                                        }
+                                        else if(data == "string-seq")
+                                        {
+                                            operation = proxy.sendStringSeq;
+                                        }
+                                        else if(data == "struct-seq")
+                                        {
+                                            operation = proxy.sendStructSeq;
+                                        }
+                                        else if(data == "fixed-seq")
+                                        {
+                                            operation = proxy.sendFixedSeq;
+                                        }
+                                        out.write("sending");
+                                    }
+                                    else if(test == "receive")
+                                    {
+                                        proxy = twoway;
+                                        if(data == "byte-seq")
+                                        {
+                                            operation = proxy.recvByteSeq;
+                                        }
+                                        else if(data == "string-seq")
+                                        {
+                                            operation = proxy.recvStringSeq;
+                                        }
+                                        else if(data == "struct-seq")
+                                        {
+                                            operation = proxy.recvStructSeq;
+                                        }
+                                        else if(data == "fixed-seq")
+                                        {
+                                            operation = proxy.recvFixedSeq;
+                                        }
+                                        out.write("receiving");
+                                    }
+                                    else if(test == "echo")
+                                    {
+                                        proxy = twoway;
+                                        if(data == "byte-seq")
+                                        {
+                                            operation = proxy.echoByteSeq;
+                                        }
+                                        else if(data == "string-seq")
+                                        {
+                                            operation = proxy.echoStringSeq;
+                                        }
+                                        else if(data == "struct-seq")
+                                        {
+                                            operation = proxy.echoStructSeq;
+                                        }
+                                        else if(data == "fixed-seq")
+                                        {
+                                            operation = proxy.echoFixedSeq;
+                                        }
+                                        out.write("sending and receiving");
+                                    }
+                                    
+                                    out.write(" " + repetitions);
+                                    if(data == "byte-seq")
+                                    {
+                                        out.write(" byte");
+                                    }
+                                    else if(data == "string-seq")
+                                    {
+                                        out.write(" string");
+                                    }
+                                    else if(data == "struct-seq")
+                                    {
+                                        out.write(" variable-length struct");
+                                    }
+                                    else if(data == "fixed-seq")
+                                    {
+                                        out.write(" fixed-length struct");
+                                    }
+                                    out.write(" sequences of size " + seqSize);
+                                    if(test == "oneway")
+                                    {
+                                        out.write(" as oneway");
+                                    }
+                                    out.writeLine("...");
+                                    
+                                    setTimeout(
+                                        function()
+                                        {
+                                            var p1 = new Ice.Promise();
+                                            var count = 0;
+                                            var start = new Date().getTime();
+                                            for(var i = 0; i < repetitions; ++i)
+                                            {
+                                                var args = [];
+                                                if(test != "receive")
+                                                {
+                                                    args.push(seq);
+                                                }
+                                                operation.apply(proxy, args).then(
+                                                    function(asyncResult)
+                                                    {
+                                                        if(++count == repetitions)
+                                                        {
+                                                            p1.succeed();
+                                                        }
+                                                    },
+                                                    function(ex)
+                                                    {
+                                                        writeException(ex);
+                                                        p1.fail(ex);
+                                                    });
+                                            }
+                                            
+                                            p1.then(
+                                                function()
+                                                {
+                                                    var total = new Date().getTime() - start;
+                                                    out.writeLine("time for " + repetitions + " sequences: " + total  + " ms");
+                                                    out.writeLine("time per sequence: " + total / repetitions + " ms");
+                                                    
+                                                    var mbit = repetitions * seqSize * wireSize * 8.0 / total / 1000.0;
+                                                    if(test == "echo")
+                                                    {
+                                                        mbit *= 2;
+                                                    }
+                                                    mbit = Math.round(mbit * 100) / 100;
+                                                    out.writeLine("throughput: " + mbit + " Mbps");
+                                                    run.removeClass("disabled");
+                                                },
+                                                function(ex)
+                                                {
+                                                    run.removeClass("disabled");
+                                                    writeException(ex);
+                                                }
+                                            ).exception(
+                                                function(ex)
+                                                {
+                                                    run.removeClass("disabled");
+                                                    writeException(ex);
+                                                });
+                                        }, 10);
+                                },
+                                exceptionCB
+                            ).exception(
+                                function(ex)
+                                {
+                                    run.removeClass("disabled");
+                                    writeException(ex);
+                                }
+                            );
+                        }
+                        catch(ex)
+                        {
+                            run.removeClass("disabled");
+                            writeException(ex);
+                        }
+                    }
+                    return false;
+                });
+                
+            var shutdown = $("#shutdown");
+            shutdown.click(
+                function()
+                {
+                    if(!shutdown.hasClass("disabled"))
+                    {
+                        shutdown.addClass("disabled");
+                        try
+                        {
+                            $("#console").val("");
+                            var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
+                            
+                            Demo.ThroughputPrx.checkedCast(communicator.stringToProxy("throughput:ws -h " + hostname + " -p 10000")).then(
+                                function(asyncResult, throughput)
+                                {
+                                    return throughput.shutdown();
+                                },
+                                exceptionCB
+                            ).then(
+                                function()
+                                {
+                                    shutdown.removeClass("disabled");
+                                },
+                                exceptionCB
+                            ).exception(
+                                function(ex)
+                                {
+                                    shutdown.removeClass("disabled");
+                                    writeException(ex);
+                                });
+                        }
+                        catch(ex)
+                        {
+                            shutdown.removeClass("disabled");
+                            writeException(ex);
+                        }
+                    }
+                    return false;
+                });
+        });
+    </script>
+  </body>
+</html>

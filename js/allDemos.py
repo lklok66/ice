@@ -26,7 +26,8 @@ from demoscript import Util
 demos = [
     "Ice/hello",
     "Ice/latency",
-    "Ice/minimal"
+    "Ice/minimal",
+    "Ice/throughput"
 ]
 
 if __name__ == "__main__":
