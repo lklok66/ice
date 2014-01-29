@@ -2032,7 +2032,10 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     }
     _out << eb << ",";
     _out << nl << baseRef << ",";
-    _out << nl << "\"" << p->scoped() << "\",";
+     if(!p->isLocal())
+     {
+        _out << nl << "\"" << p->scoped() << "\",";
+     }
     _out << nl << "\"" << p->scoped().substr(2) << "\"";
 
     // TODO: equals?
