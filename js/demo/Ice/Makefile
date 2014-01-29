@@ -11,7 +11,9 @@ top_srcdir	= ../..
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= hello
+SUBDIRS		= hello \
+	latency \
+	minimal
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \

@@ -89,18 +89,7 @@
         $(document).foundation();
       
         $(document).ready(function(){
-        
-            var hostname = document.location.host;
-            if(hostname)
-            {
-                hostname = hostname.indexOf(":") !== -1 ? hostname.substr(0, hostname.indexOf(":")) : hostname;
-            }
-            else
-            {
-                hostname = "127.0.0.1";
-            }
-            $("#hostname").attr("placeholder", hostname);
-        
+            $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
             $("#timeout").noUiSlider({range: [0, 2500], start: 0, handles: 1});
             $("#delay").noUiSlider({range: [0, 2500], start: 0, handles: 1});
             
@@ -127,25 +116,10 @@
                 }
             };
             
-            var writeException = function(ex)
-            {
-                out.writeException(ex);
-            };
+            var writeException = function(ex){ out.writeException(ex); };
+            var exceptionCB = function(ex){ throw ex; };
             
-            var exceptionCB = function(ex)
-            {
-                throw ex;
-            };
-            
-            var hostname = $("#hostname").val() ? $("#hostname").val() : $("#hostname").attr("placeholder");
-            
-            var id = new Ice.InitializationData();
-            id.properties = Ice.createProperties();
-            id.properties.setProperty("Ice.Trace.Network", "3");
-            id.properties.setProperty("Hello.Proxy", "hello:ws -h " + hostname + " -p 10000" +
-                                                          ":wss -h " + hostname + " -p 10001");
-
-            communicator = Ice.initialize(id);
+            communicator = Ice.initialize();
             
             $("#hello").click(
                 function()
@@ -153,6 +127,10 @@
                     $("#console").val("");
                     try
                     {
+                        var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
+                        id.properties.setProperty("Hello.Proxy", "hello:ws -h " + hostname + " -p 10000" +
+                                                                     ":wss -h " + hostname + " -p 10001");
+                        
                         var twoway = communicator.propertyToProxy("Hello.Proxy").ice_twoway().ice_timeout(-1).ice_secure(false);
                         
                         Demo.HelloPrx.checkedCast(twoway).then(
@@ -233,6 +211,10 @@
                 {
                     try
                     {
+                        var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
+                        id.properties.setProperty("Hello.Proxy", "hello:ws -h " + hostname + " -p 10000" +
+                                                                     ":wss -h " + hostname + " -p 10001");
+                        
                         var twoway= communicator.propertyToProxy("Hello.Proxy").ice_twoway().ice_timeout(-1).ice_secure(false);
                         
                         Demo.HelloPrx.checkedCast(twoway).then(
