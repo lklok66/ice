@@ -7,17 +7,14 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
-        var Ice = global.Ice || {};
-        var TimeUtil = {};
-        TimeUtil.now = function()
-        {
-            return new Date().getTime();
-        };
-        Ice.TimeUtil = TimeUtil;
-        global.Ice = Ice;
+(function(){
+    var global = this;
+    var Ice = global.Ice || {};
+    var TimeUtil = {};
+    TimeUtil.now = function()
+    {
+        return new Date().getTime();
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/TimeUtil"));
+    Ice.TimeUtil = TimeUtil;
+    global.Ice = Ice;
+}());

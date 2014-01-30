@@ -7,28 +7,24 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
-        
-        var Ice = global.Ice || {};
-        
-        var ObjectFactory = function()
-        {
-        };
-
-        ObjectFactory.prototype.create = function(type)
-        {
-            throw new Error("not implemented");
-        };
-
-        ObjectFactory.prototype.destroy = function()
-        {
-            throw new Error("not implemented");
-        };
-
-        Ice.ObjectFactory = ObjectFactory;
-        global.Ice = Ice;
+(function(){
+    var global = this;
+    var Ice = global.Ice || {};
+    
+    var ObjectFactory = function()
+    {
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/ObjectFactory"));
+
+    ObjectFactory.prototype.create = function(type)
+    {
+        throw new Error("not implemented");
+    };
+
+    ObjectFactory.prototype.destroy = function()
+    {
+        throw new Error("not implemented");
+    };
+
+    Ice.ObjectFactory = ObjectFactory;
+    global.Ice = Ice;
+}());

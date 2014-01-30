@@ -7,82 +7,79 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
+(function(){
+    var global = this;
+    
+    require("Ice/Debug");
+    require("Ice/LocalException");
 
-        require("Ice/Debug");
-        require("Ice/LocalException");
+    var Ice = global.Ice || {};
 
-        var Ice = global.Ice || {};
+    var Debug = Ice.Debug;
 
-        var Debug = Ice.Debug;
-
-        var RetryQueue = function(instance)
-        {
-            this._instance = instance;
-            this._requests = [];
-        };
-
-        RetryQueue.prototype.add = function(outAsync, interval)
-        {
-            var task = new RetryTask(this, outAsync);
-            this._instance.timer().schedule(function()
-                {
-                    task.run();
-                }, interval);
-            this._requests.push(task);
-        };
-
-        RetryQueue.prototype.destroy = function()
-        {
-            for(var i = 0; i < this._requests.length; ++i)
-            {
-                this._requests[i].destroy();
-            }
-            this._requests = [];
-        };
-
-        RetryQueue.prototype.remove = function(task)
-        {
-            var idx = this._requests.indexOf(task);
-            if(idx >= 0)
-            {
-                this._requests.splice(idx, 1);
-                return true;
-            }
-            return false;
-        };
-
-        Ice.RetryQueue = RetryQueue;
-
-        var RetryTask = function(queue, outAsync, interval)
-        {
-            this.queue = queue;
-            this.outAsync = outAsync;
-        };
-
-        RetryTask.prototype.run = function()
-        {
-            if(this.queue.remove(this))
-            {
-                try
-                {
-                    this.outAsync.__send();
-                }
-                catch(ex)
-                {
-                    this.outAsync.__exception(ex);
-                }
-            }
-        };
-
-        RetryTask.prototype.destroy = function()
-        {
-            this.outAsync.__exception(new Ice.CommunicatorDestroyedException());
-        };
-
-        global.Ice = Ice;
+    var RetryQueue = function(instance)
+    {
+        this._instance = instance;
+        this._requests = [];
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
-        __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/RetryQueue"));
+
+    RetryQueue.prototype.add = function(outAsync, interval)
+    {
+        var task = new RetryTask(this, outAsync);
+        this._instance.timer().schedule(function()
+            {
+                task.run();
+            }, interval);
+        this._requests.push(task);
+    };
+
+    RetryQueue.prototype.destroy = function()
+    {
+        for(var i = 0; i < this._requests.length; ++i)
+        {
+            this._requests[i].destroy();
+        }
+        this._requests = [];
+    };
+
+    RetryQueue.prototype.remove = function(task)
+    {
+        var idx = this._requests.indexOf(task);
+        if(idx >= 0)
+        {
+            this._requests.splice(idx, 1);
+            return true;
+        }
+        return false;
+    };
+
+    Ice.RetryQueue = RetryQueue;
+
+    var RetryTask = function(queue, outAsync, interval)
+    {
+        this.queue = queue;
+        this.outAsync = outAsync;
+    };
+
+    RetryTask.prototype.run = function()
+    {
+        if(this.queue.remove(this))
+        {
+            try
+            {
+                this.outAsync.__send();
+            }
+            catch(ex)
+            {
+                this.outAsync.__exception(ex);
+            }
+        }
+    };
+
+    RetryTask.prototype.destroy = function()
+    {
+        this.outAsync.__exception(new Ice.CommunicatorDestroyedException());
+    };
+
+    global.Ice = Ice;
+}());

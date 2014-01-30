@@ -7,38 +7,34 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
+(function(){
+    var global = this;
+    require("Ice/AsyncResult");
 
-        require("Ice/AsyncResult");
+    var Ice = global.Ice || {};
 
-        var Ice = global.Ice || {};
+    var AsyncResult = Ice.AsyncResult;
 
-        var AsyncResult = Ice.AsyncResult;
-
-        var BatchOutgoingAsync = function(communicator, operation)
-        {
-            AsyncResult.call(this, communicator, operation, null, null, null, null);
-        };
-
-        BatchOutgoingAsync.prototype = new AsyncResult();
-        BatchOutgoingAsync.prototype.constructor = BatchOutgoingAsync;
-
-        BatchOutgoingAsync.prototype.__sent = function(connection)
-        {
-            this._state |= AsyncResult.Done | AsyncResult.OK | AsyncResult.Sent;
-            this._os.resize(0);
-            this.succeed(this);
-        };
-
-        BatchOutgoingAsync.prototype.__finishedEx = function(exc, sent)
-        {
-            this.__exception(exc);
-        };
-
-        Ice.BatchOutgoingAsync = BatchOutgoingAsync;
-        global.Ice = Ice;
+    var BatchOutgoingAsync = function(communicator, operation)
+    {
+        AsyncResult.call(this, communicator, operation, null, null, null, null);
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
-        __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/BatchOutgoingAsync"));
+
+    BatchOutgoingAsync.prototype = new AsyncResult();
+    BatchOutgoingAsync.prototype.constructor = BatchOutgoingAsync;
+
+    BatchOutgoingAsync.prototype.__sent = function(connection)
+    {
+        this._state |= AsyncResult.Done | AsyncResult.OK | AsyncResult.Sent;
+        this._os.resize(0);
+        this.succeed(this);
+    };
+
+    BatchOutgoingAsync.prototype.__finishedEx = function(exc, sent)
+    {
+        this.__exception(exc);
+    };
+
+    Ice.BatchOutgoingAsync = BatchOutgoingAsync;
+    global.Ice = Ice;
+}());

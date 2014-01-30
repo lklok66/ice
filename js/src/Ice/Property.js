@@ -7,33 +7,29 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
-        
-        var Ice = global.Ice || {};
-        
-        var Property = function Property(pattern, deprecated, deprecatedBy)
-        {
-            this._pattern = pattern;
-            this._deprecated = deprecated;
-            this._deprecatedBy = deprecatedBy;
-        };
-
-        Object.defineProperty(Property.prototype, "pattern",{
-            get: function() { return this._pattern; }
-        });
-
-        Object.defineProperty(Property.prototype, "deprecated",{
-            get: function() { return this._deprecated; }
-        });
-
-        Object.defineProperty(Property.prototype, "deprecatedBy",{
-            get: function() { return this._deprecatedBy; }
-        });
-
-        Ice.Property = Property;
-        global.Ice = Ice;
+(function(){
+    var global = this;
+    var Ice = global.Ice || {};
+    
+    var Property = function Property(pattern, deprecated, deprecatedBy)
+    {
+        this._pattern = pattern;
+        this._deprecated = deprecated;
+        this._deprecatedBy = deprecatedBy;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/Property"));
+
+    Object.defineProperty(Property.prototype, "pattern",{
+        get: function() { return this._pattern; }
+    });
+
+    Object.defineProperty(Property.prototype, "deprecated",{
+        get: function() { return this._deprecated; }
+    });
+
+    Object.defineProperty(Property.prototype, "deprecatedBy",{
+        get: function() { return this._deprecatedBy; }
+    });
+
+    Ice.Property = Property;
+    global.Ice = Ice;
+}());

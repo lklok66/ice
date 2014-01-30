@@ -7,165 +7,274 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
+(function(){
+    var global = this;
 
-        require("Ice/AsyncResult");
-        require("Ice/AsyncStatus");
-        require("Ice/BasicStream");
-        require("Ice/BatchOutgoingAsync");
-        require("Ice/ConnectionRequestHandler");
-        require("Ice/Debug");
-        require("Ice/ExUtil");
-        require("Ice/LocalExceptionWrapper");
-        require("Ice/OutgoingAsync");
-        require("Ice/Protocol");
-        require("Ice/ReferenceMode");
-        require("Ice/Exception");
-        require("Ice/Promise");
+    require("Ice/AsyncResult");
+    require("Ice/AsyncStatus");
+    require("Ice/BasicStream");
+    require("Ice/BatchOutgoingAsync");
+    require("Ice/ConnectionRequestHandler");
+    require("Ice/Debug");
+    require("Ice/ExUtil");
+    require("Ice/LocalExceptionWrapper");
+    require("Ice/OutgoingAsync");
+    require("Ice/Protocol");
+    require("Ice/ReferenceMode");
+    require("Ice/Exception");
+    require("Ice/Promise");
 
-        var Ice = global.Ice || {};
+    var Ice = global.Ice || {};
 
-        var AsyncResult = Ice.AsyncResult;
-        var AsyncStatus = Ice.AsyncStatus;
-        var BasicStream = Ice.BasicStream;
-        var BatchOutgoingAsync = Ice.BatchOutgoingAsync;
-        var ConnectionRequestHandler = Ice.ConnectionRequestHandler;
-        var Debug = Ice.Debug;
-        var ExUtil = Ice.ExUtil;
-        var LocalExceptionWrapper = Ice.LocalExceptionWrapper;
-        var OutgoingAsync = Ice.OutgoingAsync;
-        var Protocol = Ice.Protocol;
-        var ReferenceMode = Ice.ReferenceMode;
-        var LocalException = Ice.LocalException;
-        var Promise = Ice.Promise;
+    var AsyncResult = Ice.AsyncResult;
+    var AsyncStatus = Ice.AsyncStatus;
+    var BasicStream = Ice.BasicStream;
+    var BatchOutgoingAsync = Ice.BatchOutgoingAsync;
+    var ConnectionRequestHandler = Ice.ConnectionRequestHandler;
+    var Debug = Ice.Debug;
+    var ExUtil = Ice.ExUtil;
+    var LocalExceptionWrapper = Ice.LocalExceptionWrapper;
+    var OutgoingAsync = Ice.OutgoingAsync;
+    var Protocol = Ice.Protocol;
+    var ReferenceMode = Ice.ReferenceMode;
+    var LocalException = Ice.LocalException;
+    var Promise = Ice.Promise;
 
-        var ConnectRequestHandler = function(ref, proxy)
+    var ConnectRequestHandler = function(ref, proxy)
+    {
+        this._reference = ref;
+        this._response = ref.getMode() === ReferenceMode.ModeTwoway;
+        this._proxy = proxy;
+        this._batchAutoFlush = ref.getInstance().initializationData().properties.getPropertyAsIntWithDefault(
+            "Ice.BatchAutoFlush", 1) > 0 ? true : false;
+        this._initialized = false;
+        this._flushing = false;
+        this._batchRequestInProgress = false;
+        this._batchRequestsSize = Protocol.requestBatchHdr.length;
+        this._batchStream =
+            new BasicStream(ref.getInstance(), Protocol.currentProtocolEncoding, this._batchAutoFlush);
+        this._updateRequestHandler = false;
+
+        this._connection = null;
+        this._compress = false;
+        this._exception = null;
+        this._requests = [];
+        this._updateRequestHandler = false;
+        this._pendingPromises = [];
+    };
+
+    ConnectRequestHandler.prototype.connect = function()
+    {
+        var self = this;
+        this._reference.getConnection().then(
+            function(connection, compress)
+            {
+                self.setConnection(connection, compress);
+            }).exception(
+                function(ex)
+                {
+                    self.setException(ex);
+                });
+
+        if(this.initialized())
         {
-            this._reference = ref;
-            this._response = ref.getMode() === ReferenceMode.ModeTwoway;
-            this._proxy = proxy;
-            this._batchAutoFlush = ref.getInstance().initializationData().properties.getPropertyAsIntWithDefault(
-                "Ice.BatchAutoFlush", 1) > 0 ? true : false;
-            this._initialized = false;
-            this._flushing = false;
+            Debug.assert(this._connection !== null);
+            return new ConnectionRequestHandler(this._reference, this._connection, this._compress);
+        }
+        else
+        {
+            // The proxy request handler will be updated when the connection is set.
+            this._updateRequestHandler = true;
+            return this;
+        }
+    };
+
+    ConnectRequestHandler.prototype.prepareBatchRequest = function(os)
+    {
+        if(!this.initialized())
+        {
+            this._batchRequestInProgress = true;
+            this._batchStream.swap(os);
+            return;
+        }
+
+        this._connection.prepareBatchRequest(os);
+    };
+
+    ConnectRequestHandler.prototype.finishBatchRequest = function(os)
+    {
+        if(!this.initialized())
+        {
+            Debug.assert(this._batchRequestInProgress);
             this._batchRequestInProgress = false;
+
+            this._batchStream.swap(os);
+
+            if(!this._batchAutoFlush &&
+                this._batchStream.size + this._batchRequestsSize > this._reference.getInstance().messageSizeMax())
+            {
+                ExUtil.throwMemoryLimitException(this._batchStream.size + this._batchRequestsSize,
+                                                    this._reference.getInstance().messageSizeMax());
+            }
+
+            this._requests.push(new Request(this._batchStream));
+            return;
+        }
+        this._connection.finishBatchRequest(os, this._compress);
+    };
+
+    ConnectRequestHandler.prototype.abortBatchRequest = function()
+    {
+        if(!this.initialized())
+        {
+            Debug.assert(this._batchRequestInProgress);
+            this._batchRequestInProgress = false;
+
+            var dummy = new BasicStream(this._reference.getInstance(), Protocol.currentProtocolEncoding,
+                                        this._batchAutoFlush);
+            this._batchStream.swap(dummy);
             this._batchRequestsSize = Protocol.requestBatchHdr.length;
-            this._batchStream =
-                new BasicStream(ref.getInstance(), Protocol.currentProtocolEncoding, this._batchAutoFlush);
-            this._updateRequestHandler = false;
 
-            this._connection = null;
-            this._compress = false;
-            this._exception = null;
-            this._requests = [];
-            this._updateRequestHandler = false;
-            this._pendingPromises = [];
-        };
+            return;
+        }
+        this._connection.abortBatchRequest();
+    };
 
-        ConnectRequestHandler.prototype.connect = function()
+    ConnectRequestHandler.prototype.sendAsyncRequest = function(out)
+    {
+        if(!this.initialized())
+        {
+            this._requests.push(new Request(out));
+            return AsyncStatus.Queued;
+        }
+        return this._connection.sendAsyncRequest(out, this._compress, this._response);
+    };
+
+    ConnectRequestHandler.prototype.flushAsyncBatchRequests = function(out)
+    {
+        if(!this.initialized())
+        {
+            this._requests.push(new Request(out));
+            return AsyncStatus.Queued;
+        }
+        return this._connection.flushAsyncBatchRequests(out);
+    };
+
+    ConnectRequestHandler.prototype.getReference = function()
+    {
+        return this._reference;
+    };
+
+    ConnectRequestHandler.prototype.getConnection = function()
+    {
+        if(this._exception !== null)
+        {
+            throw this._exception;
+        }
+        else
+        {
+            return this._connection;
+        }
+    };
+
+    ConnectRequestHandler.prototype.onConnection = function(r)
+    {
+        //
+        // Called by ObjectPrx.ice_getConnection
+        //
+
+        if(this._exception !== null)
+        {
+            r.__exception(this._exception);
+        }
+        else if(this._connection !== null)
+        {
+            Debug.assert(this._initialized);
+            r.succeed(r, this._connection);
+        }
+        else
+        {
+            this._pendingPromises.push(r);
+        }
+    };
+
+    //
+    // Implementation of Reference_GetConnectionCallback
+    //
+
+    ConnectRequestHandler.prototype.setConnection = function(connection, compress)
+    {
+        Debug.assert(this._exception === null && this._connection === null);
+        Debug.assert(this._updateRequestHandler || this._requests.length === 0);
+
+        this._connection = connection;
+        this._compress = compress;
+
+        //
+        // If this proxy is for a non-local object, and we are using a router, then
+        // add this proxy to the router info object.
+        //
+        var ri = this._reference.getRouterInfo();
+        if(ri !== null)
         {
             var self = this;
-            this._reference.getConnection().then(
-                function(connection, compress)
+            var promise = ri.addProxy(this._proxy).then(
+                function()
                 {
-                    self.setConnection(connection, compress);
+                    //
+                    // The proxy was added to the router info, we're now ready to send the
+                    // queued requests.
+                    //
+                    self.flushRequests();
                 }).exception(
                     function(ex)
                     {
                         self.setException(ex);
                     });
 
-            if(this.initialized())
+            if(!promise.completed())
             {
-                Debug.assert(this._connection !== null);
-                return new ConnectionRequestHandler(this._reference, this._connection, this._compress);
+                return; // The request handler will be initialized once addProxy completes.
             }
-            else
-            {
-                // The proxy request handler will be updated when the connection is set.
-                this._updateRequestHandler = true;
-                return this;
-            }
-        };
+        }
 
-        ConnectRequestHandler.prototype.prepareBatchRequest = function(os)
+        //
+        // We can now send the queued requests.
+        //
+        this.flushRequests();
+    };
+
+    ConnectRequestHandler.prototype.setException = function(ex)
+    {
+        Debug.assert(!this._initialized && this._exception === null);
+        Debug.assert(this._updateRequestHandler || this._requests.length === 0);
+
+        this._exception = ex;
+        this._proxy = null; // Break cyclic reference count.
+
+        //
+        // If some requests were queued, we notify them of the failure.
+        //
+        if(this._requests.length > 0)
         {
-            if(!this.initialized())
-            {
-                this._batchRequestInProgress = true;
-                this._batchStream.swap(os);
-                return;
-            }
+            this.flushRequestsWithException(ex);
+        }
 
-            this._connection.prepareBatchRequest(os);
-        };
-
-        ConnectRequestHandler.prototype.finishBatchRequest = function(os)
+        for(var i = 0; i < this._pendingPromises.length; ++i)
         {
-            if(!this.initialized())
-            {
-                Debug.assert(this._batchRequestInProgress);
-                this._batchRequestInProgress = false;
+            this._pendingPromises[i].fail(ex);
+        }
+        this._pendingPromises = [];
+    };
 
-                this._batchStream.swap(os);
-
-                if(!this._batchAutoFlush &&
-                   this._batchStream.size + this._batchRequestsSize > this._reference.getInstance().messageSizeMax())
-                {
-                    ExUtil.throwMemoryLimitException(this._batchStream.size + this._batchRequestsSize,
-                                                     this._reference.getInstance().messageSizeMax());
-                }
-
-                this._requests.push(new Request(this._batchStream));
-                return;
-            }
-            this._connection.finishBatchRequest(os, this._compress);
-        };
-
-        ConnectRequestHandler.prototype.abortBatchRequest = function()
+    ConnectRequestHandler.prototype.initialized = function()
+    {
+        if(this._initialized)
         {
-            if(!this.initialized())
-            {
-                Debug.assert(this._batchRequestInProgress);
-                this._batchRequestInProgress = false;
-
-                var dummy = new BasicStream(this._reference.getInstance(), Protocol.currentProtocolEncoding,
-                                            this._batchAutoFlush);
-                this._batchStream.swap(dummy);
-                this._batchRequestsSize = Protocol.requestBatchHdr.length;
-
-                return;
-            }
-            this._connection.abortBatchRequest();
-        };
-
-        ConnectRequestHandler.prototype.sendAsyncRequest = function(out)
-        {
-            if(!this.initialized())
-            {
-                this._requests.push(new Request(out));
-                return AsyncStatus.Queued;
-            }
-            return this._connection.sendAsyncRequest(out, this._compress, this._response);
-        };
-
-        ConnectRequestHandler.prototype.flushAsyncBatchRequests = function(out)
-        {
-            if(!this.initialized())
-            {
-                this._requests.push(new Request(out));
-                return AsyncStatus.Queued;
-            }
-            return this._connection.flushAsyncBatchRequests(out);
-        };
-
-        ConnectRequestHandler.prototype.getReference = function()
-        {
-            return this._reference;
-        };
-
-        ConnectRequestHandler.prototype.getConnection = function()
+            Debug.assert(this._connection !== null);
+            return true;
+        }
+        else
         {
             if(this._exception !== null)
             {
@@ -173,272 +282,160 @@
             }
             else
             {
-                return this._connection;
+                return this._initialized;
             }
-        };
+        }
+    };
 
-        ConnectRequestHandler.prototype.onConnection = function(r)
-        {
-            //
-            // Called by ObjectPrx.ice_getConnection
-            //
-
-            if(this._exception !== null)
-            {
-                r.__exception(this._exception);
-            }
-            else if(this._connection !== null)
-            {
-                Debug.assert(this._initialized);
-                r.succeed(r, this._connection);
-            }
-            else
-            {
-                this._pendingPromises.push(r);
-            }
-        };
+    ConnectRequestHandler.prototype.flushRequests = function()
+    {
+        Debug.assert(this._connection !== null && !this._initialized);
 
         //
-        // Implementation of Reference_GetConnectionCallback
+        // We set the _flushing flag to true to prevent any additional queuing. Callers
+        // might block for a little while as the queued requests are being sent but this
+        // shouldn't be an issue as the request sends are non-blocking.
         //
+        this._flushing = true;
 
-        ConnectRequestHandler.prototype.setConnection = function(connection, compress)
+        try
         {
-            Debug.assert(this._exception === null && this._connection === null);
-            Debug.assert(this._updateRequestHandler || this._requests.length === 0);
-
-            this._connection = connection;
-            this._compress = compress;
-
-            //
-            // If this proxy is for a non-local object, and we are using a router, then
-            // add this proxy to the router info object.
-            //
-            var ri = this._reference.getRouterInfo();
-            if(ri !== null)
+            while(this._requests.length > 0)
             {
-                var self = this;
-                var promise = ri.addProxy(this._proxy).then(
-                    function()
-                    {
-                        //
-                        // The proxy was added to the router info, we're now ready to send the
-                        // queued requests.
-                        //
-                        self.flushRequests();
-                    }).exception(
-                        function(ex)
-                        {
-                            self.setException(ex);
-                        });
-
-                if(!promise.completed())
+                var request = this._requests[0];
+                if(request.out !== null)
                 {
-                    return; // The request handler will be initialized once addProxy completes.
+                    this._connection.sendAsyncRequest(request.out, this._compress, this._response);
                 }
+                else if(request.batchOut !== null)
+                {
+                    this._connection.flushAsyncBatchRequests(request.batchOut);
+                }
+                else
+                {
+                    var os = new BasicStream(request.os.instance, Protocol.currentProtocolEncoding);
+                    this._connection.prepareBatchRequest(os);
+                    try
+                    {
+                        request.os.pos = 0;
+                        os.writeBlob(request.os.readBlob(request.os.size));
+                    }
+                    catch(ex)
+                    {
+                        this._connection.abortBatchRequest();
+                        throw ex;
+                    }
+                    this._connection.finishBatchRequest(os, this._compress);
+                }
+                this._requests.shift();
             }
-
-            //
-            // We can now send the queued requests.
-            //
-            this.flushRequests();
-        };
-
-        ConnectRequestHandler.prototype.setException = function(ex)
+        }
+        catch(ex)
         {
-            Debug.assert(!this._initialized && this._exception === null);
-            Debug.assert(this._updateRequestHandler || this._requests.length === 0);
-
-            this._exception = ex;
-            this._proxy = null; // Break cyclic reference count.
-
-            //
-            // If some requests were queued, we notify them of the failure.
-            //
-            if(this._requests.length > 0)
+            if(ex instanceof LocalExceptionWrapper)
             {
+                Debug.assert(this._exception === null && this._requests.length > 0);
+                this._exception = ex.inner;
+                this.flushRequestsWithExceptionWrapper(ex);
+            }
+            else if(ex instanceof LocalException)
+            {
+                Debug.assert(this._exception === null && this._requests.length > 0);
+                this._exception = ex;
                 this.flushRequestsWithException(ex);
             }
-
-            for(var i = 0; i < this._pendingPromises.length; ++i)
-            {
-                this._pendingPromises[i].fail(ex);
-            }
-            this._pendingPromises = [];
-        };
-
-        ConnectRequestHandler.prototype.initialized = function()
-        {
-            if(this._initialized)
-            {
-                Debug.assert(this._connection !== null);
-                return true;
-            }
             else
             {
-                if(this._exception !== null)
-                {
-                    throw this._exception;
-                }
-                else
-                {
-                    return this._initialized;
-                }
+                throw ex;
             }
-        };
+        }
 
-        ConnectRequestHandler.prototype.flushRequests = function()
+        //
+        // We've finished sending the queued requests and the request handler now send
+        // the requests over the connection directly. It's time to substitute the
+        // request handler of the proxy with the more efficient connection request
+        // handler which does not have any synchronization. This also breaks the cyclic
+        // reference count with the proxy.
+        //
+        // NOTE: _updateRequestHandler is immutable once _flushing = true
+        //
+        if(this._updateRequestHandler && this._exception === null)
         {
-            Debug.assert(this._connection !== null && !this._initialized);
+            this._proxy.__setRequestHandler(
+                new ConnectionRequestHandler(this._reference, this._connection, this._compress));
+        }
 
-            //
-            // We set the _flushing flag to true to prevent any additional queuing. Callers
-            // might block for a little while as the queued requests are being sent but this
-            // shouldn't be an issue as the request sends are non-blocking.
-            //
-            this._flushing = true;
-
-            try
-            {
-                while(this._requests.length > 0)
-                {
-                    var request = this._requests[0];
-                    if(request.out !== null)
-                    {
-                        this._connection.sendAsyncRequest(request.out, this._compress, this._response);
-                    }
-                    else if(request.batchOut !== null)
-                    {
-                        this._connection.flushAsyncBatchRequests(request.batchOut);
-                    }
-                    else
-                    {
-                        var os = new BasicStream(request.os.instance, Protocol.currentProtocolEncoding);
-                        this._connection.prepareBatchRequest(os);
-                        try
-                        {
-                            request.os.pos = 0;
-                            os.writeBlob(request.os.readBlob(request.os.size));
-                        }
-                        catch(ex)
-                        {
-                            this._connection.abortBatchRequest();
-                            throw ex;
-                        }
-                        this._connection.finishBatchRequest(os, this._compress);
-                    }
-                    this._requests.shift();
-                }
-            }
-            catch(ex)
-            {
-                if(ex instanceof LocalExceptionWrapper)
-                {
-                    Debug.assert(this._exception === null && this._requests.length > 0);
-                    this._exception = ex.inner;
-                    this.flushRequestsWithExceptionWrapper(ex);
-                }
-                else if(ex instanceof LocalException)
-                {
-                    Debug.assert(this._exception === null && this._requests.length > 0);
-                    this._exception = ex;
-                    this.flushRequestsWithException(ex);
-                }
-                else
-                {
-                    throw ex;
-                }
-            }
-
-            //
-            // We've finished sending the queued requests and the request handler now send
-            // the requests over the connection directly. It's time to substitute the
-            // request handler of the proxy with the more efficient connection request
-            // handler which does not have any synchronization. This also breaks the cyclic
-            // reference count with the proxy.
-            //
-            // NOTE: _updateRequestHandler is immutable once _flushing = true
-            //
-            if(this._updateRequestHandler && this._exception === null)
-            {
-                this._proxy.__setRequestHandler(
-                    new ConnectionRequestHandler(this._reference, this._connection, this._compress));
-            }
-
-            Debug.assert(!this._initialized);
-            if(this._exception === null)
-            {
-                this._initialized = true;
-                this._flushing = false;
-            }
-            this._proxy = null; // Break cyclic reference count.
-
-            for(var i = 0; i < this._pendingPromises.length; ++i)
-            {
-                this._pendingPromises[i].succeed(this._pendingPromises[i], this._connection);
-            }
-            this._pendingPromises = [];
-        };
-
-        ConnectRequestHandler.prototype.flushRequestsWithException = function(ex)
+        Debug.assert(!this._initialized);
+        if(this._exception === null)
         {
-            for(var i = 0; i < this._requests.length; ++i)
-            {
-                var request = this._requests[i];
-                if(request.out !== null)
-                {
-                    request.out.__finishedEx(ex, false);
-                }
-                else if(request.batchOut !== null)
-                {
-                    request.batchOut.__finishedEx(ex, false);
-                }
-            }
-            this._requests = [];
-        };
+            this._initialized = true;
+            this._flushing = false;
+        }
+        this._proxy = null; // Break cyclic reference count.
 
-        ConnectRequestHandler.prototype.flushRequestsWithExceptionWrapper = function(ex)
+        for(var i = 0; i < this._pendingPromises.length; ++i)
         {
-            for(var i = 0; i < this._requests.length; ++i)
-            {
-                var request = this._requests[i];
-                if(request.out !== null)
-                {
-                    request.out.__finishedWrapper(ex);
-                }
-                else if(request.batchOut !== null)
-                {
-                    request.batchOut.__finishedEx(ex.inner, false);
-                }
-            }
-            this._requests = [];
-        };
-
-        Ice.ConnectRequestHandler = ConnectRequestHandler;
-        global.Ice = Ice;
-
-        var Request = function(arg)
-        {
-            this.os = null;
-            this.out = null;
-            this.batchOut = null;
-
-            if(arg instanceof BasicStream)
-            {
-                this.os = new BasicStream(arg.instance, Protocol.currentProtocolEncoding);
-                this.os.swap(arg);
-            }
-            else if(arg instanceof OutgoingAsync)
-            {
-                this.out = arg;
-            }
-            else
-            {
-                Debug.assert(arg instanceof BatchOutgoingAsync);
-                this.batchOut = arg;
-            }
-        };
+            this._pendingPromises[i].succeed(this._pendingPromises[i], this._connection);
+        }
+        this._pendingPromises = [];
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
-        __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/ConnectRequestHandler"));
+
+    ConnectRequestHandler.prototype.flushRequestsWithException = function(ex)
+    {
+        for(var i = 0; i < this._requests.length; ++i)
+        {
+            var request = this._requests[i];
+            if(request.out !== null)
+            {
+                request.out.__finishedEx(ex, false);
+            }
+            else if(request.batchOut !== null)
+            {
+                request.batchOut.__finishedEx(ex, false);
+            }
+        }
+        this._requests = [];
+    };
+
+    ConnectRequestHandler.prototype.flushRequestsWithExceptionWrapper = function(ex)
+    {
+        for(var i = 0; i < this._requests.length; ++i)
+        {
+            var request = this._requests[i];
+            if(request.out !== null)
+            {
+                request.out.__finishedWrapper(ex);
+            }
+            else if(request.batchOut !== null)
+            {
+                request.batchOut.__finishedEx(ex.inner, false);
+            }
+        }
+        this._requests = [];
+    };
+
+    Ice.ConnectRequestHandler = ConnectRequestHandler;
+    global.Ice = Ice;
+
+    var Request = function(arg)
+    {
+        this.os = null;
+        this.out = null;
+        this.batchOut = null;
+
+        if(arg instanceof BasicStream)
+        {
+            this.os = new BasicStream(arg.instance, Protocol.currentProtocolEncoding);
+            this.os.swap(arg);
+        }
+        else if(arg instanceof OutgoingAsync)
+        {
+            this.out = arg;
+        }
+        else
+        {
+            Debug.assert(arg instanceof BatchOutgoingAsync);
+            this.batchOut = arg;
+        }
+    };
+}());

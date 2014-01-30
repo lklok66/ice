@@ -7,13 +7,9 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
-        require("Glacier2/PermissionsVerifier");
-        require("Glacier2/Router");
-        require("Glacier2/Session");
-        require("Glacier2/SSLInfo");
-    };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Glacier2/Glacier2"));
+(function(){
+    require("Glacier2/PermissionsVerifier");
+    require("Glacier2/Router");
+    require("Glacier2/Session");
+    require("Glacier2/SSLInfo");
+}());

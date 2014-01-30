@@ -197,30 +197,7 @@ Parser.dir = function(base, depends)
 var d = Parser.dir(baseDir);
 d.depends = d.expand().sort();
 
-//
-// Define all modules inside an anonymous function we don't want
-// that all variables become global in the browser.
-//
-process.stdout.write("(function()\n");
-process.stdout.write("{\n");
-
-//
-// Now write a bundle to stdout.
-//
-
-if(subDirs.indexOf("src/Ice") !== -1)
-{
-    var data = fs.readFileSync(path.join(__dirname, "module.js"));
-    var lines = data.toString().split("\n");
-    var j;
-
-    for(j in lines)
-    {
-        process.stdout.write("    " + lines[j] + "\n");
-    }
-    process.stdout.write("\n");
-}
-var file, i, length = d.depends.length, fullPath;
+var file, i, length = d.depends.length, fullPath, line;
 
 for(i = 0;  i < length; ++i)
 {
@@ -235,8 +212,11 @@ for(i = 0;  i < length; ++i)
     lines = data.toString().split("\n");
     for(j in lines)
     {
-        process.stdout.write("    " + lines[j] + "\n");
+        line = lines[j];
+        if(line.match(/require\(".*"\);/))
+        {
+            continue;
+        }
+        process.stdout.write(lines[j] + "\n");
     }
 }
-
-process.stdout.write("}());");

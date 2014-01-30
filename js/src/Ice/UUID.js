@@ -7,27 +7,23 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
+(function(){
+    var global = this;
+    var Ice = global.Ice || {};
 
-        var Ice = global.Ice || {};
+    var UUID = {};
 
-        var UUID = {};
-
-        UUID.generateUUID = function()
-        {
-            var d = new Date().getTime();
-            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                var r = (d + Math.random() * 16) % 16 | 0;
-                d = Math.floor(d / 16);
-                return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
-            });
-            return uuid;
-        };
-
-        Ice.UUID = UUID;
-        global.Ice = Ice;
+    UUID.generateUUID = function()
+    {
+        var d = new Date().getTime();
+        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = (d + Math.random() * 16) % 16 | 0;
+            d = Math.floor(d / 16);
+            return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
+        });
+        return uuid;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
-        __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/UUID"));
+
+    Ice.UUID = UUID;
+    global.Ice = Ice;
+}());

@@ -1069,11 +1069,11 @@ Slice::Gen::generate(const UnitPtr& p)
 {
     JsGenerator::validateMetaData(p);
 
-    _out << nl << "(function(module, name)";
+    _out << nl << "(function()";
     _out << sb;
-    _out << nl << "var __m = function(global, module, exports, require)";
-    _out << sb;
-
+    _out << nl << "var global = this;";
+    _out << nl << "var require = require || function(){};";
+    
     RequireVisitor requireVisitor(_out, _includePaths);
     p->visit(&requireVisitor, false);
     vector<string> seenModules = requireVisitor.writeRequires(p);
@@ -1087,18 +1087,8 @@ Slice::Gen::generate(const UnitPtr& p)
     ExportVisitor exportVisitor(_out);
     p->visit(&exportVisitor, false);
 
-    _out << eb << ";";
-    _out << nl << "return (module === undefined) ? this.Ice.__defineModule(__m, name) : ";
-    _out.inc();
-    _out << nl << "__m(global, module, module.exports, module.require);";
-    _out.dec();
     _out << eb;
-    _out << nl << "(typeof module !== \"undefined\" ? module : undefined, \"";
-    if(!_include.empty())
-    {
-        _out << _include << "/";
-    }
-    _out << _fileBase << "\"));";
+    _out << nl << "());";
 }
 
 void

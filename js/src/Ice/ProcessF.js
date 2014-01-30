@@ -7,8 +7,4 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){};
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/ProcessF"));
+// Dummy file so require works

@@ -7,21 +7,18 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
-        
-        var Ice = global.Ice || {};
-        
-        var SocketOperation = {};
-
-        SocketOperation.None = 0;
-        SocketOperation.Read = 1;
-        SocketOperation.Write = 2;
-        SocketOperation.Connect = 2; // Same as Write
-
-        Ice.SocketOperation = SocketOperation;
-        global.Ice = Ice;
+(function(){
+    var global = this;
+    var Ice = global.Ice || {};
+    
+    var SocketOperation = 
+    {
+        None: 0,
+        Read: 1,
+        Write: 2,
+        Connect: 2 // Same as Write
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/SocketOperation"));
+
+    Ice.SocketOperation = SocketOperation;
+    global.Ice = Ice;
+}());

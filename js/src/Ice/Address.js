@@ -7,20 +7,17 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
-        
-        var Ice = global.Ice || {};
-        
-        var Address = function(host, port)
-        {
-            this.host = host;
-            this.port = port;
-        };
-        
-        Ice.Address = Address;
-        global.Ice = Ice;
+(function(){
+    var global = this;
+    var Ice = global.Ice || {};
+    
+    var Address = function(host, port)
+    {
+        this.host = host;
+        this.port = port;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/Address"));
+    
+    Ice.Address = Address;
+    
+    global.Ice = Ice;
+}());

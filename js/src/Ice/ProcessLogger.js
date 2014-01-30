@@ -8,37 +8,33 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
-        
-        require("Ice/Logger");
-        var Ice = global.Ice || {};
-        var Logger = Ice.Logger;
-        
-        var processLogger = null;
-        
-        var getProcessLogger = function()
+(function(){
+    var global = this;
+    require("Ice/Logger");
+    var Ice = global.Ice || {};
+    var Logger = Ice.Logger;
+    
+    var processLogger = null;
+    
+    var getProcessLogger = function()
+    {
+        if(processLogger === null)
         {
-            if(processLogger === null)
-            {
-                //
-                // TODO: Would be nice to be able to use process name as prefix by default.
-                //
-                processLogger = new Logger("", "");
-            }
+            //
+            // TODO: Would be nice to be able to use process name as prefix by default.
+            //
+            processLogger = new Logger("", "");
+        }
 
-            return processLogger;
-        };
-
-        var setProcessLogger = function(logger)
-        {
-            processLogger = logger;
-        };
-
-        Ice.getProcessLogger = getProcessLogger;
-        Ice.setProcessLogger = setProcessLogger;
-        global.Ice = Ice;
+        return processLogger;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/ProcessLogger"));
+
+    var setProcessLogger = function(logger)
+    {
+        processLogger = logger;
+    };
+
+    Ice.getProcessLogger = getProcessLogger;
+    Ice.setProcessLogger = setProcessLogger;
+    global.Ice = Ice;
+}());

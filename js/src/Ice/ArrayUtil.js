@@ -7,133 +7,128 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
+(function(){
+    var global = this;
+    var Ice = global.Ice || {};
+    var Slice = global.Slice || {};
+    var ArrayUtil = {};
+
+    ArrayUtil.clone = function(arr)
+    {
+        if(arr === undefined)
+        {
+            return arr;
+        }
+        else if(arr === null)
+        {
+            return [];
+        }
+        else
+        {
+            return arr.slice();
+        }
+    };
+
+    ArrayUtil.equals = function(v1, v2, equalFn)
+    {
+        var i, length;
         
-        var Ice = global.Ice || {};
-        var Slice = global.Slice || {};
-        var ArrayUtil = {};
-
-        ArrayUtil.clone = function(arr)
+        if(v1.length != v2.length)
         {
-            if(arr === undefined)
-            {
-                return arr;
-            }
-            else if(arr === null)
-            {
-                return [];
-            }
-            else
-            {
-                return arr.slice();
-            }
-        };
+            return false;
+        }
 
-        ArrayUtil.equals = function(v1, v2, equalFn)
+        if(equalFn !== undefined && equalFn !== null)
         {
-            var i, length;
-            
-            if(v1.length != v2.length)
+            for(i = 0, length = v1.length; i < length; ++i)
             {
-                return false;
-            }
-
-            if(equalFn !== undefined && equalFn !== null)
-            {
-                for(i = 0, length = v1.length; i < length; ++i)
+                if(!equalFn.call(equalFn, v1[i], v2[i]))
                 {
-                    if(!equalFn.call(equalFn, v1[i], v2[i]))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
-            else
+        }
+        else
+        {
+            for(i = 0, length = v1.length; i < length; ++i)
             {
-                for(i = 0, length = v1.length; i < length; ++i)
+                if(v1[i] != v2[i])
                 {
-                    if(v1[i] != v2[i])
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
+        }
 
-            return true;
-        };
+        return true;
+    };
 
-        ArrayUtil.shuffle = function(arr)
+    ArrayUtil.shuffle = function(arr)
+    {
+        for(var i = arr.length; i > 1; --i)
         {
-            for(var i = arr.length; i > 1; --i)
-            {
-                var e = arr[i - 1];
-                var rand = Math.floor(Math.random() * i);
-                arr[i - 1] = arr[rand];
-                arr[rand] = e;
-            }
-        };
+            var e = arr[i - 1];
+            var rand = Math.floor(Math.random() * i);
+            arr[i - 1] = arr[rand];
+            arr[rand] = e;
+        }
+    };
 
-        ArrayUtil.indexOf = function(arr, elem, equalFn)
+    ArrayUtil.indexOf = function(arr, elem, equalFn)
+    {
+        if(equalFn !== undefined && equalFn !== null)
         {
-            if(equalFn !== undefined && equalFn !== null)
-            {
-                // TODO
-                //CONFIG::debug { Debug.assert(elem is Ice.Hashable); }
-                for(var i = 0; i < arr.length; ++i)
-                {
-                    //CONFIG::debug { Debug.assert(arr[i] is Ice.Hashable); }
-                    if(equalFn.call(equalFn, arr[i], elem))
-                    {
-                        return i;
-                    }
-                }
-            }
-            else
-            {
-                return arr.indexOf(elem);
-            }
-
-            return -1;
-        };
-
-        ArrayUtil.filter = function(arr, includeFn, obj)
-        {
-            obj = obj === undefined ? includeFn : obj;
-            var result = [];
+            // TODO
+            //CONFIG::debug { Debug.assert(elem is Ice.Hashable); }
             for(var i = 0; i < arr.length; ++i)
             {
-                if(includeFn.call(obj, arr[i], i, arr))
+                //CONFIG::debug { Debug.assert(arr[i] is Ice.Hashable); }
+                if(equalFn.call(equalFn, arr[i], elem))
                 {
-                    result.push(arr[i]);
+                    return i;
                 }
             }
-            return result;
-        };
-        
-        Slice.defineSequence = function(module, name, valueHelper, optionalFormat)
+        }
+        else
         {
-            var helper = null;
-            Object.defineProperty(module, name, 
-            {
-                get: function()
-                    {
-                        if(helper === null)
-                        {
-                            /*jshint -W061 */
-                            helper = Ice.StreamHelpers.generateSeqHelper(eval(valueHelper), optionalFormat);
-                            /*jshint +W061 */
-                        }
-                        return helper;
-                    }
-            });
-        };
+            return arr.indexOf(elem);
+        }
 
-        Ice.ArrayUtil = ArrayUtil;
-        
-        global.Slice = Slice;
-        global.Ice = Ice;
+        return -1;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/ArrayUtil"));
+
+    ArrayUtil.filter = function(arr, includeFn, obj)
+    {
+        obj = obj === undefined ? includeFn : obj;
+        var result = [];
+        for(var i = 0; i < arr.length; ++i)
+        {
+            if(includeFn.call(obj, arr[i], i, arr))
+            {
+                result.push(arr[i]);
+            }
+        }
+        return result;
+    };
+    
+    Slice.defineSequence = function(module, name, valueHelper, optionalFormat)
+    {
+        var helper = null;
+        Object.defineProperty(module, name, 
+        {
+            get: function()
+                {
+                    if(helper === null)
+                    {
+                        /*jshint -W061 */
+                        helper = Ice.StreamHelpers.generateSeqHelper(eval(valueHelper), optionalFormat);
+                        /*jshint +W061 */
+                    }
+                    return helper;
+                }
+        });
+    };
+
+    Ice.ArrayUtil = ArrayUtil;
+    global.Slice = Slice;
+    global.Ice = Ice;
+}());

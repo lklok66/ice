@@ -7,28 +7,25 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
-        
-        var Ice = global.Ice || {};
-        
-        //
-        // Using a separate module for these constants so that ObjectPrx does
-        // not need to include Reference.
-        //
-        var ReferenceMode = {};
-
-        ReferenceMode.ModeTwoway = 0;
-        ReferenceMode.ModeOneway = 1;
-        ReferenceMode.ModeBatchOneway = 2;
-        ReferenceMode.ModeDatagram = 3;
-        ReferenceMode.ModeBatchDatagram = 4;
-        ReferenceMode.ModeLast = ReferenceMode.ModeBatchDatagram;
-
-        Ice.ReferenceMode = ReferenceMode;
-        
-        global.Ice = Ice;
+(function(){
+    var global = this;
+    var Ice = global.Ice || {};
+    
+    //
+    // Using a separate module for these constants so that ObjectPrx does
+    // not need to include Reference.
+    //
+    var ReferenceMode = 
+    {
+        ModeTwoway: 0, 
+        ModeOneway: 1, 
+        ModeBatchOneway: 2, 
+        ModeDatagram: 3, 
+        ModeBatchDatagram: 4,
+        ModeLast: 4
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/ReferenceMode"));
+
+    Ice.ReferenceMode = ReferenceMode;
+    
+    global.Ice = Ice;
+}());

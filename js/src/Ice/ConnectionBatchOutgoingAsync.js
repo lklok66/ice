@@ -7,32 +7,28 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
+(function(){
+    var global = this;
+    require("Ice/BatchOutgoingAsync");
 
-        require("Ice/BatchOutgoingAsync");
+    var Ice = global.Ice || {};
 
-        var Ice = global.Ice || {};
+    var BatchOutgoingAsync = Ice.BatchOutgoingAsync;
 
-        var BatchOutgoingAsync = Ice.BatchOutgoingAsync;
-
-        var ConnectionBatchOutgoingAsync = function(con, communicator, operation)
-        {
-            BatchOutgoingAsync.call(this, communicator, operation);
-            this._connection = con;
-        };
-
-        ConnectionBatchOutgoingAsync.prototype = new BatchOutgoingAsync();
-        ConnectionBatchOutgoingAsync.prototype.constructor = ConnectionBatchOutgoingAsync;
-
-        ConnectionBatchOutgoingAsync.prototype.__send = function()
-        {
-            this._connection.flushAsyncBatchRequests(this);
-        };
-
-        Ice.ConnectionBatchOutgoingAsync = ConnectionBatchOutgoingAsync;
-        global.Ice = Ice;
+    var ConnectionBatchOutgoingAsync = function(con, communicator, operation)
+    {
+        BatchOutgoingAsync.call(this, communicator, operation);
+        this._connection = con;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
-        __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/ConnectionBatchOutgoingAsync"));
+
+    ConnectionBatchOutgoingAsync.prototype = new BatchOutgoingAsync();
+    ConnectionBatchOutgoingAsync.prototype.constructor = ConnectionBatchOutgoingAsync;
+
+    ConnectionBatchOutgoingAsync.prototype.__send = function()
+    {
+        this._connection.flushAsyncBatchRequests(this);
+    };
+
+    Ice.ConnectionBatchOutgoingAsync = ConnectionBatchOutgoingAsync;
+    global.Ice = Ice;
+}());

@@ -7,408 +7,404 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
+(function(){
+    var global = this;
+    require("Ice/StringUtil");
+    
+    var Slice = global.Slice || {};
+    var Ice = global.Ice || {};
 
-        require("Ice/StringUtil");
-        
-        var Slice = global.Slice || {};
-        var Ice = global.Ice || {};
+    var StringUtil = Ice.StringUtil;
+    
+    var HashMap = function(h)
+    {
+        this._size = 0;
+        this._head = null;
+        this._initialCapacity = 32;
+        this._loadFactor = 0.75;
+        this._table = [];
+        this._keyComparator = function(k1, k2) { return k1 === k2; };
+        this._valueComparator = function(k1, k2) { return k1 === k2; };
 
-        var StringUtil = Ice.StringUtil;
-        
-        var HashMap = function(h)
+        var i, length;
+        if(h === undefined || h === null || h._size === 0)
         {
-            this._size = 0;
-            this._head = null;
-            this._initialCapacity = 32;
-            this._loadFactor = 0.75;
-            this._table = [];
-            this._keyComparator = function(k1, k2) { return k1 === k2; };
-            this._valueComparator = function(k1, k2) { return k1 === k2; };
-
-            var i, length;
-            if(h === undefined || h === null || h._size === 0)
-            {
-                this._threshold = this._initialCapacity * this._loadFactor;
-                for(i = 0; i < this._initialCapacity; i++)
-                {
-                    this._table[i] = null;
-                }
-            }
-            else
-            {
-                this._threshold = h._threshold;
-                this._keyComparator = h._keyComparator;
-                this._valueComparator = h._valueComparator;
-                length = h._table.length;
-                this._table.length = length;
-                for(i = 0; i < length; i++)
-                {
-                    this._table[i] = null;
-                }
-                this.merge(h);
-            }
-        };
-
-        Object.defineProperty(HashMap.prototype, "size", {
-            get: function() { return this._size; }
-        });
-
-        Object.defineProperty(HashMap.prototype, "entries", {
-            get: function() { return this._head; }
-        });
-
-        Object.defineProperty(HashMap.prototype, "keyComparator", {
-            get: function() { return this._keyComparator; },
-            set: function(fn) { this._keyComparator = fn; }
-        });
-
-        Object.defineProperty(HashMap.prototype, "valueComparator", {
-            get: function() { return this._valueComparator; },
-            set: function(fn) { this._valueComparator = fn; }
-        });
-
-        Object.defineProperty(HashMap, "compareEquals", {
-            get: function() { return function(o1, o2) { return o1.equals(o2); }; }
-        });
-
-        function setInternal(map, key, value, hash, index)
-        {
-            //
-            // Search for an entry with the same key.
-            //
-            for(var e = map._table[index]; e !== null; e = e._nextInBucket)
-            {
-                if(e._hash === hash && map.keysEqual(key, e._key))
-                {
-                    //
-                    // Found a match, update the value.
-                    //
-                    e._value = value;
-                    return undefined;
-                }
-            }
-
-            //
-            // No match found, add a new entry.
-            //
-            map.add(key, value, hash, index);
-            return undefined;
-        }
-
-        HashMap.prototype.set = function(key, value)
-        {
-            var hash = this.computeHash(key);
-
-            var index = this.hashIndex(hash, this._table.length);
-
-            return setInternal(this, key, value, hash, index);
-        };
-
-        HashMap.prototype.get = function(key)
-        {
-            var e = this.findEntry(key, this.computeHash(key));
-            return e !== undefined ? e._value : undefined;
-        };
-
-        HashMap.prototype.has = function(key)
-        {
-            return this.findEntry(key, this.computeHash(key)) !== undefined;
-        };
-
-        HashMap.prototype.delete = function(key)
-        {
-            var hash = this.computeHash(key);
-
-            var index = this.hashIndex(hash, this._table.length);
-
-            //
-            // Search for an entry with the same key.
-            //
-            var prev = null;
-            for(var e = this._table[index]; e !== null; e = e._nextInBucket)
-            {
-                if(e._hash === hash && this.keysEqual(key, e._key))
-                {
-                    //
-                    // Found a match.
-                    //
-                    this._size--;
-
-                    //
-                    // Remove from bucket.
-                    //
-                    if(prev !== null)
-                    {
-                        prev._nextInBucket = e._nextInBucket;
-                    }
-                    else
-                    {
-                        this._table[index] = e._nextInBucket;
-                    }
-
-                    //
-                    // Unlink the entry.
-                    //
-                    if(e._prev !== null)
-                    {
-                        e._prev._next = e._next;
-                    }
-                    if(e._next !== null)
-                    {
-                        e._next._prev = e._prev;
-                    }
-
-                    if(this._head === e)
-                    {
-                        this._head = e._next;
-                    }
-
-                    return e._value;
-                }
-
-                prev = e;
-            }
-
-            return undefined;
-        };
-
-        HashMap.prototype.clear = function()
-        {
-            for(var i = 0; i < this._table.length; ++i)
+            this._threshold = this._initialCapacity * this._loadFactor;
+            for(i = 0; i < this._initialCapacity; i++)
             {
                 this._table[i] = null;
             }
-            this._head = null;
-            this._size = 0;
-        };
-
-        HashMap.prototype.forEach = function(fn, obj)
+        }
+        else
         {
-            obj = obj === undefined ? fn : obj;
-            for(var e = this._head; e !== null; e = e._next)
+            this._threshold = h._threshold;
+            this._keyComparator = h._keyComparator;
+            this._valueComparator = h._valueComparator;
+            length = h._table.length;
+            this._table.length = length;
+            for(i = 0; i < length; i++)
             {
-                fn.call(obj, e._key, e._value);
+                this._table[i] = null;
             }
-        };
+            this.merge(h);
+        }
+    };
 
-        HashMap.prototype.equals = function(other)
+    Object.defineProperty(HashMap.prototype, "size", {
+        get: function() { return this._size; }
+    });
+
+    Object.defineProperty(HashMap.prototype, "entries", {
+        get: function() { return this._head; }
+    });
+
+    Object.defineProperty(HashMap.prototype, "keyComparator", {
+        get: function() { return this._keyComparator; },
+        set: function(fn) { this._keyComparator = fn; }
+    });
+
+    Object.defineProperty(HashMap.prototype, "valueComparator", {
+        get: function() { return this._valueComparator; },
+        set: function(fn) { this._valueComparator = fn; }
+    });
+
+    Object.defineProperty(HashMap, "compareEquals", {
+        get: function() { return function(o1, o2) { return o1.equals(o2); }; }
+    });
+
+    function setInternal(map, key, value, hash, index)
+    {
+        //
+        // Search for an entry with the same key.
+        //
+        for(var e = map._table[index]; e !== null; e = e._nextInBucket)
         {
-            if(other === null || !(other instanceof HashMap) || this._size !== other._size)
+            if(e._hash === hash && map.keysEqual(key, e._key))
+            {
+                //
+                // Found a match, update the value.
+                //
+                e._value = value;
+                return undefined;
+            }
+        }
+
+        //
+        // No match found, add a new entry.
+        //
+        map.add(key, value, hash, index);
+        return undefined;
+    }
+
+    HashMap.prototype.set = function(key, value)
+    {
+        var hash = this.computeHash(key);
+
+        var index = this.hashIndex(hash, this._table.length);
+
+        return setInternal(this, key, value, hash, index);
+    };
+
+    HashMap.prototype.get = function(key)
+    {
+        var e = this.findEntry(key, this.computeHash(key));
+        return e !== undefined ? e._value : undefined;
+    };
+
+    HashMap.prototype.has = function(key)
+    {
+        return this.findEntry(key, this.computeHash(key)) !== undefined;
+    };
+
+    HashMap.prototype.delete = function(key)
+    {
+        var hash = this.computeHash(key);
+
+        var index = this.hashIndex(hash, this._table.length);
+
+        //
+        // Search for an entry with the same key.
+        //
+        var prev = null;
+        for(var e = this._table[index]; e !== null; e = e._nextInBucket)
+        {
+            if(e._hash === hash && this.keysEqual(key, e._key))
+            {
+                //
+                // Found a match.
+                //
+                this._size--;
+
+                //
+                // Remove from bucket.
+                //
+                if(prev !== null)
+                {
+                    prev._nextInBucket = e._nextInBucket;
+                }
+                else
+                {
+                    this._table[index] = e._nextInBucket;
+                }
+
+                //
+                // Unlink the entry.
+                //
+                if(e._prev !== null)
+                {
+                    e._prev._next = e._next;
+                }
+                if(e._next !== null)
+                {
+                    e._next._prev = e._prev;
+                }
+
+                if(this._head === e)
+                {
+                    this._head = e._next;
+                }
+
+                return e._value;
+            }
+
+            prev = e;
+        }
+
+        return undefined;
+    };
+
+    HashMap.prototype.clear = function()
+    {
+        for(var i = 0; i < this._table.length; ++i)
+        {
+            this._table[i] = null;
+        }
+        this._head = null;
+        this._size = 0;
+    };
+
+    HashMap.prototype.forEach = function(fn, obj)
+    {
+        obj = obj === undefined ? fn : obj;
+        for(var e = this._head; e !== null; e = e._next)
+        {
+            fn.call(obj, e._key, e._value);
+        }
+    };
+
+    HashMap.prototype.equals = function(other)
+    {
+        if(other === null || !(other instanceof HashMap) || this._size !== other._size)
+        {
+            return false;
+        }
+
+        for(var e = this._head; e !== null; e = e._next)
+        {
+            var oe = other.findEntry(e._key, e._hash);
+            if(oe === undefined || !this.valuesEqual(e._value, oe._value))
             {
                 return false;
             }
+        }
 
-            for(var e = this._head; e !== null; e = e._next)
-            {
-                var oe = other.findEntry(e._key, e._hash);
-                if(oe === undefined || !this.valuesEqual(e._value, oe._value))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        };
-
-        HashMap.prototype.clone = function()
-        {
-            return new HashMap(this);
-        };
-
-        HashMap.prototype.merge = function(from)
-        {
-            for(var e = from._head; e !== null; e = e._next)
-            {
-                setInternal(this, e._key, e._value, e._hash, this.hashIndex(e._hash, this._table.length));
-            }
-        };
-
-        HashMap.prototype.add = function(key, value, hash, index)
-        {
-            //
-            // Create a new table entry.
-            //
-            /*
-            var e =
-            {
-                key: key,
-                value: value,
-                prev: null,
-                next: null,
-                _hash: hash
-            }
-            */
-            var e = Object.create(null, {
-                "key": {
-                    enumerable: true,
-                    get: function() { return this._key; }
-                },
-                "value": {
-                    enumerable: true,
-                    get: function() { return this._value; }
-                },
-                "next": {
-                    enumerable: true,
-                    get: function() { return this._next; }
-                },
-                "_key": {
-                    enumerable: false,
-                    writable: true,
-                    value: key
-                },
-                "_value": {
-                    enumerable: false,
-                    writable: true,
-                    value: value
-                },
-                "_prev": {
-                    enumerable: false,
-                    writable: true,
-                    value: null
-                },
-                "_next": {
-                    enumerable: false,
-                    writable: true,
-                    value: null
-                },
-                "_nextInBucket": {
-                    enumerable: false,
-                    writable: true,
-                    value: null
-                },
-                "_hash": {
-                    enumerable: false,
-                    writable: true,
-                    value: hash
-                }
-            });
-            e._nextInBucket = this._table[index];
-            this._table[index] = e;
-
-            e._next = this._head;
-            if(this._head !== null)
-            {
-                this._head._prev = e;
-            }
-            this._head = e;
-
-            this._size++;
-            if(this._size >= this._threshold)
-            {
-                this.resize(this._table.length * 2);
-            }
-        };
-
-        HashMap.prototype.resize = function(capacity)
-        {
-            var oldTable = this._table;
-
-            var newTable = [];
-            for(var i = 0; i < capacity; i++)
-            {
-                newTable[i] = null;
-            }
-
-            //
-            // Re-assign all entries to buckets.
-            //
-            for(var e = this._head; e !== null; e = e._next)
-            {
-                var index = this.hashIndex(e._hash, capacity);
-                e._nextInBucket = newTable[index];
-                newTable[index] = e;
-            }
-
-            this._table = newTable;
-            this._threshold = (capacity * this._loadFactor);
-        };
-
-        HashMap.prototype.findEntry = function(key, hash)
-        {
-            var index = this.hashIndex(hash, this._table.length);
-
-            //
-            // Search for an entry with the same key.
-            //
-            for(var e = this._table[index]; e !== null; e = e._nextInBucket)
-            {
-                if(e._hash === hash && this.keysEqual(key, e._key))
-                {
-                    return e;
-                }
-            }
-
-            return undefined;
-        };
-
-        HashMap.prototype.hashIndex = function(hash, len)
-        {
-            return hash & (len - 1);
-        };
-
-        HashMap.prototype.computeHash = function(v)
-        {
-            if(typeof(v.hashCode) === "function")
-            {
-                return v.hashCode();
-            }
-
-            var hash = 0;
-            var type = typeof(v);
-            if(type === "string" || v instanceof String)
-            {
-                hash = StringUtil.hashCode(v);
-            }
-            else if(type === "number" || v instanceof Number)
-            {
-                hash = v.toFixed(0);
-            }
-            else if(type === "boolean" || v instanceof Boolean)
-            {
-                hash = v ? 1 : 0;
-            }
-            else if(v !== null)
-            {
-                throw "cannot compute hash for value of type " + type;
-            }
-            return hash;
-        };
-
-        HashMap.prototype.keysEqual = function(k1, k2)
-        {
-            return this._keyComparator.call(this._keyComparator, k1, k2);
-        };
-
-        HashMap.prototype.valuesEqual = function(v1, v2)
-        {
-            return this._valueComparator.call(this._valueComparator, v1, v2);
-        };
-        
-        Slice.defineDictionary = function(module, name, keyHelper, valueHelper, optionalFormat)
-        {
-            var helper = null;
-            Object.defineProperty(module, name, 
-            {
-                get: function()
-                    {
-                        if(helper === null)
-                        {
-                            /*jshint -W061 */
-                            helper = Ice.StreamHelpers.generateDictHelper(eval(keyHelper), eval(valueHelper), 
-                                                                          optionalFormat);
-                            /*jshint +W061 */
-                        }
-                        return helper;
-                    }
-            });
-        };
-
-        Ice.HashMap = HashMap;
-        global.Slice = Slice;
-        global.Ice = Ice;
+        return true;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) :
-        __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/HashMap"));
+
+    HashMap.prototype.clone = function()
+    {
+        return new HashMap(this);
+    };
+
+    HashMap.prototype.merge = function(from)
+    {
+        for(var e = from._head; e !== null; e = e._next)
+        {
+            setInternal(this, e._key, e._value, e._hash, this.hashIndex(e._hash, this._table.length));
+        }
+    };
+
+    HashMap.prototype.add = function(key, value, hash, index)
+    {
+        //
+        // Create a new table entry.
+        //
+        /*
+        var e =
+        {
+            key: key,
+            value: value,
+            prev: null,
+            next: null,
+            _hash: hash
+        }
+        */
+        var e = Object.create(null, {
+            "key": {
+                enumerable: true,
+                get: function() { return this._key; }
+            },
+            "value": {
+                enumerable: true,
+                get: function() { return this._value; }
+            },
+            "next": {
+                enumerable: true,
+                get: function() { return this._next; }
+            },
+            "_key": {
+                enumerable: false,
+                writable: true,
+                value: key
+            },
+            "_value": {
+                enumerable: false,
+                writable: true,
+                value: value
+            },
+            "_prev": {
+                enumerable: false,
+                writable: true,
+                value: null
+            },
+            "_next": {
+                enumerable: false,
+                writable: true,
+                value: null
+            },
+            "_nextInBucket": {
+                enumerable: false,
+                writable: true,
+                value: null
+            },
+            "_hash": {
+                enumerable: false,
+                writable: true,
+                value: hash
+            }
+        });
+        e._nextInBucket = this._table[index];
+        this._table[index] = e;
+
+        e._next = this._head;
+        if(this._head !== null)
+        {
+            this._head._prev = e;
+        }
+        this._head = e;
+
+        this._size++;
+        if(this._size >= this._threshold)
+        {
+            this.resize(this._table.length * 2);
+        }
+    };
+
+    HashMap.prototype.resize = function(capacity)
+    {
+        var oldTable = this._table;
+
+        var newTable = [];
+        for(var i = 0; i < capacity; i++)
+        {
+            newTable[i] = null;
+        }
+
+        //
+        // Re-assign all entries to buckets.
+        //
+        for(var e = this._head; e !== null; e = e._next)
+        {
+            var index = this.hashIndex(e._hash, capacity);
+            e._nextInBucket = newTable[index];
+            newTable[index] = e;
+        }
+
+        this._table = newTable;
+        this._threshold = (capacity * this._loadFactor);
+    };
+
+    HashMap.prototype.findEntry = function(key, hash)
+    {
+        var index = this.hashIndex(hash, this._table.length);
+
+        //
+        // Search for an entry with the same key.
+        //
+        for(var e = this._table[index]; e !== null; e = e._nextInBucket)
+        {
+            if(e._hash === hash && this.keysEqual(key, e._key))
+            {
+                return e;
+            }
+        }
+
+        return undefined;
+    };
+
+    HashMap.prototype.hashIndex = function(hash, len)
+    {
+        return hash & (len - 1);
+    };
+
+    HashMap.prototype.computeHash = function(v)
+    {
+        if(typeof(v.hashCode) === "function")
+        {
+            return v.hashCode();
+        }
+
+        var hash = 0;
+        var type = typeof(v);
+        if(type === "string" || v instanceof String)
+        {
+            hash = StringUtil.hashCode(v);
+        }
+        else if(type === "number" || v instanceof Number)
+        {
+            hash = v.toFixed(0);
+        }
+        else if(type === "boolean" || v instanceof Boolean)
+        {
+            hash = v ? 1 : 0;
+        }
+        else if(v !== null)
+        {
+            throw "cannot compute hash for value of type " + type;
+        }
+        return hash;
+    };
+
+    HashMap.prototype.keysEqual = function(k1, k2)
+    {
+        return this._keyComparator.call(this._keyComparator, k1, k2);
+    };
+
+    HashMap.prototype.valuesEqual = function(v1, v2)
+    {
+        return this._valueComparator.call(this._valueComparator, v1, v2);
+    };
+    
+    Slice.defineDictionary = function(module, name, keyHelper, valueHelper, optionalFormat)
+    {
+        var helper = null;
+        Object.defineProperty(module, name, 
+        {
+            get: function()
+                {
+                    if(helper === null)
+                    {
+                        /*jshint -W061 */
+                        helper = Ice.StreamHelpers.generateDictHelper(eval(keyHelper), eval(valueHelper), 
+                                                                        optionalFormat);
+                        /*jshint +W061 */
+                    }
+                    return helper;
+                }
+        });
+    };
+
+    Ice.HashMap = HashMap;
+    global.Slice = Slice;
+    global.Ice = Ice;
+}());

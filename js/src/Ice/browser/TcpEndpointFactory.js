@@ -7,10 +7,4 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
-        // Dummy implementation so browser require works.
-    };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/TcpEndpointFactory"));
+// Dummy file to replace Node.js implementation

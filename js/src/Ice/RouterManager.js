@@ -7,77 +7,73 @@
 //
 // **********************************************************************
 
-(function(module, name){
-    var __m = function(global, module, exports, require){
-        
-        require("Ice/HashMap");
-        require("Ice/RouterInfo");
-        require("Ice/Router");
-        
-        var Ice = global.Ice || {};
-        
-        var HashMap = Ice.HashMap;
-        var RouterInfo = Ice.RouterInfo;
-        var RouterPrx = Ice.RouterPrx;
+(function(){
+    var global = this;
+    require("Ice/HashMap");
+    require("Ice/RouterInfo");
+    require("Ice/Router");
+    
+    var Ice = global.Ice || {};
+    
+    var HashMap = Ice.HashMap;
+    var RouterInfo = Ice.RouterInfo;
+    var RouterPrx = Ice.RouterPrx;
 
-        var RouterManager = function()
-        {
-            this._table = new HashMap(); // Map<Ice.RouterPrx, RouterInfo>
-            this._table.keyComparator = HashMap.compareEquals;
-        };
+    var RouterManager = function()
+    {
+        this._table = new HashMap(); // Map<Ice.RouterPrx, RouterInfo>
+        this._table.keyComparator = HashMap.compareEquals;
+    };
 
-        RouterManager.prototype.destroy = function()
+    RouterManager.prototype.destroy = function()
+    {
+        for(var e = this._table.entries; e !== null; e = e.next)
         {
-            for(var e = this._table.entries; e !== null; e = e.next)
-            {
-                e.value.destroy();
-            }
-            this._table.clear();
-        };
+            e.value.destroy();
+        }
+        this._table.clear();
+    };
+
+    //
+    // Returns router info for a given router. Automatically creates
+    // the router info if it doesn't exist yet.
+    //
+    RouterManager.prototype.find = function(rtr)
+    {
+        if(rtr === null)
+        {
+            return null;
+        }
 
         //
-        // Returns router info for a given router. Automatically creates
-        // the router info if it doesn't exist yet.
+        // The router cannot be routed.
         //
-        RouterManager.prototype.find = function(rtr)
-        {
-            if(rtr === null)
-            {
-                return null;
-            }
+        var router = RouterPrx.uncheckedCast(rtr.ice_router(null));
 
-            //
+        var info = this._table.get(router);
+        if(info === undefined)
+        {
+            info = new RouterInfo(router);
+            this._table.set(router, info);
+        }
+
+        return info;
+    };
+
+    RouterManager.prototype.erase = function(rtr)
+    {
+        var info = null;
+        if(rtr !== null)
+        {
             // The router cannot be routed.
-            //
             var router = RouterPrx.uncheckedCast(rtr.ice_router(null));
 
-            var info = this._table.get(router);
-            if(info === undefined)
-            {
-                info = new RouterInfo(router);
-                this._table.set(router, info);
-            }
-
-            return info;
-        };
-
-        RouterManager.prototype.erase = function(rtr)
-        {
-            var info = null;
-            if(rtr !== null)
-            {
-                // The router cannot be routed.
-                var router = RouterPrx.uncheckedCast(rtr.ice_router(null));
-
-                info = this._table.get(router);
-                this._table.delete(router);
-            }
-            return info;
-        };
-
-        Ice.RouterManager = RouterManager;
-        global.Ice = Ice;
+            info = this._table.get(router);
+            this._table.delete(router);
+        }
+        return info;
     };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/RouterManager"));
+
+    Ice.RouterManager = RouterManager;
+    global.Ice = Ice;
+}(this));

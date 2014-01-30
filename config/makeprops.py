@@ -118,20 +118,19 @@ namespace IceInternal
 """
 
 jsPreamble = commonPreamble + """
-(function(module, name){
-    var __m = function(global, module, exports, require){
-        require("Ice/Property");
-        var Ice = global.Ice || {};
-        var Property = Ice.Property;
-        var %(classname)s = {};\n
+(function(){
+    var global = this;
+    var Ice = global.Ice || Ice;
+    require("Ice/Property");
+    var %(classname)s = {};
+    var Property = Ice.Property;
 """
 
 jsEpilogue = \
-"""        global.Ice = Ice;
-    };
-    return (module === undefined) ? this.Ice.__defineModule(__m, name) : 
-                                    __m(global, module, module.exports, module.require);
-}(typeof module !== "undefined" ? module : undefined, "Ice/%(classname)s"));
+"""
+    Ice.%(classname)s = %(classname)s;
+    global.Ice = Ice;
+}());
 """
 
 def usage():
@@ -547,23 +546,22 @@ class JSPropertyHandler(PropertyHandler):
     def startFiles(self):
         self.srcFile = file(self.className + ".js", "wb")
         self.srcFile.write(jsPreamble % {'inputfile' : self.inputfile, 'classname' : self.className})
-        self.srcFile.write("        /* jshint -W044*/\n\n");
+        self.srcFile.write("    /* jshint -W044*/\n\n");
 
     def closeFiles(self):
-        self.srcFile.write("        /* jshint +W044*/\n\n");
-        self.srcFile.write("        %s.validProps =\n" % (self.className))
-        self.srcFile.write("        [\n")
+        self.srcFile.write("    /* jshint +W044*/\n\n");
+        self.srcFile.write("    %s.validProps =\n" % (self.className))
+        self.srcFile.write("    [\n")
         for s in self.sections:
-            self.srcFile.write("            %s.%sProps,\n" % (self.className, s))
-        self.srcFile.write("        ];\n\n")
+            self.srcFile.write("        %s.%sProps,\n" % (self.className, s))
+        self.srcFile.write("    ];\n\n")
         
-        self.srcFile.write("        %s.clPropNames =\n" % (self.className))
-        self.srcFile.write("        [\n")
+        self.srcFile.write("    %s.clPropNames =\n" % (self.className))
+        self.srcFile.write("    [\n")
         for s in self.cmdLineOptions:
-            self.srcFile.write("            \"%s\",\n" % s)
-        self.srcFile.write("        ];\n\n")
+            self.srcFile.write("        \"%s\",\n" % s)
+        self.srcFile.write("    ];\n")
         
-        self.srcFile.write("        global.Ice.%s = %s;\n" % (self.className, self.className));
         self.srcFile.write(jsEpilogue % {'classname' : self.className});
         self.srcFile.close()
 
@@ -572,23 +570,23 @@ class JSPropertyHandler(PropertyHandler):
         return string.replace(propertyName, "[any]", ".")
 
     def deprecatedImpl(self, propertyName):
-        self.srcFile.write("            new Property(\"/^%s\.%s/\", true, null),\n" % (self.currentSection, \
+        self.srcFile.write("        new Property(\"/^%s\.%s/\", true, null),\n" % (self.currentSection, \
                 self.fix(propertyName)))
 
     def deprecatedImplWithReplacementImpl(self, propertyName, deprecatedBy):
-        self.srcFile.write("            new Property(\"/^%s\.%s/\", true, \"%s\"),\n" % \
+        self.srcFile.write("        new Property(\"/^%s\.%s/\", true, \"%s\"),\n" % \
                 (self.currentSection, self.fix(propertyName), deprecatedBy))
 
     def propertyImpl(self, propertyName):
-        self.srcFile.write("            new Property(\"/^%s\.%s/\", false, null),\n" % (self.currentSection, \
+        self.srcFile.write("        new Property(\"/^%s\.%s/\", false, null),\n" % (self.currentSection, \
                 self.fix(propertyName)))
 
     def newSection(self):
-        self.srcFile.write("        %s.%sProps =\n" % (self.className, self.currentSection));
-        self.srcFile.write("        [\n")
+        self.srcFile.write("    %s.%sProps =\n" % (self.className, self.currentSection));
+        self.srcFile.write("    [\n")
             
     def closeSection(self):
-        self.srcFile.write("        ];\n")
+        self.srcFile.write("    ];\n")
         self.srcFile.write("\n")
 
     def moveFiles(self, location):
