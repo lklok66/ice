@@ -16,6 +16,7 @@
     require("Ice/Debug");
     require("Ice/ExUtil");
     require("Ice/HashMap");
+    require("Ice/IncomingAsync");
     require("Ice/LocalExceptionWrapper");
     require("Ice/Promise");
     require("Ice/Protocol");
@@ -36,6 +37,7 @@
     var Debug = Ice.Debug;
     var ExUtil = Ice.ExUtil;
     var HashMap = Ice.HashMap;
+    var IncomingAsync = Ice.IncomingAsync;
     var LocalExceptionWrapper = Ice.LocalExceptionWrapper;
     var Promise = Ice.Promise;
     var Protocol = Ice.Protocol;
@@ -1908,12 +1910,12 @@
                 // Prepare the invocation.
                 //
                 var response = !this._endpoint.datagram() && requestId !== 0;
-                inc = new Incoming(this._instance, this, adapter, response, compress, requestId);
+                inc = new IncomingAsync(this._instance, this, adapter, response, compress, requestId);
 
                 //
                 // Dispatch the invocation.
                 //
-                inc.invoke(servantManager);
+                inc.invoke(servantManager, stream);
 
                 --invokeNum;
                 inc = null;

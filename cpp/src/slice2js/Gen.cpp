@@ -1552,7 +1552,172 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             _out << eb << ",";
             _out << nl;
         }
-        _out << (p->hasMetaData("preserve-slice") && !p->inheritsMetaData("preserve-slice") ? "true" : "false");
+        _out << (p->hasMetaData("preserve-slice") && !p->inheritsMetaData("preserve-slice") ? "true" : "false") << ", ";
+
+        const OperationList ops = p->operations();
+        if(ops.empty())
+        {
+            _out << "undefined";
+        }
+        else
+        {
+            _out << sb;
+            for(OperationList::const_iterator q = ops.begin(); q != ops.end(); ++q)
+            {
+                if(q != ops.begin())
+                {
+                    _out << ',';
+                }
+
+                OperationPtr op = *q;
+                const string name = fixId(op->name());
+                const ParamDeclList paramList = op->parameters();
+                const TypePtr ret = op->returnType();
+                ParamDeclList inParams, outParams;
+                vector<string> inArgs, outArgs;
+                for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
+                {
+                    if((*pli)->isOutParam())
+                    {
+                        outParams.push_back(*pli);
+                        outArgs.push_back(fixId((*pli)->name()));
+                    }
+                    else
+                    {
+                        inParams.push_back(*pli);
+                        inArgs.push_back(fixId((*pli)->name()));
+                    }
+                }
+
+                //
+                // Each operation descriptor is a property. The value of the property
+                // is an object that may contain the following properties:
+                //
+                // n: Native method name (when Slice name is a keyword)
+                // u: Function to unmarshal in params
+                // m: Function to marshal out params
+                // e: Exception list
+                // f: Format type
+                // a: AMD
+                //
+                _out << nl << "\"" << op->name() << "\":"; // Operation name over-the-wire.
+                _out << sb;
+
+                bool props = false;
+                if(name != op->name())
+                {
+                    _out << nl << "n: \"" << name << "\""; // Native method name.
+                    props = true;
+                }
+
+                if(!inParams.empty())
+                {
+                    //
+                    // Unmarshal in params and push them onto the array __r.
+                    //
+                    if(props)
+                    {
+                        _out << ",";
+                    }
+                    props = true;
+                    _out << nl << "u: function(__is, __r)";
+                    _out << sb;
+                    _out << nl << "var ";
+                    for(vector<string>::const_iterator vsi = inArgs.begin(); vsi != inArgs.end(); ++vsi)
+                    {
+                        if(vsi != inArgs.begin())
+                        {
+                            _out << ", ";
+                        }
+                        _out << *vsi;
+                    }
+                    _out << ';';
+                    writeMarshalUnmarshalParams(inParams, 0, false);
+                    if(op->sendsClasses(false))
+                    {
+                        _out << nl << "__is.readPendingObjects();";
+                    }
+                    _out << nl << "__r.push" << spar << inArgs << epar << ';';
+                    _out << eb;
+                }
+
+                if(ret || !outParams.empty())
+                {
+                    //
+                    // Marshal out params.
+                    //
+                    if(props)
+                    {
+                        _out << ",";
+                    }
+                    props = true;
+                    _out << nl << "m: function(__os";
+                    if(ret)
+                    {
+                        _out << ", __ret";
+                    }
+                    for(vector<string>::const_iterator vsi = outArgs.begin(); vsi != outArgs.end(); ++vsi)
+                    {
+                        _out << ", " << *vsi;
+                    }
+                    _out << ')';
+                    _out << sb;
+                    writeMarshalUnmarshalParams(outParams, op, true);
+                    if(op->returnsClasses(false))
+                    {
+                        _out << nl << "__os.writePendingObjects();";
+                    }
+                    _out << eb;
+                }
+
+                const ExceptionList throws = op->throws();
+
+                if(!throws.empty())
+                {
+                    if(props)
+                    {
+                        _out << ",";
+                    }
+                    props = true;
+                    _out << nl << "e:";
+                    _out << nl << '[';
+                    _out.inc();
+                    for(ExceptionList::const_iterator eli = throws.begin(); eli != throws.end(); ++eli)
+                    {
+                        if(eli != throws.begin())
+                        {
+                            _out << ',';
+                        }
+                        _out << nl << fixId((*eli)->scoped());
+                    }
+                    _out.dec();
+                    _out << nl << ']';
+                }
+
+                if(op->format() != DefaultFormat)
+                {
+                    if(props)
+                    {
+                        _out << ",";
+                    }
+                    props = true;
+                    _out << nl << "f: " << opFormatTypeToString(op);
+                }
+
+                if(p->hasMetaData("amd") || op->hasMetaData("amd"))
+                {
+                    if(props)
+                    {
+                        _out << ",";
+                    }
+                    props = true;
+                    _out << nl << "a: true";
+                }
+
+                _out << eb;
+            }
+            _out << eb;
+        }
     }
     _out.dec();
     _out << ");";

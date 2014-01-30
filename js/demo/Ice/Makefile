@@ -14,7 +14,8 @@ include $(top_srcdir)/config/Make.rules
 SUBDIRS		= hello \
 	latency \
 	minimal \
-	throughput
+	throughput \
+	bidir
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
