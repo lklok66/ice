@@ -1072,7 +1072,7 @@ Slice::Gen::generate(const UnitPtr& p)
     _out << nl << "(function()";
     _out << sb;
     _out << nl << "var global = this;";
-    _out << nl << "var require = require || function(){};";
+    _out << nl << "var require = typeof(module) !== \"undefined\" ? module.require : function(){};";
     
     RequireVisitor requireVisitor(_out, _includePaths);
     p->visit(&requireVisitor, false);
