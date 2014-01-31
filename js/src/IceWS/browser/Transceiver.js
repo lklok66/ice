@@ -206,8 +206,31 @@
         //
         byteBuffer.position = byteBuffer.position + remaining;
 
-        this._fd.send(slice);
-        return true;
+        if(this._fd.bufferedAmount == 0)
+        {
+            this._fd.send(slice);
+            return true;
+        }
+        else
+        {
+            var self = this;
+            var writtenCB = function()
+            {
+                setTimeout(
+                    function()
+                    {
+                        if(self._fd.bufferedAmount == 0)
+                        {
+                            self._bytesWrittenCallback();
+                        }
+                        else
+                        {
+                            writtenCB();
+                        }
+                    }, 50);
+            }
+            return false;
+        }
     };
 
     Transceiver.prototype.read = function(byteBuffer, moreData)

@@ -264,19 +264,6 @@
         return this._endpointFactoryManager;
     };
 
-    /* TODO
-    Instance.prototype.pluginManager = function()
-    {
-        if(this._state === StateDestroyed)
-        {
-            throw new Ice.CommunicatorDestroyedException();
-        }
-
-        Debug.assert(this._pluginManager !== null);
-        return this._pluginManager;
-    }
-    */
-
     Instance.prototype.messageSizeMax = function()
     {
         // This value is immutable.
@@ -725,23 +712,21 @@
 
         this._state = StateDestroyed;
 
-        /* TODO
         if(_initData.properties.getPropertyAsInt("Ice.Warn.UnusedProperties") > 0)
         {
-            var unusedProperties:Vector.<String> = (_initData.properties as Ice.PropertiesI).getUnusedProperties();
+            var unusedProperties = _initData.properties.getUnusedProperties();
             if(unusedProperties.length > 0)
             {
-                var message:Vector.<String> = new Vector.<String>();
+                var message = [];
                 message.push("The following properties were set but never read:");
-                for each(var p:String in unusedProperties)
+                for(var i = 0; i < unusedProperties.length; ++i)
                 {
                     message.push("\n    ");
-                    message.push(p);
+                    message.push(unusedProperties[i]);
                 }
                 _initData.logger.warning(message.join(""));
             }
         }
-        */
 
         promise.succeed(promise);
     };

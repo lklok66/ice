@@ -26,6 +26,7 @@
     require("Ice/Locator");
     require("Ice/LocalException");
     require("Ice/Version");
+    require("Ice/PropertyNames");
     
     var Ice = global.Ice || {};
     
@@ -44,7 +45,8 @@
     var Identity = Ice.Identity;
     var RouterPrx = Ice.RouterPrx;
     var LocatorPrx = Ice.LocatorPrx;
-
+    var PropertyNames = Ice.PropertyNames;
+    
     //
     // Only for use by Instance
     //
@@ -672,15 +674,13 @@
         //
         // Do not warn about unknown properties for Ice prefixes (Ice, Glacier2, etc.)
         //
-        /* TODO
-        for(var i = 0; PropertyNames.clPropNames[i] != null; ++i)
+        for(var i = 0; i < PropertyNames.clPropNames.length; ++i)
         {
-            if(prefix.indexOf(PropertyNames.clPropNames[i] + ".") == 0)
+            if(prefix.indexOf(PropertyNames.clPropNames[i] + ".") === 0)
             {
                 return;
             }
         }
-        */
 
         var unknownProps = [], i, length;
         var props = this._instance.initializationData().properties.getPropertiesForPrefix(prefix + ".");

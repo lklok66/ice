@@ -77,11 +77,8 @@
     {
         if(equalFn !== undefined && equalFn !== null)
         {
-            // TODO
-            //CONFIG::debug { Debug.assert(elem is Ice.Hashable); }
             for(var i = 0; i < arr.length; ++i)
             {
-                //CONFIG::debug { Debug.assert(arr[i] is Ice.Hashable); }
                 if(equalFn.call(equalFn, arr[i], elem))
                 {
                     return i;

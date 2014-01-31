@@ -80,11 +80,6 @@
             message = message.replace(/\n/g, "\n   ");
         }
 
-        /* TODO: Don't need to append a newline when using console.log
-        message += "\n";
-        */
-
-        // TODO: Is console.log() always available?
         console.log(message);
     };
 

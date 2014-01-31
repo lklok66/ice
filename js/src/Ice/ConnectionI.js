@@ -847,19 +847,10 @@
                         var magic2 = this._readStream.readByte();
                         var magic3 = this._readStream.readByte();
                         if(magic0 !== Protocol.magic[0] || magic1 !== Protocol.magic[1] ||
-                        magic2 !== Protocol.magic[2] || magic3 !== Protocol.magic[3])
+                           magic2 !== Protocol.magic[2] || magic3 !== Protocol.magic[3])
                         {
                             var bme = new Ice.BadMagicException();
-                            /* TODO: Fix for sequence<byte> mapping
-                            const m:flash.utils.ByteArray = new flash.utils.ByteArray();
-                            m.endian = flash.utils.Endian.LITTLE_ENDIAN;
-                            m.length = 4;
-                            m[0] = magic0;
-                            m[1] = magic1;
-                            m[2] = magic2;
-                            m[3] = magic3;
-                            bme.badMagic = m;
-                            */
+                            bme.badMagic = Ice.Buffer.createNative([magic0, magic1, magic2, magic3]);
                             throw bme;
                         }
 
