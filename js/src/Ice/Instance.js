@@ -712,9 +712,9 @@
 
         this._state = StateDestroyed;
 
-        if(_initData.properties.getPropertyAsInt("Ice.Warn.UnusedProperties") > 0)
+        if(this._initData.properties.getPropertyAsInt("Ice.Warn.UnusedProperties") > 0)
         {
-            var unusedProperties = _initData.properties.getUnusedProperties();
+            var unusedProperties = this._initData.properties.getUnusedProperties();
             if(unusedProperties.length > 0)
             {
                 var message = [];
@@ -724,7 +724,7 @@
                     message.push("\n    ");
                     message.push(unusedProperties[i]);
                 }
-                _initData.logger.warning(message.join(""));
+                this._initData.logger.warning(message.join(""));
             }
         }
 
