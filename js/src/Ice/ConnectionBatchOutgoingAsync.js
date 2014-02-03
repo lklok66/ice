@@ -9,26 +9,23 @@
 
 (function(){
     var global = this;
+    require("Ice/Class");
     require("Ice/BatchOutgoingAsync");
 
     var Ice = global.Ice || {};
 
     var BatchOutgoingAsync = Ice.BatchOutgoingAsync;
 
-    var ConnectionBatchOutgoingAsync = function(con, communicator, operation)
-    {
-        BatchOutgoingAsync.call(this, communicator, operation);
-        this._connection = con;
-    };
-
-    ConnectionBatchOutgoingAsync.prototype = new BatchOutgoingAsync();
-    ConnectionBatchOutgoingAsync.prototype.constructor = ConnectionBatchOutgoingAsync;
-
-    ConnectionBatchOutgoingAsync.prototype.__send = function()
-    {
-        this._connection.flushAsyncBatchRequests(this);
-    };
-
-    Ice.ConnectionBatchOutgoingAsync = ConnectionBatchOutgoingAsync;
+    Ice.ConnectionBatchOutgoingAsync = Ice.__defineClass(BatchOutgoingAsync, {
+        __init__: function(con, communicator, operation)
+        {
+            BatchOutgoingAsync.call(this, communicator, operation);
+            this._connection = con;
+        },
+        __send: function()
+        {
+            this._connection.flushAsyncBatchRequests(this);
+        }
+    });
     global.Ice = Ice;
 }());

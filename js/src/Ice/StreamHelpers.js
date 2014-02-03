@@ -9,10 +9,15 @@
 
 (function(){
     var global = this;
+    
+    require("Ice/Class");
     require("Ice/HashMap");
     require("Ice/OptionalFormat");
     
     var Ice = global.Ice || {};
+    
+    var defineClass = Ice.__defineClass;
+    var defineProperty = Object.defineProperty;
     
     var HashMap = Ice.HashMap;
     var OptionalFormat = Ice.OptionalFormat;
@@ -114,43 +119,42 @@
     //
     // Sequence helper to write sequences
     //
-    var SequenceHelper = function() {};
-    SequenceHelper.prototype.write = function(os, v)
-    {
-        if(v === null || v.length === 0)
+    var SequenceHelper = defineClass({
+        write: function(os, v)
         {
-            os.writeSize(0);
-        }
-        else
-        {
-            var helper = this.elementHelper;
-            os.writeSize(v.length);
-            for(var i = 0; i < v.length; ++i)
+            if(v === null || v.length === 0)
             {
-                helper.write(os, v[i]);
+                os.writeSize(0);
             }
-        }
-    };
-    
-    SequenceHelper.prototype.read = function(is)
-    {
-        var helper = this.elementHelper; // Cache the element helper.
-        var sz = is.readAndCheckSeqSize(helper.minWireSize);
-        var v = [];
-        v.length = sz;
-        for(var i = 0; i < sz; ++i)
+            else
+            {
+                var helper = this.elementHelper;
+                os.writeSize(v.length);
+                for(var i = 0; i < v.length; ++i)
+                {
+                    helper.write(os, v[i]);
+                }
+            }
+        },
+        read: function(is)
         {
-            v[i] = helper.read(is);
+            var helper = this.elementHelper; // Cache the element helper.
+            var sz = is.readAndCheckSeqSize(helper.minWireSize);
+            var v = [];
+            v.length = sz;
+            for(var i = 0; i < sz; ++i)
+            {
+                v[i] = helper.read(is);
+            }
+            return v;
+        },
+        size: function(v)
+        {
+            return (v === null || v === undefined) ? 0 : v.length; 
         }
-        return v;
-    };
+    });
     
-    SequenceHelper.prototype.size = function(v)
-    {
-        return (v === null || v === undefined) ? 0 : v.length; 
-    };
-
-    Object.defineProperty(SequenceHelper.prototype, "minWireSize", {
+    defineProperty(SequenceHelper.prototype, "minWireSize", {
         get: function(){ return 1; }
     });
     
@@ -158,7 +162,7 @@
     var byteSeqHelper = new SequenceHelper();
     byteSeqHelper.write = function(os, v) { return os.writeByteSeq(v); }
     byteSeqHelper.read = function(is) { return is.readByteSeq(); }
-    Object.defineProperty(byteSeqHelper, "elementHelper", {
+    defineProperty(byteSeqHelper, "elementHelper", {
         get: function(){ return Ice.ByteHelper; }
     });
     StreamHelpers.VSizeContainer1OptHelper.call(byteSeqHelper);
@@ -206,13 +210,13 @@
             StreamHelpers.FSizeOptHelper.call(helper);
         }
         
-        Object.defineProperty(helper, "elementHelper", {
+        defineProperty(helper, "elementHelper", {
             get: function(){ return elementHelper; }
         });
 
         if(elementHelper == Ice.ObjectHelper)
         {
-            Object.defineProperty(helper, "elementType", {
+            defineProperty(helper, "elementType", {
                 get: function(){ return elementType; }
             });
             helper.read = objectSequenceHelperRead;
@@ -224,44 +228,42 @@
     //
     // Dictionary helper to write dictionaries
     //
-    var DictionaryHelper = function(){};
-
-    DictionaryHelper.prototype.write = function(os, v)
-    {
-        if(v === null || v.size === 0)
+    var DictionaryHelper = defineClass({
+        write: function(os, v)
         {
-            os.writeSize(0);
-        }
-        else
+            if(v === null || v.size === 0)
+            {
+                os.writeSize(0);
+            }
+            else
+            {
+                var keyHelper = this.keyHelper;
+                var valueHelper = this.valueHelper;
+                os.writeSize(v.size);
+                for(var e = v.entries; e !== null; e = e.next)
+                {
+                    keyHelper.write(os, e.key);
+                    valueHelper.write(os, e.value);
+                }
+            }
+        },
+        read: function(is)
         {
+            var v = new HashMap();
+            var sz = is.readSize();
             var keyHelper = this.keyHelper;
             var valueHelper = this.valueHelper;
-            os.writeSize(v.size);
-            for(var e = v.entries; e !== null; e = e.next)
+            for(var i = 0; i < sz; ++i)
             {
-                keyHelper.write(os, e.key);
-                valueHelper.write(os, e.value);
+                v.set(keyHelper.read(is), valueHelper.read(is));
             }
-        }
-    };
-    
-    DictionaryHelper.prototype.read = function(is)
-    {
-        var v = new HashMap();
-        var sz = is.readSize();
-        var keyHelper = this.keyHelper;
-        var valueHelper = this.valueHelper;
-        for(var i = 0; i < sz; ++i)
+            return v;
+        },
+        size: function(v)
         {
-            v.set(keyHelper.read(is), valueHelper.read(is));
+            return (v === null || v === undefined) ? 0 : v.size; 
         }
-        return v;
-    };
-    
-    DictionaryHelper.prototype.size = function(v)
-    {
-        return (v === null || v === undefined) ? 0 : v.size; 
-    };
+    });
 
     Object.defineProperty(DictionaryHelper.prototype, "minWireSize", {
         get: function(){ return 1; }
@@ -298,16 +300,16 @@
         {
             StreamHelpers.FSizeOptHelper.call(helper);
         }
-        Object.defineProperty(helper, "keyHelper", {
+        defineProperty(helper, "keyHelper", {
             get: function(){ return keyHelper; }
         });        
-        Object.defineProperty(helper, "valueHelper", {
+        defineProperty(helper, "valueHelper", {
             get: function(){ return valueHelper; }
         });
 
         if(valueHelper == Ice.ObjectHelper)
         {
-            Object.defineProperty(helper, "valueType", {
+            defineProperty(helper, "valueType", {
                 get: function(){ return valueType; }
             });
             helper.read = objectDictionaryHelperRead;

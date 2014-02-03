@@ -11,89 +11,85 @@
     var global = this;
     var Ice = global.Ice || {};
     
-    var Logger = function(prefix)
-    {
-        if(prefix !== undefined && prefix.length > 0)
+    require("Ice/Class");
+    
+    var Logger = Ice.__defineClass({
+        __init__: function(prefix)
         {
-            this._prefix = prefix + ": ";
-        }
-        else
+            if(prefix !== undefined && prefix.length > 0)
+            {
+                this._prefix = prefix + ": ";
+            }
+            else
+            {
+                this._prefix = "";
+            }
+        },
+        print: function(message)
         {
-            this._prefix = "";
-        }
-    };
-
-    Logger.prototype.print = function(message)
-    {
-        this.write(message, false);
-    };
-
-    Logger.prototype.trace = function(category, message)
-    {
-        var s = [];
-        var d = new Date();
-        s.push("-- ");
-        s.push(this.timestamp());
-        s.push(' ');
-        s.push(this._prefix);
-        s.push(category);
-        s.push(": ");
-        s.push(message);
-        this.write(s.join(""), true);
-    };
-
-    Logger.prototype.warning = function(message)
-    {
-        var s = [];
-        var d = new Date();
-        s.push("-! ");
-        s.push(this.timestamp());
-        s.push(' ');
-        s.push(this._prefix);
-        s.push("warning: ");
-        s.push(message);
-        this.write(s.join(""), true);
-    };
-
-    Logger.prototype.error = function(message)
-    {
-        var s = [];
-        var d = new Date();
-        s.push("!! ");
-        s.push(this.timestamp());
-        s.push(' ');
-        s.push(this._prefix);
-        s.push("error: ");
-        s.push(message);
-        this.write(s.join(""), true);
-    };
-
-    Logger.prototype.cloneWithPrefix = function(prefix)
-    {
-        return new Logger(prefix);
-    };
-
-    Logger.prototype.write = function(message, indent)
-    {
-        if(indent)
+            this.write(message, false);
+        },
+        trace: function(category, message)
         {
-            message = message.replace(/\n/g, "\n   ");
+            var s = [];
+            var d = new Date();
+            s.push("-- ");
+            s.push(this.timestamp());
+            s.push(' ');
+            s.push(this._prefix);
+            s.push(category);
+            s.push(": ");
+            s.push(message);
+            this.write(s.join(""), true);
+        },
+        warning: function(message)
+        {
+            var s = [];
+            var d = new Date();
+            s.push("-! ");
+            s.push(this.timestamp());
+            s.push(' ');
+            s.push(this._prefix);
+            s.push("warning: ");
+            s.push(message);
+            this.write(s.join(""), true);
+        },
+        error: function(message)
+        {
+            var s = [];
+            var d = new Date();
+            s.push("!! ");
+            s.push(this.timestamp());
+            s.push(' ');
+            s.push(this._prefix);
+            s.push("error: ");
+            s.push(message);
+            this.write(s.join(""), true);
+        },
+        cloneWithPrefix: function(prefix)
+        {
+            return new Logger(prefix);
+        },
+        write: function(message, indent)
+        {
+            if(indent)
+            {
+                message = message.replace(/\n/g, "\n   ");
+            }
+
+            console.log(message);
+        },
+        timestamp: function()
+        {
+            var d = new Date();
+            var mon = d.getMonth() + 1;
+            mon = mon < 10 ? "0" + mon : mon;
+            var day = d.getDate();
+            day = day < 10 ? "0" + day : day;
+            // TODO: Include milliseconds?
+            return mon + "-" + day + "-" + d.getFullYear() + " " + d.toLocaleTimeString();
         }
-
-        console.log(message);
-    };
-
-    Logger.prototype.timestamp = function()
-    {
-        var d = new Date();
-        var mon = d.getMonth() + 1;
-        mon = mon < 10 ? "0" + mon : mon;
-        var day = d.getDate();
-        day = day < 10 ? "0" + day : day;
-        // TODO: Include milliseconds?
-        return mon + "-" + day + "-" + d.getFullYear() + " " + d.toLocaleTimeString();
-    };
-
+    });
     Ice.Logger = Logger;
     global.Ice = Ice;
 }());

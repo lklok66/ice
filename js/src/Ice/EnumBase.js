@@ -9,53 +9,56 @@
 
 (function(){
     var global = this;
+    
+    require("Ice/Class");
+    
     var Slice = global.Slice || {};
     var Ice = global.Ice || {};
-    
     //
     // Ice.EnumBase
     //
-    var EnumBase = function(name, value)
-    {
-        this._name = name;
-        this._value = value;
-    };
+    var EnumBase = Ice.__defineClass({
+        __init__: function(name, value)
+        {
+            this._name = name;
+            this._value = value;
+        },
+        equals: function(rhs)
+        {
+            if(this === rhs)
+            {
+                return true;
+            }
 
-    Object.defineProperty(EnumBase.prototype, 'name', {
+            var proto = Object.getPrototypeOf(this);
+            if(!(rhs instanceof proto.constructor))
+            {
+                return false;
+            }
+
+            return this._value == rhs._value;
+        },
+        hashCode: function()
+        {
+            return this._value;
+        },
+        toString: function()
+        {
+            return this._name;
+        }
+    });
+    
+    var prototype = EnumBase.prototype;
+    
+    Object.defineProperty(prototype, 'name', {
         enumerable: true,
         get: function() { return this._name; }
     });
 
-    Object.defineProperty(EnumBase.prototype, 'value', {
+    Object.defineProperty(prototype, 'value', {
         enumerable: true,
         get: function() { return this._value; }
     });
-
-    EnumBase.prototype.equals = function(rhs)
-    {
-        if(this === rhs)
-        {
-            return true;
-        }
-
-        var proto = Object.getPrototypeOf(this);
-        if(!(rhs instanceof proto.constructor))
-        {
-            return false;
-        }
-
-        return this._value == rhs._value;
-    };
-
-    EnumBase.prototype.hashCode = function()
-    {
-        return this._value;
-    };
-
-    EnumBase.prototype.toString = function()
-    {
-        return this._name;
-    };
     
     var write = function(os, v)
     {

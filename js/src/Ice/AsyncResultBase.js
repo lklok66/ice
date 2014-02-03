@@ -10,74 +10,73 @@
 (function(){
     var global = this;
     
+    require("Ice/Class");
     require("Ice/Debug");
     require("Ice/Promise");
     require("Ice/Exception");
 
     var Ice = global.Ice || {};
 
-    var Debug = Ice.Debug;
     var Promise = Ice.Promise;
 
-    var AsyncResultBase = function(communicator, op, connection, proxy, adapter)
-    {
-        //
-        // AsyncResultBase can be constructed by a sub-type's prototype, in which case the
-        // arguments are undefined.
-        //
-        Promise.call(this);
-        if(communicator !== undefined)
+    var AsyncResultBase = Ice.__defineClass(Promise, {
+        __init__: function(communicator, op, connection, proxy, adapter)
         {
-            this._communicator = communicator;
-            this._instance = communicator !== null ? communicator.instance : null;
-            this._operation = op;
-            this._connection = connection;
-            this._proxy = proxy;
-            this._adapter = adapter;
-        }
-    };
-
-    AsyncResultBase.prototype = new Promise();
-    AsyncResultBase.prototype.constructor = AsyncResultBase;
-
-    //
-    // Intercept the call to fail() so that we can attach a reference to "this"
-    // to the exception.
-    //
-    AsyncResultBase.prototype.fail = function()
-    {
-        var args = arguments;
-        if(args.length > 0 && args[0] instanceof Error)
+            //
+            // AsyncResultBase can be constructed by a sub-type's prototype, in which case the
+            // arguments are undefined.
+            //
+            Promise.call(this);
+            if(communicator !== undefined)
+            {
+                this._communicator = communicator;
+                this._instance = communicator !== null ? communicator.instance : null;
+                this._operation = op;
+                this._connection = connection;
+                this._proxy = proxy;
+                this._adapter = adapter;
+            }
+        },
+        //
+        // Intercept the call to fail() so that we can attach a reference to "this"
+        // to the exception.
+        //
+        fail: function()
         {
-            args[0]._asyncResult = this;
+            var args = arguments;
+            if(args.length > 0 && args[0] instanceof Error)
+            {
+                args[0]._asyncResult = this;
+            }
+            Promise.prototype.fail.apply(this, args);
+        },
+        __exception: function(ex)
+        {
+            this.fail(ex);
         }
-        Promise.prototype.fail.apply(this, args);
-    };
-
-    Object.defineProperty(AsyncResultBase.prototype, "communicator", {
+    });
+    
+    var prototype = AsyncResultBase.prototype;
+    
+    Object.defineProperty(prototype, "communicator", {
         get: function() { return this._communicator; }
     });
 
-    Object.defineProperty(AsyncResultBase.prototype, "connection", {
+    Object.defineProperty(prototype, "connection", {
         get: function() { return this._connection; }
     });
 
-    Object.defineProperty(AsyncResultBase.prototype, "proxy", {
+    Object.defineProperty(prototype, "proxy", {
         get: function() { return this._proxy; }
     });
 
-    Object.defineProperty(AsyncResultBase.prototype, "adapter", {
+    Object.defineProperty(prototype, "adapter", {
         get: function() { return this._adapter; }
     });
 
-    Object.defineProperty(AsyncResultBase.prototype, "operation", {
+    Object.defineProperty(prototype, "operation", {
         get: function() { return this._operation; }
     });
-
-    AsyncResultBase.prototype.__exception = function(ex)
-    {
-        this.fail(ex);
-    };
 
     Ice.AsyncResultBase = AsyncResultBase;
 

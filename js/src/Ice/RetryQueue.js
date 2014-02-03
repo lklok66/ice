@@ -10,6 +10,7 @@
 (function(){
     var global = this;
     
+    require("Ice/Class");
     require("Ice/Debug");
     require("Ice/LocalException");
 
@@ -17,69 +18,68 @@
 
     var Debug = Ice.Debug;
 
-    var RetryQueue = function(instance)
-    {
-        this._instance = instance;
-        this._requests = [];
-    };
-
-    RetryQueue.prototype.add = function(outAsync, interval)
-    {
-        var task = new RetryTask(this, outAsync);
-        this._instance.timer().schedule(function()
+    var defineClass = Ice.__defineClass;
+    
+    var RetryQueue = defineClass({
+        __init__: function(instance)
+        {
+            this._instance = instance;
+            this._requests = [];
+        },
+        add: function(outAsync, interval)
+        {
+            var task = new RetryTask(this, outAsync);
+            this._instance.timer().schedule(function()
+                {
+                    task.run();
+                }, interval);
+            this._requests.push(task);
+        },
+        destroy: function()
+        {
+            for(var i = 0; i < this._requests.length; ++i)
             {
-                task.run();
-            }, interval);
-        this._requests.push(task);
-    };
-
-    RetryQueue.prototype.destroy = function()
-    {
-        for(var i = 0; i < this._requests.length; ++i)
+                this._requests[i].destroy();
+            }
+            this._requests = [];
+        },
+        remove: function(task)
         {
-            this._requests[i].destroy();
+            var idx = this._requests.indexOf(task);
+            if(idx >= 0)
+            {
+                this._requests.splice(idx, 1);
+                return true;
+            }
+            return false;
         }
-        this._requests = [];
-    };
-
-    RetryQueue.prototype.remove = function(task)
-    {
-        var idx = this._requests.indexOf(task);
-        if(idx >= 0)
-        {
-            this._requests.splice(idx, 1);
-            return true;
-        }
-        return false;
-    };
-
+    });
     Ice.RetryQueue = RetryQueue;
 
-    var RetryTask = function(queue, outAsync, interval)
-    {
-        this.queue = queue;
-        this.outAsync = outAsync;
-    };
-
-    RetryTask.prototype.run = function()
-    {
-        if(this.queue.remove(this))
+    var RetryTask = defineClass({
+        __init__: function(queue, outAsync, interval)
         {
-            try
+            this.queue = queue;
+            this.outAsync = outAsync;
+        },
+        run: function()
+        {
+            if(this.queue.remove(this))
             {
-                this.outAsync.__send();
+                try
+                {
+                    this.outAsync.__send();
+                }
+                catch(ex)
+                {
+                    this.outAsync.__exception(ex);
+                }
             }
-            catch(ex)
-            {
-                this.outAsync.__exception(ex);
-            }
+        },
+        destroy: function()
+        {
+            this.outAsync.__exception(new Ice.CommunicatorDestroyedException());
         }
-    };
-
-    RetryTask.prototype.destroy = function()
-    {
-        this.outAsync.__exception(new Ice.CommunicatorDestroyedException());
-    };
-
+    });
     global.Ice = Ice;
 }());

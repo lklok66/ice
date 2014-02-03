@@ -9,51 +9,16 @@
 
 (function(){
     var global = this;
+    
+    require("Ice/Class");
+    
     var Ice = global.Ice || {};
     
     //
     // Promise State
     //
-    var State = {};
-    State.Pending = 0;
-    State.Success = 1;
-    State.Failed = 2;
-
-    var Promise = function()
-    {
-        this.__state = State.Pending;
-        this.__listeners = [];
-    };
+    var State = {Pending: 0, Success: 1, Failed: 2};
     
-    Promise.State = State;
-
-    Promise.prototype.then = function(onResponse, onException, onProgress)
-    {
-        var promise = new Promise();
-        var self = this;
-        //
-        // Use setTimeout so the listeners are not resolved until the call stack is empty.
-        //
-        setTimeout(
-            function()
-            {
-                self.__listeners.push(
-                    {
-                        promise:promise,
-                        onResponse:onResponse,
-                        onException:onException,
-                        onProgress:onProgress
-                    });
-                self.resolve();
-            }, 0);
-        return promise;
-    };
-
-    Promise.prototype.exception = function(onException)
-    {
-        return this.then(null, onException);
-    };
-
     var resolveImp = function(self, listener)
     {
         var callback = self.__state === State.Success ? listener.onResponse : listener.onException;
@@ -96,104 +61,129 @@
         }
     };
 
-    Promise.prototype.resolve = function()
-    {
-        if(this.__state === State.Pending)
+    var Promise = Ice.__defineClass({
+        __init__: function()
         {
-            return;
-        }
-
-        var obj;
-        while((obj = this.__listeners.pop()))
+            this.__state = State.Pending;
+            this.__listeners = [];
+        },
+        then: function(onResponse, onException, onProgress)
         {
-            //
-            // We use a separate function here to capture the listeners
-            // in the loop.
-            //
-            resolveImp(this, obj);
-        }
-    };
-
-    Promise.prototype.progress = function()
-    {
-        //
-        // Don't report progress events after the promise is fulfilled.
-        //
-        if(this.__state !== State.Pending)
-        {
-            return;
-        }
-
-        var args = arguments;
-        var self = this;
-
-        //
-        // Use setTimeout so the listener are not notified until the call stack is empty.
-        //
-        setTimeout(
-            function()
-            {
-                var i, listener;
-                for(i = 0; i < self.__listeners.length; ++i)
-                {
-                    listener = self.__listeners[i];
-
-                    try
-                    {
-                        if(listener && typeof listener.onProgress === 'function')
-                        {
-                            listener.onProgress.apply(null, args);
-                        }
-                    }
-                    catch(e)
-                    {
-                        //TODO ignore or trace a warning when the progress callback throws.
-                        console.log(e);
-                    }
-                }
-            }, 0);
-    };
-
-    Promise.prototype.setState = function(state, args)
-    {
-        if(this.__state === State.Pending && state !== State.Pending)
-        {
-            this.__state = state;
-            this._args = args;
+            var promise = new Promise();
+            var self = this;
             //
             // Use setTimeout so the listeners are not resolved until the call stack is empty.
             //
+            setTimeout(
+                function()
+                {
+                    self.__listeners.push(
+                        {
+                            promise:promise,
+                            onResponse:onResponse,
+                            onException:onException,
+                            onProgress:onProgress
+                        });
+                    self.resolve();
+                }, 0);
+            return promise;
+        },
+        exception: function(onException)
+        {
+            return this.then(null, onException);
+        },
+        resolve: function()
+        {
+            if(this.__state === State.Pending)
+            {
+                return;
+            }
+
+            var obj;
+            while((obj = this.__listeners.pop()))
+            {
+                //
+                // We use a separate function here to capture the listeners
+                // in the loop.
+                //
+                resolveImp(this, obj);
+            }
+        },
+        progress: function()
+        {
+            //
+            // Don't report progress events after the promise is fulfilled.
+            //
+            if(this.__state !== State.Pending)
+            {
+                return;
+            }
+
+            var args = arguments;
             var self = this;
-            setTimeout(function(){ self.resolve(); }, 0);
+
+            //
+            // Use setTimeout so the listener are not notified until the call stack is empty.
+            //
+            setTimeout(
+                function()
+                {
+                    var i, listener;
+                    for(i = 0; i < self.__listeners.length; ++i)
+                    {
+                        listener = self.__listeners[i];
+
+                        try
+                        {
+                            if(listener && typeof listener.onProgress === 'function')
+                            {
+                                listener.onProgress.apply(null, args);
+                            }
+                        }
+                        catch(e)
+                        {
+                            //TODO ignore or trace a warning when the progress callback throws.
+                            console.log(e);
+                        }
+                    }
+                }, 0);
+        },
+        setState: function(state, args)
+        {
+            if(this.__state === State.Pending && state !== State.Pending)
+            {
+                this.__state = state;
+                this._args = args;
+                //
+                // Use setTimeout so the listeners are not resolved until the call stack is empty.
+                //
+                var self = this;
+                setTimeout(function(){ self.resolve(); }, 0);
+            }
+        },
+        succeed: function()
+        {
+            var args = arguments;
+            this.setState(State.Success, args);
+        },
+        fail: function()
+        {
+            var args = arguments;
+            this.setState(State.Failed, args);
+        },
+        succeeded: function()
+        {
+            return this.__state === State.Success;
+        },
+        failed: function()
+        {
+            return this.__state === State.Failed;
+        },
+        completed: function()
+        {
+            return this.__state !== State.Pending;
         }
-    };
-
-    Promise.prototype.succeed = function()
-    {
-        var args = arguments;
-        this.setState(State.Success, args);
-    };
-
-    Promise.prototype.fail = function()
-    {
-        var args = arguments;
-        this.setState(State.Failed, args);
-    };
-
-    Promise.prototype.succeeded = function()
-    {
-        return this.__state === State.Success;
-    };
-
-    Promise.prototype.failed = function()
-    {
-        return this.__state === State.Failed;
-    };
-
-    Promise.prototype.completed = function()
-    {
-        return this.__state !== State.Pending;
-    };
+    });
 
     //
     // Create a new promise object that is fulfilled when all the promise arguments

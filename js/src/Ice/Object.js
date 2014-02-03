@@ -14,7 +14,7 @@
     //
     // Using IceObject in this file to avoid collisions with the native Object.
     //
-
+    require("Ice/Class");
     require("Ice/Exception");
     require("Ice/ExUtil");
     require("Ice/FormatType");
@@ -26,68 +26,89 @@
 
     var ExUtil = Ice.ExUtil;
     
+    var defineClass = Ice.__defineClass;
+    
     var nextAddress = 0;
-
-    var IceObject = function()
-    {
-        // Fake Address used as the hashCode for this object instance.
-        this.__address = nextAddress++;
-    };
-
-    IceObject.prototype.hashCode = function()
-    {
-        return this.__address;
-    };
-
-    IceObject.prototype.ice_isA = function(s, current)
-    {
-        return this.ice_ids().indexOf(s) >= 0;
-    };
-
-    IceObject.prototype.ice_ping = function(current)
-    {
-    };
-
+    
+    var IceObject = defineClass({
+        __init__: function()
+        {
+            // Fake Address used as the hashCode for this object instance.
+            this.__address = nextAddress++;
+        },
+        hashCode: function()
+        {
+            return this.__address;
+        },
+        ice_isA: function(s, current)
+        {
+            return this.ice_ids().indexOf(s) >= 0;
+        },
+        ice_ping: function(current)
+        {
+        },
+        ice_ids: function(current)
+        {
+            return this.__mostDerivedType().__ids;
+        },
+        ice_id: function(current)
+        {
+            return this.__mostDerivedType().__id;
+        },
+        toString: function()
+        {
+            return "[object " + this.ice_id() + "]";
+        },
+        ice_preMarshal: function()
+        {
+        },
+        ice_postUnmarshal: function()
+        {
+        },
+        __write: function(os)
+        {
+            os.startWriteObject(null);
+            __writeImpl(this, os, this.__mostDerivedType());
+            os.endWriteObject();
+        },
+        __read: function(is)
+        {
+            is.startReadObject();
+            __readImpl(this, is, this.__mostDerivedType());
+            is.endReadObject(false);
+        },
+        ice_instanceof: function(T)
+        {
+            if(T)
+            {
+                if(this instanceof T)
+                {
+                    return true;
+                }
+                return this.__mostDerivedType().__instanceof(T);
+            }
+            return false;
+        },
+        //
+        // __mostDerivedType returns the the most derived Ice generated class. This is
+        // necessary because the user might extend Slice generated classes. The user 
+        // class extensions don't have __id, __ids, __instanceof etc static members so
+        // the implementation of ice_id, ice_ids and ice_instanceof would fail trying 
+        // to access those members of the user defined class. Instead, ice_id, ice_ids
+        // and ice_instanceof call __mostDerivedType to get the most derived Ice class.
+        //
+        // The __mostDerivedType is overriden by each Slice generated class, see the 
+        // Slice.defineObject method implementation for details.
+        //
+        __mostDerivedType: function()
+        {
+            return IceObject;
+        }
+    });
+    
     IceObject.ice_staticId = function()
     {
         return IceObject.__id;
-    };
-
-    IceObject.prototype.ice_ids = function(current)
-    {
-        return this.__mostDerivedType().__ids;
-    };
-
-    IceObject.prototype.ice_id = function(current)
-    {
-        return this.__mostDerivedType().__id;
-    };
-    
-    IceObject.prototype.toString = function()
-    {
-        return "[object " + this.ice_id() + "]";
-    };
-
-    IceObject.prototype.ice_preMarshal = function()
-    {
-    };
-
-    IceObject.prototype.ice_postUnmarshal = function()
-    {
-    };
-
-    IceObject.prototype.__write = function(os)
-    {
-        os.startWriteObject(null);
-        __writeImpl(this, os, this.__mostDerivedType());
-        os.endWriteObject();
-    };
-
-    IceObject.prototype.__read = function(is)
-    {
-        is.startReadObject();
-        __readImpl(this, is, this.__mostDerivedType());
-        is.endReadObject(false);
     };
     
     IceObject.__instanceof = function(T)
@@ -111,20 +132,7 @@
         }
         return false;
     };
-
-    IceObject.prototype.ice_instanceof = function(T)
-    {
-        if(T)
-        {
-            if(this instanceof T)
-            {
-                return true;
-            }
-            return this.__mostDerivedType().__instanceof(T);
-        }
-        return false;
-    };
-
+    
     IceObject.__ids = ["::Ice::Object"];
     IceObject.__id = IceObject.__ids[0];
     IceObject.__compactId = -1;
@@ -164,22 +172,6 @@
                 stringSeqHelper.write(__os, __ret);
             }
         }
-    };
-
-    //
-    // __mostDerivedType returns the the most derived Ice generated class. This is
-    // necessary because the user might extend Slice generated classes. The user 
-    // class extensions don't have __id, __ids, __instanceof etc static members so
-    // the implementation of ice_id, ice_ids and ice_instanceof would fail trying 
-    // to access those members of the user defined class. Instead, ice_id, ice_ids
-    // and ice_instanceof call __mostDerivedType to get the most derived Ice class.
-    //
-    // The __mostDerivedType is overriden by each Slice generated class, see the 
-    // Slice.defineObject method implementation for details.
-    //
-    IceObject.prototype.__mostDerivedType = function()
-    {
-        return IceObject;
     };
 
     //
@@ -252,84 +244,84 @@
         this.__slicedData = is.endReadObject(true);
     };
 
-    var AMDCallback = function(incomingAsync, exceptions, format, marshalFn)
-    {
-        this.incomingAsync = incomingAsync;
-        this.exceptions = exceptions;
-        this.format = format;
-        this.marshalFn = marshalFn;
-    };
-
-    AMDCallback.prototype.ice_response = function()
-    {
-        var args = arguments;
-
-        try
+    var AMDCallback = defineClass({
+        __init__: function(incomingAsync, exceptions, format, marshalFn)
         {
-            if(this.marshalFn === undefined)
+            this.incomingAsync = incomingAsync;
+            this.exceptions = exceptions;
+            this.format = format;
+            this.marshalFn = marshalFn;
+        },
+        ice_response: function()
+        {
+            var args = arguments;
+
+            try
             {
-                if(args.length > 0)
+                if(this.marshalFn === undefined)
                 {
-                    //
-                    // No results expected.
-                    //
-                    this.incomingAsync.__exception(
-                        new Ice.UnknownException("ice_response called with invalid arguments"));
-                    return;
+                    if(args.length > 0)
+                    {
+                        //
+                        // No results expected.
+                        //
+                        this.incomingAsync.__exception(
+                            new Ice.UnknownException("ice_response called with invalid arguments"));
+                        return;
+                    }
+                    else
+                    {
+                        this.incomingAsync.__writeEmptyParams();
+                    }
                 }
                 else
                 {
-                    this.incomingAsync.__writeEmptyParams();
+                    var __os = this.incomingAsync.__startWriteParams(this.format);
+                    args.splice(0, 0, __os);
+                    this.marshalFn.apply(this.marshalFn, args);
+                    this.incomingAsync.__endWriteParams(true);
                 }
+            }
+            catch(ex)
+            {
+                this.incomingAsync.__exception(ex);
+            }
+        },
+        ice_exception: function(ex)
+        {
+            if(this.exceptions !== undefined)
+            {
+                //
+                // Make sure the given exception is an instance of one of the declared user exceptions
+                // for this operation.
+                //
+                for(var i = 0; i < this.exceptions.length; ++i)
+                {
+                    if(ex instanceof this.exceptions[i])
+                    {
+                        //
+                        // User exception is valid, now marshal it.
+                        //
+                        this.incomingAsync.__exception(ex);
+                        return;
+                    }
+                }
+            }
+            else if(ex instanceof Ice.UserException)
+            {
+                this.incomingAsync.__exception(new Ice.UnknownUserException(ExUtil.toString(ex)));
+            }
+            else if(ex instanceof Ice.LocalException)
+            {
+                this.incomingAsync.__exception(new Ice.UnknownLocalException(ExUtil.toString(ex)));
             }
             else
             {
-                var __os = this.incomingAsync.__startWriteParams(this.format);
-                args.splice(0, 0, __os);
-                this.marshalFn.apply(this.marshalFn, args);
-                this.incomingAsync.__endWriteParams(true);
+                this.incomingAsync.__exception(new Ice.UnknownException(ExUtil.toString(ex)));
             }
         }
-        catch(ex)
-        {
-            this.incomingAsync.__exception(ex);
-        }
-    };
-
-    AMDCallback.prototype.ice_exception = function(ex)
-    {
-        if(this.exceptions !== undefined)
-        {
-            //
-            // Make sure the given exception is an instance of one of the declared user exceptions
-            // for this operation.
-            //
-            for(var i = 0; i < this.exceptions.length; ++i)
-            {
-                if(ex instanceof this.exceptions[i])
-                {
-                    //
-                    // User exception is valid, now marshal it.
-                    //
-                    this.incomingAsync.__exception(ex);
-                    return;
-                }
-            }
-        }
-        else if(ex instanceof Ice.UserException)
-        {
-            this.incomingAsync.__exception(new Ice.UnknownUserException(ExUtil.toString(ex)));
-        }
-        else if(ex instanceof Ice.LocalException)
-        {
-            this.incomingAsync.__exception(new Ice.UnknownLocalException(ExUtil.toString(ex)));
-        }
-        else
-        {
-            this.incomingAsync.__exception(new Ice.UnknownException(ExUtil.toString(ex)));
-        }
-    };
-
+    });
+    
     var __dispatchImpl = function(type, servant, incomingAsync, current)
     {
         var op;

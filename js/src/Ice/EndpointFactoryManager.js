@@ -9,6 +9,7 @@
 
 (function(){
     var global = this;
+    require("Ice/Class");
     require("Ice/BasicStream");
     require("Ice/Debug");
     require("Ice/OpaqueEndpointI");
@@ -26,124 +27,121 @@
     var OpaqueEndpointI = Ice.OpaqueEndpointI;
     var Protocol = Ice.Protocol;
 
-    var EndpointFactoryManager = function(instance)
-    {
-        this._instance = instance;
-        this._factories = [];
-    };
-
-    EndpointFactoryManager.prototype.add = function(factory)
-    {
-        for(var i = 0; i < this._factories.length; ++i)
+    var EndpointFactoryManager = Ice.__defineClass({
+        __init__: function(instance)
         {
-            Debug.assert(this._factories[i].type() != factory.type());
-        }
-
-        this._factories.push(factory);
-    };
-
-    EndpointFactoryManager.prototype.get = function(type)
-    {
-        for(var i = 0; i < this._factories.length; ++i)
+            this._instance = instance;
+            this._factories = [];
+        },
+        add: function(factory)
         {
-            if(this._factories[i].type() === type)
+            for(var i = 0; i < this._factories.length; ++i)
             {
-                return this._factories[i];
+                Debug.assert(this._factories[i].type() != factory.type());
             }
-        }
-        return null;
-    };
 
-    EndpointFactoryManager.prototype.create = function(str, oaEndpoint)
-    {
-        var s = str.trim();
-        if(s.length === 0)
+            this._factories.push(factory);
+        },
+        get: function(type)
         {
-            throw new EndpointParseException("value has no non-whitespace characters");
-        }
-
-        var protocol;
-        var rest = "";
-        var i, length;
-        var pos = s.search(/[ \t\n\r]+/);
-        if(pos === -1)
-        {
-            protocol = s;
-        }
-        else
-        {
-            protocol = s.substring(0, pos);
-            if(pos < s.length)
+            for(var i = 0; i < this._factories.length; ++i)
             {
-                rest = s.substring(pos);
-            }
-        }
-
-        if(protocol === "default")
-        {
-            protocol = this._instance.defaultsAndOverrides().defaultProtocol;
-        }
-
-        for(i = 0, length = this._factories.length; i < length; ++i)
-        {
-            if(this._factories[i].protocol() === protocol)
-            {
-                return this._factories[i].create(rest, oaEndpoint);
-            }
-        }
-
-        //
-        // If the stringified endpoint is opaque, create an unknown endpoint,
-        // then see whether the type matches one of the known endpoints.
-        //
-        if(protocol === "opaque")
-        {
-            var ue = OpaqueEndpointI.fromString(rest);
-            for(i = 0, length =  this._factories.length; i < length; ++i)
-            {
-                if(this._factories[i].type() == ue.type())
+                if(this._factories[i].type() === type)
                 {
-                    //
-                    // Make a temporary stream, write the opaque endpoint data into the stream,
-                    // and ask the factory to read the endpoint data from that stream to create
-                    // the actual endpoint.
-                    //
-                    var bs = new BasicStream(this._instance, Protocol.currentProtocolEncoding, true);
-                    ue.streamWrite(bs);
-                    bs.pos = 0;
-                    bs.readShort(); // type
-                    return this._factories[i].read(bs);
+                    return this._factories[i];
                 }
             }
-            return ue; // Endpoint is opaque, but we don't have a factory for its type.
-        }
-
-        return null;
-    };
-
-    EndpointFactoryManager.prototype.read = function(s)
-    {
-        var type = s.readShort();
-
-        for(var i = 0; i < this._factories.length; ++i)
+            return null;
+        },
+        create: function(str, oaEndpoint)
         {
-            if(this._factories[i].type() == type)
+            var s = str.trim();
+            if(s.length === 0)
             {
-                return this._factories[i].read(s);
+                throw new EndpointParseException("value has no non-whitespace characters");
             }
-        }
-        return OpaqueEndpointI.fromStream(type, s);
-    };
 
-    EndpointFactoryManager.prototype.destroy = function()
-    {
-        for(var i = 0; i < this._factories.length; ++i)
+            var protocol;
+            var rest = "";
+            var i, length;
+            var pos = s.search(/[ \t\n\r]+/);
+            if(pos === -1)
+            {
+                protocol = s;
+            }
+            else
+            {
+                protocol = s.substring(0, pos);
+                if(pos < s.length)
+                {
+                    rest = s.substring(pos);
+                }
+            }
+
+            if(protocol === "default")
+            {
+                protocol = this._instance.defaultsAndOverrides().defaultProtocol;
+            }
+
+            for(i = 0, length = this._factories.length; i < length; ++i)
+            {
+                if(this._factories[i].protocol() === protocol)
+                {
+                    return this._factories[i].create(rest, oaEndpoint);
+                }
+            }
+
+            //
+            // If the stringified endpoint is opaque, create an unknown endpoint,
+            // then see whether the type matches one of the known endpoints.
+            //
+            if(protocol === "opaque")
+            {
+                var ue = OpaqueEndpointI.fromString(rest);
+                for(i = 0, length =  this._factories.length; i < length; ++i)
+                {
+                    if(this._factories[i].type() == ue.type())
+                    {
+                        //
+                        // Make a temporary stream, write the opaque endpoint data into the stream,
+                        // and ask the factory to read the endpoint data from that stream to create
+                        // the actual endpoint.
+                        //
+                        var bs = new BasicStream(this._instance, Protocol.currentProtocolEncoding, true);
+                        ue.streamWrite(bs);
+                        bs.pos = 0;
+                        bs.readShort(); // type
+                        return this._factories[i].read(bs);
+                    }
+                }
+                return ue; // Endpoint is opaque, but we don't have a factory for its type.
+            }
+
+            return null;
+        },
+        read: function(s)
         {
-            this._factories[i].destroy();
-        }
-        this._factories = [];
-    };
+            var type = s.readShort();
 
+            for(var i = 0; i < this._factories.length; ++i)
+            {
+                if(this._factories[i].type() == type)
+                {
+                    return this._factories[i].read(s);
+                }
+            }
+            return OpaqueEndpointI.fromStream(type, s);
+        },
+        destroy: function()
+        {
+            for(var i = 0; i < this._factories.length; ++i)
+            {
+                this._factories[i].destroy();
+            }
+            this._factories = [];
+        }
+    });
+    
     Ice.EndpointFactoryManager = EndpointFactoryManager;
     global.Ice = Ice;
 }());

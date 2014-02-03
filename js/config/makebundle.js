@@ -199,6 +199,7 @@ d.depends = d.expand().sort();
 
 var file, i, length = d.depends.length, fullPath, line;
 
+var optimize = process.env.OPTIMIZE && process.env.OPTIMIZE == "yes";
 for(i = 0;  i < length; ++i)
 {
     file = d.depends[i].file;
@@ -207,14 +208,35 @@ for(i = 0;  i < length; ++i)
     {
         fullPath = path.join(baseDir, file)
     }
-    
+    if(optimize && file.indexOf("Ice/Debug.js") !== -1)
+    {
+        continue;
+    }
     data = fs.readFileSync(fullPath); 
     lines = data.toString().split("\n");
+    var skip = false;
     for(j in lines)
     {
-        line = lines[j];
+        line = lines[j].trim();
         if(line.match(/require\(".*"\);/))
         {
+            continue;
+        }
+        if(optimize && line.match(/Debug\.assert\(/))
+        {
+            if(line.lastIndexOf(";") === -1)
+            {
+                // skip until next semicolon
+                skip = true;
+            }
+            continue;
+        }
+        if(skip)
+        {
+            if(line.lastIndexOf(";") !== -1)
+            {
+                skip = false;
+            }
             continue;
         }
         process.stdout.write(lines[j] + "\n");

@@ -11,20 +11,19 @@
     var global = this;
     var Ice = global.Ice || {};
     
-    var ObjectFactory = function()
-    {
-    };
-
-    ObjectFactory.prototype.create = function(type)
-    {
-        throw new Error("not implemented");
-    };
-
-    ObjectFactory.prototype.destroy = function()
-    {
-        throw new Error("not implemented");
-    };
-
+    require("Ice/Class");
+    
+    var ObjectFactory = Ice.__defineClass({
+        create: function(type)
+        {
+            throw new Error("not implemented");
+        },
+        destroy: function()
+        {
+            throw new Error("not implemented");
+        }
+    });
+    
     Ice.ObjectFactory = ObjectFactory;
     global.Ice = Ice;
 }());

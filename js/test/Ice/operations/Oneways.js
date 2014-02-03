@@ -102,7 +102,8 @@
                         function(ex)
                         {
                             promise.fail(ex);
-                        });
+                        }
+                    );
                 }
                 catch(ex)
                 {

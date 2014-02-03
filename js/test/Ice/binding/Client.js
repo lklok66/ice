@@ -21,6 +21,8 @@
         {
             if(!b)
             {
+                console.log(Error().stack);
+                process.exit(1);
                 throw new Error("test failed");
             }
         };
@@ -410,7 +412,6 @@
                         function(asyncResult, obj)
                         {
                             adapter = obj;
-                            
                             return Promise.all(
                                 adapter.getTestIntf(),
                                 adapter.getTestIntf());

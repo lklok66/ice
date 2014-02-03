@@ -9,6 +9,7 @@
 
 (function(){
     var global = this;
+    require("Ice/Class");
     require("Ice/HashMap");
     require("Ice/RouterInfo");
     require("Ice/Router");
@@ -19,61 +20,59 @@
     var RouterInfo = Ice.RouterInfo;
     var RouterPrx = Ice.RouterPrx;
 
-    var RouterManager = function()
-    {
-        this._table = new HashMap(); // Map<Ice.RouterPrx, RouterInfo>
-        this._table.keyComparator = HashMap.compareEquals;
-    };
-
-    RouterManager.prototype.destroy = function()
-    {
-        for(var e = this._table.entries; e !== null; e = e.next)
+    var RouterManager = Ice.__defineClass({
+        __init__: function()
         {
-            e.value.destroy();
-        }
-        this._table.clear();
-    };
-
-    //
-    // Returns router info for a given router. Automatically creates
-    // the router info if it doesn't exist yet.
-    //
-    RouterManager.prototype.find = function(rtr)
-    {
-        if(rtr === null)
+            this._table = new HashMap(); // Map<Ice.RouterPrx, RouterInfo>
+            this._table.keyComparator = HashMap.compareEquals;
+        },
+        destroy: function()
         {
-            return null;
-        }
-
+            for(var e = this._table.entries; e !== null; e = e.next)
+            {
+                e.value.destroy();
+            }
+            this._table.clear();
+        },
         //
-        // The router cannot be routed.
+        // Returns router info for a given router. Automatically creates
+        // the router info if it doesn't exist yet.
         //
-        var router = RouterPrx.uncheckedCast(rtr.ice_router(null));
-
-        var info = this._table.get(router);
-        if(info === undefined)
+        find: function(rtr)
         {
-            info = new RouterInfo(router);
-            this._table.set(router, info);
-        }
+            if(rtr === null)
+            {
+                return null;
+            }
 
-        return info;
-    };
-
-    RouterManager.prototype.erase = function(rtr)
-    {
-        var info = null;
-        if(rtr !== null)
-        {
+            //
             // The router cannot be routed.
+            //
             var router = RouterPrx.uncheckedCast(rtr.ice_router(null));
 
-            info = this._table.get(router);
-            this._table.delete(router);
-        }
-        return info;
-    };
+            var info = this._table.get(router);
+            if(info === undefined)
+            {
+                info = new RouterInfo(router);
+                this._table.set(router, info);
+            }
 
+            return info;
+        },
+        erase: function(rtr)
+        {
+            var info = null;
+            if(rtr !== null)
+            {
+                // The router cannot be routed.
+                var router = RouterPrx.uncheckedCast(rtr.ice_router(null));
+
+                info = this._table.get(router);
+                this._table.delete(router);
+            }
+            return info;
+        }
+    });
     Ice.RouterManager = RouterManager;
     global.Ice = Ice;
 }(this));

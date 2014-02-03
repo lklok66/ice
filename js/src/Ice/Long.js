@@ -9,42 +9,44 @@
 
 (function(){
     var global = this;
+    
+    require("Ice/Class");
+    
     //
     // The Long type represents a signed 64-bit integer as two 32-bit values
     // corresponding to the high and low words.
     //
     var Ice = global.Ice || {};
     
-    var Long = function(high, low)
-    {
-        this.high = high;
-        this.low = low;
-    };
-
-    Long.prototype.hashCode = function()
-    {
-        return this.low;
-    };
-
-    Long.prototype.equals = function(rhs)
-    {
-        if(this === rhs)
+    var Long = Ice.__defineClass({
+        __init__: function(high, low)
         {
-            return true;
-        }
-        if(!(rhs instanceof Long))
+            this.high = high;
+            this.low = low;
+        },
+        hashCode: function()
         {
-            return false;
+            return this.low;
+        },
+        equals: function(rhs)
+        {
+            if(this === rhs)
+            {
+                return true;
+            }
+            if(!(rhs instanceof Long))
+            {
+                return false;
+            }
+            
+            return this.high === rhs.high && this.low === rhs.low;
+        },
+        toString: function()
+        {
+            return this.high + ":" + this.low;
         }
-        
-        return this.high === rhs.high && this.low === rhs.low;
-    };
-
-    Long.prototype.toString = function()
-    {
-        return this.high + ":" + this.low;
-    };
-
+    });
+    
     Ice.Long = Long;
     global.Ice = Ice;
 }());

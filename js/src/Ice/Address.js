@@ -9,6 +9,7 @@
 
 (function(){
     var global = this;
+        
     var Ice = global.Ice || {};
     
     var Address = function(host, port)

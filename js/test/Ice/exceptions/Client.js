@@ -20,6 +20,8 @@
         {
             if(!b)
             {
+                console.log(Error().stack);
+                process.exit(1);
                 throw new Error("test failed");
             }
         };

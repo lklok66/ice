@@ -9,16 +9,31 @@
 
 (function(){
     var global = this;
+    
+    require("Ice/Class");
+    
     var Slice = global.Slice || {};
     var Ice = global.Ice || {};
 
+    var defineClass = Ice.__defineClass;
+    
     //
     // Ice.Exception
     //
-    var Exception = function(cause)
-    {
-        this.ice_cause = cause;
-    };
+    var Exception = defineClass(Error, {
+        __init__: function(cause)
+        {
+            this.ice_cause = cause;
+        },
+        ice_name: function()
+        {
+            return "Ice::Exception";
+        },
+        toString: function()
+        {
+            return this.ice_name();
+        }
+    });
     
     Exception.captureStackTrace = function(object)
     {
@@ -62,38 +77,23 @@
         }
     };
 
-    Exception.prototype = new Error();
-    Exception.prototype.constructor = Exception;
-
-    Exception.prototype.ice_name = function()
-    {
-        return "Ice::Exception";
-    };
-
-    Exception.prototype.toString = function()
-    {
-        return this.ice_name();
-    };
-
     Ice.Exception = Exception;
 
     //
     // Ice.LocalException
     //
-    var LocalException = function(cause)
-    {
-        Exception.call(this, cause);
-        Exception.captureStackTrace(this);
-    };
-
-    LocalException.prototype = new Exception();
-    LocalException.prototype.constructor = LocalException;
-
-    LocalException.prototype.ice_name = function()
-    {
-        return "Ice::LocalException";
-    };
-
+    var LocalException = defineClass(Exception, {
+        __init__: function(cause)
+        {
+            Exception.call(this, cause);
+            Exception.captureStackTrace(this);
+        },
+        ice_name: function()
+        {
+            return "Ice::LocalException";
+        }
+    });
+    
     Ice.LocalException = LocalException;
     
     Slice.defineLocalException = function(constructor, base, name)
@@ -111,34 +111,29 @@
     //
     // Ice.UserException
     //
-    var UserException = function(cause)
-    {
-        Exception.call(this, cause);
-        Exception.captureStackTrace(this);
-    };
-
-    UserException.prototype = new Exception();
-    UserException.prototype.constructor = UserException;
-
-    UserException.prototype.ice_name = function()
-    {
-        return "Ice::UserException";
-    };
-
-    UserException.prototype.__write = function(os)
-    {
-        os.startWriteException(null);
-        __writeImpl(this, os, this.__mostDerivedType());
-        os.endWriteException();
-    };
-
-    UserException.prototype.__read = function(is)
-    {
-        is.startReadException();
-        __readImpl(this, is, this.__mostDerivedType());
-        is.endReadException(false);
-    };
-    
+    var UserException = defineClass(Exception, {
+        __init__: function(cause)
+        {
+            Exception.call(this, cause);
+            Exception.captureStackTrace(this);
+        },
+        ice_name: function()
+        {
+            return "Ice::UserException";
+        },
+        __write: function(os)
+        {
+            os.startWriteException(null);
+            __writeImpl(this, os, this.__mostDerivedType());
+            os.endWriteException();
+        },
+        __read: function(is)
+        {
+            is.startReadException();
+            __readImpl(this, is, this.__mostDerivedType());
+            is.endReadException(false);
+        }
+    });
     Ice.UserException = UserException;
     
     //

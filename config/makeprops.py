@@ -536,6 +536,7 @@ class JSPropertyHandler(PropertyHandler):
     def __init__(self, inputfile, c):
         PropertyHandler.__init__(self, inputfile, c)
         self.srcFile = None
+        self.validSections = ["Ice"]
 
     def cleanup(self):
         if self.srcFile != None:
@@ -553,13 +554,15 @@ class JSPropertyHandler(PropertyHandler):
         self.srcFile.write("    %s.validProps =\n" % (self.className))
         self.srcFile.write("    [\n")
         for s in self.sections:
-            self.srcFile.write("        %s.%sProps,\n" % (self.className, s))
+            if s in self.validSections:
+                self.srcFile.write("        %s.%sProps,\n" % (self.className, s))
         self.srcFile.write("    ];\n\n")
         
         self.srcFile.write("    %s.clPropNames =\n" % (self.className))
         self.srcFile.write("    [\n")
         for s in self.cmdLineOptions:
-            self.srcFile.write("        \"%s\",\n" % s)
+            if s in self.validSections:
+                self.srcFile.write("        \"%s\",\n" % s)
         self.srcFile.write("    ];\n")
         
         self.srcFile.write(jsEpilogue % {'classname' : self.className});
@@ -570,24 +573,30 @@ class JSPropertyHandler(PropertyHandler):
         return string.replace(propertyName, "[any]", ".")
 
     def deprecatedImpl(self, propertyName):
-        self.srcFile.write("        new Property(\"/^%s\.%s/\", true, null),\n" % (self.currentSection, \
-                self.fix(propertyName)))
+        if self.currentSection in self.validSections:
+            self.srcFile.write("        new Property(\"/^%s\.%s/\", true, null),\n" % (self.currentSection, \
+                    self.fix(propertyName)))
 
     def deprecatedImplWithReplacementImpl(self, propertyName, deprecatedBy):
-        self.srcFile.write("        new Property(\"/^%s\.%s/\", true, \"%s\"),\n" % \
-                (self.currentSection, self.fix(propertyName), deprecatedBy))
+        if self.currentSection in self.validSections:
+            self.srcFile.write("        new Property(\"/^%s\.%s/\", true, \"%s\"),\n" % \
+                    (self.currentSection, self.fix(propertyName), deprecatedBy))
 
     def propertyImpl(self, propertyName):
-        self.srcFile.write("        new Property(\"/^%s\.%s/\", false, null),\n" % (self.currentSection, \
-                self.fix(propertyName)))
+        if self.currentSection in self.validSections:
+            self.srcFile.write("        new Property(\"/^%s\.%s/\", false, null),\n" % (self.currentSection, \
+                    self.fix(propertyName)))
 
     def newSection(self):
-        self.srcFile.write("    %s.%sProps =\n" % (self.className, self.currentSection));
-        self.srcFile.write("    [\n")
-            
+        if self.currentSection in self.validSections:
+            self.skipSection = False
+            self.srcFile.write("    %s.%sProps =\n" % (self.className, self.currentSection));
+            self.srcFile.write("    [\n")
+
     def closeSection(self):
-        self.srcFile.write("    ];\n")
-        self.srcFile.write("\n")
+        if self.currentSection in self.validSections:
+            self.srcFile.write("    ];\n")
+            self.srcFile.write("\n")
 
     def moveFiles(self, location):
         dest = os.path.join(location, "js", "src", "Ice")

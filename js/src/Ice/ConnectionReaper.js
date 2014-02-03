@@ -8,30 +8,33 @@
 // **********************************************************************
 
 (function(){
+    
+    require("Ice/Class");
+    
     var global = this;
     var Ice = global.Ice || {};
     
-    var ConnectionReaper = function()
-    {
-        this._connections = [];
-    };
-
-    ConnectionReaper.prototype.add = function(connection)
-    {
-        this._connections.push(connection);
-    };
-
-    ConnectionReaper.prototype.swapConnections = function()
-    {
-        if(this._connections.length === 0)
+    var ConnectionReaper = Ice.__defineClass({
+        __init__: function()
         {
-            return null;
+            this._connections = [];
+        },
+        add: function(connection)
+        {
+            this._connections.push(connection);
+        },
+        swapConnections: function()
+        {
+            if(this._connections.length === 0)
+            {
+                return null;
+            }
+            var connections = this._connections;
+            this._connections = [];
+            return connections;
         }
-        var connections = this._connections;
-        this._connections = [];
-        return connections;
-    };
-
+    });
+    
     Ice.ConnectionReaper = ConnectionReaper;
     global.Ice = Ice;
 }());

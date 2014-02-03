@@ -10,6 +10,7 @@
 (function(){
     var global = this;
     require("Ice/Object");
+    require("Ice/Class");
     
     var Ice = global.Ice || {};
     
@@ -51,30 +52,27 @@
         this.slices = slices;
     };
     
-    var UnknownSlicedObject = function(unknownTypeId)
-    {
-        this._unknownTypeId = unknownTypeId;
-    };
-    
-    UnknownSlicedObject.prototype = new Ice.Object();
-    UnknownSlicedObject.prototype.constructor = UnknownSlicedObject;
-    
-    UnknownSlicedObject.prototype.getUnknownTypeId = function()
-    {
-        return this._unknownTypeId;
-    };
-
-    UnknownSlicedObject.prototype.__write = function(os)
-    {
-        os.startWriteObject(this._slicedData);
-        os.endWriteObject();
-    };
-
-    UnknownSlicedObject.prototype.__read = function(is)
-    {
-        is.startReadObject();
-        this._slicedData = is.endReadObject(true);
-    };
+    var UnknownSlicedObject = Ice.__defineClass(Ice.Object,
+        {
+            __init__: function(unknownTypeId)
+            {
+                this._unknownTypeId = unknownTypeId;
+            },
+            getUnknownTypeId: function()
+            {
+                return this._unknownTypeId;
+            },
+            __write: function(os)
+            {
+                os.startWriteObject(this._slicedData);
+                os.endWriteObject();
+            },
+            __read: function(is)
+            {
+                is.startReadObject();
+                this._slicedData = is.endReadObject(true);
+            }
+        });
 
     Ice.SliceInfo = SliceInfo;
     Ice.SlicedData = SlicedData;

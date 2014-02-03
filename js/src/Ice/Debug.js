@@ -9,23 +9,21 @@
 
 (function(){
     var global = this;
+    require("Ice/Class");
     require("Ice/Exception");
     
     var Ice = global.Ice || {};
     
     var Exception = Ice.Exception;
     
-    var AssertionFailedException = function(message)
-    {
-        Error.call(this);
-        Exception.captureStackTrace(this);
-        this.message = message;
-    };
-
-    AssertionFailedException.prototype = new Error();
-    
-    AssertionFailedException.prototype.constructor = AssertionFailedException;
-
+    var AssertionFailedException = Ice.__defineClass(Error, {
+        __init__: function(message)
+        {
+            Error.call(this);
+            Exception.captureStackTrace(this);
+            this.message = message;
+        }
+    });
     var Debug = {};
 
     Debug.AssertionFailedException = AssertionFailedException;

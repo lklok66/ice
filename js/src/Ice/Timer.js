@@ -12,117 +12,114 @@
     require("Ice/HashMap");
     require("Ice/TimeUtil");
     require("Ice/LocalException");
+    require("Ice/Class");
     
     var Ice = global.Ice || {};
     
     var HashMap = Ice.HashMap;
     var TimeUtil = Ice.TimeUtil;
     var CommunicatorDestroyedException = Ice.CommunicatorDestroyedException;
-
-    var Timer = function(instance)
-    {
-        this._instance = instance;
-        this._destroyed = false;
-        this._tokenId = 0;
-        this._tokens = new HashMap();
-    };
-
-    Timer.prototype.destroy = function()
-    {
-        var self = this;
-        this._tokens.forEach(function(key, value){
-            self.cancel(key);
-        });
-        this._destroyed = true;
-        this._tokens.clear();
-    };
-
-    Timer.prototype.schedule = function(callback, delay)
-    {
-        if(this._destroyed)
+    
+    var Timer = Ice.__defineClass({
+        __init__: function(instance)
         {
-            throw new CommunicatorDestroyedException();
-        }
-
-        var token = this._tokenId++;
-        var self = this;
-
-        var id = setTimeout(function() { self.handleTimeout(token); }, delay);
-        this._tokens.set(token, { callback: callback, id: id, isInterval: false });
-
-        return token;
-    };
-
-    Timer.prototype.scheduleRepeated = function(callback, period)
-    {
-        if(this._destroyed)
+            this._instance = instance;
+            this._destroyed = false;
+            this._tokenId = 0;
+            this._tokens = new HashMap();
+        },
+        destroy: function()
         {
-            throw new CommunicatorDestroyedException();
-        }
-
-        var token = this._tokenId++;
-        var self = this;
-
-        var id = setInterval(function() { self.handleInterval(token); }, period);
-        this._tokens.set(token, { callback: callback, id: id, isInterval: true });
-
-        return token;
-    };
-
-    Timer.prototype.cancel = function(id)
-    {
-        if(this._destroyed)
+            var self = this;
+            this._tokens.forEach(function(key, value){
+                self.cancel(key);
+            });
+            this._destroyed = true;
+            this._tokens.clear();
+        },
+        schedule: function(callback, delay)
         {
-            return false;
-        }
+            if(this._destroyed)
+            {
+                throw new CommunicatorDestroyedException();
+            }
 
-        var token = this._tokens.get(id);
-        if(token === undefined)
-        {
-            return false;
-        }
+            var token = this._tokenId++;
+            var self = this;
 
-        this._tokens.delete(id);
-        if(token.isInterval)
-        {
-            clearInterval(token.id);
-        }
-        else
-        {
-            clearTimeout(token.id);
-        }
+            var id = setTimeout(function() { self.handleTimeout(token); }, delay);
+            this._tokens.set(token, { callback: callback, id: id, isInterval: false });
 
-        return true;
-    };
-
-    Timer.prototype.handleTimeout = function(id)
-    {
-        if(this._destroyed)
+            return token;
+        },
+        scheduleRepeated: function(callback, period)
         {
-            return;
-        }
+            if(this._destroyed)
+            {
+                throw new CommunicatorDestroyedException();
+            }
 
-        var token = this._tokens.get(id);
-        if(token !== undefined)
+            var token = this._tokenId++;
+            var self = this;
+
+            var id = setInterval(function() { self.handleInterval(token); }, period);
+            this._tokens.set(token, { callback: callback, id: id, isInterval: true });
+
+            return token;
+        },
+        cancel: function(id)
         {
+            if(this._destroyed)
+            {
+                return false;
+            }
+
+            var token = this._tokens.get(id);
+            if(token === undefined)
+            {
+                return false;
+            }
+
             this._tokens.delete(id);
-            token.callback();
-        }
-    };
+            if(token.isInterval)
+            {
+                clearInterval(token.id);
+            }
+            else
+            {
+                clearTimeout(token.id);
+            }
 
-    Timer.prototype.handleInterval = function(id)
-    {
-        if(this._destroyed)
+            return true;
+        },
+        handleTimeout: function(id)
         {
-            return;
-        }
+            if(this._destroyed)
+            {
+                return;
+            }
 
-        var token = this._tokens.get(id);
-        if(token !== undefined)
+            var token = this._tokens.get(id);
+            if(token !== undefined)
+            {
+                this._tokens.delete(id);
+                token.callback();
+            }
+        },
+        handleInterval: function(id)
         {
-            token.callback();
+            if(this._destroyed)
+            {
+                return;
+            }
+
+            var token = this._tokens.get(id);
+            if(token !== undefined)
+            {
+                token.callback();
+            }
         }
-    };
+    });
 
     Ice.Timer = Timer;
     global.Ice = Ice;
