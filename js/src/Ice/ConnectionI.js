@@ -1871,14 +1871,6 @@
                 {
                     this.invokeException(ex, invokeNum);
                 }
-                else if(ex instanceof Debug.AssertionFailedException)
-                {
-                    // Upon assertion, we print the stack trace.
-                    var stackTrace = ""; // TODO: Can we obtain a stack trace?
-                    var uex = new Ice.UnknownException(stackTrace, ex);
-                    this._logger.error(uex.unknown);
-                    this.invokeException(uex, invokeNum);
-                }
                 else
                 {
                     throw ex;
