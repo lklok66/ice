@@ -1,0 +1,199 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Latency Demo | Ice for JavaScript</title>
+    <link rel="stylesheet" href="foundation/css/foundation.css" />
+    
+    <script src="foundation/js/modernizr.js"></script>
+    <script src="../../../lib/Ice.js"></script>
+    <script src="Callback.js"></script>
+    
+    <style type="text/css">
+        #ssl
+        {
+            margin-top:10px;
+        }
+    </style>
+  </head>
+  <body>
+    <nav class="top-bar" data-topbar>
+        <ul class="title-area">
+            <li class="name">
+                <h1><a href="#">Ice for JavaScript</a></h1>
+            </li>
+        </ul>
+    </nav>
+    <section role="main">
+        <div class="row">
+            <div class="large-12 medium-12 columns">
+                <form>
+                    <br/>
+                    <div class="row">
+                        <div class="small-3 columns">
+                            <label class="right inline" for="hostname">Hostname:</label>
+                        </div>
+                        <div class="small-9 columns">
+                            <input type="text" id="hostname"/>
+                        </div>
+                    </div>
+                </form>
+                <a href="#" class="button small" id="start">Start</a>
+                <a href="#" class="button small disabled" id="stop">Stop</a>
+                <form>
+                    <textarea id="console" class="disabled" readonly></textarea>
+                </form>
+            </div>
+        </div>
+    </section>
+    <script src="foundation/js/jquery.js"></script>
+    <script src="foundation/js/foundation.min.js"></script>
+    <script>
+        $(document).foundation();
+      
+        $(document).ready(function(){
+            $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
+            
+            var out = {};
+            
+            out.write = function(msg){
+                var text = $("#console").val();
+                $("#console").val((text == "") ? msg : (text + "\n" + msg));
+            };
+            
+            out.writeLine = function(msg){
+                this.write(msg);
+                $("#console").scrollTop($("#console").get(0).scrollHeight);
+            };
+            
+            out.writeException = function(ex){
+                if(ex && ex._asyncResult)
+                {
+                    this.writeLine("exception occurred in call to " + ex._asyncResult.operation);
+                }
+                if(ex.stack)
+                {
+                    this.writeLine(ex.stack);
+                }
+            };
+            
+            var CallbackReceiverI = function()
+            {
+            };
+
+            CallbackReceiverI.prototype = new Demo.CallbackReceiver();
+            CallbackReceiverI.prototype.constructor = CallbackReceiverI;
+
+            CallbackReceiverI.prototype.callback = function(num, current)
+            {
+                out.writeLine("received callback #" + num);
+            };
+            
+            var writeException = function(ex)
+            {
+                out.writeException(ex);
+            };
+            
+            var exceptionCB = function(ex)
+            {
+                throw ex;
+            };
+            
+            var id = new Ice.InitializationData();
+            id.properties = Ice.createProperties();
+            //
+            // Client-side ACM must be disabled for bidirectional connections.
+            //
+            id.properties.setProperty("Ice.ACM.Client", "0");
+
+            
+            
+            $("#start").click(
+                function()
+                {
+                    if(!$(this).hasClass("disabled"))
+                    {
+                        
+                        $(this).addClass("disabled");
+                        $("#console").val("");
+                        try
+                        {
+                            communicator = Ice.initialize(id);
+                            $("#stop").removeClass("disabled");
+                            var adapter = communicator.createObjectAdapter("");
+                            
+                            var server;
+                            var ident = new Ice.Identity();
+                            ident.name = Ice.UUID.generateUUID();
+                            ident.category = "";
+                            adapter.add(new CallbackReceiverI(), ident);
+                            
+                            var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
+                            
+                            Demo.CallbackSenderPrx.checkedCast(communicator.stringToProxy("sender:ws -h " + hostname + " -p 10000")).then(
+                                function(asyncResult, o)
+                                {
+                                    server = o;
+                                    return adapter.activate();
+                                }
+                            ).then(
+                                function(asyncResult)
+                                {
+                                    return server.ice_getConnection();
+                                }
+                            ).then(
+                                function(asyncResult, conn)
+                                {
+                                    conn.setAdapter(adapter);
+                                    return server.addClient(ident);
+                                }
+                            ).exception(
+                                function(ex)
+                                {
+                                    $("#start").removeClass("disabled");
+                                    $("#stop").addClass("disabled");
+                                    writeException(ex);
+                                }
+                            );
+                        }
+                        catch(ex)
+                        {
+                            $("#start").removeClass("disabled");
+                            $("#stop").addClass("disabled");
+                            out.writeException(ex);
+                        }
+                    }
+                    
+                    return false;
+                });
+                
+            $("#stop").click(
+                function()
+                {
+                    if(!$(this).hasClass("disabled"))
+                    {
+                        $(this).addClass("disabled");
+                        if(communicator !== null)
+                        {
+                            var c = communicator;
+                            communicator = null;
+                            c.destroy().then(
+                                function()
+                                {
+                                    $("#start").removeClass("disabled");
+                                    $("#stop").addClass("disabled");
+                                }
+                            ).exception(
+                                function(ex)
+                                {
+                                    $("#start").removeClass("disabled");
+                                    $("#stop").addClass("disabled");
+                                });
+                        }
+                    }
+                });
+        });
+    </script>
+  </body>
+</html>
