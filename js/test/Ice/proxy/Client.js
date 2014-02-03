@@ -15,6 +15,8 @@
     require("Test");
     var Test = this.Test;
 
+    var defaultProtocol = Ice.TcpEndpointFactory !== undefined ? "tcp" : "ws"
+    
     var AllTests = function(communicator, log)
     {
         this._communicator = communicator;
@@ -161,9 +163,9 @@
         b1 = this._communicator.stringToProxy("category/test@adapter");
         this.test(b1.ice_getIdentity().name === "test" && b1.ice_getIdentity().category === "category" &&
             b1.ice_getAdapterId() === "adapter");
-        b1 = this._communicator.stringToProxy("category/test@adapter:tcp");
+        b1 = this._communicator.stringToProxy("category/test@adapter:" + defaultProtocol);
         this.test(b1.ice_getIdentity().name === "test" && b1.ice_getIdentity().category === "category" &&
-            b1.ice_getAdapterId() === "adapter:tcp");
+            b1.ice_getAdapterId() === "adapter:" + defaultProtocol);
         b1 = this._communicator.stringToProxy("'category 1/test'@adapter");
         this.test(b1.ice_getIdentity().name === "test" && b1.ice_getIdentity().category === "category 1" &&
             b1.ice_getAdapterId() === "adapter");
@@ -176,9 +178,9 @@
         b1 = this._communicator.stringToProxy("\"category \\/test@foo/test\"@adapter");
         this.test(b1.ice_getIdentity().name === "test" && b1.ice_getIdentity().category === "category /test@foo" &&
             b1.ice_getAdapterId() === "adapter");
-        b1 = this._communicator.stringToProxy("\"category \\/test@foo/test\"@\"adapter:tcp\"");
+        b1 = this._communicator.stringToProxy("\"category \\/test@foo/test\"@\"adapter:" + defaultProtocol + "\"");
         this.test(b1.ice_getIdentity().name === "test" && b1.ice_getIdentity().category === "category /test@foo" &&
-            b1.ice_getAdapterId() === "adapter:tcp");
+            b1.ice_getAdapterId() === "adapter:" + defaultProtocol);
 
         b1 = this._communicator.stringToProxy("id -f facet");
         this.test(b1.ice_getIdentity().name === "id" && b1.ice_getIdentity().category.length === 0 &&
@@ -213,12 +215,12 @@
                 this.test(false);
             }
         }
-        b1 = this._communicator.stringToProxy("test -f facet:tcp");
+        b1 = this._communicator.stringToProxy("test -f facet:" + defaultProtocol);
         this.test(b1.ice_getIdentity().name === "test" && b1.ice_getIdentity().category.length === 0 &&
             b1.ice_getFacet() === "facet" && b1.ice_getAdapterId().length === 0);
-        b1 = this._communicator.stringToProxy("test -f \"facet:tcp\"");
+        b1 = this._communicator.stringToProxy("test -f \"facet:" + defaultProtocol + "\"");
         this.test(b1.ice_getIdentity().name === "test" && b1.ice_getIdentity().category.length === 0 &&
-            b1.ice_getFacet() === "facet:tcp" && b1.ice_getAdapterId().length === 0);
+            b1.ice_getFacet() === "facet:" + defaultProtocol && b1.ice_getAdapterId().length === 0);
         b1 = this._communicator.stringToProxy("test -f facet@test");
         this.test(b1.ice_getIdentity().name === "test" && b1.ice_getIdentity().category.length === 0 &&
             b1.ice_getFacet() === "facet" && b1.ice_getAdapterId() === "test");
@@ -273,7 +275,7 @@
 
         try
         {
-            b1 = this._communicator.stringToProxy("test:tcp@adapterId");
+            b1 = this._communicator.stringToProxy("test:" + + defaultProtocol + "@adapterId");
             this.test(false);
         }
         catch(ex)
@@ -295,7 +297,7 @@
         //}
         try
         {
-            b1 = this._communicator.stringToProxy("test::tcp");
+            b1 = this._communicator.stringToProxy("test::" + defaultProtocol);
             this.test(false);
         }
         catch(ex)
@@ -529,8 +531,8 @@
         this.test(compObj.ice_preferSecure(true).equals(compObj.ice_preferSecure(true)));
         this.test(!compObj.ice_preferSecure(true).equals(compObj.ice_preferSecure(false)));
 
-        var compObj1 = this._communicator.stringToProxy("foo:tcp -h 127.0.0.1 -p 10000");
-        var compObj2 = this._communicator.stringToProxy("foo:tcp -h 127.0.0.1 -p 10001");
+        var compObj1 = this._communicator.stringToProxy("foo:" + defaultProtocol + " -h 127.0.0.1 -p 10000");
+        var compObj2 = this._communicator.stringToProxy("foo:" + defaultProtocol + " -h 127.0.0.1 -p 10001");
         this.test(!compObj1.equals(compObj2));
 
         compObj1 = this._communicator.stringToProxy("foo@MyAdapter1");
@@ -540,14 +542,14 @@
         this.test(compObj1.ice_locatorCacheTimeout(20).equals(compObj1.ice_locatorCacheTimeout(20)));
         this.test(!compObj1.ice_locatorCacheTimeout(10).equals(compObj1.ice_locatorCacheTimeout(20)));
 
-        compObj1 = this._communicator.stringToProxy("foo:tcp -h 127.0.0.1 -p 1000");
+        compObj1 = this._communicator.stringToProxy("foo:" + defaultProtocol + " -h 127.0.0.1 -p 1000");
         compObj2 = this._communicator.stringToProxy("foo@MyAdapter1");
         this.test(!compObj1.equals(compObj2));
 
-        var endpts1 = this._communicator.stringToProxy("foo:tcp -h 127.0.0.1 -p 10000").ice_getEndpoints();
-        var endpts2 = this._communicator.stringToProxy("foo:tcp -h 127.0.0.1 -p 10001").ice_getEndpoints();
+        var endpts1 = this._communicator.stringToProxy("foo:" + defaultProtocol + " -h 127.0.0.1 -p 10000").ice_getEndpoints();
+        var endpts2 = this._communicator.stringToProxy("foo:" + defaultProtocol + " -h 127.0.0.1 -p 10001").ice_getEndpoints();
         this.test(!endpts1[0].equals(endpts2[0]));
-        this.test(endpts1[0].equals(this._communicator.stringToProxy("foo:tcp -h 127.0.0.1 -p 10000").ice_getEndpoints()[0]));
+        this.test(endpts1[0].equals(this._communicator.stringToProxy("foo:" + defaultProtocol + " -h 127.0.0.1 -p 10000").ice_getEndpoints()[0]));
 
         this.test(compObj1.ice_encodingVersion(Ice.Encoding_1_0).equals(compObj1.ice_encodingVersion(Ice.Encoding_1_0)));
         this.test(!compObj1.ice_encodingVersion(Ice.Encoding_1_0).equals(compObj1.ice_encodingVersion(Ice.Encoding_1_1)));
@@ -897,15 +899,35 @@
             this.test(ex instanceof Ice.EndpointParseException);
         }
 
-        // Legal TCP endpoint expressed as opaque endpoint
-        var p1 = this._communicator.stringToProxy("test -e 1.1:opaque -e 1.0 -t 1 -v CTEyNy4wLjAuMeouAAAQJwAAAA==");
-        var pstr = this._communicator.proxyToString(p1);
-        this.test(pstr === "test -t -e 1.1:tcp -h 127.0.0.1 -p 12010 -t 10000");
-
+        var p1, pstr;
+        if(defaultProtocol == "tcp")
+        {
+            // Legal TCP endpoint expressed as opaque endpoint
+            p1 = this._communicator.stringToProxy("test -e 1.1:opaque -e 1.0 -t 1 -v CTEyNy4wLjAuMeouAAAQJwAAAA==");
+            pstr = this._communicator.proxyToString(p1);
+            this.test(pstr === "test -t -e 1.1:tcp -h 127.0.0.1 -p 12010 -t 10000");
+        }
+        else
+        {
+            // Legal WS endpoint expressed as opaque endpoint
+            p1 = this._communicator.stringToProxy("test -e 1.1:opaque -t 4 -e 1.0 -v CTEyNy4wLjAuMeouAAAQJwAAAAA=");
+            pstr = this._communicator.proxyToString(p1);
+            this.test(pstr === "test -t -e 1.1:ws -h 127.0.0.1 -p 12010 -t 10000");
+        }
+        
+        var p2;
         // Opaque endpoint encoded with 1.1 encoding.
-        var p2 = this._communicator.stringToProxy("test:opaque -e 1.1 -t 1 -v CTEyNy4wLjAuMeouAAAQJwAAAA==");
-        this.test(this._communicator.proxyToString(p2) === "test -t -e 1.1:tcp -h 127.0.0.1 -p 12010 -t 10000");
-
+        if(defaultProtocol == "tcp")
+        {
+            p2 = this._communicator.stringToProxy("test:opaque -e 1.1 -t 1 -v CTEyNy4wLjAuMeouAAAQJwAAAA==");
+            this.test(this._communicator.proxyToString(p2) === "test -t -e 1.1:tcp -h 127.0.0.1 -p 12010 -t 10000");
+        }
+        else
+        {
+            p2 = this._communicator.stringToProxy("test:opaque -e 1.1 -t 4 -v CTEyNy4wLjAuMeouAAAQJwAAAAA==");
+            this.test(this._communicator.proxyToString(p2) === "test -t -e 1.1:ws -h 127.0.0.1 -p 12010 -t 10000");
+        }
+        
         if(this._communicator.getProperties().getPropertyAsInt("Ice.IPv6") === 0)
         {
             var ref = "test:default -p 12010";
@@ -920,9 +942,18 @@
             */
 
             // Two legal TCP endpoints expressed as opaque endpoints
-            p1 = this._communicator.stringToProxy("test -e 1.0:opaque -e 1.0 -t 1 -v CTEyNy4wLjAuMeouAAAQJwAAAA==:opaque -e 1.0 -t 1 -v CTEyNy4wLjAuMusuAAAQJwAAAA==");
-            pstr = this._communicator.proxyToString(p1);
-            this.test(pstr === "test -t -e 1.0:tcp -h 127.0.0.1 -p 12010 -t 10000:tcp -h 127.0.0.2 -p 12011 -t 10000");
+            if(defaultProtocol == "tcp")
+            {
+                p1 = this._communicator.stringToProxy("test -e 1.0:opaque -e 1.0 -t 1 -v CTEyNy4wLjAuMeouAAAQJwAAAA==:opaque -e 1.0 -t 1 -v CTEyNy4wLjAuMusuAAAQJwAAAA==");
+                pstr = this._communicator.proxyToString(p1);
+                this.test(pstr === "test -t -e 1.0:tcp -h 127.0.0.1 -p 12010 -t 10000:tcp -h 127.0.0.2 -p 12011 -t 10000");
+            }
+            else
+            {
+                p1 = this._communicator.stringToProxy("test -e 1.0:opaque -t 4 -e 1.0 -v CTEyNy4wLjAuMeouAAAQJwAAAAA=:opaque -t 4 -e 1.0 -v CTEyNy4wLjAuMusuAAAQJwAAAAA=");
+                pstr = this._communicator.proxyToString(p1);
+                this.test(pstr === "test -t -e 1.0:ws -h 127.0.0.1 -p 12010 -t 10000:ws -h 127.0.0.2 -p 12011 -t 10000");
+            }
 
             //
             // Test that an SSL endpoint and a nonsense endpoint get

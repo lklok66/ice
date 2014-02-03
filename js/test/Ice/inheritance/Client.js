@@ -10,10 +10,10 @@
 (function(){
     var require = typeof(module) !== "undefined" ? module.require : function(){};
     require("Ice/Ice");
-    var Ice = global.Ice;
+    var Ice = this.Ice;
     
     require("Test");
-    var Test = global.Test;
+    var Test = this.Test;
     var Promise = Ice.Promise;
     
     var test = function(b)

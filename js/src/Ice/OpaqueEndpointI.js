@@ -284,7 +284,7 @@
         }
     });
     
-        OpaqueEndpointI.fromString = function(str)
+    OpaqueEndpointI.fromString = function(str)
     {
         var result = new OpaqueEndpointI();
 

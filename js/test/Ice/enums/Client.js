@@ -141,33 +141,6 @@
                         test(Test.SimpleEnum.valueOf(2) === Test.SimpleEnum.blue);
                         
                         out.writeLine("ok");
-                        out.write("testing enum streaming... ");
-
-                        var os, bytes;
-                        var encoding_1_0 = 
-                            communicator.getProperties().getProperty("Ice.Default.EncodingVersion") === "1.0";
-
-                        os = Ice.createOutputStream(communicator);
-                        Test.ByteEnum.write(os, Test.ByteEnum.benum11);
-                        bytes = os.finished();
-                        test(bytes.length === 1); // ByteEnum should require one byte
-
-                        os = Ice.createOutputStream(communicator);
-                        Test.ShortEnum.write(os, Test.ShortEnum.senum11);
-                        bytes = os.finished();
-                        test(bytes.length === (encoding_1_0 ? 2 : 5));
-
-                        os = Ice.createOutputStream(communicator);
-                        Test.IntEnum.write(os, Test.IntEnum.ienum11);
-                        bytes = os.finished();
-                        test(bytes.length === (encoding_1_0 ? 4 : 5));
-
-                        os = Ice.createOutputStream(communicator);
-                        Test.SimpleEnum.write(os, Test.SimpleEnum.blue);
-                        bytes = os.finished();
-                        test(bytes.length === 1); // SimpleEnum should require one byte
-
-                        out.writeLine("ok");
                     }, 
                     exceptionCB
                 ).then(
@@ -237,101 +210,6 @@
                     {
                         test(r === g);
                         test(r === Test.SimpleEnum.green);
-                        
-                        out.writeLine("ok");
-                        out.write("testing enum exceptions... ");
-                        
-                        var os, is;
-                        try
-                        {
-                            os = Ice.createOutputStream(communicator);
-                            os.writeByte(2); // Invalid enumerator
-                            is = Ice.createInputStream(communicator, os.finished());
-                            var e = Test.ByteEnum.read(is);
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            test(ex instanceof Ice.MarshalException);
-                        }
-                        
-                        try
-                        {
-                            os = Ice.createOutputStream(communicator);
-                            os.writeByte(128); // Invalid enumerator
-                            is = Ice.createInputStream(communicator, os.finished());
-                            Test.ByteEnum.read(is);
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            test(ex instanceof Ice.MarshalException);
-                        }
-                        
-                        try
-                        {
-                            os = Ice.createOutputStream(communicator);
-                            os.writeShort(-1); // Negative enumerators are not supported
-                            is = Ice.createInputStream(communicator, os.finished());
-                            Test.ShortEnum.read(is);
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            test(ex instanceof Ice.MarshalException);
-                        }
-                        
-                        try
-                        {
-                            os = Ice.createOutputStream(communicator);
-                            os.writeShort(0); // Invalid enumerator
-                            is = Ice.createInputStream(communicator, os.finished());
-                            var e = Test.ShortEnum.read(is);
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            test(ex instanceof Ice.MarshalException);
-                        }
-                        
-                        try
-                        {
-                            os = Ice.createOutputStream(communicator);
-                            os.writeShort(32767); // Invalid enumerator
-                            is = Ice.createInputStream(communicator, os.finished());
-                            Test.ShortEnum.read(is);
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            test(ex instanceof Ice.MarshalException);
-                        }
-                        
-                        try
-                        {
-                            os = Ice.createOutputStream(communicator);
-                            os.writeInt(-1); // Negative enumerators are not supported
-                            is = Ice.createInputStream(communicator, os.finished());
-                            Test.IntEnum.read(is);
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            test(ex instanceof Ice.MarshalException);
-                        }
-                        
-                        try
-                        {
-                            os = Ice.createOutputStream(communicator);
-                            os.writeInt(2); // Invalid enumerator
-                            is = Ice.createInputStream(communicator, os.finished());
-                            Test.IntEnum.read(is);
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            test(ex instanceof Ice.MarshalException);
-                        }
 
                         out.writeLine("ok");
                         return proxy.shutdown();

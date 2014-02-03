@@ -18,6 +18,14 @@
     var Debug = Ice.Debug;
     var Promise = Ice.Promise;
     
+    var test = function(b)
+    {
+        if(!b)
+        {
+            throw new Error("test failed");
+        }
+    };
+    
     var run = function(out)
     {
         var p = new Promise();
@@ -30,15 +38,15 @@
                 promise1.then(
                     function (i)
                     {
-                        Debug.assert(i === 1024);
-                        Debug.assert(promise1.succeeded());
+                        test(i === 1024);
+                        test(promise1.succeeded());
                         out.writeLine("ok");
                         promise.succeed();
                     },
                     function(e)
                     {
                         promise.fail();
-                        Debug.assert(false, e);
+                        test(false, e);
                     });
             })
         .then(
@@ -53,12 +61,12 @@
                             function (i)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             },
                             function(e)
                             {
-                                Debug.assert(e === "promise.fail");
-                                Debug.assert(promise1.failed());
+                                test(e === "promise.fail");
+                                test(promise1.failed());
                                 out.writeLine("ok");
                                 promise.succeed();
                             });
@@ -75,16 +83,16 @@
                         promise1.then(
                             function (i, msg)
                             {
-                                Debug.assert(i === 1024);
-                                Debug.assert(msg === "Hello World!");
-                                Debug.assert(promise1.succeeded());
+                                test(i === 1024);
+                                test(msg === "Hello World!");
+                                test(promise1.succeeded());
                                 out.writeLine("ok");
                                 promise.succeed();
                             },
                             function(e)
                             {
                                 promise.fail(e);
-                                Debug.assert(false, e);
+                                test(false, e);
                             });
                     });
             })
@@ -99,26 +107,26 @@
                         promise1.then(
                             function (i)
                             {
-                                Debug.assert(i === 1024);
-                                Debug.assert(promise1.succeeded());
+                                test(i === 1024);
+                                test(promise1.succeeded());
                                 return "Hello World!";
                             },
                             function(e)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             })
                         .then(
                             function(msg)
                             {
-                                Debug.assert(msg === "Hello World!");
+                                test(msg === "Hello World!");
                                 out.writeLine("ok");
                                 promise.succeed();
                             },
                             function(e)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             });
                     });
             })
@@ -134,25 +142,25 @@
                             function (i)
                             {
                                 promise.fail();
-                                Debug.assert(false, "Succeed called.failed expected");
+                                test(false, "Succeed called.failed expected");
                             },
                             function(e)
                             {
-                                Debug.assert(e === "promise.fail");
-                                Debug.assert(promise1.failed());
+                                test(e === "promise.fail");
+                                test(promise1.failed());
                                 return "Hello World!";
                             })
                         .then(
                             function(msg)
                             {
-                                Debug.assert(msg === "Hello World!");
+                                test(msg === "Hello World!");
                                 out.writeLine("ok");
                                 promise.succeed();
                             },
                             function(e)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             });
                     });
             })
@@ -168,7 +176,7 @@
                             function (i)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             },
                             function(e)
                             {
@@ -178,13 +186,13 @@
                             function(msg)
                             {
                                 promise.fail();
-                                Debug.assert(false, "Succeed called.failed expected");
+                                test(false, "Succeed called.failed expected");
                                 
                             },
                             function(e)
                             {
-                                Debug.assert(e === "promise.fail");
-                                Debug.assert(promise1.failed());
+                                test(e === "promise.fail");
+                                test(promise1.failed());
                                 out.writeLine("ok");
                                 promise.succeed();
                             });
@@ -201,24 +209,24 @@
                         promise1.then(
                             function (i)
                             {
-                                Debug.assert(i === 1024);
-                                Debug.assert(promise1.succeeded());
+                                test(i === 1024);
+                                test(promise1.succeeded());
                             },
                             function(e)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             });
                         promise1.then(
                             function (i)
                             {
-                                Debug.assert(i === 1024);
-                                Debug.assert(promise1.succeeded());
+                                test(i === 1024);
+                                test(promise1.succeeded());
                             },
                             function(e)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             });
                         
                         promise1 = Promise.fail("promise.fail");
@@ -226,23 +234,23 @@
                             function (i)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             },
                             function(e)
                             {
-                                Debug.assert(e === "promise.fail");
-                                Debug.assert(promise1.failed());
+                                test(e === "promise.fail");
+                                test(promise1.failed());
                             });
                         promise1.then(
                             function (i)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             },
                             function(e)
                             {
-                                Debug.assert(e === "promise.fail");
-                                Debug.assert(promise1.failed());
+                                test(e === "promise.fail");
+                                test(promise1.failed());
                                 out.writeLine("ok");
                                 promise.succeed();
                             });
@@ -256,18 +264,18 @@
                     {
                         out.write("Create a promise that is not yet resolved, but will succeed... ");
                         var promise1 = new Promise();
-                        Debug.assert(!promise1.completed());
+                        test(!promise1.completed());
                         promise1.then(
                             function(i)
                             {
-                                Debug.assert(i === 1024);
+                                test(i === 1024);
                                 out.writeLine("ok");
                                 promise.succeed();
                             },
                             function(e)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             }
                         );
                         promise1.succeed(1024);
@@ -281,17 +289,17 @@
                     {
                         out.write("Create a promise that is not yet resolved, but will.fail... ");
                         var promise1 = new Promise();
-                        Debug.assert(!promise1.completed());
+                        test(!promise1.completed());
                         promise1.then(
                             function(i)
                             {
                                 promise.fail();
-                                Debug.assert(false, "Succeed called.failed expected");
+                                test(false, "Succeed called.failed expected");
                             },
                             function(e)
                             {
-                                Debug.assert(e === "promise.fail");
-                                Debug.assert(promise1.failed());
+                                test(e === "promise.fail");
+                                test(promise1.failed());
                                 out.writeLine("ok");
                                 promise.succeed();
                             }
@@ -312,51 +320,51 @@
                         promise1.then(
                             function(i)
                             {
-                                Debug.assert(i === 1);
+                                test(i === 1);
                                 return promise2;
                             },
                             function(e)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             }
                         ).then(
                             function(i)
                             {
-                                Debug.assert(i === 2);
+                                test(i === 2);
                                 return promise3;
                             },
                             function(e)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             }
                         ).then(
                             function(i)
                             {
-                                Debug.assert(i === 3);
+                                test(i === 3);
                                 return "Hello World!";
                             },
                             function(e)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             }
                         ).then(
                             function(msg)
                             {
-                                Debug.assert(promise1.succeeded() && promise2.succeeded() && promise3.succeeded());
-                                Debug.assert(msg === "Hello World!");
+                                test(promise1.succeeded() && promise2.succeeded() && promise3.succeeded());
+                                test(msg === "Hello World!");
                                 out.writeLine("ok");
                                 promise.succeed();
                             },
                             function(e)
                             {
                                 promise.fail();
-                                Debug.assert(false, e);
+                                test(false, e);
                             }
                         );
-                        Debug.assert(!promise1.completed() && !promise2.completed() && !promise3.completed());
+                        test(!promise1.completed() && !promise2.completed() && !promise3.completed());
                         
                         promise1.succeed(1);
                         promise2.succeed(2);
@@ -374,7 +382,7 @@
                         promise1.exception(
                             function(e)
                             {
-                                Debug.assert(e === "promise.fail");
+                                test(e === "promise.fail");
                                 out.writeLine("ok");
                                 promise.succeed();
                             }
@@ -393,7 +401,7 @@
                             function()
                             {
                                 promise.fail();
-                                Debug.assert(false, "response callback called but exception expected");
+                                test(false, "response callback called but exception expected");
                             }
                         ).exception(
                             function(e)
@@ -401,7 +409,7 @@
                                 //
                                 // since no exception handler was passed to the first `.then`, the error propagates.
                                 //
-                                Debug.assert(e === "promise.fail");
+                                test(e === "promise.fail");
                                 out.writeLine("ok");
                                 promise.succeed();
                             });
@@ -422,17 +430,17 @@
                         Promise.all(promise1, promise2, promise3).then(
                             function(r1, r2, r3)
                             {
-                                Debug.assert(r1.length === 1);
-                                Debug.assert(r1[0] === 1024);
+                                test(r1.length === 1);
+                                test(r1[0] === 1024);
                                 
-                                Debug.assert(r2.length === 2);
-                                Debug.assert(r2[0] === 1024);
-                                Debug.assert(r2[1] === 2048);
+                                test(r2.length === 2);
+                                test(r2[0] === 1024);
+                                test(r2[1] === 2048);
                                 
-                                Debug.assert(r3.length === 3);
-                                Debug.assert(r3[0] === 1024);
-                                Debug.assert(r3[1] === 2048);
-                                Debug.assert(r3[2] === 4096);
+                                test(r3.length === 3);
+                                test(r3[0] === 1024);
+                                test(r3[1] === 2048);
+                                test(r3[2] === 4096);
                                 
                                 out.writeLine("ok");
                                 promise.succeed();
@@ -440,7 +448,7 @@
                             function()
                             {
                                 promise.fail();
-                                Debug.assert(false);
+                                test(false);
                             }
                         );
                         
@@ -472,7 +480,7 @@
                             },
                             function(e)
                             {
-                                Debug.assert(e === "promise.fail");
+                                test(e === "promise.fail");
                                 out.writeLine("ok");
                                 promise.succeed();
                             }
@@ -501,16 +509,16 @@
                         promise1.then(
                             function()
                             {
-                                Debug.assert(p1 === 33);
-                                Debug.assert(p2 === 66);
-                                Debug.assert(p3 === 99);
+                                test(p1 === 33);
+                                test(p2 === 66);
+                                test(p3 === 99);
                                 out.writeLine("ok");
                                 promise.succeed();
                             },
                             function()
                             {
                                 promise.fail();
-                                Debug.assert(false);
+                                test(false);
                             },
                             function(p)
                             {
@@ -518,20 +526,20 @@
                                 if(!p1)
                                 {
                                     p1 = p;
-                                    Debug.assert(p1 === 33);
-                                    Debug.assert(!p2);
-                                    Debug.assert(!p3);
+                                    test(p1 === 33);
+                                    test(!p2);
+                                    test(!p3);
                                 }
                                 else if (!p2)
                                 {
                                     p2 = p;
-                                    Debug.assert(p2 === 66);
-                                    Debug.assert(!p3);
+                                    test(p2 === 66);
+                                    test(!p3);
                                 }
                                 else if(!p3)
                                 {
                                     p3 = p;
-                                    Debug.assert(p3 === 99);
+                                    test(p3 === 99);
                                     promise1.succeed();
                                 }
                             });

@@ -24,7 +24,7 @@
     {
         var value;
         
-        this.defaultProtocol = properties.getPropertyWithDefault("Ice.Default.Protocol", "tcp");
+        this.defaultProtocol = properties.getPropertyWithDefault("Ice.Default.Protocol", Ice.TcpEndpointFactory !== undefined ? "tcp" : "ws");
 
         value = properties.getProperty("Ice.Default.Host");
         this.defaultHost = value.length > 0 ? value : null;
