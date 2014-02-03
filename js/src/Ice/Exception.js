@@ -206,12 +206,12 @@
         this.__slicedData = is.endReadException(true);
     };
     
-    Slice.defineUserException = function(constructor, base, id, name, writeImpl, readImpl, preserved)
+    Slice.defineUserException = function(constructor, base, name, writeImpl, readImpl, preserved)
     {
         var ex = constructor;
         ex.__parent = base;
         ex.prototype = new base();
-        ex.__id = id;
+        ex.__id = "::" + name;
         ex.prototype.ice_name = function()
         {
             return name;

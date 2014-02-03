@@ -32,7 +32,6 @@ tests = [
     ("Ice/facets", ["once"]),
     ("Ice/info", ["once"]),
     ("Ice/inheritance", ["once"]),
-    ("Ice/invoke", ["once"]),
     ("Ice/location", ["once"]),
     ("Ice/objects", ["once"]),
     ("Ice/operations", ["once"]),
@@ -42,7 +41,6 @@ tests = [
     ("Ice/retry", ["once"]),
     ("Ice/slicing/exceptions", ["once"]),
     ("Ice/slicing/objects", ["once"]),
-#    ("Ice/stream", ["once"]),
     ("Ice/timeout", ["once"]),
     ("Glacier2/router", ["service"]),
     ]

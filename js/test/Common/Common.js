@@ -7,47 +7,52 @@
 //
 // **********************************************************************
 
-require("Ice/Ice");
+(function(){
+    require("Ice/Ice");
 
-var write = function(msg)
-{
-    process.stdout.write(msg); 
-};
+    var write = function(msg)
+    {
+        process.stdout.write(msg); 
+    };
 
-var writeLine = function(msg)
-{
-    this.write(msg + "\n");
-};
-
-var run = function(module)
-{
-    var id = new Ice.InitializationData();
-    id.properties = Ice.createProperties(process.argv);
+    var writeLine = function(msg)
+    {
+        this.write(msg + "\n");
+    };
     
-    var run = module.require("./Client").run;
+    var global = this;
     
-    run({write: write, writeLine: writeLine}, id).exception(
-        function(ex)
-        {
-            console.log(ex.stack);
-            process.exit(1);
-        }
-    ).exception(
-        function(ex)
-        {
-            if(ex && ex._asyncResult)
-            {
-                console.log("\nexception occurred in call to " + ex._asyncResult.operation);
-            }
-            if(ex.stack)
+    var run = function(module)
+    {
+        var id = new Ice.InitializationData();
+        id.properties = Ice.createProperties(process.argv);
+        
+        module.require("./Client");
+        var test = global.__test__;
+        
+        test({write: write, writeLine: writeLine}, id).exception(
+            function(ex)
             {
                 console.log(ex.stack);
+                process.exit(1);
             }
-            else
+        ).exception(
+            function(ex)
             {
-                console.log(ex);
-            }
-        });
-};
+                if(ex && ex._asyncResult)
+                {
+                    console.log("\nexception occurred in call to " + ex._asyncResult.operation);
+                }
+                if(ex.stack)
+                {
+                    console.log(ex.stack);
+                }
+                else
+                {
+                    console.log(ex);
+                }
+            });
+    };
 
-module.exports = run;
+    module.exports = run;
+}());

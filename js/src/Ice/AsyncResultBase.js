@@ -57,24 +57,25 @@
     });
     
     var prototype = AsyncResultBase.prototype;
+    var defineProperty = Object.defineProperty;
     
-    Object.defineProperty(prototype, "communicator", {
+    defineProperty(prototype, "communicator", {
         get: function() { return this._communicator; }
     });
 
-    Object.defineProperty(prototype, "connection", {
+    defineProperty(prototype, "connection", {
         get: function() { return this._connection; }
     });
 
-    Object.defineProperty(prototype, "proxy", {
+    defineProperty(prototype, "proxy", {
         get: function() { return this._proxy; }
     });
 
-    Object.defineProperty(prototype, "adapter", {
+    defineProperty(prototype, "adapter", {
         get: function() { return this._adapter; }
     });
 
-    Object.defineProperty(prototype, "operation", {
+    defineProperty(prototype, "operation", {
         get: function() { return this._operation; }
     });
 

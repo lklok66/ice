@@ -415,21 +415,21 @@
 
     Slice.defineLocalObject = function(constructor, base)
     {
-        var obj = constructor;
+        var obj = constructor || function(){};
 
         if(base !== undefined)
         {
             obj.prototype = new base();
             obj.__parent = base;
+            obj.prototype.constructor = constructor;
         }
-        obj.prototype.constructor = constructor;
         
         return obj;
     };
     
     Slice.defineObject = function(constructor, base, intfs, scope, ids, compactId, writeImpl, readImpl, preserved, ops)
     {
-        var obj = constructor;
+        var obj = constructor || function(){};
 
         obj.prototype = new base();
         obj.__parent = base;

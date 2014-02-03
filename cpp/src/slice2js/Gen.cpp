@@ -1407,46 +1407,56 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
     _out << nl << localScope << '.' << name << " = " << defineObject << "(";
     _out.inc();
     
-    _out << nl << "function" << spar << allParamNames << epar;
-    _out << sb;
-    if(!p->isLocal() || hasBaseClass)
+    if(!allParamNames.empty())
     {
-        _out << nl << baseRef << ".call" << spar << "this" << baseParamNames << epar << ';';
-    }
-    
-    for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
-    {
-        const bool isProtected = p->hasMetaData("protected") || (*q)->hasMetaData("protected");
-        const string m = fixId((*q)->name());
-        const string memberName = isProtected ? "_" + (*q)->name() : m;
-        if((*q)->optional())
+        _out << nl << "function" << spar << allParamNames << epar;
+        _out << sb;
+        if(!p->isLocal() || hasBaseClass)
         {
-            if((*q)->defaultValueType())
+            _out << nl << baseRef << ".call" << spar << "this" << baseParamNames << epar << ';';
+        }
+        
+        for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+        {
+            const bool isProtected = p->hasMetaData("protected") || (*q)->hasMetaData("protected");
+            const string m = fixId((*q)->name());
+            const string memberName = isProtected ? "_" + (*q)->name() : m;
+            if((*q)->optional())
+            {
+                if((*q)->defaultValueType())
+                {
+                    _out << nl << "this." << memberName << " = " << m << " !== undefined ? " << m << " : ";
+                    writeConstantValue(scope, (*q)->type(), (*q)->defaultValueType(), (*q)->defaultValue());
+                    _out << ';';
+                }
+                else
+                {
+                    _out << nl << "this." << memberName << " = " << m << ';';
+                }
+            }
+            else
             {
                 _out << nl << "this." << memberName << " = " << m << " !== undefined ? " << m << " : ";
-                writeConstantValue(scope, (*q)->type(), (*q)->defaultValueType(), (*q)->defaultValue());
+                if((*q)->defaultValueType())
+                {
+                    writeConstantValue(scope, (*q)->type(), (*q)->defaultValueType(), (*q)->defaultValue());
+                }
+                else
+                {
+                    _out << getValue(scope, (*q)->type());
+                }
                 _out << ';';
             }
-            else
-            {
-                _out << nl << "this." << memberName << " = " << m << ';';
-            }
         }
-        else
+        _out << eb;
+    }
+    else
+    {
+        if(hasBaseClass || !p->isLocal())
         {
-            _out << nl << "this." << memberName << " = " << m << " !== undefined ? " << m << " : ";
-            if((*q)->defaultValueType())
-            {
-                writeConstantValue(scope, (*q)->type(), (*q)->defaultValueType(), (*q)->defaultValue());
-            }
-            else
-            {
-                _out << getValue(scope, (*q)->type());
-            }
-            _out << ';';
+            _out << nl << "undefined";
         }
     }
-    _out << eb;
     if(!p->isLocal() || hasBaseClass)
     {
         _out << ",";
@@ -2202,10 +2212,6 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     }
     _out << eb << ",";
     _out << nl << baseRef << ",";
-     if(!p->isLocal())
-     {
-        _out << nl << "\"" << p->scoped() << "\",";
-     }
     _out << nl << "\"" << p->scoped().substr(2) << "\"";
 
     // TODO: equals?

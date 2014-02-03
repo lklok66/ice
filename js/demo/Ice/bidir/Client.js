@@ -73,6 +73,11 @@
                 p.fail(ex);
             }
         };
+        
+        //
+        // Exit on SIGINT
+        //
+        process.on("SIGINT", function() { cleanup(); });
 
         try
         {

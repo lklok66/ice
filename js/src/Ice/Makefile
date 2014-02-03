@@ -57,7 +57,6 @@ SRCS = Address.js \
 	Ice.js \
 	IdentityUtil.js \
 	ImplicitContextI.js \
-	InputStream.js \
 	Instance.js \
 	LocalExceptionWrapper.js \
 	LocatorInfo.js \
@@ -77,7 +76,6 @@ SRCS = Address.js \
 	OptionalFormat.js \
 	OutgoingAsync.js \
 	OutgoingConnectionFactory.js \
-	OutputStream.js \
 	ProcessF.js \
 	ProcessLogger.js \
 	Promise.js \

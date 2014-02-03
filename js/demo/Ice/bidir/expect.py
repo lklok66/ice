@@ -25,7 +25,6 @@ from demoscript.Ice import bidir
 server = Util.spawn('./server --Ice.PrintAdapterReady --Ice.Warn.Connections=0', Util.getMirrorDir("cpp"), mapping="cpp")
 server.expect('.* ready')
 
-client = Util.spawn('node Client.js --Ice.Warn.Connections=0')
-client.expect('.*==>')
+client = 'node Client.js --Ice.Warn.Connections=0'
 
-bidir.run(client, server, False, False)
+bidir.run(client, server)

@@ -18,7 +18,6 @@ SUBDIRS		= binding \
 		info \
 		facets \
 		inheritance \
-		invoke \
 		location \
 		objects \
 		operations \
@@ -27,7 +26,6 @@ SUBDIRS		= binding \
 		proxy \
 		retry \
 		slicing \
-		stream \
 		timeout
 
 $(EVERYTHING)::
