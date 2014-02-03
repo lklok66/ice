@@ -45,12 +45,6 @@ protected:
     //
     void writeMarshalUnmarshalCode(::IceUtilInternal::Output&, const TypePtr&, const std::string&, bool);
     void writeOptionalMarshalUnmarshalCode(::IceUtilInternal::Output&, const TypePtr&, const std::string&, int, bool);
-    void writeSequenceMarshalUnmarshalCode(::IceUtilInternal::Output&, const SequencePtr&, const std::string&, bool);
-    void writeDictionaryMarshalUnmarshalCode(::IceUtilInternal::Output&, const DictionaryPtr&, const std::string&, bool);
-    void writeOptionalSequenceMarshalUnmarshalCode(::IceUtilInternal::Output&, const SequencePtr&, const std::string&,
-                                                   int, bool);
-    void writeOptionalDictionaryMarshalUnmarshalCode(::IceUtilInternal::Output&, const DictionaryPtr&, const std::string&, 
-                                                     int, bool);
 
 private:
 

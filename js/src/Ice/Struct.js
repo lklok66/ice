@@ -169,7 +169,7 @@
         return __h;
     };
     
-    Slice.defineStruct = function(constructor, legalKeyType, writeImpl, readImpl, minWireSize, optionalFormat)
+    Slice.defineStruct = function(constructor, legalKeyType, writeImpl, readImpl, minWireSize, fixed)
     {
         var obj = constructor;
 
@@ -185,19 +185,31 @@
             obj.prototype.hashCode = hashCode;
         }
         
-        if(writeImpl !== undefined)
+        if(readImpl && writeImpl)
         {
             obj.prototype.__write = writeImpl;
-        }
-        
-        if(readImpl !== undefined)
-        {
             obj.prototype.__read = readImpl;
-        }
-        
-        if(minWireSize !== undefined && optionalFormat !== undefined)
-        {
-            Ice.StreamHelpers.StructHelper(obj, minWireSize, optionalFormat);
+            obj.write = function(os, v)
+            {
+                v.__write(os);
+            };
+            obj.read = function(is)
+            {
+                var v = new this();
+                v.__read(is);
+                return v;
+            };
+            Object.defineProperty(obj, "minWireSize", {
+                get: function() { return minWireSize; }
+            });
+            if(fixed)
+            {
+                Ice.StreamHelpers.VSizeOptHelper.call(obj);
+            }
+            else
+            {
+                Ice.StreamHelpers.FSizeOptHelper.call(obj);
+            }
         }
         return obj;
     };

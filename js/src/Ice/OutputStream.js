@@ -133,11 +133,6 @@
         this._os.writeEnum(v);
     };
 
-    OutputStream.prototype.writeStruct = function(v)
-    {
-        this._os.writeStruct(v);
-    };
-
     OutputStream.prototype.writeException = function(v)
     {
         this._os.writeUserException(v);

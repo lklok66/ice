@@ -2084,17 +2084,15 @@ Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
     const string scope = getLocalScope(p->scope());
     const string name = fixId(p->name());
     const string propertyName = name + "Helper";
-    
+    const bool fixed = !type->isVariableLength();
+
+    _out << nl << "Slice.defineSequence(" << scope << ", \"" << propertyName << "\", "
+         << "\"" << getHelper(type) << "\"" << ", " << (fixed ? "true" : "false");
     if(isClassType(type))
     {
-        _out << nl << "Slice.defineObjectSequence(" << scope << ", \"" << propertyName << "\", "
-             << "\"" << typeToString(type) << "\"" << ", " << getOptionalFormat(p) << ");";
+        _out<< ", \"" << typeToString(type) << "\"";
     }
-    else
-    {
-        _out << nl << "Slice.defineSequence(" << scope << ", \"" << propertyName << "\", "
-             << "\"" << getHelper(type) << "\"" << ", " << getOptionalFormat(p) << ");";
-    }
+    _out << ");";
 }
 
 bool
@@ -2309,7 +2307,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         }
         _out << eb << ","
              << nl << p->minWireSize() << ", " 
-             << nl << getOptionalFormat(p);
+             << nl << (p->isVariableLength() ? "false" : "true");
         _out.dec();
         _out << ");";
     }
@@ -2334,20 +2332,18 @@ Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
     const string scope = getLocalScope(p->scope());
     const string name = fixId(p->name());
     const string propertyName = name + "Helper";
+    bool fixed = !keyType->isVariableLength() && !valueType->isVariableLength();
+
+
+    _out << nl << "Slice.defineDictionary(" << scope  << ", \"" << propertyName << "\", "
+         << "\"" << getHelper(keyType) << "\" , "
+         << "\"" << getHelper(valueType) << "\", " 
+         << (fixed ? "true" : "false");
     if(isClassType(valueType))
     {
-        _out << nl << "Slice.defineObjectDictionary(" << scope  << ", \"" << propertyName << "\", "
-             << "\"" << getHelper(keyType) << "\" , "
-             << "\"" << typeToString(valueType) << "\", " 
-             << getOptionalFormat(p) << ");";
+        _out<< ", \"" << typeToString(valueType) << "\"";
     }
-    else
-    {
-        _out << nl << "Slice.defineDictionary(" << scope  << ", \"" << propertyName << "\", "
-             << "\"" << getHelper(keyType) << "\" , "
-             << "\"" << getHelper(valueType) << "\", " 
-             << getOptionalFormat(p) << ");";
-    }
+    _out << ");";
 }
 
 void

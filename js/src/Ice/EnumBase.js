@@ -61,6 +61,10 @@
     {
         os.writeEnum(v);
     };
+    var writeOpt = function(os, tag, v)
+    {
+        os.writeOptValue(tag, Ice.OptionalFormat.Size, Ice.BasicStream.prototype.writeEnum, v);
+    };
 
     Slice.defineEnum = function(enumerators)
     {
@@ -97,6 +101,11 @@
         type.read = function(is)
         {
             return is.readEnum(type);
+        };
+        type.writeOpt = writeOpt;
+        type.readOpt = function(is, tag)
+        {
+            return is.readOptEnum(tag, type);
         };
 
         Object.defineProperty(type, 'valueOf', {

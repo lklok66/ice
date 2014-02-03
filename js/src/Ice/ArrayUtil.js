@@ -107,7 +107,7 @@
         return result;
     };
     
-    Slice.defineSequence = function(module, name, valueHelper, optionalFormat)
+    Slice.defineSequence = function(module, name, valueHelper, fixed, elementType)
     {
         var helper = null;
         Object.defineProperty(module, name, 
@@ -117,7 +117,7 @@
                     if(helper === null)
                     {
                         /*jshint -W061 */
-                        helper = Ice.StreamHelpers.generateSeqHelper(eval(valueHelper), optionalFormat);
+                        helper = Ice.StreamHelpers.generateSeqHelper(eval(valueHelper), fixed, eval(elementType));
                         /*jshint +W061 */
                     }
                     return helper;

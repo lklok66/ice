@@ -385,7 +385,7 @@
         return this._valueComparator.call(this._valueComparator, v1, v2);
     };
     
-    Slice.defineDictionary = function(module, name, keyHelper, valueHelper, optionalFormat)
+    Slice.defineDictionary = function(module, name, keyHelper, valueHelper, fixed, valueType)
     {
         var helper = null;
         Object.defineProperty(module, name, 
@@ -395,8 +395,8 @@
                     if(helper === null)
                     {
                         /*jshint -W061 */
-                        helper = Ice.StreamHelpers.generateDictHelper(eval(keyHelper), eval(valueHelper), 
-                                                                        optionalFormat);
+                        helper = Ice.StreamHelpers.generateDictHelper(eval(keyHelper), eval(valueHelper), fixed, 
+                                                                      eval(valueType));
                         /*jshint +W061 */
                     }
                     return helper;

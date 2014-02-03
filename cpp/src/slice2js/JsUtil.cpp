@@ -538,7 +538,7 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
         }
     }
 
-    if(ProxyPtr::dynamicCast(type))
+    if(ProxyPtr::dynamicCast(type) || StructPtr::dynamicCast(type) || EnumPtr::dynamicCast(type))
     {
         if(marshal)
         {
@@ -559,53 +559,25 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
         }
         else
         {
-            out << nl << stream << ".readObject(function(obj){ " << fixSuffix(param) << " = obj; }, " << typeToString(type) << ");";
+            out << nl << stream << ".readObject(function(obj){ " << fixSuffix(param) << " = obj; }, " 
+                << typeToString(type) << ");";
         }
         return;
     }
 
-    StructPtr st = StructPtr::dynamicCast(type);
-    if(st)
+    if(SequencePtr::dynamicCast(type) || DictionaryPtr::dynamicCast(type))
     {
         if(marshal)
         {
-            out << nl << stream << ".writeStruct(" << param << ");";
+            out << nl << getHelper(type) <<".write(" << stream << ", " << param << ");";
         }
         else
         {
-            out << nl << param << " = " << stream << ".readStruct(" << typeToString(type) << ");";
+            out << nl << param << " = " << getHelper(type) << ".read(" << stream << ");";
         }
         return;
     }
 
-    EnumPtr en = EnumPtr::dynamicCast(type);
-    if(en)
-    {
-        if(marshal)
-        {
-            out << nl << stream << ".writeEnum(" << param << ");";
-        }
-        else
-        {
-            out << nl << param << " = " << stream << ".readEnum(" << typeToString(en) << ");";
-        }
-        return;
-    }
-
-
-    SequencePtr seq = SequencePtr::dynamicCast(type);
-    if(seq)
-    {
-        writeSequenceMarshalUnmarshalCode(out, seq, param, marshal);
-        return;
-    }
-
-    DictionaryPtr d = DictionaryPtr::dynamicCast(type);
-    if(d)
-    {
-        writeDictionaryMarshalUnmarshalCode(out, d, param, marshal);
-        return;
-    }
     assert(false);
 }
 
@@ -618,124 +590,6 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
 {
     string stream = marshal ? "__os" : "__is";
 
-    BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
-    if(builtin)
-    {
-        switch(builtin->kind())
-        {
-            case Builtin::KindByte:
-            {
-                if(marshal)
-                {
-                    out << nl << stream << ".writeOptByte(" << tag << ", " << param << ");";
-                }
-                else
-                {
-                    out << nl << param << " = " << stream << ".readOptByte(" << tag << ");";
-                }
-                return;
-            }
-            case Builtin::KindBool:
-            {
-                if(marshal)
-                {
-                    out << nl << stream << ".writeOptBool(" << tag << ", " << param << ");";
-                }
-                else
-                {
-                    out << nl << param << " = " << stream << ".readOptBool(" << tag << ");";
-                }
-                return;
-            }
-            case Builtin::KindShort:
-            {
-                if(marshal)
-                {
-                    out << nl << stream << ".writeOptShort(" << tag << ", " << param << ");";
-                }
-                else
-                {
-                    out << nl << param << " = " << stream << ".readOptShort(" << tag << ");";
-                }
-                return;
-            }
-            case Builtin::KindInt:
-            {
-                if(marshal)
-                {
-                    out << nl << stream << ".writeOptInt(" << tag << ", " << param << ");";
-                }
-                else
-                {
-                    out << nl << param << " = " << stream << ".readOptInt(" << tag << ");";
-                }
-                return;
-            }
-            case Builtin::KindLong:
-            {
-                if(marshal)
-                {
-                    out << nl << stream << ".writeOptLong(" << tag << ", " << param << ");";
-                }
-                else
-                {
-                    out << nl << param << " = " << stream << ".readOptLong(" << tag << ");";
-                }
-                return;
-            }
-            case Builtin::KindFloat:
-            {
-                if(marshal)
-                {
-                    out << nl << stream << ".writeOptFloat(" << tag << ", " << param << ");";
-                }
-                else
-                {
-                    out << nl << param << " = " << stream << ".readOptFloat(" << tag << ");";
-                }
-                return;
-            }
-            case Builtin::KindDouble:
-            {
-                if(marshal)
-                {
-                    out << nl << stream << ".writeOptDouble(" << tag << ", " << param << ");";
-                }
-                else
-                {
-                    out << nl << param << " = " << stream << ".readOptDouble(" << tag << ");";
-                }
-                return;
-            }
-            case Builtin::KindString:
-            {
-                if(marshal)
-                {
-                    out << nl << stream << ".writeOptString(" << tag << ", " << param << ");";
-                }
-                else
-                {
-                    out << nl << param << " = " << stream << ".readOptString(" << tag << ");";
-                }
-                return;
-            }
-            case Builtin::KindObject:
-            {
-                // Handle by isClassType below.
-                break;
-            }
-            case Builtin::KindObjectProxy:
-            {
-                break;
-            }
-            case Builtin::KindLocalObject:
-            {
-                assert(false);
-                return;
-            }
-        }
-    }
-    
     if(isClassType(type))
     {
         if(marshal)
@@ -749,63 +603,15 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
         }
         return;
     }
-    
-    if(ProxyPtr::dynamicCast(type) || (builtin && builtin->kind() == Builtin::KindObjectProxy))
-    {
-        if(marshal)
-        {
-            out << nl << typeToString(type) << ".writeOpt(" << stream << ", " << tag << ", " << param << ");";
-        }
-        else
-        {
-            out << nl << param << " = " << typeToString(type) << ".readOpt(" << stream << ", " << tag << ");";
-        }
-        return;
-    }
-    
-    StructPtr st = StructPtr::dynamicCast(type);
-    if(st)
-    {
-        if(marshal)
-        {
-            out << nl << typeToString(type) << ".writeOpt(" << stream << ", " << tag << ", " << param << ");";
-        }
-        else
-        {
-            out << nl << param << " = " << typeToString(type) << ".readOpt(" << stream << ", " << tag << ");";
-        }
-        return;
-    }
 
-    EnumPtr en = EnumPtr::dynamicCast(type);
-    if(en)
+    if(marshal)
     {
-        if(marshal)
-        {
-            out << nl << stream << ".writeOptEnum(" << tag << ", " << param << ");";
-        }
-        else
-        {
-            out << nl << param << " = " << stream << ".readOptEnum(" << tag << ", " << typeToString(en) << ");";
-        }
-        return;
+        out << nl << getHelper(type) <<".writeOpt(" << stream << ", " << tag << ", " << param << ");";
     }
-
-
-    SequencePtr seq = SequencePtr::dynamicCast(type);
-    if(seq)
+    else
     {
-        writeOptionalSequenceMarshalUnmarshalCode(out, seq, param, tag, marshal);
-        return;
+        out << nl << param << " = " << getHelper(type) << ".readOpt(" << stream << ", " << tag << ");";
     }
-
-    DictionaryPtr d = DictionaryPtr::dynamicCast(type);
-    if(d)
-    {
-        writeOptionalDictionaryMarshalUnmarshalCode(out, d, param, tag, marshal);
-        return;
-    }
-    assert(false);
 }
 
 std::string
@@ -818,40 +624,39 @@ Slice::JsGenerator::getHelper(const TypePtr& type)
         {
             case Builtin::KindByte:
             {
-                return "Ice.StreamHelpers.ByteHelper";
+                return "Ice.ByteHelper";
             }
             case Builtin::KindBool:
             {
-                return "Ice.StreamHelpers.BoolHelper";
+                return "Ice.BoolHelper";
             }
             case Builtin::KindShort:
             {
-                return "Ice.StreamHelpers.ShortHelper";
+                return "Ice.ShortHelper";
             }
             case Builtin::KindInt:
             {
-                return "Ice.StreamHelpers.IntHelper";
+                return "Ice.IntHelper";
             }
             case Builtin::KindLong:
             {
-                return "Ice.StreamHelpers.LongHelper";
+                return "Ice.LongHelper";
             }
             case Builtin::KindFloat:
             {
-                return "Ice.StreamHelpers.FloatHelper";
+                return "Ice.FloatHelper";
             }
             case Builtin::KindDouble:
             {
-                return "Ice.StreamHelpers.DoubleHelper";
+                return "Ice.DoubleHelper";
             }
             case Builtin::KindString:
             {
-                return "Ice.StreamHelpers.StringHelper";
+                return "Ice.StringHelper";
             }
             case Builtin::KindObject:
             {
-                // Uses SequenceHelper/DictionaryHelper below
-                break;
+                return "Ice.ObjectHelper";
             }
             case Builtin::KindObjectProxy:
             {
@@ -865,105 +670,25 @@ Slice::JsGenerator::getHelper(const TypePtr& type)
         }
     }
     
-    if(ProxyPtr::dynamicCast(type))
+    if(ProxyPtr::dynamicCast(type) || StructPtr::dynamicCast(type) || EnumPtr::dynamicCast(type))
     {
         return typeToString(type);
-    }
+    }    
     
-    StructPtr st = StructPtr::dynamicCast(type);
-    if(st)
-    {
-        return typeToString(type);
-    }
-    
-    else if(EnumPtr::dynamicCast(type))
-    {
-        return typeToString(type);
-    }
-    
-    SequencePtr seq = SequencePtr::dynamicCast(type);
-    if(seq)
+    if(SequencePtr::dynamicCast(type) || DictionaryPtr::dynamicCast(type))
     {
         stringstream s;
-        s << getLocalScope(seq->scoped()) << "Helper";
+        s << getLocalScope(ContainedPtr::dynamicCast(type)->scoped()) << "Helper";
         return s.str();
     }
-    
-    DictionaryPtr dict = DictionaryPtr::dynamicCast(type);
-    if(dict)
+
+    if(ClassDeclPtr::dynamicCast(type))
     {
-        stringstream s;
-        s << getLocalScope(dict->scoped()) << "Helper";
-        return s.str();
+        return "Ice.ObjectHelper";
     }
+
     assert(false);
     return "???";
-}
-
-void
-Slice::JsGenerator::writeSequenceMarshalUnmarshalCode(Output& out, const SequencePtr& seq, const string& param,
-                                                      bool marshal)
-{
-    string stream = marshal ? "__os" : "__is";
-    if(marshal)
-    {
-        out << nl << getHelper(seq) <<".write(" << stream << ", " << param << ");";
-    }
-    else
-    {
-        out << nl << param << " = " << getHelper(seq) << ".read(" << stream << ");";
-    }
-}
-
-void
-Slice::JsGenerator::writeDictionaryMarshalUnmarshalCode(Output& out, const DictionaryPtr& dict, const string& param,
-                                                      bool marshal)
-{
-    string stream = marshal ? "__os" : "__is";
-    if(marshal)
-    {
-        out << nl << getHelper(dict) <<".write(" << stream << ", " << param << ");";
-    }
-    else
-    {
-        out << nl << param << " = " << getHelper(dict) << ".read(" << stream << ");";
-    }
-}
-
-void
-Slice::JsGenerator::writeOptionalSequenceMarshalUnmarshalCode(Output& out,
-                                                              const SequencePtr& seq,
-                                                              const string& param,
-                                                              int tag,
-                                                              bool marshal)
-{
-    string stream = marshal ? "__os" : "__is";
-    if(marshal)
-    {
-        out << nl << getHelper(seq) <<".writeOpt(" << stream << ", " << tag << ", " << param << ");";
-    }
-    else
-    {
-        out << nl << param << " = " << getHelper(seq) << ".readOpt(" << stream << ", " << tag << ");";
-    }
-}
-
-void
-Slice::JsGenerator::writeOptionalDictionaryMarshalUnmarshalCode(Output& out, 
-                                                                const DictionaryPtr& dict, 
-                                                                const string& param,
-                                                                int tag,
-                                                                bool marshal)
-{
-    string stream = marshal ? "__os" : "__is";
-    if(marshal)
-    {
-        out << nl << getHelper(dict) <<".writeOpt(" << stream << ", " << tag << ", " << param << ");";
-    }
-    else
-    {
-        out << nl << param << " = " << getHelper(dict) << ".readOpt(" << stream << ", " << tag << ");";
-    }
 }
 
 void

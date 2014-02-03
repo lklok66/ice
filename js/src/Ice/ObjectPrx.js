@@ -471,11 +471,7 @@
 
     ObjectPrx.prototype.ice_getCachedConnection = function()
     {
-        if(this._handler !== null)
-        {
-            return this._handler.getConnection();
-        }
-        return null;
+        return this._handler ? this._handler.getConnection() : null;
     };
 
     ObjectPrx.prototype.ice_flushBatchRequests = function()
@@ -907,10 +903,9 @@
         __r.fail(__ex);
     };
 
-    //
-    // NOT a prototype function
-    //
-    ObjectPrx.checkedCastImpl = function(type, id, prx, facet, ctx)
+    ObjectPrx.ice_staticId = Ice.Object.ice_staticId;
+
+    ObjectPrx.checkedCast = function(prx, facet, ctx)
     {
         var __r = null;
 
@@ -926,10 +921,10 @@
                 prx = prx.ice_facet(facet);
             }
 
-            var __h = new type();
+            var __h = new this();
             __h.__copyFrom(prx);
             __r = new AsyncResultBase(prx.ice_getCommunicator(), "checkedCast", null, __h, null);
-            prx.ice_isA(id, ctx).then(
+            prx.ice_isA(this.ice_staticId(), ctx).then(
                 function(__res, __ret)
                 {
                     __r.succeed(__r, __ret ? __h : null);
@@ -950,33 +945,12 @@
         return __r;
     };
 
-    ObjectPrx.ice_staticId = Ice.Object.ice_staticId;
-
-    //
-    // NOT a prototype function
-    //
-    ObjectPrx.checkedCast = function(prx, facet, ctx)
-    {
-        return ObjectPrx.checkedCastImpl(this, this.ice_staticId(), prx, facet, ctx);
-    };
-
-    //
-    // NOT a prototype function
-    //
     ObjectPrx.uncheckedCast = function(prx, facet)
-    {
-        return ObjectPrx.uncheckedCastImpl(this, prx, facet);
-    };
-
-    //
-    // NOT a prototype function
-    //
-    ObjectPrx.uncheckedCastImpl = function(type, prx, facet)
     {
         var r = null;
         if(prx !== undefined && prx !== null)
         {
-            r = new type();
+            r = new this();
             if(facet !== undefined)
             {
                 prx = prx.ice_facet(facet);
@@ -997,12 +971,7 @@
 
     ObjectPrx.read = function(is)
     {
-        var v = is.readProxy();
-        if(v !== null)
-        {
-            v = this.uncheckedCast(v);
-        }
-        return v;
+        return is.readProxy(this);
     };
 
     ObjectPrx.writeOpt = function(os, tag, v)
@@ -1012,12 +981,7 @@
 
     ObjectPrx.readOpt = function(is, tag)
     {
-        var v = is.readOptProxy(tag);
-        if(v !== null && v !== undefined)
-        {
-            v = this.uncheckedCast(v);
-        }
-        return v;
+        return is.readOptProxy(tag, this);
     };
     
     ObjectPrx.__instanceof = function(T)

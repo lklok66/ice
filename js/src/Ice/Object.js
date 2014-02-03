@@ -130,7 +130,7 @@
     IceObject.__compactId = -1;
     IceObject.__preserved = false;
 
-    var stringSeqHelper = Ice.StreamHelpers.generateSeqHelper(Ice.StreamHelpers.StringHelper, Ice.OptionalFormat.FSize);
+    var stringSeqHelper = Ice.StreamHelpers.generateSeqHelper(Ice.StreamHelpers.StringHelper, false);
 
     IceObject.__ops =
     {
@@ -470,43 +470,6 @@
         return obj;
     };
     
-    Slice.defineObjectSequence = function(module, name, valueType, optionalFormat)
-    {
-        var helper = null;
-        Object.defineProperty(module, name, 
-        {
-            get: function()
-                {
-                    if(helper === null)
-                    {
-                        /*jshint -W061 */
-                        helper = Ice.StreamHelpers.generateObjectSeqHelper(eval(valueType), optionalFormat);
-                        /*jshint +W061 */
-                    }
-                    return helper;
-                }
-        });
-    };
-    
-    Slice.defineObjectDictionary = function(module, name, keyHelper, valueType, optionalFormat)
-    {
-        var helper = null;
-        Object.defineProperty(module, name, 
-        {
-            get: function()
-                {
-                    if(helper === null)
-                    {
-                        /*jshint -W061 */
-                        helper = Ice.StreamHelpers.generateObjectDictHelper(eval(keyHelper), eval(valueType), 
-                                                                            optionalFormat);
-                        /*jshint +W061 */
-                    }
-                    return helper;
-                }
-        });
-    };
-
     Ice.Object = IceObject;
     global.Slice = Slice;
     global.Ice = Ice;

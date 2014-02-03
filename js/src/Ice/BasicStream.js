@@ -2360,21 +2360,33 @@
         return this.readOptImpl(tag, expectedFormat);
     };
 
+    BasicStream.prototype.writeOptValue = function(tag, format, write, v)
+    {
+        if(v !== undefined)
+        {
+            if(this.writeOpt(tag, format))
+            {
+                write.call(this, v);
+            }
+        }
+    };
+
+    BasicStream.prototype.readOptValue = function(tag, format, read)
+    {
+        if(this.readOpt(tag, format))
+        {
+            return read.call(this);
+        }
+        else
+        {
+            return undefined;
+        }
+    };
+
     BasicStream.prototype.writeByte = function(v)
     {
         this.expand(1);
         this._buf.put(v);
-    };
-
-    BasicStream.prototype.writeOptByte = function(tag, v)
-    {
-        if(v !== undefined)
-        {
-            if(this.writeOpt(tag, OptionalFormat.F1))
-            {
-                this.writeByte(v);
-            }
-        }
     };
 
     BasicStream.prototype.rewriteByte = function(v, dest)
@@ -2394,18 +2406,6 @@
         }
     };
 
-    BasicStream.prototype.readOptByte = function(tag)
-    {
-        if(this.readOpt(tag, OptionalFormat.F1))
-        {
-            return this.readByte();
-        }
-        else
-        {
-            return undefined;
-        }
-    };
-    
     BasicStream.prototype.writeByteSeq = function(v)
     {
         if(v === null || v.length === 0)
@@ -2431,17 +2431,6 @@
         this._buf.put(v ? 1 : 0);
     };
 
-    BasicStream.prototype.writeOptBool = function(tag, v)
-    {
-        if(v !== undefined)
-        {
-            if(this.writeOpt(tag, OptionalFormat.F1))
-            {
-                this.writeBool(v);
-            }
-        }
-    };
-
     BasicStream.prototype.rewriteBool = function(v, dest)
     {
         this._buf.putAt(dest, v ? 1 : 0);
@@ -2459,33 +2448,10 @@
         }
     };
 
-    BasicStream.prototype.readOptBool = function(tag)
-    {
-        if(this.readOpt(tag, OptionalFormat.F1))
-        {
-            return this.readBool();
-        }
-        else
-        {
-            return undefined;
-        }
-    };
-
     BasicStream.prototype.writeShort = function(v)
     {
         this.expand(2);
         this._buf.putShort(v);
-    };
-
-    BasicStream.prototype.writeOptShort = function(tag, v)
-    {
-        if(v !== undefined)
-        {
-            if(this.writeOpt(tag, OptionalFormat.F2))
-            {
-                this.writeShort(v);
-            }
-        }
     };
 
     BasicStream.prototype.readShort = function()
@@ -2500,33 +2466,10 @@
         }
     };
 
-    BasicStream.prototype.readOptShort = function(tag)
-    {
-        if(this.readOpt(tag, OptionalFormat.F2))
-        {
-            return this.readShort();
-        }
-        else
-        {
-            return undefined;
-        }
-    };
-
     BasicStream.prototype.writeInt = function(v)
     {
         this.expand(4);
         this._buf.putInt(v);
-    };
-
-    BasicStream.prototype.writeOptInt = function(tag, v)
-    {
-        if(v !== undefined)
-        {
-            if(this.writeOpt(tag, OptionalFormat.F4))
-            {
-                this.writeInt(v);
-            }
-        }
     };
 
     BasicStream.prototype.rewriteInt = function(v, dest)
@@ -2546,33 +2489,10 @@
         }
     };
 
-    BasicStream.prototype.readOptInt = function(tag, v)
-    {
-        if(this.readOpt(tag, OptionalFormat.F4))
-        {
-            return this.readInt();
-        }
-        else
-        {
-            return undefined;
-        }
-    };
-
     BasicStream.prototype.writeLong = function(v)
     {
         this.expand(8);
         this._buf.putLong(v);
-    };
-
-    BasicStream.prototype.writeOptLong = function(tag, v)
-    {
-        if(v !== undefined)
-        {
-            if(this.writeOpt(tag, OptionalFormat.F8))
-            {
-                this.writeLong(v);
-            }
-        }
     };
 
     BasicStream.prototype.readLong = function()
@@ -2587,33 +2507,10 @@
         }
     };
 
-    BasicStream.prototype.readOptLong = function(tag)
-    {
-        if(this.readOpt(tag, OptionalFormat.F8))
-        {
-            return this.readLong();
-        }
-        else
-        {
-            return undefined;
-        }
-    };
-
     BasicStream.prototype.writeFloat = function(v)
     {
         this.expand(4);
         this._buf.putFloat(v);
-    };
-
-    BasicStream.prototype.writeOptFloat = function(tag, v)
-    {
-        if(v !== undefined)
-        {
-            if(this.writeOpt(tag, OptionalFormat.F4))
-            {
-                this.writeFloat(v);
-            }
-        }
     };
 
     BasicStream.prototype.readFloat = function()
@@ -2628,33 +2525,10 @@
         }
     };
 
-    BasicStream.prototype.readOptFloat = function(tag)
-    {
-        if(this.readOpt(tag, OptionalFormat.F4))
-        {
-            return this.readFloat();
-        }
-        else
-        {
-            return undefined;
-        }
-    };
-
     BasicStream.prototype.writeDouble = function(v)
     {
         this.expand(8);
         this._buf.putDouble(v);
-    };
-
-    BasicStream.prototype.writeOptDouble = function(tag, v)
-    {
-        if(v !== undefined)
-        {
-            if(this.writeOpt(tag, OptionalFormat.F8))
-            {
-                this.writeDouble(v);
-            }
-        }
     };
 
     BasicStream.prototype.readDouble = function()
@@ -2669,18 +2543,6 @@
         }
     };
 
-    BasicStream.prototype.readOptDouble = function(tag)
-    {
-        if(this.readOpt(tag, OptionalFormat.F8))
-        {
-            return this.readDouble();
-        }
-        else
-        {
-            return undefined;
-        }
-    };
-
     BasicStream.prototype.writeString = function(v)
     {
         if(v === null || v.length === 0)
@@ -2690,17 +2552,6 @@
         else
         {
             this._buf.writeString(this, v);
-        }
-    };
-
-    BasicStream.prototype.writeOptString = function(tag, v)
-    {
-        if(v !== undefined)
-        {
-            if(this.writeOpt(tag, OptionalFormat.VSize))
-            {
-                this.writeString(v);
-            }
         }
     };
 
@@ -2729,18 +2580,6 @@
         }
     };
 
-    BasicStream.prototype.readOptString = function(tag)
-    {
-        if(this.readOpt(tag, OptionalFormat.VSize))
-        {
-            return this.readString();
-        }
-        else
-        {
-            return undefined;
-        }
-    };
-
     BasicStream.prototype.writeProxy = function(v)
     {
         this._instance.proxyFactory().proxyToStream(v, this);
@@ -2759,17 +2598,17 @@
         }
     };
 
-    BasicStream.prototype.readProxy = function()
+    BasicStream.prototype.readProxy = function(type)
     {
-        return this._instance.proxyFactory().streamToProxy(this);
+        return this._instance.proxyFactory().streamToProxy(this, type);
     };
 
-    BasicStream.prototype.readOptProxy = function(tag)
+    BasicStream.prototype.readOptProxy = function(tag, type)
     {
         if(this.readOpt(tag, OptionalFormat.FSize))
         {
             this.skip(4);
-            return this.readProxy();
+            return this.readProxy(type);
         }
         else
         {
@@ -2797,17 +2636,6 @@
         else
         {
             this.writeSize(v.value);
-        }
-    };
-    
-    BasicStream.prototype.writeOptEnum = function(tag, v)
-    {
-        if(v !== undefined)
-        {
-            if(this.writeOpt(tag, OptionalFormat.Size))
-            {
-                this.writeEnum(v);
-            }
         }
     };
 
@@ -2852,18 +2680,6 @@
         {
             return undefined;
         }
-    };
-
-    BasicStream.prototype.writeStruct = function(v)
-    {
-        v.__write(this);
-    };
-
-    BasicStream.prototype.readStruct = function(T)
-    {
-        var v = new T();
-        v.__read(this);
-        return v;
     };
 
     BasicStream.prototype.writeObject = function(v)
@@ -3233,6 +3049,56 @@
 
         return userEx;
     };
+    
+    var defineBuiltinHelper = function(write, read, sz, format)
+    {
+        var helper = {
+            write: function(os, v) { return write.call(os, v); },
+            read: function(is) { return read.call(is); },
+            writeOpt: function(os, tag, v) { os.writeOptValue(tag, format, write, v); },
+            readOpt: function(is, tag) { return is.readOptValue(tag, format, read); },
+        };
+        Object.defineProperty(helper, "minWireSize", {
+            get: function() { return sz; }
+        });
+        return helper;
+    }
+
+    var stream = BasicStream.prototype;
+    Ice.ByteHelper = defineBuiltinHelper(stream.writeByte, stream.readByte, 1, Ice.OptionalFormat.F1);
+    Ice.BoolHelper = defineBuiltinHelper(stream.writeBool, stream.readBool, 1, Ice.OptionalFormat.F1);
+    Ice.ShortHelper = defineBuiltinHelper(stream.writeShort, stream.readShort, 2, Ice.OptionalFormat.F2);
+    Ice.IntHelper = defineBuiltinHelper(stream.writeInt, stream.readInt, 4, Ice.OptionalFormat.F4);
+    Ice.LongHelper = defineBuiltinHelper(stream.writeLong, stream.readLong, 8, Ice.OptionalFormat.F8);
+    Ice.FloatHelper = defineBuiltinHelper(stream.writeFloat, stream.readFloat, 4, Ice.OptionalFormat.F4);
+    Ice.DoubleHelper = defineBuiltinHelper(stream.writeDouble, stream.readDouble, 8, Ice.OptionalFormat.F8);
+    Ice.StringHelper = defineBuiltinHelper(stream.writeString, stream.readString, 1, Ice.OptionalFormat.VSize);
+    
+    Ice.ObjectHelper = {
+        write: function(os, v)
+        {
+            os.writeObject(v);
+        },
+        read: function(is)
+        {
+            var o;
+            is.readObject(function(v) { o = v }, Ice.Object);
+            return o;
+        },
+        writeOpt: function(os, tag, v)
+        {
+            os.writeOptValue(tag, Ice.OptionalFormat.Class, stream.writeObject, v);
+        },
+        readOpt: function(is, tag)
+        {
+            var o;
+            is.readOptObject(tag, function(v) { o = v }, Ice.Object);
+            return o;
+        },
+    };
+    Object.defineProperty(Ice.ObjectHelper, "minWireSize", {
+        get: function() { return 1; }
+    });
 
     Ice.BasicStream = BasicStream;
     global.Ice = Ice;

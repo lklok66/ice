@@ -98,7 +98,11 @@
                             promise.succeed();
                         },
                         exceptionCB
-                    );
+                    ).exception(
+                        function(ex)
+                        {
+                            promise.fail(ex);
+                        });
                 }
                 catch(ex)
                 {

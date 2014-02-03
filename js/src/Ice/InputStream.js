@@ -156,11 +156,6 @@
         return this._is.readEnum(type);
     };
 
-    InputStream.prototype.readStruct = function(type)
-    {
-        return this._is.readStruct(type);
-    };
-
     InputStream.prototype.throwException = function()
     {
         this._is.throwException();

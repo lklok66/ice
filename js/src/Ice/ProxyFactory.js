@@ -109,20 +109,20 @@
         }
     };
 
-    ProxyFactory.prototype.streamToProxy = function(s)
+    ProxyFactory.prototype.streamToProxy = function(s, type)
     {
         var ident = new Identity();
         ident.__read(s);
 
         var ref = this._instance.referenceFactory().createFromStream(ident, s);
-        return this.referenceToProxy(ref);
+        return this.referenceToProxy(ref, type);
     };
 
-    ProxyFactory.prototype.referenceToProxy = function(ref)
+    ProxyFactory.prototype.referenceToProxy = function(ref, type)
     {
         if(ref !== null)
         {
-            var proxy = new ObjectPrx();
+            var proxy = type ? new type() : new ObjectPrx();
             proxy.__setup(ref);
             return proxy;
         }
