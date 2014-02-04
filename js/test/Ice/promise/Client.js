@@ -48,7 +48,7 @@
                 out.write("Creating a promise object that is resolved and succeed... ");
                 var promise1 = Promise.succeed(1024);
                 promise1.then(
-                    function (i)
+                    function(i)
                     {
                         test(i === 1024);
                         test(promise1.succeeded());
@@ -70,7 +70,7 @@
                         out.write("Creating a promise object that is resolved and failed... ");
                         var promise1 = Promise.fail("promise.fail");
                         promise1.then(
-                            function (i)
+                            function(i)
                             {
                                 promise.fail();
                                 test(false, e);
@@ -93,7 +93,7 @@
                         out.write("Creating a promise object that is resolved and succeed with multiple arguments... ");
                         var promise1 = Promise.succeed(1024, "Hello World!");
                         promise1.then(
-                            function (i, msg)
+                            function(i, msg)
                             {
                                 test(i === 1024);
                                 test(msg === "Hello World!");
@@ -117,7 +117,7 @@
                         out.write("Creating a promise with a callback that returns a new value... ");
                         var promise1 = Promise.succeed(1024);
                         promise1.then(
-                            function (i)
+                            function(i)
                             {
                                 test(i === 1024);
                                 test(promise1.succeeded());
@@ -151,7 +151,7 @@
                         out.write("Creating a promise object that recovers from a failure... ");
                         var promise1 = Promise.fail("promise.fail");
                         promise1.then(
-                            function (i)
+                            function(i)
                             {
                                 promise.fail();
                                 test(false, "Succeed called.failed expected");
@@ -185,7 +185,7 @@
                         out.write("Creating a promise object that rethrow a.failure... ");
                         var promise1 = Promise.fail("promise.fail");
                         promise1.then(
-                            function (i)
+                            function(i)
                             {
                                 promise.fail();
                                 test(false, e);
@@ -219,7 +219,7 @@
                         out.write("A second call to then should produce the same results... ");
                         var promise1 = Promise.succeed(1024);
                         promise1.then(
-                            function (i)
+                            function(i)
                             {
                                 test(i === 1024);
                                 test(promise1.succeeded());
@@ -230,7 +230,7 @@
                                 test(false, e);
                             });
                         promise1.then(
-                            function (i)
+                            function(i)
                             {
                                 test(i === 1024);
                                 test(promise1.succeeded());
@@ -243,7 +243,7 @@
                         
                         promise1 = Promise.fail("promise.fail");
                         promise1.then(
-                            function (i)
+                            function(i)
                             {
                                 promise.fail();
                                 test(false, e);
@@ -254,7 +254,7 @@
                                 test(promise1.failed());
                             });
                         promise1.then(
-                            function (i)
+                            function(i)
                             {
                                 promise.fail();
                                 test(false, e);
@@ -407,9 +407,58 @@
                 return deferred(
                     function(promise)
                     {
-                        out.write("Promise exception propagation... ");
+                        out.write("Promise exception propagation in succeed callback... ");
                         var promise1 = Promise.fail("promise.fail");
                         promise1.then(
+                            function()
+                            {
+                                promise.fail();
+                                test(false, "response callback called but exception expected");
+                            }
+                        ).then(
+                            function()
+                            {
+                                promise.fail();
+                                test(false, "response callback called but exception expected");
+                            }
+                        ).exception(
+                            function(e)
+                            {
+                                //
+                                // since no exception handler was passed to the first `.then`, the error propagates.
+                                //
+                                test(e === "promise.fail");
+                                out.writeLine("ok");
+                                promise.succeed();
+                            });
+                    }
+                );
+            })
+        .then(
+            function()
+            {
+                return deferred(
+                    function(promise)
+                    {
+                        out.write("Promise exception propagation in exception callback... ");
+                        var promise1 = Promise.fail("promise.fail");
+                        promise1.then(
+                            function()
+                            {
+                                promise.fail();
+                                test(false, "response callback called but exception expected");
+                            },
+                            function(ex)
+                            {
+                                throw "promise.fail";
+                            }
+                        ).then(
+                            function()
+                            {
+                                promise.fail();
+                                test(false, "response callback called but exception expected");
+                            }
+                        ).then(
                             function()
                             {
                                 promise.fail();

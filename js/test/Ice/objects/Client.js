@@ -189,12 +189,6 @@
     {
         var p = new Promise();
 
-        //
-        // re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex){ throw ex; };
-
         setTimeout(function(){
             try
             {
@@ -223,15 +217,13 @@
                         test(initial !== null);
                         test(initial.equals(base));
                         out.writeLine("ok");
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         out.write("getting B1... ");
                         return initial.getB1();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, obj)
                     {
@@ -240,8 +232,7 @@
                         out.writeLine("ok");
                         out.write("getting B2... ");
                         return initial.getB2();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, obj)
                     {
@@ -250,8 +241,7 @@
                         out.writeLine("ok");
                         out.write("getting C... ");
                         return initial.getC();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, obj)
                     {
@@ -260,16 +250,14 @@
                         out.writeLine("ok");
                         out.write("getting D... ");
                         return initial.getD();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, obj)
                     {
                         d = obj;
                         test(d !== null);
                         out.writeLine("ok");
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -303,8 +291,7 @@
                         out.write("getting B1, B2, C, and D all at once... ");
 
                         return initial.getAll();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, b1, b2, c, d)
                     {
@@ -343,15 +330,13 @@
 
                         out.write("testing protected members... ");
                         return initial.getE();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, e)
                     {
                         test(e.checkValues());
                         return initial.getF();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, f)
                     {
@@ -360,24 +345,21 @@
                         out.writeLine("ok");
                         out.write("getting I, J and H... ");
                         return initial.getI();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, obj)
                     {
                         i = obj;
                         test(i);
                         return initial.getJ();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, obj)
                     {
                         j = obj;
                         test(j);
                         return initial.getH();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, obj)
                     {
@@ -385,34 +367,29 @@
                         test(h);
                         out.write("setting I... ");
                         return initial.setI(i);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return initial.setI(j);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return initial.setI(h);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         out.writeLine("ok");
                         out.write("testing sequences... ");
                         return initial.opBaseSeq([]);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, retS, outS)
                     {
                         return initial.opBaseSeq([new Test.Base(new Test.S(), "")]);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, retS, outS)
                     {
@@ -421,8 +398,7 @@
                         out.write("testing compact ID... ");
 
                         return initial.getCompact();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, compact)
                     {
@@ -435,8 +411,7 @@
                         var uoet = Test.UnexpectedObjectExceptionTestPrx.uncheckedCast(base);
                         test(uoet !== null);
                         return uoet.op();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -451,7 +426,7 @@
                         }
                         else
                         {
-                            exceptionCB(ex);
+                            throw ex;
                         }
                         out.writeLine("ok");
                         return initial.shutdown();
@@ -460,8 +435,7 @@
                     function()
                     {
                         p.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

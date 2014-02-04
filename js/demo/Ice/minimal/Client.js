@@ -14,27 +14,26 @@
     
     var communicator = Ice.initialize();
     
-    var cleanup = function(ex)
-    {
-        if(ex instanceof Error)
-        {
-            console.log(ex.stack);
-        }
-        if(communicator !== null)
-        {
-            var c = communicator;
-            communicator = null;
-            return c.destroy();
-        }
-    };
-    
-    var exceptionCB = function(ex) { throw ex; };
-    
     Demo.HelloPrx.checkedCast(communicator.stringToProxy("hello:tcp -h localhost -p 10000")).then(
         function(asyncResult, hello)
         {
             return hello.sayHello();
-        },
-        exceptionCB
-    ).then(cleanup, exceptionCB).exception(cleanup);
+        }
+    ).then(
+        function(asyncResult)
+        {
+            var c = communicator;
+            communicator =  null;
+            return c.destroy();
+        }
+    ).exception(
+        function(ex)
+        {
+            if(communicator !== null)
+            {
+                communicator.destroy();
+            }
+            console.log(ex.toString());
+        }
+    );
 }());

@@ -8,17 +8,14 @@
 
     var writeException = function(ex)
     {
-        if(ex && ex._asyncResult)
+        console.log(ex.toString());
+        if(ex._asyncResult)
         {
-            console.log("exception occurred in call to " + ex._asyncResult.operation);
+            console.log("\nexception occurred in call to " + ex._asyncResult.operation);
         }
         if(ex.stack)
         {
             console.log(ex.stack);
-        }
-        else
-        {
-            console.log(ex);
         }
     };
 

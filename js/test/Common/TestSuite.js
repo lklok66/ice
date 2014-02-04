@@ -56,17 +56,18 @@ $(document).foundation();
                         function()
                         {
                             $("#run").removeClass("disabled");
-                        },
-                        function(ex)
-                        {
-                            out.writeLine("");
-                            if(ex && ex._asyncResult)
+                        }).exception(
+                            function(ex)
                             {
-                                out.writeLine("exception occurred in call to " + ex._asyncResult.operation);
+                                out.writeLine("");
+                                if(ex && ex._asyncResult)
+                                {
+                                    out.writeLine("exception occurred in call to " + ex._asyncResult.operation);
+                                }
+                                out.writeLine(ex.toString());
+                                $("#run").removeClass("disabled");
                             }
-                            out.writeLine(ex.toString());
-                            $("#run").removeClass("disabled");
-                        });
+                        );
                     return false;
                 }
             });

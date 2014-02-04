@@ -9,17 +9,14 @@ console.log("Client.js");
         
         var writeException = function(ex)
         {
-            if(ex && ex._asyncResult)
+            console.log(ex.toString());
+            if(ex._asyncResult)
             {
-                console.log("exception occurred in call to " + ex._asyncResult.operation);
+                console.log("\nexception occurred in call to " + ex._asyncResult.operation);
             }
             if(ex.stack)
             {
                 console.log(ex.stack);
-            }
-            else
-            {
-                console.log(ex);
             }
         };
 
@@ -90,13 +87,9 @@ console.log("Client.js");
                             }
                         };
                         
-                        var exceptionCB = function(ex)
-                        {
-                            p.fail(ex);
-                        };
                         for(var i = 0; i < repetitions; ++i)
                         {
-                            obj.ice_ping().then(succeedCB).exception(exceptionCB);
+                            obj.ice_ping().then(succeedCB).exception(function(ex){ p.fail(ex); });
                         }
                         return p;
                     },

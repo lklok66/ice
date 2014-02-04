@@ -23,11 +23,6 @@
     {
         var promise = new Ice.Promise();
 
-        //
-        // Re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex) { throw ex; };
         var failCB = function() { test(false); };
 
         setTimeout(function(){
@@ -67,20 +62,17 @@
                         }
 
                         return p.opVoid();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
                         return p.opIdempotent();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
                         return p.opNonmutating();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
@@ -95,8 +87,7 @@
                         }
 
                         promise.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

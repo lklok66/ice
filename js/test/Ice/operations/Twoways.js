@@ -23,11 +23,6 @@
     {
         var promise = new Ice.Promise();
 
-        //
-        // Re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex) { throw ex; };
         var failCB = function() { test(false); };
 
         setTimeout(function(){
@@ -46,43 +41,37 @@
                     function(r)
                     {
                         return p.ice_isA(Test.MyClass.ice_staticId());
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, b)
                     {
                         test(b);
                         return p.ice_id();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, id)
                     {
                         test(id === Test.MyDerivedClass.ice_staticId());
                         return p.ice_ids();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, ids)
                     {
                         test(ids.length === 3);
                         return p.opVoid();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
                         return p.opByte(0xff, 0x0f);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p3)
                     {
                         test(p3 === 0xf0);
                         test(retval === 0xff);
                         return p.opBool(true, false);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p3)
                     {
@@ -90,8 +79,7 @@
                         test(!retval);
                         var lo = new Ice.Long(0, 12);
                         return p.opShortIntLong(10, 11, lo);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, s, i, l)
                     {
@@ -101,8 +89,7 @@
                         test(l.equals(lo));
                         test(retval.equals(lo));
                         return p.opFloatDouble(3.14, 1.1E10);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, f, d)
                     {
@@ -110,24 +97,21 @@
                         test(d == 1.1E10);
                         test(retval == 1.1E10);
                         return p.opString("hello", "world");
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p3)
                     {
                         test(p3 === "world hello");
                         test(retval === "hello world");
                         return p.opMyEnum(Test.MyEnum.enum2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p2)
                     {
                         test(p2 === Test.MyEnum.enum2);
                         test(retval === Test.MyEnum.enum3);
                         return p.opMyClass(p);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p2, p3)
                     {
@@ -146,8 +130,7 @@
                         si2.s = new Test.AnotherStruct();
                         si2.s.s = "def";
                         return p.opStruct(si1, si2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p3)
                     {
@@ -161,8 +144,7 @@
                         var bsi1 = Ice.Buffer.createNative([ 0x01, 0x11, 0x12, 0x22 ]);
                         var bsi2 = Ice.Buffer.createNative([ 0xf1, 0xf2, 0xf3, 0xf4 ]);
                         return p.opByteS(bsi1, bsi2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p3)
                     {
@@ -184,8 +166,7 @@
                         var bsi1 = [ true, true, false ];
                         var bsi2 = [ false ];
                         return p.opBoolS(bsi1, bsi2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p3)
                     {
@@ -206,8 +187,7 @@
                         var l3 = new Ice.Long(0, 20);
                         var lsi = [ l1, l2, l3 ];
                         return p.opShortIntLongS(ssi, isi, lsi);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, sso, iso, lso)
                     {
@@ -238,8 +218,7 @@
                         var fsi = [ 3.14, 1.11 ];
                         var dsi = [ 1.1E10, 1.2E10, 1.3E10 ];
                         return p.opFloatDoubleS(fsi, dsi);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, fso, dso)
                     {
@@ -259,8 +238,7 @@
                         var ssi1 = [ "abc", "de", "fghi" ];
                         var ssi2 = [ "xyz" ];
                         return p.opStringS(ssi1, ssi2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, sso)
                     {
@@ -285,8 +263,7 @@
                                 Ice.Buffer.createNative([ 0xf2, 0xf1 ])
                             ];
                         return p.opByteSS(bsi1, bsi2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, bso)
                     {
@@ -321,8 +298,7 @@
                                 [ 1.1E10, 1.2E10, 1.3E10 ]
                             ];
                         return p.opFloatDoubleSS(fsi, dsi);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, fso, dso)
                     {
@@ -359,8 +335,7 @@
                                 [ "xyz" ]
                             ];
                         return p.opStringSS(ssi1, ssi2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, sso)
                     {
@@ -416,8 +391,7 @@
                             ]
                         ];
                         return p.opStringSSS(sssi1, sssi2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, ssso)
                     {
@@ -463,8 +437,7 @@
                         di2.set(101, true);
 
                         return p.opByteBoolD(di1, di2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p3)
                     {
@@ -487,8 +460,7 @@
                         di2.set(1101, 0);
 
                         return p.opShortIntD(di1, di2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p3)
                     {
@@ -513,8 +485,7 @@
                         di2.set(new Ice.Long(0, 999999130), 0.5);
 
                         return p.opLongFloatD(di1, di2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p3)
                     {
@@ -541,8 +512,7 @@
                         di2.set("BAR", "abc 0.5");
 
                         return p.opStringStringD(di1, di2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p3)
                     {
@@ -565,8 +535,7 @@
                         di2.set("Hello!!", Test.MyEnum.enum2);
 
                         return p.opStringMyEnumD(di1, di2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p3)
                     {
@@ -587,8 +556,7 @@
                         di2.set(Test.MyEnum.enum3, "qwerty");
 
                         return p.opMyEnumStringD(di1, di2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p3)
                     {
@@ -613,8 +581,7 @@
                         di2.set(s23, Test.MyEnum.enum2);
 
                         return p.opMyStructMyEnumD(di1, di2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, retval, p3)
                     {
@@ -671,44 +638,38 @@
 
                         next(0);
                         return promise2;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         test(p.ice_getContext().size === 0);
 
                         return p.opContext();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, c)
                     {
                         test(!c.equals(ctx));
                         return p.opContext(ctx);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, c)
                     {
                         test(c.equals(ctx));
                         return Test.MyClassPrx.checkedCast(p.ice_context(ctx));
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, p2)
                     {
                         test(p2.ice_getContext().equals(ctx));
                         return p2.opContext();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, c)
                     {
                         test(c.equals(ctx));
                         return r.proxy.opContext(ctx);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, c)
                     {
@@ -729,8 +690,7 @@
                         test(ic.getImplicitContext().getContext().equals(ctx));
 
                         return p3.opContext();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, c)
                     {
@@ -738,8 +698,7 @@
 
                         r.communicator.getImplicitContext().put("zero", "ZERO");
                         return r.proxy.opContext();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, c)
                     {
@@ -760,8 +719,7 @@
                         r.communicator.getImplicitContext().setContext(null);
 
                         return p3.opContext();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, c)
                     {
@@ -769,16 +727,14 @@
                         r.communicator.getImplicitContext().setContext(ctx);
 
                         return r.proxy.opContext();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, c)
                     {
                         test(c.equals(combined));
 
                         return r.communicator.destroy();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
@@ -790,38 +746,32 @@
                         }
 
                         return p.opDoubleMarshaling(d, ds);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
                         return p.opIdempotent();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
                         return p.opNonmutating();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
                         return Test.MyDerivedClassPrx.checkedCast(p);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, d)
                     {
                         return d.opDerived();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
                         promise.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

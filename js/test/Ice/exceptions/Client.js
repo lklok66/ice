@@ -27,11 +27,7 @@
     var allTests = function(out, communicator)
     {
         var p = new Promise();
-        //
-        // re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex){ throw ex; };
+
         var failCB = function(){ test(false); };
 
         var supportsUndeclaredExceptions = function(thrower)
@@ -227,8 +223,7 @@
                         out.writeLine("ok");
                         out.write("catching exact types... ");
                         return thrower.throwAasA(1);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -387,15 +382,13 @@
                     function()
                     {
                         return supportsAssertException(thrower);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         out.write("testing memory limit marshal exception...");
                         return thrower.throwMemoryLimitException(null);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -510,8 +503,7 @@
                     function(asyncResult)
                     {
                         return thrower.throwAfterException();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -527,8 +519,7 @@
                     function()
                     {
                         p.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

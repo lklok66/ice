@@ -254,7 +254,7 @@
                 
                 for(var i = 0; i < c.length; ++i)
                 {
-                    c[i].flushBatchRequests().then(successCB, exceptionCB);
+                    c[i].flushBatchRequests().then(successCB).exception(exceptionCB);
                 }
             }
             else
@@ -770,7 +770,7 @@
                     connectionList = e.value;
                     for(var i = 0; i < connectionList.length; ++i)
                     {
-                        connectionList[i].waitUntilFinished().then(successCB, exceptionCB);
+                        connectionList[i].waitUntilFinished().then(successCB).exception(exceptionCB);
                     }
                 }
             }

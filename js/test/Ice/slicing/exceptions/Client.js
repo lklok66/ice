@@ -28,11 +28,7 @@
     var allTests = function(out, communicator)
     {
         var p = new Promise();
-        //
-        // re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex){ throw ex; };
+
         var failCB = function(){ test(false); };
         
         setTimeout(function(){
@@ -56,8 +52,7 @@
                         out.writeLine("ok");
                         out.write("base... ");
                         return prx.baseAsBase();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -296,8 +291,7 @@
                     function()
                     {
                         p.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

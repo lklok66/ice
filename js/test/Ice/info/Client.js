@@ -28,11 +28,7 @@
     var allTests = function(out, communicator)
     {
         var p = new Promise();
-        //
-        // re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex){ throw ex; };
+        
         var failCB = function(){ test(false); };
         
         setTimeout(function(){
@@ -74,8 +70,7 @@
                     {
                         testIntf = obj;
                         return base.ice_getConnection();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, conn)
                     {
@@ -85,8 +80,7 @@
                         test(ipinfo.host == defaultHost);
 
                         return testIntf.getEndpointInfoAsContext();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, ctx)
                     {
@@ -96,8 +90,7 @@
                         out.writeLine("ok");
                         out.write("testing connection information... ");
                         return base.ice_getConnection();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, conn)
                     {
@@ -112,8 +105,7 @@
                         test(info.remotePort == 12010);
                         test(info.remoteAddress == defaultHost);
                         return testIntf.getConnectionInfoAsContext();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, ctx)
                     {
@@ -129,8 +121,7 @@
 
                         out.writeLine("ok");
                         return testIntf.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {

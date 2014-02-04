@@ -42,14 +42,12 @@
                         communicator = Ice.initialize(initData);
                         com = Test.RemoteCommunicatorPrx.uncheckedCast(communicator.stringToProxy("communicator:default -p 12010"));
                         p.succeed();
-                    },
+                    }
+                ).exception(
                     function(ex)
                     {
                         p.fail(ex);
-                    }).exception(
-                        function(ex){
-                            p.fail(ex);
-                        }
+                    }
                 );
             }
             else
@@ -59,12 +57,7 @@
             }
             return p;
         }
-
-        //
-        // re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex){ throw ex; };
+        
         var failCB = function(){ test(false); };
         
         var createTestIntfPrx = function(adapters)
@@ -139,13 +132,13 @@
                         {
                             p.succeed();
                         }
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {
                         p.fail(ex); 
-                    });
+                    }
+                );
             };
             setTimeout(
                 function(){
@@ -212,13 +205,13 @@
                                                         {
                                                             p2.succeed(proxies);
                                                         }
-                                                    },
-                                                    exceptionCB)
-                                                .exception(
+                                                    }
+                                                ).exception(
                                                     function(ex)
                                                     {
                                                         p2.fail(ex);
-                                                    });
+                                                    }
+                                                );
                                             };
                                             
                                             setTimeout(
@@ -227,9 +220,8 @@
                                                 });
                                             
                                             return p2;
-                                        },
-                                        exceptionCB)
-                                    .then(
+                                        }
+                                    ).then(
                                         function(proxies){
                                             proxies.forEach(
                                                 function(p){
@@ -297,13 +289,13 @@
                                                         {
                                                             p.succeed();
                                                         }
-                                                    },
-                                                    exceptionCB
+                                                    }
                                                 ).exception(
                                                     function(ex)
                                                     {
                                                         p.fail(ex);
-                                                    });
+                                                    }
+                                                );
                                             };
                                             
                                             var p4 = new Promise();
@@ -324,8 +316,7 @@
                                                             }
                                                         });
                                                     test(connections.length <= adapters.length);
-                                                },
-                                                exceptionCB
+                                                }
                                             ).then(
                                                 function()
                                                 {
@@ -333,18 +324,18 @@
                                                     f3(p5, ArrayUtil.clone(adapters));
                                                     
                                                     return p5;
-                                                },
-                                                exceptionCB
+                                                }
                                             ).then(
                                                 function()
                                                 {
                                                     p4.succeed();
-                                                },
-                                                exceptionCB
+                                                }
                                             ).exception(
-                                                function(ex){
+                                                function(ex)
+                                                {
                                                     p4.fail(ex);
-                                                });
+                                                }
+                                            );
                                             return p4;
                                         }
                                     ).then(
@@ -358,12 +349,13 @@
                                             {
                                                 f1(--count, adapterCount, proxies);
                                             }
-                                        },
-                                        exceptionCB
+                                        }
                                     ).exception(
-                                        function(ex){
+                                        function(ex)
+                                        {
                                             p.fail(ex);
-                                        });
+                                        }
+                                    );
                                 };
                                 
                                 setTimeout(function(){
@@ -371,20 +363,19 @@
                                 });
                                 
                                 return p;
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function()
                             {
                                 out.writeLine("ok");
                                 return testPromise.succeed();
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
                                 testPromise.fail()
-                            });
+                            }
+                        );
                     });
                     return testPromise;
                 };
@@ -404,8 +395,7 @@
                         names = ["Adapter11", "Adapter12", "Adapter13"];
                     
                         return com.createObjectAdapter("Adapter", "default");
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, obj)
                     {
@@ -413,8 +403,7 @@
                         return Promise.all(
                             adapter.getTestIntf(),
                             adapter.getTestIntf());
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r1, r2)
                     {
@@ -424,8 +413,7 @@
                         return Promise.all(
                             test1.ice_getConnection(),
                             test2.ice_getConnection());
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r1, r2)
                     {
@@ -435,14 +423,12 @@
                         return Promise.all(
                             test1.ice_ping(),
                             test2.ice_ping());
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r1, r2)
                     {
                         return com.deactivateObjectAdapter(adapter);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -451,8 +437,7 @@
                         return Promise.all(
                             test3.ice_getConnection(),
                             test1.ice_getConnection());
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r1, r2)
                     {
@@ -464,8 +449,7 @@
                             test3.ice_getConnection(),
                             test2.ice_getConnection());
                         
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r1, r2)
                     {
@@ -473,8 +457,7 @@
                         conn2 = r2[1];
                         test(conn3 === conn2);
                         return test3.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -486,8 +469,7 @@
                         }
                         out.writeLine("ok");
                         return initialize();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -497,8 +479,7 @@
                             com.createObjectAdapter("Adapter11", "default"),
                             com.createObjectAdapter("Adapter12", "default"),
                             com.createObjectAdapter("Adapter13", "default"));
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     //
                     // Ensure that when a connection is opened it's reused for new
@@ -519,16 +500,14 @@
                                     test1 = obj;
                                     ArrayUtil.shuffle(adpts);
                                     return createTestIntfPrx(adpts);
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(obj)
                                 {
                                     test2 = obj;
                                     ArrayUtil.shuffle(adpts);
                                     return createTestIntfPrx(adpts);
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(obj)
                                 {
@@ -536,8 +515,7 @@
                                     return Promise.all(
                                         test1.ice_getConnection(),
                                         test2.ice_getConnection());
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(r1, r2)
                                 {
@@ -545,15 +523,13 @@
                                     return Promise.all(
                                         test2.ice_getConnection(),
                                         test3.ice_getConnection());
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(r1, r2)
                                 {
                                     test(r1[1] === r2[1]);
                                     return test1.getAdapterName();
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(asyncResult, name)
                                 {
@@ -562,14 +538,12 @@
                                         names.splice(names.indexOf(name), 1);
                                     }
                                     return test1.ice_getConnection();
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(asyncResult, conn)
                                 {
                                     return conn.close(false);
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function()
                                 {
@@ -581,8 +555,7 @@
                                     {
                                         p.succeed();
                                     }
-                                },
-                                exceptionCB
+                                }
                             ).exception(
                                 function(ex)
                                 {
@@ -594,8 +567,7 @@
                             f1(ArrayUtil.clone(names));
                         });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -613,8 +585,7 @@
                                 function(asyncResult, test)
                                 {
                                     return test.ice_ping();
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function()
                                 {
@@ -639,8 +610,7 @@
                                 f1(ArrayUtil.clone(adapters))
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -668,13 +638,13 @@
                                                 test(i == nRetry);
                                                 p.succeed();
                                             }
-                                        },
-                                        exceptionCB
+                                        }
                                     ).exception(
                                         function(ex)
                                         {
                                             p.fail(ex);
-                                        });
+                                        }
+                                    );
                                 };
                                 
                                 test1.getAdapterName().then(
@@ -682,18 +652,17 @@
                                     {
                                         adapterName = name;
                                         f1();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).exception(
                                     function(ex)
                                     {
                                         p.fail(ex);
-                                    });
+                                    }
+                                );
                             });
                         
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -705,14 +674,12 @@
                                 function(asyncResult, test)
                                 {
                                     return test.ice_getConnection();
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(asyncResult, conn)
                                 {
                                     conn.close(false);
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function()
                                 {
@@ -729,7 +696,8 @@
                                 function(ex)
                                 {
                                     p.fail(ex);
-                                });
+                                }
+                            );
                         }
                         setTimeout(
                             function()
@@ -737,15 +705,13 @@
                                 f1(ArrayUtil.clone(adapters))
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         names = ["Adapter12", "Adapter13"];
                         return com.deactivateObjectAdapter(adapters[0]);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -759,16 +725,14 @@
                                     test1 = obj;
                                     ArrayUtil.shuffle(adpts);
                                     return createTestIntfPrx(adpts);
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(obj)
                                 {
                                     test2 = obj;
                                     ArrayUtil.shuffle(adpts);
                                     return createTestIntfPrx(adpts);
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(obj)
                                 {
@@ -782,16 +746,14 @@
                                         {
                                             conn1 = conn
                                             return test2.ice_getConnection();
-                                        },
-                                        exceptionCB
+                                        }
                                     ).then(
                                         function(asyncResult, conn)
                                         {
                                             conn2 = conn;
                                             test(conn1 === conn2);
                                             p.succeed();
-                                        },
-                                        exceptionCB
+                                        }
                                     ).exception(
                                         function(ex)
                                         {
@@ -800,8 +762,7 @@
                                     );
                                     
                                     return p;
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function()
                                 {
@@ -812,30 +773,26 @@
                                         {
                                             conn1 = conn
                                             return test3.ice_getConnection();
-                                        },
-                                        exceptionCB
+                                        }
                                     ).then(
                                         function(asyncResult, conn)
                                         {
                                             conn2 = conn;
                                             test(conn1 === conn2);
                                             p.succeed();
-                                        },
-                                        exceptionCB
+                                        }
                                     ).exception(
                                         function(ex)
                                         {
                                             p.fail(ex);
                                         });
                                     return p;
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function()
                                 {
                                     return test1.getAdapterName();
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(asyncResult, name)
                                 {
@@ -844,14 +801,12 @@
                                         names.splice(names.indexOf(name), 1);
                                     }
                                     return test1.ice_getConnection();
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(asyncResult, conn)
                                 {
                                     return conn.close(false);
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function()
                                 {
@@ -863,8 +818,7 @@
                                     {
                                         p.succeed();
                                     }
-                                },
-                                exceptionCB
+                                }
                             ).exception(
                                 function(ex)
                                 {
@@ -876,40 +830,34 @@
                             f1(ArrayUtil.clone(names));
                         });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                             return com.deactivateObjectAdapter(adapters[2]);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return createTestIntfPrx(adapters);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(prx)
                     {
                         return prx.getAdapterName();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, name)
                     {
                         test(name == "Adapter12");
                         return deactivate(com, adapters);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         out.writeLine("ok");
                         return initialize();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -920,14 +868,12 @@
                         {
                             return multipleRandomEndpoints();
                         }
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         return initialize();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -935,15 +881,13 @@
                         names = ["Adapter21", "Adapter22", "Adapter23"];
                         return Promise.all.apply(Promise, 
                                 names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[1]; });
                         return createTestIntfPrx(adapters);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(prx)
                     {
@@ -961,14 +905,12 @@
                                         names.splice(names.indexOf(name), 1);
                                     }
                                     return prx.ice_getConnection();
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(asyncResult, conn)
                                 {
                                     return conn.close(false);
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function()
                                 {
@@ -980,20 +922,19 @@
                                     {
                                         p.succeed(prx);
                                     }
-                                },
-                                exceptionCB
+                                }
                             ).exception(
                                 function(ex)
                                 {
                                     p.fail(ex);
-                                });
+                                }
+                            );
                         };
                         
                         setTimeout(f1);
                         
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(obj)
                     {
@@ -1014,14 +955,12 @@
                                         names.splice(names.indexOf(name), 1);
                                     }
                                     return prx.ice_getConnection();
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(asyncResult, conn)
                                 {
                                     return conn.close(false);
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function()
                                 {
@@ -1033,13 +972,13 @@
                                     {
                                         p.succeed(prx);
                                     }
-                                },
-                                exceptionCB
+                                }
                             ).exception(
                                 function(ex)
                                 {
                                     p.fail(ex);
-                                });
+                                }
+                            );
                         };
                         
                         setTimeout(f1);
@@ -1050,15 +989,13 @@
                     function()
                     {
                         return  deactivate(com, adapters);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         out.writeLine("ok");
                         return initialize();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -1066,15 +1003,13 @@
                         names = ["Adapter31", "Adapter32", "Adapter33"];
                         return Promise.all.apply(Promise, 
                                 names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[1]; });
                         return createTestIntfPrx(adapters);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(obj)
                     {
@@ -1090,8 +1025,7 @@
                                 function(asyncResult, name)
                                 {
                                     test(name === names[0]);
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function()
                                 {
@@ -1113,16 +1047,14 @@
                                                 {
                                                     p.succeed();
                                                 }
-                                            },
-                                            exceptionCB
+                                            }
                                         ).exception(
                                             function(ex)
                                             {
                                                 p.fail(ex);
                                             });
                                     }
-                                },
-                                exceptionCB
+                                }
                             ).exception(
                                 function(ex)
                                 {
@@ -1140,13 +1072,9 @@
                     function()
                     {
                         return prx.getAdapterName();
-                    },
-                    exceptionCB
+                    }
                 ).then(
-                    function()
-                    {
-                        test(false);
-                    },
+                    failCB,
                     function(ex)
                     {
                         if(!(typeof(window) == 'undefined' && ex instanceof Ice.ConnectionRefusedException) &&
@@ -1168,8 +1096,7 @@
                                 function(asyncResult, obj)
                                 {
                                     return obj.getTestIntf();
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(asyncResult, obj)
                                 {
@@ -1193,8 +1120,7 @@
                                                 {
                                                     p.succeed();
                                                 }
-                                            },
-                                        exceptionCB
+                                            }
                                         ).exception(
                                             function(ex){
                                                 p.fail(ex);
@@ -1204,8 +1130,7 @@
                                         function(){
                                             f2(0, names);
                                         });
-                                },
-                                exceptionCB
+                                }
                             ).exception(
                                 function(ex){
                                     p.fail(ex);
@@ -1215,27 +1140,23 @@
                             f1(0, ["Adapter36", "Adapter35", "Adapter34"]);
                         });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         return deactivate(com, adapters);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(){
                         out.writeLine("ok");
                         return initialize
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         out.write("testing per request binding with single endpoint... ");
                         return com.createObjectAdapter("Adapter41", "default");
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, adapter)
                     {
@@ -1247,8 +1168,7 @@
                                 {
                                     test1 = Test.TestIntfPrx.uncheckedCast(obj.ice_connectionCached(false));
                                     return adapter.getTestIntf()
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(asyncResult, obj)
                                 {
@@ -1258,15 +1178,13 @@
                                     return Promise.all(
                                         test1.ice_getConnection(),
                                         test2.ice_getConnection());
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(r1, r2)
                                 {
                                     test(r1[1] == r2[1]);
                                     return test1.ice_ping();
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function(asyncResult)
                                 {
@@ -1278,13 +1196,9 @@
                                     var test3 = Test.TestIntfPrx.uncheckedCast(test1);
                                     return Promise.all(test3.ice_getConnection(),
                                                         test1.ice_getConnection());
-                                },
-                                exceptionCB
+                                }
                             ).then(
-                                function(r1, r2)
-                                {
-                                    test(false);
-                                },
+                                failCB,
                                 function(ex)
                                 {
                                     if(!(typeof(window) == 'undefined' && ex instanceof Ice.ConnectionRefusedException) &&
@@ -1297,19 +1211,18 @@
                             ).exception(
                                 function(ex){
                                     p.fail(ex);
-                                });
+                                }
+                            );
                         };
                         setTimeout(f1);
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         out.writeLine("ok");
                         return initialize();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -1317,8 +1230,7 @@
                         names = ["Adapter51", "Adapter52", "Adapter53"];
                         return Promise.all.apply(Promise, 
                                 names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -1341,8 +1253,7 @@
                                     {
                                         p.succeed();
                                     }
-                                },
-                                exceptionCB
+                                }
                             ).exception(
                                 function(ex)
                                 {
@@ -1358,15 +1269,13 @@
                                 {
                                     prx = obj;
                                     prx = Test.TestIntfPrx.uncheckedCast(prx.ice_connectionCached(false));
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function()
                                 {
                                     test(!prx.ice_isConnectionCached());
                                     f2(p1, prx);
-                                },
-                                exceptionCB
+                                }
                             ).exception(
                                 function(ex)
                                 {
@@ -1380,15 +1289,13 @@
                             function()
                             {
                                 return com.deactivateObjectAdapter(adapters[0]);
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function()
                             {
                                 names = ["Adapter52", "Adapter53"];
                                 f2(p2, prx);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
@@ -1401,15 +1308,13 @@
                             function()
                             {
                                 return com.deactivateObjectAdapter(adapters[0]);
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function()
                             {
                                 names = ["Adapter52"];
                                 f2(p3, prx);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
@@ -1417,21 +1322,18 @@
                             });
                         
                         return p3;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         return deactivate(com, adapters);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         out.writeLine("ok");
                         return initialize();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -1439,15 +1341,13 @@
                         names = ["Adapter61", "Adapter62", "Adapter63"];
                         return Promise.all.apply(Promise, 
                                 names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[1]; });
                         return createTestIntfPrx(adapters);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(obj)
                     {
@@ -1465,8 +1365,7 @@
                                 function(asyncResult, name)
                                 {
                                     test(name === names[0]);
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function()
                                 {
@@ -1488,16 +1387,14 @@
                                                 {
                                                     p.succeed();
                                                 }
-                                            },
-                                            exceptionCB
+                                            }
                                         ).exception(
                                             function(ex)
                                             {
                                                 p.fail(ex);
                                             });
                                     }
-                                },
-                                exceptionCB
+                                }
                             ).exception(
                                 function(ex)
                                 {
@@ -1510,19 +1407,14 @@
                                 f1(0, 0, ArrayUtil.clone(names));
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         return prx.getAdapterName();
-                    },
-                    exceptionCB
+                    }
                 ).then(
-                    function()
-                    {
-                        test(false);
-                    },
+                    failCB,
                     function(ex)
                     {
                         if(!(typeof(window) == 'undefined' && ex instanceof Ice.ConnectionRefusedException) &&
@@ -1562,8 +1454,7 @@
                                                 {
                                                     p.succeed();
                                                 }
-                                            },
-                                        exceptionCB
+                                            }
                                         ).exception(
                                             function(ex){
                                                 p.fail(ex);
@@ -1573,8 +1464,7 @@
                                         function(){
                                             f2(0, names);
                                         });
-                                },
-                                exceptionCB
+                                }
                             ).exception(
                                 function(ex){
                                     p.fail(ex);
@@ -1584,21 +1474,18 @@
                             f1(0, ["Adapter66", "Adapter65", "Adapter64"]);
                         });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         out.writeLine("ok");
                         return com.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         p.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

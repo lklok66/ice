@@ -80,8 +80,6 @@
             $("#console").val("");
             $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
             
-            var exceptionCB = function(ex) { throw ex; };
-            
             var out = 
             {
                 write: function(msg)
@@ -330,8 +328,7 @@
                                                     out.writeLine(ex.toString());
                                                 });
                                         }, 10);
-                                },
-                                exceptionCB
+                                }
                             ).exception(
                                 function(ex)
                                 {
@@ -365,14 +362,12 @@
                                 function(asyncResult, throughput)
                                 {
                                     return throughput.shutdown();
-                                },
-                                exceptionCB
+                                }
                             ).then(
                                 function()
                                 {
                                     shutdown.removeClass("disabled");
-                                },
-                                exceptionCB
+                                }
                             ).exception(
                                 function(ex)
                                 {

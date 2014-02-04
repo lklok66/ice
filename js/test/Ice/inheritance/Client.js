@@ -28,12 +28,6 @@
     {
         var p = new Promise();
         
-        //
-        // re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex){ throw ex; };
-        
         setTimeout(function(){
             try
             {
@@ -61,8 +55,7 @@
                                             initial.cbop(),
                                             initial.ccop(),
                                             initial.cdop());
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r1, r2, r3, r4)
                     {
@@ -84,8 +77,7 @@
                                             initial.ib1op(),
                                             initial.ib2op(),
                                             initial.icop());
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r1, r2, r3, r4)
                     {
@@ -124,8 +116,7 @@
                             cc.ccop(cc), // r18
                             cc.ccop(cc), // r19
                             cc.ccop(cc)) // r20
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, 
                                 r11, r12, r13, r14, r15, r16, r17, r18, r19, r20)
@@ -191,8 +182,7 @@
                             ic.icop(ic),    // r34
                             ic.icop(ic),    // r35
                             ic.icop(ic));   // r36
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, 
                                 r11, r12, r13, r14, r15, r16, r17, r18, r19, r20,
@@ -252,8 +242,7 @@
                             cd.cdop(cd),    // r10
                             cd.cdop(cd),    // r11
                             cd.cdop(cd));    // r12
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, 
                                 r11, r12)
@@ -272,14 +261,12 @@
                         test(r12[1].equals(cd));
                         out.writeLine("ok");
                         return initial.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         p.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

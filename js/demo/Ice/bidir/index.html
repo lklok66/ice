@@ -81,8 +81,6 @@
                 out.writeLine("received callback #" + num);
             };
             
-            var exceptionCB = function(ex){ throw ex; };
-            
             var id = new Ice.InitializationData();
             id.properties = Ice.createProperties();
             //

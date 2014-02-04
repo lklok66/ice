@@ -28,11 +28,6 @@
     {
         var p = new Promise();
 
-        //
-        // re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex){ throw ex; };
         var failCB = function(asyncResult) { test(false); }
 
         setTimeout(function(){
@@ -103,8 +98,7 @@
                         out.write("starting server... ");
                         return manager.startServer();
                         
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -112,48 +106,42 @@
                         out.write("testing checked cast... ");
                         
                         return Test.TestIntfPrx.checkedCast(base);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, o)
                     {
                         obj = o;
                         test(obj !== null);
                         return Test.TestIntfPrx.checkedCast(base2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, o)
                     {
                         obj2 = o;
                         test(obj2 !== null);
                         return Test.TestIntfPrx.checkedCast(base3);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, o)
                     {
                         obj3 = o;
                         test(obj3 !== null);
                         return Test.ServerManagerPrx.checkedCast(base4);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, o)
                     {
                         obj4 = o;
                         test(obj4 !== null);
                         return Test.TestIntfPrx.checkedCast(base5);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, o)
                     {
                         obj5 = o;
                         test(obj !== null);
                         return Test.TestIntfPrx.checkedCast(base6);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, o)
                     {
@@ -162,163 +150,137 @@
                         out.writeLine("ok");
                         out.write("testing id@AdapterId indirect proxy... ");
                         return obj.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return manager.startServer();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj2.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         out.writeLine("ok");
                         out.write("testing id@ReplicaGroupId indirect proxy... ");
                         return obj.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return manager.startServer();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         
                         return obj6.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         out.writeLine("ok");
                         out.write("testing identity indirect proxy... ");
                         obj.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return manager.startServer();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj3.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj2.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return manager.startServer();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj2.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj3.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return manager.startServer();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj2.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         obj.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return manager.startServer();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj3.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return manager.startServer();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj2.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return manager.startServer();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj5.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -326,8 +288,7 @@
                         out.write("testing proxy with unknown identity... ");
                         base = communicator.stringToProxy("unknown/unknown");
                         return base.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -366,23 +327,20 @@
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 test(++count == newCount);
                                 p.succeed(count);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
                                 p.fail(ex);
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(count)
                     {
@@ -392,23 +350,20 @@
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 test(++count == newCount);
                                 p.succeed(count);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
                                 p.fail(ex);
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(count)
                     {
@@ -418,8 +373,7 @@
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
@@ -428,16 +382,14 @@
                                     function(){
                                         p.succeed(count);
                                     }, 1200);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
                                 p.fail(ex);
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(count)
                     {
@@ -447,23 +399,20 @@
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 test(++count == newCount);
                                 p.succeed(count);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
                                 p.fail(ex);
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(count)
                     {
@@ -473,24 +422,21 @@
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 count += 2;
                                 test(count == newCount);
                                 p.succeed(count);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
                                 p.fail(ex);
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(count)
                     {
@@ -500,15 +446,13 @@
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 test(count == newCount);
                                 p.succeed(count);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
@@ -518,8 +462,7 @@
                                     }, 1200);
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(count)
                     {
@@ -529,24 +472,21 @@
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 count += 2;
                                 test(count == newCount);
                                 p.succeed(count);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
                                 p.fail(ex);
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(count)
                     {
@@ -556,23 +496,20 @@
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 test(count == newCount);
                                 p.succeed(count);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
                                 p.fail(ex);
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(count)
                     {
@@ -582,23 +519,20 @@
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 test(count == newCount);
                                 p.succeed(count);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
                                 p.fail(ex);
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(count)
                     {
@@ -608,23 +542,20 @@
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 test(count == newCount);
                                 p.succeed(count);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
                                 p.fail(ex);
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(count)
                     {
@@ -634,23 +565,20 @@
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 test(count == newCount);
                                 p.succeed(count);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
                                 p.fail(ex);
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -658,15 +586,13 @@
                         out.writeLine("ok");
                         out.write("testing proxy from server... ");
                         return Test.TestIntfPrx.checkedCast(communicator.stringToProxy("test@TestAdapter"));
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, o)
                     {
                         obj = o;
                         return Promise.all(obj.getHello(), obj.getReplicatedHello());
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -675,43 +601,37 @@
                         hello = arguments[1][1];
                         test(hello.ice_getAdapterId() == "ReplicatedAdapter");
                         return hello.sayHello();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         out.writeLine("ok");
                         out.write("testing proxy from server after shutdown... ");
                         return obj.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return manager.startServer();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return hello.sayHello();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         out.writeLine("ok");
                         out.write("testing locator request queuing... ");
                         return obj.getReplicatedHello();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, o)
                     {
                         hello = o.ice_locatorCacheTimeout(0).ice_connectionCached(false);
                         return locator.getRequestCount();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, count)
                     {
@@ -720,22 +640,19 @@
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 test(++count == newCount);
                                 p.succeed(count);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex){
                                 p.fail(ex);
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(count)
                     {
@@ -751,8 +668,7 @@
                             function()
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
@@ -765,16 +681,14 @@
                                 hello = hello.ice_adapterId("unknown");
                                 count = newCount;
                                 p.succeed(count);
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
                                 p.fail(ex);
                             });
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(count)
                     {
@@ -809,16 +723,14 @@
                         }
                         
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         out.writeLine("ok");
                         out.write("testing adapter locator cache... ");
                         return communicator.stringToProxy("test@TestAdapter3").ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -836,27 +748,23 @@
                     function(asyncResult, adapter)
                     {
                         return registry.setAdapterDirectProxy("TestAdapter3", adapter);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return communicator.stringToProxy("test@TestAdapter3").ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         registry.setAdapterDirectProxy("TestAdapter3", communicator.stringToProxy("dummy:tcp"));
                         return communicator.stringToProxy("test@TestAdapter3").ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return communicator.stringToProxy("test@TestAdapter3").ice_locatorCacheTimeout(0).ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -882,22 +790,19 @@
                     {
                         registry.setAdapterDirectProxy("TestAdapter3", adapter);
                         return communicator.stringToProxy("test@TestAdapter3").ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         out.writeLine("ok");
                         out.write("testing well-known object locator cache... ");
                         return registry.addObject(communicator.stringToProxy("test3@TestUnknown"));
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return communicator.stringToProxy("test3").ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -913,20 +818,17 @@
                     function()
                     {
                         return registry.addObject(communicator.stringToProxy("test3@TestAdapter4")); // Update
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return registry.setAdapterDirectProxy("TestAdapter4", communicator.stringToProxy("dummy:tcp"));
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return communicator.stringToProxy("test3").ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -941,32 +843,27 @@
                     function(asyncResult, adapter)
                     {
                         return registry.setAdapterDirectProxy("TestAdapter4", adapter);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return communicator.stringToProxy("test3").ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return registry.setAdapterDirectProxy("TestAdapter4", communicator.stringToProxy("dummy:tcp"));
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return communicator.stringToProxy("test3").ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return communicator.stringToProxy("test@TestAdapter4").ice_locatorCacheTimeout(0).ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -1001,20 +898,17 @@
                     function(asyncResult)
                     {
                         return communicator.stringToProxy("test3").ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return registry.addObject(communicator.stringToProxy("test4"));
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return communicator.stringToProxy("test4").ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -1037,20 +931,17 @@
                             function(asyncResult, adapter)
                             {
                                 return registry.setAdapterDirectProxy("TestAdapter5", adapter);
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult)
                             {
                                 return registry.addObject(communicator.stringToProxy("test3@TestAdapter"));
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, count)
                             {
@@ -1061,30 +952,26 @@
                                     {
                                         // No locator cache.
                                         return ic.stringToProxy("test3").ice_locatorCacheTimeout(0).ice_ping();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult)
                                     {
                                         return locator.getRequestCount();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult, newCount)
                                     {
                                         count += 3;
                                         test(count === newCount);
                                         p1.succeed(count);
-                                    },
-                                    exceptionCB
+                                    }
                                 ).exception(
                                     function(ex){
                                         p1.fail(ex);
                                     });
                                     
                                 return p1;
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(count)
                             {
@@ -1093,28 +980,24 @@
                                     function(asyncResult)
                                     {
                                         return registry.addObject(communicator.stringToProxy("test3:tcp"));
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult)
                                     {
                                         // 10s timeout.
                                         return ic.stringToProxy("test@TestAdapter5").ice_locatorCacheTimeout(10).ice_ping();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult)
                                     {
                                         // 10s timeout.
                                         return ic.stringToProxy("test3").ice_locatorCacheTimeout(10).ice_ping();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult)
                                     {
                                         return locator.getRequestCount();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult, newCount)
                                     {
@@ -1123,16 +1006,14 @@
                                             function(){
                                                 p1.succeed(count);
                                             }, 1200);
-                                    },
-                                    exceptionCB
+                                    }
                                 ).exception(
                                     function(ex)
                                     {
                                         p1.fail(ex);
                                     });
                                 return p1;
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(count)
                             {
@@ -1146,22 +1027,21 @@
                                     {
                                         // 1s timeout.
                                         return ic.stringToProxy("test3").ice_locatorCacheTimeout(1).ice_ping();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult)
                                     {
                                         p1.succeed();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).exception(
-                                    function(ex){
+                                    function(ex)
+                                    {
                                         p1.fail(ex);
-                                    });
+                                    }
+                                );
                                 
                                 return p1;
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(){
                                 var p1 = new Promise();
@@ -1189,14 +1069,14 @@
                                         function(ex)
                                         {
                                             p1.fail(ex);
-                                        });
+                                        }
+                                    );
                                 };
                                 
                                 f1();
                                 
                                 return p1;
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function()
                             {
@@ -1229,20 +1109,17 @@
                                 
                                 f1();
                                 return p1;
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function()
                             {
                                 return ic.destroy();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function()
                             {
                                 p.succeed();
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
@@ -1257,86 +1134,73 @@
                         out.writeLine("ok");
                         out.write("testing proxy from server after shutdown... ");
                         return obj.getReplicatedHello();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, o)
                     {
                         hello = o;
                         return obj.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return manager.startServer();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return hello.sayHello();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         out.writeLine("ok");
                         out.write("testing object migration...");
                         return Test.HelloPrx.checkedCast(communicator.stringToProxy("hello"));
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, o)
                     {
                         hello = o;
                         return obj.migrateHello();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return hello.sayHello();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj.migrateHello();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return hello.sayHello();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return obj.migrateHello();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return hello.sayHello();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         out.writeLine("ok");
                         out.write("testing locator encoding resolution... ");
                         return Test.HelloPrx.checkedCast(communicator.stringToProxy("hello"));
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, o)
                     {
                         return locator.getRequestCount();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, count)
                     {
@@ -1348,67 +1212,59 @@
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 test(count == newCount);
                                 return communicator.stringToProxy("test@TestAdapter10").ice_encodingVersion(
                                                                                     Ice.Encoding_1_0).ice_ping();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 test(++count == newCount);
                                 return communicator.stringToProxy("test -e 1.0@TestAdapter10-2").ice_ping();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult)
                             {
                                 return locator.getRequestCount();
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult, newCount)
                             {
                                 test(++count == newCount);
                                 p.succeed();
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
                                 p.fail(ex);
-                            });
+                            }
+                        );
                         
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         out.writeLine("ok")
                         out.write("shutdown server... ");
                         return obj.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         out.writeLine("ok");
                         out.write("testing whether server is gone... ");
                         return obj2.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -1446,8 +1302,7 @@
                     {
                         out.writeLine("ok");
                         p.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

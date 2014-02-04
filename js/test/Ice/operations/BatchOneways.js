@@ -23,11 +23,6 @@
     {
         var promise = new Ice.Promise();
 
-        //
-        // Re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex) { throw ex; };
         var failCB = function() { test(false); };
 
         setTimeout(function(){
@@ -55,14 +50,12 @@
                     function(r)
                     {
                         return p.opByteSOneway(bs2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
                         return p.opByteSOneway(bs3);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -82,8 +75,7 @@
                     function(r, con)
                     {
                         return con.flushBatchRequests();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
@@ -93,20 +85,17 @@
                         batch2.ice_ping().exception(failCB);
 
                         return batch.ice_flushBatchRequests();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
                         return batch.ice_getConnection();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, con)
                     {
                         return con.close(false);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
@@ -118,8 +107,7 @@
                         batch3.ice_ping().exception(failCB);
 
                         return batch3.ice_flushBatchRequests();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
@@ -128,14 +116,12 @@
                         batch.ice_ping().exception(failCB);
 
                         return batch.ice_flushBatchRequests();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r)
                     {
                         promise.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

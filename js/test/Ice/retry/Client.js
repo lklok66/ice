@@ -28,11 +28,6 @@
     {
         var p = new Promise();
 
-        //
-        // Re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex) { throw ex; };
         var failCB = function() { test(false); };
 
         setTimeout(function(){
@@ -55,8 +50,7 @@
                         test(retry1 !== null);
                         test(retry1.equals(base1));
                         return Test.RetryPrx.checkedCast(base2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, obj)
                     {
@@ -66,21 +60,16 @@
                         out.writeLine("ok");
                         out.write("calling regular operation with first proxy... ");
                         return retry1.op(false);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         out.writeLine("ok");
                         out.write("calling operation to kill connection with second proxy... ");
                         return retry2.op(true);
-                    },
-                    exceptionCB
+                    }
                 ).then(
-                    function(asyncResult)
-                    {
-                        test(false);
-                    },
+                    failCB,
                     function(ex)
                     {
                         test((typeof(window) === undefined && ex instanceof Ice.ConnectionLostException) ||
@@ -94,14 +83,12 @@
                     {
                         out.writeLine("ok");
                         return retry1.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         p.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

@@ -28,12 +28,6 @@
     {
         var p = new Promise();
         
-        //
-        // re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex){ throw ex; };
-        
         setTimeout(function(){
             try
             {
@@ -52,8 +46,7 @@
                         test(proxy !== null);
                         test(proxy.equals(base));
                         out.writeLine("ok");
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -141,8 +134,7 @@
                         test(Test.SimpleEnum.valueOf(2) === Test.SimpleEnum.blue);
                         
                         out.writeLine("ok");
-                    }, 
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -155,56 +147,49 @@
                         test(r === b1);
                         test(r === Test.ByteEnum.benum1);
                         return proxy.opByte(Test.ByteEnum.benum11);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r, b11)
                     {
                         test(r === b11);
                         test(r === Test.ByteEnum.benum11);
                         return proxy.opShort(Test.ShortEnum.senum1);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r, s1)
                     {
                         test(r === s1);
                         test(r === Test.ShortEnum.senum1);
                         return proxy.opShort(Test.ShortEnum.senum11);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r, s11)
                     {
                         test(r === s11);
                         test(r === Test.ShortEnum.senum11);
                         return proxy.opInt(Test.IntEnum.ienum1);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r, i1)
                     {
                         test(r === i1);
                         test(r === Test.IntEnum.ienum1);
                         return proxy.opInt(Test.IntEnum.ienum11);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r, i11)
                     {
                         test(r === i11);
                         test(r === Test.IntEnum.ienum11);
                         return proxy.opInt(Test.IntEnum.ienum12);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r, i12)
                     {
                         test(r === i12);
                         test(r === Test.IntEnum.ienum12);
                         return proxy.opSimple(Test.SimpleEnum.green);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r, g)
                     {
@@ -213,14 +198,12 @@
 
                         out.writeLine("ok");
                         return proxy.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         p.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

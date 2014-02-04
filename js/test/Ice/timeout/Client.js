@@ -28,11 +28,6 @@
     {
         var p = new Promise();
 
-        //
-        // Re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex) { throw ex; };
         var failCB = function() { test(false); };
 
         setTimeout(function(){
@@ -61,20 +56,17 @@
                         out.write("testing connect timeout... ");
                         to = Test.TimeoutPrx.uncheckedCast(obj.ice_timeout(500 * mult));
                         return to.holdAdapter(2000 * mult);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return to.ice_getConnection();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, con)
                     {
                         return con.close(true); // Force a reconnect.
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -82,8 +74,7 @@
                         // Expect ConnectTimeoutException.
                         //
                         return to.op();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -96,20 +87,17 @@
                     {
                         to = Test.TimeoutPrx.uncheckedCast(obj.ice_timeout(2000 * mult));
                         return to.holdAdapter(500 * mult);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return to.ice_getConnection();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, con)
                     {
                         return con.close(true); // Force a reconnect.
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -117,8 +105,7 @@
                         // Expect success.
                         //
                         return to.op();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -129,8 +116,7 @@
                         // Expect TimeoutException.
                         //
                         return to.sleep(750 * mult);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -143,8 +129,7 @@
                     {
                         to = Test.TimeoutPrx.uncheckedCast(obj.ice_timeout(1500 * mult));
                         return to.sleep(500 * mult);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -152,8 +137,7 @@
                         out.write("testing write timeout... ");
                         to = Test.TimeoutPrx.uncheckedCast(obj.ice_timeout(500 * mult));
                         return to.holdAdapter(2000 * mult);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -166,8 +150,7 @@
                         // Expect TimeoutException.
                         //
                         return to.sendData(seq);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -180,8 +163,7 @@
                     {
                         to = Test.TimeoutPrx.uncheckedCast(obj.ice_timeout(1500 * mult));
                         return to.holdAdapter(500 * mult);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -202,8 +184,7 @@
                         // Expect success.
                         //
                         return to.sendData(seq);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -211,21 +192,18 @@
                         out.write("testing close timeout... ");
                         to = Test.TimeoutPrx.uncheckedCast(obj.ice_timeout(250));
                         return to.ice_getConnection();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, con)
                     {
                         connection = con;
                         return timeout.holdAdapter(750);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return connection.close(false);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -270,15 +248,13 @@
                                         }
                                         comm = Ice.initialize(initData);
                                         return Test.TimeoutPrx.checkedCast(comm.stringToProxy(ref));
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult, obj)
                                     {
                                         to = obj;
                                         return to.sleep(750 * mult);
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     failCB,
                                     function(ex)
@@ -293,15 +269,13 @@
                                         // Calling ice_timeout() should have no effect.
                                         //
                                         return Test.TimeoutPrx.checkedCast(to.ice_timeout(1000 * mult));
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult, obj)
                                     {
                                         to = obj;
                                         return to.sleep(750 * mult);
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     failCB,
                                     function(ex)
@@ -328,14 +302,12 @@
                                         comm = Ice.initialize(initData);
                                         to = Test.TimeoutPrx.uncheckedCast(comm.stringToProxy(ref));
                                         return timeout.holdAdapter(3000 * mult);
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult)
                                     {
                                         return to.op();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     failCB,
                                     function(ex)
@@ -347,8 +319,7 @@
                                     function(asyncResult)
                                     {
                                         return timeout.holdAdapter(3000 * mult);
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult)
                                     {
@@ -357,8 +328,7 @@
                                         //
                                         to = Test.TimeoutPrx.uncheckedCast(to.ice_timeout(3500 * mult));
                                         return to.op();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     failCB,
                                     function(ex)
@@ -370,14 +340,12 @@
                                     function(asyncResult)
                                     {
                                         return to.op(); // Force connection.
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult)
                                     {
                                         return to.sleep(4000 * mult);
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     failCB,
                                     function(ex)
@@ -396,21 +364,18 @@
                                         initData.properties.setProperty("Ice.Override.CloseTimeout", "200");
                                         comm = Ice.initialize(initData);
                                         return comm.stringToProxy(ref).ice_getConnection();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult, con)
                                     {
                                         return timeout.holdAdapter(750);
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult)
                                     {
                                         now = Date.now();
                                         return comm.destroy();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult)
                                     {
@@ -418,14 +383,12 @@
                                         test(t - now < 500);
                                         out.writeLine("ok");
                                         return timeout.shutdown();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).then(
                                     function(asyncResult)
                                     {
                                         p.succeed();
-                                    },
-                                    exceptionCB
+                                    }
                                 ).exception(
                                     function(ex)
                                     {
@@ -433,8 +396,7 @@
                                     }
                                 );
                             }, 500);
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

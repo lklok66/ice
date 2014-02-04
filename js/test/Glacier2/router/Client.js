@@ -30,11 +30,6 @@
     {
         var p = new Promise();
 
-        //
-        // re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex){ throw ex; };
         var failCB = function () { test(false); }
 
         setTimeout(function(){
@@ -60,8 +55,7 @@
                         
                         out.write("getting the session timeout... ");
                         return router.getSessionTimeout();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, timeout)
                     {
@@ -74,8 +68,7 @@
                         
                         out.write("trying to ping server before session creation... ");
                         return base.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -123,8 +116,7 @@
                         
                         out.write("trying to create a second session... ");
                         return router.createSession("userid", "abc123");
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -161,8 +153,7 @@
                         
                         out.write("getting category from router... ");
                         return router.getCategoryForClient();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, c)
                     {
@@ -173,8 +164,7 @@
                         return twoway.shutdown();
                         // No ping, otherwise the router prints a warning message if it's
                         // started with --Ice.Warn.Connections.
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -182,8 +172,7 @@
                         
                         out.write("destroying session... ");
                         return router.destroySession();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
@@ -191,8 +180,7 @@
                         
                         out.write("trying to ping server after session destruction... ");
                         return base.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -223,14 +211,12 @@
                         
                         out.write("testing Glacier2 shutdown... ");
                         return process.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult)
                     {
                         return process.ice_ping();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -245,8 +231,7 @@
                     function()
                     {
                         p.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

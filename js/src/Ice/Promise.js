@@ -22,7 +22,7 @@
         var callback = self.__state === State.Success ? listener.onResponse : listener.onException;
         try
         {
-            if(typeof callback !== 'function')
+            if(!(callback instanceof Function))
             {
                 listener.promise.setState(self.__state, self._args);
             }
@@ -33,7 +33,7 @@
                 //
                 // Callback can return a new promise.
                 //
-                if(result && typeof result.then === 'function')
+                if(result && result.then instanceof Function)
                 {
                     result.then(
                         function()

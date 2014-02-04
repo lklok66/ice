@@ -27,11 +27,6 @@
     {
         var p = new Promise();
 
-        //
-        // Re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex) { throw ex; };
         var failCB = function() { test(false); };
 
         setTimeout(function(){
@@ -46,21 +41,18 @@
                     {
                         cl = prx;
                         return Test.MyDerivedClassPrx.checkedCast(cl);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(r, prx)
                     {
                         derived = prx;
                         return Twoways.run(communicator, out, cl);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         return Twoways.run(communicator, out, derived);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -68,8 +60,7 @@
 
                         out.write("testing oneway operations... ");
                         return Oneways.run(communicator, out, cl);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -77,22 +68,19 @@
 
                         out.write("testing batch oneway operations... ");
                         return BatchOneways.run(communicator, out, cl);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         out.writeLine("ok");
 
                         return cl.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         p.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {

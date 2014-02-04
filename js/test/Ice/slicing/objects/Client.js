@@ -58,11 +58,6 @@
         };
         
         var p = new Promise();
-        //
-        // re-throw exception so it propagates to final exception
-        // handler.
-        //
-        var exceptionCB = function(ex){ throw ex; };
         var failCB = function(){ test(false); };
         
         setTimeout(function(){
@@ -85,8 +80,7 @@
                         out.writeLine("ok");
                         out.write("base as Object... ");
                         return prx.SBaseAsObject();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, sb)
                     {
@@ -96,8 +90,7 @@
                         out.writeLine("ok");
                         out.write("base as base... ");
                         return prx.SBaseAsSBase();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, sb)
                     {
@@ -105,8 +98,7 @@
                         out.writeLine("ok");
                         out.write("base with known derived as base... ");
                         return prx.SBSKnownDerivedAsSBase();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, sb)
                     {
@@ -116,8 +108,7 @@
                         out.writeLine("ok");
                         out.write("base with known derived as known derived... ");
                         return prx.SBSKnownDerivedAsSBSKnownDerived();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, sb)
                     {
@@ -125,8 +116,7 @@
                         out.writeLine("ok");
                         out.write("base with unknown derived as base... ");
                         return prx.SBSUnknownDerivedAsSBase();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, sb)
                     {
@@ -171,16 +161,14 @@
                                 );
                         }
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         out.writeLine("ok");
                         out.write("unknown with Object as Object... ");
                         return prx.SUnknownAsObject();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, obj)
                     {
@@ -203,8 +191,7 @@
                         out.writeLine("ok");
                         out.write("one-element cycle... ");
                         return prx.oneElementCycle();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, b)
                     {
@@ -215,8 +202,7 @@
                         out.writeLine("ok");
                         out.write("two-element cycle... ");
                         return prx.twoElementCycle();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, b1)
                     {
@@ -233,8 +219,7 @@
                         out.writeLine("ok");
                         out.write("known derived pointer slicing as derived... ");
                         return prx.D1AsD1();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, d1)
                     {
@@ -253,8 +238,7 @@
                         out.writeLine("ok");
                         out.write("unknown derived pointer slicing as base... ");
                         return prx.D2AsB();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, b2)
                     {
@@ -275,8 +259,7 @@
                         out.writeLine("ok");
                         out.write("param ptr slicing with known first... ");
                         return prx.paramTest1();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, b1, b2)
                     {
@@ -295,8 +278,7 @@
                         out.writeLine("ok");
                         out.write("param ptr slicing with unknown first... ");
                         return prx.paramTest2();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, b2, b1)
                     {
@@ -315,8 +297,7 @@
                         out.writeLine("ok");
                         out.write("return value identity with known first... ");
                         return prx.returnTest1();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r, p1, p2)
                     {
@@ -324,8 +305,7 @@
                         out.writeLine("ok");
                         out.write("return value identity with unknown first... ");
                         return prx.returnTest2();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r, p1, p2)
                     {
@@ -369,17 +349,16 @@
                                 test(b2 !== d1);
                                 test(b2 !== d3);
                                 p.succeed();
-                            },
-                            exceptionCB
-                            ).exception(
-                                function(ex)
-                                {
-                                    p.fail(ex);
-                                });
+                            }
+                        ).exception(
+                            function(ex)
+                            {
+                                p.fail(ex);
+                            }
+                        );
                         
                         return p;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
@@ -423,12 +402,13 @@
                                 test(b2 !== d3);
                                 
                                 p.succeed();
-                            },
-                            exceptionCB
-                            ).exception(function(ex){
+                            }
+                        ).exception(
+                            function(ex)
+                            {
                                 p.fail(ex);
-                            });
-                            
+                            }
+                        );
                         
                         return p;
                     }
@@ -438,8 +418,7 @@
                         out.writeLine("ok");
                         out.write("remainder unmarshaling (3 instances)... ");
                         return prx.paramTest3();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, ret, p1, p2)
                     {
@@ -461,8 +440,7 @@
                         out.writeLine("ok");
                         out.write("remainder unmarshaling (4 instances)... ");
                         return prx.paramTest4();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, ret, b)
                     {
@@ -494,8 +472,7 @@
                         b2.pb = b1;
 
                         return prx.returnTest3(d3, b2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, ret)
                     {
@@ -525,8 +502,7 @@
                         d12.pd1 = d11;
 
                         return prx.returnTest3(d3, d12);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, ret)
                     {
@@ -585,8 +561,7 @@
                         ss2.s[2] = ss2d3;
                         
                         return prx.sequenceTest(ss1, ss2);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, ss)
                     {
@@ -631,8 +606,7 @@
                             bin.set(i, d1);
                         }
                         return prx.dictionaryTest(bin);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, ret, boutH)
                     {
@@ -665,8 +639,7 @@
                         out.writeLine("ok");
                         out.write("base exception thrown as base exception... ");
                         return prx.throwBaseAsBase();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     failCB,
                     function(ex)
@@ -776,8 +749,7 @@
                         pd.pb = pd;
 
                         return prx.exchangePBase(pd);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r)
                     {
@@ -794,8 +766,7 @@
                         pu.pu = "preserved";
 
                         return prx.exchangePBase(pu);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r)
                     {
@@ -811,8 +782,7 @@
                         pcd.pbs = [ pcd ];
 
                         return prx.exchangePBase(pcd);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r)
                     {
@@ -836,8 +806,7 @@
                         pcd.pbs = [ pcd ];
 
                         return prx.exchangePBase(pcd);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r)
                     {
@@ -876,8 +845,7 @@
                         pcd.pcd3 = pcd.pbs[10];
 
                         return prx.exchangePBase(pcd);
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, r)
                     {
@@ -908,8 +876,7 @@
                         // they should be included.
                         //
                         return prx.PBSUnknownAsPreserved();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function(asyncResult, p)
                     {
@@ -925,8 +892,7 @@
                                 {
                                     p1.succeed();
                                 }
-                            },
-                            exceptionCB
+                            }
                         ).then(
                             function(asyncResult)
                             {
@@ -934,8 +900,7 @@
                                 {
                                     p1.succeed();
                                 }
-                            },
-                            exceptionCB
+                            }
                         ).exception(
                             function(ex)
                             {
@@ -943,21 +908,18 @@
                             });
                         
                         return p1;
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         out.writeLine("ok");
                         return prx.shutdown();
-                    },
-                    exceptionCB
+                    }
                 ).then(
                     function()
                     {
                         p.succeed();
-                    },
-                    exceptionCB
+                    }
                 ).exception(
                     function(ex)
                     {
