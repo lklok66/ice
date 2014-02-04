@@ -119,7 +119,6 @@ NODEJS_SRCS = \
 	TcpTransceiver.js \
 
 BROWSER_SRCS = \
-	browser/Buffer.js \
 	browser/EndpointInfo.js \
 	browser/ConnectionInfo.js \
 	browser/Transceiver.js \
@@ -127,7 +126,8 @@ BROWSER_SRCS = \
 	browser/EndpointFactory.js
 
 ifneq ($(OPTIMIZE),yes)
-    COMMON_SRCS := $(COMMON_SRCS) Debug.js
+    NODEJS_SRCS := $(NODEJS_SRCS) Debug.js
+    BROWSER_SRCS := $(BROWSER_SRCS) browser/Debug.js
 endif
 
 SRCS		:= $(BROWSER_SRCS) $(GEN_SRCS) $(COMMON_SRCS)

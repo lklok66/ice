@@ -8,32 +8,21 @@
 // **********************************************************************
 
 (function(global){
-    require("Ice/Class");
-    require("Ice/Exception");
     
     var Ice = global.Ice || {};
     
-    var Exception = Ice.Exception;
-    
-    var AssertionFailedException = Ice.__defineClass(Error, {
-        __init__: function(message)
+    var Debug = {
+        assert: function(b, msg)
         {
-            Error.call(this);
-            Exception.captureStackTrace(this);
-            this.message = message;
-        }
-    });
-    var Debug = {};
-
-    Debug.AssertionFailedException = AssertionFailedException;
-
-    Debug.assert = function(b, msg)
-    {
-        if(!b)
-        {
-            throw new AssertionFailedException(msg === undefined ? "assertion failed" : msg);
+            if(!b)
+            {
+                console.log(msg === undefined ? "assertion failed" : msg);
+                console.log(Error().stack);
+                process.exit(1);
+            }
         }
     };
+    
     Ice.Debug = Debug;
     global.Ice = Ice;
 }(typeof (global) === "undefined" ? window : global));
