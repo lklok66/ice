@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/StringUtil");
     
@@ -396,4 +395,4 @@
     Ice.HashMap = HashMap;
     global.Slice = Slice;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

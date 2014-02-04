@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/ArrayUtil");
     require("Ice/Debug");
@@ -227,4 +226,4 @@
     });
     Ice.RouterInfo = RouterInfo;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

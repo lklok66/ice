@@ -7,10 +7,9 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/HashMap");
     var Ice = global.Ice || {};
     Ice.CompactIdRegistry = new Ice.HashMap();
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

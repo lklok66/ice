@@ -781,7 +781,7 @@
                         var p = new Promise();
                         
                         var all = 0;
-                        exCB = function(ex)
+                        var exCB = function(ex)
                         {
                             if(!(ex instanceof Ice.NotRegisteredException))
                             {
@@ -798,7 +798,7 @@
                             }
                         };
                         
-                        okCB = function()
+                        var okCB = function()
                         {
                             p.fail("test failed");
                         };
@@ -1489,5 +1489,5 @@
             });
         return p;
     };
-    this.__test__ = run;
-}());
+    global.__test__ = run;
+}(typeof (global) === "undefined" ? window : global));

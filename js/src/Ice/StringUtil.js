@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Debug");
     
     var Ice = global.Ice || {};
@@ -488,4 +487,4 @@
 
     Ice.StringUtil = StringUtil;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

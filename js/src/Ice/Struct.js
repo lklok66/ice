@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/HashUtil");
     require("Ice/ArrayUtil");
     require("Ice/HashMap");
@@ -216,4 +215,4 @@
     
     global.Slice = Slice;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

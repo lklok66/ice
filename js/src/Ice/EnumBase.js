@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-    
+(function(global){
     require("Ice/Class");
     
     var Slice = global.Slice || {};
@@ -135,4 +133,4 @@
     
     global.Slice = Slice;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

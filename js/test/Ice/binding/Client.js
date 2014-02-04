@@ -7,13 +7,13 @@
 //
 // **********************************************************************
 
-(function(){
+(function(global){
     var require = typeof(module) !== "undefined" ? module.require : function(){};
     require("Ice/Ice");
-    var Ice = this.Ice;
+    var Ice = global.Ice;
     
     require("Test");
-    var Test = this.Test;
+    var Test = global.Test;
     var Promise = Ice.Promise;
     var ArrayUtil = Ice.ArrayUtil;
     
@@ -89,7 +89,7 @@
                         adapters.forEach(
                             function(adapter)
                             {
-                                conn = adapter.ice_getCachedConnection();
+                                var conn = adapter.ice_getCachedConnection();
                                 if(conn != null)
                                 {
                                     closePromises.push(conn.close(false));
@@ -1638,8 +1638,5 @@
         return p;
     };
     
-    console.log("Client.js included");
-    this.__test__ = run;
-}());
-
-            
+    global.__test__ = run;
+}(typeof (global) === "undefined" ? window : global));

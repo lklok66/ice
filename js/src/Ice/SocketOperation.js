@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     var Ice = global.Ice || {};
     
     var SocketOperation = 
@@ -21,4 +20,4 @@
 
     Ice.SocketOperation = SocketOperation;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

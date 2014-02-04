@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/FormatType");
     require("Ice/EndpointTypes");
     require("Ice/Protocol");
@@ -99,4 +98,4 @@
 
     Ice.DefaultsAndOverrides = DefaultsAndOverrides;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

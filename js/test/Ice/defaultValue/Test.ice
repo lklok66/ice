@@ -31,7 +31,7 @@ struct Struct1
     long l = 4;
     float f = 5.1;
     double d = 6.2;
-    string str = "foo \\ \"bar\n \r\n\t\v\f\a\b\? \007 \x07";
+    string str = "foo \\ \"bar\n \r\n\t\v\f\a\b\?";
     Color c1 = ::Test::red;
     Color c2 = Test::green;
     Color c3 = blue;
@@ -54,7 +54,7 @@ const int ConstInt = 3;
 const long ConstLong = 4;
 const float ConstFloat = 5.1;
 const double ConstDouble = 6.2;
-const string ConstString = "foo \\ \"bar\n \r\n\t\v\f\a\b\? \007 \x07";
+const string ConstString = "foo \\ \"bar\n \r\n\t\v\f\a\b\?";
 const Color ConstColor1 = ::Test::red;
 const Color ConstColor2 = Test::green;
 const Color ConstColor3 = blue;
@@ -103,7 +103,7 @@ struct Struct3
     long l = 4;
     float f = 5.1;
     double d = 6.2;
-    string str = "foo \\ \"bar\n \r\n\t\v\f\a\b\? \007 \x07";
+    string str = "foo \\ \"bar\n \r\n\t\v\f\a\b\?";
     Color c1 = ::Test::red;
     Color c2 = Test::green;
     Color c3 = blue;
@@ -129,7 +129,7 @@ class Base
     long l = 4;
     float f = 5.1;
     double d = 6.2;
-    string str = "foo \\ \"bar\n \r\n\t\v\f\a\b\? \007 \x07";
+    string str = "foo \\ \"bar\n \r\n\t\v\f\a\b\?";
     string noDefault;
     int zeroI = 0;
     long zeroL = 0;
@@ -159,7 +159,7 @@ exception BaseEx
     long l = 4;
     float f = 5.1;
     double d = 6.2;
-    string str = "foo \\ \"bar\n \r\n\t\v\f\a\b\? \007 \x07";
+    string str = "foo \\ \"bar\n \r\n\t\v\f\a\b\?";
     string noDefault;
     int zeroI = 0;
     long zeroL = 0;

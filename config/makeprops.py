@@ -118,8 +118,7 @@ namespace IceInternal
 """
 
 jsPreamble = commonPreamble + """
-(function(){
-    var global = this;
+(function(global){
     var Ice = global.Ice || Ice;
     require("Ice/Property");
     var %(classname)s = {};
@@ -130,7 +129,7 @@ jsEpilogue = \
 """
     Ice.%(classname)s = %(classname)s;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));
 """
 
 def usage():

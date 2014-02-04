@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-    
+(function(global){
     require("Ice/Class");
     require("Ice/AsyncResult");
     require("Ice/AsyncStatus");
@@ -53,4 +51,4 @@
     
     Ice.ProxyBatchOutgoingAsync = ProxyBatchOutgoingAsync;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

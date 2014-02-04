@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     var Ice = global.Ice || {};
     var TimeUtil = {};
     TimeUtil.now = function()
@@ -17,4 +16,4 @@
     };
     Ice.TimeUtil = TimeUtil;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

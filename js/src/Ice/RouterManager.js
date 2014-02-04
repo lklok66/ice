@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/HashMap");
     require("Ice/RouterInfo");
@@ -75,4 +74,4 @@
     });
     Ice.RouterManager = RouterManager;
     global.Ice = Ice;
-}(this));
+}(typeof (global) === "undefined" ? window : global));

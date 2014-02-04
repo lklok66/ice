@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-    
+(function(global){
     require("Ice/Class");
     require("Ice/Base64");
     require("Ice/Debug");
@@ -452,4 +450,4 @@
     });
     
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

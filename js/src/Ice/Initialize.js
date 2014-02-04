@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-
+(function(global){
     require("Ice/Protocol");
     require("Ice/LocalException");
     require("Ice/Communicator");
@@ -112,4 +110,4 @@
     Ice.Encoding_1_1 = Protocol.Encoding_1_1;
     
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

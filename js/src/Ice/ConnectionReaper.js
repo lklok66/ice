@@ -7,11 +7,10 @@
 //
 // **********************************************************************
 
-(function(){
+(function(global){
     
     require("Ice/Class");
     
-    var global = this;
     var Ice = global.Ice || {};
     
     var ConnectionReaper = Ice.__defineClass({
@@ -37,4 +36,4 @@
     
     Ice.ConnectionReaper = ConnectionReaper;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

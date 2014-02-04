@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/Instance");
     require("Ice/Promise");
@@ -160,4 +159,4 @@
 
     Ice.Communicator = Communicator;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

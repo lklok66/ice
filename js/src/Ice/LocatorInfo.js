@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-    
+(function(global){
     require("Ice/Class");
     require("Ice/Debug");
     require("Ice/ExUtil");
@@ -607,4 +605,4 @@
             }
         }
     });
-}());
+}(typeof (global) === "undefined" ? window : global));

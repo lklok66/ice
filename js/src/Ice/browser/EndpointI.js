@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/Address");
     require("Ice/HashUtil");
@@ -547,4 +546,4 @@
             return this._secure;
         }
     });
-}());
+}(typeof (global) === "undefined" ? window : global));

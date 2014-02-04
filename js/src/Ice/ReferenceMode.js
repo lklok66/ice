@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     var Ice = global.Ice || {};
     
     //
@@ -28,4 +27,4 @@
     Ice.ReferenceMode = ReferenceMode;
     
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

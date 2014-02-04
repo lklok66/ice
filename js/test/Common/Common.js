@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
+(function(global){
     require("Ice/Ice");
 
     var write = function(msg)
@@ -20,8 +20,6 @@
         this.write(msg + "\n");
     };
     
-    var global = this;
-    
     var run = function(module)
     {
         var id = new Ice.InitializationData();
@@ -33,13 +31,8 @@
         test({write: write, writeLine: writeLine}, id).exception(
             function(ex)
             {
-                console.log(ex.stack);
-                process.exit(1);
-            }
-        ).exception(
-            function(ex)
-            {
-                if(ex && ex._asyncResult)
+                console.log(ex.toString());
+                if(ex._asyncResult)
                 {
                     console.log("\nexception occurred in call to " + ex._asyncResult.operation);
                 }
@@ -47,12 +40,9 @@
                 {
                     console.log(ex.stack);
                 }
-                else
-                {
-                    console.log(ex);
-                }
+                process.exit(1);
             });
     };
 
     module.exports = run;
-}());
+}(typeof (global) === "undefined" ? window : global));

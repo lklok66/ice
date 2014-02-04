@@ -7,15 +7,15 @@
 //
 // **********************************************************************
 
-(function(){
+(function(global){
     var require = typeof(module) !== "undefined" ? module.require : function(){};
     require("Ice/Ice");
     require("Glacier2/Glacier2");
 
-    var Ice = this.Ice;
+    var Ice = global.Ice;
     
     require("Callback");
-    var Test = this.Test;
+    var Test = global.Test;
     var Promise = Ice.Promise;
 
     var test = function(b)
@@ -291,5 +291,5 @@
             });
         return p;
     };
-    this.__test__ = run;
-}());
+    global.__test__ = run;
+}(typeof (global) === "undefined" ? window : global));

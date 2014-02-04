@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     var Ice = global.Ice || {};
     
     require("Ice/Class");
@@ -92,4 +91,4 @@
     });
     Ice.Logger = Logger;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-    
+(function(global){
     require("Ice/Class");
     require("Ice/HashMap");
     require("Ice/TimeUtil");
@@ -115,4 +113,4 @@
         this.time = time;
         this.reference = reference;
     };
-}());
+}(typeof (global) === "undefined" ? window : global));

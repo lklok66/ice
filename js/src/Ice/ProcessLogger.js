@@ -8,8 +8,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Logger");
     var Ice = global.Ice || {};
     var Logger = Ice.Logger;
@@ -37,4 +36,4 @@
     Ice.getProcessLogger = getProcessLogger;
     Ice.setProcessLogger = setProcessLogger;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

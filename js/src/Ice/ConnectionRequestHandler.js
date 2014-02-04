@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Promise");
     require("Ice/Class");
     require("Ice/ReferenceMode");
@@ -62,4 +61,4 @@
     
     Ice.ConnectionRequestHandler = ConnectionRequestHandler;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     var Ice = global.Ice || {};
     
     var TraceLevels = function(properties)
@@ -64,4 +63,4 @@
 
     Ice.TraceLevels = TraceLevels;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

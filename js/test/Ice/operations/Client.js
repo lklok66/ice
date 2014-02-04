@@ -7,21 +7,21 @@
 //
 // **********************************************************************
 
-(function(){
+(function(global){
     var require = typeof(module) !== "undefined" ? module.require : function(){};
     require("Ice/Ice");
-    var Ice = this.Ice;
+    var Ice = global.Ice;
 
     require("Test");
-    var Test = this.Test;
+    var Test = global.Test;
     var Promise = Ice.Promise;
 
     require("Twoways");
     require("Oneways");
     require("BatchOneways");
-    var Twoways = this.Twoways;
-    var Oneways = this.Oneways;
-    var BatchOneways = this.BatchOneways;
+    var Twoways = global.Twoways;
+    var Oneways = global.Oneways;
+    var BatchOneways = global.BatchOneways;
 
     var allTests = function(out, communicator)
     {
@@ -140,5 +140,5 @@
             });
         return p;
     };
-    this.__test__ = run;
-}());
+    global.__test__ = run;
+}(typeof (global) === "undefined" ? window : global));

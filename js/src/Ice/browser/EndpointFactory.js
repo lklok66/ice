@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/Endpoint");
 
@@ -49,4 +48,4 @@
     });
     IceWS.EndpointFactory = EndpointFactory;
     global.IceWS = IceWS;
-}());
+}(typeof (global) === "undefined" ? window : global));

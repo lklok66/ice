@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     var net = require("net");
 
     require("Ice/Class");
@@ -428,4 +427,4 @@
 
     Ice.TcpTransceiver = TcpTransceiver;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/BasicStream");
     require("Ice/Debug");
@@ -144,4 +143,4 @@
     
     Ice.EndpointFactoryManager = EndpointFactoryManager;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

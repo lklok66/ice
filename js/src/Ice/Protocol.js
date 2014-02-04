@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/StringUtil");
     require("Ice/LocalException");
     require("Ice/Version");
@@ -314,4 +313,4 @@
     {
         return major + "." + minor;
     }
-}());
+}(typeof (global) === "undefined" ? window : global));

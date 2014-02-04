@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/HashMap");
     require("Ice/LocalException");
     require("Ice/Current");
@@ -143,4 +142,4 @@
     };
     Ice.ImplicitContextI = ImplicitContextI;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

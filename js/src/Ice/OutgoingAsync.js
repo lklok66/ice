@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/AsyncStatus");
     require("Ice/AsyncResult");
@@ -569,4 +568,4 @@
     
     Ice.OutgoingAsync = OutgoingAsync;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

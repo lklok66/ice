@@ -5,17 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stream Test | Ice for JavaScript</title>
     <style type="text/css">
-        .console ul
-        { 
-            max-height: 300px; 
-            min-height: 300px; 
-            overflow-y: auto; 
-            overflow-x: none;
-            word-wrap:break-word;
+        #wss
+        {
+            margin-top:10px;
         }
-        ul {list-style-type: none;}
-        nav h4 { margin-top: 10px; }
-        .side-nav li.current b { color:orange; font-weight: bold; font-style:italic;}
     </style>
   </head>
   <body>
@@ -29,18 +22,32 @@
     </nav>
     
     <section role="main">
-        <a id="select-test" href="#" data-dropdown="drop" class="button dropdown large">...</a><br>
-        <ul id="drop" data-dropdown-content class="f-dropdown tests"></ul>
-        <form>
-            <label for="default-host">Default Host:</label>
-            <input type="text" id="default-host"/>
-        </form>
-        <label>Output</label>
-        <hr>
-        <div class="panel console">
-            <ul><li></li></ul>
+        <div class="row">
+            <div class="large-12 medium-12 columns">
+                <a id="select-test" href="#" data-dropdown="drop" class="button dropdown large">...</a><br>
+                <ul id="drop" data-dropdown-content class="f-dropdown tests"></ul>
+                <form>
+                    <div class="row">
+                        <div class="small-3 columns">
+                            <label class="right inline" for="default-host">Default Host:</label>
+                        </div>
+                        <div class="small-9 columns">
+                            <input type="text" id="default-host"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="small-3 columns">
+                            <label class="right inline" for="wss">WSS:</label>
+                        </div>
+                        <div class="small-9 columns">
+                            <input id="wss" type="checkbox">
+                        </div>
+                    </div>
+                    <a href="#" class="button" id="run">Run</a>
+                    <textarea id="console" class="disabled" readonly></textarea>
+                </form>
+            </div>
         </div>
-        <a href="#" class="button" id="run">Run</a>
     </section>
     <script type="text/javascript">
         var TestCases = {

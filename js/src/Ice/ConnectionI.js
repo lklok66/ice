@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/AsyncStatus");
     require("Ice/AsyncResultBase");
@@ -2044,4 +2043,4 @@
         m.adopt = false;
         return m;
     };
-}());
+}(typeof (global) === "undefined" ? window : global));

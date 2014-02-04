@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/Exception");
     
@@ -37,4 +36,4 @@
     };
     Ice.Debug = Debug;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

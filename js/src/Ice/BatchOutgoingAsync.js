@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/AsyncResult");
 
@@ -35,4 +34,4 @@
 
     Ice.BatchOutgoingAsync = BatchOutgoingAsync;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

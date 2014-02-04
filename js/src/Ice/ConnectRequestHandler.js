@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-
+(function(global){
     require("Ice/Class");
     require("Ice/AsyncResult");
     require("Ice/AsyncStatus");
@@ -426,4 +424,4 @@
             this.batchOut = arg;
         }
     };
-}());
+}(typeof (global) === "undefined" ? window : global));

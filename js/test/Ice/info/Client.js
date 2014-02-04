@@ -7,13 +7,13 @@
 //
 // **********************************************************************
 
-(function(){
+(function(global){
     var require = typeof(module) !== "undefined" ? module.require : function(){};
     require("Ice/Ice");
-    var Ice = this.Ice;
+    var Ice = global.Ice;
     
     require("Test");
-    var Test = this.Test;
+    var Test = global.Test;
     var Promise = Ice.Promise;
     var ArrayUtil = Ice.ArrayUtil;
     
@@ -39,7 +39,7 @@
             try
             {
                 var defaultHost = communicator.getProperties().getProperty("Ice.Default.Host");
-                var ipinfo;
+                var info, ipinfo;
                 out.write("testing proxy endpoint information... ");
                 var p1 = communicator.stringToProxy("test -t:default -h tcphost -p 10000 -t 1200 -z:" +
                                                     "opaque -e 1.8 -t 100 -v ABCD");
@@ -174,7 +174,5 @@
             });
         return p;
     };
-    this.__test__ = run;
-}());
-
-            
+    global.__test__ = run;
+}(typeof (global) === "undefined" ? window : global));

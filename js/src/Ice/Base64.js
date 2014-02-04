@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Buffer");
 
     var Ice = global.Ice || {};
@@ -274,4 +273,4 @@
 
     Ice.Base64 = Base64;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/HashMap");
     require("Ice/TimeUtil");
     require("Ice/LocalException");
@@ -123,4 +122,4 @@
 
     Ice.Timer = Timer;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

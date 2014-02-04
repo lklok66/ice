@@ -93,30 +93,19 @@
             $("#timeout").noUiSlider({range: [0, 2500], start: 0, handles: 1});
             $("#delay").noUiSlider({range: [0, 2500], start: 0, handles: 1});
             
-            var out = {};
-            
-            out.write = function(msg){
-                var text = $("#console").val();
-                $("#console").val((text == "") ? msg : (text + "\n" + msg));
-            };
-            
-            out.writeLine = function(msg){
-                this.write(msg);
-                $("#console").scrollTop($("#console").get(0).scrollHeight);
-            };
-            
-            out.writeException = function(ex){
-                if(ex && ex._asyncResult)
+            var out = 
+            {
+                write: function(msg)
                 {
-                    this.writeLine("exception occurred in call to " + ex._asyncResult.operation);
-                }
-                if(ex.stack)
+                    var text = $("#console").val();
+                    $("#console").val((text == "") ? msg : (text + msg));
+                },
+                writeLine: function(msg)
                 {
-                    this.writeLine(ex.stack);
+                    out.write(msg + "\n");
+                    $("#console").scrollTop($("#console").get(0).scrollHeight);
                 }
             };
-            
-            var writeException = function(ex){ out.writeException(ex); };
             
             communicator = Ice.initialize();
             
@@ -185,11 +174,11 @@
                                     return batchOneway.sayHello(delay);
                                 }
                             }
-                        ).exception(writeException);
+                        ).exception(out.writeLine);
                     }
                     catch(ex)
                     {
-                        out.writeException(ex);
+                        out.writeLine(ex);
                     }
                 });
             
@@ -199,7 +188,7 @@
                     if(!$(this).hasClass("disabled"))
                     {
                         $(this).addClass("disabled");
-                        communicator.flushBatchRequests().exception(writeException);
+                        communicator.flushBatchRequests().exception(out.writeLine);
                     }
                 });
             
@@ -214,11 +203,11 @@
                             {
                                 return twoway.shutdown();
                             }
-                        ).exception(writeException);
+                        ).exception(out.writeLine);
                     }
                     catch(ex)
                     {
-                        out.writeException(ex);
+                        out.writeLine(out.writeLine);
                     }
                 });
         });

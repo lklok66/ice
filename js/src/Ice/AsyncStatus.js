@@ -7,10 +7,9 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     var Ice = global.Ice || {};
     var AsyncStatus = {Queued: 0, Sent: 1};
     Ice.AsyncStatus = AsyncStatus;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

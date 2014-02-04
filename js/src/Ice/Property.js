@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     var Ice = global.Ice || {};
     
     var Property = function Property(pattern, deprecated, deprecatedBy)
@@ -32,4 +31,4 @@
 
     Ice.Property = Property;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

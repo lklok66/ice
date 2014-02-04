@@ -55,26 +55,17 @@
         $(document).ready(function(){
             $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
             
-            var out = {};
-            
-            out.write = function(msg){
-                var text = $("#console").val();
-                $("#console").val((text == "") ? msg : (text + "\n" + msg));
-            };
-            
-            out.writeLine = function(msg){
-                this.write(msg);
-                $("#console").scrollTop($("#console").get(0).scrollHeight);
-            };
-            
-            out.writeException = function(ex){
-                if(ex && ex._asyncResult)
+            var out = 
+            {
+                write: function(msg)
                 {
-                    this.writeLine("exception occurred in call to " + ex._asyncResult.operation);
-                }
-                if(ex.stack)
+                    var text = $("#console").val();
+                    $("#console").val((text == "") ? msg : (text + msg));
+                },
+                writeLine: function(msg)
                 {
-                    this.writeLine(ex.stack);
+                    out.write(msg + "\n");
+                    $("#console").scrollTop($("#console").get(0).scrollHeight);
                 }
             };
             
@@ -90,15 +81,7 @@
                 out.writeLine("received callback #" + num);
             };
             
-            var writeException = function(ex)
-            {
-                out.writeException(ex);
-            };
-            
-            var exceptionCB = function(ex)
-            {
-                throw ex;
-            };
+            var exceptionCB = function(ex){ throw ex; };
             
             var id = new Ice.InitializationData();
             id.properties = Ice.createProperties();
@@ -153,7 +136,7 @@
                                 {
                                     $("#start").removeClass("disabled");
                                     $("#stop").addClass("disabled");
-                                    writeException(ex);
+                                    out.writeLine(ex.toString());
                                 }
                             );
                         }
@@ -161,7 +144,7 @@
                         {
                             $("#start").removeClass("disabled");
                             $("#stop").addClass("disabled");
-                            out.writeException(ex);
+                            out.writeLine(ex.toString());
                         }
                     }
                     
@@ -189,6 +172,7 @@
                                 {
                                     $("#start").removeClass("disabled");
                                     $("#stop").addClass("disabled");
+                                    out.writeLine(ex.toString());
                                 });
                         }
                     }

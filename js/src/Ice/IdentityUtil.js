@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/ExUtil");
     require("Ice/StringUtil");
     require("Ice/Identity");
@@ -226,4 +225,4 @@
     };
     
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

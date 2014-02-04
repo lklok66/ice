@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/ArrayUtil");
     require("Ice/AsyncResult");
@@ -1066,4 +1065,4 @@
     
     global.Slice = Slice;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

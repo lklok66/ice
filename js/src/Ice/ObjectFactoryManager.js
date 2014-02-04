@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-    
+(function(global){
     require("Ice/Class");
     require("Ice/HashMap");
     require("Ice/LocalException");
@@ -75,4 +73,4 @@
     
     Ice.ObjectFactoryManager = ObjectFactoryManager;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

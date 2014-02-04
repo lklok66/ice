@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-    
+(function(global){
     require("Ice/Class");
     
     var Ice = global.Ice || {};
@@ -226,18 +224,6 @@
     };
 
     //
-    // Create a new promise object and call function fn with
-    // the promise as its first argument, then return the new
-    // promise.
-    //
-    Promise.deferred = function(fn)
-    {
-        var promise = new Promise();
-        fn.apply(null, [promise]);
-        return promise;
-    };
-
-    //
     // Create a new promise, call succeed with the received arguments,
     // then return the new promise.
     //
@@ -263,4 +249,4 @@
 
     Ice.Promise = Promise;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

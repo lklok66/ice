@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-    
+(function(global){
     require("Ice/Class");
     
     var Slice = global.Slice || {};
@@ -31,7 +29,17 @@
         },
         toString: function()
         {
-            return this.ice_name();
+            var s = this.ice_name();
+            for(var key in this)
+            {
+                var value = this[key];
+                if(value instanceof Function || key == "stack" || key.indexOf("_") === 0)
+                {
+                    continue;
+                }
+                s += "\n    " + key + ": \"" + value + "\"";
+            }
+            return s;
         }
     });
     
@@ -51,27 +59,7 @@
             var name =  object.ice_name ? object.ice_name().replace("::", ".") : "";
             Object.defineProperty(object, "stack", {
                 get: function(){
-                    if(formattedStack === undefined)
-                    {
-                        //
-                        // Format the stack
-                        //
-                        var lines = stack.split("\n");
-                        for(var i = 0; i < lines.length; ++i)
-                        {
-                            if(lines[i].indexOf(name) !== -1)
-                            {
-                                if(i < lines.length)
-                                {
-                                    lines = lines.slice(i + 1);
-                                    break;
-                                }
-                            }
-                        }
-                        formattedStack = name + ": " + object.message + "\n"; 
-                        formattedStack += lines.join("\n");
-                    }
-                    return formattedStack;
+                    return stack;
                 }
             });
         }
@@ -231,4 +219,4 @@
 
     global.Slice = Slice;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

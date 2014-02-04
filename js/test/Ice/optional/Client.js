@@ -7,13 +7,13 @@
 //
 // **********************************************************************
 
-(function(){
+(function(global){
     var require = typeof(module) !== "undefined" ? module.require : function(){};
     require("Ice/Ice");
-    var Ice = this.Ice;
+    var Ice = global.Ice;
 
     require("Test");
-    var Test = this.Test;
+    var Test = global.Test;
     var Promise = Ice.Promise;
     var ArrayUtil = Ice.ArrayUtil;
 
@@ -137,7 +137,7 @@
                         mo1.sid.set("test", 10);
                         mo1.fs = new Test.FixedStruct();
                         mo1.fs.m = 78;
-                        mo1.vs = vs = new Test.VarStruct();
+                        mo1.vs = new Test.VarStruct();
                         mo1.vs.m = "hello";
 
                         mo1.shs = [1];
@@ -1096,5 +1096,5 @@
             });
         return p;
     };
-    this.__test__ = run;
-}());
+    global.__test__ = run;
+}(typeof (global) === "undefined" ? window : global));

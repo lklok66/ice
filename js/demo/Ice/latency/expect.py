@@ -26,7 +26,7 @@ server.expect('.* ready')
 
 sys.stdout.write("testing ping... ")
 sys.stdout.flush()
-client = Util.spawn('node Client.js')
+client = Util.spawn('node --use_strict Client.js')
 client.waitTestSuccess(timeout=100)
 print("ok")
 

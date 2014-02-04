@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Object");
     require("Ice/Class");
     
@@ -78,4 +77,4 @@
     Ice.SlicedData = SlicedData;
     Ice.UnknownSlicedObject = UnknownSlicedObject;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Address");
     
     var Ice = global.Ice || {};
@@ -123,4 +122,4 @@
 
     Ice.Network = Network;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

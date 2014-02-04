@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-    
+(function(global){
     require("Ice/Class");
     require("Ice/Debug");
     require("Ice/LocalException");
@@ -82,4 +80,4 @@
         }
     });
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

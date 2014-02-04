@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Debug");
     require("Ice/HashMap");
     require("Ice/Protocol");
@@ -472,4 +471,4 @@
             return "unknown";
         }
     }
-}());
+}(typeof (global) === "undefined" ? window : global));

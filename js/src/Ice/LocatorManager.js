@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-    
+(function(global){
     require("Ice/Class");
     require("Ice/HashMap");
     require("Ice/LocatorInfo");
@@ -87,4 +85,4 @@
     
     Ice.LocatorManager = LocatorManager;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

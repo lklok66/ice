@@ -7,13 +7,13 @@
 //
 // **********************************************************************
 
-(function(module, name){
+(function(global){
     var require = typeof(module) !== "undefined" ? module.require : function(){};
     
     require("Ice/Ice");
     require("Ice/Debug");
     
-    var Ice = this.Ice || {};
+    var Ice = global.Ice || {};
     
     var Debug = Ice.Debug;
     var Promise = Ice.Promise;
@@ -26,11 +26,23 @@
         }
     };
     
+    //
+    // Create a new promise object and call function fn with
+    // the promise as its first argument, then return the new
+    // promise.
+    //
+    var deferred = function(fn)
+    {
+        var promise = new Promise();
+        fn.call(null, promise);
+        return promise;
+    };
+    
     var run = function(out)
     {
         var p = new Promise();
         
-        Promise.deferred(
+        deferred(
             function(promise)
             {
                 out.write("Creating a promise object that is resolved and succeed... ");
@@ -52,7 +64,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("Creating a promise object that is resolved and failed... ");
@@ -75,7 +87,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("Creating a promise object that is resolved and succeed with multiple arguments... ");
@@ -99,7 +111,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("Creating a promise with a callback that returns a new value... ");
@@ -133,7 +145,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("Creating a promise object that recovers from a failure... ");
@@ -167,7 +179,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("Creating a promise object that rethrow a.failure... ");
@@ -201,7 +213,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("A second call to then should produce the same results... ");
@@ -259,7 +271,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("Create a promise that is not yet resolved, but will succeed... ");
@@ -284,7 +296,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("Create a promise that is not yet resolved, but will.fail... ");
@@ -310,7 +322,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("Create a promise chain that is not yet resolved, but will succeed... ");
@@ -374,7 +386,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("Use exception method on a Promise that will.fail... ");
@@ -392,7 +404,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("Promise exception propagation... ");
@@ -419,7 +431,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("Use Promise.all to wait for several promises and all succeed... ");
@@ -465,7 +477,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("Use Promise.all to wait for several promises and one fails... ");
@@ -498,7 +510,7 @@
         .then(
             function()
             {
-                return Promise.deferred(
+                return deferred(
                     function(promise)
                     {
                         out.write("Test Promise progress callback... ");
@@ -559,5 +571,5 @@
         );
         return p;
     };
-    this.__test__ = run;
-}());
+    global.__test__ = run;
+}(typeof (global) === "undefined" ? window : global));

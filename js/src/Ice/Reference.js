@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-    
+(function(global){
     require("Ice/Class");
     require("Ice/ArrayUtil");
     require("Ice/Debug");
@@ -2345,4 +2343,4 @@
                     });
         }
     });
-}());
+}(typeof (global) === "undefined" ? window : global));

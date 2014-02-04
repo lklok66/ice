@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     var Ice = global.Ice || {};
     var Slice = global.Slice || {};
     var ArrayUtil = {};
@@ -128,4 +127,4 @@
     Ice.ArrayUtil = ArrayUtil;
     global.Slice = Slice;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

@@ -7,9 +7,9 @@
 //
 // **********************************************************************
 
-(function(){
-    var Ice = this.Ice;
-    var Test = this.Test;
+(function(global){
+    var Ice = global.Ice;
+    var Test = global.Test;
 
     var test = function(b)
     {
@@ -152,5 +152,5 @@
         return promise;
     };
 
-    this.BatchOneways = { run: run };
-}());
+    global.BatchOneways = { run: run };
+}(typeof (global) === "undefined" ? window : global));

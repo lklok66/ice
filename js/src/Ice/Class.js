@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     var Ice = global.Ice || {};
     
     var defineClass = function()
@@ -55,6 +54,5 @@
     };
     
     Ice.__defineClass = defineClass;
-    
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

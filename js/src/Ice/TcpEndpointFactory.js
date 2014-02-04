@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/TcpEndpointI");
     require("Ice/Endpoint");
@@ -47,4 +46,4 @@
     
     Ice.TcpEndpointFactory = TcpEndpointFactory;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

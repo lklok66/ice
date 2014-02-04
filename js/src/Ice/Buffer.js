@@ -16,8 +16,7 @@
 // Define Node.Buffer as an alias to NodeJS global Buffer type,
 // that allow us to refer to Ice.Buffer as Buffer in this file.
 //
-(function(){
-    var global = this;
+(function(global){
     var Node = { Buffer: global.Buffer };
 
     require("Ice/Long");
@@ -427,4 +426,4 @@
 
     Ice.Buffer = Buffer;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

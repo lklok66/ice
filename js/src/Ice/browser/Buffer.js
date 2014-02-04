@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
-        
+(function(global){
     //
     // IE 10 doesn't implement ArrayBuffer.slice
     //
@@ -417,4 +415,4 @@
 
     Ice.Buffer = Buffer;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

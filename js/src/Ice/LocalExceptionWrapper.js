@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/Exception");
     require("Ice/ExUtil");
@@ -81,4 +80,4 @@
     
     Ice.LocalExceptionWrapper = LocalExceptionWrapper;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

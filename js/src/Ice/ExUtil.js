@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     //
     // Exception utilities
     //
@@ -51,4 +50,4 @@
 
     Ice.ExUtil = ExUtil;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     var Ice = global.Ice || {};
 
     var UUID = {};
@@ -26,4 +25,4 @@
 
     Ice.UUID = UUID;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

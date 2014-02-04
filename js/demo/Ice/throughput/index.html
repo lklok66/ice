@@ -82,13 +82,19 @@
             
             var exceptionCB = function(ex) { throw ex; };
             
-            var out =
+            var out = 
             {
-                write: function(msg){ $("#console").val($("#console").val() + msg); },
-                writeLine: function(msg){ this.write(msg + "\n"); }
+                write: function(msg)
+                {
+                    var text = $("#console").val();
+                    $("#console").val((text == "") ? msg : (text + msg));
+                },
+                writeLine: function(msg)
+                {
+                    out.write(msg + "\n");
+                    $("#console").scrollTop($("#console").get(0).scrollHeight);
+                }
             };
-
-            var writeException = function(ex) { out.writeLine(ex.stack); };
             
             var byteSeq = [];
             for(var i = 0; i < Demo.ByteSeqSize; ++i)
@@ -291,7 +297,7 @@
                                                     },
                                                     function(ex)
                                                     {
-                                                        writeException(ex);
+                                                        out.writeLine(ex.toString());
                                                         p1.fail(ex);
                                                     });
                                             }
@@ -315,13 +321,13 @@
                                                 function(ex)
                                                 {
                                                     run.removeClass("disabled");
-                                                    writeException(ex);
+                                                    out.writeLine(ex.toString());
                                                 }
                                             ).exception(
                                                 function(ex)
                                                 {
                                                     run.removeClass("disabled");
-                                                    writeException(ex);
+                                                    out.writeLine(ex.toString());
                                                 });
                                         }, 10);
                                 },
@@ -330,14 +336,14 @@
                                 function(ex)
                                 {
                                     run.removeClass("disabled");
-                                    writeException(ex);
+                                    out.writeLine(ex.toString());
                                 }
                             );
                         }
                         catch(ex)
                         {
                             run.removeClass("disabled");
-                            writeException(ex);
+                            out.writeLine(ex.toString());
                         }
                     }
                     return false;
@@ -371,13 +377,13 @@
                                 function(ex)
                                 {
                                     shutdown.removeClass("disabled");
-                                    writeException(ex);
+                                    out.writeLine(ex.toString());
                                 });
                         }
                         catch(ex)
                         {
                             shutdown.removeClass("disabled");
-                            writeException(ex);
+                            out.writeLine(ex.toString());
                         }
                     }
                     return false;

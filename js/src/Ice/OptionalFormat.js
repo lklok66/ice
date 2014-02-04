@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/EnumBase");
     
     var Ice = global.Ice || {};
@@ -17,4 +16,4 @@
         {'F1':0, 'F2':1, 'F4':2, 'F8':3, 'Size':4, 'VSize':5, 'FSize':6, 'Class':7});
     
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));

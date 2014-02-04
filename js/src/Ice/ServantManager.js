@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-(function(){
-    var global = this;
+(function(global){
     require("Ice/Class");
     require("Ice/Debug");
     require("Ice/ExUtil");
@@ -295,4 +294,4 @@
     
     Ice.ServantManager = ServantManager;
     global.Ice = Ice;
-}());
+}(typeof (global) === "undefined" ? window : global));
