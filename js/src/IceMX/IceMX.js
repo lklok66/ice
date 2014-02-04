@@ -7,4 +7,6 @@
 //
 // **********************************************************************
 
-// Dummy file to replace Node.js implementation
+(function(){
+    require("IceMX/Metrics");
+}());

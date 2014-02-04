@@ -9,11 +9,7 @@
 
 top_srcdir	= ../../..
 
-SLICES = Latency.ice
-
-GEN_SRCS = $(patsubst 	%.ice, %.js,  $(SLICES))
-
-SRCS = Client.js
+TARGETS = Latency.js
 
 include $(top_srcdir)/config/Make.rules
 

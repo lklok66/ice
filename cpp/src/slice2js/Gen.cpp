@@ -1069,6 +1069,13 @@ Slice::Gen::generate(const UnitPtr& p)
 {
     JsGenerator::validateMetaData(p);
 
+    if(p->hasOnlyClassDecls())
+    {
+        // Don't generate any code if the Slice file only contains
+        // forward declarations.
+        return;
+    }
+
     _out << nl << "(function()";
     _out << sb;
     _out << nl << "var global = this;";

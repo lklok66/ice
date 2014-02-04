@@ -9,11 +9,7 @@
 
 top_srcdir	= ../../..
 
-SLICES = Callback.ice
-
-GEN_SRCS = $(patsubst 	%.ice, %.js,  $(SLICES))
-
-SRCS = Client.js
+TARGETS = Callback.js
 
 include $(top_srcdir)/config/Make.rules
 

@@ -9,11 +9,7 @@
 
 top_srcdir	= ../../..
 
-SLICES = Throughput.ice
-
-GEN_SRCS = $(patsubst 	%.ice, %.js,  $(SLICES))
-
-SRCS = Client.js
+TARGETS	= Throughput.js
 
 include $(top_srcdir)/config/Make.rules
 

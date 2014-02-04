@@ -9,25 +9,34 @@
 
 top_srcdir	= ../..
 
+LIBNAME = Ice
+
+TARGETS	= $(call mklibtargets,$(LIBNAME))
+
 SLICES = $(SDIR)/BuiltinSequences.ice \
 	$(SDIR)/Connection.ice \
+	$(SDIR)/ConnectionF.ice \
 	$(SDIR)/Current.ice \
 	$(SDIR)/Endpoint.ice \
+	$(SDIR)/EndpointF.ice \
 	$(SDIR)/EndpointTypes.ice \
 	$(SDIR)/Identity.ice \
 	$(SDIR)/LocalException.ice \
 	$(SDIR)/Locator.ice \
 	$(SDIR)/Metrics.ice \
+	$(SDIR)/ObjectAdapterF.ice \
 	$(SDIR)/Process.ice \
+	$(SDIR)/ProcessF.ice \
 	$(SDIR)/PropertiesAdmin.ice \
 	$(SDIR)/Router.ice \
 	$(SDIR)/Version.ice
-	
+
 SDIR	= $(slicedir)/Ice
 
-GEN_SRCS = $(patsubst 	$(SDIR)/%.ice, %.js,  $(SLICES))
+GEN_SRCS = $(patsubst $(SDIR)/%.ice, %.js, $(SLICES))
 
-SRCS = Address.js \
+COMMON_SRCS = \
+	Address.js \
 	ArrayUtil.js \
 	AsyncResultBase.js \
 	AsyncResult.js \
@@ -35,7 +44,7 @@ SRCS = Address.js \
 	Base64.js \
 	BasicStream.js \
 	BatchOutgoingAsync.js \
-	Buffer.js \
+	Class.js \
 	Communicator.js \
 	ConnectionBatchOutgoingAsync.js \
 	ConnectionF.js \
@@ -44,19 +53,18 @@ SRCS = Address.js \
 	ConnectionReaper.js \
 	ConnectionRequestHandler.js \
 	ConnectRequestHandler.js \
-	Debug.js \
 	DefaultsAndOverrides.js \
 	EndpointFactoryManager.js \
-	EndpointF.js \
 	EnumBase.js \
 	Exception.js \
 	ExUtil.js \
 	FormatType.js \
 	HashMap.js \
 	HashUtil.js \
-	Ice.js \
 	IdentityUtil.js \
 	ImplicitContextI.js \
+	IncomingAsync.js \
+	Initialize.js \
 	Instance.js \
 	LocalExceptionWrapper.js \
 	LocatorInfo.js \
@@ -95,9 +103,6 @@ SRCS = Address.js \
 	StreamHelpers.js \
 	StringUtil.js \
 	Struct.js \
-	TcpEndpointFactory.js \
-	TcpEndpointI.js \
-	TcpTransceiver.js \
 	Timer.js \
 	TimeUtil.js \
 	TraceLevels.js \
@@ -106,10 +111,31 @@ SRCS = Address.js \
 	UnknownSlicedObject.js \
 	UUID.js
 
+NODEJS_SRCS = \
+	Buffer.js \
+	Ice.js \
+	TcpEndpointFactory.js \
+	TcpEndpointI.js \
+	TcpTransceiver.js \
+
+BROWSER_SRCS = \
+	browser/Buffer.js \
+	browser/EndpointInfo.js \
+	browser/ConnectionInfo.js \
+	browser/Transceiver.js \
+	browser/EndpointI.js \
+	browser/EndpointFactory.js
+
+ifneq ($(OPTIMIZE),yes)
+    COMMON_SRCS := $(COMMON_SRCS) Debug.js
+endif
+
+SRCS		:= $(BROWSER_SRCS) $(GEN_SRCS) $(COMMON_SRCS)
+INSTALL_SRCS	:= $(NODEJS_SRCS) $(GEN_SRCS) $(COMMON_SRCS)
+
 include $(top_srcdir)/config/Make.rules
 
 # Prevent generation of these files from .ice files
-
 Communicator.js:
 	
 Properties.js:
@@ -120,13 +146,16 @@ ServantLocator.js:
 	
 ObjectFactory.js:
 	
-ConnectionF.js:
-	
-EndpointF.js:
-	
-ObjectAdapterF.js:
-	
-ProcessF.js:
-	
 
 SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --include-dir Ice --ice -I$(slicedir)
+
+# IceWS slice files
+browser/%.js: $(slicedir)/IceWS/%.ice $(SLICE2JS) $(SLICEPARSERLIB)
+	rm -f browser/$(*F).js
+	$(SLICE2JS) $(SLICE2JSFLAGS) $<
+	mv $(*F).js browser/
+
+install:: all
+	$(call installlib,$(DESTDIR)$(install_libdir),$(libdir),$(LIBNAME))
+	$(call installmodule,$(DESTDIR)$(install_moduledir),$(INSTALL_SRCS),$(LIBNAME))
+

@@ -30,14 +30,20 @@
     require("Ice/ProxyFactory");
     require("Ice/RetryQueue");
     require("Ice/RouterManager");
-    require("Ice/TcpEndpointFactory");
-    require("IceWS/EndpointFactory");
     require("Ice/Timer");
     require("Ice/TraceLevels");
     require("Ice/Reference");
     require("Ice/LocalException");
     require("Ice/Exception");
     require("Ice/ProcessLogger");
+
+    //
+    // We don't load the endpoint factories here, instead the Ice.js
+    // file for NodeJS loads the TcpEndpointFactory and the Ice.js
+    // file for the web browser includes the IceWS endpoint factory.
+    //
+    //require("Ice/TcpEndpointFactory");
+    //require("IceWS/EndpointFactory");
 
     var Ice = global.Ice || {};
 
@@ -379,12 +385,13 @@
                 this._preferIPv6 = this._initData.properties.getPropertyAsInt("Ice.PreferIPv6Address") > 0;
 
                 this._endpointFactoryManager = new EndpointFactoryManager(this);
-                if(Ice.TcpEndpointFactory !== undefined)
+
+                if(typeof(Ice.TcpEndpointFactory) !== "undefined")
                 {
                     this._endpointFactoryManager.add(new Ice.TcpEndpointFactory(this));
                 }
                 
-                if(IceWS.EndpointFactory !== undefined)
+                if(typeof(IceWS) !== "undefined" && typeof(IceWS.EndpointFactory) !== "undefined")
                 {
                     this._endpointFactoryManager.add(new IceWS.EndpointFactory(this, false));
                     this._endpointFactoryManager.add(new IceWS.EndpointFactory(this, true));

@@ -14,7 +14,7 @@ var esprima = require('esprima');
 var usage = function()
 {
     console.log("usage:");
-    console.log("" + process.argv[0] + " " + path.basename(process.argv[1]) + " <base-dir> <sub-dirs>"); 
+    console.log("" + process.argv[0] + " " + path.basename(process.argv[1]) + " <files>"); 
 }
 
 if(process.argv.length < 3)
@@ -23,12 +23,10 @@ if(process.argv.length < 3)
     process.exit(1);
 }
 
-var baseDir = process.argv[2];
-
-var subDirs = [];
-for(var i = 3; i < process.argv.length; ++i)
+var files = [];
+for(var i = 2; i < process.argv.length; ++i)
 {
-    subDirs.push(path.join(baseDir, process.argv[i]));
+    files.push(process.argv[i]);
 }
 
 var Depends = function()
@@ -87,11 +85,12 @@ Depends.comparator = function(a, b)
 {
     // B depends on A
     var i;
+    var result = 0;
     for(i = 0; i < b.depends.length; ++i)
     {
         if(b.depends[i] === a.file)
         {
-            return -1;
+            result = -1;
         }
     }
     // A depends on B
@@ -99,10 +98,16 @@ Depends.comparator = function(a, b)
     {
         if(a.depends[i] === b.file)
         {
-            return 1;
+            if(result == -1)
+            {
+                process.stderr.write("warning: circulary dependency between: " + a.file + " and " + b.file + "\n");
+                return result;
+            }
+            result = 1;
         }
     }
-    return 0;
+
+    return result;
 };
 
 Depends.prototype.sort = function()
@@ -112,7 +117,7 @@ Depends.prototype.sort = function()
     {
         for(var j = 0; j < objects.length; ++j)
         {
-            if(j === i) {continue; }
+            if(j === i) { continue; }
             var v = Depends.comparator(objects[i], objects[j]);
             if(v < 0)
             {
@@ -127,14 +132,14 @@ Depends.prototype.sort = function()
 
 var Parser = {};
 
-Parser.traverse = function(object, depend, file, basedir)
+Parser.traverse = function(object, depend, file)
 {
     for(key in object)
     {
         var value = object[key];
         if(value !== null && typeof value == "object") 
         {
-            Parser.traverse(value, depend, file, basedir);
+            Parser.traverse(value, depend, file);
 
             if(value.type === "CallExpression")
             {
@@ -143,8 +148,12 @@ Parser.traverse = function(object, depend, file, basedir)
                     var includedFile = value.arguments[0].value + ".js";
                     if(includedFile.indexOf("Ice/") === 0 ||
                        includedFile.indexOf("IceWS/") === 0 ||
-                       includedFile.indexOf("Glacier2/"))
+                       includedFile.indexOf("IceMX/") === 0 ||
+                       includedFile.indexOf("IceGrid/")  === 0 ||
+                       includedFile.indexOf("IceStorm/") === 0 ||
+                       includedFile.indexOf("Glacier2/") === 0)
                     {
+                        includedFile = path.resolve("../" + includedFile);
                         if(depend.depends.indexOf(includedFile) === -1)
                         {
                             depend.depends.push(includedFile);
@@ -158,61 +167,52 @@ Parser.traverse = function(object, depend, file, basedir)
 
 Parser.dir = function(base, depends)
 {
-    if(base != baseDir && subDirs.indexOf(base) === -1)
-    {
-        return;
-    }
-
-    var files = fs.readdirSync(base);
     var d = depends || new Depends();
     for(var i = 0; i < files.length; ++i)
     {
         var file = files[i];
-        file = path.join(base, file);
         var stats = fs.statSync(file);
         if(path.extname(file) == ".js" && stats.isFile())
         {
             try
             {
                 var dirname = path.basename(path.dirname(file));
-                var basename = path.basename(file);
-                var depend = { file: dirname + "/" + basename, depends: []};
+                var fullpath;
+                if(dirname === "browser")
+                {
+                    fullpath = path.resolve(path.dirname(file) + "/../" + path.basename(file));
+                    if(!fs.existsSync(fullpath))
+                    {
+                        fullpath = path.resolve(file);
+                    }
+                }
+                else
+                {
+                    fullpath = path.resolve(file);
+                }
+                var depend = { realpath: file, file: fullpath, depends: [] };
                 d.depends.push(depend);
                 var ast = esprima.parse(fs.readFileSync(file, 'utf-8'));
-                Parser.traverse(ast, depend, basename, dirname);
+                Parser.traverse(ast, depend, file);
             }
             catch(e)
             {
                 throw e;
             }
         }
-        else if(path.basename(file) !== "browser" && stats.isDirectory())
-        {
-            Parser.dir(path.join(file), d);
-        }
     }
     return d;
 };
 
-var d = Parser.dir(baseDir);
+var d = Parser.dir("");
 d.depends = d.expand().sort();
 
-var file, i, length = d.depends.length, fullPath, line;
-
+var file, i, length = d.depends.length, line;
 var optimize = process.env.OPTIMIZE && process.env.OPTIMIZE == "yes";
 for(i = 0;  i < length; ++i)
 {
-    file = d.depends[i].file;
-    fullPath = path.join(baseDir, path.dirname(file), "browser",  path.basename(file));
-    if(!fs.existsSync(fullPath))
-    {
-        fullPath = path.join(baseDir, file)
-    }
-    if(optimize && file.indexOf("Ice/Debug.js") !== -1)
-    {
-        continue;
-    }
-    data = fs.readFileSync(fullPath); 
+    file = d.depends[i].realpath;
+    data = fs.readFileSync(file); 
     lines = data.toString().split("\n");
     var skip = false;
     for(j in lines)

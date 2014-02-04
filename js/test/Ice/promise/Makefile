@@ -9,12 +9,9 @@
 
 top_srcdir	= ../../..
 
+TARGETS = index.html
+
 include $(top_srcdir)/config/Make.rules
 
 index.html: $(top_srcdir)/test/Common/index.html
 	cp $(top_srcdir)/test/Common/index.html .
-	
-all:: index.html
-
-clean:: 
-	rm -rf index.html

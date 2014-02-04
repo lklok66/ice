@@ -9,6 +9,10 @@
 
 top_srcdir	= ../..
 
+LIBNAME = IceGrid
+
+TARGETS	= $(call mklibtargets,$(LIBNAME))
+
 SLICES = $(SDIR)/Admin.ice \
 	$(SDIR)/Descriptor.ice \
 	$(SDIR)/Exception.ice \
@@ -22,10 +26,15 @@ SLICES = $(SDIR)/Admin.ice \
 
 SDIR	= $(slicedir)/IceGrid
 
-GEN_SRCS = $(patsubst 	$(SDIR)/%.ice, %.js,  $(SLICES))
+GEN_SRCS = $(patsubst $(SDIR)/%.ice, %.js, $(SLICES))
 
+SRCS		:= $(GEN_SRCS)
+INSTALL_SRCS	:= IceGrid.js $(GEN_SRCS)
 
-        
 include $(top_srcdir)/config/Make.rules
-	
+
 SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --include-dir IceGrid --ice -I$(slicedir)
+
+install:: all
+	$(call installlib,$(DESTDIR)$(install_libdir),$(libdir),$(LIBNAME))
+	$(call installmodule,$(DESTDIR)$(install_moduledir),$(INSTALL_SRCS),$(LIBNAME))

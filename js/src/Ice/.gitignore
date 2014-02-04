@@ -14,3 +14,7 @@ Router.js
 ServantLocator.js
 SliceChecksumDict.js
 Version.js
+ConnectionF.js
+EndpointF.js
+ObjectAdapterF.js
+ProcessF.js

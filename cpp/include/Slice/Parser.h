@@ -458,6 +458,7 @@ public:
     bool hasOnlyDictionaries(DictionaryList&) const;
     bool hasClassDecls() const;
     bool hasClassDefs() const;
+    bool hasOnlyClassDecls() const;
     bool hasAbstractClassDefs() const;
     bool hasNonLocalDataOnlyClasses() const;
     bool hasOtherConstructedOrExceptions() const; // Exceptions or constructed types other than classes.

@@ -1648,6 +1648,8 @@ Slice::Container::hasNonLocalExceptions() const
     return false;
 }
 
+
+
 bool
 Slice::Container::hasClassDecls() const
 {
@@ -1741,6 +1743,28 @@ Slice::Container::hasClassDefs() const
     }
 
     return false;
+}
+
+bool
+Slice::Container::hasOnlyClassDecls() const
+{
+    for(ContainedList::const_iterator p = _contents.begin(); p != _contents.end(); ++p)
+    {
+        ModulePtr m = ModulePtr::dynamicCast(*p);
+        if(m)
+        {
+            if(!m->hasOnlyClassDecls())
+            {
+                return false;
+            }
+        }
+        else if(!ClassDeclPtr::dynamicCast(*p))
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool

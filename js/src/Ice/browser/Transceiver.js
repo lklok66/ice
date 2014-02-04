@@ -19,7 +19,7 @@
     require("Ice/Exception");
     require("Ice/LocalException");
     
-    require("IceWS/ConnectionInfo");
+    require("Ice/browser/ConnectionInfo");
     
     var Ice = global.Ice || {};
     var IceWS = global.IceWS || {};

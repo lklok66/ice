@@ -13,11 +13,11 @@
     require("Ice/Address");
     require("Ice/HashUtil");
     require("Ice/StringUtil");
-    require("IceWS/Transceiver");
     require("Ice/Endpoint");
     require("Ice/LocalException");
     
-    require("IceWS/EndpointInfo");
+    require("Ice/browser/Transceiver");
+    require("Ice/browser/EndpointInfo");
     
     var Ice = global.Ice || {};
     var IceWS = global.IceWS || {};

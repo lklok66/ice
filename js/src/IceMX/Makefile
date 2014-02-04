@@ -9,23 +9,22 @@
 
 top_srcdir	= ../..
 
-LIBNAME = IceStorm
+LIBNAME = IceMX
 
 TARGETS	= $(call mklibtargets,$(LIBNAME))
 
-SLICES = $(SDIR)/IceStorm.ice \
-	$(SDIR)/Metrics.ice
+SLICES  = $(SDIR)/Metrics.ice
 
-SDIR	= $(slicedir)/IceStorm
+SDIR	= $(slicedir)/Ice
 
 GEN_SRCS = $(patsubst $(SDIR)/%.ice, %.js, $(SLICES))
 
 SRCS		:= $(GEN_SRCS)
-INSTALL_SRCS	:= IceStorm.js $(GEN_SRCS)
+INSTALL_SRCS	:= IceMX.js $(GEN_SRCS)
 
 include $(top_srcdir)/config/Make.rules
 
-SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --include-dir IceStorm --ice -I$(slicedir)
+SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --include-dir Ice --ice -I$(slicedir)
 
 install:: all
 	$(call installlib,$(DESTDIR)$(install_libdir),$(libdir),$(LIBNAME))

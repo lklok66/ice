@@ -9,6 +9,10 @@
 
 top_srcdir	= ../..
 
+LIBNAME = Glacier2
+
+TARGETS	= $(call mklibtargets,$(LIBNAME))
+
 SLICES = $(SDIR)/PermissionsVerifierF.ice \
 	$(SDIR)/PermissionsVerifier.ice \
 	$(SDIR)/Router.ice \
@@ -21,8 +25,13 @@ SDIR	= $(slicedir)/Glacier2
 
 GEN_SRCS = $(patsubst 	$(SDIR)/%.ice, %.js,  $(SLICES))
 
+SRCS		:= $(GEN_SRCS)
+INSTALL_SRCS	:= Glacier2.js $(GEN_SRCS)
 
-        
 include $(top_srcdir)/config/Make.rules
-	
+
 SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --include-dir Glacier2 --ice -I$(slicedir)
+
+install:: all
+	$(call installlib,$(DESTDIR)$(install_libdir),$(libdir),$(LIBNAME))
+	$(call installmodule,$(DESTDIR)$(install_moduledir),$(INSTALL_SRCS),$(LIBNAME))

@@ -11,14 +11,14 @@
     var global = this;
     require("Ice/Class");
     require("Ice/Endpoint");
-    require("IceWS/EndpointInfo");
-    require("IceWS/EndpointI");
+
+    require("Ice/browser/EndpointInfo");
+    require("Ice/browser/EndpointI");
     
     var Ice = global.Ice || {};
     var IceWS = global.IceWS || {};
     
     var EndpointI = IceWS.EndpointI;
-    var WSEndpointType = Ice.WSEndpointType;
 
     var EndpointFactory = Ice.__defineClass({
         __init__:function(instance, secure)

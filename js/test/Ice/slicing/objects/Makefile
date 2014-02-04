@@ -9,6 +9,8 @@
 
 top_srcdir	= ../../../..
 
+TARGETS = index.html
+
 SLICES = Test.ice
 
 GEN_SRCS = $(patsubst 	%.ice, %.js,  $(SLICES))
@@ -19,10 +21,5 @@ include $(top_srcdir)/config/Make.rules
 
 SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) -I$(slicedir)
 
-index.html: $(top_srcdir)/test/Common/index.html
+index.html: $(GEN_SRCS) $(top_srcdir)/test/Common/index.html
 	cp $(top_srcdir)/test/Common/index.html .
-	
-all:: index.html
-
-clean:: 
-	rm -rf index.html

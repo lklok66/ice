@@ -8,13 +8,14 @@
 // **********************************************************************
 
 (function(){
-    require("Ice/Debug");
-    require("Ice/ExUtil");
-    require("Ice/Network");
-    require("Ice/SocketOperation");
-    require("Ice/Connection");
-    require("Ice/Exception");
-    require("Ice/LocalException");
-    
-    require("IceWS/ConnectionInfo");
+    require("IceGrid/Admin");
+    require("IceGrid/Descriptor");
+    require("IceGrid/Exception");
+    require("IceGrid/FileParser");
+    require("IceGrid/Locator");
+    require("IceGrid/Observer");
+    require("IceGrid/Query");
+    require("IceGrid/Registry");
+    require("IceGrid/Session");
+    require("IceGrid/UserAccountMapper");
 }());

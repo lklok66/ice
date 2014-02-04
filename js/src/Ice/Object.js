@@ -16,7 +16,6 @@
     //
     require("Ice/Class");
     require("Ice/Exception");
-    require("Ice/ExUtil");
     require("Ice/FormatType");
     require("Ice/StreamHelpers");
     require("Ice/OptionalFormat");
@@ -24,8 +23,6 @@
     var Ice = global.Ice || {};
     var Slice = global.Slice || {};
 
-    var ExUtil = Ice.ExUtil;
-    
     var defineClass = Ice.__defineClass;
     
     var nextAddress = 0;
@@ -309,15 +306,15 @@
             }
             else if(ex instanceof Ice.UserException)
             {
-                this.incomingAsync.__exception(new Ice.UnknownUserException(ExUtil.toString(ex)));
+                this.incomingAsync.__exception(new Ice.UnknownUserException(ex.toString()));
             }
             else if(ex instanceof Ice.LocalException)
             {
-                this.incomingAsync.__exception(new Ice.UnknownLocalException(ExUtil.toString(ex)));
+                this.incomingAsync.__exception(new Ice.UnknownLocalException(ex.toString()));
             }
             else
             {
-                this.incomingAsync.__exception(new Ice.UnknownException(ExUtil.toString(ex)));
+                this.incomingAsync.__exception(new Ice.UnknownException(ex.toString()));
             }
         }
     });
