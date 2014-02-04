@@ -21,7 +21,8 @@
 
     var run = function(communicator, log, p)
     {
-        var promise = new Ice.Promise();
+        var Promise = Ice.Promise;
+        var promise = new Promise();
 
         var failCB = function() { test(false); };
 
@@ -64,26 +65,47 @@
 
                         batch = p.ice_batchOneway();
 
+                        var promise1 = new Promise();
+                        
+                        var all = [];
                         for(var i = 0; i < 30; ++i)
                         {
-                            batch.opByteSOneway(bs1).exception(failCB);
+                            all[i] = batch.opByteSOneway(bs1);
                         }
-
-                        return batch.ice_getConnection();
+                        
+                        Promise.all.apply(Promise, all).then(
+                            function()
+                            {
+                                return batch.ice_getConnection();
+                            }
+                        ).then(
+                            function(r, con)
+                            {
+                                return con.flushBatchRequests();
+                            }
+                        ).then(
+                            function()
+                            {
+                                promise1.succeed(p);
+                            }
+                        ).exception(
+                            function(ex)
+                            {
+                                promise1.fail(ex);
+                            }
+                        );
+                        return promise1;
                     }
                 ).then(
-                    function(r, con)
-                    {
-                        return con.flushBatchRequests();
-                    }
-                ).then(
-                    function(r)
+                    function(p)
                     {
                         batch2 = p.ice_batchOneway();
 
-                        batch.ice_ping().exception(failCB);
-                        batch2.ice_ping().exception(failCB);
-
+                        return Promise.all(batch.ice_ping(), batch2.ice_ping());
+                    }
+                ).then(
+                    function()
+                    {
                         return batch.ice_flushBatchRequests();
                     }
                 ).then(
@@ -99,22 +121,30 @@
                 ).then(
                     function(r)
                     {
-                        batch.ice_ping().exception(failCB);
-                        batch2.ice_ping().exception(failCB);
-
+                        return Promise.all(batch.ice_ping(), batch2.ice_ping());
+                    }
+                ).then(
+                    function()
+                    {
                         var identity = communicator.stringToIdentity("invalid");
                         batch3 = batch.ice_identity(identity);
-                        batch3.ice_ping().exception(failCB);
-
+                        
+                        return batch3.ice_ping();
+                    }
+                ).then(
+                    function()
+                    {
                         return batch3.ice_flushBatchRequests();
                     }
                 ).then(
                     function(r)
                     {
                         // Make sure that a bogus batch request doesn't cause troubles to other ones.
-                        batch3.ice_ping().exception(failCB);
-                        batch.ice_ping().exception(failCB);
-
+                        return Promise.all(batch3.ice_ping(), batch.ice_ping());
+                    }
+                ).then(
+                    function()
+                    {
                         return batch.ice_flushBatchRequests();
                     }
                 ).then(

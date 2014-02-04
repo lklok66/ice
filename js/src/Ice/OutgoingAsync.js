@@ -417,6 +417,7 @@
             {
                 Debug.assert(this._handler !== null);
                 this._handler.finishBatchRequest(this._os);
+                this.succeed(this);
             }
             else
             {
