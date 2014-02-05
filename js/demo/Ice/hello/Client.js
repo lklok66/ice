@@ -27,14 +27,6 @@
         var writeException = function(ex)
         {
             console.log(ex.toString());
-            if(ex._asyncResult)
-            {
-                console.log("\nexception occurred in call to " + ex._asyncResult.operation);
-            }
-            if(ex.stack)
-            {
-                console.log(ex.stack);
-            }
         };
 
         var Client = function()
@@ -90,7 +82,6 @@
                 var timeout = -1;
                 var delay = 0;
                 
-                var printEx = function(ex){ console.log(ex.stack); };
                 Demo.HelloPrx.checkedCast(proxy).then(
                     function(asyncResult, twoway)
                     {
@@ -124,19 +115,19 @@
                                         
                                         if(key == "t")
                                         {
-                                            twoway.sayHello(delay).exception(printEx);
+                                            twoway.sayHello(delay).exception(writeException);
                                         }
                                         else if(key == "o")
                                         {
-                                            oneway.sayHello(delay).exception(printEx);
+                                            oneway.sayHello(delay).exception(writeException);
                                         }
                                         else if(key == "O")
                                         {
-                                            batchOneway.sayHello(delay).exception(printEx);
+                                            batchOneway.sayHello(delay).exception(writeException);
                                         }
                                         else if(key == "f")
                                         {
-                                            communicator.flushBatchRequests().exception(printEx);
+                                            communicator.flushBatchRequests().exception(writeException);
                                         }
                                         else if(key == "T")
                                         {
@@ -186,7 +177,7 @@
                                         }
                                         else if(key == "s")
                                         {
-                                            twoway.shutdown().exception(printEx);
+                                            twoway.shutdown().exception(writeException);
                                         }
                                         else if(key == "?")
                                         {

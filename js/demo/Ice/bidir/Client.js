@@ -9,14 +9,6 @@
     var writeException = function(ex)
     {
         console.log(ex.toString());
-        if(ex._asyncResult)
-        {
-            console.log("\nexception occurred in call to " + ex._asyncResult.operation);
-        }
-        if(ex.stack)
-        {
-            console.log(ex.stack);
-        }
     };
 
     var CallbackReceiverI = function()
