@@ -28,8 +28,7 @@
                 "s: shutdown server\n" +
                 "x: exit\n" +
                 "?: help\n" +
-                "\n" +
-                "==> ");
+                "\n");
     };        
 
     var Client = function()
@@ -50,6 +49,7 @@
                 var batchOneway = twoway.ice_batchOneway();
 
                 menu();
+                process.stdout.write("==> ");
                 var loop = new Ice.Promise();
                 var processKey = function(key)
                 {
@@ -101,7 +101,7 @@
                     }
                     else if(key == "P")
                     {
-                        if(delay == 0)
+                        if(delay === 0)
                         {
                             delay = 2500;
                         }
@@ -110,7 +110,7 @@
                             delay = 0;
                         }
 
-                        if(delay == 0)
+                        if(delay === 0)
                         {
                             console.log("server delay is now deactivated");
                         }
@@ -134,7 +134,7 @@
                         process.stdout.write("\n");
                         menu();
                     }
-                }
+                };
 
                 //
                 // Process keys sequentially. We chain the promise objects
@@ -200,11 +200,11 @@
     ).then(
         function()
         {
-            process.exit(0)
+            process.exit(0);
         },
         function(ex)
         {
-            console.log(ex.toString());   
+            console.log(ex.toString());
             process.exit(1);
         }
     );
