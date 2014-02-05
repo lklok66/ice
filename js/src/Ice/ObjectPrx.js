@@ -981,8 +981,10 @@
             get: function(){ return 2; }
         });
         
-        addOperations(prx, operations);
-        
+        if(operations !== undefined)
+        {
+            addOperations(prx, operations);
+        }
         return prx;
     };
     

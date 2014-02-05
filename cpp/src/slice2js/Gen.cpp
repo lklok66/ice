@@ -1746,230 +1746,241 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         
         _out << sp;
         _out << nl << localScope << '.' << prxName << " = " << "Slice.defineProxy(" << baseProxy << ", " << staticId;
-        _out << ", [";
-        if(!bases.empty())
-        {
-            _out.inc();
-            for(ClassList::const_iterator q = bases.begin(); q != bases.end();)
-            {
-                ClassDefPtr base = *q;
-                if(base->isInterface())
-                {
-                    _out << nl << getLocalScope(base->scope()) << "." << base->name() << "Prx";
-                    if(++q != bases.end())
-                    {
-                        _out << ", ";
-                    }
-                }
-                else
-                {
-                    q++;
-                }
-            }
-            _out.dec();
-        }
-        _out << "],";
-        _out << sb;
-        
         const OperationList ops = p->operations();
-        for(OperationList::const_iterator q = ops.begin(); q != ops.end(); )
+        if(!bases.empty() || !ops.empty())
         {
-            OperationPtr op = *q;
-            const TypePtr ret = op->returnType();
-            ExceptionList throws = op->throws();
-            throws.sort();
-            throws.unique();
-
-            bool first = true;
-            
-            const ParamDeclList paramList = op->parameters();
-            ParamDeclList inParams, outParams;
-            for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
+            if(!bases.empty())
             {
-                if((*pli)->isOutParam())
+                _out << ", [";
+                _out.inc();
+                for(ClassList::const_iterator q = bases.begin(); q != bases.end();)
                 {
-                    outParams.push_back(*pli);
-                }
-                else
-                {
-                    inParams.push_back(*pli);
-                }
-            }
-            
-            _out << nl << op->name() << ":";
-            _out << sb;
-            
-            if(op->sendMode() != Operation::Normal)
-            {
-                _out << nl << "o: " << sliceModeToIceMode(op->sendMode());
-                first = false;
-            }
-            
-            if(op->format() != DefaultFormat)
-            {
-                if(!first)
-                {
-                    _out << ",";
-                }
-                else
-                {
-                    first = false;
-                }
-                _out << nl << "f: " << opFormatTypeToString(op);
-            }
-            
-            //
-            // Function to marshal in-params.
-            //
-            if(!inParams.empty())
-            {
-                if(!first)
-                {
-                    _out << ",";
-                }
-                else
-                {
-                    first = false;
-                }
-                _out << nl << "m: function" << spar << "__os" << getParams(op) << epar;
-                _out << sb;
-                writeMarshalUnmarshalParams(inParams, 0, true);
-                if(op->sendsClasses(false))
-                {
-                    _out << nl << "__os.writePendingObjects();";
-                }
-                _out << eb;
-            }
-            //
-            // Function to unmarshal out-params.
-            //
-            if(ret || !outParams.empty())
-            {
-                if(!first)
-                {
-                    _out << ",";
-                }
-                else
-                {
-                    first = false;
-                }
-                _out << nl << "u: ";
-                //
-                // Select an unmarshal callback. We provide generic callbacks for operations that
-                // return one value of built-in type. Otherwise, we have to generate a callback.
-                //
-                TypePtr t;
-                if((ret && outParams.empty()) || (!ret && outParams.size() == 1))
-                {
-                    if(ret)
+                    ClassDefPtr base = *q;
+                    if(base->isInterface())
                     {
-                        assert(outParams.size() == 0);
-                        t = ret;
-                    }
-                    else
-                    {
-                        assert(outParams.size() == 1);
-                        t = outParams.front()->type();
-                    }
-                }
-
-                BuiltinPtr b = BuiltinPtr::dynamicCast(t);
-                if(b)
-                {
-                    if(b->kind() == Builtin::KindObject)
-                    {
-                        _out << "Ice.ObjectPrx.__returns_Object";
-                    }
-                    else if(b->kind() == Builtin::KindObjectProxy)
-                    {
-                        _out << "Ice.ObjectPrx.__returns_ObjectPrx";
-                    }
-                    else
-                    {
-                        assert(b->kind() != Builtin::KindLocalObject);
-                        _out << "Ice.ObjectPrx.__returns_" + b->typeId();
-                    }
-                }
-                else
-                {
-                    _out << "function(__is, __results)";
-                    _out << sb;
-                    vector<string> outArgs;
-                    if(ret)
-                    {
-                        _out << nl << "var __ret;";
-                    }
-                    if(!outParams.empty())
-                    {
-                        _out << nl << "var ";
-                        for(ParamDeclList::const_iterator pli = outParams.begin(); pli != outParams.end(); ++pli)
+                        _out << nl << getLocalScope(base->scope()) << "." << base->name() << "Prx";
+                        if(++q != bases.end())
                         {
-                            if(pli != outParams.begin())
+                            _out << ", ";
+                        }
+                    }
+                    else
+                    {
+                        q++;
+                    }
+                }
+                _out.dec();
+                _out << "]";
+            }
+            else
+            {
+                _out << ", undefined";
+            }
+            
+            if(!ops.empty())
+            {
+                _out << ", " << sb;
+                for(OperationList::const_iterator q = ops.begin(); q != ops.end(); )
+                {
+                    OperationPtr op = *q;
+                    const TypePtr ret = op->returnType();
+                    ExceptionList throws = op->throws();
+                    throws.sort();
+                    throws.unique();
+
+                    bool first = true;
+                    
+                    const ParamDeclList paramList = op->parameters();
+                    ParamDeclList inParams, outParams;
+                    for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
+                    {
+                        if((*pli)->isOutParam())
+                        {
+                            outParams.push_back(*pli);
+                        }
+                        else
+                        {
+                            inParams.push_back(*pli);
+                        }
+                    }
+                    
+                    _out << nl << op->name() << ":";
+                    _out << sb;
+                    
+                    if(op->sendMode() != Operation::Normal)
+                    {
+                        _out << nl << "o: " << sliceModeToIceMode(op->sendMode());
+                        first = false;
+                    }
+                    
+                    if(op->format() != DefaultFormat)
+                    {
+                        if(!first)
+                        {
+                            _out << ",";
+                        }
+                        else
+                        {
+                            first = false;
+                        }
+                        _out << nl << "f: " << opFormatTypeToString(op);
+                    }
+                    
+                    //
+                    // Function to marshal in-params.
+                    //
+                    if(!inParams.empty())
+                    {
+                        if(!first)
+                        {
+                            _out << ",";
+                        }
+                        else
+                        {
+                            first = false;
+                        }
+                        _out << nl << "m: function" << spar << "__os" << getParams(op) << epar;
+                        _out << sb;
+                        writeMarshalUnmarshalParams(inParams, 0, true);
+                        if(op->sendsClasses(false))
+                        {
+                            _out << nl << "__os.writePendingObjects();";
+                        }
+                        _out << eb;
+                    }
+                    //
+                    // Function to unmarshal out-params.
+                    //
+                    if(ret || !outParams.empty())
+                    {
+                        if(!first)
+                        {
+                            _out << ",";
+                        }
+                        else
+                        {
+                            first = false;
+                        }
+                        _out << nl << "u: ";
+                        //
+                        // Select an unmarshal callback. We provide generic callbacks for operations that
+                        // return one value of built-in type. Otherwise, we have to generate a callback.
+                        //
+                        TypePtr t;
+                        if((ret && outParams.empty()) || (!ret && outParams.size() == 1))
+                        {
+                            if(ret)
+                            {
+                                assert(outParams.size() == 0);
+                                t = ret;
+                            }
+                            else
+                            {
+                                assert(outParams.size() == 1);
+                                t = outParams.front()->type();
+                            }
+                        }
+
+                        BuiltinPtr b = BuiltinPtr::dynamicCast(t);
+                        if(b)
+                        {
+                            if(b->kind() == Builtin::KindObject)
+                            {
+                                _out << "Ice.ObjectPrx.__returns_Object";
+                            }
+                            else if(b->kind() == Builtin::KindObjectProxy)
+                            {
+                                _out << "Ice.ObjectPrx.__returns_ObjectPrx";
+                            }
+                            else
+                            {
+                                assert(b->kind() != Builtin::KindLocalObject);
+                                _out << "Ice.ObjectPrx.__returns_" + b->typeId();
+                            }
+                        }
+                        else
+                        {
+                            _out << "function(__is, __results)";
+                            _out << sb;
+                            vector<string> outArgs;
+                            if(ret)
+                            {
+                                _out << nl << "var __ret;";
+                            }
+                            if(!outParams.empty())
+                            {
+                                _out << nl << "var ";
+                                for(ParamDeclList::const_iterator pli = outParams.begin(); pli != outParams.end(); ++pli)
+                                {
+                                    if(pli != outParams.begin())
+                                    {
+                                        _out << ", ";
+                                    }
+                                    string s = fixId((*pli)->name());
+                                    _out << s;
+                                    outArgs.push_back(s);
+                                }
+                                _out << ';';
+                            }
+                            writeMarshalUnmarshalParams(outParams, op, false);
+                            if(op->returnsClasses(false))
+                            {
+                                _out << nl << "__is.readPendingObjects();";
+                            }
+                            _out << nl << "__results.push" << spar;
+                            if(ret)
+                            {
+                                _out << "__ret";
+                            }
+                            _out << outArgs << epar << ';';
+                            _out << eb;
+                        }
+                    }
+                    //
+                    // User exceptions.
+                    //
+                    if(!throws.empty())
+                    {
+                        //
+                        // Arrange exceptions into most-derived to least-derived order. If we don't
+                        // do this, a base exception handler can appear before a derived exception
+                        // handler, causing compiler warnings and resulting in the base exception
+                        // being marshaled instead of the derived exception.
+                        //
+        #if defined(__SUNPRO_CC)
+                        throws.sort(Slice::derivedToBaseCompare);
+        #else
+                        throws.sort(Slice::DerivedToBaseCompare());
+        #endif
+                        if(!first)
+                        {
+                            _out << ",";
+                        }
+                        else
+                        {
+                            first = false;
+                        }
+                        _out << nl << "e: [";
+                        for(ExceptionList::const_iterator eli = throws.begin(); eli != throws.end(); ++eli)
+                        {
+                            if(eli != throws.begin())
                             {
                                 _out << ", ";
                             }
-                            string s = fixId((*pli)->name());
-                            _out << s;
-                            outArgs.push_back(s);
+                            _out << getLocalScope((*eli)->scoped());
                         }
-                        _out << ';';
+                        _out << ']';
                     }
-                    writeMarshalUnmarshalParams(outParams, op, false);
-                    if(op->returnsClasses(false))
-                    {
-                        _out << nl << "__is.readPendingObjects();";
-                    }
-                    _out << nl << "__results.push" << spar;
-                    if(ret)
-                    {
-                        _out << "__ret";
-                    }
-                    _out << outArgs << epar << ';';
                     _out << eb;
-                }
-            }
-            //
-            // User exceptions.
-            //
-            if(!throws.empty())
-            {
-                //
-                // Arrange exceptions into most-derived to least-derived order. If we don't
-                // do this, a base exception handler can appear before a derived exception
-                // handler, causing compiler warnings and resulting in the base exception
-                // being marshaled instead of the derived exception.
-                //
-#if defined(__SUNPRO_CC)
-                throws.sort(Slice::derivedToBaseCompare);
-#else
-                throws.sort(Slice::DerivedToBaseCompare());
-#endif
-                if(!first)
-                {
-                    _out << ",";
-                }
-                else
-                {
-                    first = false;
-                }
-                _out << nl << "e: [";
-                for(ExceptionList::const_iterator eli = throws.begin(); eli != throws.end(); ++eli)
-                {
-                    if(eli != throws.begin())
+                    if(++q != ops.end())
                     {
-                        _out << ", ";
+                        _out << ",";
                     }
-                    _out << getLocalScope((*eli)->scoped());
                 }
-                _out << ']';
             }
             _out << eb;
-            if(++q != ops.end())
-            {
-                _out << ",";
-            }
         }
-        _out << eb << ");";
+        _out << ");";
 
         //
         // Register the compact id
