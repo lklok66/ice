@@ -171,6 +171,7 @@
                 if(router !== null)
                 {
                     this._routerInfo = this._instance.routerManager().find(router);
+                    Debug.assert(this._routerInfo !== null);
                     if(this._routerInfo !== null)
                     {
                         //
@@ -237,17 +238,11 @@
                             function()
                             {
                                 promise.succeed(promise, self);
-                            }
-                        ).exception(
+                            },
                             function(ex)
                             {
                                 promise.fail(ex);
                             });
-                    }
-                    else
-                    {
-                        //TODO is this necessary, what happen when routerInfo is null?
-                        promise.succeed(promise, this);
                     }
                 }
                 else
@@ -301,7 +296,7 @@
 
             if(printAdapterReady)
             {
-                console.log(this._name + " ready"); // TODO: Is console.log portable?
+                console.log(this._name + " ready");
             }
 
             Debug.assert(!this._deactivated);
