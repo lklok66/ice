@@ -46,20 +46,8 @@ slice_translator = slice2js.exe
 bindir = $(top_srcdir)\bin
 libdir = $(top_srcdir)\lib
 
-install_libdir 	  = $(prefix)/lib
-install_moduledir = $(prefix)/node_modules
-
-#installmodule	= if test ! -d $(1)/$(3) ; \
-#	    	  then \
-#			echo "Creating $(1)/$(3)..." ; \
-#			mkdir -p $(1)/$(3) ; \
-#			chmod a+rx $(1)/$(3) ; \
-#		  fi ; \
-#		  for f in "$(2)"; \
-#		  do \
-#		      cp $$f $(1)/$(3); \
-#		  done; \
-#		  cp package.json $(1)/$(3)
+install_libdir 	  = $(prefix)\lib
+install_moduledir = $(prefix)\node_modules
 
 !if exist ($(top_srcdir)\..\config\Make.common.rules.mak)
 !include $(top_srcdir)\..\config\Make.common.rules.mak
@@ -121,17 +109,17 @@ index.html: $(GEN_SRCS) $(top_srcdir)\test\Common\index.html
 !endif
 
 $(libdir)/$(LIBNAME).js $(libdir)/$(LIBNAME).js.gz: $(SRCS)
-	@rm -f $(libdir)/$(LIBNAME).js $(libdir)/$(LIBNAME).js.gz
-	node $(top_srcdir)/config/makebundle.js $(SRCS) > $(libdir)/$(LIBNAME).js
-	gzip -c9 $(libdir)/$(LIBNAME).js > $(libdir)/$(LIBNAME).js.gz
+	@del /q $(libdir)\$(LIBNAME).js $(libdir)\$(LIBNAME).js.gz
+	node $(top_srcdir)\config\makebundle.js $(SRCS) > $(libdir)\$(LIBNAME).js
+	gzip -c9 $(libdir)\$(LIBNAME).js > $(libdir)\$(LIBNAME).js.gz
 
 !if "$(OPTIMIZE)" == "yes"
 $(libdir)/$(LIBNAME).min.js $(libdir)/$(LIBNAME).min.js.gz: $(libdir)/$(LIBNAME).js
-	@rm -f $(libdir)/$(LIBNAME).min.js $(libdir)/$(LIBNAME).min.js.gz
-	node $(top_srcdir)/config/makebundle.js $(SRCS) > $(libdir)/$(LIBNAME).tmp.js
-	java -jar $(CLOSURE_PATH)/compiler.jar $(CLOSUREFLAGS) --js $(libdir)/$(LIBNAME).js --js_output_file $(libdir)/$(LIBNAME).min.js
-	gzip -c9 $(libdir)/$(LIBNAME).min.js > $(libdir)/$(LIBNAME).min.js.gz
-	rm -f $(libdir)/$(LIBNAME).tmp.js
+	@del /q $(libdir)\$(LIBNAME).min.js $(libdir)\$(LIBNAME).min.js.gz
+	node $(top_srcdir)\config\makebundle.js $(SRCS) > $(libdir)\$(LIBNAME).tmp.js
+	java -jar $(CLOSURE_PATH)\compiler.jar $(CLOSUREFLAGS) --js $(libdir)\$(LIBNAME).js --js_output_file $(libdir)\$(LIBNAME).min.js
+	gzip -c9 $(libdir)\$(LIBNAME).min.js > $(libdir)\$(LIBNAME).min.js.gz
+	del /q $(libdir)\$(LIBNAME).tmp.js
 !endif
 
 lint: $(TARGETS)

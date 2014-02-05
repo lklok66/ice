@@ -163,12 +163,22 @@ browser\ConnectionInfo.js: "$(SLICE2JS)" "$(SLICEPARSERLIB)"
 	move ConnectionInfo.js browser
 
 !if "$(OPTIMIZE)" == "yes"
-#install:: all
-#	$(call installlib,$(DESTDIR)$(install_libdir),$(libdir),$(LIBNAME))
-#	$(call installmodule,$(DESTDIR)$(install_moduledir),$(INSTALL_SRCS),$(LIBNAME))
+install:: all
+	copy $(libdir)\$(LIBNAME).min.js $(install_libdir)
+	copy $(libdir)\$(LIBNAME).min.js.gz $(install_libdir)
 !else
-#install:: all
-#	$(call installlib,$(DESTDIR)$(install_libdir),$(libdir),$(LIBNAME))
-#	$(call installmodule,$(DESTDIR)$(install_moduledir),$(INSTALL_SRCS),$(LIBNAME))
+install:: all
+	copy $(libdir)\$(LIBNAME).js $(install_libdir)
+	copy $(libdir)\$(LIBNAME).js.gz $(install_libdir)
 !endif
+
+MODULEDIR	= $(install_moduledir)\$(LIBNAME)
+
+install:: all
+	@if not exist $(MODULEDIR) \
+	    @echo "Creating $(MODULEDIR)" && \
+	    mkdir "$(MODULEDIR)"
+	@for %i in ( $(INSTALL_SRCS) ) do \
+	    copy %i "$(MODULEDIR)"
+	copy package.json "$(MODULEDIR)"
 
