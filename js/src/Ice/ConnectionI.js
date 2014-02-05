@@ -792,6 +792,7 @@
                 Debug.assert(this._writeStream.buffer.remaining === 0);
             }
 
+            this.unscheduleTimeout(SocketOperation.write);
             //
             // Keep reading until no more data is available.
             //
@@ -1267,6 +1268,7 @@
 
                 case StateNotValidated:
                 {
+                    this.unscheduleTimeout(SocketOperation.Connect);
                     if(this._state !== StateNotInitialized)
                     {
                         Debug.assert(this._state === StateClosed);
@@ -1487,7 +1489,7 @@
                     }
 
                     if(this._writeStream.pos != this._writeStream.size &&
-                    !this._transceiver.write(this._writeStream.buffer))
+                       !this._transceiver.write(this._writeStream.buffer))
                     {
                         this.scheduleTimeout(SocketOperation.Write, this.connectTimeout());
                         return false;
@@ -1502,7 +1504,7 @@
                     }
 
                     if(this._readStream.pos !== this._readStream.size &&
-                    !this._transceiver.read(this._readStream.buffer, this._hasMoreData))
+                       !this._transceiver.read(this._readStream.buffer, this._hasMoreData))
                     {
                         this.scheduleTimeout(SocketOperation.Read, this.connectTimeout());
                         return false;
@@ -1512,7 +1514,7 @@
                     this._readStream.pos = 0;
                     var m = this._readStream.readBlob(4);
                     if(m[0] !== Protocol.magic[0] || m[1] !== Protocol.magic[1] ||
-                    m[2] !== Protocol.magic[2] || m[3] !== Protocol.magic[3])
+                       m[2] !== Protocol.magic[2] || m[3] !== Protocol.magic[3])
                     {
                         var bme = new Ice.BadMagicException();
                         bme.badMagic = m;
@@ -1539,6 +1541,7 @@
                     TraceUtil.traceRecv(this._readStream, this._logger, this._traceLevels);
 
                     this._validated = true;
+                    this.unscheduleTimeout(SocketOperation.Read);
                 }
             }
 

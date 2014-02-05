@@ -283,7 +283,7 @@
                 {
                     var __os = this.incomingAsync.__startWriteParams(this.format);
                     args = Array.prototype.slice.call(args);
-                    args.splice(0, 0, __os);
+                    args.unshift(__os);
                     this.marshalFn.apply(this.marshalFn, args);
                     this.incomingAsync.__endWriteParams(true);
                 }

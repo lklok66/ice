@@ -205,7 +205,7 @@
                     },
                     function(ex)
                     {
-                        console.log("invalid proxy: " + twoway);
+                        console.log("invalid proxy: " + proxy);
                         cleanup(ex);
                     }
                 ).exception(cleanup);
