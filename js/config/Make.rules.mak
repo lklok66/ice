@@ -16,7 +16,7 @@ prefix			= C:\IceJS-$(VERSION)
 #
 # Define to yes for an optimized build.
 #
-OPTIMIZE 		= no
+#OPTIMIZE 		= yes
 
 #
 # Google Closure Compiler
