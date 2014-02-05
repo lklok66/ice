@@ -14,7 +14,7 @@ NAME		= $(top_srcdir)\bin\slice2js.exe
 TARGETS		= $(NAME)
 
 OBJS		= Gen.obj \
-		  JsUtil.obj
+		  JsUtil.obj \
 		  Main.obj
 
 SRCS		= $(OBJS:.obj=.cpp)
@@ -27,9 +27,9 @@ CPPFLAGS	= -I. $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN
 PDBFLAGS        = /pdb:$(NAME:.exe=.pdb)
 !endif
 
-RES_FILE        = Slice2Cs.res
+RES_FILE        = Slice2Js.res
 
-$(NAME): $(OBJS) Slice2Cs.res
+$(NAME): $(OBJS) Slice2Js.res
 	$(LINK) $(LD_EXEFLAGS) $(PDBFLAGS) $(OBJS) $(SETARGV) $(PREOUT)$@ $(PRELIBS)slice$(LIBSUFFIX).lib \
 		$(BASELIBS) $(RES_FILE)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \

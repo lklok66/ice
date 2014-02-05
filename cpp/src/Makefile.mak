@@ -38,6 +38,7 @@ SUBDIRS		= IceUtil \
 		  slice2html \
 		  slice2php \
 		  slice2rb \
+		  slice2js \
 		  Ice \
 		  IceSSL \
 		  ca \
