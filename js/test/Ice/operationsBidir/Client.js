@@ -44,18 +44,23 @@
 
                 var Test = amd ? global.TestAMD : global.Test;
 
-                var adapter = communicator.createObjectAdapter("");
+                var adapter;
+                communicator.createObjectAdapter("").then(
+                    function(r, o)
+                    {
+                        adapter = o;
 
-                if(amd)
-                {
-                    adapter.add(new AMDMyDerivedClassI(), communicator.stringToIdentity("test"));
-                }
-                else
-                {
-                    adapter.add(new MyDerivedClassI(), communicator.stringToIdentity("test"));
-                }
-
-                adapter.activate().then(
+                        if(amd)
+                        {
+                            adapter.add(new AMDMyDerivedClassI(), communicator.stringToIdentity("test"));
+                        }
+                        else
+                        {
+                            adapter.add(new MyDerivedClassI(), communicator.stringToIdentity("test"));
+                        }
+                        return adapter.activate();
+                    }
+                ).then(
                     function(r)
                     {
                         return base.ice_getConnection();

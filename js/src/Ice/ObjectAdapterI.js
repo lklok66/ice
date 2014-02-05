@@ -71,7 +71,7 @@
     // Only for use by IceInternal.ObjectAdapterFactory
     //
     var ObjectAdapterI = Ice.__defineClass({
-        __init__: function(instance, communicator, objectAdapterFactory, name, router, noConfig)
+        __init__: function(instance, communicator, objectAdapterFactory, name, router, noConfig, promise)
         {
             this._deactivated = false;
             this._instance = instance;
@@ -96,6 +96,7 @@
             if(this._noConfig)
             {
                 this._reference = this._instance.referenceFactory().createFromString("dummy -t", "");
+                promise.succeed(promise, this);
                 return;
             }
 
@@ -169,7 +170,7 @@
                 }
                 if(router !== null)
                 {
-                    this._routerInfo = this._instance.routerManager().get(router);
+                    this._routerInfo = this._instance.routerManager().find(router);
                     if(this._routerInfo !== null)
                     {
                         //
@@ -186,48 +187,67 @@
                         // Add the router's server proxy endpoints to this object
                         // adapter.
                         //
-                        var endpoints = this._routerInfo.getServerEndpoints();
-                        for(var i = 0; i < endpoints.length; ++i)
-                        {
-                            this._routerEndpoints.push(endpoints[i]);
-                        }
-                        this._routerEndpoints.sort(     // Must be sorted.
-                            function(e1, e2)
+                        var self = this;
+                        this._routerInfo.getServerEndpoints().then(
+                            function(endpoints)
                             {
-                                return e1.compareTo(e2);
+                                for(var i = 0; i < endpoints.length; ++i)
+                                {
+                                    self._routerEndpoints.push(endpoints[i]);
+                                }
+                                self._routerEndpoints.sort(     // Must be sorted.
+                                    function(e1, e2)
+                                    {
+                                        return e1.compareTo(e2);
+                                    });
+
+                                //
+                                // Remove duplicate endpoints, so we have a list of unique
+                                // endpoints.
+                                //
+                                for(var i = 0; i < self._routerEndpoints.length - 1;)
+                                {
+                                    var e1 = self._routerEndpoints[i];
+                                    var e2 = self._routerEndpoints[i + 1];
+                                    if(e1.equals(e2))
+                                    {
+                                        self._routerEndpoints.splice(i, 1);
+                                    }
+                                    else
+                                    {
+                                        ++i;
+                                    }
+                                }
+
+                                //
+                                // Associate this object adapter with the router. This way,
+                                // new outgoing connections to the router's client proxy will
+                                // use this object adapter for callbacks.
+                                //
+                                self._routerInfo.setAdapter(self);
+
+                                //
+                                // Also modify all existing outgoing connections to the
+                                // router's client proxy to use this object adapter for
+                                // callbacks.
+                                //
+                                return self._instance.outgoingConnectionFactory().setRouterInfo(self._routerInfo);
+                            }
+                        ).then(
+                            function()
+                            {
+                                promise.succeed(promise, self);
+                            }
+                        ).exception(
+                            function(ex)
+                            {
+                                promise.fail(ex);
                             });
-
-                        //
-                        // Remove duplicate endpoints, so we have a list of unique
-                        // endpoints.
-                        //
-                        for(var i = 0; i < this._routerEndpoints.length - 1;)
-                        {
-                            var e1 = this._routerEndpoints[i];
-                            var e2 = this._routerEndpoints[i + 1];
-                            if(e1.equals(e2))
-                            {
-                                this._routerEndpoints.splice(i, 1);
-                            }
-                            else
-                            {
-                                ++i;
-                            }
-                        }
-
-                        //
-                        // Associate this object adapter with the router. This way,
-                        // new outgoing connections to the router's client proxy will
-                        // use this object adapter for callbacks.
-                        //
-                        this._routerInfo.setAdapter(this);
-
-                        //
-                        // Also modify all existing outgoing connections to the
-                        // router's client proxy to use this object adapter for
-                        // callbacks.
-                        //
-                        this._instance.outgoingConnectionFactory().setRouterInfo(this._routerInfo);
+                    }
+                    else
+                    {
+                        //TODO is this necessary, what happen when routerInfo is null?
+                        promise.succeed(promise, this);
                     }
                 }
                 else
@@ -237,6 +257,7 @@
                     {
                         throw new Ice.FeatureNotSupportedException("object adapter endpoints not supported");
                     }
+                    promise.succeed(promise, this);
                 }
             }
             catch(ex)

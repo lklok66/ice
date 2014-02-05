@@ -12,6 +12,7 @@
     require("Ice/Instance");
     require("Ice/Promise");
     require("Ice/UUID");
+    require("Ice/AsyncResultBase");
 
     var Ice = global.Ice || {};
 
@@ -80,7 +81,9 @@
         },
         createObjectAdapter: function(name)
         {
-            return this._instance.objectAdapterFactory().createObjectAdapter(name, null);
+            var promise = new Ice.AsyncResultBase(this, "createObjectAdapter", this, null, null);
+            this._instance.objectAdapterFactory().createObjectAdapter(name, null, promise);
+            return promise;
         },
         createObjectAdapterWithEndpoints: function(name, endpoints)
         {
@@ -90,7 +93,9 @@
             }
 
             this.getProperties().setProperty(name + ".Endpoints", endpoints);
-            return this._instance.objectAdapterFactory().createObjectAdapter(name, null);
+            var promise = new Ice.AsyncResultBase(this, "createObjectAdapterWithEndpoints", this, null, null);
+            this._instance.objectAdapterFactory().createObjectAdapter(name, null, promise);
+            return promise;
         },
         createObjectAdapterWithRouter: function(name, router)
         {
@@ -99,6 +104,8 @@
                 name = UUID.generateUUID();
             }
 
+            var promise = new Ice.AsyncResultBase(this, "createObjectAdapterWithRouter", this, null, null);
+            
             //
             // We set the proxy properties here, although we still use the proxy supplied.
             //
@@ -107,8 +114,9 @@
             {
                 this.getProperties().setProperty(e.key, e.value);
             }
-
-            return this._instance.objectAdapterFactory().createObjectAdapter(name, router);
+            
+            this._instance.objectAdapterFactory().createObjectAdapter(name, router, promise);
+            return promise;
         },
         addObjectFactory: function(factory, id)
         {

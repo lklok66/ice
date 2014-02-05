@@ -1,3 +1,11 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2013 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
 
 (function(){
 
@@ -5,11 +13,7 @@
     require("Callback");
 
     var Demo = global.Demo || {};
-
-    var writeException = function(ex)
-    {
-        console.log(ex.toString());
-    };
+    var CallbackSenderPrx = Demo.CallbackSenderPrx;
 
     var CallbackReceiverI = function()
     {
@@ -23,107 +27,66 @@
         console.log("received callback #" + num);
     };
 
-    var Client = function()
+    var run = function()
     {
-    };
+        var id = new Ice.InitializationData();
+        id.properties = Ice.createProperties();
+        //
+        // Client-side ACM must be disabled for bidirectional connections.
+        //
+        id.properties.setProperty("Ice.ACM.Client", "0");
 
-    Client.prototype.run = function()
-    {
-        var communicator;
-        var p = new Ice.Promise();
-
-        var cleanup = function(ex)
-        {
-            if(communicator !== null)
-            {
-                communicator.destroy().then(
-                    function(asyncResult)
-                    {
-                        if(ex && ex instanceof Error)
-                        {
-                            writeException(ex);
-                            p.fail(ex);
-                        }
-                        else
-                        {
-                            p.succeed();
-                        }
-                    }
-                ).exception(
-                    function(ex)
-                    {
-                        p.fail(ex);
-                    }
-                );
-            }
-            else
-            {
-                writeException(ex);
-                p.fail(ex);
-            }
-        };
+        var communicator = Ice.initialize(id);
         
         //
         // Exit on SIGINT
         //
-        process.on("SIGINT", function() { cleanup(); });
-
-        try
-        {
-            var id = new Ice.InitializationData();
-            id.properties = Ice.createProperties();
-            id.properties.setProperty("CallbackSender.Proxy", "sender:tcp -p 10000");
-            //
-            // Client-side ACM must be disabled for bidirectional connections.
-            //
-            id.properties.setProperty("Ice.ACM.Client", "0");
-
-            communicator = Ice.initialize(id);
-            var adapter = communicator.createObjectAdapter("");
-            var ident = new Ice.Identity();
-            ident.name = Ice.UUID.generateUUID();
-            ident.category = "";
-            adapter.add(new CallbackReceiverI(), ident);
-
-            var server;
-
-            Demo.CallbackSenderPrx.checkedCast(communicator.propertyToProxy("CallbackSender.Proxy")
-                ).then(
-                    function(asyncResult, o)
+        process.on("SIGINT", function() {
+            if(communicator)
+            {
+                communicator.destroy().finally(
+                    function()
                     {
-                        server = o;
-                        return adapter.activate();
+                        process.exit(0);
                     }
-                ).then(
-                    function(asyncResult)
+                );
+            }
+        });
+
+        var ident = new Ice.Identity(Ice.UUID.generateUUID(), "");
+        
+        CallbackSenderPrx.checkedCast(communicator.stringToProxy("sender:tcp -p 10000")).then(
+            function(r, server)
+            {
+                return communicator.createObjectAdapter("").then(
+                    function(r, adapter)
                     {
-                        return server.ice_getConnection();
-                    }
-                ).then(
-                    function(asyncResult, conn)
+                        adapter.add(new CallbackReceiverI(), ident);
+                        return adapter.activate().then(
+                            function(asyncResult)
+                            {
+                                return server.ice_getConnection();
+                            }
+                        ).then(
+                            function(asyncResult, conn)
+                            {
+                                conn.setAdapter(adapter);
+                                return server.addClient(ident);
+                            }
+                        );
+                    });
+            }
+        ).exception(
+            function(ex)
+            {
+                console.log(ex.toString());
+                communicator.destroy().finally(
+                    function()
                     {
-                        conn.setAdapter(adapter);
-                        return server.addClient(ident);
-                    }
-                ).exception(cleanup);
-        }
-        catch(ex)
-        {
-            cleanup(ex);
-        }
-        return p;
+                        process.exit(1);
+                    });
+            });
     };
 
-    var client = new Client();
-    client.run().then(
-        function()
-        {
-            process.exit(0)
-        }
-    ).exception(
-        function(ex)
-        {
-            process.exit(1);
-        }
-    );
+    run();
 }());

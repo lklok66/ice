@@ -124,97 +124,119 @@
             return p;
         };
 
+        var base, ref, thrower;
         setTimeout(function(){
             try
             {
+                
                 out.write("testing object adapter registration exceptions... ");
-                try
-                {
-                    communicator.createObjectAdapter("TestAdapter0");
-                    test(false);
-                }
-                catch(ex)
-                {
-                    test(ex instanceof Ice.InitializationException); // Expected
-                }
 
-                try
-                {
-                    communicator.createObjectAdapterWithEndpoints("TestAdapter0", "default");
-                    test(false);
-                }
-                catch(ex)
-                {
-                    test(ex instanceof Ice.FeatureNotSupportedException); // Expected
-                }
-                out.writeLine("ok");
+                Promise.try(
+                    function()
+                    {
+                        return communicator.createObjectAdapter("TestAdapter0").then(
+                            function()
+                            {
+                                test(false);
+                            },
+                            function(ex)
+                            {
+                                test(ex instanceof Ice.InitializationException); // Expected
+                            })
+                    }
+                ).then(
+                    function()
+                    {
 
-                out.write("testing servant registration exceptions... ");
-                var adapter = communicator.createObjectAdapter("");
-                var obj = new EmptyI();
-                adapter.add(obj, communicator.stringToIdentity("x"));
-                try
-                {
-                    adapter.add(obj, communicator.stringToIdentity("x"));
-                    test(false);
-                }
-                catch(ex)
-                {
-                    test(ex instanceof Ice.AlreadyRegisteredException);
-                }
+                        return communicator.createObjectAdapterWithEndpoints("TestAdapter0", "default").then(
+                            failCB,
+                            function(ex)
+                            {
+                                test(ex instanceof Ice.FeatureNotSupportedException); // Expected
+                                out.writeLine("ok");
+                            });
+                    }
+                ).then(
+                    function()
+                    {
+                        out.write("testing servant registration exceptions... ");
+                        return communicator.createObjectAdapter("").then(
+                            function(r, adapter)
+                            {
+                                var obj = new EmptyI();
+                                adapter.add(obj, communicator.stringToIdentity("x"));
+                                try
+                                {
+                                    adapter.add(obj, communicator.stringToIdentity("x"));
+                                    test(false);
+                                }
+                                catch(ex)
+                                {
+                                    test(ex instanceof Ice.AlreadyRegisteredException);
+                                }
 
-                adapter.remove(communicator.stringToIdentity("x"));
-                try
-                {
-                    adapter.remove(communicator.stringToIdentity("x"));
-                    test(false);
-                }
-                catch(ex)
-                {
-                    test(ex instanceof Ice.NotRegisteredException);
-                }
-                adapter.deactivate();
-                out.writeLine("ok");
+                                adapter.remove(communicator.stringToIdentity("x"));
+                                try
+                                {
+                                    adapter.remove(communicator.stringToIdentity("x"));
+                                    test(false);
+                                }
+                                catch(ex)
+                                {
+                                    test(ex instanceof Ice.NotRegisteredException);
+                                }
+                                adapter.deactivate();
+                                out.writeLine("ok");
+                            });
+                    }
+                ).then(
+                    function()
+                    {
+                        out.write("testing servant locator registration exceptions... ");
+                        return communicator.createObjectAdapter("").then(
+                            function(r, adapter)
+                            {
+                                var loc = new ServantLocatorI();
+                                adapter.addServantLocator(loc, "x");
+                                try
+                                {
+                                    adapter.addServantLocator(loc, "x");
+                                    test(false);
+                                }
+                                catch(ex)
+                                {
+                                    test(ex instanceof Ice.AlreadyRegisteredException);
+                                }
+                                adapter.deactivate();
+                                out.writeLine("ok");
+                            });
+                    }
+                ).then(
+                    function()
+                    {
+                        out.write("testing object factory registration exception... ");
+                        var of = new ObjectFactoryI();
+                        communicator.addObjectFactory(of, "::x");
+                        try
+                        {
+                            communicator.addObjectFactory(of, "::x");
+                            test(false);
+                        }
+                        catch(ex)
+                        {
+                            test(ex instanceof Ice.AlreadyRegisteredException);
+                        }
+                        out.writeLine("ok");
 
-                out.write("testing servant locator registration exceptions... ");
-                var adapter = communicator.createObjectAdapter("");
-                var loc = new ServantLocatorI();
-                adapter.addServantLocator(loc, "x");
-                try
-                {
-                    adapter.addServantLocator(loc, "x");
-                    test(false);
-                }
-                catch(ex)
-                {
-                    test(ex instanceof Ice.AlreadyRegisteredException);
-                }
-                adapter.deactivate();
-                out.writeLine("ok");
-
-                out.write("testing object factory registration exception... ");
-                var of = new ObjectFactoryI();
-                communicator.addObjectFactory(of, "::x");
-                try
-                {
-                    communicator.addObjectFactory(of, "::x");
-                    test(false);
-                }
-                catch(ex)
-                {
-                    test(ex instanceof Ice.AlreadyRegisteredException);
-                }
-                out.writeLine("ok");
-
-                out.write("testing stringToProxy... ");
-                var ref = "thrower:default -p 12010";
-                var base = communicator.stringToProxy(ref);
-                test(base !== null);
-                out.writeLine("ok");
-
-                var thrower;
-                out.write("testing checked cast... ");
-                Test.ThrowerPrx.checkedCast(base).then(
+                        out.write("testing stringToProxy... ");
+                        ref = "thrower:default -p 12010";
+                        base = communicator.stringToProxy(ref);
+                        test(base !== null);
+                        out.writeLine("ok");
+                        out.write("testing checked cast... ");
+                        return Test.ThrowerPrx.checkedCast(base);
+                    }
+                  ).then(
                     function(asyncResult, obj)
                     {
                         thrower = obj;

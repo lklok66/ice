@@ -173,7 +173,7 @@
 
             return promise;
         },
-        createObjectAdapter: function(name, router)
+        createObjectAdapter: function(name, router, promise)
         {
             if(this._instance === null)
             {
@@ -181,22 +181,28 @@
             }
 
             var adapter = null;
-            if(name.length === 0)
+            try
             {
-                var uuid = UUID.generateUUID();
-                adapter = new ObjectAdapterI(this._instance, this._communicator, this, uuid, null, true);
-            }
-            else
-            {
-                if(this._adapterNamesInUse.indexOf(name) !== -1)
+                if(name.length === 0)
                 {
-                    throw new Ice.AlreadyRegisteredException("object adapter", name);
+                    var uuid = UUID.generateUUID();
+                    adapter = new ObjectAdapterI(this._instance, this._communicator, this, uuid, null, true, promise);
                 }
-                adapter = new ObjectAdapterI(this._instance, this._communicator, this, name, router, false);
-                this._adapterNamesInUse.push(name);
+                else
+                {
+                    if(this._adapterNamesInUse.indexOf(name) !== -1)
+                    {
+                        throw new Ice.AlreadyRegisteredException("object adapter", name);
+                    }
+                    adapter = new ObjectAdapterI(this._instance, this._communicator, this, name, router, false, promise);
+                    this._adapterNamesInUse.push(name);
+                }
+                this._adapters.push(adapter);
             }
-            this._adapters.push(adapter);
-            return adapter;
+            catch(ex)
+            {
+                promise.fail(ex);
+            }
         },
         findObjectAdapter: function(proxy)
         {

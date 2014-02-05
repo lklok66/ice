@@ -102,13 +102,8 @@
                         {
                             communicator = Ice.initialize(id);
                             $("#stop").removeClass("disabled");
-                            var adapter = communicator.createObjectAdapter("");
-                            
-                            var server;
-                            var ident = new Ice.Identity();
-                            ident.name = Ice.UUID.generateUUID();
-                            ident.category = "";
-                            adapter.add(new CallbackReceiverI(), ident);
+
+                            var server, adapter, ident;
                             
                             var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
                             
@@ -116,6 +111,13 @@
                                 function(asyncResult, o)
                                 {
                                     server = o;
+                                    return communicator.createObjectAdapter("");
+                                }
+                            ).then(
+                                function(r, o)
+                                {
+                                    adapter = o;
+                                    adapter.add(new CallbackReceiverI(), ident);
                                     return adapter.activate();
                                 }
                             ).then(
