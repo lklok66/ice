@@ -23,9 +23,9 @@
     var Slice = global.Slice || {};
 
     var defineClass = Ice.__defineClass;
-    
+
     var nextAddress = 0;
-    
+
     var IceObject = defineClass({
         __init__: function()
         {
@@ -87,13 +87,13 @@
         },
         //
         // __mostDerivedType returns the the most derived Ice generated class. This is
-        // necessary because the user might extend Slice generated classes. The user 
+        // necessary because the user might extend Slice generated classes. The user
         // class extensions don't have __id, __ids, __instanceof etc static members so
-        // the implementation of ice_id, ice_ids and ice_instanceof would fail trying 
+        // the implementation of ice_id, ice_ids and ice_instanceof would fail trying
         // to access those members of the user defined class. Instead, ice_id, ice_ids
         // and ice_instanceof call __mostDerivedType to get the most derived Ice class.
         //
-        // The __mostDerivedType is overriden by each Slice generated class, see the 
+        // The __mostDerivedType is overriden by each Slice generated class, see the
         // Slice.defineObject method implementation for details.
         //
         __mostDerivedType: function()
@@ -101,12 +101,12 @@
             return IceObject;
         }
     });
-    
+
     IceObject.ice_staticId = function()
     {
         return IceObject.__id;
     };
-    
+
     IceObject.__instanceof = function(T)
     {
         if(T === this)
@@ -128,56 +128,11 @@
         }
         return false;
     };
-    
+
     IceObject.__ids = ["::Ice::Object"];
     IceObject.__id = IceObject.__ids[0];
     IceObject.__compactId = -1;
     IceObject.__preserved = false;
-
-    IceObject.__ops =
-    {
-        "ice_ping":
-        {
-        },
-        "ice_isA":
-        {
-            u: function(__is, __r)
-            {
-                var id;
-                id = __is.readString();
-                __r.push(id);
-            },
-            m: function(__os, __ret)
-            {
-                __os.writeBool(__ret);
-            }
-        },
-        "ice_id":
-        {
-            m: function(__os, __ret)
-            {
-                __os.writeString(__ret);
-            }
-        },
-        "ice_ids":
-        {
-            m: function(__os, __ret)
-            {
-                if(__ret !== null)
-                {
-                    __os.writeSize(__ret.length);
-                    for(var i = 0; i < __ret.length; ++i)
-                    {
-                        __os.writeString(__ret[i]);
-                    }
-                }
-                else
-                {
-                    __os.writeSize(0);
-                }
-            }
-        }
-    };
 
     //
     // Private methods
@@ -187,7 +142,7 @@
     {
         //
         // The __writeImpl method is a recursive method that goes down the
-        // class hierarchy to marshal each slice of the class using the 
+        // class hierarchy to marshal each slice of the class using the
         // generated __writeMemberImpl method.
         //
 
@@ -209,7 +164,7 @@
     {
         //
         // The __readImpl method is a recursive method that goes down the
-        // class hierarchy to marshal each slice of the class using the 
+        // class hierarchy to marshal each slice of the class using the
         // generated __readMemberImpl method.
         //
 
@@ -327,30 +282,13 @@
             }
         }
     });
-    
-    var __dispatchImpl = function(type, servant, incomingAsync, current)
+
+    var __dispatchImpl = function(servant, incomingAsync, current, methodName, unmarshalInParamsFn, marshalOutParamsFn,
+                                  userExceptions, format, amd)
     {
-        var op;
-        var o = type;
-        while(o !== undefined && op === undefined)
-        {
-            op = o.__ops[current.operation];
-            if(op === undefined)
-            {
-                o = o.__parent;
-            }
-        }
-
-        if(op === undefined)
-        {
-            throw new Ice.OperationNotExistException(current.id, current.facet, current.operation);
-        }
-
         //
-        // The "n" property contains the native method name in case the operation's Slice name is a keyword.
         // Check to make sure the servant implements the operation.
         //
-        var methodName = op.n !== undefined ? op.n : current.operation;
         if(servant[methodName] === undefined || typeof(servant[methodName]) !== "function")
         {
             var comm = current.adapter.getCommunicator();
@@ -360,33 +298,12 @@
             throw new Ice.UnknownException(msg);
         }
 
-        //
-        // The "m" property defines a function to marshal the results.
-        //
-        var marshalOutParamsFn = op.m;
-
-        //
-        // The "e" property defines the user exceptions the operation has declared (if any).
-        //
-        var userExceptions = op.e;
-
-        //
-        // The "f" property defines the operation format (if non-default).
-        //
-        var format = op.f === undefined ? Ice.FormatType.DefaultFormat : Ice.FormatType.valueOf(op.f);
-
-        //
-        // The "a" property indicates whether the operation uses AMD.
-        //
-        var amd = op.a;
-
         var cb = new AMDCallback(incomingAsync, userExceptions, format, marshalOutParamsFn);
 
         //
         // Unmarshal the in params (if any). The "u" property defines the unmarshaling function.
         //
         var inParams = amd ? [cb] : [];
-        var unmarshalInParamsFn = op.u;
         if(unmarshalInParamsFn === undefined)
         {
             incomingAsync.readEmptyParams();
@@ -412,12 +329,129 @@
         {
             cb.ice_exception(ex);
         }
+    };
+
+    var opPrefix = "__op_";
+
+    function addOperation(type, name, op)
+    {
+        var dispatchMethod = opPrefix + name;
 
         //
-        // Not necessary
+        // The "n" property contains the native method name in case the operation's Slice name is a keyword.
+        // Check to make sure the servant implements the operation.
         //
-        //return DispatchStatus.DispatchAsync;
+        var methodName = op.n !== undefined ? op.n : name;
+
+        //
+        // The "u" property defines a function to unmarshal the in params.
+        //
+        var unmarshalInParamsFn = op.u;
+
+        //
+        // The "m" property defines a function to marshal the results.
+        //
+        var marshalOutParamsFn = op.m;
+
+        //
+        // The "e" property defines the user exceptions the operation has declared (if any).
+        //
+        var userExceptions = op.e;
+
+        //
+        // The "f" property defines the operation format (if non-default).
+        //
+        var format = op.f === undefined ? Ice.FormatType.DefaultFormat : Ice.FormatType.valueOf(op.f);
+
+        //
+        // The "a" property indicates whether the operation uses AMD.
+        //
+        var amd = op.a;
+
+        type.prototype[dispatchMethod] = function(servant, incomingAsync, current)
+        {
+            __dispatchImpl(servant, incomingAsync, current, methodName, unmarshalInParamsFn, marshalOutParamsFn,
+                           userExceptions, format, amd);
+        };
     };
+
+    function addOperations(type, ops, intfs)
+    {
+        //
+        // Add a dispatch method for every operation declared by this class/interface.
+        //
+        if(ops)
+        {
+            for(var name in ops)
+            {
+                addOperation(type, name, ops[name]);
+            }
+        }
+
+        //
+        // Also copy dispatch methods from any base interfaces.
+        //
+        if(intfs)
+        {
+            for(var i = 0; i < intfs.length; ++i)
+            {
+                for(var name in intfs[i])
+                {
+                    if(name.indexOf(opPrefix) === 0)
+                    {
+                        type.prototype[name] = intfs[i][name];
+                    }
+                }
+            }
+        }
+    };
+
+    var __IceObjectOps =
+    {
+        "ice_ping":
+        {
+        },
+        "ice_isA":
+        {
+            u: function(__is, __r)
+            {
+                var id;
+                id = __is.readString();
+                __r.push(id);
+            },
+            m: function(__os, __ret)
+            {
+                __os.writeBool(__ret);
+            }
+        },
+        "ice_id":
+        {
+            m: function(__os, __ret)
+            {
+                __os.writeString(__ret);
+            }
+        },
+        "ice_ids":
+        {
+            m: function(__os, __ret)
+            {
+                if(__ret !== null)
+                {
+                    __os.writeSize(__ret.length);
+                    for(var i = 0; i < __ret.length; ++i)
+                    {
+                        __os.writeString(__ret[i]);
+                    }
+                }
+                else
+                {
+                    __os.writeSize(0);
+                }
+            }
+        }
+    };
+
+    addOperations(IceObject, __IceObjectOps, undefined);
 
     Slice.defineLocalObject = function(constructor, base)
     {
@@ -429,10 +463,10 @@
             obj.__parent = base;
             obj.prototype.constructor = constructor;
         }
-        
+
         return obj;
     };
-    
+
     Slice.defineObject = function(constructor, base, intfs, scope, ids, compactId, writeImpl, readImpl, preserved, ops)
     {
         var obj = constructor || function(){};
@@ -444,7 +478,6 @@
         obj.__compactId = compactId;
         obj.__instanceof = IceObject.__instanceof;
         obj.__implements = intfs;
-        obj.__ops = ops;
         obj.ice_staticId = function()
         {
             return ids[scope];
@@ -460,14 +493,29 @@
         obj.prototype.__writeMemberImpl = writeImpl;
         obj.prototype.__readMemberImpl = readImpl;
 
+        //
+        // Define the dispatch methods.
+        //
+        addOperations(obj, ops, intfs);
+
         obj.prototype.__dispatch = function(incomingAsync, current)
         {
-            __dispatchImpl(obj, this, incomingAsync, current);
+            //
+            // Retrieve the dispatch method for this operation.
+            //
+            var disp = this[opPrefix + current.operation];
+
+            if(disp === undefined || typeof(disp) !== 'function')
+            {
+                throw new Ice.OperationNotExistException(current.id, current.facet, current.operation);
+            }
+
+            disp.call(disp, this, incomingAsync, current);
         };
 
         return obj;
     };
-    
+
     Ice.Object = IceObject;
     global.Slice = Slice;
     global.Ice = Ice;
