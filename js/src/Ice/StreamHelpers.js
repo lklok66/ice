@@ -11,12 +11,12 @@
     require("Ice/Class");
     require("Ice/HashMap");
     require("Ice/OptionalFormat");
-    
+
     var Ice = global.Ice || {};
-    
+
     var defineClass = Ice.__defineClass;
     var defineProperty = Object.defineProperty;
-    
+
     var HashMap = Ice.HashMap;
     var OptionalFormat = Ice.OptionalFormat;
 
@@ -33,7 +33,7 @@
                 os.endSize(pos);
             }
         };
-        
+
         this.readOpt = function(is, tag)
         {
             var v;
@@ -44,8 +44,8 @@
             }
             return v;
         };
-    };    
-    
+    };
+
     StreamHelpers.VSizeOptHelper = function()
     {
         this.writeOpt = function(os, tag, v)
@@ -56,7 +56,7 @@
                 this.write(os, v);
             }
         };
-        
+
         this.readOpt = function(is, tag)
         {
             var v;
@@ -67,7 +67,7 @@
             }
             return v;
         };
-    };    
+    };
 
     StreamHelpers.VSizeContainerOptHelper = function(elementSize)
     {
@@ -80,7 +80,7 @@
                 this.write(os, v);
             }
         };
-        
+
         this.readOpt = function(is, tag)
         {
             var v;
@@ -92,7 +92,7 @@
             return v;
         };
     };
-    
+
     StreamHelpers.VSizeContainer1OptHelper = function()
     {
         this.writeOpt = function(os, tag, v)
@@ -102,7 +102,7 @@
                 this.write(os, v);
             }
         };
-        
+
         this.readOpt = function(is, tag)
         {
             var v;
@@ -148,14 +148,14 @@
         },
         size: function(v)
         {
-            return (v === null || v === undefined) ? 0 : v.length; 
+            return (v === null || v === undefined) ? 0 : v.length;
         }
     });
-    
+
     defineProperty(SequenceHelper.prototype, "minWireSize", {
         get: function(){ return 1; }
     });
-    
+
     // Speacialization optimized for ByteSeq
     var byteSeqHelper = new SequenceHelper();
     byteSeqHelper.write = function(os, v) { return os.writeByteSeq(v); }
@@ -176,7 +176,7 @@
         {
             is.readObject(function(obj) { v[idx] = obj; }, elementType);
         };
-        
+
         for(var i = 0; i < sz; ++i)
         {
             readObjectAtIndex(i);
@@ -207,7 +207,7 @@
         {
             StreamHelpers.FSizeOptHelper.call(helper);
         }
-        
+
         defineProperty(helper, "elementHelper", {
             get: function(){ return elementHelper; }
         });
@@ -219,7 +219,7 @@
             });
             helper.read = objectSequenceHelperRead;
         }
-        
+
         return helper;
     };
 
@@ -247,7 +247,8 @@
         },
         read: function(is)
         {
-            var v = new HashMap();
+            var mapType = this.mapType;
+            var v = new mapType();
             var sz = is.readSize();
             var keyHelper = this.keyHelper;
             var valueHelper = this.valueHelper;
@@ -259,7 +260,7 @@
         },
         size: function(v)
         {
-            return (v === null || v === undefined) ? 0 : v.size; 
+            return (v === null || v === undefined) ? 0 : v.size;
         }
     });
 
@@ -271,14 +272,15 @@
     var objectDictionaryHelperRead = function(is)
     {
         var sz = is.readSize();
-        var v = new HashMap();
+        var mapType = this.mapType;
+        var v = new mapType();
         var valueType = this.valueType;
-        
+
         var readObjectForKey = function(key)
         {
             is.readObject(function(obj) { v.set(key, obj); }, valueType);
         };
-        
+
         var keyHelper = this.keyHelper;
         for(var i = 0; i < sz; ++i)
         {
@@ -287,7 +289,7 @@
         return v;
     };
 
-    StreamHelpers.generateDictHelper = function(keyHelper, valueHelper, fixed, valueType)
+    StreamHelpers.generateDictHelper = function(keyHelper, valueHelper, fixed, valueType, mapType)
     {
         var helper = new DictionaryHelper();
         if(fixed)
@@ -298,9 +300,12 @@
         {
             StreamHelpers.FSizeOptHelper.call(helper);
         }
+        defineProperty(helper, "mapType", {
+            get: function(){ return mapType; }
+        });
         defineProperty(helper, "keyHelper", {
             get: function(){ return keyHelper; }
-        });        
+        });
         defineProperty(helper, "valueHelper", {
             get: function(){ return valueHelper; }
         });

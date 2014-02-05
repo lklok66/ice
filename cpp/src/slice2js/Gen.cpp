@@ -2361,6 +2361,17 @@ Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
     const TypePtr valueType = p->valueType();
 
     //
+    // For some key types, we have to use an equals() method to compare keys
+    // rather than the native comparison operators.
+    //
+    bool useEquals = false;
+    const BuiltinPtr b = BuiltinPtr::dynamicCast(keyType);
+    if((b && b->kind() == Builtin::KindLong) || StructPtr::dynamicCast(keyType))
+    {
+        useEquals = true;
+    }
+
+    //
     // Stream helpers for dictionaries of objects are lazy initialized
     // as the required object type might not be available until later.
     //
@@ -2369,11 +2380,11 @@ Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
     const string propertyName = name + "Helper";
     bool fixed = !keyType->isVariableLength() && !valueType->isVariableLength();
 
-
-    _out << nl << "Slice.defineDictionary(" << scope  << ", \"" << propertyName << "\", "
+    _out << nl << "Slice.defineDictionary(" << scope << ", \"" << name << "\", \"" << propertyName << "\", "
          << "\"" << getHelper(keyType) << "\" , "
          << "\"" << getHelper(valueType) << "\", " 
-         << (fixed ? "true" : "false");
+         << (fixed ? "true" : "false") << ", "
+         << (useEquals ? "true" : "false");
     if(isClassType(valueType))
     {
         _out<< ", \"" << typeToString(valueType) << "\"";

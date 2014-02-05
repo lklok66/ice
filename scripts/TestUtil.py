@@ -1222,6 +1222,21 @@ def getMirrorDir(base, mapping):
         raise RuntimeError("cannot find language dir")
     return os.path.join(before, mapping, *after)
 
+def getMappingDir(base, mapping, dirnames):
+    """Get the directory for the given mapping."""
+    lang = getDefaultMapping()
+    after = []
+    before = base
+    while len(before) > 0:
+        current = os.path.basename(before)
+        before = os.path.dirname(before)
+        if current == lang:
+            break
+        after.insert(0, current)
+    else:
+        raise RuntimeError("cannot find language dir")
+    return os.path.join(before, mapping, *dirnames)
+
 def getClientCrossTestDir(base):
     """Get the client directory from client-home for the given test."""
     global clientHome
@@ -1369,6 +1384,103 @@ def collocatedTest(additionalOptions = ""):
     collocatedProc.waitTestSuccess()
     if appverifier:
         appVerifierAfterTestEnd([exe])
+
+def clientEchoTest(additionalServerOptions = "", additionalClientOptions = "",
+                   server = None, client = None, serverenv = None, clientenv = None):
+    if server is None:
+        server = getDefaultServerFile()
+    if client is None:
+        client = getDefaultClientFile()
+    serverDesc = server
+    clientDesc = client
+
+    lang = getDefaultMapping()
+    testdir = os.getcwd()
+
+    # Setup the server.
+    if lang in ["rb", "php", "js"]:
+        serverdir = getMappingDir(testdir, "cpp", ["test", "Ice", "echo"])
+    else:
+        serverdir = testdir
+    if lang != "java":
+        server = os.path.join(serverdir, server)
+
+    if serverenv is None:
+        if lang in ["rb", "php", "js"]:
+            serverenv = getTestEnv("cpp", serverdir)
+        else:
+            serverenv = getTestEnv(lang, serverdir)
+
+    global cross
+    if len(cross) == 0:
+        cross.append(lang)
+
+    global clientHome
+    for clientLang in cross:
+        clientCfg = DriverConfig("client")
+        if clientLang != lang:
+            if clientDesc != getDefaultClientFile():
+                print("** skipping cross test")
+                return
+
+            clientCfg.lang = clientLang
+            client = getDefaultClientFile(clientLang)
+            if clientHome:
+                clientdir = getMirrorDir(getClientCrossTestDir(testdir), clientLang)
+            else:
+                clientdir = getMirrorDir(testdir, clientLang)
+            if not os.path.exists(clientdir):
+                print("** no matching test for %s" % clientLang)
+                return
+        else:
+            if clientHome:
+                clientdir = getClientCrossTestDir(testdir)
+            else:
+                clientdir = testdir
+            if not os.path.exists(clientdir):
+                print("** no matching test for %s" % clientLang)
+                return
+
+        if clientLang != "java":
+            client = os.path.join(clientdir, client)
+
+        if clientenv is None:
+            clientenv = getTestEnv(clientLang, clientdir)
+
+        if lang == "php":
+            phpSetup()
+
+        clientExe = client
+        serverExe = server
+
+        if appverifier:
+            setAppVerifierSettings([clientExe, serverExe])
+
+        sys.stdout.write("starting " + serverDesc + "... ")
+        sys.stdout.flush()
+        serverCfg = DriverConfig("server")
+        if lang in ["rb", "php", "js"]:
+            serverCfg.lang = "cpp"
+        server = getCommandLine(server, serverCfg, additionalServerOptions)
+        serverProc = spawnServer(server, env = serverenv, lang=serverCfg.lang, mx=serverCfg.mx)
+        print("ok")
+
+        if not serverOnly:
+            if clientLang == lang:
+                sys.stdout.write("starting %s... " % clientDesc)
+            else:
+                sys.stdout.write("starting %s %s ... " % (clientLang, clientDesc))
+            sys.stdout.flush()
+            client = getCommandLine(client, clientCfg, additionalClientOptions)
+            clientProc = spawnClient(client, env = clientenv, startReader = False, lang=clientCfg.lang)
+            print("ok")
+            clientProc.startReader()
+            clientProc.waitTestSuccess()
+
+        serverProc.waitTestSuccess()
+
+        if appverifier:
+            appVerifierAfterTestEnd([clientExe, serverExe])
 
 def cleanDbDir(path):
     if os.path.exists(os.path.join(path, "__Freeze", "lock")):

@@ -373,10 +373,29 @@
         get: function() { return function(o1, o2) { return o1.equals(o2); }; }
     });
     
-    Slice.defineDictionary = function(module, name, keyHelper, valueHelper, fixed, valueType)
+    Slice.defineDictionary = function(module, name, helperName, keyHelper, valueHelper, fixed, useEquals, valueType)
     {
+        if(useEquals)
+        {
+            //
+            // Define a constructor function for a dictionary whose key type requires
+            // comparison using an equals() method instead of the native comparison
+            // operators.
+            //
+            module[name] = function(h)
+            {
+                var r = new HashMap(h);
+                r.keyComparator = HashMap.compareEquals;
+                return r;
+            };
+        }
+        else
+        {
+            module[name] = HashMap;
+        }
+
         var helper = null;
-        Object.defineProperty(module, name, 
+        Object.defineProperty(module, helperName,
         {
             get: function()
                 {
@@ -384,7 +403,7 @@
                     {
                         /*jshint -W061 */
                         helper = Ice.StreamHelpers.generateDictHelper(eval(keyHelper), eval(valueHelper), fixed, 
-                                                                      eval(valueType));
+                                                                      eval(valueType), module[name]);
                         /*jshint +W061 */
                     }
                     return helper;

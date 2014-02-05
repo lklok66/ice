@@ -34,7 +34,8 @@ SUBDIRS		= proxy \
 		  stream \
 		  metrics \
 		  optional \
-		  enums
+		  enums \
+		  echo
 
 !if "$(WINRT)" != "yes"
 SUBDIRS		= $(SUBDIRS) \

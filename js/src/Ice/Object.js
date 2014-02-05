@@ -38,18 +38,18 @@
         },
         ice_isA: function(s, current)
         {
-            return this.ice_ids().indexOf(s) >= 0;
+            return [this.__mostDerivedType().__ids.indexOf(s) >= 0];
         },
         ice_ping: function(current)
         {
         },
         ice_ids: function(current)
         {
-            return this.__mostDerivedType().__ids;
+            return [this.__mostDerivedType().__ids];
         },
         ice_id: function(current)
         {
-            return this.__mostDerivedType().__id;
+            return [this.__mostDerivedType().__id];
         },
         toString: function()
         {
@@ -134,8 +134,6 @@
     IceObject.__compactId = -1;
     IceObject.__preserved = false;
 
-    var stringSeqHelper = Ice.StreamHelpers.generateSeqHelper(Ice.StreamHelpers.StringHelper, false);
-
     IceObject.__ops =
     {
         "ice_ping":
@@ -165,7 +163,18 @@
         {
             m: function(__os, __ret)
             {
-                stringSeqHelper.write(__os, __ret);
+                if(__ret !== null)
+                {
+                    __os.writeSize(__ret.length);
+                    for(var i = 0; i < __ret.length; ++i)
+                    {
+                        __os.writeString(__ret[i]);
+                    }
+                }
+                else
+                {
+                    __os.writeSize(0);
+                }
             }
         }
     };
@@ -273,6 +282,7 @@
                 else
                 {
                     var __os = this.incomingAsync.__startWriteParams(this.format);
+                    args = Array.prototype.slice.call(args);
                     args.splice(0, 0, __os);
                     this.marshalFn.apply(this.marshalFn, args);
                     this.incomingAsync.__endWriteParams(true);

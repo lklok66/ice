@@ -9,7 +9,6 @@
 
 (function(global){
     var Ice = global.Ice;
-    var Test = global.Test;
 
     var test = function(b)
     {
@@ -19,7 +18,7 @@
         }
     };
 
-    var run = function(communicator, log, p)
+    var run = function(communicator, log, p, Test)
     {
         var promise = new Ice.Promise();
 
@@ -667,69 +666,6 @@
                     {
                         test(c.equals(ctx));
 
-                        //
-                        // Test implicit context propagation
-                        //
-
-                        var initData = new Ice.InitializationData();
-                        initData.properties = communicator.getProperties().clone();
-                        initData.properties.setProperty("Ice.ImplicitContext", "Shared");
-
-                        var ic = Ice.initialize(initData);
-
-                        var p3 = Test.MyClassPrx.uncheckedCast(ic.stringToProxy("test:default -p 12010"));
-                        ic.getImplicitContext().setContext(ctx);
-                        test(ic.getImplicitContext().getContext().equals(ctx));
-
-                        return p3.opContext();
-                    }
-                ).then(
-                    function(r, c)
-                    {
-                        test(c.equals(ctx));
-
-                        r.communicator.getImplicitContext().put("zero", "ZERO");
-                        return r.proxy.opContext();
-                    }
-                ).then(
-                    function(r, c)
-                    {
-                        test(c.equals(r.communicator.getImplicitContext().getContext()));
-
-                        ctx = r.communicator.getImplicitContext().getContext();
-
-                        var prxContext = new Ice.Context();
-                        prxContext.set("one", "UN");
-                        prxContext.set("four", "QUATRE");
-
-                        combined = new Ice.Context(ctx);
-                        combined.merge(prxContext);
-                        test(combined.get("one") === "UN");
-
-                        var p3 = Test.MyClassPrx.uncheckedCast(r.proxy.ice_context(prxContext));
-
-                        r.communicator.getImplicitContext().setContext(null);
-
-                        return p3.opContext();
-                    }
-                ).then(
-                    function(r, c)
-                    {
-                        test(c.equals(r.proxy.ice_getContext()));
-                        r.communicator.getImplicitContext().setContext(ctx);
-
-                        return r.proxy.opContext();
-                    }
-                ).then(
-                    function(r, c)
-                    {
-                        test(c.equals(combined));
-
-                        return r.communicator.destroy();
-                    }
-                ).then(
-                    function(r)
-                    {
                         var d = 1278312346.0 / 13.0;
                         var ds = [];
                         for(var i = 0; i < 5; i++)

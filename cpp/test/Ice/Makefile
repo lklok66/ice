@@ -47,7 +47,8 @@ SUBDIRS		= proxy \
 		  plugin \
 		  admin \
 		  metrics \
-		  enums
+		  enums \
+		  echo
 
 .PHONY: $(EVERYTHING) $(SUBDIRS)
 

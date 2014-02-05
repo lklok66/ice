@@ -21,6 +21,7 @@ SUBDIRS		= binding \
 		location \
 		objects \
 		operations \
+		operationsBidir \
 		optional \
 		promise \
 		proxy \
