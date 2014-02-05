@@ -22,6 +22,7 @@ SERVER		= $(NAME_PREFIX)server
 TARGETS		= $(SERVER)$(EXT)
 
 SOBJS		= BlobjectI.obj \
+		  Test.obj \
 		  Server.obj
 
 SRCS		= $(SOBJS:.obj=.cpp)
