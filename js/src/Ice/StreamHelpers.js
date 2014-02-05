@@ -158,8 +158,8 @@
 
     // Speacialization optimized for ByteSeq
     var byteSeqHelper = new SequenceHelper();
-    byteSeqHelper.write = function(os, v) { return os.writeByteSeq(v); }
-    byteSeqHelper.read = function(is) { return is.readByteSeq(); }
+    byteSeqHelper.write = function(os, v) { return os.writeByteSeq(v); };
+    byteSeqHelper.read = function(is) { return is.readByteSeq(); };
     defineProperty(byteSeqHelper, "elementHelper", {
         get: function(){ return Ice.ByteHelper; }
     });

@@ -1021,7 +1021,7 @@
         prx.prototype[name] = function()
         {
             return ObjectPrx.__invoke(this, name, o, f, arguments[n], m, u, e, Array.prototype.slice.call(arguments));
-        }
+        };
     }
     
     function addOperations(prx, operations)

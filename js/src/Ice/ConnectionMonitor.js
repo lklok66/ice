@@ -84,7 +84,7 @@
         },
         remove: function(connection)
         {
-            Debug.assert(this._instance != null);
+            Debug.assert(this._instance !== null);
             var pos = this._connections.indexOf(connection);
             Debug.assert(pos !== -1);
             this._connections.splice(pos, 1);

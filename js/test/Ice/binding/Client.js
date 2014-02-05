@@ -177,7 +177,7 @@
                                 var p = new Promise();
                                 var f1 = function(count, adapterCount, proxies)
                                 {
-                                    var p1 = count === 10 ? com.deactivateObjectAdapter(adapters[2]) : Promise.succeed();
+                                    var p1 = count === 10 ? com.deactivateObjectAdapter(adapters[2]) : new Promise().succeed();
                                     p1.then(
                                         function()
                                         {

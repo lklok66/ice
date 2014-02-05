@@ -97,7 +97,7 @@
         {
             if(this._serverEndpoints !== null) // Lazy initialization.
             {
-                return Promise.succeed(this._serverEndpoints);
+                return new Promise().succeed(this._serverEndpoints);
             }
             else
             {
@@ -118,7 +118,7 @@
                 //
                 // Only add the proxy to the router if it's not already in our local map.
                 //
-                return Promise.succeed();
+                return new Promise().succeed();
             }
             else
             {

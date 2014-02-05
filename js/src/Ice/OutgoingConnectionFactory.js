@@ -100,12 +100,12 @@
                 var connection = this.findConnectionByEndpoint(endpoints, compress);
                 if(connection !== null)
                 {
-                    return Promise.succeed(connection, compress.value);
+                    return new Promise().succeed(connection, compress.value);
                 }
             }
             catch(ex)
             {
-                return Promise.fail(ex);
+                return new Promise().fail(ex);
             }
 
             var cb = new ConnectCallback(this, endpoints, hasMore, selType);

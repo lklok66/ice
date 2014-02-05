@@ -2239,7 +2239,7 @@
             var endpoints = this.filterEndpoints(allEndpoints);
             if(endpoints.length === 0)
             {
-                return Promise.fail(new Ice.NoEndpointException(this.toString()));
+                return new Promise().fail(new Ice.NoEndpointException(this.toString()));
             }
 
             //

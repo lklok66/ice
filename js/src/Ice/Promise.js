@@ -65,7 +65,7 @@
             this.__state = State.Pending;
             this.__listeners = [];
         },
-        then: function(onResponse, onException, onProgress)
+        then: function(onResponse, onException)
         {
             var promise = new Promise();
             var self = this;
@@ -79,8 +79,7 @@
                         {
                             promise:promise,
                             onResponse:onResponse,
-                            onException:onException,
-                            onProgress:onProgress
+                            onException:onException
                         });
                     self.resolve();
                 }, 0);
@@ -89,6 +88,42 @@
         exception: function(onException)
         {
             return this.then(null, onException);
+        },
+        finally: function(cb)
+        {
+            var p = new Promise();
+            var self = this;
+            
+            var finallyHandler = function(method)
+            {
+                return function()
+                {
+                    var args = arguments;
+                    try
+                    {
+                        var result = cb.apply(null, args);
+                        if(result && result.then instanceof Function)
+                        {
+                            var handler = function(){ method.apply(p, args); };
+                            result.then(handler).exception(handler);
+                        }
+                        else
+                        {
+                            method.apply(p, args);
+                        }
+                    }
+                    catch(e)
+                    {
+                        method.apply(p, args);
+                    }
+                }
+            };
+            
+            setTimeout(
+                function(){
+                    self.then(finallyHandler(p.succeed), finallyHandler(p.fail));
+                });
+            return p;
         },
         resolve: function()
         {
@@ -107,45 +142,6 @@
                 resolveImp(this, obj);
             }
         },
-        progress: function()
-        {
-            //
-            // Don't report progress events after the promise is fulfilled.
-            //
-            if(this.__state !== State.Pending)
-            {
-                return;
-            }
-
-            var args = arguments;
-            var self = this;
-
-            //
-            // Use setTimeout so the listener are not notified until the call stack is empty.
-            //
-            setTimeout(
-                function()
-                {
-                    var i, listener;
-                    for(i = 0; i < self.__listeners.length; ++i)
-                    {
-                        listener = self.__listeners[i];
-
-                        try
-                        {
-                            if(listener && typeof listener.onProgress === 'function')
-                            {
-                                listener.onProgress.apply(null, args);
-                            }
-                        }
-                        catch(e)
-                        {
-                            //TODO ignore or trace a warning when the progress callback throws.
-                            console.log(e);
-                        }
-                    }
-                }, 0);
-        },
         setState: function(state, args)
         {
             if(this.__state === State.Pending && state !== State.Pending)
@@ -163,11 +159,13 @@
         {
             var args = arguments;
             this.setState(State.Success, args);
+            return this;
         },
         fail: function()
         {
             var args = arguments;
             this.setState(State.Failed, args);
+            return this;
         },
         succeeded: function()
         {
@@ -222,29 +220,10 @@
         }
         return promise;
     };
-
-    //
-    // Create a new promise, call succeed with the received arguments,
-    // then return the new promise.
-    //
-    Promise.succeed = function()
+    
+    Promise.try = function(onResponse)
     {
-        var args = arguments;
-        var p = new Promise();
-        p.succeed.apply(p, args);
-        return p;
-    };
-
-    //
-    // Create a new promise, call fail with the received arguments,
-    // then return the new promise.
-    //
-    Promise.fail = function()
-    {
-        var args = arguments;
-        var p = new Promise();
-        p.fail.apply(p, args);
-        return p;
+        return new Promise().succeed().then(onResponse);
     };
 
     Ice.Promise = Promise;

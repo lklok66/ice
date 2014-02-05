@@ -72,7 +72,7 @@
         {
             if(this._locatorRegistry !== null)
             {
-                return Promise.succeed(this._locatorRegistry);
+                return new Promise().succeed(this._locatorRegistry);
             }
 
             var self = this;

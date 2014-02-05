@@ -166,7 +166,7 @@
                 if(this._state >= StateClosed) // The connection might already be closed if the communicator was destroyed.
                 {
                     Debug.assert(this._exception !== null);
-                    return Promise.fail(this._exception);
+                    return new Promise().fail(this._exception);
                 }
 
                 this._startPromise = new Promise();
@@ -186,7 +186,7 @@
                 {
                     this.exception(ex);
                 }
-                return Promise.fail(ex);
+                return new Promise().fail(ex);
             }
 
             return this._startPromise;
