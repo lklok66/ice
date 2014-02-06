@@ -120,6 +120,10 @@
             is.startReadException();
             __readImpl(this, is, this.__mostDerivedType());
             is.endReadException(false);
+        },
+        __usesClasses: function()
+        {
+            return false;
         }
     });
     Ice.UserException = UserException;
@@ -194,7 +198,7 @@
         this.__slicedData = is.endReadException(true);
     };
     
-    Slice.defineUserException = function(constructor, base, name, writeImpl, readImpl, preserved)
+    Slice.defineUserException = function(constructor, base, name, writeImpl, readImpl, preserved, usesClasses)
     {
         var ex = constructor;
         ex.__parent = base;
@@ -214,6 +218,15 @@
         }
         ex.prototype.__writeMemberImpl = writeImpl;
         ex.prototype.__readMemberImpl = readImpl;
+
+        if(usesClasses)
+        {
+            ex.prototype.__usesClasses = function()
+            {
+                return true;
+            };
+        }
+
         return ex;
     };
 

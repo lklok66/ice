@@ -14,6 +14,7 @@
     // Using IceObject in this file to avoid collisions with the native Object.
     //
     require("Ice/Class");
+    require("Ice/DispatchStatus");
     require("Ice/Exception");
     require("Ice/FormatType");
     require("Ice/StreamHelpers");
@@ -216,39 +217,62 @@
         {
             var args = arguments;
 
-            try
+            if(this.incomingAsync.__validateResponse(true))
             {
-                if(this.marshalFn === undefined)
+                try
                 {
-                    if(args.length > 0)
-                    {
-                        //
-                        // No results expected.
-                        //
-                        this.incomingAsync.__exception(
-                            new Ice.UnknownException("ice_response called with invalid arguments"));
-                        return;
-                    }
-                    else
-                    {
-                        this.incomingAsync.__writeEmptyParams();
-                    }
+                    this.__sendResponse.apply(this, args);
+                    this.incomingAsync.__response();
                 }
-                else
+                catch(ex)
                 {
-                    var __os = this.incomingAsync.__startWriteParams(this.format);
-                    args = Array.prototype.slice.call(args);
-                    args.unshift(__os);
-                    this.marshalFn.apply(this.marshalFn, args);
-                    this.incomingAsync.__endWriteParams(true);
+                    this.incomingAsync.__exception(ex);
                 }
-            }
-            catch(ex)
-            {
-                this.incomingAsync.__exception(ex);
             }
         },
         ice_exception: function(ex)
+        {
+            if(this.__checkException(ex))
+            {
+                if(this.incomingAsync.__validateResponse(false))
+                {
+                    this.__sendException(ex);
+                    this.incomingAsync.__response();
+                }
+            }
+            else
+            {
+                this.incomingAsync.ice_exception(ex);
+            }
+        },
+        __sendResponse: function()
+        {
+            var args = arguments;
+
+            if(this.marshalFn === undefined)
+            {
+                if(args.length > 0)
+                {
+                    //
+                    // No results expected.
+                    //
+                    throw new Ice.UnknownException("ice_response called with invalid arguments");
+                }
+                else
+                {
+                    this.incomingAsync.__writeEmptyParams();
+                }
+            }
+            else
+            {
+                var __os = this.incomingAsync.__startWriteParams(this.format);
+                args = Array.prototype.slice.call(args);
+                args.unshift(__os);
+                this.marshalFn.apply(this.marshalFn, args);
+                this.incomingAsync.__endWriteParams(true);
+            }
+        },
+        __checkException: function(ex)
         {
             if(this.exceptions !== undefined)
             {
@@ -261,25 +285,21 @@
                     if(ex instanceof this.exceptions[i])
                     {
                         //
-                        // User exception is valid, now marshal it.
+                        // User exception is valid.
                         //
-                        this.incomingAsync.__exception(ex);
-                        return;
+                        return true;
                     }
                 }
             }
-            else if(ex instanceof Ice.UserException)
-            {
-                this.incomingAsync.__exception(new Ice.UnknownUserException(ex.toString()));
-            }
-            else if(ex instanceof Ice.LocalException)
-            {
-                this.incomingAsync.__exception(new Ice.UnknownLocalException(ex.toString()));
-            }
-            else
-            {
-                this.incomingAsync.__exception(new Ice.UnknownException(ex.toString()));
-            }
+
+            return false;
+        },
+        __sendException: function(ex)
+        {
+            //
+            // User exception is valid, now marshal it.
+            //
+            this.incomingAsync.__writeUserException(ex, this.format);
         }
     });
 
@@ -300,34 +320,55 @@
 
         var cb = new AMDCallback(incomingAsync, userExceptions, format, marshalOutParamsFn);
 
-        //
-        // Unmarshal the in params (if any). The "u" property defines the unmarshaling function.
-        //
-        var inParams = amd ? [cb] : [];
-        if(unmarshalInParamsFn === undefined)
-        {
-            incomingAsync.readEmptyParams();
-        }
-        else
-        {
-            var __is = incomingAsync.startReadParams();
-            unmarshalInParamsFn(__is, inParams);
-            incomingAsync.endReadParams();
-        }
-
-        inParams.push(current);
         try
         {
-            var results = servant[methodName].apply(servant, inParams);
-
-            if(!amd)
+            //
+            // Unmarshal the in params (if any). The "u" property defines the unmarshaling function.
+            //
+            var inParams = amd ? [cb] : [];
+            if(unmarshalInParamsFn === undefined)
             {
-                cb.ice_response.apply(cb, results);
+                incomingAsync.readEmptyParams();
+            }
+            else
+            {
+                var __is = incomingAsync.startReadParams();
+                unmarshalInParamsFn(__is, inParams);
+                incomingAsync.endReadParams();
+            }
+
+            inParams.push(current);
+
+            if(amd)
+            {
+                try
+                {
+                    servant[methodName].apply(servant, inParams);
+                }
+                catch(ex)
+                {
+                    cb.ice_exception(ex);
+                }
+                return Ice.DispatchStatus.DispatchAsync;
+            }
+            else
+            {
+                var results = servant[methodName].apply(servant, inParams);
+                cb.__sendResponse.apply(cb, results);
+                return Ice.DispatchStatus.DispatchOK;
             }
         }
         catch(ex)
         {
-            cb.ice_exception(ex);
+            if(cb.__checkException(ex))
+            {
+                cb.__sendException(ex);
+                return Ice.DispatchStatus.DispatchUserException;
+            }
+            else
+            {
+                throw ex;
+            }
         }
     };
 
@@ -370,8 +411,8 @@
 
         type.prototype[dispatchMethod] = function(servant, incomingAsync, current)
         {
-            __dispatchImpl(servant, incomingAsync, current, methodName, unmarshalInParamsFn, marshalOutParamsFn,
-                           userExceptions, format, amd);
+            return __dispatchImpl(servant, incomingAsync, current, methodName, unmarshalInParamsFn, marshalOutParamsFn,
+                                  userExceptions, format, amd);
         };
     }
 
@@ -511,7 +552,7 @@
                 throw new Ice.OperationNotExistException(current.id, current.facet, current.operation);
             }
 
-            disp.call(disp, this, incomingAsync, current);
+            return disp.call(disp, this, incomingAsync, current);
         };
 
         return obj;

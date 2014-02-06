@@ -2273,6 +2273,9 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
         {
             _out << nl << "false";
         }
+
+        const bool usesClasses = p->usesClasses(false) && (!base || (base && !base->usesClasses(false)));
+        _out << "," << nl << (usesClasses ? "true" : "false");
     }
     _out << ");";
     _out.dec();

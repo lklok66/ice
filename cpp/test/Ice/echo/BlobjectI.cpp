@@ -78,12 +78,18 @@ BlobjectI::ice_invoke_async(const Ice::AMD_Object_ice_invokePtr& amdCb, const ve
         {
             _startBatch = false;
             _batchProxy = obj->ice_batchOneway();
+            obj = _batchProxy;
+        }
+
+        if(!current.facet.empty())
+        {
+            obj = obj->ice_facet(current.facet);
         }
 
         if(_batchProxy)
         {
             vector<Ice::Byte> out;
-            _batchProxy->ice_invoke(current.operation, current.mode, inEncaps, out, current.ctx);
+            obj->ice_invoke(current.operation, current.mode, inEncaps, out, current.ctx);
             amdCb->ice_response(true, vector<Ice::Byte>());
         }
         else
@@ -96,6 +102,11 @@ BlobjectI::ice_invoke_async(const Ice::AMD_Object_ice_invokePtr& amdCb, const ve
     }
     else
     {
+        if(!current.facet.empty())
+        {
+            obj = obj->ice_facet(current.facet);
+        }
+
         CallbackPtr cb = new Callback(amdCb, true);
         Ice::Callback_Object_ice_invokePtr del =
             Ice::newCallback_Object_ice_invoke(cb, &Callback::response, &Callback::exception, &Callback::sent);

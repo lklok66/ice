@@ -29,6 +29,7 @@ tests = [
     ("Ice/defaultValue", ["once"]),
     ("Ice/enums", ["once"]),
     ("Ice/exceptions", ["once"]),
+    ("Ice/exceptionsBidir", ["once"]),
     ("Ice/facets", ["once"]),
     ("Ice/info", ["once"]),
     ("Ice/inheritance", ["once"]),
