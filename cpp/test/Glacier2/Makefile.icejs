@@ -7,13 +7,11 @@
 #
 # **********************************************************************
 
-top_srcdir	= ..
+top_srcdir	= ../..
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= Ice \
-		  IceSSL \
-		  Glacier2
+SUBDIRS		= router
 
 .PHONY: $(EVERYTHING) $(SUBDIRS)
 
@@ -22,6 +20,7 @@ all:: $(SUBDIRS)
 $(SUBDIRS):
 	@echo "making all in $@"
 	@$(MAKE) all --directory=$@
+
 
 $(EVERYTHING_EXCEPT_ALL)::
 	@for subdir in $(SUBDIRS); \
