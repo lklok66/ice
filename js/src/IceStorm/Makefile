@@ -27,6 +27,9 @@ include $(top_srcdir)/config/Make.rules
 
 SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --include-dir IceStorm --ice -I$(slicedir)
 
+lint:: $(INSTALL_SRCS)
+	jshint $(LINTFLAGS) $(INSTALL_SRCS)
+
 install:: all
 	$(call installlib,$(DESTDIR)$(install_libdir),$(libdir),$(LIBNAME))
 	$(call installmodule,$(DESTDIR)$(install_moduledir),$(INSTALL_SRCS),$(LIBNAME))

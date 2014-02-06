@@ -156,6 +156,9 @@ browser/%.js: $(slicedir)/IceWS/%.ice $(SLICE2JS) $(SLICEPARSERLIB)
 	$(SLICE2JS) $(SLICE2JSFLAGS) $<
 	mv $(*F).js browser/
 
+lint:: $(SRCS)
+	jshint $(LINTFLAGS) $(NODEJS_SRCS) $(BROWSER_SRCS) $(GEN_SRCS) $(COMMON_SRCS)
+
 install:: all
 	$(call installlib,$(DESTDIR)$(install_libdir),$(libdir),$(LIBNAME))
 	$(call installmodule,$(DESTDIR)$(install_moduledir),$(INSTALL_SRCS),$(LIBNAME))
