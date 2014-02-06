@@ -7,13 +7,16 @@
 #
 # **********************************************************************
 
-top_srcdir	= ..
+top_srcdir	= ../..
 
-!include $(top_srcdir)\config\Make.rules.mak
+include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= Ice Glacier2
+SUBDIRS		= chat
 
 $(EVERYTHING)::
-	@for %i in ( $(SUBDIRS) ) do \
-	    @echo "making $@ in %i" && \
-	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $@" || exit 1
+	@for subdir in $(SUBDIRS); \
+	do \
+	    echo "making $@ in $$subdir"; \
+	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
+	done
+

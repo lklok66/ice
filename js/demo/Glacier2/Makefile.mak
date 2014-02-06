@@ -7,11 +7,11 @@
 #
 # **********************************************************************
 
-top_srcdir	= ..
+top_srcdir	= ..\..
 
 !include $(top_srcdir)\config\Make.rules.mak
 
-SUBDIRS		= Ice Glacier2
+SUBDIRS         = chat
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \

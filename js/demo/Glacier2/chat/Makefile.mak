@@ -7,13 +7,10 @@
 #
 # **********************************************************************
 
-top_srcdir	= ..
+top_srcdir	= ..\..\..
+
+TARGETS = Chat.js
 
 !include $(top_srcdir)\config\Make.rules.mak
 
-SUBDIRS		= Ice Glacier2
-
-$(EVERYTHING)::
-	@for %i in ( $(SUBDIRS) ) do \
-	    @echo "making $@ in %i" && \
-	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $@" || exit 1
+SLICE2JSFLAGS	= $(SLICE2JSFLAGS) -I"$(slicedir)"
