@@ -662,10 +662,11 @@
         },
         checkForUnknownProperties: function(prefix)
         {
+            var unknownProps = [], i, length;
             //
             // Do not warn about unknown properties for Ice prefixes (Ice, Glacier2, etc.)
             //
-            for(var i = 0; i < PropertyNames.clPropNames.length; ++i)
+            for(i = 0; i < PropertyNames.clPropNames.length; ++i)
             {
                 if(prefix.indexOf(PropertyNames.clPropNames[i] + ".") === 0)
                 {
@@ -673,7 +674,6 @@
                 }
             }
 
-            var unknownProps = [], i, length;
             var props = this._instance.initializationData().properties.getPropertiesForPrefix(prefix + ".");
             for(var e = props.entries; e !== null; e = e.next)
             {

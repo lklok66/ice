@@ -194,20 +194,6 @@
             endpoint.value = this;
             return null;
         },
-        //
-        // Return an acceptor for this endpoint, or null if no acceptors
-        // is available. In case an acceptor is created, this operation
-        // also returns a new "effective" endpoint, which might differ
-        // from this endpoint, for example, if a dynamic port number is
-        // assigned.
-        //
-        acceptor: function(endpoint, adapterName)
-        {
-            var p = new TcpAcceptor(this._instance, this._host, this._port);
-            endpoint.value = new TcpEndpointI(this._instance, this._host, p.effectivePort(), this._timeout,
-                                                this._connectionId, this._compress);
-            return p;
-        },
         connect: function()
         {
             if(this._instance.traceLevels().network >= 2)

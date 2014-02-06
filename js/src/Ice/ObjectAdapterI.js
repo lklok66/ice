@@ -192,7 +192,9 @@
                         this._routerInfo.getServerEndpoints().then(
                             function(endpoints)
                             {
-                                for(var i = 0; i < endpoints.length; ++i)
+                                var i;
+                                
+                                for(i = 0; i < endpoints.length; ++i)
                                 {
                                     self._routerEndpoints.push(endpoints[i]);
                                 }
@@ -206,7 +208,7 @@
                                 // Remove duplicate endpoints, so we have a list of unique
                                 // endpoints.
                                 //
-                                for(var i = 0; i < self._routerEndpoints.length - 1;)
+                                for(i = 0; i < self._routerEndpoints.length - 1;)
                                 {
                                     var e1 = self._routerEndpoints[i];
                                     var e2 = self._routerEndpoints[i + 1];
@@ -770,9 +772,9 @@
             //
             // Do not create unknown properties list if Ice prefix, i.e., Ice, Glacier2, etc.
             //
-            var addUnknown = true;
+            var addUnknown = true, i;
             var prefix = this._name + ".";
-            for(var i = 0; i < PropertyNames.clPropNames.length; ++i)
+            for(i = 0; i < PropertyNames.clPropNames.length; ++i)
             {
                 if(prefix.indexOf(PropertyNames.clPropNames[i] + ".") === 0)
                 {
@@ -786,7 +788,7 @@
             for(var e = props.entries; e !== null; e = e.next)
             {
                 var valid = false;
-                for(var i = 0; i < _suffixes.length; ++i)
+                for(i = 0; i < _suffixes.length; ++i)
                 {
                     if(e.key === prefix + _suffixes[i])
                     {

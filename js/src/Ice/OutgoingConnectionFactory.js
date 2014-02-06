@@ -207,13 +207,13 @@
         {
             var promise = new AsyncResultBase(this._communicator, "flushBatchRequests", null, null, null);
 
-            var c = [];
+            var c = [], e, i;
             if(!this._destroyed)
             {
-                for(var e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
+                for(e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
                 {
                     var connectionList = e.value;
-                    for(var i = 0; i < connectionList.length; ++i)
+                    for(i = 0; i < connectionList.length; ++i)
                     {
                         if(connectionList[i].isActiveOrHolding())
                         {
@@ -252,7 +252,7 @@
                     }
                 };
                 
-                for(var i = 0; i < c.length; ++i)
+                for(i = 0; i < c.length; ++i)
                 {
                     c[i].flushBatchRequests().then(successCB).exception(exceptionCB);
                 }

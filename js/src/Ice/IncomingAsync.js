@@ -205,7 +205,7 @@
             Debug.assert(this._connection !== null);
 
             var props = this._instance.initializationData().properties;
-
+            var s;
             if(ex instanceof Ice.RequestFailedException)
             {
                 if(ex.id === null)
@@ -339,7 +339,7 @@
                     this._os.resize(Protocol.headerSize + 4); // Reply status position.
                     this._os.writeByte(Protocol.replyUnknownLocalException);
                     //this._os.writeString(ex.toString());
-                    var s = [ ex.ice_name() ];
+                    s = [ ex.ice_name() ];
                     if(ex.stack)
                     {
                         s.push("\n");
@@ -365,7 +365,7 @@
                     this._os.resize(Protocol.headerSize + 4); // Reply status position.
                     this._os.writeByte(Protocol.replyUnknownUserException);
                     //this._os.writeString(ex.toString());
-                    var s = [ ex.ice_name() ];
+                    s = [ ex.ice_name() ];
                     if(ex.stack)
                     {
                         s.push("\n");

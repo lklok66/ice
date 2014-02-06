@@ -116,7 +116,7 @@
                     {
                         method.apply(p, args);
                     }
-                }
+                };
             };
             
             setTimeout(

@@ -89,9 +89,9 @@
                     this._state = StateConnected;
                 }
             }
-            catch(ex)
+            catch(err)
             {
-                ex = translateError(this._state, ex);
+                var ex = translateError(this._state, err);
                 this._state = StateError;
                 if(ex instanceof LocalException)
                 {
@@ -178,7 +178,7 @@
             //
             byteBuffer.position = byteBuffer.position + remaining;
 
-            if(this._fd.bufferedAmount == 0)
+            if(this._fd.bufferedAmount === 0)
             {
                 this._fd.send(slice);
                 return true;
@@ -191,7 +191,7 @@
                     setTimeout(
                         function()
                         {
-                            if(self._fd.bufferedAmount == 0)
+                            if(self._fd.bufferedAmount === 0)
                             {
                                 self._bytesWrittenCallback();
                             }

@@ -373,16 +373,17 @@
             __dispatchImpl(servant, incomingAsync, current, methodName, unmarshalInParamsFn, marshalOutParamsFn,
                            userExceptions, format, amd);
         };
-    };
+    }
 
     function addOperations(type, ops, intfs)
     {
+        var name;
         //
         // Add a dispatch method for every operation declared by this class/interface.
         //
         if(ops)
         {
-            for(var name in ops)
+            for(name in ops)
             {
                 addOperation(type, name, ops[name]);
             }
@@ -395,7 +396,7 @@
         {
             for(var i = 0; i < intfs.length; ++i)
             {
-                for(var name in intfs[i])
+                for(name in intfs[i])
                 {
                     if(name.indexOf(opPrefix) === 0)
                     {
@@ -404,7 +405,7 @@
                 }
             }
         }
-    };
+    }
 
     var __IceObjectOps =
     {
