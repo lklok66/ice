@@ -29,7 +29,12 @@ CLOSURE_PATH		= C:\closure
 CLOSUREFLAGS 		= --language_in ECMASCRIPT5
 
 #
-# jslint flags
+# jsHint location
+#
+JSHINT_PATH 		= $(NODE_PATH)\jshint
+
+#
+# jsHint flags
 #
 LINTFLAGS 		= --verbose
 
@@ -77,7 +82,7 @@ SLICEPARSERLIB          = $(ice_dir)\lib$(x64suffix)\sliced.lib
 !endif
 !endif
 
-EVERYTHING		= all clean install
+EVERYTHING		= all clean install lint
 
 .SUFFIXES:
 .SUFFIXES:		.js .ice
@@ -122,7 +127,11 @@ $(libdir)/$(LIBNAME).min.js $(libdir)/$(LIBNAME).min.js.gz: $(libdir)/$(LIBNAME)
 	del /q $(libdir)\$(LIBNAME).tmp.js
 !endif
 
-lint: $(TARGETS)
-	jshint $(LINTFLAGS) $(TARGETS)
+!if "$(INSTALL_SRCS)" != ""
+lint: $(INSTALL_SRCS)
+	node "$(JSHINT_PATH)\bin\jshint" $(LINTFLAGS) $(INSTALL_SRCS)
+!else
+lint::
+!endif
 
 install::
