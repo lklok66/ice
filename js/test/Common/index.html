@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stream Test | Ice for JavaScript</title>
+    <title>Test Suite | Ice for JavaScript</title>
     <style type="text/css">
         #wss
         {
@@ -16,11 +16,14 @@
     <nav class="top-bar" data-topbar>
         <ul class="title-area">
             <li class="name">
-                <h1><a href="#">Ice for JavaScript</a></h1>
+                <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
             </li>
         </ul>
     </nav>
-    
+    <ul class="breadcrumbs">
+            <li><a href="../../../index.html">Ice</a></li>
+            <li class="current"><a href="#">Test</a></li>
+        </ul>
     <section role="main">
         <div class="row">
             <div class="large-12 medium-12 columns">
@@ -84,9 +87,9 @@
             }
             
             scripts = [
-                basePath + "Common/foundation/js/modernizr.js",
-                basePath + "Common/foundation/js/jquery.js",
-                basePath + "Common/foundation/js/foundation.min.js",
+                basePath + "../config/foundation/js/modernizr.js",
+                basePath + "../config/foundation/js/jquery.js",
+                basePath + "../config/foundation/js/foundation.min.js",
                 basePath + "../lib/Ice.js"
             ];
             
@@ -101,7 +104,7 @@
             
             var link = document.createElement("link");
             link.rel = "stylesheet";
-            link.href = basePath + "Common/foundation/css/foundation.css";
+            link.href = basePath + "../config/foundation/css/foundation.css";
             head.appendChild(link);
             
             function loadScript()
