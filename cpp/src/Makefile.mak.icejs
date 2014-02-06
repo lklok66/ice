@@ -12,9 +12,14 @@ top_srcdir	= ..
 !include $(top_srcdir)/config/Make.rules.mak
 
 SUBDIRS		= IceUtil \
+		  Slice \
+		  slice2cpp \
+		  slice2js \
 		  Ice \
 		  IceSSL \
-		  IceWS
+		  IceWS \
+		  Glacier2Lib \
+		  Glacier2
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \

@@ -12,7 +12,8 @@ top_srcdir	= ..
 !include $(top_srcdir)/config/Make.rules.mak
 
 SUBDIRS		= Ice \
-                  IceSSL
+                  IceSSL \
+		  Glacier2
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \
