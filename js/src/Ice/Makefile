@@ -119,6 +119,7 @@ NODEJS_SRCS = \
 	TcpTransceiver.js \
 
 BROWSER_SRCS = \
+	browser/Buffer.js \
 	browser/EndpointInfo.js \
 	browser/ConnectionInfo.js \
 	browser/Transceiver.js \
