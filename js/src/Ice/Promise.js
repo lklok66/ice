@@ -59,7 +59,7 @@
         }
     };
 
-    var Promise = Ice.__defineClass({
+    var Promise = Ice.Class({
         __init__: function()
         {
             this.__state = State.Pending;

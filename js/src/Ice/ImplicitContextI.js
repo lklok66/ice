@@ -21,7 +21,7 @@
     //
     // The base class for all ImplicitContext implementations
     //
-    var ImplicitContextI = Ice.__defineClass({
+    var ImplicitContextI = Ice.Class({
         __init__: function()
         {
             this._context = new HashMap();

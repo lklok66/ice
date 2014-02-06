@@ -17,7 +17,7 @@
 
     var Promise = Ice.Promise;
 
-    var AsyncResultBase = Ice.__defineClass(Promise, {
+    var AsyncResultBase = Ice.Class(Promise, {
         __init__: function(communicator, op, connection, proxy, adapter)
         {
             //

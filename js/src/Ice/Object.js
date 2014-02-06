@@ -22,11 +22,11 @@
     var Ice = global.Ice || {};
     var Slice = global.Slice || {};
 
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
 
     var nextAddress = 0;
 
-    var IceObject = defineClass({
+    var IceObject = Class({
         __init__: function()
         {
             // Fake Address used as the hashCode for this object instance.
@@ -204,7 +204,7 @@
         this.__slicedData = is.endReadObject(true);
     };
 
-    var AMDCallback = defineClass({
+    var AMDCallback = Class({
         __init__: function(incomingAsync, exceptions, format, marshalFn)
         {
             this.incomingAsync = incomingAsync;

@@ -21,7 +21,7 @@
     var LocatorTable = Ice.LocatorTable;
     var LocatorPrx = Ice.LocatorPrx;
 
-    var LocatorManager = Ice.__defineClass({
+    var LocatorManager = Ice.Class({
         __init__: function(properties)
         {
             this._background = properties.getPropertyAsInt("Ice.BackgroundLocatorCacheUpdates") > 0;

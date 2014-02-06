@@ -15,7 +15,7 @@
 
     var AsyncResult = Ice.AsyncResult;
 
-    var BatchOutgoingAsync = Ice.__defineClass(AsyncResult, {
+    var BatchOutgoingAsync = Ice.Class(AsyncResult, {
         __init__: function(communicator, operation)
         {
             AsyncResult.call(this, communicator, operation, null, null, null, null);

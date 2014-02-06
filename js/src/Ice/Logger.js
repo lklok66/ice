@@ -12,7 +12,7 @@
     
     require("Ice/Class");
     
-    var Logger = Ice.__defineClass({
+    var Logger = Ice.Class({
         __init__: function(prefix)
         {
             if(prefix !== undefined && prefix.length > 0)

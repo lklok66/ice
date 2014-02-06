@@ -26,9 +26,9 @@
     var Protocol = Ice.Protocol;
     var StringUtil = Ice.StringUtil;
     
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
 
-    var OpaqueEndpointI = defineClass(Ice.Endpoint, {
+    var OpaqueEndpointI = Class(Ice.Endpoint, {
         //
         // Marshal the endpoint
         //
@@ -429,7 +429,7 @@
 
     Ice.OpaqueEndpointI = OpaqueEndpointI;
     
-    var OpaqueEndpointInfoI = defineClass(Ice.OpaqueEndpointInfo, {
+    var OpaqueEndpointInfoI = Class(Ice.OpaqueEndpointInfo, {
         __init__: function(timeout, compress, rawEncoding, rawBytes, type)
         {
             Ice.OpaqueEndpointInfo.call(this, -1, false, rawEncoding, rawBytes);

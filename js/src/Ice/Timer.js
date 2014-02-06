@@ -19,7 +19,7 @@
     var TimeUtil = Ice.TimeUtil;
     var CommunicatorDestroyedException = Ice.CommunicatorDestroyedException;
     
-    var Timer = Ice.__defineClass({
+    var Timer = Ice.Class({
         __init__: function(instance)
         {
             this._instance = instance;

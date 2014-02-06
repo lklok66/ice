@@ -39,7 +39,7 @@
     var LocalException = Ice.LocalException;
     var Promise = Ice.Promise;
 
-    var ConnectRequestHandler = Ice.__defineClass({
+    var ConnectRequestHandler = Ice.Class({
         __init__: function(ref, proxy)
         {
             this._reference = ref;

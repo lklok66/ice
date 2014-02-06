@@ -47,7 +47,7 @@
     var LocatorPrx = Ice.LocatorPrx;
     var PropertyNames = Ice.PropertyNames;
     
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
     
     var suffixes =
     [
@@ -64,7 +64,7 @@
     //
     // Only for use by Instance
     //
-    var ReferenceFactory = defineClass({
+    var ReferenceFactory = Class({
         __init__: function(instance, communicator)
         {
             this._instance = instance;
@@ -834,7 +834,7 @@
     
     Ice.ReferenceFactory = ReferenceFactory;
     
-    var Reference = defineClass({
+    var Reference = Class({
         __init__: function(instance, communicator, identity, facet, mode, secure, protocol, encoding)
         {
             //
@@ -1375,7 +1375,7 @@
 
     Ice.Reference = Reference;
 
-    var FixedReference = defineClass(Reference, {
+    var FixedReference = Class(Reference, {
         __init__: function(instance, communicator, identity, facet, mode, secure, encoding, connection)
         {
             Reference.call(this, instance, communicator, identity, facet, mode, secure, Protocol.Protocol_1_0, encoding);
@@ -1580,7 +1580,7 @@
 
     Ice.FixedReference = FixedReference;
 
-    var RoutableReference = defineClass(Reference, {
+    var RoutableReference = Class(Reference, {
         __init__: function(instance, communicator, identity, facet, mode, secure, protocol, encoding, endpoints,
                            adapterId, locatorInfo, routerInfo, cacheConnection, preferSecure, endpointSelection,
                            locatorCacheTimeout)
@@ -2294,7 +2294,7 @@
     Ice.RoutableReference = RoutableReference;
     global.Ice = Ice;
     
-    var CreateConnectionCallback = defineClass({
+    var CreateConnectionCallback = Class({
         __init__: function(r, endpoints, promise)
         {
             this.ref = r;

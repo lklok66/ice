@@ -36,7 +36,7 @@
     var StateClosed = 5;
     var StateError = 6;
 
-    var TcpTransceiver = Ice.__defineClass({
+    var TcpTransceiver = Ice.Class({
         __init__: function(instance)
         {
             this._traceLevels = instance.traceLevels();

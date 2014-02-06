@@ -19,7 +19,7 @@
     var ExUtil = Ice.ExUtil;
     var TimeUtil = Ice.TimeUtil;
 
-    var ConnectionMonitor = Ice.__defineClass({
+    var ConnectionMonitor = Ice.Class({
         __init__: function(instance, interval)
         {
             this._instance = instance;

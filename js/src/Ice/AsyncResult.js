@@ -25,7 +25,7 @@
     var UserException = Ice.UserException;
     var BasicStream = Ice.BasicStream;
 
-    var AsyncResult = Ice.__defineClass(AsyncResultBase, {
+    var AsyncResult = Ice.Class(AsyncResultBase, {
         __init__: function(communicator, op, connection, proxy, adapter, completedFn, sentFn)
         {
             //

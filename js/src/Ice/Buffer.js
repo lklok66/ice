@@ -29,7 +29,7 @@
     var __BufferUnderflowException__ = "BufferUnderflowException";
     var __IndexOutOfBoundsException__ = "IndexOutOfBoundsException";
 
-    var Buffer = Ice.__defineClass({
+    var Buffer = Ice.Class({
         __init__: function(buffer)
         {
             if(buffer !== undefined)

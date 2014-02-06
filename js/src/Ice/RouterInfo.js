@@ -23,7 +23,7 @@
     var HashMap = Ice.HashMap;
     var Promise = Ice.Promise;
 
-    var RouterInfo = Ice.__defineClass({
+    var RouterInfo = Ice.Class({
         __init__: function(router)
         {
             this._router = router;

@@ -74,7 +74,7 @@
     //
     // Instance - only for use by Communicator
     //
-    var Instance = Ice.__defineClass({
+    var Instance = Ice.Class({
         __init__: function(initData)
         {
             this._state = StateActive;

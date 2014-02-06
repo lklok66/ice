@@ -21,7 +21,7 @@
     //
     // Only for use by Instance
     //
-    var ObjectFactoryManager = Ice.__defineClass({
+    var ObjectFactoryManager = Ice.Class({
         __init__: function()
         {
             this._factoryMap = new HashMap(); // Map<String, ObjectFactory>

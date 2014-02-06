@@ -15,7 +15,7 @@
     //
     // Ice.EnumBase
     //
-    var EnumBase = Ice.__defineClass({
+    var EnumBase = Ice.Class({
         __init__: function(name, value)
         {
             this._name = name;

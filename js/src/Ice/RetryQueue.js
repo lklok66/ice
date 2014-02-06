@@ -16,9 +16,9 @@
 
     var Debug = Ice.Debug;
 
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
     
-    var RetryQueue = defineClass({
+    var RetryQueue = Class({
         __init__: function(instance)
         {
             this._instance = instance;
@@ -54,7 +54,7 @@
     });
     Ice.RetryQueue = RetryQueue;
 
-    var RetryTask = defineClass({
+    var RetryTask = Class({
         __init__: function(queue, outAsync, interval)
         {
             this.queue = queue;

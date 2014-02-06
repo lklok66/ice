@@ -68,9 +68,9 @@
         this.outAsync = null;
     };
 
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
     
-    var ConnectionI = defineClass({
+    var ConnectionI = Class({
         __init__: function(communicator, instance, reaper, transceiver, endpoint, incoming, adapter)
         {
             this._communicator = communicator;
@@ -1985,7 +1985,7 @@
     Ice.ConnectionI = ConnectionI;
     global.Ice = Ice;
 
-    var OutgoingMessage = defineClass({
+    var OutgoingMessage = Class({
         __init__: function()
         {
             this.stream = null;

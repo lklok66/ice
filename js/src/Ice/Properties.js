@@ -34,7 +34,7 @@
     //
     // Ice.Properties
     //
-    var Properties = Ice.__defineClass({
+    var Properties = Ice.Class({
         __init__: function(args, defaults)
         {
             this._properties = new HashMap();

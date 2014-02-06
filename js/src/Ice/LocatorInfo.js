@@ -27,9 +27,9 @@
     var Protocol = Ice.Protocol;
     var LocatorRegistryPrx = Ice.LocatorRegisterPrx;
 
-    var  defineClass = Ice.__defineClass;
+    var  Class = Ice.Class;
     
-    var LocatorInfo = defineClass({
+    var LocatorInfo = Class({
         __init__: function(locator, table, background)
         {
             this._locator = locator;
@@ -413,7 +413,7 @@
     Ice.LocatorInfo = LocatorInfo;
     global.Ice = Ice;
     
-    var RequestCallback = defineClass({
+    var RequestCallback = Class({
         __init__: function(ref, ttl, promise)
         {
             this._ref = ref;
@@ -491,7 +491,7 @@
         }
     });
 
-    var Request = defineClass({
+    var Request = Class({
         __init__: function(locatorInfo, ref)
         {
             this._locatorInfo = locatorInfo;
@@ -550,7 +550,7 @@
         }
     });
     
-    var ObjectRequest = defineClass(Request, {
+    var ObjectRequest = Class(Request, {
         __init__: function(locatorInfo, reference)
         {
             Request.call(this, locatorInfo, reference);
@@ -578,7 +578,7 @@
         }
     });
     
-    var AdapterRequest = defineClass(Request, {
+    var AdapterRequest = Class(Request, {
         __init__: function(locatorInfo, reference)
         {
             Request.call(this, locatorInfo, reference);

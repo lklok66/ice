@@ -13,12 +13,12 @@
     var Slice = global.Slice || {};
     var Ice = global.Ice || {};
 
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
     
     //
     // Ice.Exception
     //
-    var Exception = defineClass(Error, {
+    var Exception = Class(Error, {
         __init__: function(cause)
         {
             this.ice_cause = cause;
@@ -70,7 +70,7 @@
     //
     // Ice.LocalException
     //
-    var LocalException = defineClass(Exception, {
+    var LocalException = Class(Exception, {
         __init__: function(cause)
         {
             Exception.call(this, cause);
@@ -99,7 +99,7 @@
     //
     // Ice.UserException
     //
-    var UserException = defineClass(Exception, {
+    var UserException = Class(Exception, {
         __init__: function(cause)
         {
             Exception.call(this, cause);

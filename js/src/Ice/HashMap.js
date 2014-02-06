@@ -40,7 +40,7 @@
         return undefined;
     }
     
-    var HashMap = Ice.__defineClass({
+    var HashMap = Ice.Class({
         __init__: function(h)
         {
             this._size = 0;

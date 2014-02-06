@@ -42,7 +42,7 @@
     //
     // Ice.ObjectPrx
     //
-    var ObjectPrx = Ice.__defineClass({
+    var ObjectPrx = Ice.Class({
         __init__: function()
         {
             this._reference = null;

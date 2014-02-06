@@ -51,7 +51,7 @@
         this.slices = slices;
     };
     
-    var UnknownSlicedObject = Ice.__defineClass(Ice.Object,
+    var UnknownSlicedObject = Ice.Class(Ice.Object,
         {
             __init__: function(unknownTypeId)
             {

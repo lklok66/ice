@@ -26,7 +26,7 @@
     var OpaqueEndpointI = Ice.OpaqueEndpointI;
     var Protocol = Ice.Protocol;
 
-    var EndpointFactoryManager = Ice.__defineClass({
+    var EndpointFactoryManager = Ice.Class({
         __init__: function(instance)
         {
             this._instance = instance;

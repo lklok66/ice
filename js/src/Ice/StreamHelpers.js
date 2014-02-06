@@ -14,7 +14,7 @@
 
     var Ice = global.Ice || {};
 
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
     var defineProperty = Object.defineProperty;
 
     var HashMap = Ice.HashMap;
@@ -117,7 +117,7 @@
     //
     // Sequence helper to write sequences
     //
-    var SequenceHelper = defineClass({
+    var SequenceHelper = Class({
         write: function(os, v)
         {
             if(v === null || v.length === 0)
@@ -226,7 +226,7 @@
     //
     // Dictionary helper to write dictionaries
     //
-    var DictionaryHelper = defineClass({
+    var DictionaryHelper = Class({
         write: function(os, v)
         {
             if(v === null || v.size === 0)

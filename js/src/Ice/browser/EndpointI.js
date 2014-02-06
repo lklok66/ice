@@ -26,9 +26,9 @@
     var StringUtil = Ice.StringUtil;
     var Transceiver = IceWS.Transceiver;
 
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
     
-    var EndpointI = defineClass(Ice.Endpoint, {
+    var EndpointI = Class(Ice.Endpoint, {
         __init__: function(instance, secure, ho, po, ti, conId, co, re)
         {
             this._instance = instance;
@@ -527,7 +527,7 @@
     IceWS.EndpointI = EndpointI;
     global.IceWS = IceWS;
     
-    var EndpointInfoI = defineClass(IceWS.EndpointInfo, {
+    var EndpointInfoI = Class(IceWS.EndpointInfo, {
         __init__: function(secure, timeout, compress, host, port, resource)
         {
             IceWS.EndpointInfo.call(this, timeout, compress, host, port, resource);

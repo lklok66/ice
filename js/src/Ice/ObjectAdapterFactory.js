@@ -25,7 +25,7 @@
     //
     // Only for use by Instance.
     //
-    var ObjectAdapterFactory = Ice.__defineClass({
+    var ObjectAdapterFactory = Ice.Class({
         __init__: function(instance, communicator)
         {
             this._instance = instance;

@@ -19,7 +19,7 @@
     var TimeUtil = Ice.TimeUtil;
     var Debug = Ice.Debug;
 
-    var LocatorTable = Ice.__defineClass({
+    var LocatorTable = Ice.Class({
         __init__: function()
         {
             this._adapterEndpointsTable = new HashMap(); // Map<String, EndpointTableEntry>

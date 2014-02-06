@@ -58,9 +58,9 @@
         this.patcher = patcher;
     };
     
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
 
-    var EncapsDecoder = defineClass({
+    var EncapsDecoder = Class({
         __init__: function(stream, encaps, sliceObjects, f)
         {
             this._stream = stream;
@@ -263,7 +263,7 @@
         }
     });
     
-    var EncapsDecoder10 = defineClass(EncapsDecoder, {
+    var EncapsDecoder10 = Class(EncapsDecoder, {
         __init__: function(stream, encaps, sliceObjects, f)
         {
             EncapsDecoder.call(this, stream, encaps, sliceObjects, f);
@@ -523,7 +523,7 @@
         }
     });
 
-    var EncapsDecoder11 = defineClass(EncapsDecoder, {
+    var EncapsDecoder11 = Class(EncapsDecoder, {
         __init__: function(stream, encaps, sliceObjects, f)
         {
             EncapsDecoder.call(this, stream, encaps, sliceObjects, f);
@@ -1053,7 +1053,7 @@
             };
     };
 
-    var EncapsEncoder = defineClass({
+    var EncapsEncoder = Class({
         __init__: function(stream, encaps)
         {
             this._stream = stream;
@@ -1087,7 +1087,7 @@
         }
     });
     
-    var EncapsEncoder10 = defineClass(EncapsEncoder, {
+    var EncapsEncoder10 = Class(EncapsEncoder, {
         __init__: function(stream, encaps)
         {
             EncapsEncoder.call(this, stream, encaps);
@@ -1261,7 +1261,7 @@
         }
     });
     
-    var EncapsEncoder11 = defineClass(EncapsEncoder, {
+    var EncapsEncoder11 = Class(EncapsEncoder, {
         __init__: function(stream, encaps)
         {
             EncapsEncoder.call(this, stream, encaps); 
@@ -1579,7 +1579,7 @@
         this.indirectionMap = null; // HashMap<Ice.Object, int> 
     };
 
-    var ReadEncaps = defineClass({
+    var ReadEncaps = Class({
         __init__: function()
         {
             this.start = 0;
@@ -1600,7 +1600,7 @@
         }
     });
     
-    var WriteEncaps = defineClass({
+    var WriteEncaps = Class({
         __init__: function()
         {
             this.start = 0;
@@ -1621,7 +1621,7 @@
         }
     });
     
-    var BasicStream = defineClass({
+    var BasicStream = Class({
         __init__: function(instance, encoding, unlimited, data)
         {
             this._instance = instance;

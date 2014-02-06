@@ -70,7 +70,7 @@
     //
     // Only for use by IceInternal.ObjectAdapterFactory
     //
-    var ObjectAdapterI = Ice.__defineClass({
+    var ObjectAdapterI = Ice.Class({
         __init__: function(instance, communicator, objectAdapterFactory, name, router, noConfig, promise)
         {
             this._deactivated = false;
@@ -492,11 +492,7 @@
         },
         addFacetWithUUID: function(object, facet)
         {
-            var ident = new Identity();
-            ident.category = "";
-            ident.name = UUID.generateUUID();
-
-            return this.addFacet(object, ident, facet);
+            return this.addFacet(object, new Identity(UUID.generateUUID(), ""), facet);
         },
         addDefaultServant: function(servant, category)
         {

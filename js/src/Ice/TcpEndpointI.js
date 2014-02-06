@@ -23,8 +23,8 @@
     var StringUtil = Ice.StringUtil;
     var TcpTransceiver = Ice.TcpTransceiver;
 
-    var defineClass = Ice.__defineClass;
-    var TcpEndpointI = defineClass(Ice.Endpoint, {
+    var Class = Ice.Class;
+    var TcpEndpointI = Class(Ice.Endpoint, {
         __init__: function(instance, ho, po, ti, conId, co)
         {
             this._instance = instance;
@@ -500,7 +500,7 @@
     Ice.TcpEndpointI = TcpEndpointI;
     global.Ice = Ice;
 
-    var TCPEndpointInfoI = defineClass(Ice.TCPEndpointInfo, {
+    var TCPEndpointInfoI = Class(Ice.TCPEndpointInfo, {
         __init__: function(timeout, compress, host, port)
         {
             Ice.TCPEndpointInfo.call(this, timeout, compress, host, port);

@@ -34,7 +34,7 @@
     var Protocol = Ice.Protocol;
     var Identity = Ice.Identity;
 
-    var OutgoingAsync = Ice.__defineClass(AsyncResult, {
+    var OutgoingAsync = Ice.Class(AsyncResult, {
         __init__: function(prx, operation, completed, sent)
         {
             //

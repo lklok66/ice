@@ -19,7 +19,7 @@
     
     var EndpointI = IceWS.EndpointI;
 
-    var EndpointFactory = Ice.__defineClass({
+    var EndpointFactory = Ice.Class({
         __init__:function(instance, secure)
         {
             this._instance = instance;

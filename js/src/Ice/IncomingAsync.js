@@ -32,7 +32,7 @@
     var Protocol = Ice.Protocol;
     var StringUtil = Ice.StringUtil;
 
-    var IncomingAsync = Ice.__defineClass({
+    var IncomingAsync = Ice.Class({
         __init__: function(instance, connection, adapter, response, compress, requestId)
         {
             this._instance = instance;

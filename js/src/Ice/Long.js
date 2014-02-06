@@ -16,7 +16,7 @@
     //
     var Ice = global.Ice || {};
     
-    var Long = Ice.__defineClass({
+    var Long = Ice.Class({
         __init__: function(high, low)
         {
             this.high = high;
