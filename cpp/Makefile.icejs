@@ -42,7 +42,7 @@ $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
 	do \
 	    echo "making $@ in $$subdir"; \
-	    ( cd $$subdir && $(MAKE) -f Makefile.icews $@ ) || exit 1; \
+	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
 	done
 
 test::
