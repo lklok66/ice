@@ -12,20 +12,20 @@
     require("Ice/Ice");
     require("Callback");
 
-    var Demo = global.Demo || {};
+    var Demo = global.Demo;
+    var Promise = Ice.Promise;
     var CallbackSenderPrx = Demo.CallbackSenderPrx;
 
-    var CallbackReceiverI = function()
-    {
-    };
-
-    CallbackReceiverI.prototype = new Demo.CallbackReceiver();
-    CallbackReceiverI.prototype.constructor = CallbackReceiverI;
-
-    CallbackReceiverI.prototype.callback = function(num, current)
-    {
-        console.log("received callback #" + num);
-    };
+    //
+    // Define a servant class that implements Demo.CallbackReceiver
+    // interface.
+    //
+    var CallbackReceiverI = Ice.Class(Demo.CallbackReceiver, {
+        callback: function(num, current)
+        {
+            console.log("received callback #" + num);
+        }
+    });
 
     var run = function()
     {
@@ -36,7 +36,7 @@
         //
         id.properties.setProperty("Ice.ACM.Client", "0");
 
-        var communicator = Ice.initialize(id);
+        var communicator;
         
         //
         // Exit on SIGINT
@@ -48,39 +48,55 @@
                     function()
                     {
                         process.exit(0);
-                    }
-                );
+                    });
             }
         });
 
         var ident = new Ice.Identity(Ice.UUID.generateUUID(), "");
-        
-        CallbackSenderPrx.checkedCast(communicator.stringToProxy("sender:tcp -p 10000")).then(
-            function(r, server)
+        Promise.try(
+            function()
             {
-                return communicator.createObjectAdapter("").then(
-                    function(r, adapter)
+                communicator = Ice.initialize(id);
+                return communicator.stringToProxy("sender:tcp -p 10000");
+            }
+        ).then(
+            function(proxy)
+            {
+                return CallbackSenderPrx.checkedCast(proxy).then(
+                    function(r, server)
                     {
-                        adapter.add(new CallbackReceiverI(), ident);
-                        return adapter.activate().then(
-                            function(asyncResult)
+                        return communicator.createObjectAdapter("").then(
+                            function(r, adapter)
                             {
-                                return server.ice_getConnection();
-                            }
-                        ).then(
-                            function(asyncResult, conn)
-                            {
-                                conn.setAdapter(adapter);
-                                return server.addClient(ident);
-                            }
-                        );
+                                adapter.add(new CallbackReceiverI(), ident);
+                                return adapter.activate().then(
+                                    function(asyncResult)
+                                    {
+                                        return server.ice_getConnection();
+                                    }
+                                ).then(
+                                    function(asyncResult, conn)
+                                    {
+                                        conn.setAdapter(adapter);
+                                        return server.addClient(ident);
+                                    }
+                                );
+                            });
                     });
             }
         ).exception(
             function(ex)
             {
                 console.log(ex.toString());
-                communicator.destroy().finally(
+                Promise.try(
+                    function()
+                    {
+                        if(communicator)
+                        {
+                            communicator.destroy();
+                        }
+                    }
+                ).finally(
                     function()
                     {
                         process.exit(1);
