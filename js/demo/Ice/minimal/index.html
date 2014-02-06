@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hello Demo | Ice for JavaScript</title>
-    <link rel="stylesheet" href="foundation/css/foundation.css" />
-    <script src="foundation/js/modernizr.js"></script>
+    <title>Minimal Demo | Ice for JavaScript</title>
+    <link rel="stylesheet" href="../../../config/foundation/css/foundation.css" />
+    <script src="../../../config/foundation/js/modernizr.js"></script>
     <script src="../../../lib/Ice.js"></script>
     <script src="Hello.js"></script>
   </head>
@@ -13,31 +13,39 @@
     <nav class="top-bar" data-topbar>
         <ul class="title-area">
             <li class="name">
-                <h1><a href="#">Ice for JavaScript</a></h1>
+                <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
             </li>
         </ul>
     </nav>
     <section role="main">
-        <br/>
-        <form>
-            <div class="row">
-                <div class="small-3 columns">
-                    <label class="right inline" for="hostname">Hostname:</label>
-                </div>
-                <div class="small-9 columns">
-                    <input type="text" id="hostname"/>
-                </div>
-                <div class="small-12 columns">
-                    <a href="#" class="button small" id="hello">Hello World!</a>
-                </div>
-                <div class="small-12 columns">
-                    <textarea id="console" readonly></textarea>
-                </div>
+        <ul class="breadcrumbs">
+            <li><a href="../../../index.html">Ice</a></li>
+            <li><a href="../../index.html">Demos</a></li>
+            <li class="current"><a href="#">Minimal</a></li>
+        </ul>
+        <div class="row">
+            <div class="large-12 medium-12 columns">
+                <form>
+                    <div class="row">
+                        <div class="small-3 columns">
+                            <label class="right inline" for="hostname">Hostname:</label>
+                        </div>
+                        <div class="small-9 columns">
+                            <input type="text" id="hostname"/>
+                        </div>
+                        <div class="small-12 columns">
+                            <a href="#" class="button small" id="hello">Hello World!</a>
+                        </div>
+                        <div class="small-12 columns">
+                            <textarea id="console" readonly></textarea>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </section>
-    <script src="foundation/js/jquery.js"></script>
-    <script src="foundation/js/foundation.min.js"></script>
+    <script src="../../../config/foundation/js/jquery.js"></script>
+    <script src="../../../config/foundation/js/foundation.min.js"></script>
     <script>
         $(document).foundation();
         $(document).ready(

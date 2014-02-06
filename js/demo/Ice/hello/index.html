@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hello Demo | Ice for JavaScript</title>
 
-    <link rel="stylesheet" href="foundation/css/jquery.nouislider.css" />
-    <link rel="stylesheet" href="foundation/css/foundation.css" />
+    <link rel="stylesheet" href="../../../config/foundation/css/jquery.nouislider.css" />
+    <link rel="stylesheet" href="../../../config/foundation/css/foundation.css" />
     
-    <script src="foundation/js/modernizr.js"></script>
+    <script src="../../../config/foundation/js/modernizr.js"></script>
     <script src="../../../lib/Ice.js"></script>
+    
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shBrushJScript.js"></script>
+    <link type="text/css" rel="stylesheet" href="../../../config/syntaxhighlighter/styles/shCoreDefault.css"/>
     <script src="Hello.js"></script>
     
     <style type="text/css">
@@ -17,17 +21,28 @@
         {
             margin-top:7px;
         }
+        #source
+        {
+            max-height:500px;
+            overflow:auto;
+        }
+        
     </style>
   </head>
   <body>
     <nav class="top-bar" data-topbar>
         <ul class="title-area">
             <li class="name">
-                <h1><a href="#">Ice for JavaScript</a></h1>
+                <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
             </li>
         </ul>
     </nav>
     <section role="main">
+        <ul class="breadcrumbs">
+            <li><a href="../../../index.html">Ice</a></li>
+            <li><a href="../../index.html">Demos</a></li>
+            <li class="current"><a href="#">Hello</a></li>
+        </ul>
         <div class="row">
             <div class="large-12 medium-12 columns">
                 <form>
@@ -72,145 +87,46 @@
                             <div id="delay" class="noUiSlider"></div>
                         </div>
                     </div>
-                </form>
-                <a href="#" class="button small" id="hello">Hello World!</a>
-                <a href="#" class="button small" id="shutdown">Shutdown</a>
-                <a href="#" class="button disabled small" id="flush">Flush</a>
-                <form>
+                    <div class="row">
+                        <div class="small-12 columns">
+                            <a href="#" class="button small" id="hello">Hello World!</a>
+                            <a href="#" class="button small" id="shutdown">Shutdown</a>
+                            <a href="#" class="button disabled small" id="flush">Flush</a>
+                            <a href="#" class="button disabled small" id="viewSource">Source</a>
+                        </div>
+                    </div>
                     <textarea id="console" class="disabled" readonly></textarea>
                 </form>
             </div>
         </div>
     </section>
-    <script src="foundation/js/jquery.js"></script>
-    <script src="foundation/js/foundation.min.js"></script>
-    <script src="foundation/js/jquery.nouislider.js"></script>
+    <div id="source-modal" class="reveal-modal" data-reveal>
+        <pre id="source" class="brush: js;"></pre>
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
+    <script src="../../../config/foundation/js/jquery.js"></script>
+    <script src="../../../config/foundation/js/foundation.min.js"></script>
+    <script src="../../../config/foundation/js/jquery.nouislider.js"></script>
     <script>
         $(document).foundation();
-      
-        $(document).ready(function(){
-            $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
-            $("#timeout").noUiSlider({range: [0, 2500], start: 0, handles: 1});
-            $("#delay").noUiSlider({range: [0, 2500], start: 0, handles: 1});
-            
-            var out = 
-            {
-                write: function(msg)
-                {
-                    var text = $("#console").val();
-                    $("#console").val((text == "") ? msg : (text + msg));
-                },
-                writeLine: function(msg)
-                {
-                    out.write(msg + "\n");
-                    $("#console").scrollTop($("#console").get(0).scrollHeight);
-                }
-            };
-            
-            communicator = Ice.initialize();
-            
-            $("#hello").click(
-                function()
-                {
-                    $("#console").val("");
-                    try
+    </script>
+    <script src="browser/Client.js"></script>
+    <script type="application/javascript">
+        $("#source").load("browser/Client.js",
+            //
+            // Load completed
+            //
+            function(){
+                SyntaxHighlighter.defaults.toolbar = false;
+                SyntaxHighlighter.all();
+                $("#viewSource").removeClass("disabled");
+                $("#viewSource").click(
+                    function()
                     {
-                        var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
-                        var s = "hello:ws -h " + hostname + " -p 10000:" +
-                                "wss -h " + hostname + " -p 10001"
-                        
-                        var proxy = communicator.stringToProxy(s).ice_twoway().ice_timeout(-1).ice_secure(false);
-                        
-                        Demo.HelloPrx.checkedCast(proxy).then(
-                            function(asyncResult, twoway)
-                            {
-                                var oneway = twoway.ice_oneway();
-                                var batchOneway = twoway.ice_batchOneway();
-                                
-                                var timeout = $("#timeout").val();
-                                var delay = $("#delay").val();
-                                var mode = $("#mode").val();
-                                
-                                if(timeout > 0)
-                                {
-                                    twoway = twoway.ice_timeout(timeout);
-                                    oneway = oneway.ice_timeout(timeout);
-                                    batchOneway = batchOneway.ice_timeout(timeout);
-                                }
-                                else
-                                {
-                                    twoway = twoway.ice_timeout(-1);
-                                    oneway = oneway.ice_timeout(-1);
-                                    batchOneway = batchOneway.ice_timeout(-1);
-                                }
-                                
-                                if(mode == "twoway")
-                                {
-                                    return twoway.sayHello(delay);
-                                }
-                                else if(mode == "twoway-secure")
-                                {
-                                    twoway = twoway.ice_secure(true);
-                                    return twoway.sayHello(delay);
-                                }
-                                else if(mode == "oneway")
-                                {
-                                    return oneway.sayHello(delay);
-                                }
-                                else if(mode == "oneway-secure")
-                                {
-                                    oneway = oneway.ice_secure(true);
-                                    return oneway.sayHello(delay);
-                                }
-                                else if(mode == "oneway-batch")
-                                {
-                                    $("#flush").removeClass("disabled");
-                                    return batchOneway.sayHello(delay);
-                                }
-                                else if(mode == "oneway-batch-secure")
-                                {
-                                    $("#flush").removeClass("disabled");
-                                    batchOneway = batchOneway.ice_secure(true);
-                                    return batchOneway.sayHello(delay);
-                                }
-                            }
-                        ).exception(out.writeLine);
-                    }
-                    catch(ex)
-                    {
-                        out.writeLine(ex);
-                    }
-                });
-            
-            $("#flush").click(
-                function()
-                {
-                    if(!$(this).hasClass("disabled"))
-                    {
-                        $(this).addClass("disabled");
-                        communicator.flushBatchRequests().exception(out.writeLine);
-                    }
-                });
-            
-            $("#shutdown").click(
-                function()
-                {
-                    try
-                    {
-                        var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
-                        Demo.HelloPrx.checkedCast(communicator.stringToProxy("hello:ws -h " + hostname + " -p 10000")).then(
-                            function(asyncResult, twoway)
-                            {
-                                return twoway.shutdown();
-                            }
-                        ).exception(out.writeLine);
-                    }
-                    catch(ex)
-                    {
-                        out.writeLine(out.writeLine);
-                    }
-                });
-        });
+                        $("#source-modal").foundation("reveal", "open");
+                        return false;
+                    });
+            });
     </script>
   </body>
 </html>
