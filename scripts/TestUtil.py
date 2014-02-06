@@ -957,7 +957,7 @@ def getCommandLine(exe, config, options = ""):
     elif config.lang == "php" and config.type == "client":
         output.write(phpCmd + " -c tmp.ini -f \""+ exe +"\" -- ")
     elif config.lang == "js":
-        output.write('node --use_strict "%s" ' % exe)
+        output.write('node "%s" ' % exe)
     elif config.lang == "cpp" and config.valgrind:
         # --child-silent-after-fork=yes is required for the IceGrid/activator test where the node
         # forks a process with execv failing (invalid exe name).
