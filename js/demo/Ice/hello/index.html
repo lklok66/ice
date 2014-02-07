@@ -26,7 +26,6 @@
             max-height:500px;
             overflow:auto;
         }
-        
     </style>
   </head>
   <body>
@@ -35,7 +34,15 @@
             <li class="name">
                 <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
             </li>
+            <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
         </ul>
+        <section class="top-bar-section">
+            <!-- Right Nav Section -->
+            <ul class="right">
+                <li class="divider"></li>
+                <li><a href="#" id="viewSource" class="disabled">View Source</a></li>
+            </ul>
+        </section>
     </nav>
     <section role="main">
         <ul class="breadcrumbs">
@@ -92,7 +99,6 @@
                             <a href="#" class="button small" id="hello">Hello World!</a>
                             <a href="#" class="button small" id="shutdown">Shutdown</a>
                             <a href="#" class="button disabled small" id="flush">Flush</a>
-                            <a href="#" class="button disabled small" id="viewSource">Source</a>
                         </div>
                     </div>
                     <textarea id="console" class="disabled" readonly></textarea>
@@ -118,7 +124,7 @@
             //
             function(){
                 SyntaxHighlighter.defaults.toolbar = false;
-                SyntaxHighlighter.all();
+                SyntaxHighlighter.highlight();
                 $("#viewSource").removeClass("disabled");
                 $("#viewSource").click(
                     function()

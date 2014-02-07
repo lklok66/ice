@@ -29,7 +29,7 @@
             <!-- Right Nav Section -->
             <ul class="right">
                 <li class="divider"></li>
-                <li><a href="#" id="viewSource" class="disabled">Source</a></li>
+                <li><a href="#" id="viewSource" class="disabled">View Source</a></li>
             </ul>
         </section>
     </nav>
@@ -139,7 +139,7 @@
             //
             function(){
                 SyntaxHighlighter.defaults.toolbar = false;
-                SyntaxHighlighter.all();
+                SyntaxHighlighter.highlight();
                 $("#viewSource").removeClass("disabled");
                 $("#viewSource").click(
                     function()
