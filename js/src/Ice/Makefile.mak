@@ -47,13 +47,13 @@ COMMON_SRCS = \
 	Class.js \
 	Communicator.js \
 	ConnectionBatchOutgoingAsync.js \
-	ConnectionF.js \
 	ConnectionI.js \
 	ConnectionMonitor.js \
 	ConnectionReaper.js \
 	ConnectionRequestHandler.js \
 	ConnectRequestHandler.js \
 	DefaultsAndOverrides.js \
+	DispatchStatus.js \
 	EndpointFactoryManager.js \
 	EnumBase.js \
 	Exception.js \
@@ -74,7 +74,6 @@ COMMON_SRCS = \
 	Long.js \
 	Network.js \
 	ObjectAdapterFactory.js \
-	ObjectAdapterF.js \
 	ObjectAdapterI.js \
 	ObjectFactory.js \
 	ObjectFactoryManager.js \
@@ -84,7 +83,6 @@ COMMON_SRCS = \
 	OptionalFormat.js \
 	OutgoingAsync.js \
 	OutgoingConnectionFactory.js \
-	ProcessF.js \
 	ProcessLogger.js \
 	Promise.js \
 	Properties.js \

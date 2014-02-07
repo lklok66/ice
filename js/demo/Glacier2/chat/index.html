@@ -1,0 +1,153 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Demo | Ice for JavaScript</title>
+
+    <link rel="stylesheet" href="../../../config/foundation/css/foundation.css" />
+    <link rel="stylesheet" href="../../../config/foundation/css/animate.css" />
+    <script src="../../../config/foundation/js/modernizr.js"></script>
+    <link type="text/css" rel="stylesheet" href="../../../config/syntaxhighlighter/styles/shCoreDefault.css"/>
+    <style type="text/css">
+        #source
+        {
+            max-height:500px;
+            overflow:auto;
+        }
+    </style>
+  </head>
+  <body>
+    <nav class="top-bar" data-topbar>
+        <ul class="title-area">
+            <li class="name">
+                <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
+            </li>
+            <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
+        </ul>
+        <section class="top-bar-section">
+            <!-- Right Nav Section -->
+            <ul class="right">
+                <li class="divider"></li>
+                <li><a href="#" id="viewSource" class="disabled">Source</a></li>
+            </ul>
+        </section>
+    </nav>
+    <section role="main">
+        <ul class="breadcrumbs">
+            <li><a href="../../../index.html">Ice</a></li>
+            <li><a href="../../index.html">Demos</a></li>
+            <li class="current"><a href="#">Glacier2</a></li>
+            <li class="current"><a href="#">Chat</a></li>
+        </ul>
+        <div class="row" id="signin-form">
+            <div class="large-12 medium-12 columns">
+                <form>
+                    <div class="row">
+                        <div class="small-4 medium-3 columns">
+                            <label class="right inline" for="username">Username:</label>
+                        </div>
+                        <div class="small-8 medium-9 columns">
+                            <input type="text" id="username"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="small-4 medium-3 columns">
+                            <label class="right inline" for="password">Password:</label>
+                        </div>
+                        <div class="small-8 medium-9 columns">
+                            <input type="password" id="password"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="small-12 columns">
+                            <a href="#" class="button small right" id="signin">Sign in</a>
+                        </div>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+        
+        <div class="row" style="display:none;opacity:0;" id="signin-alert">
+            <div class="large-12 medium-12 columns">
+                <div data-alert class="alert-box warning round">
+                    <span class="error-message"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row" id="loading" style="display:none;opacity:0;">
+            <div class="large-12 medium-12 columns">
+                <div class="panel">
+                    <h3>Loading Please Wait...</h3>
+                    <div class="progress radius round">
+                        <span class="meter" style="width:0%"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row" id="chat-form" style="display:none;opacity:0;">
+            <div class="large-12 medium-12 columns">
+                <nav class="top-bar" data-topbar>
+                    <ul class="title-area">
+                        <li class="name">
+                            <h1><a href="#">Chat</a></h1>
+                        </li>
+                        <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
+                    </ul>
+                    <section class="top-bar-section">
+                        <!-- Right Nav Section -->
+                        <ul class="right">
+                            <li class="divider"></li>
+                            <li class="has-form">
+                                <a href="#" id="signout" class="button">Sign out</a>
+                            </li>
+                        </ul>
+                    </section>
+                </nav>
+                <form>
+                    <textarea id="output" class="disabled" readonly></textarea>
+                    <input type="text" id="input" autocomplete="off"/>
+                </form>
+            </div>
+        </div>
+    </section>
+    <div id="source-modal" class="reveal-modal" data-reveal>
+        <pre id="source" class="brush: js;"></pre>
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
+    
+    <script src="../../../config/foundation/js/jquery.js"></script>
+    <script src="../../../config/foundation/js/foundation.min.js"></script>
+    <script src="../../../config/foundation/js/animo.js"></script>
+    <script src="../../../lib/Ice.js"></script>
+    <script src="../../../lib/Glacier2.js"></script>
+    <script src="Chat.js"></script>
+    
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shBrushJScript.js"></script>
+    <script>
+        $(document).foundation();
+    </script>
+    <script src="browser/Client.js"></script>
+    <script type="application/javascript">
+        $("#source").load("browser/Client.js",
+            //
+            // Load completed
+            //
+            function(){
+                SyntaxHighlighter.defaults.toolbar = false;
+                SyntaxHighlighter.all();
+                $("#viewSource").removeClass("disabled");
+                $("#viewSource").click(
+                    function()
+                    {
+                        $("#source-modal").foundation("reveal", "open");
+                        return false;
+                    });
+            });
+    </script>
+  </body>
+</html>
