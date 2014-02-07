@@ -22,8 +22,7 @@ var ChatCallbackPrx = Demo.ChatCallbackPrx;
 var ChatCallbackI = Ice.Class(Demo.ChatCallback, {
     message: function(data)
     {
-        console.log(data);
-        $("#output").append(data + "\n");
+        $("#output").val($("#output").val() + data + "\n");
         $("#output").scrollTop($("#output").get(0).scrollHeight);
     }
 });
@@ -175,6 +174,7 @@ var run = function(router, session)
     ).then(
         function()
         {
+            $("#loading .meter").css("width", "0%");
             state = State.Connected;
             $("#input").focus();
             //
@@ -295,6 +295,7 @@ var error = function(message)
         {
             transition(current, "#signin-alert").then(
                 function(){
+                    $("#loading .meter").css("width", "0%");
                     $("#signin-form").css("display", "block")
                         .animo({ animation: "flipInX", keep: true });
                     state = State.Disconnected;
