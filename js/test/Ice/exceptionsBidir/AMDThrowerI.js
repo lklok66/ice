@@ -25,30 +25,30 @@
     AMDThrowerI.prototype = new TestAMD.Thrower;
     AMDThrowerI.prototype.constructor = AMDThrowerI;
 
-    AMDThrowerI.prototype.shutdown = function(cb, current)
+    AMDThrowerI.prototype.shutdown_async = function(cb, current)
     {
         current.adapter.getCommunicator().shutdown();
         cb.ice_response();
     };
 
-    AMDThrowerI.prototype.supportsUndeclaredExceptions = function(cb, current)
+    AMDThrowerI.prototype.supportsUndeclaredExceptions_async = function(cb, current)
     {
         cb.ice_response(true);
     };
 
-    AMDThrowerI.prototype.supportsAssertException = function(cb, current)
+    AMDThrowerI.prototype.supportsAssertException_async = function(cb, current)
     {
         cb.ice_response(false);
     };
 
-    AMDThrowerI.prototype.throwAasA = function(cb, a, current)
+    AMDThrowerI.prototype.throwAasA_async = function(cb, a, current)
     {
         var ex = new TestAMD.A();
         ex.aMem = a;
         cb.ice_exception(ex);
     };
 
-    AMDThrowerI.prototype.throwAorDasAorD = function(cb, a, current)
+    AMDThrowerI.prototype.throwAorDasAorD_async = function(cb, a, current)
     {
         if(a > 0)
         {
@@ -64,12 +64,12 @@
         }
     };
 
-    AMDThrowerI.prototype.throwBasA = function(cb, a, b, current)
+    AMDThrowerI.prototype.throwBasA_async = function(cb, a, b, current)
     {
         this.throwBasB(cb, a, b, current);
     };
 
-    AMDThrowerI.prototype.throwBasB = function(cb, a, b, current)
+    AMDThrowerI.prototype.throwBasB_async = function(cb, a, b, current)
     {
         var ex = new TestAMD.B();
         ex.aMem = a;
@@ -77,17 +77,17 @@
         cb.ice_exception(ex);
     };
 
-    AMDThrowerI.prototype.throwCasA = function(cb, a, b, c, current)
+    AMDThrowerI.prototype.throwCasA_async = function(cb, a, b, c, current)
     {
         this.throwCasC(cb, a, b, c, current);
     };
 
-    AMDThrowerI.prototype.throwCasB = function(cb, a, b, c, current)
+    AMDThrowerI.prototype.throwCasB_async = function(cb, a, b, c, current)
     {
         this.throwCasC(cb, a, b, c, current);
     };
 
-    AMDThrowerI.prototype.throwCasC = function(cb, a, b, c, current)
+    AMDThrowerI.prototype.throwCasC_async = function(cb, a, b, c, current)
     {
         var ex = new TestAMD.C();
         ex.aMem = a;
@@ -96,14 +96,14 @@
         cb.ice_exception(ex);
     };
 
-    AMDThrowerI.prototype.throwUndeclaredA = function(cb, a, current)
+    AMDThrowerI.prototype.throwUndeclaredA_async = function(cb, a, current)
     {
         var ex = new TestAMD.A();
         ex.aMem = a;
         cb.ice_exception(ex);
     };
 
-    AMDThrowerI.prototype.throwUndeclaredB = function(cb, a, b, current)
+    AMDThrowerI.prototype.throwUndeclaredB_async = function(cb, a, b, current)
     {
         var ex = new TestAMD.B();
         ex.aMem = a;
@@ -111,7 +111,7 @@
         cb.ice_exception(ex);
     };
 
-    AMDThrowerI.prototype.throwUndeclaredC = function(cb, a, b, c, current)
+    AMDThrowerI.prototype.throwUndeclaredC_async = function(cb, a, b, c, current)
     {
         var ex = new TestAMD.C();
         ex.aMem = a;
@@ -120,39 +120,39 @@
         cb.ice_exception(ex);
     };
 
-    AMDThrowerI.prototype.throwLocalException = function(cb, current)
+    AMDThrowerI.prototype.throwLocalException_async = function(cb, current)
     {
         cb.ice_exception(new Ice.TimeoutException());
     };
 
-    AMDThrowerI.prototype.throwLocalExceptionIdempotent = function(cb, current)
+    AMDThrowerI.prototype.throwLocalExceptionIdempotent_async = function(cb, current)
     {
         cb.ice_exception(new Ice.TimeoutException());
     };
 
-    AMDThrowerI.prototype.throwNonIceException = function(cb, current)
+    AMDThrowerI.prototype.throwNonIceException_async = function(cb, current)
     {
         cb.ice_exception(new Error());
     };
 
-    AMDThrowerI.prototype.throwAssertException = function(cb, current)
+    AMDThrowerI.prototype.throwAssertException_async = function(cb, current)
     {
         test(false);
     };
 
-    AMDThrowerI.prototype.throwMemoryLimitException = function(cb, seq, current)
+    AMDThrowerI.prototype.throwMemoryLimitException_async = function(cb, seq, current)
     {
         cb.ice_response(Ice.Buffer.createNative(1024 * 20)); // 20KB is over the configured 10KB message size max.
     };
 
-    AMDThrowerI.prototype.throwAfterResponse = function(cb, current)
+    AMDThrowerI.prototype.throwAfterResponse_async = function(cb, current)
     {
         cb.ice_response();
 
         throw new Error();
     };
 
-    AMDThrowerI.prototype.throwAfterException = function(cb, current)
+    AMDThrowerI.prototype.throwAfterException_async = function(cb, current)
     {
         cb.ice_exception(new TestAMD.A());
 

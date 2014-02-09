@@ -9,7 +9,7 @@
 
 #pragma once
 
-module Test
+module TestAMD
 {
 
 class OneOptional
@@ -171,7 +171,7 @@ class F extends E
     optional(1) A af;
 };
 
-class Initial
+["amd"] class Initial
 {
     void shutdown();
 
@@ -289,6 +289,13 @@ class Initial
     bool supportsJavaSerializable();
 
     bool supportsCsharpSerializable();
+};
+
+interface Echo
+{
+    void startBatch();
+    void flushBatch();
+    void shutdown();
 };
 
 };

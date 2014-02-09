@@ -11,7 +11,6 @@
 
 #include <Ice/BuiltinSequences.ice>
 
-[["java:package:test.Ice.exceptions"]]
 module Test
 {
 

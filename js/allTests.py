@@ -38,6 +38,7 @@ tests = [
     ("Ice/operations", ["once"]),
     ("Ice/operationsBidir", ["once"]),
     ("Ice/optional", ["once"]),
+    ("Ice/optionalBidir", ["once"]),
     ("Ice/promise", ["once"]),
     ("Ice/proxy", ["once"]),
     ("Ice/retry", ["once"]),
