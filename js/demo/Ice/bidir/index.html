@@ -6,13 +6,14 @@
     <title>Bidir Demo | Ice for JavaScript</title>
     <link rel="stylesheet" href="../../../config/foundation/css/foundation.css" />
     <script src="../../../config/foundation/js/modernizr.js"></script>
-    <script src="../../../lib/Ice.js"></script>
-    <script src="Callback.js"></script>
-    
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shBrushJScript.js"></script>
+    <link type="text/css" rel="stylesheet" href="../../../config/syntaxhighlighter/styles/shCoreDefault.css"/>
     <style type="text/css">
-        #ssl
+        #source
         {
-            margin-top:10px;
+            max-height:500px;
+            overflow:auto;
         }
     </style>
   </head>
@@ -59,132 +60,37 @@
             </div>
         </div>
     </section>
+    <div id="source-modal" class="reveal-modal" data-reveal>
+        <pre id="source" class="brush: js;"></pre>
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
     <script src="../../../config/foundation/js/jquery.js"></script>
     <script src="../../../config/foundation/js/foundation.min.js"></script>
     <script type="application/javascript">
-    
-        var Promise = Ice.Promise;
-        var CallbackSenderPrx = Demo.CallbackSenderPrx;
-        
         $(document).foundation();
-      
         $(document).ready(function(){
             $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
-            
-            //
-            // Define a servant class that implements Demo.CallbackReceiver
-            // interface.
-            //
-            var CallbackReceiverI = Ice.Class(Demo.CallbackReceiver, {
-                callback: function(num, current)
-                {
-                    var s = $("#console").val();
-                    var msg = "received callback #" + num;
-                    $("#console").val(s ? s + "\n" + msg : msg);
-                    $("#console").scrollTop($("#console").get(0).scrollHeight);
-                }
-            });
-            
-            var id = new Ice.InitializationData();
-            id.properties = Ice.createProperties();
-            //
-            // Client-side ACM must be disabled for bidirectional connections.
-            //
-            id.properties.setProperty("Ice.ACM.Client", "0");
-
-            var communicator;
-            
-            $("#start").click(
-                function()
-                {
-                    if(!$(this).hasClass("disabled"))
-                    {
-                        
-                        $(this).addClass("disabled");
-                        $("#stop").removeClass("disabled");
-                        $("#console").val("");
-                        
-                        var ident = new Ice.Identity(Ice.UUID.generateUUID(), "");
-                        Promise.try(
-                            function()
-                            {
-                                communicator = Ice.initialize(id);
-                                var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
-                                return communicator.stringToProxy("sender:ws -p 10000 -h " + hostname);
-                            }
-                        ).then(
-                            function(proxy)
-                            {
-                                return CallbackSenderPrx.checkedCast(proxy).then(
-                                    function(r, server)
-                                    {
-                                        return communicator.createObjectAdapter("").then(
-                                            function(r, adapter)
-                                            {
-                                                adapter.add(new CallbackReceiverI(), ident);
-                                                return adapter.activate().then(
-                                                    function(asyncResult)
-                                                    {
-                                                        return server.ice_getConnection();
-                                                    }
-                                                ).then(
-                                                    function(asyncResult, conn)
-                                                    {
-                                                        conn.setAdapter(adapter);
-                                                        return server.addClient(ident);
-                                                    }
-                                                );
-                                            });
-                                    });
-                            }
-                        ).exception(
-                            function(ex)
-                            {
-                                $("#console").val(ex.toString());
-                                Promise.try(
-                                    function()
-                                    {
-                                        if(communicator)
-                                        {
-                                            return communicator.destroy();
-                                        }
-                                    }
-                                ).finally(
-                                    function()
-                                    {
-                                        $("#stop").addClass("disabled");
-                                        $("#start").removeClass("disabled");
-                                    });
-                            }
-                        );
-                    }
-                    return false;
-                });
-                
-            $("#stop").click(
-                function()
-                {
-                    if(!$(this).hasClass("disabled"))
-                    {
-                        $(this).addClass("disabled");
-                        Promise.try(
-                            function()
-                            {
-                                if(communicator)
-                                {
-                                    return communicator.destroy();
-                                }
-                            }
-                        ).finally(
-                            function()
-                            {
-                                $("#stop").addClass("disabled");
-                                $("#start").removeClass("disabled");
-                            }
-                        );
-                    }
-                });
         });
+    </script>
+    <script src="../../../lib/Ice.js"></script>
+    <script src="Callback.js"></script>
+    <script src="browser/Client.js"></script>
+    <script type="application/javascript">
+        $("#source").load("browser/Client.js",
+            //
+            // Load completed
+            //
+            function(){
+                SyntaxHighlighter.defaults.toolbar = false;
+                SyntaxHighlighter.highlight();
+                $("#viewSource").removeClass("disabled");
+                $("#viewSource").click(
+                    function()
+                    {
+                        $("#source-modal").foundation("reveal", "open");
+                        return false;
+                    });
+            });
     </script>
   </body>
 </html>
