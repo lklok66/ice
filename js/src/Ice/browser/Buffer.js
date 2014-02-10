@@ -28,6 +28,7 @@
     }
     
     var __BufferOverflowException__ = "BufferOverflowException";
+    var __BufferUnderflowException__ = "BufferUnderflowException";
     var __IndexOutOfBoundsException__ = "IndexOutOfBoundsException";
     
     //
@@ -258,7 +259,7 @@
         {
             if(this._position >= this._limit)
             {
-                throw new Error("BufferUnderflowException");
+                throw new Error(__BufferUnderflowException__);
             }
             var v = this.v.getUint8(this._position);
             this._position++;
@@ -276,7 +277,7 @@
         {
             if(this._position + length > this._limit)
             {
-                throw new Error("BufferUnderflowException");
+                throw new Error(__BufferUnderflowException__);
             }
             var buffer = this.b.slice(this._position, this._position + length);
             this._position += length;
@@ -286,7 +287,7 @@
         {
             if(position + length > this._limit)
             {
-                throw new Error("BufferUnderflowException");
+                throw new Error(__BufferUnderflowException__);
             }
             length = length === undefined ? (this.b.byteLength - position) : length;
             return new Uint8Array(this.b.slice(position, position + length));
@@ -295,7 +296,7 @@
         {
             if(this._limit - this._position < 2)
             {
-                throw new Error("BufferUnderflowException");
+                throw new Error(__BufferUnderflowException__);
             }
             var v = this.v.getInt16(this._position, true);
             this._position += 2;
@@ -305,7 +306,7 @@
         {
             if(this._limit - this._position < 4)
             {
-                throw new Error("BufferUnderflowException");
+                throw new Error(__BufferUnderflowException__);
             }
             var v = this.v.getInt32(this._position, true);
             this._position += 4;
@@ -315,7 +316,7 @@
         {
             if(this._limit - this._position < 4)
             {
-                throw new Error("BufferUnderflowException");
+                throw new Error(__BufferUnderflowException__);
             }
             var v = this.v.getFloat32(this._position, true);
             this._position += 4;
@@ -325,7 +326,7 @@
         {
             if(this._limit - this._position < 8)
             {
-                throw new Error("BufferUnderflowException");
+                throw new Error(__BufferUnderflowException__);
             }
             var v = this.v.getFloat64(this._position, true);
             this._position += 8;
@@ -335,7 +336,7 @@
         {
             if(this._limit - this._position < 8)
             {
-                throw new Error("BufferUnderflowException");
+                throw new Error(__BufferUnderflowException__);
             }
             var v = new Long();
             v.low = this.v.getInt32(this._position, true);
@@ -348,7 +349,7 @@
         {
             if(this._position + length > this._limit)
             {
-                throw new Error("BufferUnderflowException");
+                throw new Error(__BufferUnderflowException__);
             }
             
             var data = new DataView(this.b, this._position, length);

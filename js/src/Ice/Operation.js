@@ -20,6 +20,8 @@
 
     var Ice = global.Ice || {};
     var Slice = global.Slice || {};
+    
+    /*jshint -W069 */
 
     var Class = Ice.Class;
 
@@ -39,7 +41,6 @@
 
     function parseParam(p)
     {
-        var r = {};
         var type = p[0];
         var t = typeof(type);
         if(t === 'number')
@@ -52,10 +53,12 @@
             type = eval(type);
             /*jshint +W061 */
         }
-        r["type"] = type;
-        r["isObject"] = p[1] === true;
-        r["tag"] = p[2]; // Optional tag, which may not be present - an undefined tag means "not optional".
-        return r;
+        
+        return {
+            "type": type,
+            "isObject": (p[1] === true),
+            "tag": p[2] // Optional tag, which may not be present - an undefined tag means "not optional".
+        };
     }
 
     //
@@ -79,6 +82,7 @@
     {
         var r = {};
         var i;
+        var p;
 
         r["name"] = name;
         r["mode"] = arr[1] ? Ice.OperationMode.valueOf(arr[1]) : Ice.OperationMode.Normal;
@@ -109,7 +113,7 @@
         {
             for(i = 0; i < arr[6].length; ++i)
             {
-                var p = parseParam(arr[6][i]);
+                p = parseParam(arr[6][i]);
                 p["pos"] = i;
                 inParams.push(p);
                 if(p.tag)
@@ -129,7 +133,7 @@
             var offs = ret ? 1 : 0;
             for(i = 0; i < arr[7].length; ++i)
             {
-                var p = parseParam(arr[7][i]);
+                p = parseParam(arr[7][i]);
                 p["pos"] = i + offs;
                 outParams.push(p);
                 if(p.tag)
@@ -188,17 +192,16 @@
 
     function unmarshalParams(is, retvalInfo, allParamInfo, optParamInfo, usesClasses, params, offset)
     {
-        var i;
-
+        var i, p, v;
         //
         // First read all required params.
         //
         for(i = 0; i < allParamInfo.length; ++i)
         {
-            var p = allParamInfo[i];
+            p = allParamInfo[i];
             if(!p.tag)
             {
-                var v = p.type.read(is);
+                v = p.type.read(is);
                 params[p.pos + offset] = v;
             }
         }
@@ -208,7 +211,7 @@
         //
         if(retvalInfo)
         {
-            var v = retvalInfo.type.read(is);
+            v = retvalInfo.type.read(is);
             params[retvalInfo.pos + offset] = v;
         }
 
@@ -217,8 +220,8 @@
         //
         for(i = 0; i < optParamInfo.length; ++i)
         {
-            var p = optParamInfo[i];
-            var v = p.type.readOpt(is, p.tag);
+            p = optParamInfo[i];
+            v = p.type.readOpt(is, p.tag);
             params[p.pos + offset] = v;
         }
 
@@ -230,14 +233,14 @@
 
     function marshalParams(os, params, retvalInfo, paramInfo, optParamInfo, usesClasses)
     {
-        var i;
+        var i, p;
 
         //
         // Write the required params.
         //
         for(i = 0; i < paramInfo.length; ++i)
         {
-            var p = paramInfo[i];
+            p = paramInfo[i];
             if(!p.tag)
             {
                 p.type.write(os, params[p.pos]);
@@ -257,7 +260,7 @@
         //
         for(i = 0; i < optParamInfo.length; ++i)
         {
-            var p = optParamInfo[i];
+            p = optParamInfo[i];
             p.type.writeOpt(os, p.tag, params[p.pos]);
         }
 
@@ -331,7 +334,7 @@
                 {
                     retvalInfo = this.op.returns;
                 }
-                marshalParams(__os, args, retvalInfo, this.op.outParams, this.op.outParamsOpt, this.op.returnsClasses)
+                marshalParams(__os, args, retvalInfo, this.op.outParams, this.op.outParamsOpt, this.op.returnsClasses);
                 this.incomingAsync.__endWriteParams(true);
             }
         },
@@ -484,7 +487,7 @@
         //
         // The dispatch method is named __op_<Slice name> and is stored in the type (not the prototype).
         //
-        var methodName = dispatchPrefix = name;
+        var methodName = dispatchPrefix + name;
 
         //
         // First check the servant type.
@@ -552,7 +555,7 @@
                 //
                 // Now check the op tables of all base interfaces.
                 //
-                for(var i = 0; op === undefined && i < allInterfaces.length; ++I)
+                for(var i = 0; op === undefined && i < allInterfaces.length; ++i)
                 {
                     var intf = allInterfaces[i];
                     if(intf.__ops)
@@ -739,4 +742,6 @@
 
     global.Slice = Slice;
     global.Ice = Ice;
+    
+    /*jshint +W069 */
 }(typeof (global) === "undefined" ? window : global));
