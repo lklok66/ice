@@ -33,6 +33,14 @@ using namespace IceUtilInternal;
 namespace
 {
 
+bool
+isObjectType(const TypePtr& type)
+{
+    BuiltinPtr b = BuiltinPtr::dynamicCast(type);
+    ClassDeclPtr cl = ClassDeclPtr::dynamicCast(type);
+    return cl || (b && b->kind() == Builtin::KindObject);
+}
+
 string
 sliceModeToIceMode(Operation::Mode opMode)
 {
@@ -1079,14 +1087,14 @@ Slice::Gen::generate(const UnitPtr& p)
     _out << nl << "(function(global)";
     _out << sb;
     _out << nl << "var require = typeof(module) !== \"undefined\" ? module.require : function(){};";
-    
+
     RequireVisitor requireVisitor(_out, _includePaths);
     p->visit(&requireVisitor, false);
     vector<string> seenModules = requireVisitor.writeRequires(p);
 
     TypesVisitor typesVisitor(_out, seenModules);
     p->visit(&typesVisitor, false);
-    
+
     //
     // Export the top-level modules.
     //
@@ -1174,6 +1182,7 @@ Slice::Gen::printHeader()
 Slice::Gen::RequireVisitor::RequireVisitor(IceUtilInternal::Output& out, vector<string> includePaths)
     : JsVisitor(out),
     _seenClass(false),
+    _seenOperation(false),
     _seenStruct(false),
     _seenUserException(false),
     _seenLocalException(false),
@@ -1192,7 +1201,7 @@ bool
 Slice::Gen::RequireVisitor::visitClassDefStart(const ClassDefPtr& p)
 {
     _seenClass = true; // Set regardless of whether p->isLocal()
-    return false;
+    return !p->isLocal(); // Look for operations.
 }
 
 bool
@@ -1200,6 +1209,12 @@ Slice::Gen::RequireVisitor::visitStructStart(const StructPtr& p)
 {
     _seenStruct = true; // Set regardless of whether p->isLocal()
     return false;
+}
+
+void
+Slice::Gen::RequireVisitor::visitOperation(const OperationPtr& p)
+{
+    _seenOperation = true;
 }
 
 bool
@@ -1247,7 +1262,7 @@ vector<string>
 Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
 {
     vector<string> seenModules;
-    
+
     //
     // Generate require() statements for all of the run-time code needed by the generated code.
     //
@@ -1258,6 +1273,10 @@ Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
     if(_seenClass)
     {
         _out << nl << "require(\"Ice/ObjectPrx\");";
+    }
+    if(_seenOperation)
+    {
+        _out << nl << "require(\"Ice/Operation\");";
     }
     if(_seenStruct)
     {
@@ -1273,7 +1292,7 @@ Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
     {
         _out << nl << "require(\"Ice/EnumBase\");";
     }
-    
+
     _out << nl << "require(\"Ice/TypeRegistry\");";
     _out << nl << "require(\"Ice/HashMap\");";
     _out << nl << "require(\"Ice/HashUtil\");";
@@ -1282,12 +1301,12 @@ Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
     _out << nl;
     _out << nl << "var Ice = global.Ice || {};";
     seenModules.push_back("Ice");
-    
+
     StringList includes = p->includeFiles();
     for(StringList::const_iterator i = includes.begin(); i != includes.end(); ++i)
     {
         _out << nl << "require(\""  << changeInclude(*i, _includePaths) << "\");";
-        
+
         set<string> modules = p->getTopLevelModules(*i);
         for(set<string>::const_iterator j = modules.begin(); j != modules.end(); ++j)
         {
@@ -1303,7 +1322,7 @@ Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
     return seenModules;
 }
 
-Slice::Gen::TypesVisitor::TypesVisitor(IceUtilInternal::Output& out, vector<string> seenModules) : 
+Slice::Gen::TypesVisitor::TypesVisitor(IceUtilInternal::Output& out, vector<string> seenModules) :
     JsVisitor(out),
     _seenModules(seenModules)
 {
@@ -1334,7 +1353,7 @@ Slice::Gen::TypesVisitor::visitModuleStart(const ModulePtr& p)
         }
         else
         {
-            _out << nl << scoped << " = global." << getLocalScope(p->scope()) << " ? (global." << scoped 
+            _out << nl << scoped << " = global." << getLocalScope(p->scope()) << " ? (global." << scoped
                  << " ||  {}) : {};";
         }
     }
@@ -1350,6 +1369,7 @@ bool
 Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
 {
     const string scope = p->scope();
+    const string scoped = p->scoped();
     const string localScope = getLocalScope(scope);
     const string name = fixId(p->name());
     const string prxName = p->name() + "Prx";
@@ -1407,12 +1427,12 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             baseParamNames.push_back(fixId((*q)->name()));
         }
     }
-    
+
     _out << sp;
     writeDocComment(p, getDeprecateReason(p, 0, "type"));
     _out << nl << localScope << '.' << name << " = " << defineObject << "(";
     _out.inc();
-    
+
     if(!allParamNames.empty())
     {
         _out << nl << "function" << spar << allParamNames << epar;
@@ -1421,7 +1441,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         {
             _out << nl << baseRef << ".call" << spar << "this" << baseParamNames << epar << ';';
         }
-        
+
         for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
         {
             const bool isProtected = p->hasMetaData("protected") || (*q)->hasMetaData("protected");
@@ -1468,10 +1488,9 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         _out << ",";
         _out << nl << baseRef;
     }
-    
+
     if(!p->isLocal())
     {
-        string scoped = p->scoped();
         ClassList allBases = p->allBases();
         StringList ids;
 
@@ -1516,7 +1535,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         transform(allBases.begin(), allBases.end(), back_inserter(ids), ::IceUtil::constMemFun(&Contained::scoped));
 #endif
         StringList other;
-        other.push_back(p->scoped());
+        other.push_back(scoped);
         other.push_back("::Ice::Object");
         other.sort();
         ids.merge(other);
@@ -1526,7 +1545,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
         StringList::const_iterator scopedIter = find(ids.begin(), ids.end(), scoped);
         assert(scopedIter != ids.end());
         StringList::difference_type scopedPos = IceUtilInternal::distance(firstIter, scopedIter);
-        
+
         _out << ", " << scopedPos << ",";
         _out << nl << "[";
         _out.inc();
@@ -1554,7 +1573,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
                 writeMarshalDataMember(*q);
             }
             _out << eb << ",";
-            
+
             _out << nl << "function(__is)";
             _out << sb;
             if(hasClassMembers)
@@ -1568,417 +1587,45 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             _out << eb << ",";
             _out << nl;
         }
-        _out << (p->hasMetaData("preserve-slice") && !p->inheritsMetaData("preserve-slice") ? "true" : "false") << ", ";
-
-        const OperationList ops = p->operations();
-        if(ops.empty())
-        {
-            _out << "undefined";
-        }
-        else
-        {
-            _out << sb;
-            for(OperationList::const_iterator q = ops.begin(); q != ops.end(); ++q)
-            {
-                if(q != ops.begin())
-                {
-                    _out << ',';
-                }
-
-                OperationPtr op = *q;
-                const string name = fixId(op->name());
-                const ParamDeclList paramList = op->parameters();
-                const TypePtr ret = op->returnType();
-                ParamDeclList inParams, outParams;
-                vector<string> inArgs, outArgs;
-                for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
-                {
-                    if((*pli)->isOutParam())
-                    {
-                        outParams.push_back(*pli);
-                        outArgs.push_back(fixId((*pli)->name()));
-                    }
-                    else
-                    {
-                        inParams.push_back(*pli);
-                        inArgs.push_back(fixId((*pli)->name()));
-                    }
-                }
-
-                //
-                // Each operation descriptor is a property. The value of the property
-                // is an object that may contain the following properties:
-                //
-                // n: Native method name (when Slice name is a keyword)
-                // u: Function to unmarshal in params
-                // m: Function to marshal out params
-                // e: Exception list
-                // f: Format type
-                // a: AMD
-                //
-                _out << nl << "\"" << op->name() << "\":"; // Operation name over-the-wire.
-                _out << sb;
-
-                bool props = false;
-                if(name != op->name())
-                {
-                    _out << nl << "n: \"" << name << "\""; // Native method name.
-                    props = true;
-                }
-
-                if(!inParams.empty())
-                {
-                    //
-                    // Unmarshal in params and push them onto the array __r.
-                    //
-                    if(props)
-                    {
-                        _out << ",";
-                    }
-                    props = true;
-                    _out << nl << "u: function(__is, __r)";
-                    _out << sb;
-                    _out << nl << "var ";
-                    for(vector<string>::const_iterator vsi = inArgs.begin(); vsi != inArgs.end(); ++vsi)
-                    {
-                        if(vsi != inArgs.begin())
-                        {
-                            _out << ", ";
-                        }
-                        _out << *vsi;
-                    }
-                    _out << ';';
-                    writeMarshalUnmarshalParams(inParams, 0, false);
-                    if(op->sendsClasses(false))
-                    {
-                        _out << nl << "__is.readPendingObjects();";
-                    }
-                    _out << nl << "__r.push" << spar << inArgs << epar << ';';
-                    _out << eb;
-                }
-
-                if(ret || !outParams.empty())
-                {
-                    //
-                    // Marshal out params.
-                    //
-                    if(props)
-                    {
-                        _out << ",";
-                    }
-                    props = true;
-                    _out << nl << "m: function(__os";
-                    if(ret)
-                    {
-                        _out << ", __ret";
-                    }
-                    for(vector<string>::const_iterator vsi = outArgs.begin(); vsi != outArgs.end(); ++vsi)
-                    {
-                        _out << ", " << *vsi;
-                    }
-                    _out << ')';
-                    _out << sb;
-                    writeMarshalUnmarshalParams(outParams, op, true);
-                    if(op->returnsClasses(false))
-                    {
-                        _out << nl << "__os.writePendingObjects();";
-                    }
-                    _out << eb;
-                }
-
-                const ExceptionList throws = op->throws();
-
-                if(!throws.empty())
-                {
-                    if(props)
-                    {
-                        _out << ",";
-                    }
-                    props = true;
-                    _out << nl << "e:";
-                    _out << nl << '[';
-                    _out.inc();
-                    for(ExceptionList::const_iterator eli = throws.begin(); eli != throws.end(); ++eli)
-                    {
-                        if(eli != throws.begin())
-                        {
-                            _out << ',';
-                        }
-                        _out << nl << fixId((*eli)->scoped());
-                    }
-                    _out.dec();
-                    _out << nl << ']';
-                }
-
-                if(op->format() != DefaultFormat)
-                {
-                    if(props)
-                    {
-                        _out << ",";
-                    }
-                    props = true;
-                    _out << nl << "f: " << opFormatTypeToString(op);
-                }
-
-                if(p->hasMetaData("amd") || op->hasMetaData("amd"))
-                {
-                    if(props)
-                    {
-                        _out << ",";
-                    }
-                    props = true;
-                    _out << nl << "a: true";
-                }
-
-                _out << eb;
-            }
-            _out << eb;
-        }
+        _out << (p->hasMetaData("preserve-slice") && !p->inheritsMetaData("preserve-slice") ? "true" : "false");
     }
     _out.dec();
     _out << ");";
-    
+
     if(!p->isLocal())
     {
         const string staticId = localScope + "." + name + ".ice_staticId";
-        const string baseProxy = 
+        const string baseProxy =
             !p->isInterface() && base ? (getLocalScope(base->scope()) + "." + base->name() + "Prx") : "Ice.ObjectPrx";
-        
+
         _out << sp;
         _out << nl << localScope << '.' << prxName << " = " << "Slice.defineProxy(" << baseProxy << ", " << staticId;
-        const OperationList ops = p->operations();
-        if(!bases.empty() || !ops.empty())
+        if(!bases.empty())
         {
-            if(!bases.empty())
+            _out << ", [";
+            _out.inc();
+            for(ClassList::const_iterator q = bases.begin(); q != bases.end();)
             {
-                _out << ", [";
-                _out.inc();
-                for(ClassList::const_iterator q = bases.begin(); q != bases.end();)
+                ClassDefPtr base = *q;
+                if(base->isInterface())
                 {
-                    ClassDefPtr base = *q;
-                    if(base->isInterface())
+                    _out << nl << getLocalScope(base->scope()) << "." << base->name() << "Prx";
+                    if(++q != bases.end())
                     {
-                        _out << nl << getLocalScope(base->scope()) << "." << base->name() << "Prx";
-                        if(++q != bases.end())
-                        {
-                            _out << ", ";
-                        }
-                    }
-                    else
-                    {
-                        q++;
+                        _out << ", ";
                     }
                 }
-                _out.dec();
-                _out << "]";
-            }
-            else
-            {
-                _out << ", undefined";
-            }
-            
-            if(!ops.empty())
-            {
-                _out << ", " << sb;
-                for(OperationList::const_iterator q = ops.begin(); q != ops.end(); )
+                else
                 {
-                    OperationPtr op = *q;
-                    const TypePtr ret = op->returnType();
-                    ExceptionList throws = op->throws();
-                    throws.sort();
-                    throws.unique();
-
-                    bool first = true;
-                    
-                    const ParamDeclList paramList = op->parameters();
-                    ParamDeclList inParams, outParams;
-                    for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
-                    {
-                        if((*pli)->isOutParam())
-                        {
-                            outParams.push_back(*pli);
-                        }
-                        else
-                        {
-                            inParams.push_back(*pli);
-                        }
-                    }
-                    
-                    _out << nl << op->name() << ":";
-                    _out << sb;
-                    
-                    if(op->sendMode() != Operation::Normal)
-                    {
-                        _out << nl << "o: " << sliceModeToIceMode(op->sendMode());
-                        first = false;
-                    }
-                    
-                    if(op->format() != DefaultFormat)
-                    {
-                        if(!first)
-                        {
-                            _out << ",";
-                        }
-                        else
-                        {
-                            first = false;
-                        }
-                        _out << nl << "f: " << opFormatTypeToString(op);
-                    }
-                    
-                    //
-                    // Function to marshal in-params.
-                    //
-                    if(!inParams.empty())
-                    {
-                        if(!first)
-                        {
-                            _out << ",";
-                        }
-                        else
-                        {
-                            first = false;
-                        }
-                        _out << nl << "m: function" << spar << "__os" << getParams(op) << epar;
-                        _out << sb;
-                        writeMarshalUnmarshalParams(inParams, 0, true);
-                        if(op->sendsClasses(false))
-                        {
-                            _out << nl << "__os.writePendingObjects();";
-                        }
-                        _out << eb;
-                    }
-                    //
-                    // Function to unmarshal out-params.
-                    //
-                    if(ret || !outParams.empty())
-                    {
-                        if(!first)
-                        {
-                            _out << ",";
-                        }
-                        else
-                        {
-                            first = false;
-                        }
-                        _out << nl << "u: ";
-                        //
-                        // Select an unmarshal callback. We provide generic callbacks for operations that
-                        // return one value of built-in type. Otherwise, we have to generate a callback.
-                        //
-                        TypePtr t;
-                        if((ret && outParams.empty()) || (!ret && outParams.size() == 1))
-                        {
-                            if(ret)
-                            {
-                                assert(outParams.size() == 0);
-                                t = ret;
-                            }
-                            else
-                            {
-                                assert(outParams.size() == 1);
-                                t = outParams.front()->type();
-                            }
-                        }
-
-                        BuiltinPtr b = BuiltinPtr::dynamicCast(t);
-                        if(b)
-                        {
-                            if(b->kind() == Builtin::KindObject)
-                            {
-                                _out << "Ice.ObjectPrx.__returns_Object";
-                            }
-                            else if(b->kind() == Builtin::KindObjectProxy)
-                            {
-                                _out << "Ice.ObjectPrx.__returns_ObjectPrx";
-                            }
-                            else
-                            {
-                                assert(b->kind() != Builtin::KindLocalObject);
-                                _out << "Ice.ObjectPrx.__returns_" + b->typeId();
-                            }
-                        }
-                        else
-                        {
-                            _out << "function(__is, __results)";
-                            _out << sb;
-                            vector<string> outArgs;
-                            if(ret)
-                            {
-                                _out << nl << "var __ret;";
-                            }
-                            if(!outParams.empty())
-                            {
-                                _out << nl << "var ";
-                                for(ParamDeclList::const_iterator pli = outParams.begin(); pli != outParams.end(); ++pli)
-                                {
-                                    if(pli != outParams.begin())
-                                    {
-                                        _out << ", ";
-                                    }
-                                    string s = fixId((*pli)->name());
-                                    _out << s;
-                                    outArgs.push_back(s);
-                                }
-                                _out << ';';
-                            }
-                            writeMarshalUnmarshalParams(outParams, op, false);
-                            if(op->returnsClasses(false))
-                            {
-                                _out << nl << "__is.readPendingObjects();";
-                            }
-                            _out << nl << "__results.push" << spar;
-                            if(ret)
-                            {
-                                _out << "__ret";
-                            }
-                            _out << outArgs << epar << ';';
-                            _out << eb;
-                        }
-                    }
-                    //
-                    // User exceptions.
-                    //
-                    if(!throws.empty())
-                    {
-                        //
-                        // Arrange exceptions into most-derived to least-derived order. If we don't
-                        // do this, a base exception handler can appear before a derived exception
-                        // handler, causing compiler warnings and resulting in the base exception
-                        // being marshaled instead of the derived exception.
-                        //
-        #if defined(__SUNPRO_CC)
-                        throws.sort(Slice::derivedToBaseCompare);
-        #else
-                        throws.sort(Slice::DerivedToBaseCompare());
-        #endif
-                        if(!first)
-                        {
-                            _out << ",";
-                        }
-                        else
-                        {
-                            first = false;
-                        }
-                        _out << nl << "e: [";
-                        for(ExceptionList::const_iterator eli = throws.begin(); eli != throws.end(); ++eli)
-                        {
-                            if(eli != throws.begin())
-                            {
-                                _out << ", ";
-                            }
-                            _out << getLocalScope((*eli)->scoped());
-                        }
-                        _out << ']';
-                    }
-                    _out << eb;
-                    if(++q != ops.end())
-                    {
-                        _out << ",";
-                    }
+                    q++;
                 }
             }
-            _out << eb;
+            _out.dec();
+            _out << "]";
+        }
+        else
+        {
+            _out << ", undefined";
         }
         _out << ");";
 
@@ -1993,127 +1640,223 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             _out << nl << "Ice.CompactIdRegistry.set(" << p->compactId() << ", " << localScope << "."
                  << name << ".ice_staticId());";
         }
+
+        _out << sp << nl << "Slice.defineOperations(" << localScope << '.' << name << ", " << localScope << '.'
+             << prxName;
+        const OperationList ops = p->operations();
+        if(!ops.empty())
+        {
+            _out << ',';
+            _out << sb;
+            for(OperationList::const_iterator q = ops.begin(); q != ops.end(); ++q)
+            {
+                if(q != ops.begin())
+                {
+                    _out << ',';
+                }
+
+                OperationPtr op = *q;
+                const string name = fixId(op->name());
+                const ParamDeclList paramList = op->parameters();
+                const TypePtr ret = op->returnType();
+                ParamDeclList inParams, outParams;
+                for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
+                {
+                    if((*pli)->isOutParam())
+                    {
+                        outParams.push_back(*pli);
+                    }
+                    else
+                    {
+                        inParams.push_back(*pli);
+                    }
+                }
+
+                //
+                // Each operation descriptor is a property. The key is the "on-the-wire"
+                // name, and the value is an array consisting of the following elements:
+                //
+                //  0: servant method name in case of a keyword conflict (e.g., "_while"),
+                //     otherwise an empty string
+                //  1: mode (undefined == Normal or int)
+                //  2: sendMode (undefined == Normal or int)
+                //  3: amd (undefined or 1)
+                //  4: format (undefined == Default or int)
+                //  5: return type (undefined if void, or [type, tag])
+                //  6: in params (undefined if none, or array of [type, tag])
+                //  7: out params (undefined if none, or array of [type, tag])
+                //  8: exceptions (undefined if none, or array of types)
+                //  9: sends classes (true or undefined)
+                // 10: returns classes (true or undefined)
+                //
+                _out << nl << "\"" << op->name() << "\": ["; // Operation name over-the-wire.
+
+                if(name != op->name())
+                {
+                    _out << name; // Native method name.
+                }
+                _out << ", ";
+
+                if(op->mode() != Operation::Normal)
+                {
+                    _out << sliceModeToIceMode(op->mode()); // Mode.
+                }
+                _out << ", ";
+
+                if(op->sendMode() != Operation::Normal)
+                {
+                    _out << sliceModeToIceMode(op->sendMode()); // Send mode.
+                }
+                _out << ", ";
+
+                if(p->hasMetaData("amd") || op->hasMetaData("amd"))
+                {
+                    _out << "1"; // AMD.
+                }
+                _out << ", ";
+
+                if(op->format() != DefaultFormat)
+                {
+                    _out << opFormatTypeToString(op); // Format.
+                }
+                _out << ", ";
+
+                //
+                // Return type.
+                //
+                if(ret)
+                {
+                    _out << '[' << encodeTypeForOperation(ret);
+                    const bool isObj = isObjectType(ret);
+                    if(isObj)
+                    {
+                        _out << ", true";
+                    }
+                    if(op->returnIsOptional())
+                    {
+                        if(!isObj)
+                        {
+                            _out << ", ";
+                        }
+                        _out << ", " << op->returnTag();
+                    }
+                    _out << ']';
+                }
+                _out << ", ";
+
+                //
+                // In params.
+                //
+                if(!inParams.empty())
+                {
+                    _out << '[';
+                    for(ParamDeclList::const_iterator pli = inParams.begin(); pli != inParams.end(); ++pli)
+                    {
+                        if(pli != inParams.begin())
+                        {
+                            _out << ", ";
+                        }
+                        TypePtr t = (*pli)->type();
+                        _out << '[' << encodeTypeForOperation(t);
+                        const bool isObj = isObjectType(t);
+                        if(isObj)
+                        {
+                            _out << ", true";
+                        }
+                        if((*pli)->optional())
+                        {
+                            if(!isObj)
+                            {
+                                _out << ", ";
+                            }
+                            _out << ", " << (*pli)->tag();
+                        }
+                        _out << ']';
+                    }
+                    _out << ']';
+                }
+                _out << ", ";
+
+                //
+                // Out params.
+                //
+                if(!outParams.empty())
+                {
+                    _out << '[';
+                    for(ParamDeclList::const_iterator pli = outParams.begin(); pli != outParams.end(); ++pli)
+                    {
+                        if(pli != outParams.begin())
+                        {
+                            _out << ", ";
+                        }
+                        TypePtr t = (*pli)->type();
+                        _out << '[' << encodeTypeForOperation(t);
+                        const bool isObj = isObjectType(t);
+                        if(isObj)
+                        {
+                            _out << ", true";
+                        }
+                        if((*pli)->optional())
+                        {
+                            if(!isObj)
+                            {
+                                _out << ", ";
+                            }
+                            _out << ", " << (*pli)->tag();
+                        }
+                        _out << ']';
+                    }
+                    _out << ']';
+                }
+                _out << ", ";
+
+                //
+                // User exceptions.
+                //
+                ExceptionList throws = op->throws();
+                throws.sort();
+                throws.unique();
+#if defined(__SUNPRO_CC)
+                throws.sort(derivedToBaseCompare);
+#else
+                throws.sort(Slice::DerivedToBaseCompare());
+#endif
+                if(!throws.empty())
+                {
+                    _out << nl << '[';
+                    _out.inc();
+                    for(ExceptionList::const_iterator eli = throws.begin(); eli != throws.end(); ++eli)
+                    {
+                        if(eli != throws.begin())
+                        {
+                            _out << ',';
+                        }
+                        _out << nl << fixId((*eli)->scoped());
+                    }
+                    _out.dec();
+                    _out << nl << ']';
+                }
+                _out << ", ";
+
+                if(op->sendsClasses(false))
+                {
+                    _out << "true";
+                }
+                _out << ", ";
+
+                if(op->returnsClasses(false))
+                {
+                    _out << "true";
+                }
+
+                _out << ']';
+            }
+            _out << eb;
+        }
+        _out << ");";
     }
 
     return false;
-}
-
-void
-Slice::Gen::TypesVisitor::visitOperation(const OperationPtr& p)
-{
-#if 0 // TODO
-    ClassDefPtr classDef = ClassDefPtr::dynamicCast(p->container());
-    bool isLocal = classDef->isLocal();
-    bool isInterface = classDef->isInterface();
-
-    //
-    // Non-local classes and interfaces get the operations from their
-    // Operations base interfaces.
-    //
-    if(isInterface && !isLocal)
-    {
-        return;
-    }
-
-    bool amd = !isLocal && (classDef->hasMetaData("amd") || p->hasMetaData("amd"));
-
-    string name = p->name();
-    ParamDeclList paramList = p->parameters();
-    vector<string> params;
-    vector<string> args;
-    string retS;
-
-    if(!amd)
-    {
-        params = getParams(p);
-        args = getArgs(p);
-        name = fixId(name, DotNet::ICloneable, true);
-        retS = typeToString(p->returnType(), p->returnIsOptional());
-    }
-    else
-    {
-        params = getParamsAsync(p, true);
-        args = getArgsAsync(p);
-        retS = "void";
-        name = name + "_async";
-    }
-
-    _out << sp;
-    if(isInterface && isLocal)
-    {
-        _out << nl;
-    }
-
-    writeDocComment(p, getDeprecateReason(p, classDef, "operation"));
-    if(!isInterface)
-    {
-        _out << nl << "public ";
-        if(isLocal)
-        {
-            _out << "abstract ";
-        }
-    }
-    _out << retS << " " << name << spar << params << epar;
-    if(isLocal)
-    {
-        _out << ";";
-    }
-    else
-    {
-        _out << sb;
-        _out << nl;
-        if(!amd && p->returnType())
-        {
-            _out << "return ";
-        }
-        _out << name << spar << args << "Ice.ObjectImpl.defaultCurrent" << epar << ';';
-        _out << eb;
-    }
-
-    if(!isLocal)
-    {
-        _out << nl << "public abstract " << retS << " " << name
-             << spar << params << "Ice.Current current__" << epar << ';';
-    }
-
-    if(isLocal && (classDef->hasMetaData("async") || p->hasMetaData("async")))
-    {
-        vector<string> paramsNewAsync = getParamsAsync(p, false, true);
-
-        _out << sp;
-        _out << nl;
-        if(!isInterface)
-        {
-            _out << "public abstract ";
-        }
-        _out << "Ice.AsyncResult";
-        if(p->returnsData())
-        {
-            string clScope = fixId(classDef->scope());
-            string cbType = clScope + "Callback_" + classDef->name() + "_" + name;
-            _out << '<' << cbType << '>';
-        }
-        _out << " begin_" << name << spar << paramsNewAsync << epar << ';';
-
-        _out << sp;
-        _out << nl;
-        if(!isInterface)
-        {
-            _out << "public abstract ";
-        }
-        _out << "Ice.AsyncResult begin_" << name << spar << paramsNewAsync << "Ice.AsyncCallback cb__"
-             << "object cookie__" << epar << ';';
-
-        _out << sp;
-        _out << nl;
-        if(!isInterface)
-        {
-            _out << "public abstract ";
-        }
-        _out << typeToString(p->returnType(), p->returnIsOptional()) << " end_" << name << spar
-             << getParamsAsyncCB(p, true) << "Ice.AsyncResult r__" << epar << ';';
-    }
-#endif
 }
 
 void
@@ -2193,7 +1936,7 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     writeDocComment(p, getDeprecateReason(p, 0, "type"));
     _out << nl << localScope << '.' << name << " = " << defineException << "(";
     _out.inc();
-    
+
     _out << nl << "function" << spar << allParamNames << "_cause" << epar;
     _out << sb;
     _out << nl << baseRef << ".call" << spar << "this" << baseParamNames << "_cause" << epar << ';';
@@ -2263,7 +2006,7 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
         }
         bool basePreserved = p->inheritsMetaData("preserve-slice");
         bool preserved = p->hasMetaData("preserve-slice");
-        
+
         _out << ",";
         if(preserved && !basePreserved)
         {
@@ -2290,13 +2033,13 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
     const string name = fixId(p->name());
 
     const DataMemberList dataMembers = p->dataMembers();
-    
+
     vector<string> paramNames;
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
         paramNames.push_back(fixId((*q)->name()));
     }
-    
+
     //
     // Only generate hashCode if this structure type is a legal dictionary key type.
     //
@@ -2316,7 +2059,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         {
             hasClassMembers = true;
         }
-        
+
         string memberName = fixId((*q)->name());
         _out << nl << "this." << memberName << " = " << memberName << " !== undefined ? " << memberName << " : ";
         if((*q)->defaultValueType())
@@ -2355,7 +2098,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
             writeUnmarshalDataMember(*q);
         }
         _out << eb << ","
-             << nl << p->minWireSize() << ", " 
+             << nl << p->minWireSize() << ", "
              << nl << (p->isVariableLength() ? "false" : "true");
         _out.dec();
         _out << ");";
@@ -2395,8 +2138,8 @@ Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
     bool fixed = !keyType->isVariableLength() && !valueType->isVariableLength();
 
     _out << nl << "Slice.defineDictionary(" << scope << ", \"" << name << "\", \"" << propertyName << "\", "
-         << "\"" << getHelper(keyType) << "\" , "
-         << "\"" << getHelper(valueType) << "\", " 
+         << "\"" << getHelper(keyType) << "\", "
+         << "\"" << getHelper(valueType) << "\", "
          << (fixed ? "true" : "false") << ", "
          << (useEquals ? "true" : "false");
     if(isClassType(valueType))
@@ -2458,6 +2201,71 @@ Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
     writeConstantValue(scope, p->type(), p->valueType(), p->value());
     _out.dec();
     _out << nl << "});";
+}
+
+string
+Slice::Gen::TypesVisitor::encodeTypeForOperation(const TypePtr& type)
+{
+    assert(type);
+
+    static const char* builtinTable[] =
+    {
+        "0", // byte
+        "1", // bool
+        "2", // short
+        "3", // int
+        "4", // long
+        "5", // float
+        "6", // double
+        "7", // string
+        "8", // Ice.Object
+        "9", // Ice.ObjectPrx
+        "??" // LocalObject
+    };
+
+    BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
+    if(builtin)
+    {
+        return builtinTable[builtin->kind()];
+    }
+
+    ProxyPtr proxy = ProxyPtr::dynamicCast(type);
+    if(proxy)
+    {
+        return "\"" + fixId(proxy->_class()->scoped() + "Prx") + "\"";
+    }
+
+    SequencePtr seq = SequencePtr::dynamicCast(type);
+    if(seq)
+    {
+        return "\"" + fixId(seq->scoped() + "Helper") + "\"";
+    }
+
+    DictionaryPtr d = DictionaryPtr::dynamicCast(type);
+    if(d)
+    {
+        return "\"" + fixId(d->scoped() + "Helper") + "\"";
+    }
+
+    EnumPtr e = EnumPtr::dynamicCast(type);
+    if(e)
+    {
+        return fixId(e->scoped()) + ".__helper";
+    }
+
+    StructPtr st = StructPtr::dynamicCast(type);
+    if(st)
+    {
+        return fixId(st->scoped());
+    }
+
+    ClassDeclPtr cl = ClassDeclPtr::dynamicCast(type);
+    if(cl)
+    {
+        return "\"" + fixId(cl->scoped()) + "\"";
+    }
+
+    return "???";
 }
 
 Slice::Gen::ExportVisitor::ExportVisitor(IceUtilInternal::Output& out)

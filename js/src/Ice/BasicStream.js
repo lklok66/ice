@@ -1596,7 +1596,7 @@
         setEncoding: function(encoding)
         {
             this.encoding = encoding;
-            this.encoding_1_0 = encoding.equals(Protocol.Encoding_1_0);
+            this.encoding_1_0 = encoding.equals(Ice.Encoding_1_0);
         }
     });
     
@@ -1617,7 +1617,7 @@
         setEncoding: function(encoding)
         {
             this.encoding = encoding;
-            this.encoding_1_0 = encoding.equals(Protocol.Encoding_1_0);
+            this.encoding_1_0 = encoding.equals(Ice.Encoding_1_0);
         }
     });
     
@@ -2078,7 +2078,7 @@
                 this._readEncapsStack.decoder.readPendingObjects();
             }
             else if((this._readEncapsStack !== null && this._readEncapsStack.encoding_1_0) ||
-                    (this._readEncapsStack === null && this._encoding.equals(Protocol.Encoding_1_0)))
+                    (this._readEncapsStack === null && this._encoding.equals(Ice.Encoding_1_0)))
             {
                 //
                 // If using the 1.0 encoding and no objects were read, we
@@ -2099,7 +2099,7 @@
                 this._writeEncapsStack.encoder.writePendingObjects();
             }
             else if((this._writeEncapsStack !== null && this._writeEncapsStack.encoding_1_0) ||
-                    (this._writeEncapsStack === null && this._encoding.equals(Protocol.Encoding_1_0)))
+                    (this._writeEncapsStack === null && this._encoding.equals(Ice.Encoding_1_0)))
             {
                 //
                 // If using the 1.0 encoding and no objects were written, we
@@ -2504,7 +2504,7 @@
         readEnum: function(T)
         {
             var v;
-            if(this.getReadEncoding().equals(Protocol.Encoding_1_0))
+            if(this.getReadEncoding().equals(Ice.Encoding_1_0))
             {
                 if(T.maxValue < 127)
                 {

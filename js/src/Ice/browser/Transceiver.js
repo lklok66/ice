@@ -168,39 +168,36 @@
             var remaining = byteBuffer.remaining;
             Debug.assert(remaining > 0);
 
-            //
-            // Create a slice of the source buffer representing the remaining data to be written.
-            //
-            var slice = byteBuffer.b.slice(byteBuffer.position, byteBuffer.position + remaining);
-
-            //
-            // The socket will accept all of the data.
-            //
-            byteBuffer.position = byteBuffer.position + remaining;
-
             if(this._fd.bufferedAmount === 0)
             {
+                //
+                // Create a slice of the source buffer representing the remaining data to be written.
+                //
+                var slice = byteBuffer.b.slice(byteBuffer.position, byteBuffer.position + remaining);
+                
+                //
+                // The socket will accept all of the data.
+                //
+                byteBuffer.position = byteBuffer.position + remaining;
                 this._fd.send(slice);
                 return true;
             }
             else
             {
-                var self = this;
+                var transceiver = this;
                 var writtenCB = function()
                 {
-                    setTimeout(
-                        function()
-                        {
-                            if(self._fd.bufferedAmount === 0)
-                            {
-                                self._bytesWrittenCallback();
-                            }
-                            else
-                            {
-                                writtenCB();
-                            }
-                        }, 50);
+                    if(transceiver._fd.bufferedAmount === 0)
+                    {
+                        transceiver._bytesWrittenCallback();
+                    }
+                    else
+                    {
+                        setTimeout(writtenCB, 50);
+                    }
                 };
+
+                setTimeout(writtenCB, 50);
                 return false;
             }
         },

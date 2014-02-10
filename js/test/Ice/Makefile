@@ -24,6 +24,7 @@ SUBDIRS		= binding \
 		operations \
 		operationsBidir \
 		optional \
+		optionalBidir \
 		promise \
 		proxy \
 		retry \

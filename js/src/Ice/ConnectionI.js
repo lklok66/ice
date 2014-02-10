@@ -22,7 +22,6 @@
     require("Ice/Protocol");
     require("Ice/SocketOperation");
     require("Ice/Timer");
-    require("Ice/TimeUtil");
     require("Ice/TraceUtil");
     require("Ice/Version");
     require("Ice/Exception");
@@ -43,7 +42,6 @@
     var Protocol = Ice.Protocol;
     var SocketOperation = Ice.SocketOperation;
     var Timer = Ice.Timer;
-    var TimeUtil = Ice.TimeUtil;
     var TraceUtil = Ice.TraceUtil;
     var ProtocolVersion = Ice.ProtocolVersion;
     var EncodingVersion = Ice.EncodingVersion;
@@ -200,7 +198,7 @@
 
             if(this._acmTimeout > 0)
             {
-                this._acmAbsoluteTimeoutMillis = TimeUtil.now() + this._acmTimeout * 1000;
+                this._acmAbsoluteTimeoutMillis = Date.now() + this._acmTimeout * 1000;
             }
 
             this.setState(StateActive);
@@ -786,23 +784,27 @@
                 return;
             }
 
-            if((operation & SocketOperation.Write) !== 0)
-            {
-                // TODO: Anything to do here?
-                Debug.assert(this._writeStream.buffer.remaining === 0);
-            }
-
-            this.unscheduleTimeout(SocketOperation.write);
+            this.unscheduleTimeout(operation);
             //
             // Keep reading until no more data is available.
             //
-            this._hasMoreData.value = true;
+            this._hasMoreData.value = (operation & SocketOperation.Read) !== 0;
             do
             {
                 var info = null;
 
                 try
                 {
+                    if((operation & SocketOperation.Write) != 0 && this._writeStream.buffer.remaining > 0)
+                    {
+                        if(!this._transceiver.write(this._writeStream.buffer))
+                        {
+                            Debug.assert(!this._writeStream.isEmpty());
+                            this.scheduleTimeout(SocketOperation.Write, this._endpoint.timeout());
+                            return;
+                        }
+                        Debug.assert(this._writeStream.buffer.remaining === 0);
+                    }
                     if((operation & SocketOperation.Read) !== 0 && !this._readStream.isEmpty())
                     {
                         if(this._readHeader) // Read header if necessary.
@@ -974,7 +976,7 @@
 
                 if(this._acmTimeout > 0)
                 {
-                    this._acmAbsoluteTimeoutMillis = TimeUtil.now() + this._acmTimeout * 1000;
+                    this._acmAbsoluteTimeoutMillis = Date.now() + this._acmTimeout * 1000;
                 }
 
                 this.dispatch(info);
@@ -1268,7 +1270,6 @@
 
                 case StateNotValidated:
                 {
-                    this.unscheduleTimeout(SocketOperation.Connect);
                     if(this._state !== StateNotInitialized)
                     {
                         Debug.assert(this._state === StateClosed);
@@ -1539,9 +1540,7 @@
                         throw new Ice.IllegalMessageSizeException();
                     }
                     TraceUtil.traceRecv(this._readStream, this._logger, this._traceLevels);
-
                     this._validated = true;
-                    this.unscheduleTimeout(SocketOperation.Read);
                 }
             }
 
@@ -1562,7 +1561,6 @@
             }
 
             Debug.assert(!this._writeStream.isEmpty() && this._writeStream.pos === this._writeStream.size);
-
             try
             {
                 while(true)
@@ -1573,7 +1571,7 @@
                     var message = this._sendStreams.shift();
                     this._writeStream.swap(message.stream);
                     message.sent(this);
-
+                    
                     //
                     // If there's nothing left to send, we're done.
                     //
@@ -1654,6 +1652,12 @@
         },
         sendMessage: function(message)
         {
+            if(this._sendStreams.length > 0)
+            {
+                message.doAdopt();
+                this._sendStreams.push(message);
+                return AsyncStatus.Queued;
+            }
             Debug.assert(this._state < StateClosed);
 
             Debug.assert(!message.prepared);
@@ -1663,7 +1667,7 @@
             stream.writeInt(stream.size);
             stream.prepareWrite();
             message.prepared = true;
-
+            
             TraceUtil.trace("sending asynchronous request", message.stream, this._logger, this._traceLevels);
 
             if(this._transceiver.write(message.stream.buffer))
@@ -1674,7 +1678,7 @@
                 message.sent(this);
                 if(this._acmTimeout > 0)
                 {
-                    this._acmAbsoluteTimeoutMillis = TimeUtil.now() + this._acmTimeout * 1000;
+                    this._acmAbsoluteTimeoutMillis = Date.now() + this._acmTimeout * 1000;
                 }
                 return AsyncStatus.Sent;
             }
@@ -1683,6 +1687,7 @@
             this._writeStream.swap(message.stream);
             this._sendStreams.push(message);
             this.scheduleTimeout(SocketOperation.Write, this._endpoint.timeout());
+            
             return AsyncStatus.Queued;
         },
         parseMessage: function()

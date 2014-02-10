@@ -45,8 +45,8 @@
         toString: function()
         {
             var val = Base64.encode(this._rawBytes);
-            return "opaque -t " + this._type + " -e " + Protocol.encodingVersionToString(this._rawEncoding) +
-                " -v " + val;
+            return "opaque -t " + this._type + " -e " + Ice.encodingVersionToString(this._rawEncoding) +
+                   " -v " + val;
         },
         //
         // Return the endpoint information.
@@ -385,7 +385,7 @@
                     }
                     try
                     {
-                        result._rawEncoding = Protocol.stringToEncodingVersion(argument);
+                        result._rawEncoding = Ice.stringToEncodingVersion(argument);
                     }
                     catch(e)
                     {

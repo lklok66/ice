@@ -10,7 +10,7 @@
 import sys, os, re, getopt, time, string, threading, atexit, platform
 
 # Global flags and their default values.
-protocol = ""                   # If unset, default to TCP. Valid values are "tcp" or "ssl".
+protocol = ""                   # If unset, default to TCP. Valid values are "tcp", "ssl", "ws" or "wss".
 compress = False                # Set to True to enable bzip2 compression.
 serialize = False               # Set to True to have tests use connection serialization
 host = None                     # Will default to loopback.
@@ -276,7 +276,7 @@ def run(tests, root = False):
           --filter=<regex>        Run all the tests that match the given regex.
           --rfilter=<regex>       Run all the tests that do not match the given regex.
           --debug                 Display debugging information on each test.
-          --protocol=tcp|ssl      Run with the given protocol.
+          --protocol=tcp|ssl|ws   Run with the given protocol.
           --compress              Run the tests with protocol compression.
           --host=host             Set --Ice.Default.Host=<host>.
           --valgrind              Run the test with valgrind.
@@ -366,9 +366,9 @@ def run(tests, root = False):
         elif o == "--script":
             script = True
         elif o == "--protocol":
-            if a not in ( "ssl", "tcp"):
+            if a not in ( "ws", "wss", "ssl", "tcp"):
                 usage()
-            if not root and getDefaultMapping() == "cs" and a == "ssl":
+            if not root and getDefaultMapping() == "cs" and (a == "ssl" or a == "wss"):
                 if mono:
                     print("SSL is not supported with mono")
                     sys.exit(1)
@@ -402,6 +402,9 @@ def run(tests, root = False):
         a = '--protocol=ssl %s'  % arg
         expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
+        a = '--protocol=ws %s'  % arg
+        expanded.append([ (test, a, config) for test,config in tests if "core" in config])
+
         a = '--protocol=tcp --compress %s'  % arg
         expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
@@ -413,6 +416,9 @@ def run(tests, root = False):
             expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
             a = "--ipv6 --protocol=ssl %s" % arg
+            expanded.append([ (test, a, config) for test,config in tests if "core" in config])
+
+            a = "--ipv6 --protocol=ws %s" % arg
             expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
         a = "--protocol=tcp %s" % arg
@@ -693,30 +699,43 @@ class InvalidSelectorString(Exception):
 
 sslConfigTree = {
         "cpp" : {
-            "plugin" : " --Ice.Plugin.IceSSL=IceSSL:createIceSSL --Ice.Default.Protocol=ssl " +
+            "plugin" : " --Ice.Plugin.IceSSL=IceSSL:createIceSSL " +
             "--IceSSL.DefaultDir=%(certsdir)s --IceSSL.CertAuthFile=cacert.pem --IceSSL.VerifyPeer=%(verifyPeer)s",
             "client" : " --IceSSL.CertFile=c_rsa1024_pub.pem --IceSSL.KeyFile=c_rsa1024_priv.pem",
             "server" : " --IceSSL.CertFile=s_rsa1024_pub.pem --IceSSL.KeyFile=s_rsa1024_priv.pem",
             "colloc" : " --IceSSL.CertFile=c_rsa1024_pub.pem --IceSSL.KeyFile=c_rsa1024_priv.pem"
             },
         "java" : {
-            "plugin" : " --Ice.Plugin.IceSSL=IceSSL.PluginFactory --Ice.Default.Protocol=ssl " +
+            "plugin" : " --Ice.Plugin.IceSSL=IceSSL.PluginFactory " +
             "--IceSSL.DefaultDir=%(certsdir)s --IceSSL.Password=password --IceSSL.VerifyPeer=%(verifyPeer)s",
             "client" : " --IceSSL.Keystore=client.jks",
             "server" : " --IceSSL.Keystore=server.jks",
             "colloc" : " --IceSSL.Keystore=client.jks"
             },
         "cs" : {
-            "plugin" : " --Ice.Plugin.IceSSL=%(icesslcs)s:IceSSL.PluginFactory --Ice.Default.Protocol=ssl" +
+            "plugin" : " --Ice.Plugin.IceSSL=%(icesslcs)s:IceSSL.PluginFactory " +
             " --IceSSL.Password=password --IceSSL.DefaultDir=%(certsdir)s --IceSSL.VerifyPeer=%(verifyPeer)s",
             "client" : " --IceSSL.CertFile=c_rsa1024.pfx --IceSSL.CheckCertName=0",
             "server" : " --IceSSL.CertFile=s_rsa1024.pfx --IceSSL.ImportCert.CurrentUser.Root=cacert.pem",
-            "colloc" : " --IceSSL.CertFile=c_rsa1024.pfx --IceSSL.ImportCert.CurrentUser.Root=cacert.pem --IceSSL.CheckCertName=0"
+            "colloc" : " --IceSSL.CertFile=c_rsa1024.pfx --IceSSL.ImportCert.CurrentUser.Root=cacert.pem " + 
+            "--IceSSL.CheckCertName=0"
             },
         }
 sslConfigTree["py"] = sslConfigTree["cpp"]
 sslConfigTree["rb"] = sslConfigTree["cpp"]
 sslConfigTree["php"] = sslConfigTree["cpp"]
+
+wsConfigTree = {
+        "cpp" : {
+            "plugin" : " --Ice.Plugin.IceWS=IceWS:createIceWS ",
+            "client" : " ",
+            "server" : " ",
+            "colloc" : " ",
+            },
+        }
+wsConfigTree["py"] = wsConfigTree["cpp"]
+wsConfigTree["rb"] = wsConfigTree["cpp"]
+wsConfigTree["php"] = wsConfigTree["cpp"]
 
 def getDefaultMapping():
     """Try and guess the language mapping out of the current path"""
@@ -844,7 +863,7 @@ def getCommandLineProperties(exe, config):
     # Now we add additional components dependent on the desired
     # configuration.
     #
-    if config.protocol == "ssl":
+    if config.protocol == "ssl" or config.protocol == "wss":
         sslenv = {}
         sslenv["icesslcs"] = quoteArgument("\\\"" + os.path.join(getIceDir("cs"), "Assemblies", "IceSSL.dll") + "\\\"")
         if winrt:
@@ -855,6 +874,14 @@ def getCommandLineProperties(exe, config):
             sslenv["verifyPeer"] = "2"
         components.append(sslConfigTree[config.lang]["plugin"] % sslenv)
         components.append(sslConfigTree[config.lang][config.type] % sslenv)
+
+    if config.protocol == "ws" or config.protocol == "wss":
+        wsenv = {}
+        wsenv["icewscs"] = quoteArgument("\\\"" + os.path.join(getIceDir("cs"), "Assemblies", "IceWS.dll") + "\\\"")
+        components.append(wsConfigTree[config.lang]["plugin"] % wsenv)
+        components.append(wsConfigTree[config.lang][config.type] % wsenv)
+
+    components.append("--Ice.Default.Protocol=" + config.protocol)
 
     if config.compress:
         components.append("--Ice.Override.Compress=1")
@@ -957,7 +984,7 @@ def getCommandLine(exe, config, options = ""):
     elif config.lang == "php" and config.type == "client":
         output.write(phpCmd + " -c tmp.ini -f \""+ exe +"\" -- ")
     elif config.lang == "js":
-        output.write('node --use_strict "%s" ' % exe)
+        output.write('node "%s" ' % exe)
     elif config.lang == "cpp" and config.valgrind:
         # --child-silent-after-fork=yes is required for the IceGrid/activator test where the node
         # forks a process with execv failing (invalid exe name).
@@ -1747,7 +1774,7 @@ def processCmdLine():
         print("usage: " + sys.argv[0] + """
           --debug                 Display debugging information on each test.
           --trace=<file>          Display tracing.
-          --protocol=tcp|ssl      Run with the given protocol.
+          --protocol=tcp|ssl|ws   Run with the given protocol.
           --compress              Run the tests with protocol compression.
           --valgrind              Run the tests with valgrind.
           --appverifier           Run the tests with appverifier.
@@ -1849,10 +1876,10 @@ def processCmdLine():
             global printenv
             printenv = True
         elif o == "--protocol":
-            if a not in ( "ssl", "tcp"):
+            if a not in ( "ws", "wss", "ssl", "tcp"):
                 usage()
             # ssl protocol isn't directly supported with mono.
-            if mono and getDefaultMapping() == "cs" and a == "ssl":
+            if mono and getDefaultMapping() == "cs" and (a == "ssl" or a == "wss"):
                 print("SSL is not supported with mono")
                 sys.exit(1)
             global protocol
@@ -2022,12 +2049,17 @@ def runTests(start, expanded, num = 0, script = False):
 
             # If this is mono and we're running ssl protocol tests
             # then skip. This occurs when using --all.
-            if mono and ("nomono" in config or (i.find(os.path.join("cs","test")) != -1 and args.find("ssl") != -1)):
+            if mono and ("nomono" in config or (i.find(os.path.join("cs","test")) != -1 and 
+                                                (args.find("ssl") != -1 or args.find("wss") != -1))):
                 print("%s*** test not supported with mono%s" % (prefix, suffix))
                 continue
 
-            if args.find("ssl") != -1 and ("nossl" in config):
+            if (args.find("ssl") != -1 or args.find("wss") != -1) and ("nossl" in config):
                 print("%s*** test not supported with IceSSL%s" % (prefix, suffix))
+                continue
+
+            if (args.find("ws") != -1 or args.find("wss") != -1) and ("nows" in config):
+                print("%s*** test not supported with IceWS%s" % (prefix, suffix))
                 continue
 
             # If this is java and we're running ipv6 under windows then skip.
@@ -2037,12 +2069,14 @@ def runTests(start, expanded, num = 0, script = False):
                 continue
 
             # Skip tests not supported by valgrind
-            if args.find("valgrind") != -1 and ("novalgrind" in config or args.find("ssl") != -1):
+            if args.find("valgrind") != -1 and ("novalgrind" in config or args.find("ssl") != -1 or 
+                                                args.find("wss") != -1):
                 print("%s*** test not supported with valgrind%s" % (prefix, suffix))
                 continue
 
             # Skip tests not supported by appverifier
-            if args.find("appverifier") != -1 and ("noappverifier" in config or args.find("ssl") != -1):
+            if args.find("appverifier") != -1 and ("noappverifier" in config or args.find("ssl") != -1 or 
+                                                   args.find("wss") != -1):
                 print("%s*** test not supported with appverifier%s" % (prefix, suffix))
                 continue
 

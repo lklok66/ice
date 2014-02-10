@@ -210,12 +210,6 @@ d.depends = d.expand().sort();
 var file, i, length = d.depends.length, line;
 var optimize = process.env.OPTIMIZE && process.env.OPTIMIZE == "yes";
 
-//
-// Wrap libraries in an anonymous function that enables strict mode.
-//
-process.stdout.write("(function(){\n");
-process.stdout.write("\"use strict\";\n");
-
 for(i = 0;  i < length; ++i)
 {
     file = d.depends[i].realpath;
@@ -225,10 +219,19 @@ for(i = 0;  i < length; ++i)
     for(j in lines)
     {
         line = lines[j].trim();
-        if(line.match(/require\(".*"\);/))
+        //
+        // Get rid of require statements, the bundle include all required files, 
+        // so require statements are not required.
+        //
+        if(line == "var require = typeof(module) !== \"undefined\" ? module.require : function(){};")
         {
             continue;
         }
+        else if(line.match(/require\(".*"\);/))
+        {
+            continue;
+        }
+        
         if(optimize && line.match(/Debug\.assert\(/))
         {
             if(line.lastIndexOf(";") === -1)
@@ -249,5 +252,3 @@ for(i = 0;  i < length; ++i)
         process.stdout.write(lines[j] + "\n");
     }
 }
-
-process.stdout.write("}())\n");

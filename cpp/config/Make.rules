@@ -329,6 +329,10 @@ ifeq ($(ICESSL_LIBS),)
     ICESSL_LIBS         = -lIceSSL $(LIBS)
 endif
 
+ifeq ($(ICEWS_LIBS),)
+    ICEWS_LIBS          = -lIceWS $(LIBS)
+endif
+
 EVERYTHING		= all depend clean install
 EVERYTHING_EXCEPT_ALL   = depend clean install
 

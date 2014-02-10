@@ -9,7 +9,6 @@
 
 #pragma once
 
-[["java:package:test.Ice.slicing.objects.client"]]
 module Test
 {
 

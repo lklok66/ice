@@ -21,6 +21,10 @@ class Instance;
 IceUtil::Shared* upCast(IceSSL::Instance*);
 typedef IceInternal::Handle<Instance> InstancePtr;
 
+class SharedInstance;
+IceUtil::Shared* upCast(IceSSL::SharedInstance*);
+typedef IceInternal::Handle<SharedInstance> SharedInstancePtr;
+
 }
 
 #endif

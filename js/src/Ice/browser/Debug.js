@@ -31,6 +31,8 @@
     {
         if(!b)
         {
+            console.log(msg === undefined ? "assertion failed" : msg);
+            console.log(Error().stack);
             throw new AssertionFailedException(msg === undefined ? "assertion failed" : msg);
         }
     };

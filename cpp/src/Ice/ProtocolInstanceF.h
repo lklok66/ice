@@ -7,22 +7,19 @@
 //
 // **********************************************************************
 
-#ifndef ICE_ENDPOINT_I_F_H
-#define ICE_ENDPOINT_I_F_H
+#ifndef ICE_PROTOCOL_INSTANCE_F_H
+#define ICE_PROTOCOL_INSTANCE_F_H
+
+#include <IceUtil/Shared.h>
 
 #include <Ice/Handle.h>
-#include <Ice/LocalObject.h>
 
 namespace IceInternal
 {
 
-class EndpointI;
-ICE_API Ice::LocalObject* upCast(EndpointI*);
-typedef Handle<EndpointI> EndpointIPtr;
-
-class EndpointHostResolver;
-ICE_API IceUtil::Shared* upCast(EndpointHostResolver*);
-typedef Handle<EndpointHostResolver> EndpointHostResolverPtr;
+class ProtocolInstance;
+ICE_API IceUtil::Shared* upCast(ProtocolInstance*);
+typedef IceInternal::Handle<ProtocolInstance> ProtocolInstancePtr;
 
 }
 

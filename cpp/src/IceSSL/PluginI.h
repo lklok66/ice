@@ -39,7 +39,7 @@ public:
 
 private:
 
-    InstancePtr _instance;
+    SharedInstancePtr _sharedInstance;
 };
 
 }

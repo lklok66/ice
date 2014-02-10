@@ -11,7 +11,7 @@ top_srcdir	= .
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= modules python
+SUBDIRS		= modules python test
 
 INSTALL_SUBDIRS = $(install_pythondir) $(install_libdir)
 

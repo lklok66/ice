@@ -17,7 +17,8 @@ ifneq ($(findstring MINGW,$(UNAME)),)
 			  slice2cpp \
 			  slice2rb \
 			  Ice \
-			  IceSSL
+			  IceSSL \
+			  IceWS
 else
     SUBDIRS		= IceUtil \
 			  Slice \
@@ -34,6 +35,7 @@ else
 			  Ice \
 			  IceXML \
 			  IceSSL \
+			  IceWS \
 			  Freeze \
 			  FreezeScript \
 			  IceBox \
@@ -61,7 +63,7 @@ slice2cpp slice2cs slice2freeze slice2freezej slice2java slice2php slice2py slic
 
 Ice: slice2cpp
 
-IceXML IceSSL Freeze FreezeScript IceBox Glacier2Lib IcePatch2Lib IceStormLib IceGridLib: Ice
+IceXML IceSSL IceWS Freeze FreezeScript IceBox Glacier2Lib IcePatch2Lib IceStormLib IceGridLib: Ice
 
 Freeze: slice2freeze
 
@@ -91,4 +93,3 @@ $(EVERYTHING_EXCEPT_ALL)::
                 ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
             fi; \
         done
-

@@ -78,6 +78,9 @@ BlobjectI::ice_invoke_async(const Ice::AMD_Object_ice_invokePtr& amdCb, const ve
         {
             _startBatch = false;
             _batchProxy = obj->ice_batchOneway();
+        }
+        if(_batchProxy)
+        {
             obj = _batchProxy;
         }
 

@@ -9,14 +9,12 @@
 
 (function(global){
     require("Ice/HashMap");
-    require("Ice/TimeUtil");
     require("Ice/LocalException");
     require("Ice/Class");
     
     var Ice = global.Ice || {};
     
     var HashMap = Ice.HashMap;
-    var TimeUtil = Ice.TimeUtil;
     var CommunicatorDestroyedException = Ice.CommunicatorDestroyedException;
     
     var Timer = Ice.Class({

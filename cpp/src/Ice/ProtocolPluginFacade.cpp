@@ -32,54 +32,6 @@ IceInternal::ProtocolPluginFacade::getCommunicator() const
     return _communicator;
 }
 
-string
-IceInternal::ProtocolPluginFacade::getDefaultHost() const
-{
-    return _instance->defaultsAndOverrides()->defaultHost;
-}
-
-Ice::EncodingVersion
-IceInternal::ProtocolPluginFacade::getDefaultEncoding() const
-{
-    return _instance->defaultsAndOverrides()->defaultEncoding;
-}
-
-int
-IceInternal::ProtocolPluginFacade::getNetworkTraceLevel() const
-{
-    return _instance->traceLevels()->network;
-}
-
-const char*
-IceInternal::ProtocolPluginFacade::getNetworkTraceCategory() const
-{
-    return _instance->traceLevels()->networkCat;
-}
-
-EndpointHostResolverPtr
-IceInternal::ProtocolPluginFacade::getEndpointHostResolver() const
-{
-    return _instance->endpointHostResolver();
-}
-
-ProtocolSupport
-IceInternal::ProtocolPluginFacade::getProtocolSupport() const
-{
-    return _instance->protocolSupport();
-}
-
-bool
-IceInternal::ProtocolPluginFacade::preferIPv6() const
-{
-    return _instance->preferIPv6();
-}
-
-NetworkProxyPtr
-IceInternal::ProtocolPluginFacade::getNetworkProxy() const
-{
-    return _instance->networkProxy();
-}
-
 void
 IceInternal::ProtocolPluginFacade::addEndpointFactory(const EndpointFactoryPtr& factory) const
 {

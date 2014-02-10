@@ -47,7 +47,7 @@
         setCallbacks: function(
             connectedCallback,      // function()
             bytesAvailableCallback, // function()
-            bytesWrittenCallback,   // function() TODO: Remove
+            bytesWrittenCallback,   // function()
             closedCallback,         // function()
             errorCallback           // function(ex)
         )
@@ -227,16 +227,18 @@
 
             var self = this;
 
-            this._fd.write(slice, null,
-                //
-                // Callback function invoked when data is eventually written.
-                //
-                function()
+            var sync = this._fd.write(slice, null, function(){
+                if(!sync)
                 {
                     self.socketBytesWritten(remaining);
-                });
-
-            return true;
+                    self._bytesWrittenCallback();
+                }
+            });
+            if(sync)
+            {
+                 self.socketBytesWritten(remaining);
+            }
+            return sync;
         },
         read: function(byteBuffer, moreData)
         {
