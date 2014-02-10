@@ -784,23 +784,27 @@
                 return;
             }
 
-            if((operation & SocketOperation.Write) !== 0)
-            {
-                // TODO: Anything to do here?
-                Debug.assert(this._writeStream.buffer.remaining === 0);
-            }
-
             this.unscheduleTimeout(SocketOperation.write);
             //
             // Keep reading until no more data is available.
             //
-            this._hasMoreData.value = true;
+            this._hasMoreData.value = (operation & SocketOperation.Read) !== 0;
             do
             {
                 var info = null;
 
                 try
                 {
+                    if((operation & SocketOperation.Write) != 0 && !this._writeStream.isEmpty())
+                    {
+                        if(!this._transceiver.write(this._writeStream.buffer))
+                        {
+                            Debug.assert(!this._writeStream.isEmpty());
+                            this.scheduleTimeout(SocketOperation.Write, this._endpoint.timeout());
+                            return;
+                        }
+                        Debug.assert(this._writeStream.buffer.remaining === 0);
+                    }
                     if((operation & SocketOperation.Read) !== 0 && !this._readStream.isEmpty())
                     {
                         if(this._readHeader) // Read header if necessary.
@@ -1560,7 +1564,6 @@
             }
 
             Debug.assert(!this._writeStream.isEmpty() && this._writeStream.pos === this._writeStream.size);
-
             try
             {
                 while(true)
@@ -1571,7 +1574,7 @@
                     var message = this._sendStreams.shift();
                     this._writeStream.swap(message.stream);
                     message.sent(this);
-
+                    
                     //
                     // If there's nothing left to send, we're done.
                     //
@@ -1652,6 +1655,12 @@
         },
         sendMessage: function(message)
         {
+            if(this._sendStreams.length > 0)
+            {
+                message.doAdopt();
+                this._sendStreams.push(message);
+                return AsyncStatus.Queued;
+            }
             Debug.assert(this._state < StateClosed);
 
             Debug.assert(!message.prepared);
@@ -1661,7 +1670,7 @@
             stream.writeInt(stream.size);
             stream.prepareWrite();
             message.prepared = true;
-
+            
             TraceUtil.trace("sending asynchronous request", message.stream, this._logger, this._traceLevels);
 
             if(this._transceiver.write(message.stream.buffer))
@@ -1681,6 +1690,7 @@
             this._writeStream.swap(message.stream);
             this._sendStreams.push(message);
             this.scheduleTimeout(SocketOperation.Write, this._endpoint.timeout());
+            
             return AsyncStatus.Queued;
         },
         parseMessage: function()

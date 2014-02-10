@@ -184,23 +184,20 @@
             }
             else
             {
-                var self = this;
+                var transceiver = this;
                 var writtenCB = function()
                 {
-                    setTimeout(
-                        function()
-                        {
-                            if(self._fd.bufferedAmount === 0)
-                            {
-                                self._bytesWrittenCallback();
-                            }
-                            else
-                            {
-                                writtenCB();
-                            }
-                        }, 50);
+                    if(transceiver._fd.bufferedAmount === 0)
+                    {
+                        transceiver._bytesWrittenCallback();
+                    }
+                    else
+                    {
+                        setTimeout(writtenCB, 50);
+                    }
                 };
-                writtenCB();
+
+                setTimeout(writtenCB, 50);
                 return false;
             }
         },
