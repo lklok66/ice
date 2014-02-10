@@ -1919,6 +1919,10 @@ def processCmdLine():
         elif o == "--mx":
             global mx
             mx = True
+            
+        if protocol in ["ssl", "wss"] and not serverOnly and getDefaultMapping() == "js":
+            print("SSL is not supported with Node.js")
+            sys.exit(1)
 
     if len(args) > 0:
         usage()
@@ -2052,6 +2056,18 @@ def runTests(start, expanded, num = 0, script = False):
             if mono and ("nomono" in config or (i.find(os.path.join("cs","test")) != -1 and 
                                                 (args.find("ssl") != -1 or args.find("wss") != -1))):
                 print("%s*** test not supported with mono%s" % (prefix, suffix))
+                continue
+            
+            # 
+            # Skip configurations not supported by node
+            #
+            if (i.find(os.path.join("js","test")) != -1 and
+                                  ((not serverOnly and (args.find("ssl") != -1 or 
+                                                        args.find("wss") != -1 or 
+                                                        args.find("ws") != -1)) or
+                                   args.find("compress") != -1 or
+                                   args.find("mx") != -1)):
+                print("%s*** test not supported with node%s" % (prefix, suffix))
                 continue
 
             if (args.find("ssl") != -1 or args.find("wss") != -1) and ("nossl" in config):
