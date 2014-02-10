@@ -369,7 +369,7 @@
         transceiver._fd = null;
         transceiver._addr = addr;
         transceiver._connected = false;
-        transceiver._desc = "remote address: " + Network.addrToString(addr.host, addr.port) + " <not connected>";
+        transceiver._desc = "remote address: " + host + ":" + port + " <not connected>";
         transceiver._state = StateNeedConnect;
         transceiver._secure = secure;
         

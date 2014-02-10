@@ -19,7 +19,6 @@
     require("Ice/IdentityUtil");
     require("Ice/LocatorManager");
     require("Ice/Logger");
-    require("Ice/Network");
     require("Ice/ObjectAdapterFactory");
     require("Ice/ObjectFactoryManager");
     require("Ice/OutgoingConnectionFactory");
@@ -54,7 +53,6 @@
     var ImplicitContextI = Ice.ImplicitContextI;
     var LocatorManager = Ice.LocatorManager;
     var Logger = Ice.Logger;
-    var Network = Ice.Network;
     var ObjectAdapterFactory = Ice.ObjectAdapterFactory;
     var ObjectFactoryManager = Ice.ObjectFactoryManager;
     var OutgoingConnectionFactory = Ice.OutgoingConnectionFactory;
@@ -174,10 +172,6 @@
         preferIPv6: function()
         {
             return this._preferIPv6;
-        },
-        networkProxy: function()
-        {
-            return this._networkProxy;
         },
         connectionMonitor: function()
         {
@@ -353,29 +347,6 @@
                 this._referenceFactory = new ReferenceFactory(this, communicator);
 
                 this._proxyFactory = new ProxyFactory(this);
-
-                // TODO: Network proxy
-                this._networkProxy = null;
-
-                var ipv4 = this._initData.properties.getPropertyAsIntWithDefault("Ice.IPv4", 1) > 0;
-                var ipv6 = this._initData.properties.getPropertyAsIntWithDefault("Ice.IPv6", 0) > 0;
-                if(!ipv4 && !ipv6)
-                {
-                    throw new Ice.InitializationException("Both IPV4 and IPv6 support cannot be disabled");
-                }
-                else if(ipv4 && ipv6)
-                {
-                    this._protocolSupport = Network.EnableBoth;
-                }
-                else if(ipv4)
-                {
-                    this._protocolSupport = Network.EnableIPv4;
-                }
-                else
-                {
-                    this._protocolSupport = Network.EnableIPv6;
-                }
-                this._preferIPv6 = this._initData.properties.getPropertyAsInt("Ice.PreferIPv6Address") > 0;
 
                 this._endpointFactoryManager = new EndpointFactoryManager(this);
 
