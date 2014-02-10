@@ -42,6 +42,7 @@ THIRDPARTY_HOME = $(PROGRAMFILES)\ZeroC\Ice-$(ICE_VERSION)-ThirdParty
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
 
+CPP_COMPILER	= VC110
 
 #
 # Common definitions
