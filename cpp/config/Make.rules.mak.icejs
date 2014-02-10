@@ -38,20 +38,6 @@ THIRDPARTY_HOME = $(PROGRAMFILES)\ZeroC\Ice-$(ICE_VERSION)-ThirdParty
 !endif
 !endif
 
-#
-# If Ice is not installed in a standard location or ICE_HOME is not
-# set in your environment then change the following setting to reflect
-# the Ice installation location.
-#
-!if "$(ICE_HOME)" == ""
-!if "$(PROCESSOR_ARCHITECTURE)" == "AMD64"
-ICE_HOME = $(PROGRAMFILES) (x86)\ZeroC\Ice-$(ICE_VERSION)
-!else
-ICE_HOME = $(PROGRAMFILES)\ZeroC\Ice-$(ICE_VERSION) 
-!endif
-!endif
-
-
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
