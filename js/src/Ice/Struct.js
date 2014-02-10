@@ -34,18 +34,7 @@
         }
         else if(e1 instanceof Ice.HashMap)
         {
-            var keyComparator = e1.keyComparator;
-            var valueComparator = e1.valueComparator;
-            
-            e1.keyComparator = eq;
-            e1.valueComparator = eq;
-            
-            var r = e1.equals(e2);
-            
-            e1.keyComparator = keyComparator;
-            e1.valueComparator = valueComparator;
-            
-            return r;
+            return e1.equals(e2);
         }
         else if(e1.equals instanceof Function)
         {

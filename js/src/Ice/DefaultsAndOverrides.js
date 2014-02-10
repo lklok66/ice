@@ -88,8 +88,8 @@
         this.defaultPreferSecure = false;
 
         value = properties.getPropertyWithDefault("Ice.Default.EncodingVersion",
-                                                Protocol.encodingVersionToString(Protocol.currentEncoding));
-        this.defaultEncoding = Protocol.stringToEncodingVersion(value);
+                                                  Ice.encodingVersionToString(Protocol.currentEncoding));
+        this.defaultEncoding = Ice.stringToEncodingVersion(value);
         Protocol.checkSupportedEncoding(this.defaultEncoding);
 
         var slicedFormat = properties.getPropertyAsIntWithDefault("Ice.Default.SlicedFormat", 0) > 0;

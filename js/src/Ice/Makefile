@@ -80,6 +80,7 @@ COMMON_SRCS = \
 	Object.js \
 	ObjectPrx.js \
 	OpaqueEndpointI.js \
+	Operation.js \
 	OptionalFormat.js \
 	OutgoingAsync.js \
 	OutgoingConnectionFactory.js \
@@ -102,7 +103,6 @@ COMMON_SRCS = \
 	StringUtil.js \
 	Struct.js \
 	Timer.js \
-	TimeUtil.js \
 	TraceLevels.js \
 	TraceUtil.js \
 	TypeRegistry.js \

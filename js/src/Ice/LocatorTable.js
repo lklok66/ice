@@ -10,13 +10,11 @@
 (function(global){
     require("Ice/Class");
     require("Ice/HashMap");
-    require("Ice/TimeUtil");
     require("Ice/Debug");
     
     var Ice = global.Ice || {};
     
     var HashMap = Ice.HashMap;
-    var TimeUtil = Ice.TimeUtil;
     var Debug = Ice.Debug;
 
     var LocatorTable = Ice.Class({
@@ -50,7 +48,7 @@
         },
         addAdapterEndpoints: function(adapter, endpoints)
         {
-            this._adapterEndpointsTable.set(adapter, new EndpointTableEntry(TimeUtil.now(), endpoints));
+            this._adapterEndpointsTable.set(adapter, new EndpointTableEntry(Date.now(), endpoints));
         },
         removeAdapterEndpoints: function(adapter)
         {
@@ -77,7 +75,7 @@
         },
         addObjectReference: function(id, ref)
         {
-            this._objectTable.set(id, new ReferenceTableEntry(TimeUtil.now(), ref));
+            this._objectTable.set(id, new ReferenceTableEntry(Date.now(), ref));
         },
         removeObjectReference: function(id)
         {
@@ -94,7 +92,7 @@
             }
             else
             {
-                return TimeUtil.now() - time <= (ttl * 1000);
+                return Date.now() - time <= (ttl * 1000);
             }
         }
     });

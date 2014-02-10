@@ -22,7 +22,6 @@
     require("Ice/Protocol");
     require("Ice/SocketOperation");
     require("Ice/Timer");
-    require("Ice/TimeUtil");
     require("Ice/TraceUtil");
     require("Ice/Version");
     require("Ice/Exception");
@@ -43,7 +42,6 @@
     var Protocol = Ice.Protocol;
     var SocketOperation = Ice.SocketOperation;
     var Timer = Ice.Timer;
-    var TimeUtil = Ice.TimeUtil;
     var TraceUtil = Ice.TraceUtil;
     var ProtocolVersion = Ice.ProtocolVersion;
     var EncodingVersion = Ice.EncodingVersion;
@@ -200,7 +198,7 @@
 
             if(this._acmTimeout > 0)
             {
-                this._acmAbsoluteTimeoutMillis = TimeUtil.now() + this._acmTimeout * 1000;
+                this._acmAbsoluteTimeoutMillis = Date.now() + this._acmTimeout * 1000;
             }
 
             this.setState(StateActive);
@@ -974,7 +972,7 @@
 
                 if(this._acmTimeout > 0)
                 {
-                    this._acmAbsoluteTimeoutMillis = TimeUtil.now() + this._acmTimeout * 1000;
+                    this._acmAbsoluteTimeoutMillis = Date.now() + this._acmTimeout * 1000;
                 }
 
                 this.dispatch(info);
@@ -1674,7 +1672,7 @@
                 message.sent(this);
                 if(this._acmTimeout > 0)
                 {
-                    this._acmAbsoluteTimeoutMillis = TimeUtil.now() + this._acmTimeout * 1000;
+                    this._acmAbsoluteTimeoutMillis = Date.now() + this._acmTimeout * 1000;
                 }
                 return AsyncStatus.Sent;
             }

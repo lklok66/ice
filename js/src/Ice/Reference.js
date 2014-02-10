@@ -206,7 +206,7 @@
             var mode = RefMode.ModeTwoway;
             var secure = false;
             var encoding = this._instance.defaultsAndOverrides().defaultEncoding;
-            var protocol = Protocol.Protocol_1_0;
+            var protocol = Ice.Protocol_1_0;
             var adapter = "";
 
             while(true)
@@ -376,7 +376,7 @@
 
                         try
                         {
-                            encoding = Protocol.stringToEncodingVersion(argument);
+                            encoding = Ice.stringToEncodingVersion(argument);
                         }
                         catch(e) // VersionParseException
                         {
@@ -395,7 +395,7 @@
 
                         try
                         {
-                            protocol = Protocol.stringToProtocolVersion(argument);
+                            protocol = Ice.stringToProtocolVersion(argument);
                         }
                         catch(e) // VersionParseException
                         {
@@ -596,7 +596,7 @@
 
             var protocol = null;
             var encoding = null;
-            if(!s.getReadEncoding().equals(Protocol.Encoding_1_0))
+            if(!s.getReadEncoding().equals(Ice.Encoding_1_0))
             {
                 protocol = new Ice.ProtocolVersion();
                 protocol.__read(s);
@@ -605,8 +605,8 @@
             }
             else
             {
-                protocol = Protocol.Protocol_1_0;
-                encoding = Protocol.Encoding_1_0;
+                protocol = Ice.Protocol_1_0;
+                encoding = Ice.Encoding_1_0;
             }
             
             var endpoints = null; // EndpointI[]
@@ -1165,7 +1165,7 @@
 
             s.writeBool(this._secure);
 
-            if(!s.getWriteEncoding().equals(Protocol.Encoding_1_0))
+            if(!s.getWriteEncoding().equals(Ice.Encoding_1_0))
             {
                 this._protocol.__write(s);
                 this._encoding.__write(s);
@@ -1263,7 +1263,7 @@
                 s.push(" -s");
             }
 
-            if(!this._protocol.equals(Protocol.Protocol_1_0))
+            if(!this._protocol.equals(Ice.Protocol_1_0))
             {
                 //
                 // We only print the protocol if it's not 1.0. It's fine as
@@ -1272,7 +1272,7 @@
                 // stringToProxy.
                 //
                 s.push(" -p ");
-                s.push(Protocol.protocolVersionToString(this._protocol));
+                s.push(Ice.protocolVersionToString(this._protocol));
             }
 
             //
@@ -1281,7 +1281,7 @@
             // stringToProxy (and won't use Ice.Default.EncodingVersion).
             //
             s.push(" -e ");
-            s.push(Protocol.encodingVersionToString(this._encoding));
+            s.push(Ice.encodingVersionToString(this._encoding));
 
             return s.join("");
 
@@ -1378,7 +1378,7 @@
     var FixedReference = Class(Reference, {
         __init__: function(instance, communicator, identity, facet, mode, secure, encoding, connection)
         {
-            Reference.call(this, instance, communicator, identity, facet, mode, secure, Protocol.Protocol_1_0, encoding);
+            Reference.call(this, instance, communicator, identity, facet, mode, secure, Ice.Protocol_1_0, encoding);
             this._fixedConnection = connection;
         },
         getEndpoints: function()
