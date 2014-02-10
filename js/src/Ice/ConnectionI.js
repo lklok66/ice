@@ -795,7 +795,7 @@
 
                 try
                 {
-                    if((operation & SocketOperation.Write) != 0 && !this._writeStream.isEmpty())
+                    if((operation & SocketOperation.Write) != 0 && this._writeStream.buffer.remaining > 0)
                     {
                         if(!this._transceiver.write(this._writeStream.buffer))
                         {
@@ -1540,7 +1540,6 @@
                         throw new Ice.IllegalMessageSizeException();
                     }
                     TraceUtil.traceRecv(this._readStream, this._logger, this._traceLevels);
-
                     this._validated = true;
                 }
             }
