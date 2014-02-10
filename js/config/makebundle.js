@@ -219,10 +219,19 @@ for(i = 0;  i < length; ++i)
     for(j in lines)
     {
         line = lines[j].trim();
-        if(line.match(/require\(".*"\);/))
+        //
+        // Get rid of require statements, the bundle include all required files, 
+        // so require statements are not required.
+        //
+        if(line == "var require = typeof(module) !== \"undefined\" ? module.require : function(){};")
         {
             continue;
         }
+        else if(line.match(/require\(".*"\);/))
+        {
+            continue;
+        }
+        
         if(optimize && line.match(/Debug\.assert\(/))
         {
             if(line.lastIndexOf(";") === -1)
