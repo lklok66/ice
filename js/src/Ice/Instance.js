@@ -98,11 +98,6 @@
             this._retryQueue = null;
             this._endpointHostResolver = null;
             this._endpointFactoryManager = null;
-
-            this._adminAdapter = null;
-            this._adminFacets = new HashMap();
-            this._adminFacetFilter = [];
-            this._adminIdentity = null;
         },
         initializationData: function()
         {
@@ -402,19 +397,6 @@
 
                 this._retryQueue = new RetryQueue(this);
 
-                /* TODO
-                //
-                // Add Process and Properties facets
-                //
-                var facetFilter = this._initData.properties.getPropertyAsList("Ice.Admin.Facets");
-                if(facetFilter.length > 0)
-                {
-                    this._adminFacetFilter.concat(facetFilter);
-                }
-
-                this._adminFacets.put("Properties", new PropertiesAdminI(_initData.properties));
-                this._adminFacets.put("Process", new ProcessI(communicator));*/
-
                 //
                 // Get default router and locator proxies. Don't move this
                 // initialization before the plug-in initialization!!! The proxies
@@ -441,43 +423,6 @@
                 this._connectionMonitor = new ConnectionMonitor(this, interval);
                 this._connectionMonitor.checkIntervalForACM(this._clientACM);
                 this._connectionMonitor.checkIntervalForACM(this._serverACM);
-
-                /*
-                //
-                // This must be done last as this call creates the Ice.Admin object adapter
-                // and eventually registers a process proxy with the Ice locator (allowing
-                // remote clients to invoke on Ice.Admin facets as soon as it's registered).
-                //
-                if(this._initData.properties.getPropertyAsIntWithDefault("Ice.Admin.DelayCreation", 0) <= 0)
-                {
-                    if(this.checkAdmin(promise !== null))
-                    {
-                        //
-                        // If the user calls initializeWithAdmin and the Admin OA is properly
-                        // configured, we call getAdmin now and delay completion of initializeWithAdmin
-                        // until getAdmin completes.
-                        //
-                        this.getAdmin(communicator).then(
-                            function(admin)
-                            {
-                                promise.succeed(communicator);
-                            }).exception(
-                                function(ex)
-                                {
-                                    this.destroy().then(
-                                        function()
-                                        {
-                                            promise.fail(ex);
-                                        }).exception(
-                                            function(e)
-                                            {
-                                                promise.fail(ex);
-                                            });
-                                });
-                        return;
-                    }
-                }
-                */
 
                 if(promise !== null)
                 {
@@ -681,11 +626,6 @@
                 this._endpointFactoryManager.destroy();
                 this._endpointFactoryManager = null;
             }
-
-            /*
-            this._adminAdapter = null;
-            this._adminFacets.clear();
-            */
 
             this._state = StateDestroyed;
 
