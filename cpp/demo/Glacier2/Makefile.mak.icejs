@@ -11,12 +11,7 @@ top_srcdir	= ..\..
 
 !include $(top_srcdir)\config\Make.rules.mak
 
-SUBDIRS         = bidir \
-                  hello \
-                  latency \
-                  minimal \
-                  throughput \
-                  ws
+SUBDIRS		= chat
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \
