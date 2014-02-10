@@ -42,18 +42,15 @@
         },
         shutdown: function()
         {
-            // TODO
-            //this._instance.objectAdapterFactory().shutdown();
+            this._instance.objectAdapterFactory().shutdown();
         },
         waitForShutdown: function()
         {
-            // TODO
-            //return this._instance.objectAdapterFactory().waitForShutdown();
+            return this._instance.objectAdapterFactory().waitForShutdown();
         },
         isShutdown: function()
         {
-            // TODO
-            //return this._instance.objectAdapterFactory().isShutdown();
+            return this._instance.objectAdapterFactory().isShutdown();
         },
         stringToProxy: function(s)
         {
@@ -124,8 +121,7 @@
         },
         findObjectFactory: function(id)
         {
-            // TODO
-            //return this._instance.servantFactoryManager().find(id);
+            return this._instance.servantFactoryManager().find(id);
         },
         getImplicitContext: function()
         {
