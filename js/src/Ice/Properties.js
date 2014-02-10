@@ -179,7 +179,10 @@
                     {
                         continue;
                     }
+                    
                     var found = false;
+                    var mismatchCase = false;
+                    var otherKey;
                     for(var j = 0; j < PropertyNames.validProps[i][j].length && !found; ++j)
                     {
                         pattern = PropertyNames.validProps[i][j].pattern();
@@ -194,17 +197,33 @@
                                 key = PropertyNames.validProps[i][j].deprecatedBy;
                             }
                         }
+                        
+                        if(found)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            pComp = new RegExp(pattern.toUpperCase());
+                            found = pComp.test(key.toUpperCase());
+                            if(found)
+                            {
+                                mismatchCase = true;
+                                otherKey = pattern.substr(2);
+                                otherKey = otherKey.substr(0, otherKey.length -1);
+                                otherKey = otherKey.replace(/\\/g, "");
+                                break;
+                            }
+                        }
                     }
-
-                    //
-                    // TODO Add mismatchCase checks as we do in Java/C++/.NET
+                    
                     if(!found)
                     {
                         logger.warning("unknown property: " + key);
                     }
-                    else
+                    else if(mismatchCase)
                     {
-                        break;
+                        logger.warning("unknown property: `" + key + "'; did you mean `" + otherKey + "'");
                     }
                 }
             }
