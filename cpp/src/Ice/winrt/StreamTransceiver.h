@@ -39,10 +39,12 @@ public:
     virtual NativeInfoPtr getNativeInfo();
     virtual void setCompletedHandler(SocketOperationCompletedHandler^);
     
-    virtual SocketOperation initialize(Buffer&, Buffer&);
+    virtual SocketOperation initialize(Buffer&, Buffer&, bool&);
+    virtual SocketOperation initialize();
+    virtual SocketOperation closing(bool, const Ice::LocalException&);
     virtual void close();
-    virtual bool write(Buffer&);
-    virtual bool read(Buffer&);
+    virtual SocketOperation write(Buffer&);
+    virtual SocketOperation read(Buffer&);
 
     virtual bool startWrite(Buffer&);
     virtual void finishWrite(Buffer&);

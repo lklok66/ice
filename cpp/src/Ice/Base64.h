@@ -17,7 +17,7 @@
 namespace IceInternal
 {
 
-class Base64
+class ICE_API Base64
 {
 public:
 

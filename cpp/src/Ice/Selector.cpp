@@ -140,6 +140,7 @@ Selector::initialize(EventHandler* handler)
         throw ex;
     }
     handler->__incRef();
+    handler->getNativeInfo()->initialize(_handle, reinterpret_cast<ULONG_PTR>(handler));
 }
 
 void
@@ -482,15 +483,16 @@ Selector::select(vector<pair<EventHandler*, SocketOperation> >& handlers, int ti
     }
 
     assert(ret > 0);
-    handlers.clear();
     for(int i = 0; i < ret; ++i)
     {
         pair<EventHandler*, SocketOperation> p;
 #if defined(ICE_USE_EPOLL)
         struct epoll_event& ev = _events[i];
         p.first = reinterpret_cast<EventHandler*>(ev.data.ptr);
-        p.second = static_cast<SocketOperation>(((ev.events & EPOLLIN) ? SocketOperationRead : SocketOperationNone) | 
-                                                ((ev.events & EPOLLOUT) ? SocketOperationWrite : SocketOperationNone));
+        p.second = static_cast<SocketOperation>(((ev.events & EPOLLIN) ? 
+                                                 SocketOperationRead : SocketOperationNone) | 
+                                                ((ev.events & (EPOLLOUT | EPOLLERR)) ? 
+                                                 SocketOperationWrite : SocketOperationNone));
 #else
         struct kevent& ev = _events[i];
         if(ev.flags & EV_ERROR)
@@ -701,7 +703,6 @@ Selector::select(vector<pair<EventHandler*, SocketOperation> >& handlers, int ti
     }
 
     assert(ret > 0);
-    handlers.clear();
 
 #if defined(ICE_USE_SELECT)
     if(_selectedReadFdSet.fd_count == 0 && _selectedWriteFdSet.fd_count == 0 && _selectedErrorFdSet.fd_count == 0)

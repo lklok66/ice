@@ -40,6 +40,7 @@
 #include <Ice/GC.h>
 #include <Ice/MetricsAdminI.h>
 #include <Ice/InstrumentationI.h>
+#include <Ice/ProtocolInstance.h>
  
 #include <IceUtil/UUID.h>
 #include <IceUtil/Mutex.h>
@@ -1097,15 +1098,17 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
 
         _endpointFactoryManager = new EndpointFactoryManager(this);
 #ifndef ICE_OS_WINRT
-        EndpointFactoryPtr tcpEndpointFactory = new TcpEndpointFactory(this);
+        ProtocolInstancePtr tcpProtocolInstance = new ProtocolInstance(this, TCPEndpointType, "tcp");
+        EndpointFactoryPtr tcpEndpointFactory = new TcpEndpointFactory(tcpProtocolInstance);
         _endpointFactoryManager->add(tcpEndpointFactory);
 #else
-        EndpointFactoryPtr tcpStreamEndpointFactory = new StreamEndpointFactory(this, TCPEndpointType);
+        EndpointFactoryPtr tcpStreamEndpointFactory = new StreamEndpointFactory(this, TCPEndpointType, "tcp");
         _endpointFactoryManager->add(tcpStreamEndpointFactory);
-        EndpointFactoryPtr sslStreamEndpointFactory = new StreamEndpointFactory(this, IceSSL::EndpointType);
+        EndpointFactoryPtr sslStreamEndpointFactory = new StreamEndpointFactory(this, IceSSL::EndpointType, "ssl");
         _endpointFactoryManager->add(sslStreamEndpointFactory);
 #endif
-        EndpointFactoryPtr udpEndpointFactory = new UdpEndpointFactory(this);
+        ProtocolInstancePtr udpProtocolInstance = new ProtocolInstance(this, UDPEndpointType, "udp");
+        EndpointFactoryPtr udpEndpointFactory = new UdpEndpointFactory(udpProtocolInstance);
         _endpointFactoryManager->add(udpEndpointFactory);
 
         _dynamicLibraryList = new DynamicLibraryList;

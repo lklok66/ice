@@ -1162,6 +1162,7 @@ IceInternal::RoutableReference::streamWrite(BasicStream* s) const
         assert(_adapterId.empty());
         for(vector<EndpointIPtr>::const_iterator p = _endpoints.begin(); p != _endpoints.end(); ++p)
         {
+            s->write((*p)->type());
             (*p)->streamWrite(s);
         }
     }
