@@ -72,7 +72,6 @@ usage(const char* n)
         "-d, --debug             Print debug messages.\n"
         "--ice                   Permit `Ice' prefix (for building Ice source code only).\n"
         "--underscore            Permit underscores in Slice identifiers.\n"
-        "--checksum              Generate checksums for Slice definitions.\n"
         ;
 }
 
@@ -92,7 +91,6 @@ compile(int argc, char* argv[])
     opts.addOpt("d", "debug");
     opts.addOpt("", "ice");
     opts.addOpt("", "underscore");
-    opts.addOpt("", "checksum");
 
     vector<string> args;
     try
@@ -150,8 +148,6 @@ compile(int argc, char* argv[])
     bool ice = opts.isSet("ice");
 
     bool underscore = opts.isSet("underscore");
-
-    bool checksum = opts.isSet("checksum");
 
     if(args.empty())
     {
@@ -252,10 +248,6 @@ compile(int argc, char* argv[])
                     {
                         Gen gen(icecpp->getBaseName(), include, includePaths, output);
                         gen.generate(p);
-                        if(checksum)
-                        {
-                            gen.generateChecksums(p);
-                        }
                     }
                     catch(const Slice::FileException& ex)
                     {
