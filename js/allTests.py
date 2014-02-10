@@ -33,6 +33,7 @@ tests = [
     ("Ice/facets", ["core"]),
     ("Ice/info", ["once"]),
     ("Ice/inheritance", ["once"]),
+    ("Ice/inheritanceBidir", ["once"]),
     ("Ice/location", ["once"]),
     ("Ice/objects", ["core"]),
     ("Ice/operations", ["core"]),

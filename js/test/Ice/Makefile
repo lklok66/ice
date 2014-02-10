@@ -19,6 +19,7 @@ SUBDIRS		= binding \
 		info \
 		facets \
 		inheritance \
+		inheritanceBidir \
 		location \
 		objects \
 		operations \
