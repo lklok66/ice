@@ -795,7 +795,7 @@
 
                 try
                 {
-                    if((operation & SocketOperation.Write) != 0 && this._writeStream.buffer.remaining > 0)
+                    if((operation & SocketOperation.Write) !== 0 && this._writeStream.buffer.remaining > 0)
                     {
                         if(!this._transceiver.write(this._writeStream.buffer))
                         {
