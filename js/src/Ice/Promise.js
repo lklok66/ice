@@ -22,7 +22,7 @@
         var callback = self.__state === State.Success ? listener.onResponse : listener.onException;
         try
         {
-            if(!(typeof callback == "function"))
+            if(typeof callback !== "function")
             {
                 listener.promise.setState(self.__state, self._args);
             }
