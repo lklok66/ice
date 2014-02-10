@@ -21,7 +21,7 @@
     var BatchOutgoingAsync = Ice.BatchOutgoingAsync;
     var Protocol = Ice.Protocol;
 
-    var ProxyBatchOutgoingAsync = Ice.__defineClass(BatchOutgoingAsync, {
+    var ProxyBatchOutgoingAsync = Ice.Class(BatchOutgoingAsync, {
         __init__: function(prx, operation)
         {
             BatchOutgoingAsync.call(this, prx.ice_getCommunicator(), operation);

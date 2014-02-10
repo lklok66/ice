@@ -11,15 +11,13 @@
     require("Ice/Class");
     require("Ice/Debug");
     require("Ice/ExUtil");
-    require("Ice/TimeUtil");
     
     var Ice = global.Ice || {};
     
     var Debug = Ice.Debug;
     var ExUtil = Ice.ExUtil;
-    var TimeUtil = Ice.TimeUtil;
 
-    var ConnectionMonitor = Ice.__defineClass({
+    var ConnectionMonitor = Ice.Class({
         __init__: function(instance, interval)
         {
             this._instance = instance;
@@ -91,7 +89,7 @@
         },
         runTimerTask: function()
         {
-            var now = TimeUtil.now();
+            var now = Date.now();
             for(var i = 0; i < this._connections.length; ++i)
             {
                 try

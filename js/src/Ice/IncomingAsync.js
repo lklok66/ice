@@ -14,6 +14,7 @@
     require("Ice/Connection");
     require("Ice/Current");
     require("Ice/Debug");
+    require("Ice/DispatchStatus");
     require("Ice/Exception");
     require("Ice/HashMap");
     require("Ice/Identity");
@@ -32,7 +33,7 @@
     var Protocol = Ice.Protocol;
     var StringUtil = Ice.StringUtil;
 
-    var IncomingAsync = Ice.__defineClass({
+    var IncomingAsync = Ice.Class({
         __init__: function(instance, connection, adapter, response, compress, requestId)
         {
             this._instance = instance;
@@ -70,7 +71,7 @@
             this._is = null;
 
             this._cb = null;
-            this._inParamPos = -1;
+            this._active = true;
         },
         __startWriteParams: function(format)
         {
@@ -205,7 +206,7 @@
             Debug.assert(this._connection !== null);
 
             var props = this._instance.initializationData().properties;
-
+            var s;
             if(ex instanceof Ice.RequestFailedException)
             {
                 if(ex.id === null)
@@ -339,7 +340,7 @@
                     this._os.resize(Protocol.headerSize + 4); // Reply status position.
                     this._os.writeByte(Protocol.replyUnknownLocalException);
                     //this._os.writeString(ex.toString());
-                    var s = [ ex.ice_name() ];
+                    s = [ ex.ice_name() ];
                     if(ex.stack)
                     {
                         s.push("\n");
@@ -365,7 +366,7 @@
                     this._os.resize(Protocol.headerSize + 4); // Reply status position.
                     this._os.writeByte(Protocol.replyUnknownUserException);
                     //this._os.writeString(ex.toString());
-                    var s = [ ex.ice_name() ];
+                    s = [ ex.ice_name() ];
                     if(ex.stack)
                     {
                         s.push("\n");
@@ -505,18 +506,13 @@
                     // DispatchAsync is a "pseudo dispatch status", used internally only
                     // to indicate async dispatch.
                     //
-                    //if(this._servant.__dispatch(this, this._current) === DispatchStatus.DispatchAsync)
-                    //{
-                    //    //
-                    //    // If this was an asynchronous dispatch, we're done here.
-                    //    //
-                    //    return;
-                    //}
-
-                    //
-                    // In JavaScript all servant upcalls are dispatched asynchronously.
-                    //
-                    this._servant.__dispatch(this, this._current);
+                    if(this._servant.__dispatch(this, this._current) === Ice.DispatchStatus.DispatchAsync)
+                    {
+                        //
+                        // If this was an asynchronous dispatch, we're done here.
+                        //
+                        return;
+                    }
 
                     if(this._locator !== null && !this.__servantLocatorFinished())
                     {
@@ -534,12 +530,12 @@
                     if(servantManager !== null && servantManager.hasServant(this._current.id))
                     {
                         throw new Ice.FacetNotExistException(this._current.id, this._current.facet,
-                                                            this._current.operation);
+                                                             this._current.operation);
                     }
                     else
                     {
                         throw new Ice.ObjectNotExistException(this._current.id, this._current.facet,
-                                                            this._current.operation);
+                                                              this._current.operation);
                     }
                 }
             }
@@ -595,24 +591,6 @@
             this._current.encoding = new Ice.EncodingVersion();
             return this._is.readEncaps(this._current.encoding);
         },
-        ice_exception: function(ex)
-        {
-            if(this._connection !== null)
-            {
-                this.__exception(ex);
-            }
-            else
-            {
-                //
-                // Response has already been sent.
-                //
-                if(this._instance.initializationData().properties.getPropertyAsIntWithDefault(
-                    "Ice.Warn.Dispatch", 1) > 0)
-                {
-                    this.__warning(ex);
-                }
-            }
-        },
         __response: function()
         {
             try
@@ -654,6 +632,38 @@
             catch(ex)
             {
                 this._connection.invokeException(ex, 1);
+            }
+        },
+        __validateResponse: function(ok)
+        {
+            if(!this._active)
+            {
+                return false;
+            }
+            this._active = false;
+            return true;
+        },
+        ice_exception: function(ex)
+        {
+            if(!this._active)
+            {
+                return;
+            }
+            this._active = false;
+
+            if(this._connection !== null)
+            {
+                this.__exception(ex);
+            }
+            else
+            {
+                //
+                // Response has already been sent.
+                //
+                if(this._instance.initializationData().properties.getPropertyAsIntWithDefault("Ice.Warn.Dispatch", 1) > 0)
+                {
+                    this.__warning(ex);
+                }
             }
         }
     });

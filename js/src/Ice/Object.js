@@ -14,6 +14,7 @@
     // Using IceObject in this file to avoid collisions with the native Object.
     //
     require("Ice/Class");
+    require("Ice/DispatchStatus");
     require("Ice/Exception");
     require("Ice/FormatType");
     require("Ice/StreamHelpers");
@@ -22,11 +23,11 @@
     var Ice = global.Ice || {};
     var Slice = global.Slice || {};
 
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
 
     var nextAddress = 0;
 
-    var IceObject = defineClass({
+    var IceObject = Class({
         __init__: function()
         {
             // Fake Address used as the hashCode for this object instance.
@@ -101,6 +102,33 @@
             return IceObject;
         }
     });
+
+    //
+    // These methods are used for object parameters.
+    //
+    IceObject.write = function(os, v)
+    {
+        os.writeObject(v);
+    };
+
+    IceObject.writeOpt = function(os, tag, v)
+    {
+        os.writeOptObject(tag, v);
+    };
+
+    IceObject.read = function(is)
+    {
+        var v = { value: null };
+        is.readObject(function(o) { v.value = o; }, IceObject);
+        return v;
+    };
+
+    IceObject.readOpt = function(is, tag)
+    {
+        var v = { value: undefined };
+        is.readOptObject(tag, function(o) { v.value = o; }, IceObject);
+        return v;
+    };
 
     IceObject.ice_staticId = function()
     {
@@ -204,254 +232,7 @@
         this.__slicedData = is.endReadObject(true);
     };
 
-    var AMDCallback = defineClass({
-        __init__: function(incomingAsync, exceptions, format, marshalFn)
-        {
-            this.incomingAsync = incomingAsync;
-            this.exceptions = exceptions;
-            this.format = format;
-            this.marshalFn = marshalFn;
-        },
-        ice_response: function()
-        {
-            var args = arguments;
-
-            try
-            {
-                if(this.marshalFn === undefined)
-                {
-                    if(args.length > 0)
-                    {
-                        //
-                        // No results expected.
-                        //
-                        this.incomingAsync.__exception(
-                            new Ice.UnknownException("ice_response called with invalid arguments"));
-                        return;
-                    }
-                    else
-                    {
-                        this.incomingAsync.__writeEmptyParams();
-                    }
-                }
-                else
-                {
-                    var __os = this.incomingAsync.__startWriteParams(this.format);
-                    args = Array.prototype.slice.call(args);
-                    args.unshift(__os);
-                    this.marshalFn.apply(this.marshalFn, args);
-                    this.incomingAsync.__endWriteParams(true);
-                }
-            }
-            catch(ex)
-            {
-                this.incomingAsync.__exception(ex);
-            }
-        },
-        ice_exception: function(ex)
-        {
-            if(this.exceptions !== undefined)
-            {
-                //
-                // Make sure the given exception is an instance of one of the declared user exceptions
-                // for this operation.
-                //
-                for(var i = 0; i < this.exceptions.length; ++i)
-                {
-                    if(ex instanceof this.exceptions[i])
-                    {
-                        //
-                        // User exception is valid, now marshal it.
-                        //
-                        this.incomingAsync.__exception(ex);
-                        return;
-                    }
-                }
-            }
-            else if(ex instanceof Ice.UserException)
-            {
-                this.incomingAsync.__exception(new Ice.UnknownUserException(ex.toString()));
-            }
-            else if(ex instanceof Ice.LocalException)
-            {
-                this.incomingAsync.__exception(new Ice.UnknownLocalException(ex.toString()));
-            }
-            else
-            {
-                this.incomingAsync.__exception(new Ice.UnknownException(ex.toString()));
-            }
-        }
-    });
-
-    var __dispatchImpl = function(servant, incomingAsync, current, methodName, unmarshalInParamsFn, marshalOutParamsFn,
-                                  userExceptions, format, amd)
-    {
-        //
-        // Check to make sure the servant implements the operation.
-        //
-        if(servant[methodName] === undefined || typeof(servant[methodName]) !== "function")
-        {
-            var comm = current.adapter.getCommunicator();
-            var msg = "servant for identity " + comm.identityToString(current.id) +
-                " does not define operation `" + methodName + "'";
-            console.log(msg);
-            throw new Ice.UnknownException(msg);
-        }
-
-        var cb = new AMDCallback(incomingAsync, userExceptions, format, marshalOutParamsFn);
-
-        //
-        // Unmarshal the in params (if any). The "u" property defines the unmarshaling function.
-        //
-        var inParams = amd ? [cb] : [];
-        if(unmarshalInParamsFn === undefined)
-        {
-            incomingAsync.readEmptyParams();
-        }
-        else
-        {
-            var __is = incomingAsync.startReadParams();
-            unmarshalInParamsFn(__is, inParams);
-            incomingAsync.endReadParams();
-        }
-
-        inParams.push(current);
-        try
-        {
-            var results = servant[methodName].apply(servant, inParams);
-
-            if(!amd)
-            {
-                cb.ice_response.apply(cb, results);
-            }
-        }
-        catch(ex)
-        {
-            cb.ice_exception(ex);
-        }
-    };
-
-    var opPrefix = "__op_";
-
-    function addOperation(type, name, op)
-    {
-        var dispatchMethod = opPrefix + name;
-
-        //
-        // The "n" property contains the native method name in case the operation's Slice name is a keyword.
-        // Check to make sure the servant implements the operation.
-        //
-        var methodName = op.n !== undefined ? op.n : name;
-
-        //
-        // The "u" property defines a function to unmarshal the in params.
-        //
-        var unmarshalInParamsFn = op.u;
-
-        //
-        // The "m" property defines a function to marshal the results.
-        //
-        var marshalOutParamsFn = op.m;
-
-        //
-        // The "e" property defines the user exceptions the operation has declared (if any).
-        //
-        var userExceptions = op.e;
-
-        //
-        // The "f" property defines the operation format (if non-default).
-        //
-        var format = op.f === undefined ? Ice.FormatType.DefaultFormat : Ice.FormatType.valueOf(op.f);
-
-        //
-        // The "a" property indicates whether the operation uses AMD.
-        //
-        var amd = op.a;
-
-        type.prototype[dispatchMethod] = function(servant, incomingAsync, current)
-        {
-            __dispatchImpl(servant, incomingAsync, current, methodName, unmarshalInParamsFn, marshalOutParamsFn,
-                           userExceptions, format, amd);
-        };
-    };
-
-    function addOperations(type, ops, intfs)
-    {
-        //
-        // Add a dispatch method for every operation declared by this class/interface.
-        //
-        if(ops)
-        {
-            for(var name in ops)
-            {
-                addOperation(type, name, ops[name]);
-            }
-        }
-
-        //
-        // Also copy dispatch methods from any base interfaces.
-        //
-        if(intfs)
-        {
-            for(var i = 0; i < intfs.length; ++i)
-            {
-                for(var name in intfs[i])
-                {
-                    if(name.indexOf(opPrefix) === 0)
-                    {
-                        type.prototype[name] = intfs[i][name];
-                    }
-                }
-            }
-        }
-    };
-
-    var __IceObjectOps =
-    {
-        "ice_ping":
-        {
-        },
-        "ice_isA":
-        {
-            u: function(__is, __r)
-            {
-                var id;
-                id = __is.readString();
-                __r.push(id);
-            },
-            m: function(__os, __ret)
-            {
-                __os.writeBool(__ret);
-            }
-        },
-        "ice_id":
-        {
-            m: function(__os, __ret)
-            {
-                __os.writeString(__ret);
-            }
-        },
-        "ice_ids":
-        {
-            m: function(__os, __ret)
-            {
-                if(__ret !== null)
-                {
-                    __os.writeSize(__ret.length);
-                    for(var i = 0; i < __ret.length; ++i)
-                    {
-                        __os.writeString(__ret[i]);
-                    }
-                }
-                else
-                {
-                    __os.writeSize(0);
-                }
-            }
-        }
-    };
-
-    addOperations(IceObject, __IceObjectOps, undefined);
+    Ice.Object = IceObject;
 
     Slice.defineLocalObject = function(constructor, base)
     {
@@ -467,7 +248,7 @@
         return obj;
     };
 
-    Slice.defineObject = function(constructor, base, intfs, scope, ids, compactId, writeImpl, readImpl, preserved, ops)
+    Slice.defineObject = function(constructor, base, intfs, scope, ids, compactId, writeImpl, readImpl, preserved)
     {
         var obj = constructor || function(){};
 
@@ -478,6 +259,31 @@
         obj.__compactId = compactId;
         obj.__instanceof = IceObject.__instanceof;
         obj.__implements = intfs;
+
+        //
+        // These methods are used for object parameters.
+        //
+        obj.write = function(os, v)
+        {
+            os.writeObject(v);
+        };
+        obj.writeOpt = function(os, tag, v)
+        {
+            os.writeOptObject(tag, v);
+        };
+        obj.read = function(is)
+        {
+            var v = { value: null };
+            is.readObject(function(o) { v.value = o; }, obj);
+            return v;
+        };
+        obj.readOpt = function(is, tag)
+        {
+            var v = { value: undefined };
+            is.readOptObject(tag, function(o) { v.value = o; }, obj);
+            return v;
+        };
+
         obj.ice_staticId = function()
         {
             return ids[scope];
@@ -493,30 +299,9 @@
         obj.prototype.__writeMemberImpl = writeImpl;
         obj.prototype.__readMemberImpl = readImpl;
 
-        //
-        // Define the dispatch methods.
-        //
-        addOperations(obj, ops, intfs);
-
-        obj.prototype.__dispatch = function(incomingAsync, current)
-        {
-            //
-            // Retrieve the dispatch method for this operation.
-            //
-            var disp = this[opPrefix + current.operation];
-
-            if(disp === undefined || typeof(disp) !== 'function')
-            {
-                throw new Ice.OperationNotExistException(current.id, current.facet, current.operation);
-            }
-
-            disp.call(disp, this, incomingAsync, current);
-        };
-
         return obj;
     };
 
-    Ice.Object = IceObject;
     global.Slice = Slice;
     global.Ice = Ice;
 }(typeof (global) === "undefined" ? window : global));

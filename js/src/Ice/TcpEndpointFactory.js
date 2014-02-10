@@ -17,7 +17,7 @@
     var TcpEndpointI = Ice.TcpEndpointI;
     var TCPEndpointType = Ice.TCPEndpointType;
 
-    var TcpEndpointFactory = Ice.__defineClass({
+    var TcpEndpointFactory = Ice.Class({
         __init__: function(instance)
         {
             this._instance = instance;

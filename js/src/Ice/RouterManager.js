@@ -19,7 +19,7 @@
     var RouterInfo = Ice.RouterInfo;
     var RouterPrx = Ice.RouterPrx;
 
-    var RouterManager = Ice.__defineClass({
+    var RouterManager = Ice.Class({
         __init__: function()
         {
             this._table = new HashMap(); // Map<Ice.RouterPrx, RouterInfo>

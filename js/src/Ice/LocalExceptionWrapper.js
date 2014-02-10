@@ -19,7 +19,7 @@
     var ExUtil = Ice.ExUtil;
     var Debug = Ice.Debug;
 
-    var LocalExceptionWrapper = Ice.__defineClass(Error, {
+    var LocalExceptionWrapper = Ice.Class(Error, {
         __init__: function(ex, retry)
         {
             retry = retry === undefined ? false : retry;

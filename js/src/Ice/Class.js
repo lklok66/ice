@@ -10,7 +10,7 @@
 (function(global){
     var Ice = global.Ice || {};
     
-    var defineClass = function()
+    var Class = function()
     {
         var base;
         var desc;
@@ -53,6 +53,6 @@
         return o;
     };
     
-    Ice.__defineClass = defineClass;
+    Ice.Class = Class;
     global.Ice = Ice;
 }(typeof (global) === "undefined" ? window : global));

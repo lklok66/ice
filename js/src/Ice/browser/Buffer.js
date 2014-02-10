@@ -41,7 +41,7 @@
     var Ice = global.Ice || Ice;
     var Long = Ice.Long;
 
-    var Buffer = Ice.__defineClass({
+    var Buffer = Ice.Class({
         __init__: function(buffer)
         {
             if(buffer !== undefined)

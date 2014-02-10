@@ -13,12 +13,12 @@
     var Slice = global.Slice || {};
     var Ice = global.Ice || {};
 
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
     
     //
     // Ice.Exception
     //
-    var Exception = defineClass(Error, {
+    var Exception = Class(Error, {
         __init__: function(cause)
         {
             this.ice_cause = cause;
@@ -70,7 +70,7 @@
     //
     // Ice.LocalException
     //
-    var LocalException = defineClass(Exception, {
+    var LocalException = Class(Exception, {
         __init__: function(cause)
         {
             Exception.call(this, cause);
@@ -99,7 +99,7 @@
     //
     // Ice.UserException
     //
-    var UserException = defineClass(Exception, {
+    var UserException = Class(Exception, {
         __init__: function(cause)
         {
             Exception.call(this, cause);
@@ -120,6 +120,10 @@
             is.startReadException();
             __readImpl(this, is, this.__mostDerivedType());
             is.endReadException(false);
+        },
+        __usesClasses: function()
+        {
+            return false;
         }
     });
     Ice.UserException = UserException;
@@ -194,7 +198,7 @@
         this.__slicedData = is.endReadException(true);
     };
     
-    Slice.defineUserException = function(constructor, base, name, writeImpl, readImpl, preserved)
+    Slice.defineUserException = function(constructor, base, name, writeImpl, readImpl, preserved, usesClasses)
     {
         var ex = constructor;
         ex.__parent = base;
@@ -214,6 +218,15 @@
         }
         ex.prototype.__writeMemberImpl = writeImpl;
         ex.prototype.__readMemberImpl = readImpl;
+
+        if(usesClasses)
+        {
+            ex.prototype.__usesClasses = function()
+            {
+                return true;
+            };
+        }
+
         return ex;
     };
 

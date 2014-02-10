@@ -13,7 +13,7 @@
     
     var Ice = global.Ice || {};
     
-    var ConnectionReaper = Ice.__defineClass({
+    var ConnectionReaper = Ice.Class({
         __init__: function()
         {
             this._connections = [];

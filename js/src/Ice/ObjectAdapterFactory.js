@@ -25,7 +25,7 @@
     //
     // Only for use by Instance.
     //
-    var ObjectAdapterFactory = Ice.__defineClass({
+    var ObjectAdapterFactory = Ice.Class({
         __init__: function(instance, communicator)
         {
             this._instance = instance;
@@ -53,20 +53,22 @@
             {
                 var self = this;
 
+                var successCB = function(r)
+                {
+                    if(--count === 0)
+                    {
+                        self._shutdownPromise.succeed();
+                    }
+                };
+               
+                var exceptionCB = function(ex)
+                {
+                    self._shutdownPromise.fail(ex);
+                };
+                
                 for(var i = 0; i < this._adapters.length; ++i)
                 {
-                    this._adapters[i].deactivate().then(
-                        function(r)
-                        {
-                            if(--count === 0)
-                            {
-                                self._shutdownPromise.succeed();
-                            }
-                        }).exception(
-                            function(ex)
-                            {
-                                self._shutdownPromise.fail(ex);
-                            });
+                    this._adapters[i].deactivate().then(successCB).exception(exceptionCB);
                 }
             }
             else
@@ -97,20 +99,22 @@
                     var count = self._adapters.length;
                     if(count > 0)
                     {
+                        var successCB = function(r)
+                        {
+                            if(--count === 0)
+                            {
+                                promise.succeed(promise);
+                            }
+                        };
+                        
+                        var exceptionCB = function(ex)
+                        {
+                            promise.fail(ex);
+                        };
+                        
                         for(var i = 0; i < self._adapters.length; ++i)
                         {
-                            self._adapters[i].waitForDeactivate().then(
-                                function(r)
-                                {
-                                    if(--count === 0)
-                                    {
-                                        promise.succeed(promise);
-                                    }
-                                }).exception(
-                                    function(ex)
-                                    {
-                                        promise.fail(ex);
-                                    });
+                            self._adapters[i].waitForDeactivate().then(successCB).exception(exceptionCB);
                         }
                     }
                     else
@@ -144,21 +148,23 @@
                     var count = self._adapters.length;
                     if(count > 0)
                     {
+                        var successCB = function(r)
+                        {
+                            if(--count === 0)
+                            {
+                                promise.succeed();
+                                self._adapters = [];
+                            }
+                        };
+                        
+                        var exceptionCB = function(ex)
+                        {
+                            promise.fail(ex);
+                        };
+                        
                         for(var i = 0; i < self._adapters.length; ++i)
                         {
-                            self._adapters[i].destroy().then(
-                                function(r)
-                                {
-                                    if(--count === 0)
-                                    {
-                                        promise.succeed();
-                                        self._adapters = [];
-                                    }
-                                }).exception(
-                                    function(ex)
-                                    {
-                                        promise.fail(ex);
-                                    });
+                            self._adapters[i].destroy().then(successCB).exception(exceptionCB);
                         }
                     }
                     else

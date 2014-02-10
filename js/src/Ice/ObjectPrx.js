@@ -26,7 +26,7 @@
 
     var Ice = global.Ice || {};
     var Slice = global.Slice || {};
-    
+
     var ArrayUtil = Ice.ArrayUtil;
     var AsyncResultBase = Ice.AsyncResultBase;
     var AsyncResult = Ice.AsyncResult;
@@ -42,7 +42,7 @@
     //
     // Ice.ObjectPrx
     //
-    var ObjectPrx = Ice.__defineClass({
+    var ObjectPrx = Ice.Class({
         __init__: function()
         {
             this._reference = null;
@@ -517,9 +517,9 @@
             {
                 ctx = new Ice.HashMap();
             }
-            
+
             var self = this;
-            
+
             var completedFn = function(__res)
                 {
                     try
@@ -545,9 +545,9 @@
                         return;
                     }
                 };
-                
+
             var __r = new OutgoingAsync(this, operation, completedFn, completedFn);
-            
+
             try
             {
                 __r.__prepare(operation, mode, ctx);
@@ -627,16 +627,13 @@
             return false;
         }
     });
-    
+
     //
     // Generic invocation for operations that have input parameters.
     //
-    ObjectPrx.__invoke = function(p, name, modeNum, fmtNum, ctx, marshalFn, unmarshalFn, userEx, args)
+    ObjectPrx.__invoke = function(p, name, mode, fmt, ctx, marshalFn, unmarshalFn, userEx, args)
     {
-        var mode = OperationMode.valueOf(modeNum);
-        var fmt = FormatType.valueOf(fmtNum);
-
-        if(unmarshalFn !== null || userEx !== null)
+        if(unmarshalFn !== null || userEx.length > 0)
         {
             p.__checkAsyncTwowayOnly(name);
         }
@@ -657,8 +654,7 @@
             else
             {
                 var __os = __r.__startWriteParams(fmt);
-                args.unshift(__os);
-                marshalFn.apply(null, args);
+                marshalFn.call(null, __os, args);
                 __r.__endWriteParams();
             }
             __r.__send();
@@ -689,10 +685,7 @@
             }
             else
             {
-                var __is = __r.__startReadParams();
-                var results = [__r];
-                unmarshalFn(__is, results);
-                __r.__endReadParams();
+                var results = unmarshalFn(__r);
                 __r.succeed.apply(__r, results);
             }
         }
@@ -824,8 +817,6 @@
         return true;
     };
 
-    
-
     ObjectPrx.__dispatchLocalException = function(__r, __ex)
     {
         __r.fail(__ex);
@@ -911,7 +902,7 @@
     {
         return is.readOptProxy(tag, this);
     };
-    
+
     ObjectPrx.__instanceof = function(T)
     {
         if(T === this)
@@ -934,34 +925,18 @@
         return false;
     };
 
-    Slice.defineProxy = function(base, staticId, prxInterfaces, operations)
+    Slice.defineProxy = function(base, staticId, prxInterfaces)
     {
         var prx = function()
         {
             base.call(this);
         };
         prx.__parent = base;
+        prx.__implements = prxInterfaces;
 
         // All generated proxies inherit from ObjectPrx
         prx.prototype = new base();
         prx.prototype.constructor = prx;
-
-        if(prxInterfaces !== undefined)
-        {
-            // Copy methods from super-interfaces
-            prx.__implements = prxInterfaces;
-            for(var intf in prxInterfaces)
-            {
-                var prxInterface = prxInterfaces[intf].prototype;
-                for(var f in prxInterface)
-                {
-                    if(typeof prxInterface[f] == "function" && prx.prototype[f] === undefined)
-                    {
-                        prx.prototype[f] = prxInterface[f];
-                    }
-                }
-            }
-        }
 
         // Static methods
         prx.ice_staticId = staticId;
@@ -973,98 +948,19 @@
         prx.writeOpt = ObjectPrx.writeOpt;
         prx.read = ObjectPrx.read;
         prx.readOpt = ObjectPrx.readOpt;
-        
+
         prx.__instanceof = ObjectPrx.__instanceof;
 
-        //static properties
+        // Static properties
         Object.defineProperty(prx, "minWireSize", {
             get: function(){ return 2; }
         });
-        
-        if(operations !== undefined)
-        {
-            addOperations(prx, operations);
-        }
+
         return prx;
     };
-    
-    function addOperation(prx, name, operation)
-    {
-        //
-        // The "o" property defines the operation mode (if non-default).
-        //
-        var o = operation.o === undefined ? 0 : operation.o;
-        
-        //
-        // The "f" property defines the operation format (if non-default).
-        //
-        var f = operation.f === undefined ? 0 : operation.f;
-        
-        //
-        // The "m" property defines the marshaling function.
-        //
-        var m = operation.m === undefined ? null : operation.m;
-        
-        //
-        // The "u" property defines the unmarshaling function.
-        //
-        var u = operation.u === undefined ? null : operation.u;
-        
-        //
-        // The "e" property defines the user exceptions the operation has declared (if any).
-        //
-        var e = operation.e === undefined ? null : operation.e;
-        
-        //
-        // The number of input parameters (if any).
-        //
-        var n = m === null ? 0 : m.length - 1;
-        
-        prx.prototype[name] = function()
-        {
-            return ObjectPrx.__invoke(this, name, o, f, arguments[n], m, u, e, Array.prototype.slice.call(arguments));
-        };
-    }
-    
-    function addOperations(prx, operations)
-    {
-        for(var name in operations)
-        {
-            addOperation(prx, name, operations[name]);
-        }
-    }
-    
-    addOperations(ObjectPrx, {
-        ice_isA:
-        {
-            o:1,
-            m:function(__os, __id)
-            {
-                __os.writeString(__id);
-            },
-            u:ObjectPrx.__returns_bool
-        },
-        ice_ping:
-        {
-            o:1
-        },
-        ice_ids:
-        {
-            o:1,
-            u:function(__is, __results)
-            {
-                __results.push(Ice.StringSeqHelper.read(__is));
-            }
-        },
-        ice_id:
-        {
-            o:1,
-            u:ObjectPrx.__returns_string
-        }
-    });
-    
+
     Ice.ObjectPrx = ObjectPrx;
-    
+
     global.Slice = Slice;
     global.Ice = Ice;
 }(typeof (global) === "undefined" ? window : global));

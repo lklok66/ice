@@ -538,7 +538,20 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
         }
     }
 
-    if(ProxyPtr::dynamicCast(type) || StructPtr::dynamicCast(type) || EnumPtr::dynamicCast(type))
+    if(EnumPtr::dynamicCast(type))
+    {
+        if(marshal)
+        {
+            out << nl << typeToString(type) << ".__write(" << stream << ", " << param << ");";
+        }
+        else
+        {
+            out << nl << param << " = " << typeToString(type) << ".__read(" << stream << ");";
+        }
+        return;
+    }
+
+    if(ProxyPtr::dynamicCast(type) || StructPtr::dynamicCast(type))
     {
         if(marshal)
         {
@@ -559,7 +572,7 @@ Slice::JsGenerator::writeMarshalUnmarshalCode(Output &out,
         }
         else
         {
-            out << nl << stream << ".readObject(function(obj){ " << fixSuffix(param) << " = obj; }, " 
+            out << nl << stream << ".readObject(function(__o){ " << fixSuffix(param) << " = __o; }, "
                 << typeToString(type) << ");";
         }
         return;
@@ -598,8 +611,21 @@ Slice::JsGenerator::writeOptionalMarshalUnmarshalCode(Output &out,
         }
         else
         {
-            out << nl << stream << ".readOptObject(" << tag << ", function(obj){ " << fixSuffix(param)
-                << " = obj; }, " << typeToString(type) << ");";
+            out << nl << stream << ".readOptObject(" << tag << ", function(__o){ " << fixSuffix(param)
+                << " = __o; }, " << typeToString(type) << ");";
+        }
+        return;
+    }
+
+    if(EnumPtr::dynamicCast(type))
+    {
+        if(marshal)
+        {
+            out << nl << typeToString(type) <<".__writeOpt(" << stream << ", " << tag << ", " << param << ");";
+        }
+        else
+        {
+            out << nl << param << " = " << typeToString(type) << ".__readOpt(" << stream << ", " << tag << ");";
         }
         return;
     }
@@ -669,12 +695,17 @@ Slice::JsGenerator::getHelper(const TypePtr& type)
             }
         }
     }
-    
-    if(ProxyPtr::dynamicCast(type) || StructPtr::dynamicCast(type) || EnumPtr::dynamicCast(type))
+
+    if(EnumPtr::dynamicCast(type))
+    {
+        return typeToString(type) + ".__helper";
+    }
+
+    if(ProxyPtr::dynamicCast(type) || StructPtr::dynamicCast(type))
     {
         return typeToString(type);
-    }    
-    
+    }
+
     if(SequencePtr::dynamicCast(type) || DictionaryPtr::dynamicCast(type))
     {
         stringstream s;

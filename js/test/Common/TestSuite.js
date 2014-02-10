@@ -13,7 +13,7 @@ $(document).foundation();
         
             $("#default-host").attr("placeholder", document.location.hostname || "127.0.0.1");
             
-            $("#console").height($(window).height() / 2);
+            $("#console").height(120);
             
             for(name in TestCases)
             {

@@ -138,12 +138,9 @@ $(libdir)/$(LIBNAME).min.js $(libdir)/$(LIBNAME).min.js.gz: $(libdir)/$(LIBNAME)
 	rm -f $(libdir)/$(LIBNAME).tmp.js
 endif
 
-lint: $(TARGETS)
-	jshint $(LINTFLAGS) $(TARGETS)
-
 .PHONY : lint
 
 install::
 
-EVERYTHING		= all clean install
-EVERYTHING_EXCEPT_ALL	= install clean
+EVERYTHING		= all clean install lint
+EVERYTHING_EXCEPT_ALL	= install clean lint

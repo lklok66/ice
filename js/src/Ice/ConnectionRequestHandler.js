@@ -17,7 +17,7 @@
     var Promise = Ice.Promise;
     var ReferenceMode = Ice.ReferenceMode;
 
-    var ConnectionRequestHandler = Ice.__defineClass({
+    var ConnectionRequestHandler = Ice.Class({
         __init__: function(ref, connection, compress)
         {
             this._reference = ref;

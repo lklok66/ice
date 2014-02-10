@@ -11,7 +11,6 @@
 
 #include <Ice/Current.ice>
 
-[["java:package:test.Ice.info"]]
 module Test
 {
 

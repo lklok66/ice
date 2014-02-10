@@ -15,7 +15,7 @@
 
     var BatchOutgoingAsync = Ice.BatchOutgoingAsync;
 
-    Ice.ConnectionBatchOutgoingAsync = Ice.__defineClass(BatchOutgoingAsync, {
+    Ice.ConnectionBatchOutgoingAsync = Ice.Class(BatchOutgoingAsync, {
         __init__: function(con, communicator, operation)
         {
             BatchOutgoingAsync.call(this, communicator, operation);

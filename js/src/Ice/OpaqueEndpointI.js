@@ -26,9 +26,9 @@
     var Protocol = Ice.Protocol;
     var StringUtil = Ice.StringUtil;
     
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
 
-    var OpaqueEndpointI = defineClass(Ice.Endpoint, {
+    var OpaqueEndpointI = Class(Ice.Endpoint, {
         //
         // Marshal the endpoint
         //
@@ -45,8 +45,8 @@
         toString: function()
         {
             var val = Base64.encode(this._rawBytes);
-            return "opaque -t " + this._type + " -e " + Protocol.encodingVersionToString(this._rawEncoding) +
-                " -v " + val;
+            return "opaque -t " + this._type + " -e " + Ice.encodingVersionToString(this._rawEncoding) +
+                   " -v " + val;
         },
         //
         // Return the endpoint information.
@@ -385,7 +385,7 @@
                     }
                     try
                     {
-                        result._rawEncoding = Protocol.stringToEncodingVersion(argument);
+                        result._rawEncoding = Ice.stringToEncodingVersion(argument);
                     }
                     catch(e)
                     {
@@ -429,7 +429,7 @@
 
     Ice.OpaqueEndpointI = OpaqueEndpointI;
     
-    var OpaqueEndpointInfoI = defineClass(Ice.OpaqueEndpointInfo, {
+    var OpaqueEndpointInfoI = Class(Ice.OpaqueEndpointInfo, {
         __init__: function(timeout, compress, rawEncoding, rawBytes, type)
         {
             Ice.OpaqueEndpointInfo.call(this, -1, false, rawEncoding, rawBytes);

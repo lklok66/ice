@@ -15,6 +15,7 @@ SUBDIRS		= binding \
 		defaultValue \
 		enums \
 		exceptions \
+		exceptionsBidir \
 		info \
 		facets \
 		inheritance \
@@ -23,6 +24,7 @@ SUBDIRS		= binding \
 		operations \
 		operationsBidir \
 		optional \
+		optionalBidir \
 		promise \
 		proxy \
 		retry \

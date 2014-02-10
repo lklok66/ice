@@ -33,11 +33,11 @@
     var Promise = Ice.Promise;
     var EndpointSelectionType = Ice.EndpointSelectionType;
 
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
     //
     // Only for use by Instance.
     //
-    var OutgoingConnectionFactory = defineClass({
+    var OutgoingConnectionFactory = Class({
         __init__: function(communicator, instance)
         {
             this._communicator = communicator;
@@ -207,13 +207,13 @@
         {
             var promise = new AsyncResultBase(this._communicator, "flushBatchRequests", null, null, null);
 
-            var c = [];
+            var c = [], e, i;
             if(!this._destroyed)
             {
-                for(var e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
+                for(e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
                 {
                     var connectionList = e.value;
-                    for(var i = 0; i < connectionList.length; ++i)
+                    for(i = 0; i < connectionList.length; ++i)
                     {
                         if(connectionList[i].isActiveOrHolding())
                         {
@@ -252,7 +252,7 @@
                     }
                 };
                 
-                for(var i = 0; i < c.length; ++i)
+                for(i = 0; i < c.length; ++i)
                 {
                     c[i].flushBatchRequests().then(successCB).exception(exceptionCB);
                 }
@@ -816,7 +816,7 @@
     //
     // Value is a Vector<Ice.ConnectionI>
     //
-    var ConnectionListMap = defineClass(HashMap, {
+    var ConnectionListMap = Class(HashMap, {
         __init__: function(h)
         {
             HashMap.call(this, h);
@@ -848,7 +848,7 @@
         }
     });
     
-    var ConnectCallback = defineClass({
+    var ConnectCallback = Class({
         __init__: function(f, endpoints, more, selType)
         {
             this._factory = f;
@@ -1024,7 +1024,7 @@
         }
     });
     
-    var ConnectionsFinished = defineClass({
+    var ConnectionsFinished = Class({
         __init__: function(size, complete, cbContext)
         {
             this._size = size;

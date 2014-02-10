@@ -23,7 +23,7 @@
     //
     // Ice.Communicator
     //
-    var Communicator = Ice.__defineClass({
+    var Communicator = Ice.Class({
         __init__: function(initData)
         {
             this._instance = new Instance(initData);

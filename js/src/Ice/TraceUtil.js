@@ -353,7 +353,7 @@
         if(!ver.equals(Protocol.Encoding_1_0))
         {
             s.push("\nencoding = ");
-            s.push(Protocol.encodingVersionToString(ver));
+            s.push(Ice.encodingVersionToString(ver));
         }
     }
 

@@ -15,7 +15,7 @@
     
     var Exception = Ice.Exception;
     
-    var AssertionFailedException = Ice.__defineClass(Error, {
+    var AssertionFailedException = Ice.Class(Error, {
         __init__: function(message)
         {
             Error.call(this);
@@ -31,6 +31,8 @@
     {
         if(!b)
         {
+            console.log(msg === undefined ? "assertion failed" : msg);
+            console.log(Error().stack);
             throw new AssertionFailedException(msg === undefined ? "assertion failed" : msg);
         }
     };

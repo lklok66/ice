@@ -47,13 +47,13 @@ COMMON_SRCS = \
 	Class.js \
 	Communicator.js \
 	ConnectionBatchOutgoingAsync.js \
-	ConnectionF.js \
 	ConnectionI.js \
 	ConnectionMonitor.js \
 	ConnectionReaper.js \
 	ConnectionRequestHandler.js \
 	ConnectRequestHandler.js \
 	DefaultsAndOverrides.js \
+	DispatchStatus.js \
 	EndpointFactoryManager.js \
 	EnumBase.js \
 	Exception.js \
@@ -74,17 +74,16 @@ COMMON_SRCS = \
 	Long.js \
 	Network.js \
 	ObjectAdapterFactory.js \
-	ObjectAdapterF.js \
 	ObjectAdapterI.js \
 	ObjectFactory.js \
 	ObjectFactoryManager.js \
 	Object.js \
 	ObjectPrx.js \
 	OpaqueEndpointI.js \
+	Operation.js \
 	OptionalFormat.js \
 	OutgoingAsync.js \
 	OutgoingConnectionFactory.js \
-	ProcessF.js \
 	ProcessLogger.js \
 	Promise.js \
 	Properties.js \
@@ -104,7 +103,6 @@ COMMON_SRCS = \
 	StringUtil.js \
 	Struct.js \
 	Timer.js \
-	TimeUtil.js \
 	TraceLevels.js \
 	TraceUtil.js \
 	TypeRegistry.js \
@@ -119,6 +117,7 @@ NODEJS_SRCS = \
 	TcpTransceiver.js \
 
 BROWSER_SRCS = \
+	browser/Buffer.js \
 	browser/EndpointInfo.js \
 	browser/ConnectionInfo.js \
 	browser/Transceiver.js \
@@ -154,6 +153,9 @@ browser/%.js: $(slicedir)/IceWS/%.ice $(SLICE2JS) $(SLICEPARSERLIB)
 	rm -f browser/$(*F).js
 	$(SLICE2JS) $(SLICE2JSFLAGS) $<
 	mv $(*F).js browser/
+
+lint:: $(SRCS)
+	jshint $(LINTFLAGS) $(NODEJS_SRCS) $(BROWSER_SRCS) $(GEN_SRCS) $(COMMON_SRCS)
 
 install:: all
 	$(call installlib,$(DESTDIR)$(install_libdir),$(libdir),$(LIBNAME))

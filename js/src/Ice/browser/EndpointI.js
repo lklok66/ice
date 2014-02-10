@@ -26,9 +26,9 @@
     var StringUtil = Ice.StringUtil;
     var Transceiver = IceWS.Transceiver;
 
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
     
-    var EndpointI = defineClass(Ice.Endpoint, {
+    var EndpointI = Class(Ice.Endpoint, {
         __init__: function(instance, secure, ho, po, ti, conId, co, re)
         {
             this._instance = instance;
@@ -367,6 +367,8 @@
         var timeout = -1;
         var compress = false;
         var resource = null;
+        
+        var protocol = secure ? "wss" : "ws";
 
         var arr = str.split(/[ \t\n\r]+/);
 
@@ -383,7 +385,7 @@
             if(option.length != 2 && option.charAt(0) != '-')
             {
                 throw new Ice.EndpointParseException("expected an endpoint option but found `" + option +
-                                                        "' in endpoint `tcp " + str + "'");
+                                                        "' in endpoint `" + protocol + " " + str + "'");
             }
 
             var argument = null;
@@ -402,8 +404,8 @@
                 {
                     if(argument === null)
                     {
-                        throw new Ice.EndpointParseException("no argument provided for -h option in endpoint `tcp " +
-                                                            str + "'");
+                        throw new Ice.EndpointParseException("no argument provided for -h option in endpoint `" +
+                                                             protocol + " " + str + "'");
                     }
 
                     host = argument;
@@ -414,8 +416,8 @@
                 {
                     if(argument === null)
                     {
-                        throw new Ice.EndpointParseException("no argument provided for -p option in endpoint `tcp " +
-                                                            str + "'");
+                        throw new Ice.EndpointParseException("no argument provided for -p option in endpoint `" +
+                                                             protocol + " " + str + "'");
                     }
 
                     try
@@ -425,13 +427,14 @@
                     catch(ex)
                     {
                         throw new Ice.EndpointParseException("invalid port value `" + argument +
-                                                            "' in endpoint `tcp " + str + "'");
+                                                             "' in endpoint `" + protocol + " " + str + "'");
                     }
 
                     if(port < 0 || port > 65535)
                     {
                         throw new Ice.EndpointParseException("port value `" + argument +
-                                                            "' out of range in endpoint `tcp " + str + "'");
+                                                             "' out of range in endpoint `" + protocol + " " + str +
+                                                             "'");
                     }
 
                     break;
@@ -441,8 +444,8 @@
                 {
                     if(argument === null)
                     {
-                        throw new Ice.EndpointParseException("no argument provided for -r option in endpoint `tcp " +
-                                                            str + "'");
+                        throw new Ice.EndpointParseException("no argument provided for -r option in endpoint `" +
+                                                             protocol + " " + str + "'");
                     }
 
                     host = argument;
@@ -453,8 +456,8 @@
                 {
                     if(argument === null)
                     {
-                        throw new Ice.EndpointParseException("no argument provided for -t option in endpoint `tcp " +
-                                                            str + "'");
+                        throw new Ice.EndpointParseException("no argument provided for -t option in endpoint `" +
+                                                             protocol + " " + str + "'");
                     }
 
                     try
@@ -464,7 +467,7 @@
                     catch(ex)
                     {
                         throw new Ice.EndpointParseException("invalid timeout value `" + argument +
-                                                                "' in endpoint `tcp " + str + "'");
+                                                             "' in endpoint `" + protocol + " " + str + "'");
                     }
 
                     break;
@@ -475,7 +478,8 @@
                     if(argument !== null)
                     {
                         throw new Ice.EndpointParseException("unexpected argument `" + argument +
-                                                                "' provided for -z option in `tcp " + str + "'");
+                                                             "' provided for -z option in `" + protocol + " " + str +
+                                                             "'");
                     }
 
                     compress = true;
@@ -484,7 +488,8 @@
 
                 default:
                 {
-                    throw new Ice.EndpointParseException("unknown option `" + option + "' in `tcp " + str + "'");
+                    throw new Ice.EndpointParseException("unknown option `" + option + "' in `" + protocol + " " + 
+                                                         str + "'");
                 }
             }
         }
@@ -501,7 +506,8 @@
             }
             else
             {
-                throw new Ice.EndpointParseException("`-h *' not valid for proxy endpoint `tcp " + str + "'");
+                throw new Ice.EndpointParseException("`-h *' not valid for proxy endpoint `" + protocol + " " + str +
+                                                     "'");
             }
         }
 
@@ -527,7 +533,7 @@
     IceWS.EndpointI = EndpointI;
     global.IceWS = IceWS;
     
-    var EndpointInfoI = defineClass(IceWS.EndpointInfo, {
+    var EndpointInfoI = Class(IceWS.EndpointInfo, {
         __init__: function(secure, timeout, compress, host, port, resource)
         {
             IceWS.EndpointInfo.call(this, timeout, compress, host, port, resource);

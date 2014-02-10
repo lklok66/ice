@@ -3,75 +3,86 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hello Demo | Ice for JavaScript</title>
-    <link rel="stylesheet" href="foundation/css/foundation.css" />
-    <script src="foundation/js/modernizr.js"></script>
-    <script src="../../../lib/Ice.js"></script>
-    <script src="Hello.js"></script>
+    <title>Minimal Demo | Ice for JavaScript</title>
+    <link rel="stylesheet" href="../../../config/foundation/css/foundation.css" />
+    <script src="../../../config/foundation/js/modernizr.js"></script>
+    <link type="text/css" rel="stylesheet" href="../../../config/syntaxhighlighter/styles/shCoreDefault.css"/>
+    <style type="text/css">
+        #source
+        {
+            max-height:500px;
+            overflow:auto;
+        }
+    </style>
   </head>
   <body>
     <nav class="top-bar" data-topbar>
         <ul class="title-area">
             <li class="name">
-                <h1><a href="#">Ice for JavaScript</a></h1>
+                <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
             </li>
+            <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
         </ul>
+        <section class="top-bar-section">
+            <!-- Right Nav Section -->
+            <ul class="right">
+                <li class="divider"></li>
+                <li><a href="#" id="viewSource" class="disabled">View Source</a></li>
+            </ul>
+        </section>
     </nav>
     <section role="main">
-        <br/>
-        <form>
-            <div class="row">
-                <div class="small-3 columns">
-                    <label class="right inline" for="hostname">Hostname:</label>
-                </div>
-                <div class="small-9 columns">
-                    <input type="text" id="hostname"/>
-                </div>
-                <div class="small-12 columns">
-                    <a href="#" class="button small" id="hello">Hello World!</a>
-                </div>
-                <div class="small-12 columns">
-                    <textarea id="console" readonly></textarea>
-                </div>
+        <ul class="breadcrumbs">
+            <li><a href="../../../index.html">Ice</a></li>
+            <li><a href="../../index.html">Demos</a></li>
+            <li class="current"><a href="#">Minimal</a></li>
+        </ul>
+        <div class="row">
+            <div class="large-12 medium-12 columns">
+                <form>
+                    <div class="row">
+                        <div class="small-3 columns">
+                            <label class="right inline" for="hostname">Hostname:</label>
+                        </div>
+                        <div class="small-9 columns">
+                            <input type="text" id="hostname"/>
+                        </div>
+                        <div class="small-12 columns">
+                            <a href="#" class="button small" id="hello">Hello World!</a>
+                        </div>
+                        <div class="small-12 columns">
+                            <textarea id="console" readonly></textarea>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </section>
-    <script src="foundation/js/jquery.js"></script>
-    <script src="foundation/js/foundation.min.js"></script>
+    <div id="source-modal" class="reveal-modal" data-reveal>
+        <pre id="source" class="brush: js;"></pre>
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
+    <script src="../../../config/foundation/js/jquery.js"></script>
+    <script src="../../../config/foundation/js/foundation.min.js"></script>
     <script>
         $(document).foundation();
-        $(document).ready(
+        $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
+    </script>
+    <script src="../../../lib/Ice.js"></script>
+    <script src="Hello.js"></script>
+    <script src="browser/Client.js"></script>
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shBrushJScript.js"></script>
+    <script type="application/javascript">
+        $("#source").load("browser/Client.js",
             function(){
-                $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
-                
-                $("#hello").click(
+                SyntaxHighlighter.defaults.toolbar = false;
+                SyntaxHighlighter.highlight();
+                $("#viewSource").removeClass("disabled");
+                $("#viewSource").click(
                     function()
                     {
-                        $("#console").val("");
-                        var communicator = Ice.initialize();
-                        var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
-                        Demo.HelloPrx.checkedCast(communicator.stringToProxy("hello:ws -h " + hostname + " -p 10000")).then(
-                            function(asyncResult, hello)
-                            {
-                                return hello.sayHello();
-                            }
-                        ).then(
-                            function(asyncResult)
-                            {
-                                var c = communicator;
-                                communicator =  null;
-                                return c.destroy();
-                            }
-                        ).exception(
-                            function(ex)
-                            {
-                                if(communicator !== null)
-                                {
-                                    communicator.destroy();
-                                }
-                                $("#console").val(ex.toString());
-                            }
-                        );
+                        $("#source-modal").foundation("reveal", "open");
                         return false;
                     });
             });

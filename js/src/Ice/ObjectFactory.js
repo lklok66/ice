@@ -12,7 +12,7 @@
     
     require("Ice/Class");
     
-    var ObjectFactory = Ice.__defineClass({
+    var ObjectFactory = Ice.Class({
         create: function(type)
         {
             throw new Error("not implemented");

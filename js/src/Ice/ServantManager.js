@@ -25,7 +25,7 @@
     //
     // Only for use by Ice.ObjectAdatperI.
     //
-    var ServantManager = Ice.__defineClass({
+    var ServantManager = Ice.Class({
         __init__: function(instance, adapterName)
         {
             this._instance = instance;

@@ -19,10 +19,10 @@
     
     var Protocol = {};
 
-    Protocol.Encoding_1_0 = new Ice.EncodingVersion(1, 0);
-    Protocol.Encoding_1_1 = new Ice.EncodingVersion(1, 1);
+    Ice.Encoding_1_0 = new Ice.EncodingVersion(1, 0);
+    Ice.Encoding_1_1 = new Ice.EncodingVersion(1, 1);
 
-    Protocol.Protocol_1_0 = new Ice.ProtocolVersion(1, 0);
+    Ice.Protocol_1_0 = new Ice.ProtocolVersion(1, 0);
 
     //
     // Size of the Ice protocol header
@@ -211,7 +211,7 @@
     *
     * @return The converted protocol version.
     **/
-    Protocol.stringToProtocolVersion = function(version)
+    Ice.stringToProtocolVersion = function(version)
     {
         return new Ice.ProtocolVersion(stringToMajor(version), stringToMinor(version));
     };
@@ -223,7 +223,7 @@
     *
     * @return The converted object identity.
     **/
-    Protocol.stringToEncodingVersion = function(version)
+    Ice.stringToEncodingVersion = function(version)
     {
         return new Ice.EncodingVersion(stringToMajor(version), stringToMinor(version));
     };
@@ -235,7 +235,7 @@
     *
     * @return The converted string.
     **/
-    Protocol.protocolVersionToString = function(v)
+    Ice.protocolVersionToString = function(v)
     {
         return majorMinorToString(v.major, v.minor);
     };
@@ -247,7 +247,7 @@
     *
     * @return The converted string.
     **/
-    Protocol.encodingVersionToString = function(v)
+    Ice.encodingVersionToString = function(v)
     {
         return majorMinorToString(v.major, v.minor);
     };

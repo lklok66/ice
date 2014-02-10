@@ -17,13 +17,52 @@
     require("Callback");
     var Test = global.Test;
     var Promise = Ice.Promise;
-
+    var Debug = Ice.Debug;
+    
     var test = function(b)
     {
         if(!b)
         {
             throw new Error("test failed");
         }
+    };
+    
+    var CallbackPrx = Test.CallbackPrx;
+    var CallbackReceiverPrx = Test.CallbackReceiverPrx;
+    
+    var CallbackReceiverI = function()
+    {
+        this._callback = false;
+        this._p = new Promise();
+    };
+    CallbackReceiverI.prototype = new Test.CallbackReceiver();
+    CallbackReceiverI.prototype.constructor = CallbackReceiverI;
+
+    CallbackReceiverI.prototype.callback = function(current)
+    {
+        Debug.assert(!this._callback);
+        this._p.succeed();
+    };
+    
+    CallbackReceiverI.prototype.callbackEx = function(current)
+    {
+        this.callback(current);
+        var ex = new Test.CallbackException();
+        ex.someValue = 3.14;
+        ex.someString = "3.14";
+        throw ex;
+    };
+    
+    CallbackReceiverI.prototype.callbackOK = function()
+    {
+        var p = new Promise();
+        var self = this;
+        this._p.then(function(){ 
+            p.succeed();
+            this._callback = false;
+            self._p = new Promise();
+        });
+        return p;
     };
 
     var allTests = function(out, communicator)
@@ -40,10 +79,15 @@
                 test(routerBase !== null);
                 out.writeLine("ok");
                 
-                var router, base, session, twoway, category, processBase, process;
+                var router, base, session, twoway, oneway, category, processBase, process;
+                var adapter;
+                var callbackReceiverImpl;
+                var callbackReceiver;
+                var twowayR, onewayR;
+                var fakeTwowayR;
                 out.write("testing checked cast for router... ");
                 Glacier2.RouterPrx.checkedCast(routerBase).then(
-                    function(asyncResult, o)
+                    function(r, o)
                     {
                         router = o;
                         test(router !== null);
@@ -57,7 +101,7 @@
                         return router.getSessionTimeout();
                     }
                 ).then(
-                    function(asyncResult, timeout)
+                    function(r, timeout)
                     {
                         test(timeout.low === 30);
                         out.writeLine("ok");
@@ -109,7 +153,7 @@
                         return router.createSession("userid", "abc123");
                     }
                 ).then(
-                    function(asyncResult, s)
+                    function(r, s)
                     {
                         session = s;
                         out.writeLine("ok");
@@ -131,42 +175,178 @@
                         return base.ice_ping();
                     }
                 ).then(
-                    function(asyncResult)
+                    function(r)
                     {
                         out.writeLine("ok");
                         
                         out.write("testing checked cast for server object... ");
                         return Test.CallbackPrx.checkedCast(base);
-                    },
-                    function(ex)
-                    {
-                        console.log(ex);
-                        console.log(ex.stack);
-                        proccess.exit(1);
                     }
                 ).then(
-                    function(asyncResult, o)
+                    function(r, o)
                     {
                         twoway = o;
                         test(twoway !== null);
                         out.writeLine("ok");
-                        
+                        out.write("creating and activating callback receiver adapter... ");
+                        communicator.getProperties().setProperty("Ice.PrintAdapterReady", "0");
+                        return communicator.createObjectAdapterWithRouter("CallbackReceiverAdapter", router);
+                    }
+                ).then(
+                    function(r, o)
+                    {
+                        adapter = o;
+                        return adapter.activate();
+                    }
+                ).then(
+                    function(r)
+                    {
+                        out.writeLine("ok");
                         out.write("getting category from router... ");
                         return router.getCategoryForClient();
                     }
                 ).then(
-                    function(asyncResult, c)
+                    function(r, c)
                     {
                         category = c;
                         out.writeLine("ok");
-                        
+                        out.write("creating and adding callback receiver object... ");
+                        callbackReceiverImpl = new CallbackReceiverI();
+                        callbackReceiver = callbackReceiverImpl;
+                        var callbackReceiverIdent = new Ice.Identity();
+                        callbackReceiverIdent.name = "callbackReceiver";
+                        callbackReceiverIdent.category = category;
+                        twowayR = CallbackReceiverPrx.uncheckedCast(adapter.add(callbackReceiver, callbackReceiverIdent));
+                        var fakeCallbackReceiverIdent = new Ice.Identity();
+                        fakeCallbackReceiverIdent.name = "callbackReceiver";
+                        fakeCallbackReceiverIdent.category = "dummy";
+                        fakeTwowayR = CallbackReceiverPrx.uncheckedCast(
+                            adapter.add(callbackReceiver, fakeCallbackReceiverIdent));
+                    }
+                ).then(
+                    function()
+                    {
+                        out.writeLine("ok");
+                        out.write("testing oneway callback... ");
+                        oneway = CallbackPrx.uncheckedCast(twoway.ice_oneway());
+                        onewayR = CallbackReceiverPrx.uncheckedCast(twowayR.ice_oneway());
+                        var context = new Ice.Context();
+                        context.set("_fwd", "o");
+                        return oneway.initiateCallback(onewayR, context);
+                    }
+                ).then(
+                    function(r)
+                    {
+                        return callbackReceiverImpl.callbackOK();
+                    }
+                ).then(
+                    function()
+                    {
+                        out.writeLine("ok");
+                        out.write("testing twoway callback... ");
+                        var context = new Ice.Context();
+                        context.set("_fwd", "t");
+                        return twoway.initiateCallback(twowayR, context);
+                    }
+                ).then(
+                    function(r)
+                    {
+                        return callbackReceiverImpl.callbackOK();
+                    }
+                ).then(
+                    function()
+                    {
+                        out.writeLine("ok");
+                        out.write("ditto, but with user exception... ");
+                        var context = new Ice.Context();
+                        context.set("_fwd", "t");
+                        return twoway.initiateCallbackEx(twowayR, context);
+                    }
+                ).then(
+                    failCB,
+                    function(ex)
+                    {
+                        if(!(ex instanceof Test.CallbackException))
+                        {
+                            throw ex;
+                        }
+                        test(ex.someValue == 3.14);
+                        test(ex.someString == "3.14");
+                        return callbackReceiverImpl.callbackOK();
+                    }
+                ).then(
+                    function()
+                    {
+                        out.writeLine("ok");
+                        out.write("trying twoway callback with fake category... ");
+                        var context = new Ice.Context();
+                        context.set("_fwd", "t");
+                        return twoway.initiateCallback(fakeTwowayR, context);
+                    }
+                ).then(
+                    failCB,
+                    function(ex)
+                    {
+                        if(!(ex instanceof Ice.ObjectNotExistException))
+                        {
+                            throw ex;
+                        }
+                        out.writeLine("ok");
+                        out.write("testing whether other allowed category is accepted... ");
+                        var context = new Ice.Context();
+                        context.set("_fwd", "t");
+                        var otherCategoryTwoway = CallbackPrx.uncheckedCast(
+                            twoway.ice_identity(communicator.stringToIdentity("c2/callback")));
+                        return otherCategoryTwoway.initiateCallback(twowayR, context);
+                    }
+                ).then(
+                    function()
+                    {
+                        return callbackReceiverImpl.callbackOK();
+                    }
+                ).then(
+                    function()
+                    {
+                        out.writeLine("ok");
+                        out.write("testing whether disallowed category gets rejected... ");
+                        var context = new Ice.Context();
+                        context.set("_fwd", "t");
+                        var otherCategoryTwoway = CallbackPrx.uncheckedCast(
+                            twoway.ice_identity(communicator.stringToIdentity("c3/callback")));
+                        return otherCategoryTwoway.initiateCallback(twowayR, context);
+                    }
+                ).then(
+                    failCB,
+                    function(ex)
+                    {
+                        if(!(ex instanceof Ice.ObjectNotExistException))
+                        {
+                            throw ex;
+                        }
+                        out.writeLine("ok");
+                        out.write("testing whether user-id as category is accepted... ");
+                        var context = new Ice.Context();
+                        context.set("_fwd", "t");
+                        var otherCategoryTwoway = CallbackPrx.uncheckedCast(
+                            twoway.ice_identity(communicator.stringToIdentity("_userid/callback")));
+                        return otherCategoryTwoway.initiateCallback(twowayR, context);
+                    }
+                ).then(
+                    function()
+                    {
+                        return callbackReceiverImpl.callbackOK();
+                    }
+                ).then(
+                    function()
+                    {
+                        out.writeLine("ok");
                         out.write("testing server shutdown... ");
                         return twoway.shutdown();
                         // No ping, otherwise the router prints a warning message if it's
                         // started with --Ice.Warn.Connections.
                     }
                 ).then(
-                    function(asyncResult)
+                    function(r)
                     {
                         out.writeLine("ok");
                         
@@ -174,7 +354,7 @@
                         return router.destroySession();
                     }
                 ).then(
-                    function(asyncResult)
+                    function(r)
                     {
                         out.writeLine("ok");
                         
@@ -203,7 +383,7 @@
                         return Ice.ProcessPrx.checkedCast(processBase);
                     }
                 ).then(
-                    function(asyncResult, o)
+                    function(r, o)
                     {
                         process = o;
                         test(process !== null);
@@ -213,7 +393,7 @@
                         return process.shutdown();
                     }
                 ).then(
-                    function(asyncResult)
+                    function(r)
                     {
                         return process.ice_ping();
                     }
@@ -221,7 +401,8 @@
                     failCB,
                     function(ex)
                     {
-                        if(!(ex instanceof Ice.LocalException))
+                        if(!(ex instanceof Ice.LocalException) || 
+                            (ex._asyncResult && ex._asyncResult.operation !== "ice_ping"))
                         {
                             throw ex;
                         }
@@ -256,10 +437,11 @@
                 var c = null;
                 try
                 {
-                    id.properties.setProperty("Ice.Warn.Dispatch", "0");
+                    //id.properties.setProperty("Ice.ACM.Client", "0");
+                    id.properties.setProperty("Ice.Warn.Dispatch", "1");
                     id.properties.setProperty("Ice.Warn.Connections", "0");
-                    id.properties.setProperty("Ice.Trace.Protocol", "0");
-                    id.properties.setProperty("Ice.Trace.Network", "0");
+                    //id.properties.setProperty("Ice.Trace.Protocol", "3");
+                    //id.properties.setProperty("Ice.Trace.Network", "3");
                     c = Ice.initialize(id);
                     allTests(out, c).then(function(){
                             return c.destroy();

@@ -30,7 +30,7 @@
     //
     // Only for use by Instance.
     //
-    var ProxyFactory = Ice.__defineClass({
+    var ProxyFactory = Ice.Class({
         __init__: function(instance)
         {
             this._instance = instance;

@@ -90,11 +90,6 @@
         return new Ice.Properties(args, defaults);
     };
 
-    Ice.stringToProtocolVersion = Protocol.stringToProtocolVersion;
-    Ice.stringToEncodingVersion = Protocol.stringToEncodingVersion;
-    Ice.protocolVersionToString = Protocol.protocolVersionToString;
-    Ice.encodingVersionToString = Protocol.encodingVersionToString;
-
     Ice.currentProtocol = function()
     {
         return Protocol.currentProtocol.clone();
@@ -104,10 +99,6 @@
     {
         return Protocol.currentEncoding.clone();
     };
-
-    Ice.Protocol_1_0 = Protocol.Protocol_1_0;
-    Ice.Encoding_1_0 = Protocol.Encoding_1_0;
-    Ice.Encoding_1_1 = Protocol.Encoding_1_1;
     
     global.Ice = Ice;
 }(typeof (global) === "undefined" ? window : global));

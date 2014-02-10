@@ -47,7 +47,7 @@
     var LocatorPrx = Ice.LocatorPrx;
     var PropertyNames = Ice.PropertyNames;
     
-    var defineClass = Ice.__defineClass;
+    var Class = Ice.Class;
     
     var suffixes =
     [
@@ -64,7 +64,7 @@
     //
     // Only for use by Instance
     //
-    var ReferenceFactory = defineClass({
+    var ReferenceFactory = Class({
         __init__: function(instance, communicator)
         {
             this._instance = instance;
@@ -206,7 +206,7 @@
             var mode = RefMode.ModeTwoway;
             var secure = false;
             var encoding = this._instance.defaultsAndOverrides().defaultEncoding;
-            var protocol = Protocol.Protocol_1_0;
+            var protocol = Ice.Protocol_1_0;
             var adapter = "";
 
             while(true)
@@ -376,7 +376,7 @@
 
                         try
                         {
-                            encoding = Protocol.stringToEncodingVersion(argument);
+                            encoding = Ice.stringToEncodingVersion(argument);
                         }
                         catch(e) // VersionParseException
                         {
@@ -395,7 +395,7 @@
 
                         try
                         {
-                            protocol = Protocol.stringToProtocolVersion(argument);
+                            protocol = Ice.stringToProtocolVersion(argument);
                         }
                         catch(e) // VersionParseException
                         {
@@ -596,7 +596,7 @@
 
             var protocol = null;
             var encoding = null;
-            if(!s.getReadEncoding().equals(Protocol.Encoding_1_0))
+            if(!s.getReadEncoding().equals(Ice.Encoding_1_0))
             {
                 protocol = new Ice.ProtocolVersion();
                 protocol.__read(s);
@@ -605,8 +605,8 @@
             }
             else
             {
-                protocol = Protocol.Protocol_1_0;
-                encoding = Protocol.Encoding_1_0;
+                protocol = Ice.Protocol_1_0;
+                encoding = Ice.Encoding_1_0;
             }
             
             var endpoints = null; // EndpointI[]
@@ -662,10 +662,11 @@
         },
         checkForUnknownProperties: function(prefix)
         {
+            var unknownProps = [], i, length;
             //
             // Do not warn about unknown properties for Ice prefixes (Ice, Glacier2, etc.)
             //
-            for(var i = 0; i < PropertyNames.clPropNames.length; ++i)
+            for(i = 0; i < PropertyNames.clPropNames.length; ++i)
             {
                 if(prefix.indexOf(PropertyNames.clPropNames[i] + ".") === 0)
                 {
@@ -673,7 +674,6 @@
                 }
             }
 
-            var unknownProps = [], i, length;
             var props = this._instance.initializationData().properties.getPropertiesForPrefix(prefix + ".");
             for(var e = props.entries; e !== null; e = e.next)
             {
@@ -834,7 +834,7 @@
     
     Ice.ReferenceFactory = ReferenceFactory;
     
-    var Reference = defineClass({
+    var Reference = Class({
         __init__: function(instance, communicator, identity, facet, mode, secure, protocol, encoding)
         {
             //
@@ -1165,7 +1165,7 @@
 
             s.writeBool(this._secure);
 
-            if(!s.getWriteEncoding().equals(Protocol.Encoding_1_0))
+            if(!s.getWriteEncoding().equals(Ice.Encoding_1_0))
             {
                 this._protocol.__write(s);
                 this._encoding.__write(s);
@@ -1263,7 +1263,7 @@
                 s.push(" -s");
             }
 
-            if(!this._protocol.equals(Protocol.Protocol_1_0))
+            if(!this._protocol.equals(Ice.Protocol_1_0))
             {
                 //
                 // We only print the protocol if it's not 1.0. It's fine as
@@ -1272,7 +1272,7 @@
                 // stringToProxy.
                 //
                 s.push(" -p ");
-                s.push(Protocol.protocolVersionToString(this._protocol));
+                s.push(Ice.protocolVersionToString(this._protocol));
             }
 
             //
@@ -1281,7 +1281,7 @@
             // stringToProxy (and won't use Ice.Default.EncodingVersion).
             //
             s.push(" -e ");
-            s.push(Protocol.encodingVersionToString(this._encoding));
+            s.push(Ice.encodingVersionToString(this._encoding));
 
             return s.join("");
 
@@ -1375,10 +1375,10 @@
 
     Ice.Reference = Reference;
 
-    var FixedReference = defineClass(Reference, {
+    var FixedReference = Class(Reference, {
         __init__: function(instance, communicator, identity, facet, mode, secure, encoding, connection)
         {
-            Reference.call(this, instance, communicator, identity, facet, mode, secure, Protocol.Protocol_1_0, encoding);
+            Reference.call(this, instance, communicator, identity, facet, mode, secure, Ice.Protocol_1_0, encoding);
             this._fixedConnection = connection;
         },
         getEndpoints: function()
@@ -1580,7 +1580,7 @@
 
     Ice.FixedReference = FixedReference;
 
-    var RoutableReference = defineClass(Reference, {
+    var RoutableReference = Class(Reference, {
         __init__: function(instance, communicator, identity, facet, mode, secure, protocol, encoding, endpoints,
                            adapterId, locatorInfo, routerInfo, cacheConnection, preferSecure, endpointSelection,
                            locatorCacheTimeout)
@@ -2294,7 +2294,7 @@
     Ice.RoutableReference = RoutableReference;
     global.Ice = Ice;
     
-    var CreateConnectionCallback = defineClass({
+    var CreateConnectionCallback = Class({
         __init__: function(r, endpoints, promise)
         {
             this.ref = r;
