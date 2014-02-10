@@ -1,0 +1,12 @@
+Source Code
+-----------
+
+The source distribution of IceWS used to build this distribution can
+be downloaded at no cost from
+
+  http://www.zeroc.com/labs/icews/download.html
+
+The source distributions of bzip2/libbzip2 and OpenSSL used to build
+this distribution can be downloaded at no cost from
+
+  http://www.zeroc.com/download.html
