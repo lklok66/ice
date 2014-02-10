@@ -784,7 +784,7 @@
                 return;
             }
 
-            this.unscheduleTimeout(SocketOperation.write);
+            this.unscheduleTimeout(operation);
             //
             // Keep reading until no more data is available.
             //
@@ -1270,7 +1270,6 @@
 
                 case StateNotValidated:
                 {
-                    this.unscheduleTimeout(SocketOperation.Connect);
                     if(this._state !== StateNotInitialized)
                     {
                         Debug.assert(this._state === StateClosed);
@@ -1543,7 +1542,6 @@
                     TraceUtil.traceRecv(this._readStream, this._logger, this._traceLevels);
 
                     this._validated = true;
-                    this.unscheduleTimeout(SocketOperation.Read);
                 }
             }
 
