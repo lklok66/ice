@@ -466,21 +466,18 @@ Slice::JsVisitor::writeConstantValue(const string& scope, const TypePtr& type, c
             IceUtil::Int64 l = IceUtilInternal::strToInt64(value.c_str(), 0, 0);
             
             //
-            // For big edian swap the bytes.
+            // JavaScript doesn't support 64 bit integer so long types are written as 
+            // two 32 bit words hi, low wrapped in the Ice.Long class.
+            //
+            // If slice2js runs in a big edian machine we need to swap the words, we do not
+            // need to swap the word bytes as we just write each word as a number to the
+            // output file.
             //
 #ifdef ICE_BIG_ENDIAN
-            IceUtil::Int64 j = l;
-            typedef unsigned char Byte;
-            reinterpret_cast<Byte*>(&l)[0] = reinterpret_cast<Byte*>(&j)[7];
-            reinterpret_cast<Byte*>(&l)[1] = reinterpret_cast<Byte*>(&j)[6];
-            reinterpret_cast<Byte*>(&l)[2] = reinterpret_cast<Byte*>(&j)[5];
-            reinterpret_cast<Byte*>(&l)[3] = reinterpret_cast<Byte*>(&j)[4];
-            reinterpret_cast<Byte*>(&l)[4] = reinterpret_cast<Byte*>(&j)[3];
-            reinterpret_cast<Byte*>(&l)[5] = reinterpret_cast<Byte*>(&j)[2];
-            reinterpret_cast<Byte*>(&l)[6] = reinterpret_cast<Byte*>(&j)[1];
-            reinterpret_cast<Byte*>(&l)[7] = reinterpret_cast<Byte*>(&j)[0];
-#endif
+            _out << "new Ice.Long(" << (l & 0xFFFFFFFF) << ", " << ((l >> 32) & 0xFFFFFFFF)  << ")";
+#else
             _out << "new Ice.Long(" << ((l >> 32) & 0xFFFFFFFF) << ", " << (l & 0xFFFFFFFF)  << ")";
+#endif
         }
         else if((ep = EnumPtr::dynamicCast(type)))
         {
