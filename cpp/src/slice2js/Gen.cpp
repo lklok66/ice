@@ -1154,6 +1154,7 @@ Slice::Gen::printHeader()
 Slice::Gen::RequireVisitor::RequireVisitor(IceUtilInternal::Output& out, vector<string> includePaths)
     : JsVisitor(out),
     _seenClass(false),
+    _seenCompactId(false),
     _seenOperation(false),
     _seenStruct(false),
     _seenUserException(false),
@@ -1173,6 +1174,10 @@ bool
 Slice::Gen::RequireVisitor::visitClassDefStart(const ClassDefPtr& p)
 {
     _seenClass = true; // Set regardless of whether p->isLocal()
+    if(p->compactId() >= 0)
+    {
+        _seenCompactId = true;
+    }
     return !p->isLocal(); // Look for operations.
 }
 
@@ -1265,7 +1270,12 @@ Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
         _out << nl << "require(\"Ice/EnumBase\");";
     }
 
-    _out << nl << "require(\"Ice/TypeRegistry\");";
+    if(_seenCompactId)
+    {
+        _out << nl << "require(\"Ice/CompactIdRegistry\");";
+    }
+    
+    _out << nl << "require(\"Ice/Long\");";
     _out << nl << "require(\"Ice/HashMap\");";
     _out << nl << "require(\"Ice/HashUtil\");";
     _out << nl << "require(\"Ice/ArrayUtil\");";

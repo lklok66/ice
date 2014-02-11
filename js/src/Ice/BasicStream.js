@@ -21,7 +21,7 @@
     require("Ice/Exception");
     require("Ice/LocalException");
     require("Ice/Version");
-    require("Ice/TypeRegistry");
+    require("Ice/CompactIdRegistry");
     require("Ice/ArrayUtil");
     require("Ice/UnknownSlicedObject");
     

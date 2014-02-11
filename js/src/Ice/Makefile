@@ -104,7 +104,7 @@ COMMON_SRCS = \
 	Timer.js \
 	TraceLevels.js \
 	TraceUtil.js \
-	TypeRegistry.js \
+	CompactIdRegistry.js \
 	UnknownSlicedObject.js \
 	UUID.js
 
