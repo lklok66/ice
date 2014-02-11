@@ -284,7 +284,7 @@
             {
                 try
                 {
-                    this.__sendResponse.apply(this, args);
+                    this.__sendResponse(args);
                     this.incomingAsync.__response();
                 }
                 catch(ex)
@@ -308,13 +308,11 @@
                 this.incomingAsync.ice_exception(ex);
             }
         },
-        __sendResponse: function()
+        __sendResponse: function(results)
         {
-            var args = arguments;
-
             if(this.op.returns === undefined && this.op.outParams.length === 0)
             {
-                if(args.length > 0)
+                if(results && results.length > 0)
                 {
                     //
                     // No results expected.
@@ -334,7 +332,8 @@
                 {
                     retvalInfo = this.op.returns;
                 }
-                marshalParams(__os, args, retvalInfo, this.op.outParams, this.op.outParamsOpt, this.op.returnsClasses);
+                marshalParams(__os, results, retvalInfo, this.op.outParams, this.op.outParamsOpt,
+                              this.op.returnsClasses);
                 this.incomingAsync.__endWriteParams(true);
             }
         },
@@ -439,8 +438,35 @@
             }
             else
             {
+                //
+                // Determine how many out parameters to expect.
+                //
+                var numExpectedResults = op.outParams.length;
+                if(op.returns)
+                {
+                    ++numExpectedResults;
+                }
+
                 var results = method.apply(servant, params);
-                up.__sendResponse.apply(up, results);
+
+                //
+                // Complain if we expect more than out parameter and the servant doesn't return an array.
+                //
+                if(numExpectedResults > 1 && !(results instanceof Array))
+                {
+                    var msg = "operation `" + op.servantMethod + "' should return an array of length " + numParams;
+                    console.log(msg);
+                    throw new Ice.MarshalException(msg);
+                }
+                else if(numExpectedResults === 1)
+                {
+                    //
+                    // Wrap a single out parameter in an array.
+                    //
+                    results = [results];
+                }
+
+                up.__sendResponse(results);
                 return Ice.DispatchStatus.DispatchOK;
             }
         }

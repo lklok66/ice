@@ -100,10 +100,12 @@
                         if(typeof(window) == "undefined")
                         {
                             test(info.localPort > 0);
-                            test(info.localAddress == defaultHost);
+                            test(info.localAddress == defaultHost ||
+                                 (info.localAddress == "::1" && defaultHost == "0:0:0:0:0:0:0:1"));
                         }
                         test(info.remotePort == 12010);
-                        test(info.remoteAddress == defaultHost);
+                        test(info.remoteAddress == defaultHost ||
+                             (info.remoteAddress == "::1" && defaultHost == "0:0:0:0:0:0:0:1"));
                         return testIntf.getConnectionInfoAsContext();
                     }
                 ).then(

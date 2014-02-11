@@ -85,8 +85,7 @@
             mon = mon < 10 ? "0" + mon : mon;
             var day = d.getDate();
             day = day < 10 ? "0" + day : day;
-            // TODO: Include milliseconds?
-            return mon + "-" + day + "-" + d.getFullYear() + " " + d.toLocaleTimeString();
+            return mon + "-" + day + "-" + d.getFullYear() + " " + d.toLocaleTimeString() + "." + d.getMilliseconds();
         }
     });
     Ice.Logger = Logger;

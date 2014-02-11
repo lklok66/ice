@@ -67,7 +67,6 @@ public:
     ~Gen();
 
     void generate(const UnitPtr&);
-    void generateChecksums(const UnitPtr&);
     void closeOutput();
 
 private:

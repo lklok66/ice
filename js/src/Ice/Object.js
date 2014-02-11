@@ -39,18 +39,18 @@
         },
         ice_isA: function(s, current)
         {
-            return [this.__mostDerivedType().__ids.indexOf(s) >= 0];
+            return this.__mostDerivedType().__ids.indexOf(s) >= 0;
         },
         ice_ping: function(current)
         {
         },
         ice_ids: function(current)
         {
-            return [this.__mostDerivedType().__ids];
+            return this.__mostDerivedType().__ids;
         },
         ice_id: function(current)
         {
-            return [this.__mostDerivedType().__id];
+            return this.__mostDerivedType().__id;
         },
         toString: function()
         {

@@ -72,7 +72,6 @@ COMMON_SRCS = \
 	LocatorTable.js \
 	Logger.js \
 	Long.js \
-	Network.js \
 	ObjectAdapterFactory.js \
 	ObjectAdapterI.js \
 	ObjectFactory.js \

@@ -1047,22 +1047,25 @@
             this.test(pstr === "test -t -e 1.0:ssl -h 127.0.0.1 -p 10001:opaque -t 99 -e 1.0 -v abch");
         }
 
+        this.finished();
+    };
+
+    AllTests.prototype.finished = function()
+    {
+        var ref = "test:default -p 12010";
+        var base = this._communicator.stringToProxy(ref);
+        var derived = Test.MyDerivedClassPrx.uncheckedCast(base);
         var self = this;
         derived.shutdown().then(
             function(r)
             {
-                self.finished();
+                self._log.writeLine("ok");
+                self._promise.succeed();
             }).exception(
                 function(ex)
                 {
                     self.exception(ex);
                 });
-    };
-
-    AllTests.prototype.finished = function()
-    {
-        this._log.writeLine("ok");
-        this._promise.succeed();
     };
 
     AllTests.prototype.exception = function(ex)

@@ -33,7 +33,7 @@
             for(var key in this)
             {
                 var value = this[key];
-                if(value instanceof Function || key == "stack" || key.indexOf("_") === 0)
+                if(typeof value == "function" || key == "stack" || key.indexOf("_") === 0)
                 {
                     continue;
                 }

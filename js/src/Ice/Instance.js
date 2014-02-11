@@ -19,7 +19,6 @@
     require("Ice/IdentityUtil");
     require("Ice/LocatorManager");
     require("Ice/Logger");
-    require("Ice/Network");
     require("Ice/ObjectAdapterFactory");
     require("Ice/ObjectFactoryManager");
     require("Ice/OutgoingConnectionFactory");
@@ -54,7 +53,6 @@
     var ImplicitContextI = Ice.ImplicitContextI;
     var LocatorManager = Ice.LocatorManager;
     var Logger = Ice.Logger;
-    var Network = Ice.Network;
     var ObjectAdapterFactory = Ice.ObjectAdapterFactory;
     var ObjectFactoryManager = Ice.ObjectFactoryManager;
     var OutgoingConnectionFactory = Ice.OutgoingConnectionFactory;
@@ -98,11 +96,6 @@
             this._retryQueue = null;
             this._endpointHostResolver = null;
             this._endpointFactoryManager = null;
-
-            this._adminAdapter = null;
-            this._adminFacets = new HashMap();
-            this._adminFacetFilter = [];
-            this._adminIdentity = null;
         },
         initializationData: function()
         {
@@ -179,10 +172,6 @@
         preferIPv6: function()
         {
             return this._preferIPv6;
-        },
-        networkProxy: function()
-        {
-            return this._networkProxy;
         },
         connectionMonitor: function()
         {
@@ -359,29 +348,6 @@
 
                 this._proxyFactory = new ProxyFactory(this);
 
-                // TODO: Network proxy
-                this._networkProxy = null;
-
-                var ipv4 = this._initData.properties.getPropertyAsIntWithDefault("Ice.IPv4", 1) > 0;
-                var ipv6 = this._initData.properties.getPropertyAsIntWithDefault("Ice.IPv6", 0) > 0;
-                if(!ipv4 && !ipv6)
-                {
-                    throw new Ice.InitializationException("Both IPV4 and IPv6 support cannot be disabled");
-                }
-                else if(ipv4 && ipv6)
-                {
-                    this._protocolSupport = Network.EnableBoth;
-                }
-                else if(ipv4)
-                {
-                    this._protocolSupport = Network.EnableIPv4;
-                }
-                else
-                {
-                    this._protocolSupport = Network.EnableIPv6;
-                }
-                this._preferIPv6 = this._initData.properties.getPropertyAsInt("Ice.PreferIPv6Address") > 0;
-
                 this._endpointFactoryManager = new EndpointFactoryManager(this);
 
                 if(typeof(Ice.TcpEndpointFactory) !== "undefined")
@@ -401,19 +367,6 @@
                 this._objectAdapterFactory = new ObjectAdapterFactory(this, communicator);
 
                 this._retryQueue = new RetryQueue(this);
-
-                /* TODO
-                //
-                // Add Process and Properties facets
-                //
-                var facetFilter = this._initData.properties.getPropertyAsList("Ice.Admin.Facets");
-                if(facetFilter.length > 0)
-                {
-                    this._adminFacetFilter.concat(facetFilter);
-                }
-
-                this._adminFacets.put("Properties", new PropertiesAdminI(_initData.properties));
-                this._adminFacets.put("Process", new ProcessI(communicator));*/
 
                 //
                 // Get default router and locator proxies. Don't move this
@@ -441,43 +394,6 @@
                 this._connectionMonitor = new ConnectionMonitor(this, interval);
                 this._connectionMonitor.checkIntervalForACM(this._clientACM);
                 this._connectionMonitor.checkIntervalForACM(this._serverACM);
-
-                /*
-                //
-                // This must be done last as this call creates the Ice.Admin object adapter
-                // and eventually registers a process proxy with the Ice locator (allowing
-                // remote clients to invoke on Ice.Admin facets as soon as it's registered).
-                //
-                if(this._initData.properties.getPropertyAsIntWithDefault("Ice.Admin.DelayCreation", 0) <= 0)
-                {
-                    if(this.checkAdmin(promise !== null))
-                    {
-                        //
-                        // If the user calls initializeWithAdmin and the Admin OA is properly
-                        // configured, we call getAdmin now and delay completion of initializeWithAdmin
-                        // until getAdmin completes.
-                        //
-                        this.getAdmin(communicator).then(
-                            function(admin)
-                            {
-                                promise.succeed(communicator);
-                            }).exception(
-                                function(ex)
-                                {
-                                    this.destroy().then(
-                                        function()
-                                        {
-                                            promise.fail(ex);
-                                        }).exception(
-                                            function(e)
-                                            {
-                                                promise.fail(ex);
-                                            });
-                                });
-                        return;
-                    }
-                }
-                */
 
                 if(promise !== null)
                 {
@@ -681,11 +597,6 @@
                 this._endpointFactoryManager.destroy();
                 this._endpointFactoryManager = null;
             }
-
-            /*
-            this._adminAdapter = null;
-            this._adminFacets.clear();
-            */
 
             this._state = StateDestroyed;
 

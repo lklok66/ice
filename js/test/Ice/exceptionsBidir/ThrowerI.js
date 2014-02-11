@@ -11,6 +11,8 @@
     var Ice = global.Ice;
     var Test = global.Test;
 
+    var Class = Ice.Class;
+
     var test = function(b)
     {
         if(!b)
@@ -19,146 +21,141 @@
         }
     };
 
-    var ThrowerI = function()
-    {
-    };
+    var ThrowerI = Class(Test.Thrower, {
+        shutdown: function(current)
+        {
+            current.adapter.getCommunicator().shutdown();
+        },
 
-    ThrowerI.prototype = new Test.Thrower;
-    ThrowerI.prototype.constructor = ThrowerI;
+        supportsUndeclaredExceptions: function(current)
+        {
+            return true;
+        },
 
-    ThrowerI.prototype.shutdown = function(current)
-    {
-        current.adapter.getCommunicator().shutdown();
-    };
+        supportsAssertException: function(current)
+        {
+            return false;
+        },
 
-    ThrowerI.prototype.supportsUndeclaredExceptions = function(current)
-    {
-        return [true];
-    };
-
-    ThrowerI.prototype.supportsAssertException = function(current)
-    {
-        return [false];
-    };
-
-    ThrowerI.prototype.throwAasA = function(a, current)
-    {
-        var ex = new Test.A();
-        ex.aMem = a;
-        throw ex;
-    };
-
-    ThrowerI.prototype.throwAorDasAorD = function(a, current)
-    {
-        if(a > 0)
+        throwAasA: function(a, current)
         {
             var ex = new Test.A();
             ex.aMem = a;
             throw ex;
-        }
-        else
+        },
+
+        throwAorDasAorD: function(a, current)
         {
-            var ex = new Test.D();
-            ex.dMem = a;
+            if(a > 0)
+            {
+                var ex = new Test.A();
+                ex.aMem = a;
+                throw ex;
+            }
+            else
+            {
+                var ex = new Test.D();
+                ex.dMem = a;
+                throw ex;
+            }
+        },
+
+        throwBasA: function(a, b, current)
+        {
+            this.throwBasB(a, b, current);
+        },
+
+        throwBasB: function(a, b, current)
+        {
+            var ex = new Test.B();
+            ex.aMem = a;
+            ex.bMem = b;
             throw ex;
-        }
-    };
+        },
 
-    ThrowerI.prototype.throwBasA = function(a, b, current)
-    {
-        this.throwBasB(a, b, current);
-    };
+        throwCasA: function(a, b, c, current)
+        {
+            this.throwCasC(a, b, c, current);
+        },
 
-    ThrowerI.prototype.throwBasB = function(a, b, current)
-    {
-        var ex = new Test.B();
-        ex.aMem = a;
-        ex.bMem = b;
-        throw ex;
-    };
+        throwCasB: function(a, b, c, current)
+        {
+            this.throwCasC(a, b, c, current);
+        },
 
-    ThrowerI.prototype.throwCasA = function(a, b, c, current)
-    {
-        this.throwCasC(a, b, c, current);
-    };
+        throwCasC: function(a, b, c, current)
+        {
+            var ex = new Test.C();
+            ex.aMem = a;
+            ex.bMem = b;
+            ex.cMem = c;
+            throw ex;
+        },
 
-    ThrowerI.prototype.throwCasB = function(a, b, c, current)
-    {
-        this.throwCasC(a, b, c, current);
-    };
+        throwUndeclaredA: function(a, current)
+        {
+            var ex = new Test.A();
+            ex.aMem = a;
+            throw ex;
+        },
 
-    ThrowerI.prototype.throwCasC = function(a, b, c, current)
-    {
-        var ex = new Test.C();
-        ex.aMem = a;
-        ex.bMem = b;
-        ex.cMem = c;
-        throw ex;
-    };
+        throwUndeclaredB: function(a, b, current)
+        {
+            var ex = new Test.B();
+            ex.aMem = a;
+            ex.bMem = b;
+            throw ex;
+        },
 
-    ThrowerI.prototype.throwUndeclaredA = function(a, current)
-    {
-        var ex = new Test.A();
-        ex.aMem = a;
-        throw ex;
-    };
+        throwUndeclaredC: function(a, b, c, current)
+        {
+            var ex = new Test.C();
+            ex.aMem = a;
+            ex.bMem = b;
+            ex.cMem = c;
+            throw ex;
+        },
 
-    ThrowerI.prototype.throwUndeclaredB = function(a, b, current)
-    {
-        var ex = new Test.B();
-        ex.aMem = a;
-        ex.bMem = b;
-        throw ex;
-    };
+        throwLocalException: function(current)
+        {
+            throw new Ice.TimeoutException();
+        },
 
-    ThrowerI.prototype.throwUndeclaredC = function(a, b, c, current)
-    {
-        var ex = new Test.C();
-        ex.aMem = a;
-        ex.bMem = b;
-        ex.cMem = c;
-        throw ex;
-    };
+        throwLocalExceptionIdempotent: function(current)
+        {
+            throw new Ice.TimeoutException();
+        },
 
-    ThrowerI.prototype.throwLocalException = function(current)
-    {
-        throw new Ice.TimeoutException();
-    };
+        throwNonIceException: function(current)
+        {
+            throw new Error();
+        },
 
-    ThrowerI.prototype.throwLocalExceptionIdempotent = function(current)
-    {
-        throw new Ice.TimeoutException();
-    };
+        throwAssertException: function(current)
+        {
+            test(false);
+        },
 
-    ThrowerI.prototype.throwNonIceException = function(current)
-    {
-        throw new Error();
-    };
+        throwMemoryLimitException: function(seq, current)
+        {
+            return Ice.Buffer.createNative(1024 * 20); // 20KB is over the configured 10KB message size max.
+        },
 
-    ThrowerI.prototype.throwAssertException = function(current)
-    {
-        test(false);
-    };
+        throwAfterResponse: function(current)
+        {
+            //
+            // Only relevant for AMD.
+            //
+        },
 
-    ThrowerI.prototype.throwMemoryLimitException = function(seq, current)
-    {
-        return [Ice.Buffer.createNative(1024 * 20)]; // 20KB is over the configured 10KB message size max.
-    };
-
-    ThrowerI.prototype.throwAfterResponse = function(current)
-    {
-        //
-        // Only relevant for AMD.
-        //
-    };
-
-    ThrowerI.prototype.throwAfterException = function(current)
-    {
-        //
-        // Only relevant for AMD.
-        //
-        throw new Test.A();
-    };
+        throwAfterException: function(current)
+        {
+            //
+            // Only relevant for AMD.
+            //
+            throw new Test.A();
+        },
+    });
 
     global.ThrowerI = ThrowerI;
 }(typeof (global) === "undefined" ? window : global));

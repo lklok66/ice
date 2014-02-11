@@ -24,5 +24,7 @@
     };
 
     Ice.UUID = UUID;
+    Ice.generateUUID = UUID.generateUUID;
+
     global.Ice = Ice;
 }(typeof (global) === "undefined" ? window : global));

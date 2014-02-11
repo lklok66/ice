@@ -13,7 +13,6 @@
     require("Ice/Class");
     require("Ice/Debug");
     require("Ice/ExUtil");
-    require("Ice/Network");
     require("Ice/SocketOperation");
     require("Ice/Connection");
     require("Ice/Exception");
@@ -84,54 +83,6 @@
                     //
 
                     this._desc = fdToString(this._fd, this._proxy, this._addr);
-
-                    if(this._proxy !== null)
-                    {
-                        //
-                        // Prepare the read & write buffers in advance.
-                        //
-                        this._proxy.beginWriteConnectRequest(this._addr.host, this._addr.port, writeBuffer);
-                        this._proxy.beginReadConnectRequestResponse(readBuffer);
-
-                        //
-                        // Write the proxy connection message.
-                        //
-                        if(this.write(writeBuffer))
-                        {
-                            //
-                            // Write completed immediately.
-                            //
-                            this._proxy.endWriteConnectRequest(writeBuffer);
-
-                            //
-                            // Try to read the response.
-                            //
-                            var dummy = { value: false };
-                            if(this.read(readBuffer, dummy))
-                            {
-                                //
-                                // Read completed immediately - fall through.
-                                //
-                                this._proxy.endReadConnectRequestResponse(readBuffer);
-                            }
-                            else
-                            {
-                                //
-                                // Return SocketOperation.Read to indicate we need to complete the read.
-                                //
-                                this._state = StateProxyConnectRequestPending; // Wait for proxy response
-                                return SocketOperation.Read;
-                            }
-                        }
-                        else
-                        {
-                            //
-                            // Return SocketOperationWrite to indicate we need to complete the write.
-                            //
-                            this._state = StateProxyConnectRequest; // Send proxy connect request
-                            return SocketOperation.Write;
-                        }
-                    }
 
                     this._state = StateConnected;
                 }
@@ -377,15 +328,14 @@
         }
     });
     
-    function fdToString(fd, proxy, targetAddr)
+    function fdToString(fd, targetAddr)
     {
         if(fd === null)
         {
             return "<closed>";
         }
 
-        return Network.addressesToString(fd.localAddress, fd.localPort, fd.remoteAddress, fd.remotePort, proxy,
-                                        targetAddr);
+        return addressesToString(fd.localAddress, fd.localPort, fd.remoteAddress, fd.remotePort, targetAddr);
     }
 
     function translateError(ex)
@@ -393,21 +343,47 @@
         if(ex.code === "ECONNREFUSED")
         {
             return new Ice.ConnectionRefusedException(ex.code, ex);
-            
         }
         // TODO: Search the exception's error message for symbols like ECONNREFUSED ?
         return new SocketException(0, ex);
     }
+    
+    function addressesToString(localHost, localPort, remoteHost, remotePort, targetAddr)
+    {
+        remoteHost = remoteHost === undefined ? null : remoteHost;
+        targetAddr = targetAddr === undefined ? null : targetAddr;
+
+        var s = [];
+        s.push("local address = ");
+        s.push(localHost + ":" + localPort);
+
+        if(remoteHost === null && targetAddr !== null)
+        {
+            remoteHost = targetAddr.host;
+            remotePort = targetAddr.port;
+        }
+
+        if(remoteHost === null)
+        {
+            s.push("\nremote address = <not connected>");
+        }
+        else
+        {
+            s.push("\nremote address = ");
+            s.push(remoteHost + ":" + remotePort);
+        }
+
+        return s.join("");
+    };
     
     TcpTransceiver.createOutgoing = function(instance, addr)
     {
         var transceiver = new TcpTransceiver(instance);
 
         transceiver._fd = new net.Socket();
-        transceiver._proxy = instance.networkProxy();
         transceiver._addr = addr;
         transceiver._connected = false;
-        transceiver._desc = "remote address: " + Network.addrToString(addr.host, addr.port) + " <not connected>";
+        transceiver._desc = "remote address: " +addr.host + ":" + addr.port + " <not connected>";
         transceiver._state = StateNeedConnect;
 
         return transceiver;
@@ -418,7 +394,6 @@
         var transceiver = new TcpTransceiver(instance);
 
         transceiver._fd = fd;
-        transceiver._proxy = null;
         transceiver._addr = null;
         transceiver._connected = true;
         transceiver._desc = fdToString(fd);

@@ -36,7 +36,7 @@
         {
             return e1.equals(e2);
         }
-        else if(e1.equals instanceof Function)
+        else if(typeof e1.equals == "function")
         {
             return e1.equals(e2);
         }
@@ -70,7 +70,7 @@
 
             e1 = this[key];
             e2 = other[key];
-            if(e1 instanceof Function)
+            if(typeof e1 == "function")
             {
                 continue; // Don't need to compare functions
             }
@@ -93,11 +93,11 @@
             {
                 other[key] = e;
             }
-            else if(e instanceof Function)
+            else if(typeof e == "function")
             {
                 continue;
             }
-            else if(e.clone instanceof Function)
+            else if(typeof e.clone == "function")
             {
                 other[key] = e.clone();
             }
@@ -115,7 +115,7 @@
     
     var memberHashCode = function(h, e)
     {
-        if(e.hashCode instanceof Function)
+        if(typeof e.hashCode == "function")
         {
             return Ice.HashUtil.addHashable(h, e);
         }
@@ -148,7 +148,7 @@
         for(var key in this)
         {
             e = this[key];
-            if(e === undefined || e === null || e instanceof Function)
+            if(e === undefined || e === null || typeof e == "function")
             {
                 continue;
             }

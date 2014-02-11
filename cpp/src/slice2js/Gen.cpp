@@ -1075,8 +1075,6 @@ Slice::Gen::~Gen()
 void
 Slice::Gen::generate(const UnitPtr& p)
 {
-    JsGenerator::validateMetaData(p);
-
     if(p->hasOnlyClassDecls())
     {
         // Don't generate any code if the Slice file only contains
@@ -1103,54 +1101,6 @@ Slice::Gen::generate(const UnitPtr& p)
 
     _out << eb;
     _out << nl << "(typeof (global) === \"undefined\" ? window : global));";
-}
-
-void
-Slice::Gen::generateChecksums(const UnitPtr& u)
-{
-    // TODO
-#if 0
-    ChecksumMap map = createChecksums(u);
-    if(!map.empty())
-    {
-        string className = "X" + generateUUID();
-        for(string::size_type pos = 1; pos < className.size(); ++pos)
-        {
-            if(!isalnum(static_cast<unsigned char>(className[pos])))
-            {
-                className[pos] = '_';
-            }
-        }
-
-        _out << sp << nl << "namespace IceInternal";
-        _out << sb;
-        _out << nl << "namespace SliceChecksums";
-        _out << sb;
-        _out << nl << "[_System.CodeDom.Compiler.GeneratedCodeAttribute(\"slice2cs\", \"" << ICE_STRING_VERSION
-             << "\")]";
-        _out << nl << "public sealed class " << className;
-        _out << sb;
-        _out << nl << "public static _System.Collections.Hashtable map = new _System.Collections.Hashtable();";
-        _out << sp << nl << "static " << className << "()";
-        _out << sb;
-        for(ChecksumMap::const_iterator p = map.begin(); p != map.end(); ++p)
-        {
-            _out << nl << "map.Add(\"" << p->first << "\", \"";
-            ostringstream str;
-            str.flags(ios_base::hex);
-            str.fill('0');
-            for(vector<unsigned char>::const_iterator q = p->second.begin(); q != p->second.end(); ++q)
-            {
-                str << (int)(*q);
-            }
-            _out << str.str() << "\");";
-        }
-        _out << eb;
-        _out << eb << ';';
-        _out << eb;
-        _out << eb;
-    }
-#endif
 }
 
 void
