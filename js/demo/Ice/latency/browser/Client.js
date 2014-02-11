@@ -101,11 +101,9 @@ function run()
                         // Write the results.
                         //
                         total = new Date().getTime() - start;
-                        var perPing = total / repetitions;
-
                         writeLine("time for " + repetitions + " pings: " + 
                                   total + "ms");
-                        writeLine("time per ping: " + perPing + "ms");
+                        writeLine("time per ping: " + (total / repetitions) + "ms");
                         setSate(State.Finish);
                     });
             }

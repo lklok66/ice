@@ -289,9 +289,7 @@ function run()
                 //
                 if(communicator)
                 {
-                    var c = communicator;
-                    communicator = null;
-                    return c.destroy();
+                    return communicator.destroy();
                 }
             }
         ).then(

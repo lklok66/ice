@@ -43,6 +43,9 @@ var start = function()
                 return CallbackSenderPrx.checkedCast(proxy).then(
                     function(r, server)
                     {
+                        //
+                        // Create the client object adapter.
+                        //
                         return communicator.createObjectAdapter("").then(
                             function(r, adapter)
                             {
@@ -50,10 +53,14 @@ var start = function()
                                 // Create a callback receiver servant and add it to
                                 // the object adapter.
                                 //
-                                var ident = new Ice.Identity(Ice.UUID.generateUUID(), "");
+                                var ident = new Ice.Identity(Ice.generateUUID(), "");
                                 adapter.add(new CallbackReceiverI(), ident);
+                                
+                                //
+                                // Activate the object adapter.
+                                //
                                 return adapter.activate().then(
-                                    function(asyncResult)
+                                    function(r)
                                     {
                                         //
                                         // Retrive the proxy connection to use with our
@@ -62,7 +69,7 @@ var start = function()
                                         return server.ice_getConnection();
                                     }
                                 ).then(
-                                    function(asyncResult, conn)
+                                    function(r, conn)
                                     {
                                         //
                                         // Set the connection adapter.

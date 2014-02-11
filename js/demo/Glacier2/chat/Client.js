@@ -8,31 +8,64 @@
 // **********************************************************************
 
 (function(){
-    
-    require("Ice/Ice");
-    require("Glacier2/Glacier2");
-    require("Chat");
-    
-    //
-    // Servant that implements the ChatCallback interface,
-    // the message operation just writes the received data
-    // to stdout.
-    //
-    var ChatCallbackI = Ice.Class(Demo.ChatCallback, {
-        message: function(data)
-        {
-            console.log(data);
-        }
-    });
-    
-    var run = function(communicator)
+
+require("Ice/Ice");
+require("Glacier2/Glacier2");
+require("Chat");
+
+//
+// Servant that implements the ChatCallback interface,
+// the message operation just writes the received data
+// to stdout.
+//
+var ChatCallbackI = Ice.Class(Demo.ChatCallback, {
+    message: function(data)
     {
-        var createSession = function()
+        console.log(data);
+    }
+});
+
+var communicator;
+
+//
+// Destroy communicator on SIGINT so application
+// exit cleanly.
+//
+process.once("SIGINT", function() {
+    if(communicator)
+    {
+        communicator.destroy().finally(
+            function()
+            {
+                process.exit(0);
+            });
+    }
+});
+
+Ice.Promise.try(
+    function() 
+    {
+        //
+        // Initialize the communicator with Ice.Default.Router property
+        // set to the chat demo Glacier2 router.
+        //
+        var id = new Ice.InitializationData();
+        id.properties = Ice.createProperties();
+        id.properties.setProperty("Ice.Default.Router", 
+                                  "DemoGlacier2/router:tcp -p 4063 -h localhost");
+        communicator = Ice.initialize(id);
+        
+        function createSession()
         {
             return Ice.Promise.try(
                 function()
                 {
-                    return Glacier2.RouterPrx.checkedCast(communicator.getDefaultRouter()).then(
+                    //
+                    // Get a proxy to the default rotuer and down-cast it to Glacier2.Router
+                    // interface to ensure Glacier2 server is available.
+                    //
+                    var router = communicator.getDefaultRouter();
+                    return Glacier2.RouterPrx.checkedCast(router).then(
                         function(r, router)
                         {
                             console.log("This demo accepts any user-id / password combination.\n");
@@ -57,12 +90,12 @@
                                     if(ex instanceof Glacier2.PermissionDeniedExceptionx)
                                     {
                                         console.log("permission denied:\n" << ex.reason);
-                                        createSession();
+                                        return createSession();
                                     }
                                     else if(ex instanceof Glacier2.CannotCreateSessionException)
                                     {
                                         console.log("cannot create session:\n" << ex.reason);
-                                        createSession();
+                                        return createSession();
                                     }
                                     else
                                     {
@@ -73,7 +106,7 @@
                 });
         };
         
-        var runWithSession = function(router, session)
+        function runWithSession(router, session)
         {
             var p = new Ice.Promise();
             var refreshSession;
@@ -130,7 +163,7 @@
                     // The chat function sequantially reads stdin messages
                     // and send it to server using the session say method.
                     //
-                    var chat = function()
+                    function chat()
                     {
                         process.stdout.write("==> ");
                         return getline().then(
@@ -162,7 +195,7 @@
                             {
                                 p.fail(ex);
                             });
-                    };
+                    }
                     
                     //
                     // Start the chat loop
@@ -179,71 +212,45 @@
                 {
                     clearInterval(refreshSession);
                 });
-            
             return p;
-        };
-        
+        }
         return createSession();
     }
-    
-    var communicator;
-    Ice.Promise.try(
-        function() 
-        {
-            var id = new Ice.InitializationData();
-            id.properties = Ice.createProperties();
-            id.properties.setProperty("Ice.Default.Router", 
-                                      "DemoGlacier2/router:tcp -p 4063 -h localhost");
-            communicator = Ice.initialize(id);
-            return run(communicator);
-        }
-    ).finally(
-        function()
-        {
-            if(communicator)
-            {
-                return communicator.destroy();
-            }
-        }
-    ).then(
-        function()
-        {
-            process.exit(0);
-        },
-        function(ex)
-        {
-            console.log(ex.toString());
-            process.exit(1);
-        });
-    
-    //
-    // Destroy communicator on SIGINT so application
-    // exit cleanly.
-    //
-    process.once("SIGINT", function() {
+).finally(
+    function()
+    {
+        //
+        // Destroy the communicator if required.
+        //
         if(communicator)
         {
-            communicator.destroy().finally(
-                function()
-                {
-                    process.exit(0);
-                });
+            return communicator.destroy();
         }
-    });
-    
-    //
-    // Asynchonously process stdin lines using a promise
-    //
-    var getline = function()
+    }
+).exception(
+    function(ex)
     {
-        var p = new Ice.Promise();
-        process.stdin.resume();
-        process.stdin.once("data", 
-            function(buffer)
-            {
-                process.stdin.pause();
-                p.succeed(buffer.toString("utf-8").trim());
-            });
-        return p;
-    };
+        //
+        // Handle any exceptions above.
+        //
+        console.log(ex.toString());
+        process.exit(1);
+    });
+
+//
+// Asynchonously process stdin lines using a promise
+//
+var getline = function()
+{
+    var p = new Ice.Promise();
+    process.stdin.resume();
+    process.stdin.once("data", 
+        function(buffer)
+        {
+            process.stdin.pause();
+            p.succeed(buffer.toString("utf-8").trim());
+        });
+    return p;
+};
+
 }());
