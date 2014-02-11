@@ -10,6 +10,7 @@
 #include <IceUtil/DisableWarnings.h>
 #include <IceUtil/Functional.h>
 #include <IceUtil/StringUtil.h>
+#include <IceUtil/InputUtil.h>
 #include <Gen.h>
 #include <limits>
 #include <sys/stat.h>
@@ -459,6 +460,27 @@ Slice::JsVisitor::writeConstantValue(const string& scope, const TypePtr& type, c
             }
 
             _out << "\"";                                    // Closing "
+        }
+        else if(bp && bp->kind() == Builtin::KindLong)
+        {
+            IceUtil::Int64 l = IceUtilInternal::strToInt64(value.c_str(), 0, 0);
+            
+            //
+            // For big edian swap the bytes.
+            //
+#ifdef ICE_BIG_ENDIAN
+            IceUtil::Int64 j = l;
+            typedef unsigned char Byte;
+            reinterpret_cast<Byte*>(&l)[0] = reinterpret_cast<Byte*>(&j)[7];
+            reinterpret_cast<Byte*>(&l)[1] = reinterpret_cast<Byte*>(&j)[6];
+            reinterpret_cast<Byte*>(&l)[2] = reinterpret_cast<Byte*>(&j)[5];
+            reinterpret_cast<Byte*>(&l)[3] = reinterpret_cast<Byte*>(&j)[4];
+            reinterpret_cast<Byte*>(&l)[4] = reinterpret_cast<Byte*>(&j)[3];
+            reinterpret_cast<Byte*>(&l)[5] = reinterpret_cast<Byte*>(&j)[2];
+            reinterpret_cast<Byte*>(&l)[6] = reinterpret_cast<Byte*>(&j)[1];
+            reinterpret_cast<Byte*>(&l)[7] = reinterpret_cast<Byte*>(&j)[0];
+#endif
+            _out << "new Ice.Long(" << ((l >> 32) & 0xFFFFFFFF) << ", " << (l & 0xFFFFFFFF)  << ")";
         }
         else if((ep = EnumPtr::dynamicCast(type)))
         {
