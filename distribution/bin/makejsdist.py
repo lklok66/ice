@@ -152,6 +152,7 @@ excludeWindowsFiles = [ \
     "/vsaddin/",
     "*.rc",
     "*.sln",
+    "*.sln.icejs",
     "*.csproj",
     "*.vbproj",
     "*.vcproj",
@@ -500,13 +501,13 @@ sys.stdout.flush()
 
 # Unix demo distribution
 copy("ICE_LICENSE", demoDir)
-copy(os.path.join(distFilesDir, "src", "ws", "README.DEMOS"), demoDir)
+copy(os.path.join(distFilesDir, "src", "js", "README.DEMOS"), demoDir)
 
 copyMatchingFiles(os.path.join("certs"), os.path.join(demoDir, "certs"), demoCertsFiles)
 for d in ["", "cpp"]:
     copyMatchingFiles(os.path.join(d, "config"), os.path.join(demoDir, "config"), demoConfigFiles)
 
-copy(os.path.join(distFilesDir, "src", "ws", "Make.rules"), os.path.join(demoDir, "config"), False)
+copy(os.path.join(distFilesDir, "src", "js", "Make.rules"), os.path.join(demoDir, "config"), False)
 
 # Consolidate demoscript and demo distribution with files from each language mapping
 for d in os.listdir('.'):
@@ -520,7 +521,7 @@ for root, dirnames, filesnames in os.walk(demoDir):
             substitute(os.path.join(root, f), configSubstituteExprs)
 
 # Windows demo distribution
-copy(os.path.join(winDistFilesDir, "src", "ws", "README.DEMOS.txt"), os.path.join(winDemoDir, "README.txt"))
+copy(os.path.join(winDistFilesDir, "src", "js", "README.DEMOS.txt"), os.path.join(winDemoDir, "README.txt"))
 
 copyMatchingFiles(os.path.join(winSrcDir, "certs"), os.path.join(winDemoDir, "certs"), demoCertsFiles)
 
@@ -529,7 +530,7 @@ os.mkdir(os.path.join(winDemoDir, "config"))
 copy(os.path.join(winSrcDir, "config", "Make.common.rules.mak"), os.path.join(winDemoDir, "config"), False)
 copy(os.path.join(winSrcDir, "cpp", "config", "Make.rules.msvc"), os.path.join(winDemoDir, "config"), False)
 
-copy(os.path.join(winDistFilesDir, "src", "ws", "Make.rules.mak"), os.path.join(winDemoDir, "config"), False)
+copy(os.path.join(winDistFilesDir, "src", "js", "Make.rules.mak"), os.path.join(winDemoDir, "config"), False)
 
 # Consolidate demo distribution with files from each language mapping
 for sd in os.listdir(winSrcDir):
