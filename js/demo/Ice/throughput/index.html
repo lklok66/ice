@@ -4,12 +4,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Throughput Demo | Ice for JavaScript</title>
-
     <link rel="stylesheet" href="../../../config/foundation/css/foundation.css" />
-    
     <script src="../../../config/foundation/js/modernizr.js"></script>
-    <script src="../../../lib/Ice.js"></script>
-    <script src="Throughput.js"></script>
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shBrushJScript.js"></script>
+    <link type="text/css" rel="stylesheet" href="../../../config/syntaxhighlighter/styles/shCoreDefault.css"/>
+    <style type="text/css">
+        #source
+        {
+            max-height:500px;
+            overflow:auto;
+        }
+    </style>
   </head>
   <body>
     <nav class="top-bar" data-topbar>
@@ -72,7 +78,6 @@
                 <div class="row">
                     <div class="small-12 columns">
                         <a href="#" class="button small" id="run">Run</a>
-                        <a href="#" class="button small" id="shutdown">Shutdown</a>
                     </div>
                 </div>
                 <div class="row">
@@ -83,319 +88,35 @@
             </form>
         </div>
     </section>
+    <div id="source-modal" class="reveal-modal" data-reveal>
+        <pre id="source" class="brush: js;"></pre>
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
     <script src="../../../config/foundation/js/jquery.js"></script>
     <script src="../../../config/foundation/js/foundation.min.js"></script>
     <script>
         $(document).foundation();
-      
-        $(document).ready(function(){
-            $("#console").val("");
-            $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
-            
-            var out = 
-            {
-                write: function(msg)
-                {
-                    var text = $("#console").val();
-                    $("#console").val((text == "") ? msg : (text + msg));
-                },
-                writeLine: function(msg)
-                {
-                    out.write(msg + "\n");
-                    $("#console").scrollTop($("#console").get(0).scrollHeight);
-                }
-            };
-            
-            var byteSeq = [];
-            for(var i = 0; i < Demo.ByteSeqSize; ++i)
-            {
-                byteSeq[i] = 0;
-            }
-            byteSeq = Ice.Buffer.createNative(byteSeq);
-            
-            var stringSeq = [];
-            for(var i = 0; i < Demo.StringSeqSize; ++i)
-            {
-                stringSeq[i] = "hello";
-            }
-
-            var structSeq = [];
-            for(var i = 0; i < Demo.StringDoubleSeqSize; ++i)
-            {
-                structSeq[i] = new Demo.StringDouble();
-                structSeq[i].s = "hello";
-                structSeq[i].d = 3.14;
-            }
-
-            var fixedSeq = [];
-            for(var i = 0; i < Demo.FixedSeqSize; ++i)
-            {
-                fixedSeq[i] = new Demo.Fixed();
-                fixedSeq[i].i = 0;
-                fixedSeq[i].j = 0;
-                fixedSeq[i].d = 0;
-            }
-            
-            var communicator = Ice.initialize();
-
-            var run = $("#run");
-            
-            run.click(
-                function()
-                {
-                    if(!run.hasClass("disabled"))
+        $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
+    </script>
+    <script src="../../../lib/Ice.js"></script>
+    <script src="Throughput.js"></script>
+    <script src="browser/Client.js"></script>
+    <script type="application/javascript">
+        $("#source").load("browser/Client.js",
+            //
+            // Load completed
+            //
+            function(){
+                SyntaxHighlighter.defaults.toolbar = false;
+                SyntaxHighlighter.highlight();
+                $("#viewSource").removeClass("disabled");
+                $("#viewSource").click(
+                    function()
                     {
-                        run.addClass("disabled");
-                        try
-                        {
-                            $("#console").val("");
-                            var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
-                            
-                            Demo.ThroughputPrx.checkedCast(communicator.stringToProxy("throughput:ws -h " + hostname + " -p 10000")).then(
-                                function(asyncResult, twoway)
-                                {
-                                    oneway = twoway.ice_oneway();
-                                    
-                                    var data = $("#data").val();
-                                    var test = $("#test").val();
-                                    
-                                    var seq;
-                                    var seqSize
-                                    var wireSize;
-                                    var proxy;
-                                    var operation;
-                                    var repetitions = 100;
-                                    
-                                    if(data == "byte-seq")
-                                    {
-                                        seq = byteSeq;
-                                        seqSize = Demo.ByteSeqSize;
-                                        seq = byteSeq;
-                                        wireSize = 1;
-                                    }
-                                    else if(data == "string-seq")
-                                    {
-                                        seq = stringSeq;
-                                        seqSize = Demo.StringSeqSize;
-                                        seq = stringSeq;
-                                        wireSize = seq[0].length;
-                                    }
-                                    else if(data == "struct-seq")
-                                    {
-                                        seq = structSeq;
-                                        seqSize = Demo.StringDoubleSeqSize;
-                                        seq = structSeq;
-                                        wireSize = seq[0].s.length;
-                                        wireSize += 8; // Size of double on the wire.
-                                    }
-                                    else if(data == "fixed-seq")
-                                    {
-                                        seq = fixedSeq;
-                                        seqSize = Demo.FixedSeqSize;
-                                        seq = fixedSeq;
-                                        wireSize = 16; // Size of two ints and a double on the wire.
-                                    }
-                                    
-                                    if(test == "twoway" || test == "oneway")
-                                    {
-                                        proxy = test == "twoway" ? twoway : oneway;
-                                        if(data == "byte-seq")
-                                        {
-                                            operation = proxy.sendByteSeq;
-                                        }
-                                        else if(data == "string-seq")
-                                        {
-                                            operation = proxy.sendStringSeq;
-                                        }
-                                        else if(data == "struct-seq")
-                                        {
-                                            operation = proxy.sendStructSeq;
-                                        }
-                                        else if(data == "fixed-seq")
-                                        {
-                                            operation = proxy.sendFixedSeq;
-                                        }
-                                        out.write("sending");
-                                    }
-                                    else if(test == "receive")
-                                    {
-                                        proxy = twoway;
-                                        if(data == "byte-seq")
-                                        {
-                                            operation = proxy.recvByteSeq;
-                                        }
-                                        else if(data == "string-seq")
-                                        {
-                                            operation = proxy.recvStringSeq;
-                                        }
-                                        else if(data == "struct-seq")
-                                        {
-                                            operation = proxy.recvStructSeq;
-                                        }
-                                        else if(data == "fixed-seq")
-                                        {
-                                            operation = proxy.recvFixedSeq;
-                                        }
-                                        out.write("receiving");
-                                    }
-                                    else if(test == "echo")
-                                    {
-                                        proxy = twoway;
-                                        if(data == "byte-seq")
-                                        {
-                                            operation = proxy.echoByteSeq;
-                                        }
-                                        else if(data == "string-seq")
-                                        {
-                                            operation = proxy.echoStringSeq;
-                                        }
-                                        else if(data == "struct-seq")
-                                        {
-                                            operation = proxy.echoStructSeq;
-                                        }
-                                        else if(data == "fixed-seq")
-                                        {
-                                            operation = proxy.echoFixedSeq;
-                                        }
-                                        out.write("sending and receiving");
-                                    }
-                                    
-                                    out.write(" " + repetitions);
-                                    if(data == "byte-seq")
-                                    {
-                                        out.write(" byte");
-                                    }
-                                    else if(data == "string-seq")
-                                    {
-                                        out.write(" string");
-                                    }
-                                    else if(data == "struct-seq")
-                                    {
-                                        out.write(" variable-length struct");
-                                    }
-                                    else if(data == "fixed-seq")
-                                    {
-                                        out.write(" fixed-length struct");
-                                    }
-                                    out.write(" sequences of size " + seqSize);
-                                    if(test == "oneway")
-                                    {
-                                        out.write(" as oneway");
-                                    }
-                                    out.writeLine("...");
-                                    
-                                    setTimeout(
-                                        function()
-                                        {
-                                            var p1 = new Ice.Promise();
-                                            var count = 0;
-                                            var start = new Date().getTime();
-                                            for(var i = 0; i < repetitions; ++i)
-                                            {
-                                                var args = [];
-                                                if(test != "receive")
-                                                {
-                                                    args.push(seq);
-                                                }
-                                                operation.apply(proxy, args).then(
-                                                    function(asyncResult)
-                                                    {
-                                                        if(++count == repetitions)
-                                                        {
-                                                            p1.succeed();
-                                                        }
-                                                    },
-                                                    function(ex)
-                                                    {
-                                                        out.writeLine(ex.toString());
-                                                        p1.fail(ex);
-                                                    });
-                                            }
-                                            
-                                            p1.then(
-                                                function()
-                                                {
-                                                    var total = new Date().getTime() - start;
-                                                    out.writeLine("time for " + repetitions + " sequences: " + total  + " ms");
-                                                    out.writeLine("time per sequence: " + total / repetitions + " ms");
-                                                    
-                                                    var mbit = repetitions * seqSize * wireSize * 8.0 / total / 1000.0;
-                                                    if(test == "echo")
-                                                    {
-                                                        mbit *= 2;
-                                                    }
-                                                    mbit = Math.round(mbit * 100) / 100;
-                                                    out.writeLine("throughput: " + mbit + " Mbps");
-                                                    run.removeClass("disabled");
-                                                },
-                                                function(ex)
-                                                {
-                                                    run.removeClass("disabled");
-                                                    out.writeLine(ex.toString());
-                                                }
-                                            ).exception(
-                                                function(ex)
-                                                {
-                                                    run.removeClass("disabled");
-                                                    out.writeLine(ex.toString());
-                                                });
-                                        }, 10);
-                                }
-                            ).exception(
-                                function(ex)
-                                {
-                                    run.removeClass("disabled");
-                                    out.writeLine(ex.toString());
-                                }
-                            );
-                        }
-                        catch(ex)
-                        {
-                            run.removeClass("disabled");
-                            out.writeLine(ex.toString());
-                        }
-                    }
-                    return false;
-                });
-                
-            var shutdown = $("#shutdown");
-            shutdown.click(
-                function()
-                {
-                    if(!shutdown.hasClass("disabled"))
-                    {
-                        shutdown.addClass("disabled");
-                        try
-                        {
-                            $("#console").val("");
-                            var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
-                            
-                            Demo.ThroughputPrx.checkedCast(communicator.stringToProxy("throughput:ws -h " + hostname + " -p 10000")).then(
-                                function(asyncResult, throughput)
-                                {
-                                    return throughput.shutdown();
-                                }
-                            ).then(
-                                function()
-                                {
-                                    shutdown.removeClass("disabled");
-                                }
-                            ).exception(
-                                function(ex)
-                                {
-                                    shutdown.removeClass("disabled");
-                                    out.writeLine(ex.toString());
-                                });
-                        }
-                        catch(ex)
-                        {
-                            shutdown.removeClass("disabled");
-                            out.writeLine(ex.toString());
-                        }
-                    }
-                    return false;
-                });
-        });
+                        $("#source-modal").foundation("reveal", "open");
+                        return false;
+                    });
+            });
     </script>
   </body>
 </html>
