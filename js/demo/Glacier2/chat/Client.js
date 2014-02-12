@@ -138,7 +138,7 @@ Ice.Promise.try(
                                 function(ex){
                                     p.fail(ex);
                                 });
-                        }, (timeout.low * 500));
+                        }, (timeout.toNumber() * 500));
                     
                     //
                     // Create the ChatCallback servant and add it to the ObjectAdapter.
