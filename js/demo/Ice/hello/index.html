@@ -26,6 +26,16 @@
             max-height:500px;
             overflow:auto;
         }
+        #progress-indicator
+        {
+            margin-left:10px;
+            margin-top: 5px;
+        }
+        
+        #progress-message
+        {
+            margin-left:25px;
+        }
     </style>
   </head>
   <body>
@@ -101,7 +111,13 @@
                             <a href="#" class="button disabled small" id="flush">Flush</a>
                         </div>
                     </div>
-                    <textarea id="console" class="disabled" readonly></textarea>
+                    <textarea id="output" class="disabled" readonly></textarea>
+                    <div id="progress" class="row hide">
+                        <div class="small-12 columns left">
+                            <div id="progress-indicator" class="inline left"></div>
+                            <div id="progress-message">Sending Request...</div>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -113,11 +129,14 @@
     <script src="../../../config/foundation/js/jquery.js"></script>
     <script src="../../../config/foundation/js/foundation.min.js"></script>
     <script src="../../../config/foundation/js/jquery.nouislider.js"></script>
+    <script src="../../../config/foundation/js/spin.min.js"></script>
+    <script src="../../../config/foundation/js/jquery.spin.js"></script>
     <script>
         $(document).foundation();
         $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
         $("#timeout").noUiSlider({range: [0, 2500], start: 0, handles: 1});
         $("#delay").noUiSlider({range: [0, 2500], start: 0, handles: 1});
+        $("#progress-indicator").spin("small");
     </script>
     <script src="browser/Client.js"></script>
     <script type="application/javascript">

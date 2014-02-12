@@ -10,12 +10,17 @@
 (function(){
 
 var communicator;
+var flushEnabled = false;
+var State = {Idle:0, SendRequest:1, FlushBatchRequests:2};
+var state;
+var batch = 0;
 
 function sayHello()
 {
     Ice.Promise.try(
         function()
         {
+            setState(State.SendRequest);
             //
             // Initialize the communicator if it has not yet been initialized.
             //
@@ -94,23 +99,24 @@ function sayHello()
                     }
                     else if(mode == "oneway-batch")
                     {
-                        enableFlush(true);
+                        batch++;
                         return batchOneway.sayHello(delay);
                     }
                     else if(mode == "oneway-batch-secure")
                     {
-                        enableFlush(true);
+                        batch++;
                         return batchOneway.ice_secure(true).sayHello(delay);
                     }
                 });
         }
-    ).exception(
+    ).then(
+        function()
+        {
+            setState(State.Idle);
+        },
         function(ex)
         {
-            //
-            // Handle any exceptions above.
-            //
-            $("#console").val(ex.toString());
+            setState(State.Idle, ex);
         });
 }
 
@@ -119,14 +125,16 @@ function sayHello()
 //
 function flush()
 {
-    enableFlush(false);
-    communicator.flushBatchRequests().exception(
+    batch = 0;
+    setState(State.FlushBatchRequests);
+    communicator.flushBatchRequests().then(
+        function()
+        {
+            setState(State.Idle);
+        },
         function(ex)
         {
-            //
-            // Handle any exceptions above.
-            //
-            $("#console").val(ex.toString());
+            setState(State.Idle, ex);
         });
 }
 
@@ -138,6 +146,7 @@ function shutdown()
     Ice.Promise.try(
         function()
         {
+            setState(State.SendRequest);
             //
             // Initialize the communicator if it has not yet been initialized.
             //
@@ -165,63 +174,115 @@ function shutdown()
                     return hello.shutdown();
                 });
         }
-    ).exception(
+    ).then(
+        function()
+        {
+            setState(State.Idle);
+        },
         function(ex)
         {
-            //
-            // Handle any exceptions above.
-            //
-            $("#console").val(ex.toString());
+            setState(State.Idle, ex);
         });
 }
 
 //
-// Hello button event handler.
-//
-$("#hello").click(
-    function()
-    {
-        sayHello();
-        return false;
-    });
-
-//
-// Shutdown button event handler.
-//
-$("#shutdown").click(
-    function()
-    {
-        shutdown();
-        return false;
-    });
-
-//
 // Enable/disable flush request
 //
-var flushEnabled = false;
-
 function enableFlush(value)
 {
-    if(value != flushEnabled)
+    if(value && batch > 0)
     {
-        if(value)
-        {
-            $("#flush").removeClass("disabled")
-                       .click(
-                            function()
-                            {
-                                flush();
-                                return false;
-                            });
-        }
-        else
-        {
-            $("#flush").off("click")
-                       .addClass("disabled");
-        }
-        flushEnabled = value;
+        $("#flush").removeClass("disabled")
+                   .click(
+                        function()
+                        {
+                            flush();
+                            return false;
+                        });
+    }
+    else
+    {
+        $("#flush").off("click")
+                   .addClass("disabled");
     }
 }
+
+//
+// Client state
+//
+function setState(newState, ex)
+{
+    assert(state !== newState);
+    switch(newState)
+    {
+        case State.Idle:
+        {
+            assert(state === undefined || 
+                   state === State.SendRequest ||
+                   state === State.FlushBatchRequests);
+            
+            if(ex !== undefined)
+            {
+                $("#output").val(ex.toString());
+            }
+            
+            //
+            // Hide the progress indicator.
+            //
+            $("#progress").hide();
+            
+            //
+            // Hello button event handler.
+            //
+            $("#hello").removeClass("disabled");
+            $("#hello").click(
+                function()
+                {
+                    sayHello();
+                    return false;
+                });
+
+            //
+            // Shutdown button event handler.
+            //
+            $("#shutdown").removeClass("disabled");
+            $("#shutdown").click(
+                function()
+                {
+                    shutdown();
+                    return false;
+                });
+            
+            enableFlush(true);
+            
+            break;
+        }
+        case State.SendRequest:
+        case State.FlushBatchRequests:
+        {
+            assert(state === State.Idle);
+            //
+            // Disable buttons and show the pogress indicator.
+            //
+            $("#output").val("");
+            $("#hello").off("click");
+            $("#hello").addClass("disabled");
+            $("#shutdown").off("click");
+            $("#shutdown").addClass("disabled");
+            enableFlush(false);
+            $("#progress-message").text(
+                newState === State.SendRequest ? "Sending Request..." : "Flush Batch Requests...");
+            $("#progress").show();
+            break;
+        }
+    }
+    state = newState;
+};
+
+//
+// Sets the initial state.
+//
+setState(State.Idle);
 
 //
 // Helper method to get the hostname.
@@ -229,6 +290,14 @@ function enableFlush(value)
 function hostname()
 {
     return $("#hostname").val() || $("#hostname").attr("placeholder");
+}
+
+function assert(v)
+{
+    if(!v)
+    {
+        throw new Error("Assertion failed");
+    }
 }
 
 }());
