@@ -11,7 +11,13 @@
 
 var communicator;
 var flushEnabled = false;
-var State = {Idle:0, SendRequest:1, FlushBatchRequests:2};
+
+var State = {
+    Idle:0, 
+    SendRequest:1, 
+    FlushBatchRequests:2
+};
+
 var state;
 var batch = 0;
 
@@ -232,47 +238,60 @@ function setState(newState, ex)
             $("#progress").hide();
             
             //
+            // Restore the cursor.
+            //
+            $("body").removeClass("waiting");
+            
+            //
             // Hello button event handler.
             //
             $("#hello").removeClass("disabled");
-            $("#hello").click(
-                function()
-                {
-                    sayHello();
-                    return false;
-                });
+                       .click(
+                            function()
+                            {
+                                sayHello();
+                                return false;
+                            });
 
             //
             // Shutdown button event handler.
             //
             $("#shutdown").removeClass("disabled");
-            $("#shutdown").click(
-                function()
-                {
-                    shutdown();
-                    return false;
-                });
-            
+                          .click(
+                            function()
+                            {
+                                shutdown();
+                                return false;
+                            });
             enableFlush(true);
-            
             break;
         }
         case State.SendRequest:
         case State.FlushBatchRequests:
         {
             assert(state === State.Idle);
+
+            //
+            // Reset the output.
+            //
+            $("#output").val("");
+            
             //
             // Disable buttons and show the pogress indicator.
             //
-            $("#output").val("");
             $("#hello").off("click");
             $("#hello").addClass("disabled");
             $("#shutdown").off("click");
             $("#shutdown").addClass("disabled");
             enableFlush(false);
+
+            //
+            // Display the progress indicator, and set the wait cursor.
+            //
             $("#progress-message").text(
                 newState === State.SendRequest ? "Sending Request..." : "Flush Batch Requests...");
             $("#progress").show();
+            $("body").addClass("waiting");
             break;
         }
     }
