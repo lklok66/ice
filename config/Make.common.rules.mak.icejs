@@ -11,9 +11,9 @@
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
 
-VERSION                 = 3.5.1ws
+VERSION                 = 3.5.1js
 SHORT_VERSION           = 3.5
-PATCH_VERSION           = 1ws
+PATCH_VERSION           = 1js
 SOVERSION               = 35
 
 ICE_VERSION             = 3.5.1

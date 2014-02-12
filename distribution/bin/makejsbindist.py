@@ -128,7 +128,7 @@ if forceclean or not os.path.exists(srcDir) or not os.path.exists(buildDir):
     #
     if not os.path.exists(os.path.join(cwd, "IceJS-" + version + ".tar.gz")):
         print
-        src = raw_input("Couldn't find Ice-" + version + ".tar.gz in current directory, please specify\n" + \
+        src = raw_input("Couldn't find IceJS-" + version + ".tar.gz in current directory, please specify\n" + \
                         "where to download or copy the source distribution or hit enter to \n" + \
                         "download it from sun:/share/srcdists/" + version + ": ")
         if src == "":
