@@ -254,8 +254,8 @@ if not os.path.exists(demoArchive):
 builds = {
     "VC110": {
         "x86": {
-            "release": ["cpp"], 
-            "debug": ["cpp"]},
+            "release": ["cpp", "js"], 
+            "debug": ["cpp", "js"]},
         "amd64": {
             "release": ["cpp"], 
             "debug": ["cpp"]}
@@ -331,7 +331,7 @@ if not skipBuild:
 
                     vcvars = getVcVarsAll(compiler)
 
-                    if lang == "cpp" and compiler == "VC110":
+                    if lang in ["cpp", "js"] and compiler == "VC110":
                         command = "\"%s\" %s  && nmake /f Makefile.mak install" % (vcvars, arch)
                         executeCommand(command, env)
 #
