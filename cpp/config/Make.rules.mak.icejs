@@ -120,7 +120,7 @@ LDFLAGS			= $(LDFLAGS) $(PRELIBPATH)"$(SDK_LIBRARY_PATH)"
 LDFLAGS			= $(LDFLAGS) $(LDPLATFORMFLAGS) $(CXXFLAGS)
 
 !if "$(ice_src_dist)" != ""
-SLICE2CPP		= $(ice_cpp_dir)\bin$(x64suffix)\slice2cpp.exe
+SLICE2CPP		= $(ice_cpp_dir)\bin\slice2cpp.exe
 !else
 SLICE2CPP		= $(ice_cpp_dir)\bin$(x64suffix)\slice2cpp.exe
 !endif
