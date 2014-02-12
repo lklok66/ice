@@ -115,6 +115,9 @@
     <script src="../../../config/foundation/js/jquery.nouislider.js"></script>
     <script>
         $(document).foundation();
+        $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
+        $("#timeout").noUiSlider({range: [0, 2500], start: 0, handles: 1});
+        $("#delay").noUiSlider({range: [0, 2500], start: 0, handles: 1});
     </script>
     <script src="browser/Client.js"></script>
     <script type="application/javascript">

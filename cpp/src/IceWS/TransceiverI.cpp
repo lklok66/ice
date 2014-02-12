@@ -1236,8 +1236,15 @@ IceWS::TransceiverI::preWrite(Buffer& buf)
             }
 
             *reinterpret_cast<uint16_t*>(_writeBuffer.i) = htons(static_cast<uint16_t>(_closingReason));
-            *_writeBuffer.i++ ^= _writeMask[0];
-            *_writeBuffer.i++ ^= _writeMask[1];
+            if(!_incoming)
+            {
+                *_writeBuffer.i++ ^= _writeMask[0];
+                *_writeBuffer.i++ ^= _writeMask[1];
+            }
+            else
+            {
+                _writeBuffer.i += 2;
+            }
 
             _writeBuffer.b.resize(_writeBuffer.i - _writeBuffer.b.begin());
             _writeBuffer.i = _writeBuffer.b.begin();

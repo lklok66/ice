@@ -1,118 +1,106 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2013 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
 
 (function(){
-console.log("Client.js");
-    
-        require("Ice/Ice");
-        require("Latency");
-        
-        var Demo = global.Demo || {};
-        
-        var writeException = function(ex)
-        {
-            console.log(ex.toString());
-        };
 
-        var Client = function()
-        {
-        };
+require("Ice/Ice");
+require("Latency");
+
+var communicator;
+
+Promise.try(
+    function()
+    {
+        //
+        // Initialize the communicator and create a proxy to the 
+        // ping object.
+        //
+        communicator = Ice.initialize();
+        var start, total, repetitions = 100000;
+        var proxy = communicator.stringToProxy("ping:default -p 10000");
         
-        Client.prototype.run = function()
-        {
-            var communicator;
-            var p = new Ice.Promise();
-            
-            var cleanup = function(ex)
+        //
+        // Down-cast the proxy to the Demo.Ping interface.
+        //
+        Demo.PingPrx.checkedCast(proxy).then(
+            function(r, obj)
             {
-                if(communicator !== null)
+                //
+                // Promise used to wait for the completion of
+                // the ping calls.
+                //
+                var p = new Ice.Promise();
+                console.log("pinging server " + repetitions + " times (this may take a while)");
+                var j = 0;
+                //
+                // The success callback waits until all calls
+                // completed and then call succeed on the 
+                // promise.
+                //
+                var succeedCB = function()
                 {
-                    communicator.destroy().then(
-                        function(asyncResult)
-                        {
-                            if(ex && ex instanceof Error)
-                            {
-                                writeException(ex);
-                                p.fail(ex);
-                            }
-                            else
-                            {
-                                p.succeed();
-                            }
-                        }
-                    ).exception(
-                        function(ex)
-                        {
-                            p.fail(ex);
-                        }
-                    );
-                }
-                else
+                    j++;
+                    if(j == repetitions)
+                    {
+                        p.succeed();
+                    }
+                };
+                
+                //
+                // If an invocation fails, report that error 
+                // and we are done.
+                //
+                var exceptionCB = function(ex)
                 {
                     p.fail(ex);
+                };
+                
+                //
+                // Invoke ice_ping repetitions times.
+                //
+                start = new Date().getTime();
+                for(var i = 0; i < repetitions; ++i)
+                {
+                    obj.ice_ping().then(succeedCB).exception(exceptionCB);
                 }
+                return p;
             }
-            
-            try
+        ).then(
+            function()
             {
-                var id = new Ice.InitializationData();
-                id.properties = Ice.createProperties();
-                id.properties.setProperty("Ping.Proxy", "ping:default -p 10000");
-                
-                communicator = Ice.initialize(id);
-                
-                var start, total;
-                var repetitions = 100000;
-                
-                Demo.PingPrx.checkedCast(communicator.propertyToProxy("Ping.Proxy")).then(
-                    function(asyncResult, obj)
-                    {
-                        start = new Date().getTime();
-                        console.log("pinging server " + repetitions + " times (this may take a while)");
-                        
-                        var p = new Ice.Promise();
-                        var j = 0;
-                        var succeedCB = function()
-                        {
-                            j++;
-                            if(j == repetitions)
-                            {
-                                p.succeed();
-                            }
-                        };
-                        
-                        for(var i = 0; i < repetitions; ++i)
-                        {
-                            obj.ice_ping().then(succeedCB).exception(function(ex){ p.fail(ex); });
-                        }
-                        return p;
-                    },
-                    function(ex)
-                    {
-                        console.log("invalid proxy: ");
-                        throw ex;
-                    }
-                ).then(
-                    function()
-                    {
-                        total = new Date().getTime() - start;
-                        var perPing = total / repetitions;
+                //
+                // Write the results.
+                //
+                total = new Date().getTime() - start;
+                console.log("time for " + repetitions + " pings: " + total + "ms");
+                console.log("time per ping: " + (total / repetitions) + "ms");
+            });
+    }
+).finally(
+    function()
+    {
+        //
+        // Destroy the communicator if required.
+        //
+        if(communicator)
+        {
+            return communicator.destroy();
+        }
+    }
+).exception(
+    function(ex)
+    {
+        //
+        // Handle any exceptions above.
+        //
+        console.log(ex.toString());
+        process.exit(1);
+    });
 
-                        console.log("time for " + repetitions + " pings: " + total + "ms");
-                        console.log("time per ping: " + perPing + "ms");
-                        cleanup();
-                    },
-                    function(ex)
-                    {
-                        throw ex;
-                    }
-                ).exception(cleanup);
-            }
-            catch(ex)
-            {
-                cleanup(ex);
-            }
-            return p;
-        };
-        
-        var client = new Client();
-        client.run();
 }());

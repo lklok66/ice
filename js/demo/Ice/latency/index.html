@@ -6,13 +6,18 @@
     <title>Latency Demo | Ice for JavaScript</title>
     <link rel="stylesheet" href="../../../config/foundation/css/foundation.css" />
     <script src="../../../config/foundation/js/modernizr.js"></script>
-    <script src="../../../lib/Ice.js"></script>
-    <script src="Latency.js"></script>
-    
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shBrushJScript.js"></script>
+    <link type="text/css" rel="stylesheet" href="../../../config/syntaxhighlighter/styles/shCoreDefault.css"/>
     <style type="text/css">
-        #ssl
+        #wss
         {
             margin-top:10px;
+        }
+        #source
+        {
+            max-height:500px;
+            overflow:auto;
         }
     </style>
   </head>
@@ -52,10 +57,10 @@
                     </div>
                     <div class="row">
                         <div class="small-3 columns">
-                            <label class="right inline" for="ssl">SSL:</label>
+                            <label class="right inline" for="wss">WSS:</label>
                         </div>
                         <div class="small-9 columns">
-                            <input id="ssl" type="checkbox">
+                            <input id="wss" type="checkbox">
                         </div>
                     </div>
                 </form>
@@ -66,106 +71,35 @@
             </div>
         </div>
     </section>
+    <div id="source-modal" class="reveal-modal" data-reveal>
+        <pre id="source" class="brush: js;"></pre>
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
     <script src="../../../config/foundation/js/jquery.js"></script>
     <script src="../../../config/foundation/js/foundation.min.js"></script>
     <script>
         $(document).foundation();
-      
-        $(document).ready(function(){
-            $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
-            
-            var out = 
-            {
-                write: function(msg)
-                {
-                    var text = $("#console").val();
-                    $("#console").val((text == "") ? msg : (text + msg));
-                },
-                writeLine: function(msg)
-                {
-                    out.write(msg + "\n");
-                    $("#console").scrollTop($("#console").get(0).scrollHeight);
-                }
-            };
-            
-            var exceptionCB = function(ex){ throw ex; };
-            
-            communicator = Ice.initialize();
-            
-            $("#run").click(
-                function()
-                {
-                    if(!$(this).hasClass("disabled"))
+        $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
+    </script>
+    <script src="../../../lib/Ice.js"></script>
+    <script src="Latency.js"></script>
+    <script src="browser/Client.js"></script>
+    <script type="application/javascript">
+        $("#source").load("browser/Client.js",
+            //
+            // Load completed
+            //
+            function(){
+                SyntaxHighlighter.defaults.toolbar = false;
+                SyntaxHighlighter.highlight();
+                $("#viewSource").removeClass("disabled");
+                $("#viewSource").click(
+                    function()
                     {
-                        $("#console").val("");
-                        try
-                        {
-                            var secure = $("#ssl").is(":checked");
-                            $(this).addClass("disabled");
-                            var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
-                            var s = "ping:ws -h " + hostname + " -p 10000:wss -h " + hostname + " -p 10001";
-                            var proxy = communicator.stringToProxy(s).ice_twoway().ice_timeout(-1).ice_secure(secure);
-                            
-                            var start, total;
-                            var repetitions = 10000;
-                    
-                            Demo.PingPrx.checkedCast(proxy).then(
-                                function(asyncResult, obj)
-                                {
-                                    start = new Date().getTime();
-                                    out.writeLine("pinging server " + repetitions + " times (this may take a while)");
-                                    
-                                    var p = new Ice.Promise();
-                                    var j = 0;
-                                    var succeedCB = function()
-                                    {
-                                        j++;
-                                        if(j == repetitions)
-                                        {
-                                            p.succeed();
-                                        }
-                                    };
-                                    
-                                    for(var i = 0; i < repetitions; ++i)
-                                    {
-                                        obj.ice_ping().then(succeedCB).exception(function(ex){ p.fail(ex); });
-                                    }
-
-                                    return p;
-                                },
-                                function(ex)
-                                {
-                                    out.writeLine("invalid proxy");
-                                    throw ex;
-                                }
-                            ).then(
-                                function()
-                                {
-                                    total = new Date().getTime() - start;
-                                    var perPing = total / repetitions;
-
-                                    out.writeLine("time for " + repetitions + " pings: " + total + "ms");
-                                    out.writeLine("time per ping: " + perPing + "ms");
-                                    $("#run").removeClass("disabled");
-                                }
-                            ).exception(
-                                function(ex)
-                                {
-                                    $("#run").removeClass("disabled");
-                                    out.writeLine(ex.toString());
-                                }
-                            );
-                        }
-                        catch(ex)
-                        {
-                            $("#run").removeClass("disabled");
-                            out.writeLine(ex.toString());
-                        }
-                    }
-                    
-                    return false;
-                });
-        });
+                        $("#source-modal").foundation("reveal", "open");
+                        return false;
+                    });
+            });
     </script>
   </body>
 </html>

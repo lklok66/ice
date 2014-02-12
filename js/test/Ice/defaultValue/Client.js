@@ -40,7 +40,7 @@
                     test(v.b === 254);
                     test(v.s === 16000);
                     test(v.i === 3);
-                    test(v.l === 4);
+                    test(v.l.equals(new Ice.Long(0, 4)));
                     test(v.f === 5.1);
                     test(v.d === 6.2);
                     test(v.str === "foo \\ \"bar\n \r\n\t\u000b\f\u0007\b?");
@@ -52,7 +52,7 @@
                     test(v.nc3 === Test.Nested.Color.blue);
                     test(v.noDefault === null);
                     test(v.zeroI === 0);
-                    test(v.zeroL === 0);
+                    test(v.zeroL.equals(new Ice.Long(0, 0)));
                     test(v.zeroF === 0);
                     test(v.zeroDotF === 0);
                     test(v.zeroD === 0);
@@ -63,7 +63,7 @@
                     test(v.b === Test.ConstByte);
                     test(v.s === Test.ConstShort);
                     test(v.i === Test.ConstInt);
-                    test(v.l === Test.ConstLong);
+                    test(v.l.equals(Test.ConstLong));
                     test(v.f === Test.ConstFloat);
                     test(v.d === Test.ConstDouble);
                     test(v.str ==  Test.ConstString);
@@ -80,13 +80,13 @@
                     test(v.b === 1);
                     test(v.s === 2);
                     test(v.i === 3);
-                    test(v.l === 4);
+                    test(v.l.equals(new Ice.Long(0, 4)));
                     test(v.f === 5.1);
                     test(v.d === 6.2);
                     test(v.str == "foo \\ \"bar\n \r\n\t\u000b\f\u0007\b?");
                     test(v.noDefault === null);
                     test(v.zeroI === 0);
-                    test(v.zeroL === 0);
+                    test(v.zeroL.equals(new Ice.Long(0, 0)));
                     test(v.zeroF === 0);
                     test(v.zeroDotF === 0);
                     test(v.zeroD === 0);
@@ -98,7 +98,7 @@
                     test(v.b === 1);
                     test(v.s === 2);
                     test(v.i === 3);
-                    test(v.l === 4);
+                    test(v.l.equals(new Ice.Long(0, 4)));
                     test(v.f === 5.1);
                     test(v.d === 6.2);
                     test(v.str == "foo \\ \"bar\n \r\n\t\u000b\f\u0007\b?");
@@ -110,7 +110,7 @@
                     test(v.nc3 === Test.Nested.Color.blue);
                     test(v.noDefault === null);
                     test(v.zeroI === 0);
-                    test(v.zeroL === 0);
+                    test(v.zeroL.equals(new Ice.Long(0, 0)));
                     test(v.zeroF === 0);
                     test(v.zeroDotF === 0);
                     test(v.zeroD === 0);
@@ -122,13 +122,13 @@
                     test(v.b === 1);
                     test(v.s === 2);
                     test(v.i === 3);
-                    test(v.l === 4);
+                    test(v.l.equals(new Ice.Long(0, 4)));
                     test(v.f === 5.1);
                     test(v.d === 6.2);
                     test(v.str == "foo \\ \"bar\n \r\n\t\u000b\f\u0007\b?");
                     test(v.noDefault === null);
                     test(v.zeroI === 0);
-                    test(v.zeroL === 0);
+                    test(v.zeroL.equals(new Ice.Long(0, 0)));
                     test(v.zeroF === 0);
                     test(v.zeroDotF === 0);
                     test(v.zeroD === 0);
@@ -140,7 +140,7 @@
                     test(v.b === 1);
                     test(v.s === 2);
                     test(v.i === 3);
-                    test(v.l === 4);
+                    test(v.l.equals(new Ice.Long(0, 4)));
                     test(v.f === 5.1);
                     test(v.d === 6.2);
                     test(v.str == "foo \\ \"bar\n \r\n\t\u000b\f\u0007\b?");
@@ -152,7 +152,7 @@
                     test(v.nc2 === Test.Nested.Color.green);
                     test(v.nc3 === Test.Nested.Color.blue);
                     test(v.zeroI === 0);
-                    test(v.zeroL === 0);
+                    test(v.zeroL.equals(new Ice.Long(0, 0)));
                     test(v.zeroF === 0);
                     test(v.zeroDotF === 0);
                     test(v.zeroD === 0);

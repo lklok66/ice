@@ -10,6 +10,7 @@
 #include <IceUtil/DisableWarnings.h>
 #include <IceUtil/Functional.h>
 #include <IceUtil/StringUtil.h>
+#include <IceUtil/InputUtil.h>
 #include <Gen.h>
 #include <limits>
 #include <sys/stat.h>
@@ -459,6 +460,24 @@ Slice::JsVisitor::writeConstantValue(const string& scope, const TypePtr& type, c
             }
 
             _out << "\"";                                    // Closing "
+        }
+        else if(bp && bp->kind() == Builtin::KindLong)
+        {
+            IceUtil::Int64 l = IceUtilInternal::strToInt64(value.c_str(), 0, 0);
+            
+            //
+            // JavaScript doesn't support 64 bit integer so long types are written as 
+            // two 32 bit words hi, low wrapped in the Ice.Long class.
+            //
+            // If slice2js runs in a big edian machine we need to swap the words, we do not
+            // need to swap the word bytes as we just write each word as a number to the
+            // output file.
+            //
+#ifdef ICE_BIG_ENDIAN
+            _out << "new Ice.Long(" << (l & 0xFFFFFFFF) << ", " << ((l >> 32) & 0xFFFFFFFF)  << ")";
+#else
+            _out << "new Ice.Long(" << ((l >> 32) & 0xFFFFFFFF) << ", " << (l & 0xFFFFFFFF)  << ")";
+#endif
         }
         else if((ep = EnumPtr::dynamicCast(type)))
         {
@@ -1132,6 +1151,7 @@ Slice::Gen::printHeader()
 Slice::Gen::RequireVisitor::RequireVisitor(IceUtilInternal::Output& out, vector<string> includePaths)
     : JsVisitor(out),
     _seenClass(false),
+    _seenCompactId(false),
     _seenOperation(false),
     _seenStruct(false),
     _seenUserException(false),
@@ -1151,6 +1171,10 @@ bool
 Slice::Gen::RequireVisitor::visitClassDefStart(const ClassDefPtr& p)
 {
     _seenClass = true; // Set regardless of whether p->isLocal()
+    if(p->compactId() >= 0)
+    {
+        _seenCompactId = true;
+    }
     return !p->isLocal(); // Look for operations.
 }
 
@@ -1243,7 +1267,12 @@ Slice::Gen::RequireVisitor::writeRequires(const UnitPtr& p)
         _out << nl << "require(\"Ice/EnumBase\");";
     }
 
-    _out << nl << "require(\"Ice/TypeRegistry\");";
+    if(_seenCompactId)
+    {
+        _out << nl << "require(\"Ice/CompactIdRegistry\");";
+    }
+    
+    _out << nl << "require(\"Ice/Long\");";
     _out << nl << "require(\"Ice/HashMap\");";
     _out << nl << "require(\"Ice/HashUtil\");";
     _out << nl << "require(\"Ice/ArrayUtil\");";

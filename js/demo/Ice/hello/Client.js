@@ -9,34 +9,31 @@
 
 (function(){
     
-    require("Ice/Ice");
-    require("Hello");
-    
-    var Demo = global.Demo || {};
-    
-    var menu = function()
-    {
-        process.stdout.write(
-            "usage:\n" +
-                "t: send greeting as twoway\n" +
-                "o: send greeting as oneway\n" +
-                "O: send greeting as batch oneway\n" +
-                "f: flush all batch requests\n" +
-                "T: set a timeout\n" +
-                "P: set a server delay\n" +
-                //"S: switch secure mode on/off\n" +
-                "s: shutdown server\n" +
-                "x: exit\n" +
-                "?: help\n" +
-                "\n");
-    };        
+require("Ice/Ice");
+require("Hello");
 
-    var Client = function()
+function menu()
+{
+    process.stdout.write(
+        "usage:\n" +
+            "t: send greeting as twoway\n" +
+            "o: send greeting as oneway\n" +
+            "O: send greeting as batch oneway\n" +
+            "f: flush all batch requests\n" +
+            "T: set a timeout\n" +
+            "P: set a server delay\n" +
+            //"S: switch secure mode on/off\n" +
+            "s: shutdown server\n" +
+            "x: exit\n" +
+            "?: help\n" +
+            "\n");
+}
+
+var communicator;
+Ice.Promise.try(
+    function() 
     {
-    };
-    
-    Client.prototype.run = function(communicator)
-    {
+        communicator = Ice.initialize();
         var proxy = communicator.stringToProxy("hello:default -p 10000").ice_twoway().ice_timeout(-1).ice_secure(false);
         var secure = false;
         var timeout = -1;
@@ -51,7 +48,7 @@
                 menu();
                 process.stdout.write("==> ");
                 var loop = new Ice.Promise();
-                var processKey = function(key)
+                function processKey(key)
                 {
                     if(key == "x")
                     {
@@ -134,7 +131,7 @@
                         process.stdout.write("\n");
                         menu();
                     }
-                };
+                }
 
                 //
                 // Process keys sequentially. We chain the promise objects
@@ -172,41 +169,25 @@
                                                           process.stdin.resume();
                                                       }
                                                   });
-                                     
                                      data = [];
                                  });
 
                 return loop;
-            }
-        );
-    };
-    
-    var client = new Client();
-    var communicator;
-    Ice.Promise.try(
-        function() 
+            });
+    }
+).finally(
+    function()
+    {
+        if(communicator)
         {
-            communicator = Ice.initialize();
-            return client.run(communicator);
+            return communicator.destroy();
         }
-    ).finally(
-        function()
-        {
-            if(communicator)
-            {
-                return communicator.destroy();
-            }
-        }
-    ).then(
-        function()
-        {
-            process.exit(0);
-        },
-        function(ex)
-        {
-            console.log(ex.toString());
-            process.exit(1);
-        }
-    );
+    }
+).exception(
+    function(ex)
+    {
+        console.log(ex.toString());
+        process.exit(1);
+    });
 
 }());

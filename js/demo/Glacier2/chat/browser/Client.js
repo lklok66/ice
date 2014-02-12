@@ -57,6 +57,9 @@ var signin = function()
     ).then(
         function()
         {
+            //
+            // Start animating the loading progress bar.
+            //
             startProgress();
             //
             // Initialize the communicator with Ice.Default.Router property
@@ -64,7 +67,6 @@ var signin = function()
             //
             var id = new Ice.InitializationData();
             id.properties = Ice.createProperties();
-            //id.properties.setProperty("Ice.Trace.Protocol", "1");
             id.properties.setProperty("Ice.Default.Router", 
                                 "DemoGlacier2/router:ws -p 4063 -h localhost");
             communicator = Ice.initialize(id);
@@ -115,6 +117,11 @@ var signin = function()
 var run = function(router, session)
 {
     var refreshSession;
+    //
+    // The chat promise is used to wait for the completion of chating
+    // state. The completion could happen because the user sign out,
+    // or because there is an exception.
+    //
     var chat = new Promise();
     //
     // Get the session timeout, the router client category and
@@ -168,6 +175,10 @@ var run = function(router, session)
     ).then(
         function()
         {
+            //
+            // Stop animating the loading progress bar and
+            // transition to the chat screen.
+            //
             stopProgress(true);
             return transition("#loading", "#chat-form");
         }
@@ -305,8 +316,9 @@ var error = function(message)
 
 //
 // Do a transition from "from" screen to "to" screen, return
-// a promiset that allows to wait for the transition 
-// completion.
+// a promise that allows to wait for the transition 
+// completion. If to scree is undefined just animate out the
+// from screen.
 //
 var transition = function(from, to)
 {
@@ -360,22 +372,28 @@ var progress;
 
 var startProgress = function()
 {
-    progress = setInterval(
-        function()
-        {
-            w = w === 100 ? 0 : w + 5;
-            $("#loading .meter").css("width", w.toString() + "%");
-        }, 
-        20);
+    if(!progress)
+    {
+        progress = setInterval(
+            function()
+            {
+                w = w === 100 ? 0 : w + 5;
+                $("#loading .meter").css("width", w.toString() + "%");
+            }, 
+            20);
+    }
 };
 
 var stopProgress = function(completed)
 {
-    clearInterval(progress);
-    progress = null;
-    if(completed)
+    if(progress)
     {
-        $("#loading .meter").css("width", "100%");
+        progress = null;
+        clearInterval(progress);
+        if(completed)
+        {
+            $("#loading .meter").css("width", "100%");
+        }
     }
 };
 

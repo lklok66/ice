@@ -98,6 +98,7 @@ private:
     private:
 
         bool _seenClass;
+        bool _seenCompactId;
         bool _seenOperation;
         bool _seenStruct;
         bool _seenUserException;

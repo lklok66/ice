@@ -12,28 +12,47 @@
     require("Ice/Ice");
     require("Hello");
     
-    var communicator = Ice.initialize();
+    var communicator;
     
-    Demo.HelloPrx.checkedCast(communicator.stringToProxy("hello:tcp -h localhost -p 10000")).then(
-        function(asyncResult, hello)
+    Ice.Promise.try(
+        function()
         {
-            return hello.sayHello();
+            //
+            // Initialize the communicator and create a proxy to the hello object.
+            //
+            communicator = Ice.initialize();
+            var proxy = communicator.stringToProxy("hello:tcp -h localhost -p 10000");
+            
+            //
+            // Down-cast the proxy to the hello object interface.
+            //
+            return Demo.HelloPrx.checkedCast(proxy).then(
+                function(r, hello)
+                {
+                    //
+                    // Invoke the sayHello method.
+                    //
+                    return hello.sayHello();
+                });
         }
-    ).then(
-        function(asyncResult)
+    ).finally(
+        function()
         {
-            var c = communicator;
-            communicator =  null;
-            return c.destroy();
+            //
+            // Destroy the communicator if required.
+            //
+            if(communicator)
+            {
+                return communicator.destroy();
+            }
         }
     ).exception(
         function(ex)
         {
-            if(communicator !== null)
-            {
-                communicator.destroy();
-            }
+            //
+            // Handle any exceptions above.
+            //
             console.log(ex.toString());
-        }
-    );
+            process.exit(1);
+        });
 }());
