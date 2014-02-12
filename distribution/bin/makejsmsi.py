@@ -376,7 +376,7 @@ for arch in ["x86", "amd64"]:
             installDir = os.path.join(buildDir, "IceJS-%s" % version)
 
             if compiler == "VC110":
-                for d in ["bin"]:
+                for d in ["bin", "lib", "node_modules"]:
                     for root, dirnames, filenames in os.walk(os.path.join(installDir, d)):
                         for f in filenames:
                             if f in filterFiles:
