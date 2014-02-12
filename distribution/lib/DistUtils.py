@@ -805,7 +805,7 @@ class Platform:
         # LP64
         if language == "cpp-64":
             envs.append("LP64=yes")
-        else:
+        elif self.pkgArch != "x86_64":
             envs.append("LP64=no")
             
         return string.join(envs, " ")
@@ -874,12 +874,12 @@ class Platform:
     def getMakeOptions(self):
         return ""
 
-    def createArchive(self, cwd, buildRootDir, distDist, version, quiet):
-        sys.stdout.write("Archiving " + self.getPackageName("Ice", version) + ".tar.gz ...")
+    def createArchive(self, cwd, package, buildRootDir, distDist, version, quiet):
+        sys.stdout.write("Archiving " + self.getPackageName(package, version) + ".tar.gz ...")
         sys.stdout.flush()
         os.chdir(buildRootDir)
-        tarfile = os.path.join(cwd, self.getPackageName("Ice", version)) + ".tar.gz"
-        os.system("tar c" + quiet + "f - Ice-" + version + " | gzip -9 - > " + tarfile)
+        tarfile = os.path.join(cwd, self.getPackageName(package, version)) + ".tar.gz"
+        os.system("tar c" + quiet + "f - " + package + "-" + version + " | gzip -9 - > " + tarfile)
         os.chdir(cwd)
         print("ok")
 
@@ -920,15 +920,17 @@ class Darwin(Platform):
 
     def completeDistribution(self, buildDir, version):
         
-        print("Fixing python location")
-        move(buildDir + '/python', buildDir + '/../python')
-        print("ok")
+        if(os.path.exists(os.path.join(buildDir, "python"))):
+            print("Fixing python location")
+            move(buildDir + '/python', buildDir + '/../python')
+            print("ok")
 
-        print("Fixing IceGrid Admin.app location")
-        move(buildDir + '/bin/IceGrid Admin.app', buildDir + '/../IceGrid Admin.app')
-        print("ok")
+        if(os.path.exists(os.path.join(buildDir, "bin", "IceGrid Admin.app"))):
+            print("Fixing IceGrid Admin.app location")
+            move(buildDir + '/bin/IceGrid Admin.app', buildDir + '/../IceGrid Admin.app')
+            print("ok")
 
-    def createArchive(self, cwd, buildRootDir, distDir, version, quiet):
+    def createArchive(self, cwd, package, buildRootDir, distDir, version, quiet):
 
         sys.stdout.write("Creating installer...")
         sys.stdout.flush()
@@ -936,11 +938,12 @@ class Darwin(Platform):
             shutil.rmtree(buildRootDir + "/installer")
         os.mkdir(buildRootDir + "/installer")
 
-        pmdoc = os.path.join(distDir, "src", "mac", "Ice", "Ice.pmdoc")
-        pkg = os.path.join(buildRootDir, "installer", "Ice-" + version + ".pkg")
-        os.system("/Applications/PackageMaker.app/Contents/MacOS/PackageMaker --doc " + pmdoc + " --no-relocate --out " + pkg)
-        copy(os.path.join(distDir, "src", "mac", "Ice", "README.txt"), os.path.join(buildRootDir, "installer"))
-        copy(os.path.join(distDir, "src", "mac", "Ice", "uninstall.sh"), os.path.join(buildRootDir, "installer"))
+        pmdoc = os.path.join(distDir, "src", "mac", package, package + ".pmdoc")
+        pkg = os.path.join(buildRootDir, "installer", package + "-" + version + ".pkg")
+        os.system("/Applications/PackageMaker.app/Contents/MacOS/PackageMaker --doc " + pmdoc + 
+                  " --no-relocate --out " + pkg)
+        copy(os.path.join(distDir, "src", "mac", package, "README.txt"), os.path.join(buildRootDir, "installer"))
+        copy(os.path.join(distDir, "src", "mac", package, "uninstall.sh"), os.path.join(buildRootDir, "installer"))
         print("ok")
 
         #
@@ -983,7 +986,7 @@ class Darwin(Platform):
         os.system("pkgutil --flatten " + os.path.join(buildRootDir, "installer", "tmp") + " " + pkg)
         shutil.rmtree(os.path.join(buildRootDir, "installer", "tmp"))
 
-        volname = "Ice-" + version
+        volname = package + "-" + version
         sys.stdout.write( "Building disk image... " + volname + " ")
         sys.stdout.flush()
 

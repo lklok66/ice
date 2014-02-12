@@ -56,9 +56,9 @@ nobuild = 0
 
 (sysname, nodename, release, ver, machine) = os.uname()
 if sysname == "Darwin":
-    buildLanguages = [ "cpp", "cpp-11" ]
+    buildLanguages = [ "cpp", "cpp-11", "js" ]
 else:
-    buildLanguages = [ "cpp" ]
+    buildLanguages = [ "cpp", "js" ]
 
 for x in sys.argv[1:]:
     if x == "-h":
