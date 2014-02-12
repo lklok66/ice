@@ -13,7 +13,7 @@ include $(top_srcdir)/config/Make.rules
 
 SUBDIRS		= src test demo
 
-INSTALL_SUBDIRS	= $(install_libdir) $(install_bindir) $(install_mandir)
+INSTALL_SUBDIRS	= $(install_libdir) $(install_bindir)
 
 install:: install-common
 	@for subdir in $(INSTALL_SUBDIRS); \
