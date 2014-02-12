@@ -1353,11 +1353,7 @@ Ice::ConnectionI::message(ThreadPoolCurrent& current)
                     _observer.startWrite(_writeStream);
                 }
                 writeOp = _transceiver->write(_writeStream);
-                if(writeOp)
-                {
-                    readyOp = static_cast<SocketOperation>(readyOp & ~SocketOperationWrite);
-                }
-                else if(_observer)
+                if(_observer && !(writeOp & SocketOperationWrite) && !_writeStream.b.empty())
                 {
                     assert(_writeStream.i == _writeStream.b.end());
                     _observer.finishWrite(_writeStream);
@@ -1372,12 +1368,11 @@ Ice::ConnectionI::message(ThreadPoolCurrent& current)
                 }
 
                 readOp = _transceiver->read(_readStream, _hasMoreData);
-                if(readOp)
+                if(readOp & SocketOperationRead)
                 {
-                    readyOp = static_cast<SocketOperation>(readyOp & ~SocketOperationRead);
                     break;
                 }
-                else if(_observer && !_readHeader)
+                if(_observer && !_readHeader)
                 {
                     assert(_readStream.i == _readStream.b.end());
                     _observer.finishRead(_readStream);
@@ -1450,6 +1445,7 @@ Ice::ConnectionI::message(ThreadPoolCurrent& current)
             }
 
             SocketOperation newOp = static_cast<SocketOperation>(readOp | writeOp);
+            readyOp = static_cast<SocketOperation>(readyOp & ~newOp);
             assert(readyOp || newOp);
 
             if(_state <= StateNotValidated)
@@ -2443,7 +2439,11 @@ Ice::ConnectionI::validate(SocketOperation operation)
 SocketOperation
 Ice::ConnectionI::sendNextMessage(vector<SentCallback>& callbacks)
 {
-    assert(!_sendStreams.empty());    
+    if(_sendStreams.empty())
+    {
+        return SocketOperationNone;
+    }
+
     assert(!_writeStream.b.empty() && _writeStream.i == _writeStream.b.end());
     try
     {

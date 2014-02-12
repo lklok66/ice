@@ -170,7 +170,7 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& h
             // The server waits for the client's upgrade request, the
             // client sends the upgrade request.
             //
-            _state = StateRequestPending;
+            _state = StateUpgradeRequestPending;
             if(!_incoming)
             {
                 //
@@ -204,7 +204,7 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& h
         //
         // Try to write the client's upgrade request.
         //
-        if(_state == StateRequestPending && !_incoming)
+        if(_state == StateUpgradeRequestPending && !_incoming)
         {
             if(_writeBuffer.i < _writeBuffer.b.end())
             {
@@ -215,7 +215,7 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& h
                 }
             }
             assert(_writeBuffer.i == _writeBuffer.b.end());
-            _state = StateResponsePending;
+            _state = StateUpgradeResponsePending;
         }
 
         while(true)
@@ -232,7 +232,8 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& h
             //
             // Try to read the client's upgrade request or the server's response.
             //
-            if((_state == StateRequestPending && _incoming) || (_state == StateResponsePending && !_incoming))
+            if((_state == StateUpgradeRequestPending && _incoming) || 
+               (_state == StateUpgradeResponsePending && !_incoming))
             {
                 //
                 // Check if we have enough data for a complete message.
@@ -275,12 +276,12 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& h
             //
             // Parse the client's upgrade request.
             //
-            if(_state == StateRequestPending && _incoming)
+            if(_state == StateUpgradeRequestPending && _incoming)
             {
                 if(_parser->parse(&_readBuffer.b[0], _readI))
                 {
                     handleRequest(_writeBuffer);
-                    _state = StateResponsePending;
+                    _state = StateUpgradeResponsePending;
                 }
                 else
                 {
@@ -288,7 +289,7 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& h
                 }
             }
 
-            if(_state == StateResponsePending)
+            if(_state == StateUpgradeResponsePending)
             {
                 if(_incoming)
                 {
@@ -322,7 +323,8 @@ IceWS::TransceiverI::initialize(Buffer& readBuffer, Buffer& writeBuffer, bool& h
             throw ProtocolException(__FILE__, __LINE__, ex.reason);
         }
 
-        _state = StateHandshakeComplete;
+        _state = StateOpened;
+        _nextState = StateOpened;
 
         hasMoreData |= _readI < _readBuffer.i;
     }
@@ -361,7 +363,9 @@ IceWS::TransceiverI::closing(bool initiator, const Ice::LocalException& reason)
         out << "gracefully closing " << protocol() << " connection\n" << toString();
     }
 
-    if(_state == StateClosingRequestPending && _closingInitiator)
+    State s = _nextState == StateOpened ? _state : _nextState;
+
+    if(s == StateClosingRequestPending && _closingInitiator)
     {
         //
         // If we initiated a close connection but also received a
@@ -375,7 +379,7 @@ IceWS::TransceiverI::closing(bool initiator, const Ice::LocalException& reason)
         _closingInitiator = false;
         return SocketOperationWrite;
     }
-    else if(_state >= StateClosingRequestPending)
+    else if(s >= StateClosingRequestPending)
     {
         return SocketOperationNone;
     }
@@ -399,20 +403,34 @@ IceWS::TransceiverI::closing(bool initiator, const Ice::LocalException& reason)
         _closingReason = CLOSURE_TOO_BIG;
     }
 
-    _state = StateClosingRequestPending;
-    return initiator ? SocketOperationRead : SocketOperationWrite;
+    if(_state == StateOpened)
+    {
+        _state = StateClosingRequestPending;
+        return initiator ? SocketOperationRead : SocketOperationWrite;
+    }
+    else
+    {
+        _nextState = StateClosingRequestPending;
+        return SocketOperationNone;
+    }
 }
 
 void
 IceWS::TransceiverI::close()
 {
     _delegate->close();
+    _state = StateClosed;
 }
 
 SocketOperation
 IceWS::TransceiverI::write(Buffer& buf)
 {
-    if(_state < StateHandshakeComplete)
+    if(_writePending)
+    {
+        return SocketOperationWrite;
+    }
+
+    if(_state < StateOpened)
     {
         if(_state < StateConnected)
         {
@@ -423,53 +441,36 @@ IceWS::TransceiverI::write(Buffer& buf)
             return _delegate->write(_writeBuffer);
         }
     }
-    else if(_state > StateHandshakeComplete)
-    {
-        if(!_closingInitiator && _state == StateClosingResponsePending)
-        {
-            return SocketOperationRead;
-        }
-    }
-
-    //
-    // Nothing to do if the buffer was sent and unless we are closing
-    // the connection in which case we might need to send the close
-    // frame.
-    //
-    if(!buf.b.empty() && buf.i == buf.b.end() && _state == StateHandshakeComplete)
-    {
-        return SocketOperationNone;
-    }
 
     do
     {
-        preWrite(buf);
-
-        if(_writeBuffer.i < _writeBuffer.b.end())
+        if(preWrite(buf))
         {
-            SocketOperation s = _delegate->write(_writeBuffer);
-            if(s)
+            if(_writeBuffer.i < _writeBuffer.b.end())
             {
-                return s;
+                SocketOperation s = _delegate->write(_writeBuffer);
+                if(s)
+                {
+                    return s;
+                }
             }
-        }
-
-        if(_incoming && !buf.b.empty())
-        {
-            SocketOperation s = _delegate->write(buf);
-            if(s)
+            
+            if(_incoming && !buf.b.empty() && _writeState == WriteStatePayload)
             {
-                return s;
+                SocketOperation s = _delegate->write(buf);
+                if(s)
+                {
+                    return s;
+                }
             }
-        }
-
-        SocketOperation s = postWrite(buf);
-        if(s)
-        {
-            return s;
         }
     }
-    while(!buf.b.empty() && buf.i != buf.b.end());
+    while(postWrite(buf));
+
+    if(_state == StateClosingResponsePending && !_closingInitiator)
+    {
+        return SocketOperationRead;
+    }
 
     return SocketOperationNone;
 }
@@ -477,7 +478,12 @@ IceWS::TransceiverI::write(Buffer& buf)
 SocketOperation
 IceWS::TransceiverI::read(Buffer& buf, bool& hasMoreData)
 {
-    if(_state < StateHandshakeComplete)
+    if(_readPending)
+    {
+        return SocketOperationRead;
+    }
+
+    if(_state < StateOpened)
     {
         if(_state < StateConnected)
         {
@@ -495,58 +501,52 @@ IceWS::TransceiverI::read(Buffer& buf, bool& hasMoreData)
             }
         }
     }
-    else if(_state > StateHandshakeComplete)
-    {
-        if(_closingInitiator && _state == StateClosingResponsePending)
-        {
-            return SocketOperationWrite;
-        }
-    }
 
-    if(!buf.b.empty() && buf.i == buf.b.end())
-    {
-        return SocketOperationNone;
-    }
-
+    SocketOperation s = SocketOperationNone;
     do
     {
-        SocketOperation s = preRead(buf);
-        if(s == SocketOperationWrite)
-        {
-            return s;
-        }
-
-        if(buf.i < buf.b.end())
+        if(preRead(buf))
         {
             if(_readState == ReadStatePayload)
             {
-                SocketOperation s = _delegate->read(buf, hasMoreData);
-                if(s)
-                {
-                    postRead(buf);
-                    return s;
-                }
+                s = _delegate->read(buf, hasMoreData);
             }
             else
             {
-                SocketOperation s = _delegate->read(_readBuffer, hasMoreData);
-                if(s == SocketOperationWrite)
-                {
-                    return s;
-                }
+                s = _delegate->read(_readBuffer, hasMoreData);
+            }
+
+            if(s == SocketOperationWrite)
+            {
+                postRead(buf);
+                return s;
             }
         }
     }
-    while(postRead(buf) && buf.i != buf.b.end());
+    while(postRead(buf));
+
     hasMoreData = _readI < _readBuffer.i;
-    return buf.i == buf.b.end() ? SocketOperationNone : SocketOperationRead;
+
+    s = buf.i == buf.b.end() ? SocketOperationNone : SocketOperationRead;
+
+    if(((_state == StateClosingRequestPending && !_closingInitiator) ||
+        (_state == StateClosingResponsePending && _closingInitiator) ||
+        _state == StatePingPending ||
+        _state == StatePongPending) &&
+       _writeState == WriteStateHeader)
+    {
+        // We have things to write, ask to be notified when writes are ready.
+        s = static_cast<SocketOperation>(s | SocketOperationWrite);
+    }
+    return s;
 }
 
 #ifdef ICE_USE_IOCP
 bool
 IceWS::TransceiverI::startWrite(Buffer& buf)
 {
-    if(_state < StateHandshakeComplete)
+    _writePending = true;
+    if(_state < StateOpened)
     {
         if(_state < StateConnected)
         {
@@ -558,24 +558,31 @@ IceWS::TransceiverI::startWrite(Buffer& buf)
         }
     }
 
-    preWrite(buf);
-
-    if(_writeBuffer.i < _writeBuffer.b.end())
+    if(preWrite(buf))
     {
-        _delegate->startWrite(_writeBuffer);
-        return false;
+        if(_writeBuffer.i < _writeBuffer.b.end())
+        {
+            _delegate->startWrite(_writeBuffer);
+            return false;
+        }
+        else
+        {
+            assert(_incoming);
+            return _delegate->startWrite(buf);
+        }
     }
     else
     {
-        assert(_incoming);
-        return _delegate->startWrite(buf);
+        _delegate->getNativeInfo()->completed(IceInternal::SocketOperationWrite);
+        return false;
     }
 }
 
 void
 IceWS::TransceiverI::finishWrite(Buffer& buf)
 {
-    if(_state < StateHandshakeComplete)
+    _writePending = false;
+    if(_state < StateOpened)
     {
         if(_state < StateConnected)
         {
@@ -592,7 +599,7 @@ IceWS::TransceiverI::finishWrite(Buffer& buf)
     {
         _delegate->finishWrite(_writeBuffer);
     }
-    else
+    else if(!buf.b.empty() && buf.i != buf.b.end())
     {
         assert(_incoming);
         _delegate->finishWrite(buf);
@@ -604,7 +611,8 @@ IceWS::TransceiverI::finishWrite(Buffer& buf)
 void
 IceWS::TransceiverI::startRead(Buffer& buf)
 {
-    if(_state < StateHandshakeComplete)
+    _readPending = true;
+    if(_state < StateOpened)
     {
         if(_state < StateConnected)
         {
@@ -617,26 +625,28 @@ IceWS::TransceiverI::startRead(Buffer& buf)
         return;
     }
 
-    SocketOperation op = preRead(buf);
-
-    if(buf.i == buf.b.end() || op != SocketOperationRead)
+    if(preRead(buf))
     {
-        _delegate->getNativeInfo()->completed(IceInternal::SocketOperationRead);
-    }
-    else if(_readState == ReadStatePayload)
-    {
-        _delegate->startRead(buf);
+        if(_readState == ReadStatePayload)
+        {
+            _delegate->startRead(buf);
+        }
+        else
+        {
+            _delegate->startRead(_readBuffer);
+        }
     }
     else
     {
-        _delegate->startRead(_readBuffer);
+        _delegate->getNativeInfo()->completed(IceInternal::SocketOperationRead);
     }
 }
 
 void
 IceWS::TransceiverI::finishRead(Buffer& buf)
 {
-    if(_state < StateHandshakeComplete)
+    _readPending = false;
+    if(_state < StateOpened)
     {
         if(_state < StateConnected)
         {
@@ -649,7 +659,7 @@ IceWS::TransceiverI::finishRead(Buffer& buf)
         return;
     }
 
-    if(buf.i == buf.b.end())
+    if(buf.b.empty() || buf.i == buf.b.end())
     {
         // Nothing to do.
     }
@@ -715,7 +725,9 @@ IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, const Transceiver
     _readPayloadLength(0),
     _writeState(WriteStateHeader),
     _writeBuffer(0),
-    _writeBufferSize(1024)
+    _writeBufferSize(1024),
+    _readPending(false),
+    _writePending(false)
 {
     //
     // For client connections, the sent frame payload must be
@@ -747,7 +759,9 @@ IceWS::TransceiverI::TransceiverI(const InstancePtr& instance, const Transceiver
     _readPayloadLength(0),
     _writeState(WriteStateHeader),
     _writeBuffer(0),
-    _writeBufferSize(1024)
+    _writeBufferSize(1024),
+    _readPending(false),
+    _writePending(false)
 {
     //
     // Write and read buffer size must be large enough to hold the frame header!
@@ -985,187 +999,258 @@ IceWS::TransceiverI::handleResponse()
     }
 }
 
-SocketOperation
+bool
 IceWS::TransceiverI::preRead(Buffer& buf)
 {
-    if(_readState == ReadStateOpcode)
+    while(true)
     {
-        //
-        // Is there enough data available to read the opcode?
-        //
-        if(!readBuffered(2))
+        if(_readState == ReadStateOpcode)
         {
-            _readStart = _readBuffer.i;
-            return SocketOperationRead;
-        }
-
-        //
-        // Most-significant bit indicates whether this is the
-        // last frame. Least-significant four bits hold the
-        // opcode.
-        //
-        unsigned char ch = static_cast<unsigned char>(*_readI++);
-        _readLastFrame = (ch & FLAG_FINAL) == FLAG_FINAL;
-        _readOpCode = ch & 0xf;
-
-        ch = static_cast<unsigned char>(*_readI++);
-
-        //
-        // Check the MASK bit. Messages sent by a client must be masked;
-        // messages sent by a server must not be masked.
-        //
-        const bool masked = (ch & FLAG_MASKED) == FLAG_MASKED;
-        if(masked != _incoming)
-        {
-            throw ProtocolException(__FILE__, __LINE__, "invalid masking");
-        }
-
-        //
-        // Extract the payload length, which can have the following values:
-        //
-        // 0-125: The payload length
-        // 126:   The subsequent two bytes contain the payload length
-        // 127:   The subsequent eight bytes contain the payload length
-        //
-        _readPayloadLength = (ch & 0x7f);
-        if(_readPayloadLength < 126)
-        {
-            _readHeaderLength = 0;
-        }
-        else if(_readPayloadLength == 126)
-        {
-            _readHeaderLength = 2; // Need to read a 16-bit payload length.
-        }
-        else
-        {
-            _readHeaderLength = 8; // Need to read a 64-bit payload length.
-        }
-        if(masked)
-        {
-            _readHeaderLength += 4; // Need to read a 32-bit mask.
-        }
-
-        _readState = ReadStateHeader;
-    }
-
-    if(_readState == ReadStateHeader)
-    {
-        //
-        // Is there enough data available to read the header?
-        //
-        if(_readHeaderLength > 0 && !readBuffered(_readHeaderLength))
-        {
-            _readStart = _readBuffer.i;
-            return SocketOperationRead;
-        }
-
-        if(_readPayloadLength == 126)
-        {
-            _readPayloadLength = static_cast<size_t>(ntohs(*reinterpret_cast<uint16_t*>(_readI)));
-            _readI += 2;
-        }
-        else if(_readPayloadLength == 127)
-        {
-            assert(_readPayloadLength == 127);
-            Long l = nlltoh(_readI);
-            _readI += 8;
-            if(l < 0 || l > INT_MAX)
+            //
+            // Is there enough data available to read the opcode?
+            //
+            if(!readBuffered(2))
             {
-                ostringstream ostr;
-                ostr << "invalid WebSocket payload length: " << l;
-                throw ProtocolException(__FILE__, __LINE__, ostr.str());
-            }
-            _readPayloadLength = static_cast<size_t>(l);
-        }
-
-        //
-        // Read the mask if this is an incoming connection.
-        //
-        if(_incoming)
-        {
-            assert(_readBuffer.i - _readI >= 4); // We must have needed to read the mask.
-            memcpy(_readMask, _readI, 4); // Copy the mask.
-            _readI += 4;
-        }
-
-        switch(_readOpCode)
-        {
-        case OP_CONT: // Continuation frame
-        {
-            // TODO: Add support for continuation frames?
-            throw ProtocolException(__FILE__, __LINE__, "continuation frames not supported");
-        }
-        case OP_TEXT: // Text frame
-        {
-            throw ProtocolException(__FILE__, __LINE__, "text frames not supported");
-        }
-        case OP_DATA: // Data frame
-        {
-            if(!_readLastFrame)
-            {
-                throw ProtocolException(__FILE__, __LINE__, "continuation frames not supported");
-            }
-            if(_readPayloadLength <= 0)
-            {
-                throw ProtocolException(__FILE__, __LINE__, "payload length is 0");
-            }
-            break;
-        }
-        case OP_CLOSE: // Connection close
-        {
-            if(_instance->traceLevel() >= 2)
-            {
-                Trace out(_instance->logger(), _instance->traceCategory());
-                out << "received " << protocol() << " connection close frame\n" << toString();
+                return true;
             }
 
-            if(_state == StateClosingRequestPending)
+            //
+            // Most-significant bit indicates whether this is the
+            // last frame. Least-significant four bits hold the
+            // opcode.
+            //
+            unsigned char ch = static_cast<unsigned char>(*_readI++);
+            _readLastFrame = (ch & FLAG_FINAL) == FLAG_FINAL;
+            _readOpCode = ch & 0xf;
+
+            ch = static_cast<unsigned char>(*_readI++);
+
+            //
+            // Check the MASK bit. Messages sent by a client must be masked;
+            // messages sent by a server must not be masked.
+            //
+            const bool masked = (ch & FLAG_MASKED) == FLAG_MASKED;
+            if(masked != _incoming)
             {
-                //
-                // If we receive a close frame while we were actually
-                // waiting to send one, change the role and send a
-                // close frame response.
-                //
-                if(!_closingInitiator)
-                {
-                    _closingInitiator = true;
-                }
-                _state = StateClosingResponsePending;
-                return SocketOperationWrite;
+                throw ProtocolException(__FILE__, __LINE__, "invalid masking");
+            }
+
+            //
+            // Extract the payload length, which can have the following values:
+            //
+            // 0-125: The payload length
+            // 126:   The subsequent two bytes contain the payload length
+            // 127:   The subsequent eight bytes contain the payload length
+            //
+            _readPayloadLength = (ch & 0x7f);
+            if(_readPayloadLength < 126)
+            {
+                _readHeaderLength = 0;
+            }
+            else if(_readPayloadLength == 126)
+            {
+                _readHeaderLength = 2; // Need to read a 16-bit payload length.
             }
             else
             {
-                ConnectionLostException ex(__FILE__, __LINE__);
-                ex.error = 0;
-                throw ex;
+                _readHeaderLength = 8; // Need to read a 64-bit payload length.
+            }
+            if(masked)
+            {
+                _readHeaderLength += 4; // Need to read a 32-bit mask.
+            }
+
+            _readState = ReadStateHeader;
+        }
+
+        if(_readState == ReadStateHeader)
+        {
+            //
+            // Is there enough data available to read the header?
+            //
+            if(_readHeaderLength > 0 && !readBuffered(_readHeaderLength))
+            {
+                return true;
+            }
+
+            if(_readPayloadLength == 126)
+            {
+                _readPayloadLength = static_cast<size_t>(ntohs(*reinterpret_cast<uint16_t*>(_readI)));
+                _readI += 2;
+            }
+            else if(_readPayloadLength == 127)
+            {
+                assert(_readPayloadLength == 127);
+                Long l = nlltoh(_readI);
+                _readI += 8;
+                if(l < 0 || l > INT_MAX)
+                {
+                    ostringstream ostr;
+                    ostr << "invalid WebSocket payload length: " << l;
+                    throw ProtocolException(__FILE__, __LINE__, ostr.str());
+                }
+                _readPayloadLength = static_cast<size_t>(l);
+            }
+
+            //
+            // Read the mask if this is an incoming connection.
+            //
+            if(_incoming)
+            {
+                assert(_readBuffer.i - _readI >= 4); // We must have needed to read the mask.
+                memcpy(_readMask, _readI, 4); // Copy the mask.
+                _readI += 4;
+            }
+
+            switch(_readOpCode)
+            {
+            case OP_CONT: // Continuation frame
+            {
+                // TODO: Add support for continuation frames?
+                throw ProtocolException(__FILE__, __LINE__, "continuation frames not supported");
+            }
+            case OP_TEXT: // Text frame
+            {
+                throw ProtocolException(__FILE__, __LINE__, "text frames not supported");
+            }
+            case OP_DATA: // Data frame
+            {
+                if(!_readLastFrame)
+                {
+                    throw ProtocolException(__FILE__, __LINE__, "continuation frames not supported");
+                }
+                if(_readPayloadLength <= 0)
+                {
+                    throw ProtocolException(__FILE__, __LINE__, "payload length is 0");
+                }
+                _readState = ReadStatePayload;
+                break;
+            }
+            case OP_CLOSE: // Connection close
+            {
+                if(_instance->traceLevel() >= 2)
+                {
+                    Trace out(_instance->logger(), _instance->traceCategory());
+                    out << "received " << protocol() << " connection close frame\n" << toString();
+                }
+
+                State s = _nextState == StateOpened ? _state : _nextState;
+                if(s == StateClosingRequestPending)
+                {
+                    //
+                    // If we receive a close frame while we were actually
+                    // waiting to send one, change the role and send a
+                    // close frame response.
+                    //
+                    if(!_closingInitiator)
+                    {
+                        _closingInitiator = true;
+                    }
+                    if(_state == StateClosingRequestPending)
+                    {
+                        _state = StateClosingResponsePending;
+                    }
+                    else
+                    {
+                        _nextState = StateClosingResponsePending;
+                    }
+                    return false; // No longer interested in reading
+                }
+                else
+                {
+                    ConnectionLostException ex(__FILE__, __LINE__);
+                    ex.error = 0;
+                    throw ex;
+                }
+            }
+            case OP_PING:
+            {
+                if(_instance->traceLevel() >= 2)
+                {
+                    Trace out(_instance->logger(), _instance->traceCategory());
+                    out << "received " << protocol() << " connection ping frame\n" << toString();
+                }
+                _readState = ReadStateControlFrame;
+                break;
+            }
+            case OP_PONG: // Pong
+            {
+                if(_instance->traceLevel() >= 2)
+                {
+                    Trace out(_instance->logger(), _instance->traceCategory());
+                    out << "received " << protocol() << " connection pong frame\n" << toString();
+                }
+                _readState = ReadStateControlFrame;
+                break;
+            }
+            default:
+            {
+                ostringstream ostr;
+                ostr << "unsupported opcode: " << _readOpCode;
+                throw ProtocolException(__FILE__, __LINE__, ostr.str());
+            }
             }
         }
-        case OP_PING: // Ping
-        case OP_PONG: // Pong
+
+        if(_readState == ReadStateControlFrame)
         {
-            throw ProtocolException(__FILE__, __LINE__, "ping or pong control frames not supported");
+            if(_readPayloadLength > 0 && !readBuffered(_readPayloadLength))
+            {
+                return true;
+            }
+
+            if(_readPayloadLength > 0 && _readOpCode == OP_PING)
+            {
+                _pingPayload.clear();
+                _pingPayload.resize(_readPayloadLength);
+                memcpy(&_pingPayload[0], _readI, _pingPayload.size());
+            }
+
+            _readI += _readPayloadLength;
+            _readPayloadLength = 0;
+
+            if(_readOpCode == OP_PING)
+            {
+                if(_state == StateOpened)
+                {
+                    _state = StatePongPending; // Send pong frame now
+                }
+                else if(_nextState < StatePongPending)
+                {
+                    _nextState = StatePongPending; // Send pong frame next
+                }
+            }
+
+            //
+            // We've read the payload of the PING/PONG frame, we're ready
+            // to read a new frame.
+            //
+            _readState = ReadStateOpcode;
         }
-        default:
+
+        if(_readState == ReadStatePayload)
         {
-            ostringstream ostr;
-            ostr << "unsupported opcode: " << _readOpCode;
-            throw ProtocolException(__FILE__, __LINE__, ostr.str());
+            if(buf.b.empty() || buf.i == buf.b.end())
+            {
+                return false;
+            }
+            _readStart = buf.i;
+        
+            if(_readI < _readBuffer.i)
+            {
+                size_t n = min(_readBuffer.i - _readI, buf.b.end() - buf.i);
+                memcpy(buf.i, _readI, n);
+                buf.i += n;
+                _readI += n;
+            }
+        
+            //
+            // Continue reading if we didn't read the full message, otherwise give back
+            // the control to the connection
+            //
+            return buf.i < buf.b.end();
         }
-        }
-        _readState = ReadStatePayload;
     }
-
-    _readStart = buf.i;
-
-    if(_readI < _readBuffer.i)
-    {
-        size_t n = min(_readBuffer.i - _readI, buf.b.end() - buf.i);
-        memcpy(buf.i, _readI, n);
-        buf.i += n;
-        _readI += n;
-    }
-
-    return buf.i < buf.b.end() ? SocketOperationRead : SocketOperationNone;
 }
 
 bool
@@ -1175,6 +1260,12 @@ IceWS::TransceiverI::postRead(Buffer& buf)
     {
         return _readStart < _readBuffer.i; // Returns true if data was read.
     }
+
+    if(_readStart == buf.i)
+    {
+        return false; // Nothing was read.
+    }
+    assert(_readStart < buf.i);
 
     if(_incoming)
     {
@@ -1189,7 +1280,7 @@ IceWS::TransceiverI::postRead(Buffer& buf)
     }
 
     _readPayloadLength -= buf.i - _readStart;
-    assert(_readPayloadLength >= 0);
+    _readStart = buf.i;
     if(_readPayloadLength == 0)
     {
         //
@@ -1197,44 +1288,69 @@ IceWS::TransceiverI::postRead(Buffer& buf)
         //
         _readState = ReadStateOpcode;
     }
-
-    return _readStart < buf.i; // Returns true if data was read.
+    return buf.i != buf.b.end();
 }
 
-void
+bool
 IceWS::TransceiverI::preWrite(Buffer& buf)
 {
-    if(_state > StateHandshakeComplete)
+    if(_writeState == WriteStateHeader)
     {
-        if(_writeState == WriteStateHeader)
+        if(_state == StateOpened)
         {
-            assert((_state == StateClosingRequestPending && !_closingInitiator) ||
-                   (_state == StateClosingResponsePending && _closingInitiator));
-
-            //
-            // We need to prepare the frame header.
-            //
-            _writeBuffer.b.resize(_writeBufferSize);
-            _writeBuffer.i = _writeBuffer.b.begin();
-
-            //
-            // Set the opcode - this is the one and only data frame.
-            //
-            *_writeBuffer.i++ = OP_CLOSE | FLAG_FINAL;
-            *_writeBuffer.i++ = 0x02;
-
-            if(!_incoming)
+            if(buf.b.empty() || buf.i == buf.b.end())
             {
-                //
-                // Add a random 32-bit mask to every outgoing frame, copy the payload data,
-                // and apply the mask.
-                //
-                _writeBuffer.b[1] |= FLAG_MASKED;
-                IceUtilInternal::generateRandom(reinterpret_cast<char*>(_writeMask), sizeof(_writeMask));
-                memcpy(_writeBuffer.i, _writeMask, sizeof(_writeMask));
-                _writeBuffer.i += sizeof(_writeMask);
+                return false;
             }
 
+            assert(buf.i = buf.b.begin());
+            prepareWriteHeader(OP_DATA, buf.b.size());
+
+            //
+            // For server connections, we use the _writeBuffer only to
+            // write the header, the message is sent directly from the
+            // message buffer. For client connections, we use the write
+            // buffer for both the header and message buffer since we need
+            // to mask the message data.
+            //
+            if(_incoming)
+            {
+                _writeBuffer.b.resize(_writeBuffer.i - _writeBuffer.b.begin());
+                _writeBuffer.i = _writeBuffer.b.begin();
+            }
+            _writeState = WriteStatePayload;
+        }
+        else if(_state == StatePingPending)
+        {
+            prepareWriteHeader(OP_PING, 0); // Don't send any payload
+
+            _writeBuffer.b.resize(_writeBuffer.i - _writeBuffer.b.begin());
+            _writeState = WriteStateControlFrame;
+            _writeBuffer.i = _writeBuffer.b.begin();
+        }
+        else if(_state == StatePongPending)
+        {
+            prepareWriteHeader(OP_PONG, _pingPayload.size());
+            if(_pingPayload.size() > static_cast<size_t>(_writeBuffer.b.end() - _writeBuffer.i))
+            {
+                size_t pos = _writeBuffer.i - _writeBuffer.b.begin();
+                _writeBuffer.b.resize(pos + _pingPayload.size());
+                _writeBuffer.i = _writeBuffer.b.begin() + pos;
+            }
+            memcpy(_writeBuffer.i, &_pingPayload[0], _pingPayload.size());
+            _writeBuffer.i += _pingPayload.size();
+            _pingPayload.clear();
+
+            _writeBuffer.b.resize(_writeBuffer.i - _writeBuffer.b.begin());
+            _writeState = WriteStateControlFrame;
+            _writeBuffer.i = _writeBuffer.b.begin();
+        }
+        else if((_state == StateClosingRequestPending && !_closingInitiator) ||
+                (_state == StateClosingResponsePending && _closingInitiator))
+        {            
+            prepareWriteHeader(OP_CLOSE, 2);
+
+            // Write closing reason
             *reinterpret_cast<uint16_t*>(_writeBuffer.i) = htons(static_cast<uint16_t>(_closingReason));
             if(!_incoming)
             {
@@ -1246,153 +1362,114 @@ IceWS::TransceiverI::preWrite(Buffer& buf)
                 _writeBuffer.i += 2;
             }
 
+            _writeState = WriteStateControlFrame;
             _writeBuffer.b.resize(_writeBuffer.i - _writeBuffer.b.begin());
             _writeBuffer.i = _writeBuffer.b.begin();
-            _writePayloadLength = 0;
-            _writeState = WriteStateCloseFrame;
-            return;
-        }
-        else if(_writeState == WriteStateCloseFrame)
-        {
-            assert(_writeBuffer.i != _writeBuffer.b.end());
-            return;
-        }
-    }
-
-    //
-    // For an outgoing connection, each message must be masked with a random
-    // 32-bit value, so we copy the entire message into the internal buffer
-    // for writing.
-    //
-    // For an incoming connection, we use the internal buffer to hold the
-    // frame header, and then write the caller's buffer to avoid copying.
-    //
-    if(_writeState == WriteStateHeader)
-    {
-        assert(buf.i == buf.b.begin());
-
-        //
-        // We need to prepare the frame header.
-        //
-        _writeBuffer.b.resize(_writeBufferSize);
-        _writeBuffer.i = _writeBuffer.b.begin();
-
-        //
-        // Set the opcode - this is the one and only data frame.
-        //
-        *_writeBuffer.i++ = static_cast<Byte>(OP_DATA | FLAG_FINAL);
-
-        //
-        // Set the payload length.
-        //
-        const size_t payloadLength = buf.b.size();
-        if(payloadLength <= 125)
-        {
-            *_writeBuffer.i++ = static_cast<Byte>(payloadLength);
-        }
-        else if(payloadLength > 125 && payloadLength <= USHRT_MAX)
-        {
-            //
-            // Use an extra 16 bits to encode the payload length.
-            //
-            *_writeBuffer.i++ = static_cast<Byte>(126);
-            *reinterpret_cast<uint16_t*>(_writeBuffer.i) = htons(static_cast<uint16_t>(payloadLength));
-            _writeBuffer.i += 2;
-        }
-        else if(payloadLength > USHRT_MAX)
-        {
-            //
-            // Use an extra 64 bits to encode the payload length.
-            //
-            *_writeBuffer.i++ = static_cast<Byte>(127);
-            htonll(payloadLength, _writeBuffer.i);
-            _writeBuffer.i += 8;
-        }
-
-        if(!_incoming)
-        {
-            //
-            // Add a random 32-bit mask to every outgoing frame, copy the payload data,
-            // and apply the mask.
-            //
-            _writeBuffer.b[1] |= FLAG_MASKED;
-            IceUtilInternal::generateRandom(reinterpret_cast<char*>(_writeMask), sizeof(_writeMask));
-            memcpy(_writeBuffer.i, _writeMask, sizeof(_writeMask));
-            _writeBuffer.i += sizeof(_writeMask);
-        }
-        assert(_writeBuffer.i < _writeBuffer.b.end());
-        _writeState = WriteStatePayload;
-        _writePayloadLength = 0;
-
-        //
-        // For server connections, we use the _writeBuffer only to
-        // write the header, the message is sent directly from the
-        // message buffer. For client connections, we use the write
-        // buffer for both the header and message buffer since we need
-        // to mask the message data.
-        //
-        if(_incoming)
-        {
-            _writeBuffer.b.resize(_writeBuffer.i - _writeBuffer.b.begin());
-            _writeBuffer.i = _writeBuffer.b.begin();
-        }
-    }
-
-    if(!_incoming)
-    {
-        if((_writePayloadLength == 0 || _writeBuffer.i == _writeBuffer.b.end()))
-        {
-            if(_writeBuffer.i == _writeBuffer.b.end())
-            {
-                _writeBuffer.i = _writeBuffer.b.begin();
-            }
-            size_t n = buf.i - buf.b.begin();
-            for(; n < buf.b.size() && _writeBuffer.i < _writeBuffer.b.end(); ++_writeBuffer.i, ++n)
-            {
-                *_writeBuffer.i = buf.b[n] ^ _writeMask[n % 4];
-            }
-            _writePayloadLength = n;
-
-            if(_writeBuffer.i < _writeBuffer.b.end())
-            {
-                _writeBuffer.b.resize(_writeBuffer.i - _writeBuffer.b.begin());
-            }
-            _writeBuffer.i = _writeBuffer.b.begin();
-        }
-    }
-}
-
-SocketOperation
-IceWS::TransceiverI::postWrite(Buffer& buf)
-{
-    if(_state > StateHandshakeComplete && _writeState == WriteStateCloseFrame)
-    {
-        if(_writeBuffer.i == _writeBuffer.b.end())
-        {
-            assert((_state == StateClosingRequestPending && !_closingInitiator) ||
-                   (_state == StateClosingResponsePending && _closingInitiator));
-
-            if(_instance->traceLevel() >= 2)
-            {
-                Trace out(_instance->logger(), _instance->traceCategory());
-                out << "sent " << protocol() << " connection close frame\n" << toString();
-            }
-
-            if(_state == StateClosingRequestPending && !_closingInitiator)
-            {
-                _state = StateClosingResponsePending;
-                return SocketOperationRead;
-            }
-            else
-            {
-                ConnectionLostException ex(__FILE__, __LINE__);
-                ex.error = 0;
-                throw ex;
-            }
         }
         else
         {
-            return SocketOperationWrite;
+            return false; // Nothing to write in this state
+        }
+
+        _writePayloadLength = 0;
+    } 
+
+    if(_writeState == WriteStatePayload)
+    {
+        //
+        // For an outgoing connection, each message must be masked with a random
+        // 32-bit value, so we copy the entire message into the internal buffer
+        // for writing.
+        //
+        // For an incoming connection, we use the internal buffer to hold the
+        // frame header, and then write the caller's buffer to avoid copying.
+        //
+        if(!_incoming)
+        {
+            if((_writePayloadLength == 0 || _writeBuffer.i == _writeBuffer.b.end()))
+            {
+                if(_writeBuffer.i == _writeBuffer.b.end())
+                {
+                    _writeBuffer.i = _writeBuffer.b.begin();
+                }
+                
+                size_t n = buf.i - buf.b.begin();
+                for(; n < buf.b.size() && _writeBuffer.i < _writeBuffer.b.end(); ++_writeBuffer.i, ++n)
+                {
+                    *_writeBuffer.i = buf.b[n] ^ _writeMask[n % 4];
+                }
+                _writePayloadLength = n;
+                
+                if(_writeBuffer.i < _writeBuffer.b.end())
+                {
+                    _writeBuffer.b.resize(_writeBuffer.i - _writeBuffer.b.begin());
+                }
+                _writeBuffer.i = _writeBuffer.b.begin();
+            }
+        }
+        return true;
+    }
+    else
+    {
+        return _writeBuffer.i < _writeBuffer.b.end();
+    }
+}
+
+bool
+IceWS::TransceiverI::postWrite(Buffer& buf)
+{
+    if(_state > StateOpened && _writeState == WriteStateControlFrame)
+    {
+        if(_writeBuffer.i == _writeBuffer.b.end())
+        {
+            if(_state == StatePingPending)
+            {
+                if(_instance->traceLevel() >= 2)
+                {
+                    Trace out(_instance->logger(), _instance->traceCategory());
+                    out << "sent " << protocol() << " connection ping frame\n" << toString();
+                }
+            }
+            else if(_state == StatePongPending)
+            {
+                if(_instance->traceLevel() >= 2)
+                {
+                    Trace out(_instance->logger(), _instance->traceCategory());
+                    out << "sent " << protocol() << " connection pong frame\n" << toString();
+                }
+            }
+            else
+            {
+                assert((_state == StateClosingRequestPending && !_closingInitiator) ||
+                       (_state == StateClosingResponsePending && _closingInitiator));
+                
+                if(_instance->traceLevel() >= 2)
+                {
+                    Trace out(_instance->logger(), _instance->traceCategory());
+                    out << "sent " << protocol() << " connection close frame\n" << toString();
+                }
+                
+                if(_state == StateClosingRequestPending && !_closingInitiator)
+                {
+                    _writeState = WriteStateHeader;
+                    _state = StateClosingResponsePending;
+                    return false;
+                }
+                else
+                {
+                    ConnectionLostException ex(__FILE__, __LINE__);
+                    ex.error = 0;
+                    throw ex;
+                }
+            }
+
+            _state = _nextState;
+            _nextState = StateOpened;
+            _writeState = WriteStateHeader;
+        }
+        else
+        {
+            return true;
         }
     }
 
@@ -1404,17 +1481,17 @@ IceWS::TransceiverI::postWrite(Buffer& buf)
         }
     }
 
-    if(buf.i == buf.b.end())
+    if(buf.b.empty() || buf.i == buf.b.end())
     {
         _writeState = WriteStateHeader;
         if((_state == StateClosingRequestPending && !_closingInitiator) ||
            (_state == StateClosingResponsePending && _closingInitiator)) 
         {
-            return SocketOperationWrite;
+            return true;
         }
-        return SocketOperationNone;
+        return false;
     }
-    return SocketOperationWrite;
+    return true;
 }
 
 bool
@@ -1430,14 +1507,17 @@ IceWS::TransceiverI::readBuffered(IceInternal::Buffer::Container::size_type sz)
         IceInternal::Buffer::Container::size_type available = _readBuffer.i - _readI;
         if(available < sz)
         {
-            assert(available < _readBufferSize);
-            memmove(&_readBuffer.b[0], _readI, available);
-            _readBuffer.b.resize(_readBufferSize);
+            if(_readI != &_readBuffer.b[0])
+            {
+                memmove(&_readBuffer.b[0], _readI, available);
+            }
+            _readBuffer.b.resize(max(_readBufferSize, sz));
             _readI = _readBuffer.b.begin();
             _readBuffer.i = _readI + available;
         }
     }
 
+    _readStart = _readBuffer.i;
     if(_readI + sz > _readBuffer.i)
     {
         return false; // Not enough read.
@@ -1445,3 +1525,57 @@ IceWS::TransceiverI::readBuffered(IceInternal::Buffer::Container::size_type sz)
     assert(_readBuffer.i > _readI);
     return true;
 }
+
+void
+IceWS::TransceiverI::prepareWriteHeader(Byte opCode, IceInternal::Buffer::Container::size_type payloadLength)
+{
+    //
+    // We need to prepare the frame header.
+    //
+    _writeBuffer.b.resize(_writeBufferSize);
+    _writeBuffer.i = _writeBuffer.b.begin();
+    
+    //
+    // Set the opcode - this is the one and only data frame.
+    //
+    *_writeBuffer.i++ = static_cast<Byte>(opCode | FLAG_FINAL);
+
+    //
+    // Set the payload length.
+    //
+    if(payloadLength <= 125)
+    {
+        *_writeBuffer.i++ = static_cast<Byte>(payloadLength);
+    }
+    else if(payloadLength > 125 && payloadLength <= USHRT_MAX)
+    {
+        //
+        // Use an extra 16 bits to encode the payload length.
+        //
+        *_writeBuffer.i++ = static_cast<Byte>(126);
+        *reinterpret_cast<uint16_t*>(_writeBuffer.i) = htons(static_cast<uint16_t>(payloadLength));
+        _writeBuffer.i += 2;
+    }
+    else if(payloadLength > USHRT_MAX)
+    {
+        //
+        // Use an extra 64 bits to encode the payload length.
+        //
+        *_writeBuffer.i++ = static_cast<Byte>(127);
+        htonll(payloadLength, _writeBuffer.i);
+        _writeBuffer.i += 8;
+    }
+    
+    if(!_incoming)
+    {
+        //
+        // Add a random 32-bit mask to every outgoing frame, copy the payload data,
+        // and apply the mask.
+        //
+        _writeBuffer.b[1] |= FLAG_MASKED;
+        IceUtilInternal::generateRandom(reinterpret_cast<char*>(_writeMask), sizeof(_writeMask));
+        memcpy(_writeBuffer.i, _writeMask, sizeof(_writeMask));
+        _writeBuffer.i += sizeof(_writeMask);
+    }
+}
+
