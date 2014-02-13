@@ -27,9 +27,15 @@ SUBDIRS		= IceUtil \
 # Dependencies for 'all' target when using -jx
 #
 
-Ice: IceUtil
+Slice: IceUtil
+
+slice2cpp slice2js: Slice
+
+Ice: slice2cpp
 
 IceWS IceSSL: Ice
+
+Glacier2: Glacier2Lib
 
 all:: $(SUBDIRS)
 
