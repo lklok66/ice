@@ -9,8 +9,7 @@
 
 (function(){
 
-var communicator;
-var flushEnabled = false;
+var communicator = Ice.initialize();
 
 var State = {
     Idle:0, 
@@ -19,111 +18,68 @@ var State = {
 };
 
 var state;
+var flushEnabled = false;
 var batch = 0;
 
+//
+// Create the hello proxy.
+//
+function createProxy()
+{
+    var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
+    var proxy = communicator.stringToProxy("hello:ws -h " + hostname + " -p 10000:wss -h " + hostname + " -p 10001");
+
+    //
+    // Set or clear the timeout.
+    //
+    var timeout = $("#timeout").val();
+    proxy = proxy.ice_timeout(timeout > 0 ? timeout : -1);
+
+    //
+    // Set the mode and protocol
+    // 
+    var mode = $("#mode").val();
+    if(mode == "twoway")
+    {
+        proxy = proxy.ice_twoway();
+    }
+    else if(mode == "twoway-secure")
+    {
+        proxy = proxy.ice_twoway().ice_secure(true);
+    }
+    else if(mode == "oneway")
+    {
+        proxy = proxy.ice_oneway();
+    }
+    else if(mode == "oneway-secure")
+    {
+        return oneway.ice_oneway().ice_secure(true);
+    }
+    else if(mode == "oneway-batch")
+    {
+        proxy = proxy.ice_batchOneway();
+    }
+    else if(mode == "oneway-batch-secure")
+    {
+        proxy = proxy.ice_batchOneway().ice_secure(true);
+    }
+    return Demo.HelloPrx.uncheckedCast(proxy);
+}
+
+//
+// Invoke sayHello.
+//
 function sayHello()
 {
-    Ice.Promise.try(
-        function()
-        {
-            setState(State.SendRequest);
-            //
-            // Initialize the communicator if it has not yet been initialized.
-            //
-            if(!communicator)
-            {
-                communicator = Ice.initialize();
-            }
-            
-            //
-            // Create a proxy to the hello object.
-            //
-            var s = "hello:ws -h " + hostname() + " -p 10000:" +
-                    "wss -h " + hostname() + " -p 10001"
-            
-            var proxy = communicator.stringToProxy(s)
-                                    .ice_twoway()
-                                    .ice_timeout(-1)
-                                    .ice_secure(false);
-            
-            //
-            // Down-cast the proxy the Demo.Hello interface.
-            //
-            return Demo.HelloPrx.checkedCast(proxy).then(
-                function(asyncResult, twoway)
-                {
-                    //
-                    // Create a proxy to use in oneway invocations
-                    // by calling ice_oneway.
-                    //
-                    var oneway = twoway.ice_oneway();
-                    
-                    //
-                    // Create a proxy to use in batch oneway 
-                    // invocations by calling ice_batchOneway.
-                    //
-                    var batchOneway = twoway.ice_batchOneway();
-                    
-                    //
-                    // Set or clear the timeout.
-                    //
-                    var timeout = $("#timeout").val();
-                    if(timeout > 0)
-                    {
-                        twoway = twoway.ice_timeout(timeout);
-                        oneway = oneway.ice_timeout(timeout);
-                        batchOneway = batchOneway.ice_timeout(timeout);
-                    }
-                    else
-                    {
-                        twoway = twoway.ice_timeout(-1);
-                        oneway = oneway.ice_timeout(-1);
-                        batchOneway = batchOneway.ice_timeout(-1);
-                    }
-                    
-                    //
-                    // Now send the request with the give protocol
-                    // and mode.
-                    //
-                    var mode = $("#mode").val();
-                    var delay = $("#delay").val();
-                    if(mode == "twoway")
-                    {
-                        return twoway.sayHello(delay);
-                    }
-                    else if(mode == "twoway-secure")
-                    {
-                        return twoway.ice_secure(true).sayHello(delay);
-                    }
-                    else if(mode == "oneway")
-                    {
-                        return oneway.sayHello(delay);
-                    }
-                    else if(mode == "oneway-secure")
-                    {
-                        return oneway.ice_secure(true).sayHello(delay);
-                    }
-                    else if(mode == "oneway-batch")
-                    {
-                        batch++;
-                        return batchOneway.sayHello(delay);
-                    }
-                    else if(mode == "oneway-batch-secure")
-                    {
-                        batch++;
-                        return batchOneway.ice_secure(true).sayHello(delay);
-                    }
-                });
-        }
-    ).then(
-        function()
-        {
-            setState(State.Idle);
-        },
-        function(ex)
-        {
-            setState(State.Idle, ex);
-        });
+    setState(State.SendRequest);
+    
+    var proxy = createProxy();
+    if(proxy.ice_isBatchOneway())
+    {
+        batch++;
+    }
+    
+    return proxy.sayHello($("#delay").val());
 }
 
 //
@@ -133,15 +89,7 @@ function flush()
 {
     batch = 0;
     setState(State.FlushBatchRequests);
-    communicator.flushBatchRequests().then(
-        function()
-        {
-            setState(State.Idle);
-        },
-        function(ex)
-        {
-            setState(State.Idle, ex);
-        });
+    return communicator.flushBatchRequests();
 }
 
 //
@@ -149,121 +97,77 @@ function flush()
 //
 function shutdown()
 {
-    Ice.Promise.try(
-        function()
-        {
-            setState(State.SendRequest);
-            //
-            // Initialize the communicator if it has not yet been initialized.
-            //
-            if(!communicator)
-            {
-                communicator = Ice.initialize();
-            }
-            
-            //
-            // Create a proxy to the hello object.
-            //
-            var s = "hello:ws -h " + hostname() + " -p 10000";
-            var proxy = communicator.stringToProxy(s);
-            
-            //
-            // Down-cast the proxy the Demo.Hello interface.
-            //
-            return Demo.HelloPrx.checkedCast(proxy).then(
-                function(r, hello)
-                {
-                    //
-                    // Now invoke the shutdown operation in the proxy
-                    // to shutdown the server.
-                    //
-                    return hello.shutdown();
-                });
-        }
-    ).then(
-        function()
-        {
-            setState(State.Idle);
-        },
-        function(ex)
-        {
-            setState(State.Idle, ex);
-        });
+    setState(State.SendRequest);
+
+    var proxy = createProxy();
+    if(proxy.ice_isBatchOneway())
+    {
+        batch++;
+    }
+    
+    return proxy.shutdown();
 }
 
 //
-// Enable/disable flush request
-//
-function enableFlush(value)
+// Return an event handler suitable for "click" methods. The
+// event handler calls the given function, handles exception
+// and reset the state to Idle when the promise returned by
+// the function is fulfilled.
+// 
+var performEventHandler = function(fn)
 {
-    if(value && batch > 0)
+    return function()
     {
-        $("#flush").removeClass("disabled")
-                   .click(
-                        function()
-                        {
-                            flush();
-                            return false;
-                        });
-    }
-    else
-    {
-        $("#flush").off("click")
-                   .addClass("disabled");
+        Ice.Promise.try(
+            function()
+            {
+                return fn.call();
+            }
+        ).exception(
+            function(ex)
+            {
+                $("#output").val(ex.toString());
+            }
+        ).finally(
+            function()
+            {
+                setState(State.Idle);
+            }
+        );
     }
 }
+var sayHelloClickHandler = performEventHandler(sayHello);
+var shutdownClickHandler = performEventHandler(shutdown);
+var flushClickHandler = performEventHandler(flush);
 
 //
-// Client state
+// Set the state indicator and button status.
 //
 function setState(newState, ex)
 {
     assert(state !== newState);
+
     switch(newState)
     {
         case State.Idle:
         {
-            assert(state === undefined || 
-                   state === State.SendRequest ||
-                   state === State.FlushBatchRequests);
-            
-            if(ex !== undefined)
-            {
-                $("#output").val(ex.toString());
-            }
+            assert(state === undefined || state === State.SendRequest || state === State.FlushBatchRequests);
             
             //
             // Hide the progress indicator.
             //
             $("#progress").hide();
-            
-            //
-            // Restore the cursor.
-            //
             $("body").removeClass("waiting");
             
             //
-            // Hello button event handler.
+            // Enable buttons.
             //
-            $("#hello").removeClass("disabled");
-                       .click(
-                            function()
-                            {
-                                sayHello();
-                                return false;
-                            });
-
-            //
-            // Shutdown button event handler.
-            //
-            $("#shutdown").removeClass("disabled");
-                          .click(
-                            function()
-                            {
-                                shutdown();
-                                return false;
-                            });
-            enableFlush(true);
+            $("#hello").removeClass("disabled").click(sayHelloClickHandler);
+            $("#shutdown").removeClass("disabled").click(shutdownClickHandler);
+            if(batch > 0)
+            {
+                $("#flush").removeClass("disabled").click(flushClickHandler);
+            }
             break;
         }
         case State.SendRequest:
@@ -277,16 +181,14 @@ function setState(newState, ex)
             $("#output").val("");
             
             //
-            // Disable buttons and show the pogress indicator.
+            // Disable buttons.
             //
-            $("#hello").off("click");
-            $("#hello").addClass("disabled");
-            $("#shutdown").off("click");
-            $("#shutdown").addClass("disabled");
-            enableFlush(false);
+            $("#hello").addClass("disabled").off("click");
+            $("#shutdown").addClass("disabled").off("click");
+            $("#flush").addClass("disabled").off("click");
 
             //
-            // Display the progress indicator, and set the wait cursor.
+            // Display the progress indicator and set the wait cursor.
             //
             $("#progress-message").text(
                 newState === State.SendRequest ? "Sending Request..." : "Flush Batch Requests...");
@@ -298,19 +200,6 @@ function setState(newState, ex)
     state = newState;
 };
 
-//
-// Sets the initial state.
-//
-setState(State.Idle);
-
-//
-// Helper method to get the hostname.
-//
-function hostname()
-{
-    return $("#hostname").val() || $("#hostname").attr("placeholder");
-}
-
 function assert(v)
 {
     if(!v)
@@ -318,5 +207,10 @@ function assert(v)
         throw new Error("Assertion failed");
     }
 }
+
+//
+// Start in the iddle state
+//
+setState(State.Idle);
 
 }());
