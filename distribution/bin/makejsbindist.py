@@ -181,7 +181,29 @@ for l in buildLanguages:
     else:
         os.chdir(os.path.join(srcDir, l))
 
-    if l != "java":
+    if l == "js":
+
+	for optimize in ["no", "yes"]:
+            makeOptions = platform.getMakeOptions() + " " + platform.getMakeEnvs(version, l) + " prefix=" + buildDir + " OPTIMIZE=" + optimize
+
+            buildCmd = make + " -C src " + makeOptions
+            installCmd = make + " " + makeOptions + " install"
+
+            print "Building with " + buildCmd
+
+            if os.system(buildCmd) != 0:
+                print sys.argv[0] + ": `" + l + "' build failed"
+                os.chdir(cwd)
+                sys.exit(1)
+
+            print "Installing with " + installCmd
+         
+            if os.system(installCmd) != 0:
+                print sys.argv[0] + ": `" + l + "' build-install failed"
+                os.chdir(cwd)
+                sys.exit(1)
+
+    elif l != "java":
 
         makeOptions = platform.getMakeOptions() + " " + platform.getMakeEnvs(version, l) + " prefix=" + buildDir
 
