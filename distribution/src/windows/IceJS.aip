@@ -16,9 +16,9 @@
     <ROW Property="DEMO_DIR" Value="C:\IceBuild\dist\IceWS-0.1.0-demos"/>
     <ROW Property="DialogBitmap" Value="dialog" MultiBuildValue="DefaultBuild:installermain.bmp" Type="1" MsiKey="DialogBitmap"/>
     <ROW Property="Manufacturer" Value="Zeroc, Inc" ValueLocId="*"/>
-    <ROW Property="ProductCode" Value="1033:{D4B3C78E-F6FB-4409-A6B1-2641467EA9DD} " Type="16"/>
+    <ROW Property="ProductCode" Value="1033:{2EA88F59-6ACC-4ACF-B46A-7084DD9086DC} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
-    <ROW Property="ProductName" Value="IceWS 0.1.0" ValueLocId="*"/>
+    <ROW Property="ProductName" Value="IceJS 0.1.0" ValueLocId="*"/>
     <ROW Property="ProductVersion" Value="0.1.0" Type="32"/>
     <ROW Property="REBOOT" MultiBuildValue="DefaultBuild:ReallySuppress"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
@@ -94,76 +94,80 @@
     <ROW Directory="x64_Dir" Directory_Parent="bin_Dir" DefaultDir="x64"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
-    <ROW Component="Address.js" ComponentId="{CFD53FC4-B535-43EF-A6A4-C3518EDAFC91}" Directory_="Ice_3_Dir" Attributes="0" KeyPath="Address.js" Type="0"/>
-    <ROW Component="Admin.js" ComponentId="{A3571D02-0A75-498F-9B7A-7CFAFDDF1276}" Directory_="IceGrid_Dir" Attributes="0" KeyPath="Admin.js" Type="0"/>
-    <ROW Component="Callback.ice" ComponentId="{95E7D81A-7CF1-4CC0-A4C1-AE3962DF7BAE}" Directory_="bidir_1_Dir" Attributes="0" KeyPath="Callback.ice_1" Type="0"/>
-    <ROW Component="Chat.ice" ComponentId="{865FF135-66AE-40BF-8022-E29A8C9988C7}" Directory_="chat_1_Dir" Attributes="0" KeyPath="Chat.ice_1" Type="0"/>
-    <ROW Component="Client.js" ComponentId="{CC3C1064-37F2-4E4E-9CC8-A2A22BC0C162}" Directory_="browser_Dir" Attributes="0" KeyPath="Client.js" Type="0"/>
-    <ROW Component="Client.js_1" ComponentId="{EC42BF0A-F294-4162-977F-0D9C4E39E3CF}" Directory_="browser_1_Dir" Attributes="0" KeyPath="Client.js_2" Type="0"/>
-    <ROW Component="Client.js_2" ComponentId="{6CAD5B9B-151B-4357-83BA-16EE599DE598}" Directory_="browser_2_Dir" Attributes="0" KeyPath="Client.js_4" Type="0"/>
-    <ROW Component="Client.js_3" ComponentId="{3337DEF2-4620-492E-A77E-991C5D2C8C7E}" Directory_="hello_1_Dir" Attributes="0" KeyPath="Client.js_5" Type="0"/>
-    <ROW Component="Client.js_4" ComponentId="{D66FCC29-567A-43D6-919C-9744CBCE58E6}" Directory_="browser_3_Dir" Attributes="0" KeyPath="Client.js_6" Type="0"/>
-    <ROW Component="Client.js_5" ComponentId="{F640C9AD-4A9F-46DF-8541-872223CB6583}" Directory_="latency_1_Dir" Attributes="0" KeyPath="Client.js_7" Type="0"/>
-    <ROW Component="Client.js_6" ComponentId="{9647F8A5-3306-4C3E-B8D7-5C1CBFB2F0D4}" Directory_="browser_4_Dir" Attributes="0" KeyPath="Client.js_8" Type="0"/>
-    <ROW Component="Client.js_7" ComponentId="{2A0EF744-CE75-46CD-A0F3-31004558097A}" Directory_="minimal_1_Dir" Attributes="0" KeyPath="Client.js_9" Type="0"/>
-    <ROW Component="Client.js_8" ComponentId="{9D202B86-7BA9-4008-A18B-FDFE804BD3E8}" Directory_="browser_5_Dir" Attributes="0" KeyPath="Client.js_10" Type="0"/>
-    <ROW Component="Client.js_9" ComponentId="{953FB49C-0306-46AA-9ED2-6AD97A97AAA8}" Directory_="throughput_1_Dir" Attributes="0" KeyPath="Client.js_11" Type="0"/>
-    <ROW Component="Glacier2.js" ComponentId="{8A9F03F6-F66E-42F0-AF80-B4E1A34BF974}" Directory_="lib_Dir" Attributes="0" KeyPath="Glacier2.js" Type="0"/>
-    <ROW Component="Glacier2.js_2" ComponentId="{04A1EDB6-32F2-4916-9C8E-9296CBB6733F}" Directory_="Glacier2_3_Dir" Attributes="0" KeyPath="Glacier2.js_2" Type="0"/>
-    <ROW Component="IceMX.js" ComponentId="{07317C9B-34AA-4AB0-BB40-33EC7E384E62}" Directory_="IceMX_Dir" Attributes="0" KeyPath="IceMX.js_1" Type="0"/>
-    <ROW Component="IceStorm.js" ComponentId="{D240F4CB-C25C-4827-BC1F-07D6345DC564}" Directory_="IceStorm_Dir" Attributes="0" KeyPath="IceStorm.js_1" Type="0"/>
-    <ROW Component="Ice_3.4.2" ComponentId="{6A067A38-C5EB-40F7-A2F3-413107ABAB29}" Directory_="Ice_3.4.2_DIR" Attributes="4" KeyPath="Version"/>
-    <ROW Component="InstallDir" ComponentId="{2A1DDEB2-F2C5-4A15-B41D-0EA49856401D}" Directory_="APPDIR" Attributes="260" KeyPath="InstallDir"/>
-    <ROW Component="InstallDir_2" ComponentId="{DCEF2DE3-8D4C-47AE-803A-A4EF89F6A47B}" Directory_="APPDIR" Attributes="260" KeyPath="InstallDir_2"/>
-    <ROW Component="Make.common.rules.mak" ComponentId="{E0CA6C87-01F4-491A-9AED-1F262C6AC4E9}" Directory_="config_Dir" Attributes="0" KeyPath="Make.common.rules.mak" Type="0"/>
-    <ROW Component="Makefile.mak" ComponentId="{CE9833AC-12F8-487A-8240-281139FFEBD7}" Directory_="Glacier2_Dir" Attributes="0" KeyPath="Makefile.mak_1" Type="0"/>
-    <ROW Component="Makefile.mak_1" ComponentId="{6225EB49-1F78-4E15-8413-4CF909B32251}" Directory_="Ice_Dir" Attributes="0" KeyPath="Makefile.mak_5" Type="0"/>
-    <ROW Component="Makefile.mak_2" ComponentId="{8EF16A59-A406-4A07-B452-826940D92B16}" Directory_="Glacier2_1_Dir" Attributes="0" KeyPath="Makefile.mak_11" Type="0"/>
-    <ROW Component="Makefile.mak_3" ComponentId="{D9AFC129-9876-4EFF-ABF4-FBCF05F3BA4C}" Directory_="Ice_1_Dir" Attributes="0" KeyPath="Makefile.mak_15" Type="0"/>
-    <ROW Component="README.txt" ComponentId="{D186BE6C-FD2D-4F9B-A373-DA7320B10AE2}" Directory_="DEMO_DIR" Attributes="0" KeyPath="README.txt_10" Type="0"/>
-    <ROW Component="README.txt_12" ComponentId="{A1A0406A-D09C-4EE6-9584-D660DBB4BFC4}" Directory_="IceJS0.1.0_Dir" Attributes="0" KeyPath="README.txt"/>
-    <ROW Component="cacert.pem" ComponentId="{5C5ECA16-3929-4A0D-8F4D-B2D92FE23980}" Directory_="certs_Dir" Attributes="0" KeyPath="cacert.pem" Type="0"/>
-    <ROW Component="cacert.pem_1" ComponentId="{183755FA-FC0E-4293-8C0B-213ADBE8FCA4}" Directory_="winrt_Dir" Attributes="0" KeyPath="cacert.pem_1" Type="0"/>
-    <ROW Component="client" ComponentId="{5854CE5C-DB89-49AD-AD75-EC6164F3C55A}" Directory_="client_Dir" Attributes="0"/>
-    <ROW Component="client_1" ComponentId="{8ADEE454-C4A4-4C15-943B-AF84C5FB3DB6}" Directory_="client_1_Dir" Attributes="0"/>
-    <ROW Component="client_2" ComponentId="{D48AA5F5-6AFA-4DBA-822A-44F184E65E57}" Directory_="client_2_Dir" Attributes="0"/>
-    <ROW Component="client_3" ComponentId="{57336990-A78A-4643-8227-F82A1440820B}" Directory_="client_3_Dir" Attributes="0"/>
-    <ROW Component="client_4" ComponentId="{3A111B26-2311-46FA-A0F4-8406420F144E}" Directory_="client_4_Dir" Attributes="0"/>
-    <ROW Component="client_5" ComponentId="{B6B14C71-B1ED-449A-A040-3C5466C3408A}" Directory_="client_5_Dir" Attributes="0"/>
-    <ROW Component="demo.sln" ComponentId="{D39D2183-527B-4F98-850D-8F483E5BC354}" Directory_="demo_Dir" Attributes="0" KeyPath="demo.sln" Type="0"/>
-    <ROW Component="depend.mak" ComponentId="{51DEF813-212E-4DA4-98C6-BA2B737499F1}" Directory_="chat_Dir" Attributes="0" KeyPath="depend.mak" Type="0"/>
-    <ROW Component="depend.mak_1" ComponentId="{B81993AC-EBFB-4EA4-909D-CDAE08C398F8}" Directory_="bidir_Dir" Attributes="0" KeyPath="depend.mak_1" Type="0"/>
-    <ROW Component="depend.mak_2" ComponentId="{63D556AA-C1BB-4559-BE26-ADE884C29681}" Directory_="hello_Dir" Attributes="0" KeyPath="depend.mak_2" Type="0"/>
-    <ROW Component="depend.mak_3" ComponentId="{3229FDA9-F739-483D-90B3-3F4EB18EB14D}" Directory_="latency_Dir" Attributes="0" KeyPath="depend.mak_3" Type="0"/>
-    <ROW Component="depend.mak_4" ComponentId="{5A2C7CB5-4F6E-42FD-B2D5-0550C3EE3AE3}" Directory_="minimal_Dir" Attributes="0" KeyPath="depend.mak_4" Type="0"/>
-    <ROW Component="depend.mak_5" ComponentId="{7C21C8CF-C627-4625-A6A6-F1CCB4A68280}" Directory_="throughput_Dir" Attributes="0" KeyPath="depend.mak_5" Type="0"/>
-    <ROW Component="depend.mak_6" ComponentId="{F7DE6842-8DE8-4C81-8B2E-438B1F6CA3FF}" Directory_="ws_Dir" Attributes="0" KeyPath="depend.mak_6" Type="0"/>
-    <ROW Component="ice35.dll" ComponentId="{78C17419-B086-4272-AD0F-FE69020BC927}" Directory_="bin_Dir" Attributes="0" KeyPath="ice35.dll"/>
-    <ROW Component="ice35.dll_1" ComponentId="{4F4CA80E-9E75-41CB-B184-FB547CBE0B86}" Directory_="x64_Dir" Attributes="256" KeyPath="ice35.dll_1"/>
-    <ROW Component="ice35d.dll" ComponentId="{58F4422E-689A-41F1-A9B9-8004356B79E8}" Directory_="bin_Dir" Attributes="0" KeyPath="ice35d.dll"/>
-    <ROW Component="ice35d.dll_1" ComponentId="{E46A579A-FB8B-40A1-A3D3-586B9F7665AA}" Directory_="x64_Dir" Attributes="256" KeyPath="ice35d.dll_1"/>
-    <ROW Component="icessl35.dll" ComponentId="{A82A4A4B-40A0-48F4-8082-CBDA9C8466DE}" Directory_="bin_Dir" Attributes="0" KeyPath="icessl35.dll"/>
-    <ROW Component="icessl35.dll_1" ComponentId="{EDBA5722-63C3-4CA8-A0DF-FA33E70CE6F9}" Directory_="x64_Dir" Attributes="256" KeyPath="icessl35.dll_1"/>
-    <ROW Component="icessl35d.dll" ComponentId="{36995F91-11AA-486E-925B-57B53DC3580E}" Directory_="bin_Dir" Attributes="0" KeyPath="icessl35d.dll"/>
-    <ROW Component="icessl35d.dll_1" ComponentId="{1B68E10F-3470-4C7C-9333-769A0A55507F}" Directory_="x64_Dir" Attributes="256" KeyPath="icessl35d.dll_1"/>
-    <ROW Component="iceutil35.dll" ComponentId="{B9C3F1FC-793E-4A68-8FCC-720BFDA5C2FE}" Directory_="bin_Dir" Attributes="0" KeyPath="iceutil35.dll"/>
-    <ROW Component="iceutil35.dll_1" ComponentId="{76AAF96A-1ACA-47D5-A14D-B24946085CDB}" Directory_="x64_Dir" Attributes="256" KeyPath="iceutil35.dll_1"/>
-    <ROW Component="iceutil35d.dll" ComponentId="{B2CA6EF1-1A97-4A7B-9EEF-7F205CA836BB}" Directory_="bin_Dir" Attributes="0" KeyPath="iceutil35d.dll"/>
-    <ROW Component="iceutil35d.dll_1" ComponentId="{C821C9BE-0BBC-4D44-91C3-9A3F42A02CB7}" Directory_="x64_Dir" Attributes="256" KeyPath="iceutil35d.dll_1"/>
-    <ROW Component="icews35.dll" ComponentId="{C38E0A4E-79A4-4178-90D9-7EF5321E5B61}" Directory_="bin_Dir" Attributes="0" KeyPath="icews35.dll"/>
-    <ROW Component="icews35.dll_1" ComponentId="{0CAC018D-A00F-4BED-B4D2-944F96563C09}" Directory_="x64_Dir" Attributes="256" KeyPath="icews35.dll_1"/>
-    <ROW Component="icews35d.dll" ComponentId="{85099E49-6526-4F35-995B-9EC028E36DB7}" Directory_="bin_Dir" Attributes="0" KeyPath="icews35d.dll"/>
-    <ROW Component="icews35d.dll_1" ComponentId="{E787D44D-9007-4CD9-80EA-4D884CBFEF4A}" Directory_="x64_Dir" Attributes="256" KeyPath="icews35d.dll_1"/>
-    <ROW Component="index.html" ComponentId="{ABB36021-16D3-4A3A-9664-7E691887182F}" Directory_="demojs_Dir" Attributes="0" KeyPath="index.html_6" Type="0"/>
-    <ROW Component="server" ComponentId="{5FBD93CD-569B-465D-BE76-F36103EFBE7D}" Directory_="server_Dir" Attributes="0"/>
-    <ROW Component="server_1" ComponentId="{DF26B2EF-A00A-4C14-872B-438B8885E54F}" Directory_="server_1_Dir" Attributes="0"/>
-    <ROW Component="server_2" ComponentId="{9D2FF666-26BD-420D-897A-7BD4ED1A7B28}" Directory_="server_2_Dir" Attributes="0"/>
-    <ROW Component="server_3" ComponentId="{D81EB0B6-CAEB-484E-B85D-28D1E5A32F65}" Directory_="server_3_Dir" Attributes="0"/>
-    <ROW Component="server_4" ComponentId="{59C17804-F5AE-455B-B66C-642EF34FD4B9}" Directory_="server_4_Dir" Attributes="0"/>
-    <ROW Component="server_5" ComponentId="{714231EF-FDE7-4A33-895B-DFCF061B5777}" Directory_="server_5_Dir" Attributes="0"/>
+    <ROW Component="Address.js" ComponentId="{62E13CA0-943D-4914-8543-F3BA616204AB}" Directory_="Ice_3_Dir" Attributes="0" KeyPath="Address.js" Type="0"/>
+    <ROW Component="Admin.js" ComponentId="{627A1C96-849E-4DC8-87E7-47CAE0E62BBB}" Directory_="IceGrid_Dir" Attributes="0" KeyPath="Admin.js" Type="0"/>
+    <ROW Component="Callback.ice" ComponentId="{454D068C-89A1-4893-8586-1FD2E196C79E}" Directory_="bidir_1_Dir" Attributes="0" KeyPath="Callback.ice_1" Type="0"/>
+    <ROW Component="Chat.ice" ComponentId="{16DCFF03-9693-4842-83E4-FB7E3B9D29F0}" Directory_="chat_1_Dir" Attributes="0" KeyPath="Chat.ice_1" Type="0"/>
+    <ROW Component="Client.js" ComponentId="{BFE58369-3F75-4E00-BC98-A0CBCBAF2A01}" Directory_="browser_Dir" Attributes="0" KeyPath="Client.js" Type="0"/>
+    <ROW Component="Client.js_1" ComponentId="{8B0DAD13-0848-477D-BE56-09F33003534A}" Directory_="browser_1_Dir" Attributes="0" KeyPath="Client.js_2" Type="0"/>
+    <ROW Component="Client.js_2" ComponentId="{96C994DC-5682-45F8-B244-0D40DB45E171}" Directory_="browser_2_Dir" Attributes="0" KeyPath="Client.js_4" Type="0"/>
+    <ROW Component="Client.js_3" ComponentId="{D0066285-A70E-412D-89B9-F4AAF63F68DC}" Directory_="hello_1_Dir" Attributes="0" KeyPath="Client.js_5" Type="0"/>
+    <ROW Component="Client.js_4" ComponentId="{71BB1EC9-1903-4F1B-B391-34419025047E}" Directory_="browser_3_Dir" Attributes="0" KeyPath="Client.js_6" Type="0"/>
+    <ROW Component="Client.js_5" ComponentId="{3B25312A-4225-4C53-BF5F-FB8D2EDB2087}" Directory_="latency_1_Dir" Attributes="0" KeyPath="Client.js_7" Type="0"/>
+    <ROW Component="Client.js_6" ComponentId="{CC36E8E8-7292-49BD-A31F-965D85795F96}" Directory_="browser_4_Dir" Attributes="0" KeyPath="Client.js_8" Type="0"/>
+    <ROW Component="Client.js_7" ComponentId="{6D1CEBAA-8612-44AF-8C13-D76070F7105C}" Directory_="minimal_1_Dir" Attributes="0" KeyPath="Client.js_9" Type="0"/>
+    <ROW Component="Client.js_8" ComponentId="{8852B77F-04CA-4CEC-9B8A-81E019745D7A}" Directory_="browser_5_Dir" Attributes="0" KeyPath="Client.js_10" Type="0"/>
+    <ROW Component="Client.js_9" ComponentId="{328D0D36-4BE8-42D0-81A4-32632894F508}" Directory_="throughput_1_Dir" Attributes="0" KeyPath="Client.js_11" Type="0"/>
+    <ROW Component="Glacier2.js" ComponentId="{682D1B43-CC2A-4003-AC7A-330FE205B24D}" Directory_="lib_Dir" Attributes="0" KeyPath="Glacier2.js" Type="0"/>
+    <ROW Component="Glacier2.js_2" ComponentId="{A70D9883-C6AB-4FB1-8E6A-272EF36F36DF}" Directory_="Glacier2_3_Dir" Attributes="0" KeyPath="Glacier2.js_2" Type="0"/>
+    <ROW Component="ICE_LICENSE.txt" ComponentId="{E2575A09-C8C7-4723-9DCB-56496E6EE884}" Directory_="IceJS0.1.0_Dir" Attributes="0" KeyPath="ICE_LICENSE.txt" Type="0"/>
+    <ROW Component="IceMX.js" ComponentId="{F8F1BD7B-1F6D-474C-B45C-C1A9C306006C}" Directory_="IceMX_Dir" Attributes="0" KeyPath="IceMX.js_1" Type="0"/>
+    <ROW Component="IceStorm.js" ComponentId="{E80FACD7-3431-4DEF-8E79-FBED87BBFACE}" Directory_="IceStorm_Dir" Attributes="0" KeyPath="IceStorm.js_1" Type="0"/>
+    <ROW Component="Ice_3.4.2" ComponentId="{5F1413CB-BC55-4D55-838E-BFCDBF003829}" Directory_="Ice_3.4.2_DIR" Attributes="4" KeyPath="Version"/>
+    <ROW Component="InstallDir" ComponentId="{B6A18E8C-9FFD-438F-883C-4A1DE5DB65EF}" Directory_="APPDIR" Attributes="260" KeyPath="InstallDir"/>
+    <ROW Component="InstallDir_2" ComponentId="{FDC00AD0-3E7B-4FB4-ABA6-A35486A00E78}" Directory_="APPDIR" Attributes="260" KeyPath="InstallDir_2"/>
+    <ROW Component="Make.common.rules.mak" ComponentId="{356D5FF2-36A8-453D-B08C-AF055473F22A}" Directory_="config_Dir" Attributes="0" KeyPath="Make.common.rules.mak" Type="0"/>
+    <ROW Component="Makefile.mak" ComponentId="{9EC6764A-28E2-4241-A1A2-4C31DBFE737E}" Directory_="Glacier2_Dir" Attributes="0" KeyPath="Makefile.mak_1" Type="0"/>
+    <ROW Component="Makefile.mak_1" ComponentId="{6E8070CA-9EEE-4627-AE08-C8AD6ED40FCF}" Directory_="Ice_Dir" Attributes="0" KeyPath="Makefile.mak_5" Type="0"/>
+    <ROW Component="Makefile.mak_2" ComponentId="{CD7D4804-1CA4-42C5-AF30-C49198381DA3}" Directory_="Glacier2_1_Dir" Attributes="0" KeyPath="Makefile.mak_11" Type="0"/>
+    <ROW Component="Makefile.mak_3" ComponentId="{5511039E-90EC-442C-87C7-5582DE9DF4BB}" Directory_="Ice_1_Dir" Attributes="0" KeyPath="Makefile.mak_15" Type="0"/>
+    <ROW Component="README.txt" ComponentId="{B3044EE8-46F0-492A-A2CC-1E86B922929A}" Directory_="DEMO_DIR" Attributes="0" KeyPath="README.txt_10" Type="0"/>
+    <ROW Component="README.txt_12" ComponentId="{395E0EDB-74A1-45C0-B4B9-61DFD137A127}" Directory_="IceJS0.1.0_Dir" Attributes="0" KeyPath="README.txt"/>
+    <ROW Component="cacert.pem" ComponentId="{622A5B8F-A712-43CE-BE49-36DF5522B826}" Directory_="certs_Dir" Attributes="0" KeyPath="cacert.pem" Type="0"/>
+    <ROW Component="cacert.pem_1" ComponentId="{3B296DDF-852D-438E-946E-53E26684F4FC}" Directory_="winrt_Dir" Attributes="0" KeyPath="cacert.pem_1" Type="0"/>
+    <ROW Component="client" ComponentId="{221A5E88-5D2D-4652-957F-108A31C19C5F}" Directory_="client_Dir" Attributes="0"/>
+    <ROW Component="client_1" ComponentId="{AA8DD3DA-84EB-41E9-8357-A2D2D7C75E5A}" Directory_="client_1_Dir" Attributes="0"/>
+    <ROW Component="client_2" ComponentId="{0AD17413-0910-41A9-AA26-04E40B8FA961}" Directory_="client_2_Dir" Attributes="0"/>
+    <ROW Component="client_3" ComponentId="{DE5177C5-48F9-47EB-BA2B-E98303185054}" Directory_="client_3_Dir" Attributes="0"/>
+    <ROW Component="client_4" ComponentId="{69D0F125-A19E-466B-AF30-78A1770F1ADD}" Directory_="client_4_Dir" Attributes="0"/>
+    <ROW Component="client_5" ComponentId="{5783027E-62C0-4943-A479-50DE1B3B3CF7}" Directory_="client_5_Dir" Attributes="0"/>
+    <ROW Component="demo.sln" ComponentId="{38CFD3A7-3131-49FF-8C00-46DD00C2378E}" Directory_="demo_Dir" Attributes="0" KeyPath="demo.sln" Type="0"/>
+    <ROW Component="depend.mak" ComponentId="{DF4C5982-D064-4A7F-9304-77CE17A563D1}" Directory_="chat_Dir" Attributes="0" KeyPath="depend.mak" Type="0"/>
+    <ROW Component="depend.mak_1" ComponentId="{53DD8333-CADC-4A6F-952D-9ABDBE78CE4A}" Directory_="bidir_Dir" Attributes="0" KeyPath="depend.mak_1" Type="0"/>
+    <ROW Component="depend.mak_2" ComponentId="{FAF447A8-F5E7-4D72-B0E6-64CF0CDF1C52}" Directory_="hello_Dir" Attributes="0" KeyPath="depend.mak_2" Type="0"/>
+    <ROW Component="depend.mak_3" ComponentId="{BF3F0ACC-AFA4-4429-B348-FCF7264DDEB0}" Directory_="latency_Dir" Attributes="0" KeyPath="depend.mak_3" Type="0"/>
+    <ROW Component="depend.mak_4" ComponentId="{5A180104-AA12-434D-B329-702F7BF36DA9}" Directory_="minimal_Dir" Attributes="0" KeyPath="depend.mak_4" Type="0"/>
+    <ROW Component="depend.mak_5" ComponentId="{018453D5-C65B-4E4F-A56E-8BC53A77CE57}" Directory_="throughput_Dir" Attributes="0" KeyPath="depend.mak_5" Type="0"/>
+    <ROW Component="depend.mak_6" ComponentId="{2EF76425-8736-40A7-A893-30B739F7AD71}" Directory_="ws_Dir" Attributes="0" KeyPath="depend.mak_6" Type="0"/>
+    <ROW Component="ice35.dll" ComponentId="{99BA5416-CBE0-4D13-9616-9DB43FC7978C}" Directory_="bin_Dir" Attributes="0" KeyPath="ice35.dll"/>
+    <ROW Component="ice35.dll_1" ComponentId="{06E58D29-CBC4-4684-8144-809ADCAD8D0F}" Directory_="x64_Dir" Attributes="256" KeyPath="ice35.dll_1"/>
+    <ROW Component="ice35d.dll" ComponentId="{5EABE95D-C848-4157-B3EE-E46320B3E933}" Directory_="bin_Dir" Attributes="0" KeyPath="ice35d.dll"/>
+    <ROW Component="ice35d.dll_1" ComponentId="{D5A32E86-C03B-4B6E-93BC-AAE063BC8D3D}" Directory_="x64_Dir" Attributes="256" KeyPath="ice35d.dll_1"/>
+    <ROW Component="icessl35.dll" ComponentId="{3354BA91-F209-4167-BF47-6D0179EAA0E8}" Directory_="bin_Dir" Attributes="0" KeyPath="icessl35.dll"/>
+    <ROW Component="icessl35.dll_1" ComponentId="{87E2BC7F-D3FA-4F6A-8150-3FBB24881B52}" Directory_="x64_Dir" Attributes="256" KeyPath="icessl35.dll_1"/>
+    <ROW Component="icessl35d.dll" ComponentId="{AA148E24-011E-492B-BE8A-A3C190AEDD6F}" Directory_="bin_Dir" Attributes="0" KeyPath="icessl35d.dll"/>
+    <ROW Component="icessl35d.dll_1" ComponentId="{40401782-520C-491E-8A36-484E3501CC68}" Directory_="x64_Dir" Attributes="256" KeyPath="icessl35d.dll_1"/>
+    <ROW Component="iceutil35.dll" ComponentId="{721A36E7-E394-44A3-8E16-1AC1C0022FF8}" Directory_="bin_Dir" Attributes="0" KeyPath="iceutil35.dll"/>
+    <ROW Component="iceutil35.dll_1" ComponentId="{D68D2EBF-ECF2-4174-8951-8F487420CB69}" Directory_="x64_Dir" Attributes="256" KeyPath="iceutil35.dll_1"/>
+    <ROW Component="iceutil35d.dll" ComponentId="{F6073B99-24A7-4FB0-8CC3-2E5451D28512}" Directory_="bin_Dir" Attributes="0" KeyPath="iceutil35d.dll"/>
+    <ROW Component="iceutil35d.dll_1" ComponentId="{4E0A3025-52BC-4E35-9A5B-901FF43890D3}" Directory_="x64_Dir" Attributes="256" KeyPath="iceutil35d.dll_1"/>
+    <ROW Component="iceutilJS35.dll" ComponentId="{090D52F4-A1C8-411C-A7CA-35C999CF58BE}" Directory_="bin_Dir" Attributes="0" KeyPath="iceutilJS35.dll"/>
+    <ROW Component="icews35.dll" ComponentId="{D21AB17B-41C6-4ED4-8001-63A9E1FCBADC}" Directory_="bin_Dir" Attributes="0" KeyPath="icews35.dll"/>
+    <ROW Component="icews35.dll_1" ComponentId="{79B3B0E8-F941-4CD0-B5B4-CB72A5F6ABDA}" Directory_="x64_Dir" Attributes="256" KeyPath="icews35.dll_1"/>
+    <ROW Component="icews35d.dll" ComponentId="{570AE948-2B5D-4CDF-A482-19A64B04CACB}" Directory_="bin_Dir" Attributes="0" KeyPath="icews35d.dll"/>
+    <ROW Component="icews35d.dll_1" ComponentId="{60C5C038-45BD-44FF-941B-14370D05FCDC}" Directory_="x64_Dir" Attributes="256" KeyPath="icews35d.dll_1"/>
+    <ROW Component="index.html" ComponentId="{1735B195-02FF-497F-A464-371C7C46C55B}" Directory_="demojs_Dir" Attributes="0" KeyPath="index.html_6" Type="0"/>
+    <ROW Component="server" ComponentId="{DD5DC6D3-7260-49A8-A679-1BDCDAFA3B26}" Directory_="server_Dir" Attributes="0"/>
+    <ROW Component="server_1" ComponentId="{6C8D8F14-28B9-4F0E-BBAD-0DFCDAE7600F}" Directory_="server_1_Dir" Attributes="0"/>
+    <ROW Component="server_2" ComponentId="{510F3084-42F5-4954-B3BE-3202634C12A9}" Directory_="server_2_Dir" Attributes="0"/>
+    <ROW Component="server_3" ComponentId="{122D85F2-E813-4D00-A42F-7FEA0EB1CB4C}" Directory_="server_3_Dir" Attributes="0"/>
+    <ROW Component="server_4" ComponentId="{7DA06EDD-457F-48D1-97AD-51D60B771F78}" Directory_="server_4_Dir" Attributes="0"/>
+    <ROW Component="server_5" ComponentId="{0737DFDC-B060-473C-B464-964D5539117D}" Directory_="server_5_Dir" Attributes="0"/>
+    <ROW Component="slice2js.exe" ComponentId="{D838039C-941B-4296-B7B2-D7A5D4A18804}" Directory_="bin_Dir" Attributes="0" KeyPath="slice2js.exe"/>
+    <ROW Component="sliceJS35.dll" ComponentId="{A45E24C8-1575-4DF3-B506-AAB306F6732B}" Directory_="bin_Dir" Attributes="0" KeyPath="sliceJS35.dll"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
-    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="3" Level="1" Directory_="APPDIR" Attributes="0" Components="Address.js Admin.js Callback.ice Chat.ice Client.js Client.js_1 Client.js_2 Client.js_3 Client.js_4 Client.js_5 Client.js_6 Client.js_7 Client.js_8 Client.js_9 Glacier2.js Glacier2.js_2 IceMX.js IceStorm.js Ice_3.4.2 InstallDir InstallDir_2 Make.common.rules.mak Makefile.mak Makefile.mak_1 Makefile.mak_2 Makefile.mak_3 README.txt README.txt_12 cacert.pem cacert.pem_1 client client_1 client_2 client_3 client_4 client_5 demo.sln depend.mak depend.mak_1 depend.mak_2 depend.mak_3 depend.mak_4 depend.mak_5 depend.mak_6 ice35.dll ice35.dll_1 ice35d.dll ice35d.dll_1 icessl35.dll icessl35.dll_1 icessl35d.dll icessl35d.dll_1 iceutil35.dll iceutil35.dll_1 iceutil35d.dll iceutil35d.dll_1 icews35.dll icews35.dll_1 icews35d.dll icews35d.dll_1 index.html server server_1 server_2 server_3 server_4 server_5"/>
+    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="3" Level="1" Directory_="APPDIR" Attributes="0" Components="Address.js Admin.js Callback.ice Chat.ice Client.js Client.js_1 Client.js_2 Client.js_3 Client.js_4 Client.js_5 Client.js_6 Client.js_7 Client.js_8 Client.js_9 Glacier2.js Glacier2.js_2 ICE_LICENSE.txt IceMX.js IceStorm.js Ice_3.4.2 InstallDir InstallDir_2 Make.common.rules.mak Makefile.mak Makefile.mak_1 Makefile.mak_2 Makefile.mak_3 README.txt README.txt_12 cacert.pem cacert.pem_1 client client_1 client_2 client_3 client_4 client_5 demo.sln depend.mak depend.mak_1 depend.mak_2 depend.mak_3 depend.mak_4 depend.mak_5 depend.mak_6 ice35.dll ice35.dll_1 ice35d.dll ice35d.dll_1 icessl35.dll icessl35.dll_1 icessl35d.dll icessl35d.dll_1 iceutil35.dll iceutil35.dll_1 iceutil35d.dll iceutil35d.dll_1 iceutilJS35.dll icews35.dll icews35.dll_1 icews35d.dll icews35d.dll_1 index.html server server_1 server_2 server_3 server_4 server_5 slice2js.exe sliceJS35.dll"/>
     <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
@@ -253,6 +257,7 @@
     <ROW File="HelloI.h" Component_="depend.mak_2" FileName="HelloI.h" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\HelloI.h" SelfReg="false" NextFile="Ice.hello.client.vcxproj"/>
     <ROW File="HelloI.h_1" Component_="depend.mak_4" FileName="HelloI.h" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\minimal\HelloI.h" SelfReg="false" NextFile="Ice.minimal.client.vcxproj"/>
     <ROW File="HelloI.h_2" Component_="depend.mak_6" FileName="HelloI.h" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\ws\HelloI.h" SelfReg="false" NextFile="Ice.ws.client.vcxproj"/>
+    <ROW File="ICE_LICENSE.txt" Component_="ICE_LICENSE.txt" FileName="ICE_LI~1.TXT|ICE_LICENSE.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\ICE_LICENSE.txt" SelfReg="false" NextFile="LICENSE.txt"/>
     <ROW File="Ice.bidir.client.vcxproj" Component_="depend.mak_1" FileName="ICEBID~1.VCX|Ice.bidir.client.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\Ice.bidir.client.vcxproj" SelfReg="false" NextFile="Ice.bidir.client.vcxproj.filters"/>
     <ROW File="Ice.bidir.client.vcxproj.filters" Component_="depend.mak_1" FileName="ICEBID~1.FIL|Ice.bidir.client.vcxproj.filters" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\Ice.bidir.client.vcxproj.filters" SelfReg="false" NextFile="Ice.bidir.server.vcxproj"/>
     <ROW File="Ice.bidir.server.vcxproj" Component_="depend.mak_1" FileName="ICEBID~2.VCX|Ice.bidir.server.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\Ice.bidir.server.vcxproj" SelfReg="false" NextFile="Ice.bidir.server.vcxproj.filters"/>
@@ -303,6 +308,7 @@
     <ROW File="IncomingAsync.js" Component_="Address.js" FileName="INCOMI~1.JS|IncomingAsync.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\IncomingAsync.js" SelfReg="false" NextFile="Initialize.js"/>
     <ROW File="Initialize.js" Component_="Address.js" FileName="INITIA~1.JS|Initialize.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Initialize.js" SelfReg="false" NextFile="Instance.js"/>
     <ROW File="Instance.js" Component_="Address.js" FileName="Instance.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Instance.js" SelfReg="false" NextFile="LocalException.js"/>
+    <ROW File="LICENSE.txt" Component_="ICE_LICENSE.txt" FileName="LICENSE.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\LICENSE.txt" SelfReg="false" NextFile="SOURCES.txt"/>
     <ROW File="Latency.ice" Component_="depend.mak_3" FileName="Latency.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\latency\Latency.ice" SelfReg="false" NextFile="Makefile.mak_4"/>
     <ROW File="Latency.ice_1" Component_="Client.js_5" FileName="Latency.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\latency\Latency.ice" SelfReg="false" NextFile="Makefile.mak_14"/>
     <ROW File="LocalException.js" Component_="Address.js" FileName="LOCALE~1.JS|LocalException.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\LocalException.js" SelfReg="false" NextFile="LocalExceptionWrapper.js"/>
@@ -387,6 +393,7 @@
     <ROW File="RouterF.js" Component_="Glacier2.js_2" FileName="RouterF.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Glacier2\RouterF.js" SelfReg="false" NextFile="Session.js"/>
     <ROW File="RouterInfo.js" Component_="Address.js" FileName="ROUTER~1.JS|RouterInfo.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\RouterInfo.js" SelfReg="false" NextFile="RouterManager.js"/>
     <ROW File="RouterManager.js" Component_="Address.js" FileName="ROUTER~2.JS|RouterManager.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\RouterManager.js" SelfReg="false" NextFile="ServantManager.js"/>
+    <ROW File="SOURCES.txt" Component_="ICE_LICENSE.txt" FileName="SOURCES.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\SOURCES.txt" SelfReg="false"/>
     <ROW File="SSLInfo.js" Component_="Glacier2.js_2" FileName="SSLInfo.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Glacier2\SSLInfo.js" SelfReg="false" NextFile="Address.js"/>
     <ROW File="ServantManager.js" Component_="Address.js" FileName="SERVAN~1.JS|ServantManager.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ServantManager.js" SelfReg="false" NextFile="SocketOperation.js"/>
     <ROW File="Server.cpp" Component_="depend.mak" FileName="Server.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\Server.cpp" SelfReg="false" NextFile="Makefile.mak_1"/>
@@ -482,6 +489,7 @@
     <ROW File="iceutil35d.dll_1" Component_="iceutil35d.dll_1" FileName="ICEUTI~2.DLL|iceutil35d.dll" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\x64\iceutil35d.dll" SelfReg="false" NextFile="iceutil35d.pdb_1"/>
     <ROW File="iceutil35d.pdb" Component_="iceutil35d.dll" FileName="ICEUTI~2.PDB|iceutil35d.pdb" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\iceutil35d.pdb" SelfReg="false" NextFile="icews35.pdb"/>
     <ROW File="iceutil35d.pdb_1" Component_="iceutil35d.dll_1" FileName="ICEUTI~2.PDB|iceutil35d.pdb" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\x64\iceutil35d.pdb" SelfReg="false" NextFile="icews35.pdb_1"/>
+    <ROW File="iceutilJS35.dll" Component_="iceutilJS35.dll" FileName="ICEUTI~3.DLL|iceutilJS35.dll" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\iceutilJS35.dll" SelfReg="false" NextFile="slice2js.exe"/>
     <ROW File="icews35.dll" Component_="icews35.dll" FileName="icews35.dll" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\icews35.dll" SelfReg="false" NextFile="icews35d.dll"/>
     <ROW File="icews35.dll_1" Component_="icews35.dll_1" FileName="icews35.dll" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\x64\icews35.dll" SelfReg="false" NextFile="icews35d.dll_1"/>
     <ROW File="icews35.pdb" Component_="icews35.dll" FileName="icews35.pdb" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\icews35.pdb" SelfReg="false" NextFile="icews35d.pdb"/>
@@ -489,7 +497,7 @@
     <ROW File="icews35d.dll" Component_="icews35d.dll" FileName="icews35d.dll" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\icews35d.dll" SelfReg="false" NextFile="ice35.dll_1"/>
     <ROW File="icews35d.dll_1" Component_="icews35d.dll_1" FileName="icews35d.dll" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\x64\icews35d.dll" SelfReg="false" NextFile="Glacier2.js"/>
     <ROW File="icews35d.pdb" Component_="icews35d.dll" FileName="icews35d.pdb" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\icews35d.pdb" SelfReg="false" NextFile="ice35.pdb_1"/>
-    <ROW File="icews35d.pdb_1" Component_="icews35d.dll_1" FileName="icews35d.pdb" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\x64\icews35d.pdb" SelfReg="false"/>
+    <ROW File="icews35d.pdb_1" Component_="icews35d.dll_1" FileName="icews35d.pdb" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\x64\icews35d.pdb" SelfReg="false" NextFile="iceutilJS35.dll"/>
     <ROW File="index.html" Component_="Chat.ice" FileName="INDEX~1.HTM|index.html" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Glacier2\chat\index.html" SelfReg="false" NextFile="Makefile.mak_10"/>
     <ROW File="index.html_1" Component_="Callback.ice" FileName="INDEX~1.HTM|index.html" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\bidir\index.html" SelfReg="false" NextFile="Makefile.mak_12"/>
     <ROW File="index.html_2" Component_="Client.js_3" FileName="INDEX~1.HTM|index.html" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\hello\index.html" SelfReg="false" NextFile="Makefile.mak_13"/>
@@ -512,6 +520,8 @@
     <ROW File="s_rsa1024_pub.pem" Component_="cacert.pem" FileName="S_RSA1~2.PEM|s_rsa1024_pub.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\s_rsa1024_pub.pem" SelfReg="false" NextFile="cacert.pem_1"/>
     <ROW File="s_rsa1024_pub.pem_1" Component_="cacert.pem_1" FileName="S_RSA1~2.PEM|s_rsa1024_pub.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\winrt\s_rsa1024_pub.pem" SelfReg="false" NextFile="Make.common.rules.mak"/>
     <ROW File="server.jks" Component_="cacert.pem" FileName="server.jks" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\server.jks" SelfReg="false" NextFile="s_dsa1024_priv.pem"/>
+    <ROW File="slice2js.exe" Component_="slice2js.exe" FileName="slice2js.exe" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\slice2js.exe" SelfReg="false" NextFile="sliceJS35.dll" DigSign="true"/>
+    <ROW File="sliceJS35.dll" Component_="sliceJS35.dll" FileName="SLICEJ~1.DLL|sliceJS35.dll" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\sliceJS35.dll" SelfReg="false" NextFile="ICE_LICENSE.txt"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
     <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="1" PackageFolder="." Languages="en" InstallationType="4"/>
