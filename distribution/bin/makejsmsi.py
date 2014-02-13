@@ -222,22 +222,22 @@ if not os.path.exists(certFile):
     sys.exit(1)
     
     
-if not keyFile:
-    if os.path.exists("c:\\release\\strongname\\IceReleaseKey.snk"):
-        keyFile = "c:\\release\\strongname\\IceReleaseKey.snk"
-    elif os.path.exists(os.path.join(os.getcwd(), "..", "..", "release", "strongname", "IceReleaseKey.snk")):
-        keyFile = os.path.join(os.getcwd(), "..", "..", "release", "strongname", "IceReleaseKey.snk")
-else:
-    if not os.path.isabs(keyFile):
-        keyFile = os.path.abspath(os.path.join(os.getcwd(), keyFile))
+#if not keyFile:
+#    if os.path.exists("c:\\release\\strongname\\IceReleaseKey.snk"):
+#        keyFile = "c:\\release\\strongname\\IceReleaseKey.snk"
+#    elif os.path.exists(os.path.join(os.getcwd(), "..", "..", "release", "strongname", "IceReleaseKey.snk")):
+#        keyFile = os.path.join(os.getcwd(), "..", "..", "release", "strongname", "IceReleaseKey.snk")
+#else:
+#    if not os.path.isabs(keyFile):
+#        keyFile = os.path.abspath(os.path.join(os.getcwd(), keyFile))
         
-if keyFile is None:
-    print("You need to specify the key file to sign assemblies using --key-file option")
-    sys.exit(1)
+#if keyFile is None:
+#    print("You need to specify the key file to sign assemblies using --key-file option")
+#    sys.exit(1)
 
-if not os.path.exists(keyFile):
-    print("Key file `%s' not found")
-    sys.exit(1)
+#if not os.path.exists(keyFile):
+#    print("Key file `%s' not found")
+#    sys.exit(1)
 
 if not os.path.exists(sourceArchive):
     print("Couldn't find %s in %s" % (os.path.basename(sourceArchive), os.path.dirname(sourceArchive)))
@@ -334,6 +334,53 @@ if not skipBuild:
                     if lang in ["cpp", "js"] and compiler == "VC110":
                         command = "\"%s\" %s  && nmake /f Makefile.mak install" % (vcvars, arch)
                         executeCommand(command, env)
+
+
+    compiler = "VC110"
+    arch = "x86"
+    conf = "release"
+    lang = "cpp"
+
+    buildDir = os.path.join(iceBuildHome, "build-slice2js")
+
+    if not os.path.exists(buildDir):
+        os.makedirs(buildDir)
+
+    os.chdir(buildDir)
+
+    sourceDir = os.path.join(buildDir, "IceJS-%s-src" % version)
+    installDir = os.path.join(buildDir, "IceJS-%s" % version)
+    if not os.path.exists(sourceDir):
+        sys.stdout.write("extracting %s to %s... " % (os.path.basename(sourceArchive), sourceDir))
+        sys.stdout.flush()
+        zipfile.ZipFile(sourceArchive).extractall()
+        if os.path.exists(sourceDir):
+            shutil.rmtree(sourceDir, onerror = _handle_error)
+        shutil.move(installDir, sourceDir)
+        print("ok")
+
+    print ("Build: Slice2JS (%s/%s/%s)" % (compiler,arch,conf))
+
+    env = os.environ.copy()
+
+    env["THIRDPARTY_HOME"] = thirdPartyHome
+    env["RELEASEPDBS"] = "yes"
+    if conf == "release":
+        env["OPTIMIZE"] = "yes"
+    env["ALTERNATE_LIBSUFFIX"] = "JS"
+
+    os.chdir(os.path.join(sourceDir, lang))
+
+    command = None
+    rules = "Make.rules.mak"
+
+    setMakefileOption(os.path.join(sourceDir, lang, "config", rules), "prefix", installDir)
+
+    vcvars = getVcVarsAll("VC110")
+
+    command = "\"%s\" %s  && nmake /f Makefile.mak install" % (vcvars, arch)
+    executeCommand(command, env)
+	
 #
 # Filter files, list of files that must not be included.
 #
