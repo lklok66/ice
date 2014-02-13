@@ -32,9 +32,9 @@
             function(ex)
             {
                 console.log(ex.toString());
-                if(ex._asyncResult)
+                if(typeof ex.ice_getAsyncResult === "function")
                 {
-                    console.log("\nexception occurred in call to " + ex._asyncResult.operation);
+                    console.log("\nexception occurred in call to " + ex.ice_getAsyncResult().operation);
                 }
                 if(ex.stack)
                 {

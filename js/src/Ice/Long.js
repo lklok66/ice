@@ -9,13 +9,13 @@
 
 (function(global){
     require("Ice/Class");
-    
+
     //
     // The Long type represents a signed 64-bit integer as two 32-bit values
     // corresponding to the high and low words.
     //
     var Ice = global.Ice || {};
-    
+
     var Long = Ice.Class({
         __init__: function(high, low)
         {
@@ -73,28 +73,28 @@
             }
         }
     });
-    
+
     //
     // (high & SIGN_MASK) != 0 denotes a negative number;
     // that is, the most significant bit is set.
     //
     Long.SIGN_MASK = 0x80000000;
-    
+
     //
-    // When converting to a JavaScript Number we left shift 32 bits
-    // the high word, as that isn't possible using JavaScript left
-    // shift operator, we multiply the value for 2^32 which will
+    // When converting to a JavaScript Number we left shift the
+    // high word by 32 bits. As that isn't possible using JavaScript's
+    // left shift operator, we multiply the value by 2^32 which will
     // produce the same result.
     //
     Long.HIGH_MASK = 0x100000000;
-    
+
     //
-    // The Maximum value for the high word when coverting to 
-    // a JavaScript Number is 2^21 - 1, in witch case all 
-    // the 53 bits are used.
+    // The maximum value for the high word when coverting to
+    // a JavaScript Number is 2^21 - 1, in which case all
+    // 53 bits are used.
     //
     Long.HIGH_MAX = 0x1FFFFF;
-    
+
     Ice.Long = Long;
     global.Ice = Ice;
 }(typeof (global) === "undefined" ? window : global));

@@ -44,7 +44,8 @@
             var args = arguments;
             if(args.length > 0 && args[0] instanceof Error)
             {
-                args[0]._asyncResult = this;
+                var self = this;
+                args[0].ice_getAsyncResult = function() { return self; };
             }
             Promise.prototype.fail.apply(this, args);
         },
