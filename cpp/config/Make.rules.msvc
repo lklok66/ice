@@ -107,10 +107,10 @@ ICONV_LIB       = libiconv.lib
 !endif
 
 !if "$(WINRT)" != "yes"
-BASELIBS	= iceutil$(LIBSUFFIX).lib $(ICE_OS_LIBS)
+BASELIBS	= iceutil$(ALTERNATE_LIBSUFFIX)$(LIBSUFFIX).lib $(ICE_OS_LIBS)
 LIBS		= ice$(LIBSUFFIX).lib $(BASELIBS)
 !else
-BASELIBS	= iceutil.lib $(ICE_OS_LIBS)
+BASELIBS	= iceutil$(ALTERNATE_LIBSUFFIX).lib $(ICE_OS_LIBS)
 LIBS		= ice.lib $(BASELIBS)
 !endif
 

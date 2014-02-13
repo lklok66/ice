@@ -90,9 +90,8 @@ LDFLAGS         = $(PRELIBPATH)"$(THIRDPARTY_HOME)\lib$(libsuff)" $(LDFLAGS)
 !else
 !endif
 
-LIBSUFFIX	= $(ALTERNATE_LIBSUFFIX)
 !if "$(OPTIMIZE)" != "yes"
-LIBSUFFIX	= $(LIBSUFFIX)d
+LIBSUFFIX	= d
 RCFLAGS		= -D_DEBUG
 !endif
 
