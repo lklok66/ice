@@ -134,6 +134,7 @@ var performEventHandler = function(fn)
                 setState(State.Idle);
             }
         );
+        return false;
     }
 }
 var sayHelloClickHandler = performEventHandler(sayHello);
@@ -190,7 +191,7 @@ function setState(newState, ex)
             //
             // Display the progress indicator and set the wait cursor.
             //
-            $("#progress-message").text(
+            $("#progress .message").text(
                 newState === State.SendRequest ? "Sending Request..." : "Flush Batch Requests...");
             $("#progress").show();
             $("body").addClass("waiting");
