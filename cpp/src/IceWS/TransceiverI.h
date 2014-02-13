@@ -60,13 +60,14 @@ private:
     void handleRequest(IceInternal::Buffer&);
     void handleResponse();
 
-    IceInternal::SocketOperation preRead(IceInternal::Buffer&);
+    bool preRead(IceInternal::Buffer&);
     bool postRead(IceInternal::Buffer&);
 
-    void preWrite(IceInternal::Buffer&);
-    IceInternal::SocketOperation postWrite(IceInternal::Buffer&);
+    bool preWrite(IceInternal::Buffer&);
+    bool postWrite(IceInternal::Buffer&);
 
     bool readBuffered(IceInternal::Buffer::Container::size_type);
+    void prepareWriteHeader(Ice::Byte, IceInternal::Buffer::Container::size_type);
 
     friend class ConnectorI;
     friend class AcceptorI;
@@ -82,15 +83,18 @@ private:
     {
         StateInitializeDelegate,
         StateConnected,
-        StateRequestPending,
-        StateResponsePending,
-        StateHandshakeComplete,
+        StateUpgradeRequestPending,
+        StateUpgradeResponsePending,
+        StateOpened,
+        StatePingPending,
+        StatePongPending,
         StateClosingRequestPending,
         StateClosingResponsePending,
         StateClosed
     };
 
     State _state;
+    State _nextState;
 
     HttpParserPtr _parser;
     std::string _key;
@@ -99,7 +103,8 @@ private:
     {
         ReadStateOpcode,
         ReadStateHeader,
-        ReadStatePayload
+        ReadStateControlFrame,
+        ReadStatePayload,
     };
 
     ReadState _readState;
@@ -118,7 +123,7 @@ private:
     {
         WriteStateHeader,
         WriteStatePayload,
-        WriteStateCloseFrame
+        WriteStateControlFrame,
     };
 
     WriteState _writeState;
@@ -129,6 +134,11 @@ private:
 
     bool _closingInitiator;
     int _closingReason;
+
+    bool _readPending;
+    bool _writePending;
+
+    std::vector<Ice::Byte> _pingPayload;
 };
 typedef IceUtil::Handle<TransceiverI> TransceiverIPtr;
 

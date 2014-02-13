@@ -69,7 +69,6 @@ for(var i = 0; i < Demo.FixedSeqSize; ++i)
 }
 
 var communicator;
-
 Ice.Promise.try(
     function()
     {

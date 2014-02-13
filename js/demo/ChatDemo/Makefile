@@ -7,16 +7,10 @@
 #
 # **********************************************************************
 
-top_srcdir	= ..
+top_srcdir	= ../..
+
+TARGETS = Chat.js ChatSession.js
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= Ice Glacier2 ChatDemo
-
-$(EVERYTHING)::
-	@for subdir in $(SUBDIRS); \
-	do \
-	    echo "making $@ in $$subdir"; \
-	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
-	done
-
+SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) -I$(slicedir) -I.

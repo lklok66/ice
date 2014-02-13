@@ -36,14 +36,64 @@
             {
                 return false;
             }
-            
             return this.high === rhs.high && this.low === rhs.low;
         },
         toString: function()
         {
             return this.high + ":" + this.low;
+        },
+        toNumber: function()
+        {
+            if((this.high & Long.SIGN_MASK) != 0)
+            {
+                var low = ~this.low;
+                var high = ~this.high;
+                if(low < 0xFFFFFFFF)
+                {
+                    low += 1;
+                }
+                else
+                {
+                    low = 0;
+                    high += 1;
+                    if(high > Long.HIGH_MAX)
+                    {
+                        return Number.NEGATIVE_INFINITY;
+                    }
+                }
+                return -1 * (high * Long.HIGH_MASK) + low;
+            }
+            else
+            {
+                if(this.high > Long.HIGH_MAX)
+                {
+                    return Number.POSITIVE_INFINITY;
+                }
+                return (this.high * Long.HIGH_MASK) + this.low;
+            }
         }
     });
+    
+    //
+    // (high & SIGN_MASK) != 0 denotes a negative number;
+    // that is, the most significant bit is set.
+    //
+    Long.SIGN_MASK = 0x80000000;
+    
+    //
+    // When converting to a JavaScript Number we left shift 32 bits
+    // the high word, as that isn't possible using JavaScript left
+    // shift operator, we multiply the value for 2^32 which will
+    // produce the same result.
+    //
+    Long.HIGH_MASK = 0x100000000;
+    
+    //
+    // The Maximum value for the high word when coverting to 
+    // a JavaScript Number is 2^21 - 1, in witch case all 
+    // the 53 bits are used.
+    //
+    Long.HIGH_MAX = 0x1FFFFF;
     
     Ice.Long = Long;
     global.Ice = Ice;

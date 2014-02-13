@@ -4,28 +4,21 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hello Demo | Ice for JavaScript</title>
-
+    
     <link rel="stylesheet" href="../../../config/foundation/css/jquery.nouislider.css" />
     <link rel="stylesheet" href="../../../config/foundation/css/foundation.css" />
     
     <script src="../../../config/foundation/js/modernizr.js"></script>
-    <script src="../../../lib/Ice.js"></script>
     
-    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shCore.js"></script>
-    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shBrushJScript.js"></script>
     <link type="text/css" rel="stylesheet" href="../../../config/syntaxhighlighter/styles/shCoreDefault.css"/>
-    <script src="Hello.js"></script>
     
     <style type="text/css">
-        .noUiSlider
-        {
-            margin-top:7px;
-        }
-        #source
-        {
-            max-height:500px;
-            overflow:auto;
-        }
+        .noUiSlider{ margin-top:7px; }
+        #source{ max-height:500px; overflow:auto; }
+        #progress .icon{ margin-left:10px; margin-top: 5px; }
+        #progress .text{ margin-left:25px; }
+        #output { height: 150px; }
+        .waiting * { cursor: wait !important; }
     </style>
   </head>
   <body>
@@ -101,7 +94,13 @@
                             <a href="#" class="button disabled small" id="flush">Flush</a>
                         </div>
                     </div>
-                    <textarea id="console" class="disabled" readonly></textarea>
+                    <textarea id="output" class="disabled" readonly></textarea>
+                    <div id="progress" class="row hide">
+                        <div class="small-12 columns left">
+                            <div class="inline left icon"></div>
+                            <div class="text">Sending Request...</div>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -113,13 +112,20 @@
     <script src="../../../config/foundation/js/jquery.js"></script>
     <script src="../../../config/foundation/js/foundation.min.js"></script>
     <script src="../../../config/foundation/js/jquery.nouislider.js"></script>
+    <script src="../../../config/foundation/js/spin.min.js"></script>
+    <script src="../../../config/foundation/js/jquery.spin.js"></script>
     <script>
         $(document).foundation();
         $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
         $("#timeout").noUiSlider({range: [0, 2500], start: 0, handles: 1});
         $("#delay").noUiSlider({range: [0, 2500], start: 0, handles: 1});
+        $("#progress .icon").spin("small");
     </script>
+    <script src="../../../lib/Ice.js"></script>
+    <script src="Hello.js"></script>
     <script src="browser/Client.js"></script>
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shBrushJScript.js"></script>
     <script type="application/javascript">
         $("#source").load("browser/Client.js",
             //

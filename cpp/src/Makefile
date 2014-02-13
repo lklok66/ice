@@ -59,7 +59,7 @@ endif
 
 Slice: IceUtil
 
-slice2cpp slice2cs slice2freeze slice2freezej slice2java slice2php slice2py slice2rb slice2html: Slice
+slice2cpp slice2cs slice2freeze slice2freezej slice2java slice2js slice2php slice2py slice2rb slice2html: Slice
 
 Ice: slice2cpp
 

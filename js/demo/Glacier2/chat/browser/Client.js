@@ -151,7 +151,7 @@ var run = function(router, session)
                         function(ex){
                             chat.fail(ex);
                         });
-                }, (timeout.low * 500));
+                }, (timeout.toNumber() * 500));
             
             //
             // Create the ChatCallback servant and add it to the 
@@ -207,7 +207,7 @@ var run = function(router, session)
                             var msg = $(this).val();
                             $(this).val("");
                             session.say(msg).exception(
-                                function(){
+                                function(ex){
                                     chat.fail(ex);
                                 });
                             return false;
@@ -388,8 +388,8 @@ var stopProgress = function(completed)
 {
     if(progress)
     {
-        progress = null;
         clearInterval(progress);
+        progress = null;
         if(completed)
         {
             $("#loading .meter").css("width", "100%");

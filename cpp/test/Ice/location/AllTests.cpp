@@ -570,7 +570,8 @@ allTests(const Ice::CommunicatorPtr& communicator, const string& ref)
     cout << "testing object migration... " << flush;
     hello = HelloPrx::checkedCast(communicator->stringToProxy("hello"));
     obj->migrateHello();
-    hello->ice_getConnection()->close(false);
+    // TODO: enable after fixing ICE-5489
+    //hello->ice_getConnection()->close(false);
     hello->sayHello();
     obj->migrateHello();
     hello->sayHello();
