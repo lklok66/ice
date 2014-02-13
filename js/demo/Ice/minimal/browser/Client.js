@@ -32,8 +32,7 @@ function sayHello()
             // Create a proxy for the hello object
             //
             var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
-            var proxy = communicator.stringToProxy(
-                            "hello:ws -h " + hostname + " -p 10000");
+            var proxy = communicator.stringToProxy("hello:ws -h " + hostname + " -p 10000");
             
             //
             // Down-cast this proxy to the derived interface Demo::Hello
@@ -71,6 +70,7 @@ function setState(newState)
         case State.Iddle:
         {
             assert(state === undefined || state == State.Busy);
+
             //
             // Hide the progress indicator.
             //
@@ -86,6 +86,7 @@ function setState(newState)
         case State.Busy:
         {
             assert(state == State.Iddle);
+
             //
             // Clear any previous error messages.
             //

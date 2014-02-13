@@ -10,11 +10,11 @@
     <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shBrushJScript.js"></script>
     <link type="text/css" rel="stylesheet" href="../../../config/syntaxhighlighter/styles/shCoreDefault.css"/>
     <style type="text/css">
-        #source
-        {
-            max-height:500px;
-            overflow:auto;
-        }
+        #source { max-height:500px; overflow:auto; }
+        #console { height:150px; overflow:auto; }
+        #progress .icon { margin-left:10px; margin-top: 5px; }
+        #progress .text { margin-left:25px; }
+        .waiting * { cursor: wait !important; }
     </style>
   </head>
   <body>
@@ -85,6 +85,12 @@
                         <textarea id="console" class="disabled" readonly></textarea>
                     </div>
                 </div>
+                <div id="progress" class="row hide">
+                  <div class="small-12 columns left">
+                    <div class="inline left icon"></div>
+                    <div class="text">Running...</div>
+                  </div>
+                </div>
             </form>
         </div>
     </section>
@@ -94,9 +100,12 @@
     </div>
     <script src="../../../config/foundation/js/jquery.js"></script>
     <script src="../../../config/foundation/js/foundation.min.js"></script>
+    <script src="../../../config/foundation/js/spin.min.js"></script>
+    <script src="../../../config/foundation/js/jquery.spin.js"></script>
     <script>
         $(document).foundation();
         $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
+        $("#progress .icon").spin("small");
     </script>
     <script src="../../../lib/Ice.js"></script>
     <script src="Throughput.js"></script>
