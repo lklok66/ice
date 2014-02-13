@@ -33,7 +33,7 @@ slice2cpp slice2js: Slice
 
 Ice: slice2cpp
 
-IceWS IceSSL: Ice
+IceWS IceSSL Glavier2Lib: Ice
 
 Glacier2: Glacier2Lib
 

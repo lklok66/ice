@@ -57,6 +57,7 @@ nobuild = 0
 (sysname, nodename, release, ver, machine) = os.uname()
 if sysname == "Darwin":
     buildLanguages = [ "cpp", "cpp-11", "js" ]
+    make = "make"
 else:
     buildLanguages = [ "cpp", "js" ]
 
