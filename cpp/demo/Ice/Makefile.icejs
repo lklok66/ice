@@ -15,8 +15,7 @@ SUBDIRS		= bidir \
 		  hello \
 		  latency \
 		  minimal \
-		  throughput \
-		  ws
+		  throughput
 
 .PHONY: $(EVERYTHING) $(SUBDIRS)
 

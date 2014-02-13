@@ -137,6 +137,7 @@ excludeFiles = [ \
     "/cpp/demo/Ice/callback",
     "/cpp/demo/Ice/optional",
     "/cpp/demo/Ice/value",
+    "/cpp/demo/Ice/ws",
     "/cpp/demo/IceBox",
     "/cpp/demo/IceStorm",
     "/cpp/demo/Glacier2/callback",

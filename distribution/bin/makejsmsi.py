@@ -437,6 +437,14 @@ for arch in ["x86", "amd64"]:
                     if not os.path.exists(targetFile):
                         copy(os.path.join(installDir, f), targetFile, verbose = verbose)
 
+buildDir = os.path.join(iceBuildHome, "build-slice2js")
+binDir = os.path.join(buildDir, "IceJS-%s" % version, "bin")
+
+installDir = os.path.join(buildDir, "IceJS-%s" % version)
+for f in ["slice2js.exe", "sliceJS35.dll", "iceutilJS35.dll"]:
+    targetFile = relPath(installDir, installerDir, os.path.join(binDir, f))
+    copy(os.path.join(binDir, f), targetFile, verbose = verbose)
+
 #
 # docs dir
 #
@@ -447,17 +455,16 @@ for f in ["README.txt", "SOURCES.txt", "THIRD_PARTY_LICENSE.txt"]:
 #
 # Copy VC110 thirdpary files
 #
-files = ["bzip2.dll", "bzip2d.dll", "ssleay32.dll", "ssleay32.pdb", "libeay32.dll", "libeay32.pdb", "openssl.exe"]
-
-for root, dirnames, filenames in os.walk(os.path.join(thirdPartyHome, "bin", "vc110")):
-    for f in filenames:
-        if f not in files:
-            continue
-        targetFile = relPath(thirdPartyHome, installerDir, os.path.join(root, f))
-        targetFile = targetFile.replace("vc110", "")
-        if not os.path.exists(targetFile):
-            copy(os.path.join(root, f), targetFile, verbose = verbose)
-
+#files = ["bzip2.dll", "bzip2d.dll", "ssleay32.dll", "ssleay32.pdb", "libeay32.dll", "libeay32.pdb", "openssl.exe"]
+#
+#for root, dirnames, filenames in os.walk(os.path.join(thirdPartyHome, "bin", "vc110")):
+#    for f in filenames:
+#        if f not in files:
+#            continue
+#        targetFile = relPath(thirdPartyHome, installerDir, os.path.join(root, f))
+#        targetFile = targetFile.replace("vc110", "")
+#        if not os.path.exists(targetFile):
+#            copy(os.path.join(root, f), targetFile, verbose = verbose)
 
 
 if not skipInstaller:
