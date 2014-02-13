@@ -366,7 +366,7 @@
         var port = 0;
         var timeout = -1;
         var compress = false;
-        var resource = null;
+        var resource = "";
         
         var protocol = secure ? "wss" : "ws";
 
