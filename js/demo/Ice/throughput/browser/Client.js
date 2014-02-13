@@ -215,12 +215,13 @@ function run()
             //
             var start = new Date().getTime();
             var args = test != "receive" ? [seq] : [];
-            var p = operation.apply(proxy, args);
-            for(var i = 1; i < repetitions; ++i)
-            {
-                p = p.then(operation.apply(proxy, args));
-            }
-            return p.then(
+            return loop(
+                function() 
+                {
+                    return operation.apply(proxy, args);
+                },
+                repetitions
+            ).then(
                 function()
                 {
                     //
@@ -242,6 +243,23 @@ function run()
 }
 
 //
+// Asynchronous loop, each call to the given function returns a
+// promise that when fulfilled runs the next iteration.
+//    
+function loop(fn, repetitions)
+{
+    var i = 0;
+    var next = function() 
+    {
+        if(i++ < repetitions)
+        {
+            return fn.call().then(next);
+        }
+    };
+    return next();
+}
+
+//
 // Handle the client state.
 //
 var State = { Finish:0, Running: 1 };
@@ -259,7 +277,6 @@ function setState(s, ex)
                 $("#run").addClass("disabled");
                 $("#progress").show();
                 $("body").addClass("waiting");
-                break;
                 break;
             }
             case State.Finish:
@@ -283,6 +300,7 @@ $("#run").click(
         if(state !== State.Running)
         {
             setState(State.Running);
+
             Ice.Promise.try(
                 function()
                 {
