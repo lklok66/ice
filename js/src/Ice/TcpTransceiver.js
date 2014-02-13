@@ -151,7 +151,7 @@
             }
             catch(ex)
             {
-                throw translateError(ex);
+                throw translateError(this._state, ex);
             }
             finally
             {
@@ -324,7 +324,7 @@
         socketError: function(err)
         {
             Debug.assert(this._errorCallback !== null);
-            this._errorCallback(translateError(err));
+            this._errorCallback(translateError(this._state, err));
         }
     });
     
@@ -338,14 +338,24 @@
         return addressesToString(fd.localAddress, fd.localPort, fd.remoteAddress, fd.remotePort, targetAddr);
     }
 
-    function translateError(ex)
+    function translateError(state, err)
     {
-        if(ex.code === "ECONNREFUSED")
+        if(state < StateConnected)
         {
-            return new Ice.ConnectionRefusedException(ex.code, ex);
+            if(connectionRefused(err.code))
+            {
+                return new Ice.ConnectionRefusedException(err.code, err);
+            }
+            else if(connectionFailed(err.code))
+            {
+                return new Ice.ConnectFailedException(err.code, err);
+            }
         }
-        // TODO: Search the exception's error message for symbols like ECONNREFUSED ?
-        return new SocketException(0, ex);
+        else if(connectionLost(err.code))
+        {
+            return new Ice.ConnectionLostException(err.code, err);
+        }
+        return new Ice.SocketException(err.code, err);
     }
     
     function addressesToString(localHost, localPort, remoteHost, remotePort, targetAddr)
@@ -383,7 +393,7 @@
         transceiver._fd = new net.Socket();
         transceiver._addr = addr;
         transceiver._connected = false;
-        transceiver._desc = "remote address: " +addr.host + ":" + addr.port + " <not connected>";
+        transceiver._desc = "remote address: " + addr.host + ":" + addr.port + " <not connected>";
         transceiver._state = StateNeedConnect;
 
         return transceiver;
@@ -401,6 +411,37 @@
 
         return transceiver;
     };
+
+    
+    var ECONNABORTED = "ECONNABORTED";
+    var ECONNREFUSED = "ECONNREFUSED";
+    var ECONNRESET = "ECONNRESET"
+    var EHOSTUNREACH = "EHOSTUNREACH";
+    var ENETUNREACH = "ENETUNREACH";
+    var ENOTCONN = "ENOTCONN";
+    var EPIPE = "EPIPE";
+    var ESHUTDOWN = "ESHUTDOWN"
+    var ETIMEDOUT = "ETIMEDOUT";    
+
+    function connectionRefused(err)
+    {
+        return err == ECONNREFUSED;
+    }
+
+    function connectionFailed(err)
+    {
+        return err == ECONNREFUSED || err == ETIMEDOUT ||
+               err == ENETUNREACH || err == EHOSTUNREACH ||
+               err == ECONNRESET || err == ESHUTDOWN ||
+               err == ECONNABORTED;
+    }
+
+    function connectionLost(err)
+    {
+        return err == ECONNRESET || err == ENOTCONN ||
+               err == ESHUTDOWN || err == ECONNABORTED ||
+               err == EPIPE;
+    }
 
     Ice.TcpTransceiver = TcpTransceiver;
     global.Ice = Ice;

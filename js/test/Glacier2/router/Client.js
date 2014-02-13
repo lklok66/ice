@@ -117,10 +117,7 @@
                     failCB,
                     function(ex)
                     {
-                        if(!(ex instanceof Ice.ConnectionLostException))
-                        {
-                            throw ex;
-                        }
+                        test(ex instanceof Ice.ConnectionLostException);
                         out.writeLine("ok");
                         
                         out.write("trying to create session with wrong password... ");
@@ -143,10 +140,7 @@
                     failCB,
                     function(ex)
                     {
-                        if(!(ex instanceof Glacier2.SessionNotExistException))
-                        {
-                            throw ex;
-                        }
+                        test(ex instanceof Glacier2.SessionNotExistException);
                         out.writeLine("ok");
 
                         out.write("creating session with correct password... ");
@@ -165,10 +159,7 @@
                     failCB,
                     function(ex)
                     {
-                        if(!(ex instanceof Glacier2.CannotCreateSessionException))
-                        {
-                            throw ex;
-                        }
+                        test(ex instanceof Glacier2.CannotCreateSessionException);
                         out.writeLine("ok");
                         
                         out.write("pinging server after session creation... ");
@@ -266,10 +257,7 @@
                     failCB,
                     function(ex)
                     {
-                        if(!(ex instanceof Test.CallbackException))
-                        {
-                            throw ex;
-                        }
+                        test(ex instanceof Test.CallbackException);
                         test(ex.someValue == 3.14);
                         test(ex.someString == "3.14");
                         return callbackReceiverImpl.callbackOK();
@@ -287,10 +275,7 @@
                     failCB,
                     function(ex)
                     {
-                        if(!(ex instanceof Ice.ObjectNotExistException))
-                        {
-                            throw ex;
-                        }
+                        test(ex instanceof Ice.ObjectNotExistException);
                         out.writeLine("ok");
                         out.write("testing whether other allowed category is accepted... ");
                         var context = new Ice.Context();
@@ -319,10 +304,7 @@
                     failCB,
                     function(ex)
                     {
-                        if(!(ex instanceof Ice.ObjectNotExistException))
-                        {
-                            throw ex;
-                        }
+                        test(ex instanceof Ice.ObjectNotExistException);
                         out.writeLine("ok");
                         out.write("testing whether user-id as category is accepted... ");
                         var context = new Ice.Context();
@@ -365,10 +347,7 @@
                     failCB,
                     function(ex)
                     {
-                        if(!(ex instanceof Ice.ConnectionLostException))
-                        {
-                            throw ex;
-                        }
+                        test(ex instanceof Ice.ConnectionLostException);
                         out.writeLine("ok");
                         
                         out.write("uninstalling router with communicator... ");
@@ -401,11 +380,7 @@
                     failCB,
                     function(ex)
                     {
-                        if(!(ex instanceof Ice.LocalException) || 
-                            (ex._asyncResult && ex._asyncResult.operation !== "ice_ping"))
-                        {
-                            throw ex;
-                        }
+                        test(ex instanceof Ice.LocalException);
                         out.writeLine("ok");
                     }
                 ).then(
@@ -437,11 +412,8 @@
                 var c = null;
                 try
                 {
-                    //id.properties.setProperty("Ice.ACM.Client", "0");
                     id.properties.setProperty("Ice.Warn.Dispatch", "1");
                     id.properties.setProperty("Ice.Warn.Connections", "0");
-                    //id.properties.setProperty("Ice.Trace.Protocol", "3");
-                    //id.properties.setProperty("Ice.Trace.Network", "3");
                     c = Ice.initialize(id);
                     allTests(out, c).then(function(){
                             return c.destroy();
