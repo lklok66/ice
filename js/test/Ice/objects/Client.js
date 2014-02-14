@@ -187,10 +187,10 @@
 
     var allTests = function(out, communicator)
     {
-        var p = new Promise();
-
-        setTimeout(function(){
-            try
+        var factory, ref, base, initial, b1, b2, c, d, i, j, h;
+        
+        return Promise.try(
+            function()
             {
                 var factory = new MyObjectFactory();
                 communicator.addObjectFactory(factory, "::Test::B");
@@ -203,278 +203,247 @@
                 communicator.addObjectFactory(factory, "::Test::H");
 
                 out.write("testing stringToProxy... ");
-                var ref = "initial:default -p 12010";
-                var base = communicator.stringToProxy(ref);
+                ref = "initial:default -p 12010";
+                base = communicator.stringToProxy(ref);
                 test(base !== null);
                 out.writeLine("ok");
 
-                var initial, b1, b2, c, d, i, j, h;
                 out.write("testing checked cast... ");
-                Test.InitialPrx.checkedCast(base).then(
-                    function(asyncResult, obj)
-                    {
-                        initial = obj;
-                        test(initial !== null);
-                        test(initial.equals(base));
-                        out.writeLine("ok");
-                    }
-                ).then(
-                    function()
-                    {
-                        out.write("getting B1... ");
-                        return initial.getB1();
-                    }
-                ).then(
-                    function(asyncResult, obj)
-                    {
-                        b1 = obj;
-                        test(b1 !== null);
-                        out.writeLine("ok");
-                        out.write("getting B2... ");
-                        return initial.getB2();
-                    }
-                ).then(
-                    function(asyncResult, obj)
-                    {
-                        b2 = obj;
-                        test(b2 != null);
-                        out.writeLine("ok");
-                        out.write("getting C... ");
-                        return initial.getC();
-                    }
-                ).then(
-                    function(asyncResult, obj)
-                    {
-                        c = obj;
-                        test(c !== null);
-                        out.writeLine("ok");
-                        out.write("getting D... ");
-                        return initial.getD();
-                    }
-                ).then(
-                    function(asyncResult, obj)
-                    {
-                        d = obj;
-                        test(d !== null);
-                        out.writeLine("ok");
-                    }
-                ).then(
-                    function()
-                    {
-                        out.write("checking consistency... ");
-                        test(b1 !== b2);
-                        //test(b1 != c);
-                        //test(b1 != d);
-                        //test(b2 != c);
-                        //test(b2 != d);
-                        //test(c != d);
-                        test(b1.theB === b1);
-                        test(b1.theC === null);
-                        test(b1.theA instanceof Test.B);
-                        test(b1.theA.theA === b1.theA);
-                        test(b1.theA.theB === b1);
-                        test(b1.theA.theC instanceof Test.C);
-                        test(b1.theA.theC.theB === b1.theA);
-
-                        test(b1.preMarshalInvoked);
-                        test(b1.postUnmarshalInvoked(null));
-                        test(b1.theA.preMarshalInvoked);
-                        test(b1.theA.postUnmarshalInvoked(null));
-                        test(b1.theA.theC.preMarshalInvoked);
-                        test(b1.theA.theC.postUnmarshalInvoked(null));
-
-                        // More tests possible for b2 and d, but I think this is already
-                        // sufficient.
-                        test(b2.theA === b2);
-                        test(d.theC === null);
-                        out.writeLine("ok");
-                        out.write("getting B1, B2, C, and D all at once... ");
-
-                        return initial.getAll();
-                    }
-                ).then(
-                    function(asyncResult, b1, b2, c, d)
-                    {
-                        test(b1);
-                        test(b2);
-                        test(c);
-                        test(d);
-                        out.writeLine("ok");
-
-                        out.write("checking consistency... ");
-                        test(b1 !== b2);
-                        //test(b1 != c);
-                        //test(b1 != d);
-                        //test(b2 != c);
-                        //test(b2 != d);
-                        //test(c != d);
-                        test(b1.theA === b2);
-                        test(b1.theB === b1);
-                        test(b1.theC === null);
-                        test(b2.theA === b2);
-                        test(b2.theB === b1);
-                        test(b2.theC === c);
-                        test(c.theB === b2);
-                        test(d.theA === b1);
-                        test(d.theB === b2);
-                        test(d.theC === null);
-                        test(d.preMarshalInvoked);
-                        test(d.postUnmarshalInvoked(null));
-                        test(d.theA.preMarshalInvoked);
-                        test(d.theA.postUnmarshalInvoked(null));
-                        test(d.theB.preMarshalInvoked);
-                        test(d.theB.postUnmarshalInvoked(null));
-                        test(d.theB.theC.preMarshalInvoked);
-                        test(d.theB.theC.postUnmarshalInvoked(null));
-                        out.writeLine("ok");
-
-                        out.write("testing protected members... ");
-                        return initial.getE();
-                    }
-                ).then(
-                    function(asyncResult, e)
-                    {
-                        test(e.checkValues());
-                        return initial.getF();
-                    }
-                ).then(
-                    function(asyncResult, f)
-                    {
-                        test(f.checkValues());
-                        test(f.e2.checkValues());
-                        out.writeLine("ok");
-                        out.write("getting I, J and H... ");
-                        return initial.getI();
-                    }
-                ).then(
-                    function(asyncResult, obj)
-                    {
-                        i = obj;
-                        test(i);
-                        return initial.getJ();
-                    }
-                ).then(
-                    function(asyncResult, obj)
-                    {
-                        j = obj;
-                        test(j);
-                        return initial.getH();
-                    }
-                ).then(
-                    function(asyncResult, obj)
-                    {
-                        h = obj;
-                        test(h);
-                        out.write("setting I... ");
-                        return initial.setI(i);
-                    }
-                ).then(
-                    function(asyncResult)
-                    {
-                        return initial.setI(j);
-                    }
-                ).then(
-                    function(asyncResult)
-                    {
-                        return initial.setI(h);
-                    }
-                ).then(
-                    function(asyncResult)
-                    {
-                        out.writeLine("ok");
-                        out.write("testing sequences... ");
-                        return initial.opBaseSeq([]);
-                    }
-                ).then(
-                    function(asyncResult, retS, outS)
-                    {
-                        return initial.opBaseSeq([new Test.Base(new Test.S(), "")]);
-                    }
-                ).then(
-                    function(asyncResult, retS, outS)
-                    {
-                        test(retS.length === 1 && outS.length === 1);
-                        out.writeLine("ok");
-                        out.write("testing compact ID... ");
-
-                        return initial.getCompact();
-                    }
-                ).then(
-                    function(asyncResult, compact)
-                    {
-                        test(compact !== null);
-                        out.writeLine("ok");
-                        out.write("testing UnexpectedObjectException... ");
-                        ref = "uoet:default -p 12010";
-                        base = communicator.stringToProxy(ref);
-                        test(base !== null);
-                        var uoet = Test.UnexpectedObjectExceptionTestPrx.uncheckedCast(base);
-                        test(uoet !== null);
-                        return uoet.op();
-                    }
-                ).then(
-                    function(asyncResult)
-                    {
-                        test(false);
-                    },
-                    function(ex)
-                    {
-                        if(ex instanceof Ice.UnexpectedObjectException )
-                        {
-                            test(ex.type == "::Test::AlsoEmpty");
-                            test(ex.expectedType == "::Test::Empty");
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                        out.writeLine("ok");
-                        return initial.shutdown();
-                    }
-                ).then(
-                    function()
-                    {
-                        p.succeed();
-                    }
-                ).exception(
-                    function(ex)
-                    {
-                        p.fail(ex);
-                    }
-                );
+                return Test.InitialPrx.checkedCast(base);
             }
-            catch(ex)
+        ).then(
+            function(r, obj)
             {
-                p.fail(ex);
+                initial = obj;
+                test(initial !== null);
+                test(initial.equals(base));
+                out.writeLine("ok");
             }
-        });
-        return p;
+        ).then(
+            function()
+            {
+                out.write("getting B1... ");
+                return initial.getB1();
+            }
+        ).then(
+            function(r, obj)
+            {
+                b1 = obj;
+                test(b1 !== null);
+                out.writeLine("ok");
+                out.write("getting B2... ");
+                return initial.getB2();
+            }
+        ).then(
+            function(r, obj)
+            {
+                b2 = obj;
+                test(b2 != null);
+                out.writeLine("ok");
+                out.write("getting C... ");
+                return initial.getC();
+            }
+        ).then(
+            function(r, obj)
+            {
+                c = obj;
+                test(c !== null);
+                out.writeLine("ok");
+                out.write("getting D... ");
+                return initial.getD();
+            }
+        ).then(
+            function(r, obj)
+            {
+                d = obj;
+                test(d !== null);
+                out.writeLine("ok");
+            }
+        ).then(
+            function()
+            {
+                out.write("checking consistency... ");
+                test(b1 !== b2);
+                //test(b1 != c);
+                //test(b1 != d);
+                //test(b2 != c);
+                //test(b2 != d);
+                //test(c != d);
+                test(b1.theB === b1);
+                test(b1.theC === null);
+                test(b1.theA instanceof Test.B);
+                test(b1.theA.theA === b1.theA);
+                test(b1.theA.theB === b1);
+                test(b1.theA.theC instanceof Test.C);
+                test(b1.theA.theC.theB === b1.theA);
+
+                test(b1.preMarshalInvoked);
+                test(b1.postUnmarshalInvoked(null));
+                test(b1.theA.preMarshalInvoked);
+                test(b1.theA.postUnmarshalInvoked(null));
+                test(b1.theA.theC.preMarshalInvoked);
+                test(b1.theA.theC.postUnmarshalInvoked(null));
+
+                // More tests possible for b2 and d, but I think this is already
+                // sufficient.
+                test(b2.theA === b2);
+                test(d.theC === null);
+                out.writeLine("ok");
+                out.write("getting B1, B2, C, and D all at once... ");
+
+                return initial.getAll();
+            }
+        ).then(
+            function(r, b1, b2, c, d)
+            {
+                test(b1);
+                test(b2);
+                test(c);
+                test(d);
+                out.writeLine("ok");
+
+                out.write("checking consistency... ");
+                test(b1 !== b2);
+                //test(b1 != c);
+                //test(b1 != d);
+                //test(b2 != c);
+                //test(b2 != d);
+                //test(c != d);
+                test(b1.theA === b2);
+                test(b1.theB === b1);
+                test(b1.theC === null);
+                test(b2.theA === b2);
+                test(b2.theB === b1);
+                test(b2.theC === c);
+                test(c.theB === b2);
+                test(d.theA === b1);
+                test(d.theB === b2);
+                test(d.theC === null);
+                test(d.preMarshalInvoked);
+                test(d.postUnmarshalInvoked(null));
+                test(d.theA.preMarshalInvoked);
+                test(d.theA.postUnmarshalInvoked(null));
+                test(d.theB.preMarshalInvoked);
+                test(d.theB.postUnmarshalInvoked(null));
+                test(d.theB.theC.preMarshalInvoked);
+                test(d.theB.theC.postUnmarshalInvoked(null));
+                out.writeLine("ok");
+
+                out.write("testing protected members... ");
+                return initial.getE();
+            }
+        ).then(
+            function(r, e)
+            {
+                test(e.checkValues());
+                return initial.getF();
+            }
+        ).then(
+            function(r, f)
+            {
+                test(f.checkValues());
+                test(f.e2.checkValues());
+                out.writeLine("ok");
+                out.write("getting I, J and H... ");
+                return initial.getI();
+            }
+        ).then(
+            function(r, obj)
+            {
+                i = obj;
+                test(i);
+                return initial.getJ();
+            }
+        ).then(
+            function(r, obj)
+            {
+                j = obj;
+                test(j);
+                return initial.getH();
+            }
+        ).then(
+            function(r, obj)
+            {
+                h = obj;
+                test(h);
+                out.write("setting I... ");
+                return initial.setI(i);
+            }
+        ).then(
+            function(r)
+            {
+                return initial.setI(j);
+            }
+        ).then(
+            function(r)
+            {
+                return initial.setI(h);
+            }
+        ).then(
+            function(r)
+            {
+                out.writeLine("ok");
+                out.write("testing sequences... ");
+                return initial.opBaseSeq([]);
+            }
+        ).then(
+            function(r, retS, outS)
+            {
+                return initial.opBaseSeq([new Test.Base(new Test.S(), "")]);
+            }
+        ).then(
+            function(r, retS, outS)
+            {
+                test(retS.length === 1 && outS.length === 1);
+                out.writeLine("ok");
+                out.write("testing compact ID... ");
+
+                return initial.getCompact();
+            }
+        ).then(
+            function(r, compact)
+            {
+                test(compact !== null);
+                out.writeLine("ok");
+                out.write("testing UnexpectedObjectException... ");
+                ref = "uoet:default -p 12010";
+                base = communicator.stringToProxy(ref);
+                test(base !== null);
+                var uoet = Test.UnexpectedObjectExceptionTestPrx.uncheckedCast(base);
+                test(uoet !== null);
+                return uoet.op();
+            }
+        ).then(
+            function(r)
+            {
+                test(false);
+            },
+            function(ex)
+            {
+                test(ex instanceof Ice.UnexpectedObjectException);
+                test(ex.type == "::Test::AlsoEmpty");
+                test(ex.expectedType == "::Test::Empty");
+                out.writeLine("ok");
+                return initial.shutdown();
+            }
+        );
     };
 
     var run = function(out, id)
     {
-        var p = new Ice.Promise();
-        setTimeout(
+        return Promise.try(
             function()
             {
-                var c = null;
-                try
-                {
-                    c = Ice.initialize(id);
-                    allTests(out, c).then(function(){
+                var c = Ice.initialize(id);
+                return allTests(out, c).finally(
+                    function()
+                    {
+                        if(c)
+                        {
                             return c.destroy();
-                        }).then(function(){
-                            p.succeed();
-                        }).exception(function(ex){
-                            p.fail(ex);
-                        });
-                }
-                catch(ex)
-                {
-                    p.fail(ex);
-                }
+                        }
+                    });
             });
-        return p;
     };
     global.__test__ = run;
 }(typeof (global) === "undefined" ? window : global));

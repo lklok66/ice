@@ -19,89 +19,71 @@
         }
     };
 
-    var run = function(communicator, log, p)
+    var run = function(communicator, p)
     {
-        var promise = new Ice.Promise();
-
-        var failCB = function() { test(false); };
-
-        setTimeout(function(){
-            try
+        Ice.Promise.try(
+            function()
             {
                 p = p.ice_oneway();
-
-                p.ice_ping().then(
-                    function(r)
-                    {
-                        try
-                        {
-                            p.ice_isA(Test.MyClass.ice_staticId());
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            // Expected: twoway proxy required
-                        }
-                        try
-                        {
-                            p.ice_id();
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            // Expected: twoway proxy required
-                        }
-                        try
-                        {
-                            p.ice_ids();
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            // Expected: twoway proxy required
-                        }
-
-                        return p.opVoid();
-                    }
-                ).then(
-                    function(r)
-                    {
-                        return p.opIdempotent();
-                    }
-                ).then(
-                    function(r)
-                    {
-                        return p.opNonmutating();
-                    }
-                ).then(
-                    function(r)
-                    {
-                        try
-                        {
-                            p.opByte(0xff, 0x0f);
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            // Expected: twoway proxy required
-                        }
-
-                        promise.succeed();
-                    }
-                ).exception(
-                    function(ex)
-                    {
-                        promise.fail(ex);
-                    }
-                );
+                p.ice_ping();
             }
-            catch(ex)
+        ).then(
+            function(r)
             {
-                promise.fail(ex);
+                try
+                {
+                    p.ice_isA(Test.MyClass.ice_staticId());
+                    test(false);
+                }
+                catch(ex)
+                {
+                    // Expected: twoway proxy required
+                }
+                try
+                {
+                    p.ice_id();
+                    test(false);
+                }
+                catch(ex)
+                {
+                    // Expected: twoway proxy required
+                }
+                try
+                {
+                    p.ice_ids();
+                    test(false);
+                }
+                catch(ex)
+                {
+                    // Expected: twoway proxy required
+                }
+                
+                return p.opVoid();
             }
-        });
-
-        return promise;
+        ).then(
+            function(r)
+            {
+                return p.opIdempotent();
+            }
+        ).then(
+            function(r)
+            {
+                return p.opNonmutating();
+            }
+        ).then(
+            function(r)
+            {
+                try
+                {
+                    p.opByte(0xff, 0x0f);
+                    test(false);
+                }
+                catch(ex)
+                {
+                    // Expected: twoway proxy required
+                }
+            }
+        );
     };
 
     global.Oneways = { run: run };
