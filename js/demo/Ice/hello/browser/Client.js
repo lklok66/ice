@@ -11,13 +11,6 @@
 
 var communicator = Ice.initialize();
 
-var State = {
-    Idle:0, 
-    SendRequest:1, 
-    FlushBatchRequests:2
-};
-
-var state;
 var flushEnabled = false;
 var batch = 0;
 
@@ -142,10 +135,26 @@ var shutdownClickHandler = performEventHandler(shutdown);
 var flushClickHandler = performEventHandler(flush);
 
 //
-// Set the state indicator and button status.
+// Handle the client state.
 //
+var State = {
+    Idle:0, 
+    SendRequest:1, 
+    FlushBatchRequests:2
+};
+
+var state;
+
 function setState(newState, ex)
 {
+    function assert(v)
+    {
+        if(!v)
+        {
+            throw new Error("Assertion failed");
+        }
+    }
+
     assert(state !== newState);
 
     switch(newState)
@@ -200,14 +209,6 @@ function setState(newState, ex)
     }
     state = newState;
 };
-
-function assert(v)
-{
-    if(!v)
-    {
-        throw new Error("Assertion failed");
-    }
-}
 
 //
 // Start in the iddle state

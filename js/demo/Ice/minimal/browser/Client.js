@@ -14,13 +14,6 @@
 //
 var communicator = Ice.initialize();
 
-var State = {
-    Iddle: 0,
-    Busy: 1
-};
-
-var state;
-
 function sayHello()
 {
     Ice.Promise.try(
@@ -56,18 +49,36 @@ function sayHello()
     ).finally(
         function()
         {
-            setState(State.Iddle);
+            setState(State.Idle);
         }
     );
     return false;
 }
 
+//
+// Handle the client state
+//
+var State = {
+    Idle: 0,
+    Busy: 1
+};
+
+var state;
+
 function setState(newState)
 {
+    function assert(v)
+    {
+        if(!v)
+        {
+            throw new Error("Assertion failed");
+        }
+    }
+
     assert(state !== newState);
     switch(newState)
     {
-        case State.Iddle:
+        case State.Idle:
         {
             assert(state === undefined || state == State.Busy);
 
@@ -85,7 +96,7 @@ function setState(newState)
         }
         case State.Busy:
         {
-            assert(state == State.Iddle);
+            assert(state == State.Idle);
 
             //
             // Clear any previous error messages.
@@ -108,17 +119,9 @@ function setState(newState)
     state = newState;
 }
 
-function assert(v)
-{
-    if(!v)
-    {
-        throw new Error("Assertion failed");
-    }
-}
-
 //
 // Start in the iddle state
 //
-setState(State.Iddle);
+setState(State.Idle);
 
 }());

@@ -108,8 +108,15 @@
             }
 
             var r = Ice.Buffer.createNative(p1.length + p2.length);
-            p1.copy(r);
-            p2.copy(r, p1.length);
+            var i;
+            for(i = 0; i < p1.length; ++i)
+            {
+                r[i] = p1[i];
+            }
+            for(i = 0; i < p2.length; ++i)
+            {
+                r[i + p1.length] = p2[i];
+            }
             cb.ice_response(r, p3);
         },
 

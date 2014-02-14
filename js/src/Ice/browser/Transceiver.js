@@ -107,12 +107,6 @@
             }
 
             Debug.assert(this._state === StateConnected);
-            if(this._traceLevels.network >= 1)
-            {
-                var s = this.type() + " connection established\n" + this._desc;
-                this._logger.trace(this._traceLevels.networkCat, s);
-            }
-
             return SocketOperation.None;
         },
         register: function()

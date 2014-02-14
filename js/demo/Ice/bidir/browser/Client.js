@@ -1,3 +1,12 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2013 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
+
 (function(){
 
 var Promise = Ice.Promise;
@@ -21,102 +30,145 @@ id.properties = Ice.createProperties();
 //
 id.properties.setProperty("Ice.ACM.Client", "0");
 
-var communicator;
+//
+// Initialize the communicator
+//
+var communicator = Ice.initialize(id);
+
+var connection;
 
 var start = function()
 {
-    if(!isConnected())
-    {
-        setState(State.Connecting);
-        Promise.try(
-            function()
-            {
-                //
-                // Initialize the communicator and create a proxy to the sender object.
-                //
-                communicator = Ice.initialize(id);
-                var proxy = communicator.stringToProxy("sender:ws -p 10000 -h " + hostname());
-                
-                //
-                // Down-cast the proxy to the Demo.CallbackSender interface.
-                //
-                return CallbackSenderPrx.checkedCast(proxy).then(
-                    function(r, server)
-                    {
-                        //
-                        // Create the client object adapter.
-                        //
-                        return communicator.createObjectAdapter("").then(
-                            function(r, adapter)
-                            {
-                                //
-                                // Create a callback receiver servant and add it to
-                                // the object adapter.
-                                //
-                                var ident = new Ice.Identity(Ice.generateUUID(), "");
-                                adapter.add(new CallbackReceiverI(), ident);
-                                
-                                //
-                                // Activate the object adapter.
-                                //
-                                return adapter.activate().then(
-                                    function(r)
-                                    {
-                                        //
-                                        // Retrive the proxy connection to use with our
-                                        // object adapter.
-                                        //
-                                        return server.ice_getConnection();
-                                    }
-                                ).then(
-                                    function(r, conn)
-                                    {
-                                        //
-                                        // Set the connection adapter.
-                                        //
-                                        conn.setAdapter(adapter);
-                                        return server.addClient(ident);
-                                    }
-                                ).then(
-                                    function()
-                                    {
-                                        //
-                                        // Now switch to the connected state.
-                                        //
-                                        setState(State.Connected);
-                                    });
-                            });
-                    });
-            }
-        ).exception(
-            function(ex)
-            {
-                setState(State.Disconnecting, ex);
-            });
-    }
-    return false;
+    //
+    // Create a proxy to the sender object.
+    //
+    var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
+    var proxy = communicator.stringToProxy("sender:ws -p 10000 -h " + hostname);
+    
+    //
+    // Down-cast the proxy to the Demo.CallbackSender interface.
+    //
+    return CallbackSenderPrx.checkedCast(proxy).then(
+        function(r, server)
+        {
+            //
+            // Create the client object adapter.
+            //
+            return communicator.createObjectAdapter("").then(
+                function(r, adapter)
+                {
+                    //
+                    // Create a callback receiver servant and add it to
+                    // the object adapter.
+                    //
+                    var r = adapter.addWithUUID(new CallbackReceiverI());
+                    
+                    //
+                    // Set the connection adapter and remember the connection.
+                    //
+                    connection = proxy.ice_getCachedConnection();
+                    connection.setAdapter(adapter);
+                    
+                    //
+                    // Register the client with the bidir server.
+                    //
+                    return server.addClient(r.ice_getIdentity());
+                });
+        });
 };
 
 var stop = function()
 {
-    if(isConnected())
+    //
+    // Close the connection, the server will unregister the client
+    // when it tries to invoke on the bi-dir proxy.
+    // 
+    return connection.close(false);
+}
+
+//
+// Setup buttons click handlers
+//
+$("#start").click(
+    function()
     {
-        setState(State.Disconnecting);
-    }
+        if(isDisconnected())
+        {
+            setState(State.Connecting);
+            Promise.try(
+                function()
+                {
+                    return start().then(function()
+                                        {
+                                            setState(State.Connected);
+                                        });
+                }
+            ).exception(
+                function(ex)
+                {
+                    $("#console").val(ex.toString());
+                    setState(State.Disconnected);
+                }
+            );
+        }
+        return false;
+    });
+
+$("#stop").click(
+    function()
+    {
+        if(isConnected())
+        {
+            setState(State.Disconnecting);
+            Promise.try(
+                function()
+                {
+                    return stop();
+                }
+            ).exception(
+                function(ex)
+                {
+                    $("#console").val(ex.toString());
+                }
+            ).finally(
+                function()
+                {
+                    setState(State.Disconnected);
+                }
+            );
+        }
+        return false;
+    });
+
+//
+// Handle client state
+//
+var State = {
+    Disconnected: 0,
+    Connecting: 1,
+    Connected: 2,
+    Disconnecting: 3
 };
-
-$("#start").click(start);
-$("#stop").click(stop);
-
-var State = {Disconnected: 0, Connecting: 1, Connected: 2, Disconnecting: 3};
-var state = State.Disconnected;
 
 var isConnected = function()
 {
     return state == State.Connected;
 };
 
-var setState = function(s, ex)
+var isDisconnected = function()
+{
+    return state == State.Disconnected;
+};
+
+var writeLine = function(msg)
+{
+    $("#console").val($("#console").val() + msg + "\n");
+    $("#console").scrollTop($("#console").get(0).scrollHeight);
+}
+
+var state;
+
+var setState = function(s)
 {
     if(state == s)
     {
@@ -127,40 +179,37 @@ var setState = function(s, ex)
     {
         case State.Disconnected:
         {
-            if(ex)
-            {
-                $("#console").val(ex.toString());
-            }
             $("#start").removeClass("disabled");
+
+            $("#progress").hide();
+            $("body").removeClass("waiting");
             break;
         }
         case State.Connecting:
         {
             $("#console").val("");
             $("#start").addClass("disabled");
+
+            $("#progress .message").text("Connecting...");
+            $("#progress").show();
+            $("body").addClass("waiting");
             break;
         }
         case State.Connected:
         {
             $("#stop").removeClass("disabled");
+
+            $("#progress").hide();
+            $("body").removeClass("waiting");
             break;
         }
         case State.Disconnecting:
         {
             $("#stop").addClass("disabled");
-            Promise.try(
-                function()
-                {
-                    if(communicator)
-                    {
-                        return communicator.destroy();
-                    }
-                }
-            ).finally(
-                function()
-                {
-                    setState(State.Disconnected, ex);
-                });
+
+            $("#progress .message").text("Disconnecting...");
+            $("#progress").show();
+            $("body").addClass("waiting");
             break;
         }
         default:
@@ -170,15 +219,6 @@ var setState = function(s, ex)
     }
 };
 
-var hostname = function()
-{
-    return $("#hostname").val() || $("#hostname").attr("placeholder");
-}
-
-var writeLine = function(msg)
-{
-    $("#console").val($("#console").val() + msg + "\n");
-    $("#console").scrollTop($("#console").get(0).scrollHeight);
-}
+setState(State.Disconnected);
 
 }());

@@ -10,15 +10,12 @@
     <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shBrushJScript.js"></script>
     <link type="text/css" rel="stylesheet" href="../../../config/syntaxhighlighter/styles/shCoreDefault.css"/>
     <style type="text/css">
-        #wss
-        {
-            margin-top:10px;
-        }
-        #source
-        {
-            max-height:500px;
-            overflow:auto;
-        }
+        #wss { margin-top:10px; }
+        #source { max-height:500px; overflow:auto; }
+        #progress .icon { margin-left:10px; margin-top: 5px; }
+        #progress .text { margin-left:25px; }
+        #console { height: 150px; }
+        .waiting * { cursor: wait !important; }
     </style>
   </head>
   <body>
@@ -63,10 +60,18 @@
                             <input id="wss" type="checkbox">
                         </div>
                     </div>
-                </form>
-                <a href="#" class="button small" id="run">Run</a>
-                <form>
-                    <textarea id="console" class="disabled" readonly></textarea>
+                    <a href="#" class="button small" id="run">Run</a>
+                    <div class="row">
+                      <div class="small-12 columns">
+                        <textarea id="console" class="disabled" readonly></textarea>
+                      </div>
+                    </div>
+                    <div id="progress" class="row hide">
+                      <div class="small-12 columns left">
+                        <div class="inline left icon"></div>
+                        <div class="text">Running...</div>
+                      </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -77,9 +82,12 @@
     </div>
     <script src="../../../config/foundation/js/jquery.js"></script>
     <script src="../../../config/foundation/js/foundation.min.js"></script>
+    <script src="../../../config/foundation/js/spin.min.js"></script>
+    <script src="../../../config/foundation/js/jquery.spin.js"></script>
     <script>
         $(document).foundation();
         $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
+        $("#progress .icon").spin("small");
     </script>
     <script src="../../../lib/Ice.js"></script>
     <script src="Latency.js"></script>

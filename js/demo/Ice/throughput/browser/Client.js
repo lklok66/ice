@@ -9,7 +9,6 @@
 
 (function(){
 
-var Promise = Ice.Promise;
 var ThroughputPrx = Demo.ThroughputPrx;
 
 //
@@ -215,12 +214,13 @@ function run()
             //
             var start = new Date().getTime();
             var args = test != "receive" ? [seq] : [];
-            var p = operation.apply(proxy, args);
-            for(var i = 1; i < repetitions; ++i)
-            {
-                p = p.then(operation.apply(proxy, args));
-            }
-            return p.then(
+            return loop(
+                function() 
+                {
+                    return operation.apply(proxy, args);
+                },
+                repetitions
+            ).then(
                 function()
                 {
                     //
@@ -241,39 +241,6 @@ function run()
         });
 }
 
-//
-// Handle the client state.
-//
-var State = { Finish:0, Running: 1 };
-var state = State.Finish;
-
-function setState(s, ex)
-{
-    if(s != state)
-    {
-        switch(s)
-        {
-            case State.Running:
-            {
-                $("#console").val("");
-                $("#run").addClass("disabled");
-                $("#progress").show();
-                $("body").addClass("waiting");
-                break;
-                break;
-            }
-            case State.Finish:
-            {
-                $("#run").removeClass("disabled");
-                $("#progress").hide();
-                $("body").removeClass("waiting");
-                break;
-            }
-        }
-        state = s;
-    }
-}
-
 $("#run").click(
     function()
     {
@@ -283,6 +250,7 @@ $("#run").click(
         if(state !== State.Running)
         {
             setState(State.Running);
+
             Ice.Promise.try(
                 function()
                 {
@@ -297,12 +265,29 @@ $("#run").click(
             ).finally(
                 function()
                 {
-                    setState(State.Finish);
+                    setState(State.Idle);
                 }
             );
         }
         return false;
     });
+
+//
+// Asynchronous loop, each call to the given function returns a
+// promise that when fulfilled runs the next iteration.
+//    
+function loop(fn, repetitions)
+{
+    var i = 0;
+    var next = function() 
+    {
+        if(i++ < repetitions)
+        {
+            return fn.call().then(next);
+        }
+    };
+    return next();
+}
 
 //
 // Helper functions to write the output.
@@ -317,5 +302,42 @@ function writeLine(msg)
     write(msg + "\n");
     $("#console").scrollTop($("#console").get(0).scrollHeight);
 }
+
+//
+// Handle the client state.
+//
+var State = { 
+    Idle:0, 
+    Running: 1 
+};
+var state;
+
+function setState(s, ex)
+{
+    if(s != state)
+    {
+        switch(s)
+        {
+            case State.Running:
+            {
+                $("#console").val("");
+                $("#run").addClass("disabled");
+                $("#progress").show();
+                $("body").addClass("waiting");
+                break;
+            }
+            case State.Idle:
+            {
+                $("#run").removeClass("disabled");
+                $("#progress").hide();
+                $("body").removeClass("waiting");
+                break;
+            }
+        }
+        state = s;
+    }
+}
+
+setState(State.Idle);
 
 }());

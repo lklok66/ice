@@ -13,7 +13,6 @@ require("Ice/Ice");
 require("Callback");
 
 var Demo = global.Demo;
-var Promise = Ice.Promise;
 var CallbackSenderPrx = Demo.CallbackSenderPrx;
 
 //
@@ -34,7 +33,7 @@ id.properties = Ice.createProperties();
 //
 id.properties.setProperty("Ice.ACM.Client", "0");
 
-var communicator;
+var communicator = Ice.initialize(id);
 
 //
 // Exit on SIGINT
@@ -50,14 +49,12 @@ process.on("SIGINT", function() {
     }
 });
 
-var ident = new Ice.Identity(Ice.generateUUID(), "");
-Promise.try(
+Ice.Promise.try(
     function()
     {
         //
         // Initialize the communicator and create a proxy to the sender object.
         //
-        communicator = Ice.initialize(id);
         var proxy = communicator.stringToProxy("sender:tcp -p 10000");
         
         //
@@ -76,29 +73,17 @@ Promise.try(
                         // Create a callback receiver servant and add it to
                         // the object adapter.
                         //
-                        adapter.add(new CallbackReceiverI(), ident);
+                        var r = adapter.addWithUUID(new CallbackReceiverI());
                         
                         //
-                        // Activate the object adapter.
+                        // Set the connection adapter.
                         //
-                        return adapter.activate().then(
-                            function(r)
-                            {
-                                //
-                                // Retrive the proxy connection to use with our
-                                // object adapter.
-                                //
-                                return server.ice_getConnection();
-                            }
-                        ).then(
-                            function(r, conn)
-                            {
-                                //
-                                // Set the connection adapter.
-                                //
-                                conn.setAdapter(adapter);
-                                return server.addClient(ident);
-                            });
+                        proxy.ice_getCachedConnection().setAdapter(adapter);
+
+                        //
+                        // Register the client with the bidir server.
+                        //
+                        return server.addClient(r.ice_getIdentity());
                     });
             });
     }

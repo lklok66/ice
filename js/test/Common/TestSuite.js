@@ -60,9 +60,9 @@ $(document).foundation();
                             function(ex)
                             {
                                 out.writeLine("");
-                                if(ex && ex._asyncResult)
+                                if(ex && typeof ex.ice_getAsyncResult === "function")
                                 {
-                                    out.writeLine("exception occurred in call to " + ex._asyncResult.operation);
+                                    out.writeLine("exception occurred in call to " + ex.ice_getAsyncResult().operation);
                                 }
                                 out.writeLine(ex.toString());
                                 $("#run").removeClass("disabled");
