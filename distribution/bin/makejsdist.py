@@ -152,6 +152,7 @@ excludeFiles = [ \
 # 
 excludeWindowsFiles = [ \
     "/vsaddin/",
+    "build.bat",
     "*.rc",
     "*.sln",
     "*.sln.icejs",
