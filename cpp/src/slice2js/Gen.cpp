@@ -1053,8 +1053,7 @@ Slice::JsVisitor::writeDocCommentParam(const OperationPtr& p, ParamDir paramType
     }
 }
 
-Slice::Gen::Gen(const string& base, const string& include, const vector<string>& includePaths, const string& dir) :
-    _include(include),
+Slice::Gen::Gen(const string& base, const vector<string>& includePaths, const string& dir) :
     _includePaths(includePaths)
 {
     _fileBase = base;
