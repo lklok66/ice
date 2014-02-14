@@ -94,7 +94,7 @@
             this._state |= AsyncResult.Done;
             this._exception = ex;
             this._os.resize(0);
-            this.fail(ex);
+            this.fail(ex, this);
         },
         __response: function()
         {

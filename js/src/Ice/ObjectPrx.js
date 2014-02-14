@@ -800,17 +800,17 @@
                     {
                         if(ex instanceof __uex[i])
                         {
-                            __r.fail(ex);
+                            __r.fail(ex, __r);
                             return false;
                         }
                     }
                 }
-                __r.fail(new Ice.UnknownUserException(ex.ice_name()));
+                __r.fail(new Ice.UnknownUserException(ex.ice_name()), __r);
                 return false;
             }
             else
             {
-                __r.fail(ex);
+                __r.fail(ex, __r);
                 return false;
             }
         }
@@ -820,7 +820,7 @@
 
     ObjectPrx.__dispatchLocalException = function(__r, __ex)
     {
-        __r.fail(__ex);
+        __r.fail(__ex, __r);
     };
 
     ObjectPrx.ice_staticId = Ice.Object.ice_staticId;
@@ -857,7 +857,7 @@
                         }
                         else
                         {
-                            __r.fail(__ex);
+                            __r.fail(__ex, __r);
                         }
                     });
         }

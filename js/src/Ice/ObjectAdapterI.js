@@ -223,7 +223,7 @@
                         },
                         function(ex)
                         {
-                            promise.fail(ex);
+                            promise.fail(ex, promise);
                         });
                 }
                 else
@@ -476,7 +476,7 @@
 
                 if(promise !== undefined)
                 {
-                    promise.fail(ex);
+                    promise.fail(ex, promise);
                     return true;
                 }
                 else

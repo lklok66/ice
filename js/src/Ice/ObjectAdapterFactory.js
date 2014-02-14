@@ -121,7 +121,7 @@
             }
             catch(ex)
             {
-                promise.fail(ex);
+                promise.fail(ex, promise);
             }
         },
         removeObjectAdapter: function(adapter)
