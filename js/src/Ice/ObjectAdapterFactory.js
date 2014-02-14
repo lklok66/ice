@@ -47,87 +47,35 @@
 
             this._instance = null;
             this._communicator = null;
-
-            var count = this._adapters.length;
-            if(count > 0)
-            {
-                var self = this;
-
-                var successCB = function(r)
+            var self = this;
+            Promise.all(
+                this._adapters.map(function(adapter)
+                                   {
+                                       return adapter.deactivate();
+                                   })
+            ).then(
+                function()
                 {
-                    if(--count === 0)
-                    {
-                        self._shutdownPromise.succeed();
-                    }
-                };
-               
-                var exceptionCB = function(ex)
+                    self._shutdownPromise.succeed();
+                },
+                function(ex)
                 {
                     self._shutdownPromise.fail(ex);
-                };
-                
-                for(var i = 0; i < this._adapters.length; ++i)
-                {
-                    this._adapters[i].deactivate().then(successCB).exception(exceptionCB);
                 }
-            }
-            else
-            {
-                this._shutdownPromise.succeed();
-            }
-
+            );
             return this._shutdownPromise;
         },
         waitForShutdown: function()
         {
-            //
-            // Communicator.waitForShutdown returns this promise, so we use an AsyncResultBase.
-            //
-            var promise = new AsyncResultBase(this._communicator, "waitForShutdown", null, null, null);
-
             var self = this;
-
-            //
-            // First we wait for the shutdown of the factory itself.
-            //
-            this._shutdownPromise.then(
+            return this._shutdownPromise.then(
                 function()
                 {
-                    //
-                    // Now we wait for deactivation of each object adapter.
-                    //
-                    var count = self._adapters.length;
-                    if(count > 0)
-                    {
-                        var successCB = function(r)
-                        {
-                            if(--count === 0)
-                            {
-                                promise.succeed(promise);
-                            }
-                        };
-                        
-                        var exceptionCB = function(ex)
-                        {
-                            promise.fail(ex);
-                        };
-                        
-                        for(var i = 0; i < self._adapters.length; ++i)
-                        {
-                            self._adapters[i].waitForDeactivate().then(successCB).exception(exceptionCB);
-                        }
-                    }
-                    else
-                    {
-                        promise.succeed(promise);
-                    }
-                }).exception(
-                    function(ex)
-                    {
-                        promise.fail(ex);
-                    });
-
-            return promise;
+                    return Promise.all(self._adapters.map(function(adapter)
+                                                          {
+                                                              return adapter.waitForDeactivate();
+                                                          }));
+                });
         },
         isShutdown: function()
         {
@@ -135,49 +83,15 @@
         },
         destroy: function()
         {
-            var promise = new Promise();
-
             var self = this;
-
-            //
-            // First wait for shutdown to finish.
-            //
-            this.waitForShutdown().then(
-                function(r)
+            return this.waitForShutdown().then(
+                function()
                 {
-                    var count = self._adapters.length;
-                    if(count > 0)
-                    {
-                        var successCB = function(r)
-                        {
-                            if(--count === 0)
-                            {
-                                promise.succeed();
-                                self._adapters = [];
-                            }
-                        };
-                        
-                        var exceptionCB = function(ex)
-                        {
-                            promise.fail(ex);
-                        };
-                        
-                        for(var i = 0; i < self._adapters.length; ++i)
-                        {
-                            self._adapters[i].destroy().then(successCB).exception(exceptionCB);
-                        }
-                    }
-                    else
-                    {
-                        promise.succeed();
-                    }
-                }).exception(
-                    function(ex)
-                    {
-                        promise.fail(ex);
-                    });
-
-            return promise;
+                    return Promise.all(self._adapters.map(function(adapter)
+                                                          {
+                                                              return adapter.destroy();
+                                                          }));
+                });
         },
         createObjectAdapter: function(name, router, promise)
         {
@@ -210,37 +124,6 @@
                 promise.fail(ex);
             }
         },
-        findObjectAdapter: function(proxy)
-        {
-            if(this._instance === null)
-            {
-                return null;
-            }
-
-            for(var i = 0; i < this._adapters.length; ++i)
-            {
-                try
-                {
-                    if(this._adapters[i].isLocal(proxy))
-                    {
-                        return this._adapters[i];
-                    }
-                }
-                catch(ex)
-                {
-                    if(ex instanceof Ice.ObjectAdapterDeactivatedException)
-                    {
-                        // Ignore.
-                    }
-                    else
-                    {
-                        throw ex;
-                    }
-                }
-            }
-
-            return null;
-        },
         removeObjectAdapter: function(adapter)
         {
             if(this._instance === null)
@@ -254,7 +137,7 @@
                 this._adapters.splice(n, 1);
             }
 
-            n = this._adapterNamesInuse.indexOf(adapter.getName());
+            n = this._adapterNamesInUse.indexOf(adapter.getName());
             if(n !== -1)
             {
                 this._adapterNamesInUse.splice(n, 1);

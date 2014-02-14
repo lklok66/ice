@@ -77,21 +77,12 @@
             this._instance = instance;
             this._communicator = communicator;
             this._objectAdapterFactory = objectAdapterFactory;
-            this._hasAcmTimeout = false;
-            this._acmTimeout = 0;
             this._servantManager = new ServantManager(instance, name);
-            this._activateOneOffDone = false;
             this._name = name;
             this._routerEndpoints = [];
             this._routerInfo = null;
-            this._publishedEndpoints = [];
-            this._destroying = false;
             this._destroyed = false;
             this._noConfig = noConfig;
-            this._waitForDeactivatePromises = [];
-            this._destroyPromises = [];
-            this._id = "";
-            this._replicaGroupId = "";
 
             if(this._noConfig)
             {
@@ -122,15 +113,11 @@
             //
             if(router === null && noProps)
             {
-                this._deactivated = true;
-                this._destroyed = true;
-                this._instance = null;
-
                 var ex = new Ice.InitializationException();
                 ex.reason = "object adapter `" + this._name + "' requires configuration";
                 throw ex;
             }
-
+            
             //
             // Setup a reference to be used to get the default proxy options
             // when creating new proxies. By default, create twoway proxies.
@@ -145,7 +132,7 @@
                 if(e instanceof Ice.ProxyParseException)
                 {
                     var ex = new Ice.InitializationException();
-                    ex.reason = "invalid proxy options `" + proxyOptions + "' for object adapter `" + this._name + "'";
+                    ex.reason = "invalid proxy options `" + proxyOptions + "' for object adapter `" + name + "'";
                     throw ex;
                 }
                 else
@@ -156,13 +143,7 @@
 
             try
             {
-                this._hasAcmTimeout = properties.getProperty(this._name + ".ACM").length > 0;
-                if(this._hasAcmTimeout)
-                {
-                    this._acmTimeout = properties.getPropertyAsInt(this._name + ".ACM");
-                    this._instance.connectionMonitor().checkIntervalForACM(this._acmTimeout);
-                }
-
+                
                 if(router === null)
                 {
                     router = Ice.RouterPrx.uncheckedCast(
@@ -172,80 +153,78 @@
                 {
                     this._routerInfo = this._instance.routerManager().find(router);
                     Debug.assert(this._routerInfo !== null);
-                    if(this._routerInfo !== null)
+
+                    //
+                    // Make sure this router is not already registered with another adapter.
+                    //
+                    if(this._routerInfo.getAdapter() !== null)
                     {
-                        //
-                        // Make sure this router is not already registered with another adapter.
-                        //
-                        if(this._routerInfo.getAdapter() !== null)
-                        {
-                            throw new Ice.AlreadyRegisteredException(
-                                "object adapter with router",
-                                this._instance.identityToString(router.ice_getIdentity()));
-                        }
-
-                        //
-                        // Add the router's server proxy endpoints to this object
-                        // adapter.
-                        //
-                        var self = this;
-                        this._routerInfo.getServerEndpoints().then(
-                            function(endpoints)
-                            {
-                                var i;
-                                
-                                for(i = 0; i < endpoints.length; ++i)
-                                {
-                                    self._routerEndpoints.push(endpoints[i]);
-                                }
-                                self._routerEndpoints.sort(     // Must be sorted.
-                                    function(e1, e2)
-                                    {
-                                        return e1.compareTo(e2);
-                                    });
-
-                                //
-                                // Remove duplicate endpoints, so we have a list of unique
-                                // endpoints.
-                                //
-                                for(i = 0; i < self._routerEndpoints.length - 1;)
-                                {
-                                    var e1 = self._routerEndpoints[i];
-                                    var e2 = self._routerEndpoints[i + 1];
-                                    if(e1.equals(e2))
-                                    {
-                                        self._routerEndpoints.splice(i, 1);
-                                    }
-                                    else
-                                    {
-                                        ++i;
-                                    }
-                                }
-
-                                //
-                                // Associate this object adapter with the router. This way,
-                                // new outgoing connections to the router's client proxy will
-                                // use this object adapter for callbacks.
-                                //
-                                self._routerInfo.setAdapter(self);
-
-                                //
-                                // Also modify all existing outgoing connections to the
-                                // router's client proxy to use this object adapter for
-                                // callbacks.
-                                //
-                                return self._instance.outgoingConnectionFactory().setRouterInfo(self._routerInfo);
-                            }
-                        ).then(
-                            function()
-                            {
-                                promise.succeed(self, promise);
-                            },
-                            function(ex)
-                            {
-                                promise.fail(ex);
-                            });
+                        throw new Ice.AlreadyRegisteredException(
+                            "object adapter with router",
+                            this._instance.identityToString(router.ice_getIdentity()));
                     }
+                    
+                    //
+                    // Add the router's server proxy endpoints to this object
+                    // adapter.
+                    //
+                    var self = this;
+                    this._routerInfo.getServerEndpoints().then(
+                        function(endpoints)
+                        {
+                            var i;
+                                
+                            for(i = 0; i < endpoints.length; ++i)
+                            {
+                                self._routerEndpoints.push(endpoints[i]);
+                            }
+                            self._routerEndpoints.sort(     // Must be sorted.
+                                function(e1, e2)
+                                {
+                                    return e1.compareTo(e2);
+                                });
+                            
+                            //
+                            // Remove duplicate endpoints, so we have a list of unique
+                            // endpoints.
+                            //
+                            for(i = 0; i < self._routerEndpoints.length - 1;)
+                            {
+                                var e1 = self._routerEndpoints[i];
+                                var e2 = self._routerEndpoints[i + 1];
+                                if(e1.equals(e2))
+                                {
+                                    self._routerEndpoints.splice(i, 1);
+                                }
+                                else
+                                {
+                                    ++i;
+                                }
+                            }
+                            
+                            //
+                            // Associate this object adapter with the router. This way,
+                            // new outgoing connections to the router's client proxy will
+                            // use this object adapter for callbacks.
+                            //
+                            self._routerInfo.setAdapter(self);
+                            
+                            //
+                            // Also modify all existing outgoing connections to the
+                            // router's client proxy to use this object adapter for
+                            // callbacks.
+                            //
+                            return self._instance.outgoingConnectionFactory().setRouterInfo(self._routerInfo);
+                        }
+                    ).then(
+                        function()
+                        {
+                            promise.succeed(self, promise);
+                        },
+                        function(ex)
+                        {
+                            promise.fail(ex);
+                        });
                 }
                 else
                 {
@@ -276,38 +255,6 @@
         },
         activate: function()
         {
-            var promise = new AsyncResultBase(this._communicator, "activate", null, null, this);
-
-            if(this.checkForDeactivation(promise))
-            {
-                return promise;
-            }
-
-            if(this._activateOneOffDone)
-            {
-                promise.succeed(promise);
-                return promise;
-            }
-
-            var printAdapterReady = false;
-            if(!this._noConfig)
-            {
-                var properties = this._instance.initializationData().properties;
-                printAdapterReady = properties.getPropertyAsInt("Ice.PrintAdapterReady") > 0;
-            }
-
-            if(printAdapterReady)
-            {
-                console.log(this._name + " ready");
-            }
-
-            Debug.assert(!this._deactivated);
-
-            this._activateOneOffDone = true;
-
-            promise.succeed(promise);
-
-            return promise;
         },
         hold: function()
         {
@@ -316,68 +263,26 @@
         waitForHold: function()
         {
             var promise = new AsyncResultBase(this._communicator, "waitForHold", null, null, this);
-
-            if(this.checkForDeactivation(promise))
+            if(adapter.checkForDeactivation(promise))
             {
                 return promise;
             }
-
-            promise.succeed();
-
-            return promise;
+            return promise.succeed(promise);
         },
         deactivate: function()
         {
             var promise = new AsyncResultBase(this._communicator, "deactivate", null, null, this);
-
-            if(this._deactivated)
+            if(!this._deactivated)
             {
-                promise.succeed();
-                return promise;
+                this._deactivated = true;
+                this._instance.outgoingConnectionFactory().removeAdapter(this);
             }
-
-            this._deactivated = true;
-
-            this._instance.outgoingConnectionFactory().removeAdapter(this);
-
-            promise.succeed();
-
-            this.checkWaitForDeactivate();
-
-            return promise;
+            return promise.succeed(promise);
         },
         waitForDeactivate: function()
         {
-            var promise = new AsyncResultBase(this._communicator, "waitForDeactivate", null, null, this);
-
-            if(this._deactivated)
-            {
-                promise.succeed(promise);
-                return promise;
-            }
-
-            this._waitForDeactivatePromises.push(promise);
-
-            this.checkWaitForDeactivate();
-
-            return promise;
-        },
-        checkWaitForDeactivate: function()
-        {
-            //
-            // Wait for deactivation of the adapter itself.
-            //
-            if(!this._deactivated)
-            {
-                return;
-            }
-
-            this._waitForDeactivatePromises.forEach(
-                function(p, i, arr)
-                {
-                    p.succeed(p);
-                });
-            this._waitForDeactivatePromises = [];
+            var promise = new AsyncResultBase(this._communicator, "deactivate", null, null, this);
+            return promise.succeed(promise);
         },
         isDeactivated: function()
         {
@@ -386,88 +291,17 @@
         destroy: function()
         {
             var promise = new AsyncResultBase(this._communicator, "destroy", null, null, this);
-
-            if(this._destroying)
+            if(!this._deactivated)
             {
-                //
-                // Destroy already in progress.
-                //
-                this._destroyPromises.push(promise);
-                return promise;
+                this.deactivate();
             }
-
-            //
-            // Object adapter is already destroyed.
-            //
-            if(this._destroyed)
+            if(!this._destroyed)
             {
-                promise.succeed(promise);
-                return promise;
+                this._destroyed = true;
+                this._servantManager.destroy();
+                this._objectAdapterFactory.removeObjectAdapter(this);
             }
-
-            this._destroying = true;
-
-            this._destroyPromises.push(promise);
-
-            //
-            // Deactivate and wait for completion.
-            //
-            var self = this;
-            this.deactivate().then(
-                function(r)
-                {
-                    return self.waitForDeactivate();
-                }
-            ).then(
-                function(r)
-                {
-                    //
-                    // Now it's also time to clean up our servants and servant
-                    // locators.
-                    //
-                    self._servantManager.destroy();
-
-                    //
-                    // Signal that destroying is complete.
-                    //
-                    self._destroying = false;
-                    self._destroyed = true;
-
-                    //
-                    // Remove object references (some of them cyclic).
-                    //
-                    self._instance = null;
-                    self._routerEndpoints = null;
-                    self._routerInfo = null;
-                    self._reference = null;
-
-                    var objectAdapterFactory = self._objectAdapterFactory;
-                    self._objectAdapterFactory = null;
-
-                    if(objectAdapterFactory !== null)
-                    {
-                        objectAdapterFactory.removeObjectAdapter(self);
-                    }
-
-                    self._destroyPromises.forEach(
-                        function(p, i, arr)
-                        {
-                            p.succeed(p);
-                        });
-                    self._destroyPromises = [];
-                }
-            ).exception(
-                function(ex)
-                {
-                    self._destroyPromises.forEach(
-                        function(p, i, arr)
-                        {
-                            p.fail(ex);
-                        });
-                    self._destroyPromises = [];
-                });
-
-            return promise;
+            return promise.succeed(promise);
         },
         add: function(object, ident)
         {
@@ -584,22 +418,14 @@
         },
         createDirectProxy: function(ident)
         {
-            this.checkForDeactivation();
-            this.checkIdentity(ident);
-
-            return this.newDirectProxy(ident, "");
+            return this.createProxy(ident);
         },
         createIndirectProxy: function(ident)
         {
-            this.checkForDeactivation();
-            this.checkIdentity(ident);
-
-            return this.newIndirectProxy(ident, "", this._id);
+            throw new Ice.FeatureNotSupportedException("setLocator not supported");
         },
         setLocator: function(locator)
         {
-            this.checkForDeactivation();
-
             throw new Ice.FeatureNotSupportedException("setLocator not supported");
         },
         refreshPublishedEndpoints: function()
@@ -614,59 +440,6 @@
         {
             return [];
         },
-        isLocal: function(proxy)
-        {
-            //
-            // NOTE: it's important that isLocal() doesn't perform any blocking operations as
-            // it can be called for AMI invocations if the proxy has no delegate set yet.
-            //
-
-            var ref = proxy.__reference();
-            if(ref.isWellKnown())
-            {
-                //
-                // Check the active servant map to see if the well-known
-                // proxy is for a local object.
-                //
-                return this._servantManager.hasServant(ref.getIdentity());
-            }
-            else if(ref.isIndirect())
-            {
-                //
-                // Proxy is local if the reference adapter id matches this
-                // adapter id or replica group id.
-                //
-                //return ref.getAdapterId() === this._id || ref.getAdapterId() === this._replicaGroupId;
-                return false;
-            }
-            else
-            {
-                var endpoints = ref.getEndpoints();
-
-                this.checkForDeactivation();
-
-                //
-                // Proxies which have at least one endpoint in common with the
-                // router's server proxy endpoints (if any), are also considered
-                // local.
-                //
-                if(this._routerInfo !== null && this._routerInfo.getRouter().equals(proxy.ice_getRouter()))
-                {
-                    for(var i = 0; i < endpoints.length; ++i)
-                    {
-                        for(var j = 0; j < this._routerEndpoints.length; ++j)
-                        {
-                            if(endpoints[i].equivalent(this._routerEndpoints[j]))
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return false;
-        },
         getServantManager: function()
         {
             //
@@ -674,37 +447,7 @@
             //
             return this._servantManager;
         },
-        getACM: function()
-        {
-            // No check for deactivation here!
-
-            Debug.assert(this._instance !== null); // Must not be called after destroy().
-
-            if(this._hasAcmTimeout)
-            {
-                return this._acmTimeout;
-            }
-            else
-            {
-                return this._instance.serverACM();
-            }
-        },
         newProxy: function(ident, facet)
-        {
-            if(this._id.length === 0)
-            {
-                return this.newDirectProxy(ident, facet);
-            }
-            else if(this._replicaGroupId.length === 0)
-            {
-                return this.newIndirectProxy(ident, facet, this._id);
-            }
-            else
-            {
-                return this.newIndirectProxy(ident, facet, this._replicaGroupId);
-            }
-        },
-        newDirectProxy: function(ident, facet)
         {
             var endpoints = [];
 
@@ -722,15 +465,6 @@
             // Create a reference and return a proxy for this reference.
             //
             var ref = this._instance.referenceFactory().create(ident, facet, this._reference, endpoints);
-            return this._instance.proxyFactory().referenceToProxy(ref);
-        },
-        newIndirectProxy: function(ident, facet, id)
-        {
-            //
-            // Create a reference with the adapter id and return a proxy
-            // for the reference.
-            //
-            var ref = this._instance.referenceFactory().create(ident, facet, this._reference, id);
             return this._instance.proxyFactory().referenceToProxy(ref);
         },
         checkForDeactivation: function(promise)

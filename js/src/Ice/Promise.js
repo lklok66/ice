@@ -187,11 +187,21 @@
     //
     Promise.all = function()
     {
+        // If only one argument is provided, check if the argument is an array
+        if(arguments.length === 1 && arguments[0] instanceof Array)
+        {
+            return Promise.all.apply(this, arguments[0]);
+        }
+
         var promise = new Promise();
         var promises = Array.prototype.slice.call(arguments);
         var results = new Array(arguments.length);
 
         var pending = promises.length;
+        if(pending === 0)
+        {
+            promise.succeed.apply(promise, results);
+        }
         for(var i = 0; i < promises.length; ++i)
         {
             //
