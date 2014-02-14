@@ -56,7 +56,7 @@
                 return Test.TimeoutPrx.checkedCast(obj);
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 timeout = obj;
                 test(timeout !== null);
@@ -65,17 +65,17 @@
                 return to.holdAdapter(2000 * mult);
             }
         ).then(
-            function(r)
+            function()
             {
                 return to.ice_getConnection();
             }
         ).then(
-            function(r, con)
+            function(con)
             {
                 return con.close(true); // Force a reconnect.
             }
         ).then(
-            function(r)
+            function()
             {
                 //
                 // Expect ConnectTimeoutException.
@@ -90,23 +90,23 @@
                 return timeout.op(); // Ensure adapter is active.
             }
         ).then(
-            function(r)
+            function()
             {
                 to = Test.TimeoutPrx.uncheckedCast(obj.ice_timeout(2000 * mult));
                 return to.holdAdapter(500 * mult);
             }
         ).then(
-            function(r)
+            function()
             {
                 return to.ice_getConnection();
             }
         ).then(
-            function(r, con)
+            function(con)
             {
                 return con.close(true); // Force a reconnect.
             }
         ).then(
-            function(r)
+            function()
             {
                 //
                 // Expect success.
@@ -114,7 +114,7 @@
                 return to.op();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing read timeout... ");
@@ -132,13 +132,13 @@
                 return timeout.op(); // Ensure adapter is active.
             }
         ).then(
-            function(r)
+            function()
             {
                 to = Test.TimeoutPrx.uncheckedCast(obj.ice_timeout(1500 * mult));
                 return to.sleep(500 * mult);
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing write timeout... ");
@@ -146,7 +146,7 @@
                 return to.holdAdapter(2000 * mult);
             }
         ).then(
-            function(r)
+            function()
             {
                 var seq = Ice.Buffer.createNative(new Array(100000));
                 for(var i = 0; i < seq.length; ++i)
@@ -166,13 +166,13 @@
                 return timeout.op(); // Ensure adapter is active.
             }
         ).then(
-            function(r)
+            function()
             {
                 to = Test.TimeoutPrx.uncheckedCast(obj.ice_timeout(1500 * mult));
                 return to.holdAdapter(500 * mult);
             }
         ).then(
-            function(r)
+            function()
             {
                 var seq;
                 if(mult === 1)
@@ -193,7 +193,7 @@
                 return to.sendData(seq);
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing close timeout... ");
@@ -201,18 +201,18 @@
                 return to.ice_getConnection();
             }
         ).then(
-            function(r, con)
+            function(con)
             {
                 connection = con;
                 return timeout.holdAdapter(750);
             }
         ).then(
-            function(r)
+            function()
             {
                 return connection.close(false);
             }
         ).then(
-            function(r)
+            function()
             {
                 try
                 {
@@ -239,7 +239,7 @@
                 return timeout.op();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing timeout overrides... ");
@@ -261,7 +261,7 @@
                 return Test.TimeoutPrx.checkedCast(comm.stringToProxy(ref));
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 to = obj;
                 return to.sleep(750 * mult);
@@ -274,7 +274,7 @@
                 return timeout.op(); // Ensure adapter is active.
             }
         ).then(
-            function(r)
+            function()
             {
                 //
                 // Calling ice_timeout() should have no effect.
@@ -282,7 +282,7 @@
                 return Test.TimeoutPrx.checkedCast(to.ice_timeout(1000 * mult));
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 to = obj;
                 return to.sleep(750 * mult);
@@ -295,7 +295,7 @@
                 return comm.destroy();
             }
         ).then(
-            function(r)
+            function()
             {
                 //
                 // Test Ice.Override.ConnectTimeout.
@@ -315,7 +315,7 @@
                 return timeout.holdAdapter(3000 * mult);
             }
         ).then(
-            function(r)
+            function()
             {
                 return to.op();
             }
@@ -327,12 +327,12 @@
                 return timeout.op(); // Ensure adapter is active.
             }
         ).then(
-            function(r)
+            function()
             {
                 return timeout.holdAdapter(3000 * mult);
             }
         ).then(
-            function(r)
+            function()
             {
                 //
                 // Calling ice_timeout() should have no effect on the connect timeout.
@@ -348,12 +348,12 @@
                 return timeout.op(); // Ensure adapter is active.
             }
         ).then(
-            function(r)
+            function()
             {
                 return to.op(); // Force connection.
             }
         ).then(
-            function(r)
+            function()
             {
                 return to.sleep(4000 * mult);
             }
@@ -365,7 +365,7 @@
                 return comm.destroy();
             }
         ).then(
-            function(r)
+            function()
             {
                 //
                 // Test Ice.Override.CloseTimeout.
@@ -377,18 +377,18 @@
                 return comm.stringToProxy(ref).ice_getConnection();
             }
         ).then(
-            function(r, con)
+            function(con)
             {
                 return timeout.holdAdapter(750);
             }
         ).then(
-            function(r)
+            function()
             {
                 now = Date.now();
                 return comm.destroy();
             }
         ).then(
-            function(r)
+            function()
             {
                 var t = Date.now();
                 test(t - now < 500);

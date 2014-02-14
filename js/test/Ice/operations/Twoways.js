@@ -33,42 +33,42 @@
                 return p.ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 return p.ice_isA(Test.MyClass.ice_staticId());
             }
         ).then(
-            function(r, b)
+            function(b)
             {
                 test(b);
                 return p.ice_id();
             }
         ).then(
-            function(r, id)
+            function(id)
             {
                 test(id === Test.MyDerivedClass.ice_staticId());
                 return p.ice_ids();
             }
         ).then(
-            function(r, ids)
+            function(ids)
             {
                 test(ids.length === 3);
                 return p.opVoid();
             }
         ).then(
-            function(r)
+            function()
             {
                 return p.opByte(0xff, 0x0f);
             }
         ).then(
-            function(r, retval, p3)
+            function(retval, p3)
             {
                 test(p3 === 0xf0);
                 test(retval === 0xff);
                 return p.opBool(true, false);
             }
         ).then(
-            function(r, retval, p3)
+            function(retval, p3)
             {
                 test(p3);
                 test(!retval);
@@ -76,7 +76,7 @@
                 return p.opShortIntLong(10, 11, lo);
             }
         ).then(
-            function(r, retval, s, i, l)
+            function(retval, s, i, l)
             {
                 var lo = new Ice.Long(0, 12);
                 test(s === 10);
@@ -86,7 +86,7 @@
                 return p.opFloatDouble(3.14, 1.1E10);
             }
         ).then(
-            function(r, retval, f, d)
+            function(retval, f, d)
             {
                 test((f - 3.14) <= 0.01);
                 test(d == 1.1E10);
@@ -94,21 +94,21 @@
                 return p.opString("hello", "world");
             }
         ).then(
-            function(r, retval, p3)
+            function(retval, p3)
             {
                 test(p3 === "world hello");
                 test(retval === "hello world");
                 return p.opMyEnum(Test.MyEnum.enum2);
             }
         ).then(
-            function(r, retval, p2)
+            function(retval, p2)
             {
                 test(p2 === Test.MyEnum.enum2);
                 test(retval === Test.MyEnum.enum3);
                 return p.opMyClass(p);
             }
         ).then(
-            function(r, retval, p2, p3)
+            function(retval, p2, p3)
             {
                 test(p2.ice_getIdentity().equals(communicator.stringToIdentity("test")));
                 test(p3.ice_getIdentity().equals(communicator.stringToIdentity("noSuchIdentity")));
@@ -127,7 +127,7 @@
                 return p.opStruct(si1, si2);
             }
         ).then(
-            function(r, retval, p3)
+            function(retval, p3)
             {
                 test(retval.p === null);
                 test(retval.e === Test.MyEnum.enum2);
@@ -141,7 +141,7 @@
                 return p.opByteS(bsi1, bsi2);
             }
         ).then(
-            function(r, retval, p3)
+            function(retval, p3)
             {
                 test(p3.length === 4);
                 test(p3[0] === 0x22);
@@ -163,7 +163,7 @@
                 return p.opBoolS(bsi1, bsi2);
             }
         ).then(
-            function(r, retval, p3)
+            function(retval, p3)
             {
                 test(p3.length == 4);
                 test(p3[0]);
@@ -184,7 +184,7 @@
                 return p.opShortIntLongS(ssi, isi, lsi);
             }
         ).then(
-            function(r, retval, sso, iso, lso)
+            function(retval, sso, iso, lso)
             {
                 var l1 = new Ice.Long(0, 10);
                 var l2 = new Ice.Long(0, 30);
@@ -215,7 +215,7 @@
                 return p.opFloatDoubleS(fsi, dsi);
             }
         ).then(
-            function(r, retval, fso, dso)
+            function(retval, fso, dso)
             {
                 test(fso.length === 2);
                 test((fso[0] - 3.14) <= 0.01);
@@ -235,7 +235,7 @@
                 return p.opStringS(ssi1, ssi2);
             }
         ).then(
-            function(r, retval, sso)
+            function(retval, sso)
             {
                 test(sso.length === 4);
                 test(sso[0] === "abc");
@@ -260,7 +260,7 @@
                 return p.opByteSS(bsi1, bsi2);
             }
         ).then(
-            function(r, retval, bso)
+            function(retval, bso)
             {
                 test(bso.length === 2);
                 test(bso[0].length === 1);
@@ -295,7 +295,7 @@
                 return p.opFloatDoubleSS(fsi, dsi);
             }
         ).then(
-            function(r, retval, fso, dso)
+            function(retval, fso, dso)
             {
                 test(fso.length === 3);
                 test(fso[0].length === 1);
@@ -332,7 +332,7 @@
                 return p.opStringSS(ssi1, ssi2);
             }
         ).then(
-            function(r, retval, sso)
+            function(retval, sso)
             {
                 test(sso.length === 5);
                 test(sso[0].length === 1);
@@ -375,7 +375,7 @@
                 return p.opStringSSS(sssi1, sssi2);
             }
         ).then(
-            function(r, retval, ssso)
+            function(retval, ssso)
             {
                 test(ssso.length === 5);
                 test(ssso[0].length === 2);
@@ -421,7 +421,7 @@
                 return p.opByteBoolD(di1, di2);
             }
         ).then(
-            function(r, retval, p3)
+            function(retval, p3)
             {
                 var tmp = new Test.ByteBoolD();
                 tmp.set(10, true);
@@ -444,7 +444,7 @@
                 return p.opShortIntD(di1, di2);
             }
         ).then(
-            function(r, retval, p3)
+            function(retval, p3)
             {
                 var tmp = new Test.ShortIntD();
                 tmp.set(110, -1);
@@ -467,7 +467,7 @@
                 return p.opLongFloatD(di1, di2);
             }
         ).then(
-            function(r, retval, p3)
+            function(retval, p3)
             {
                 var tmp = new Test.LongFloatD();
                 tmp.set(new Ice.Long(0, 999999110), -1.1);
@@ -491,7 +491,7 @@
                 return p.opStringStringD(di1, di2);
             }
         ).then(
-            function(r, retval, p3)
+            function(retval, p3)
             {
                 var tmp = new Test.StringStringD();
                 tmp.set("foo", "abc -1.1");
@@ -514,7 +514,7 @@
                 return p.opStringMyEnumD(di1, di2);
             }
         ).then(
-            function(r, retval, p3)
+            function(retval, p3)
             {
                 var tmp = new Test.StringMyEnumD();
                 tmp.set("abc", Test.MyEnum.enum1);
@@ -535,7 +535,7 @@
                 return p.opMyEnumStringD(di1, di2);
             }
         ).then(
-            function(r, retval, p3)
+            function(retval, p3)
             {
                 var tmp = new Test.MyEnumStringD();
                 tmp.set(Test.MyEnum.enum1, "abc");
@@ -560,7 +560,7 @@
                 return p.opMyStructMyEnumD(di1, di2);
             }
         ).then(
-            function(r, retval, p3)
+            function(retval, p3)
             {
                 var tmp = new Test.MyStructMyEnumD();
                 var ts11 = new Test.MyStruct(1, 1);
@@ -590,7 +590,7 @@
                         }
 
                         return p.opIntS(s).then(
-                            function(r, retval)
+                            function(retval)
                             {
                                 test(retval.length === len);
                                 for(var i = 0; i < len; ++i)
@@ -612,31 +612,31 @@
                 return p.opContext();
             }
         ).then(
-            function(r, c)
+            function(c)
             {
                 test(!c.equals(ctx));
                 return p.opContext(ctx);
             }
         ).then(
-            function(r, c)
+            function(c)
             {
                 test(c.equals(ctx));
                 return Test.MyClassPrx.checkedCast(p.ice_context(ctx));
             }
         ).then(
-            function(r, p2)
+            function(p2)
             {
                 test(p2.ice_getContext().equals(ctx));
                 return p2.opContext();
             }
         ).then(
-            function(r, c)
+            function(c, r)
             {
                 test(c.equals(ctx));
                 return r.proxy.opContext(ctx);
             }
         ).then(
-            function(r, c)
+            function(c)
             {
                 test(c.equals(ctx));
 
@@ -657,7 +657,7 @@
                 return p3.opContext();
             }
         ).then(
-            function(r, c)
+            function(c, r)
             {
                 test(c.equals(ctx));
 
@@ -665,7 +665,7 @@
                 return r.proxy.opContext();
             }
         ).then(
-            function(r, c)
+            function(c, r)
             {
                 test(c.equals(r.communicator.getImplicitContext().getContext()));
 
@@ -686,7 +686,7 @@
                 return p3.opContext();
             }
         ).then(
-            function(r, c)
+            function(c, r)
             {
                 test(c.equals(r.proxy.ice_getContext()));
                 r.communicator.getImplicitContext().setContext(ctx);
@@ -694,14 +694,14 @@
                 return r.proxy.opContext();
             }
         ).then(
-            function(r, c)
+            function(c, r)
             {
                 test(c.equals(combined));
 
                 return r.communicator.destroy();
             }
         ).then(
-            function(r)
+            function()
             {
                 var d = 1278312346.0 / 13.0;
                 var ds = [];
@@ -713,22 +713,22 @@
                 return p.opDoubleMarshaling(d, ds);
             }
         ).then(
-            function(r)
+            function()
             {
                 return p.opIdempotent();
             }
         ).then(
-            function(r)
+            function()
             {
                 return p.opNonmutating();
             }
         ).then(
-            function(r)
+            function()
             {
                 return Test.MyDerivedClassPrx.checkedCast(p);
             }
         ).then(
-            function(r, d)
+            function(d)
             {
                 return d.opDerived();
             }

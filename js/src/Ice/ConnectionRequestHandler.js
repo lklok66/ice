@@ -55,7 +55,7 @@
         },
         onConnection: function(r)
         {
-            r.succeed(r, this._connection);
+            r.succeed(this._connection, r);
         }
     });
     

@@ -40,7 +40,7 @@ Ice.Promise.try(
         var delay = 0;
         
         return Demo.HelloPrx.checkedCast(proxy).then(
-            function(asyncResult, twoway)
+            function(twoway)
             {
                 var oneway = twoway.ice_oneway();
                 var batchOneway = twoway.ice_batchOneway();
@@ -150,7 +150,7 @@ Ice.Promise.try(
                                      data.forEach(function(key)
                                                   {
                                                       promise = promise.then(
-                                                          function(r) 
+                                                          function() 
                                                           { 
                                                               return processKey(key); 
                                                           }

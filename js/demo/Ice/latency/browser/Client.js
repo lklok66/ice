@@ -37,7 +37,7 @@ function run()
     // Down-cast the proxy to the Demo.Ping interface.
     //
     return Demo.PingPrx.checkedCast(proxy).then(
-        function(r, obj)
+        function(obj)
         {
             writeLine("pinging server " + repetitions + " times (this may take a while)");
             start = new Date().getTime();

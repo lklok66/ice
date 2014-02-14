@@ -67,7 +67,7 @@ Ice.Promise.try(
                     var id;
 
                     return Glacier2.RouterPrx.checkedCast(router).then(
-                        function(r, proxy)
+                        function(proxy)
                         {
                             router = proxy;
                             console.log("This demo accepts any user-id / password combination.");
@@ -87,7 +87,7 @@ Ice.Promise.try(
                             return router.createSession(id, password);
                         }
                     ).then(
-                        function(r, session)
+                        function(session)
                         {
                             return runWithSession(router, Demo.ChatSessionPrx.uncheckedCast(session));
                         },
@@ -130,9 +130,9 @@ Ice.Promise.try(
             ).then(
                 function(timeoutA, categoryA, adapterA)
                 {
-                    var timeout = timeoutA[1];
-                    var category = categoryA[1];
-                    var adapter = adapterA[1];
+                    var timeout = timeoutA[0];
+                    var category = categoryA[0];
+                    var adapter = adapterA[0];
                     
                     //
                     // Setup an interval call to refreshSession to keep

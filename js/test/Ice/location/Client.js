@@ -26,7 +26,7 @@
 
     var allTests = function(out, communicator)
     {
-        var failCB = function(r) { test(false); }
+        var failCB = function() { test(false); }
         
         var manager, locator, anotherLocator, registry, base, base2, base3, 
             base4, base5, base6, bases, obj, obj2, obj3, 
@@ -45,7 +45,7 @@
                 return locator.getRegistry();
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 registry = Test.TestLocatorRegistryPrx.uncheckedCast(obj);
                 test(registry !== null);
@@ -97,49 +97,49 @@
                 
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing checked cast... ");
                 return Test.TestIntfPrx.checkedCast(base);
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 obj = o;
                 test(obj !== null);
                 return Test.TestIntfPrx.checkedCast(base2);
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 obj2 = o;
                 test(obj2 !== null);
                 return Test.TestIntfPrx.checkedCast(base3);
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 obj3 = o;
                 test(obj3 !== null);
                 return Test.ServerManagerPrx.checkedCast(base4);
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 obj4 = o;
                 test(obj4 !== null);
                 return Test.TestIntfPrx.checkedCast(base5);
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 obj5 = o;
                 test(obj !== null);
                 return Test.TestIntfPrx.checkedCast(base6);
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 obj6 = o;
                 test(obj6 !== null);
@@ -148,136 +148,136 @@
                 return obj.shutdown();
             }
         ).then(
-            function(r)
+            function()
             {
                 return manager.startServer();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj2.ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing id@ReplicaGroupId indirect proxy... ");
                 return obj.shutdown();
             }
         ).then(
-            function(r)
+            function()
             {
                 return manager.startServer();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj6.ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing identity indirect proxy... ");
                 obj.shutdown();
             }
         ).then(
-            function(r)
+            function()
             {
                 return manager.startServer();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj3.ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj2.ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj.shutdown();
             }
         ).then(
-            function(r)
+            function()
             {
                 return manager.startServer();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj2.ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj3.ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj.shutdown();
             }
         ).then(
-            function(r)
+            function()
             {
                 return manager.startServer();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj2.ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 obj.shutdown();
             }
         ).then(
-            function(r)
+            function()
             {
                 return manager.startServer();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj3.ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj.shutdown();
             }
         ).then(
-            function(r)
+            function()
             {
                 return manager.startServer();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj2.ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj.shutdown();
             }
         ).then(
-            function(r)
+            function()
             {
                 return manager.startServer();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj5.ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing proxy with unknown identity... ");
@@ -308,7 +308,7 @@
                 return locator.getRequestCount();
             }
         ).then(
-            function(r, count)
+            function(count)
             {
                 return Promise.try(
                     function()
@@ -317,12 +317,12 @@
                         return communicator.stringToProxy("test@TestAdapter").ice_locatorCacheTimeout(0).ice_ping();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         test(++count == newCount);
                         return count;
@@ -338,14 +338,13 @@
                         return communicator.stringToProxy("test@TestAdapter").ice_locatorCacheTimeout(0).ice_ping();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
-                        console.log(count + " " + newCount);
                         test(++count == newCount);
                         return count;
                     });
@@ -361,12 +360,12 @@
                         return communicator.stringToProxy("test@TestAdapter").ice_locatorCacheTimeout(1).ice_ping();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         test(count == newCount);
                         setTimeout(
@@ -391,12 +390,12 @@
                         return communicator.stringToProxy("test@TestAdapter").ice_locatorCacheTimeout(1).ice_ping();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         test(++count == newCount);
                         return count;
@@ -412,12 +411,12 @@
                         return communicator.stringToProxy("test").ice_locatorCacheTimeout(0).ice_ping();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         count += 2;
                         return count;
@@ -429,12 +428,12 @@
                 var p = new Promise();
                 // 1s timeout.
                 communicator.stringToProxy("test").ice_locatorCacheTimeout(1).ice_ping().then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         test(count == newCount);
                         p.succeed(count);
@@ -459,12 +458,12 @@
                         return communicator.stringToProxy("test").ice_locatorCacheTimeout(0).ice_ping();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         count += 2;
                         test(count == newCount);
@@ -481,12 +480,12 @@
                         return communicator.stringToProxy("test@TestAdapter").ice_locatorCacheTimeout(-1).ice_ping();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         test(count == newCount);
                         return count;
@@ -498,12 +497,12 @@
                 var p = new Promise();
                 // 1s timeout.
                 communicator.stringToProxy("test").ice_locatorCacheTimeout(-1).ice_ping().then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         test(count == newCount);
                         p.succeed(count);
@@ -521,12 +520,12 @@
                 var p = new Promise();
                 // 1s timeout.
                 communicator.stringToProxy("test@TestAdapter").ice_ping().then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         test(count == newCount);
                         p.succeed(count);
@@ -544,12 +543,12 @@
                 var p = new Promise();
                 // 1s timeout.
                 communicator.stringToProxy("test").ice_ping().then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         test(count == newCount);
                         p.succeed(count);
@@ -570,61 +569,61 @@
                 return Test.TestIntfPrx.checkedCast(communicator.stringToProxy("test@TestAdapter"));
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 obj = o;
                 return Promise.all(obj.getHello(), obj.getReplicatedHello());
             }
         ).then(
-            function()
+            function(r1, r2)
             {
-                hello = arguments[0][1];
+                hello = r1[0];
                 test(hello.ice_getAdapterId() == "TestAdapter");
-                hello = arguments[1][1];
+                hello = r2[0];
                 test(hello.ice_getAdapterId() == "ReplicatedAdapter");
                 return hello.sayHello();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing proxy from server after shutdown... ");
                 return obj.shutdown();
             }
         ).then(
-            function(r)
+            function()
             {
                 return manager.startServer();
             }
         ).then(
-            function(r)
+            function()
             {
                 return hello.sayHello();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing locator request queuing... ");
                 return obj.getReplicatedHello();
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 hello = o.ice_locatorCacheTimeout(0).ice_connectionCached(false);
                 return locator.getRequestCount();
             }
         ).then(
-            function(r, count)
+            function(count)
             {
                 var p = new Promise();
                 hello.ice_ping().then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         test(++count == newCount);
                         p.succeed(count);
@@ -652,7 +651,7 @@
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         test(count < newCount);
                         test(newCount < count + 999);
@@ -727,23 +726,23 @@
                 return locator.findAdapterById("TestAdapter");
             }
         ).then(
-            function(r, adapter)
+            function(adapter)
             {
                 return registry.setAdapterDirectProxy("TestAdapter3", adapter);
             }
         ).then(
-            function(r)
+            function()
             {
                 return communicator.stringToProxy("test@TestAdapter3").ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 registry.setAdapterDirectProxy("TestAdapter3", communicator.stringToProxy("dummy:tcp"));
                 return communicator.stringToProxy("test@TestAdapter3").ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 return communicator.stringToProxy("test@TestAdapter3").ice_locatorCacheTimeout(0).ice_ping();
             }
@@ -768,20 +767,20 @@
                 return locator.findAdapterById("TestAdapter");
             }
         ).then(
-            function(r, adapter)
+            function(adapter)
             {
                 registry.setAdapterDirectProxy("TestAdapter3", adapter);
                 return communicator.stringToProxy("test@TestAdapter3").ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing well-known object locator cache... ");
                 return registry.addObject(communicator.stringToProxy("test3@TestUnknown"));
             }
         ).then(
-            function(r)
+            function()
             {
                 return communicator.stringToProxy("test3").ice_ping();
             }
@@ -802,12 +801,12 @@
                 return registry.addObject(communicator.stringToProxy("test3@TestAdapter4")); // Update
             }
         ).then(
-            function(r)
+            function()
             {
                 return registry.setAdapterDirectProxy("TestAdapter4", communicator.stringToProxy("dummy:tcp"));
             }
         ).then(
-            function(r)
+            function()
             {
                 return communicator.stringToProxy("test3").ice_ping();
             }
@@ -822,27 +821,27 @@
                 return locator.findAdapterById("TestAdapter");
             }
         ).then(
-            function(r, adapter)
+            function(adapter)
             {
                 return registry.setAdapterDirectProxy("TestAdapter4", adapter);
             }
         ).then(
-            function(r)
+            function()
             {
                 return communicator.stringToProxy("test3").ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 return registry.setAdapterDirectProxy("TestAdapter4", communicator.stringToProxy("dummy:tcp"));
             }
         ).then(
-            function(r)
+            function()
             {
                 return communicator.stringToProxy("test3").ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 return communicator.stringToProxy("test@TestAdapter4").ice_locatorCacheTimeout(0).ice_ping();
             }
@@ -877,17 +876,17 @@
                 return registry.addObject(communicator.stringToProxy("test3@TestAdapter"));
             }
         ).then(
-            function(r)
+            function()
             {
                 return communicator.stringToProxy("test3").ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 return registry.addObject(communicator.stringToProxy("test4"));
             }
         ).then(
-            function(r)
+            function()
             {
                 return communicator.stringToProxy("test4").ice_ping();
             }
@@ -910,38 +909,38 @@
                 var p = new Promise();
                 
                 locator.findAdapterById("TestAdapter").then(
-                    function(r, adapter)
+                    function(adapter)
                     {
                         return registry.setAdapterDirectProxy("TestAdapter5", adapter);
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return registry.addObject(communicator.stringToProxy("test3@TestAdapter"));
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, count)
+                    function(count)
                     {
                         var p1 = new Promise();
                         // No locator cache.
                         ic.stringToProxy("test@TestAdapter5").ice_locatorCacheTimeout(0).ice_ping().then(
-                            function(r)
+                            function()
                             {
                                 // No locator cache.
                                 return ic.stringToProxy("test3").ice_locatorCacheTimeout(0).ice_ping();
                             }
                         ).then(
-                            function(r)
+                            function()
                             {
                                 return locator.getRequestCount();
                             }
                         ).then(
-                            function(r, newCount)
+                            function(newCount)
                             {
                                 count += 3;
                                 test(count === newCount);
@@ -959,29 +958,29 @@
                     {
                         var p1 = new Promise();
                         registry.setAdapterDirectProxy("TestAdapter5", null).then(
-                            function(r)
+                            function()
                             {
                                 return registry.addObject(communicator.stringToProxy("test3:tcp"));
                             }
                         ).then(
-                            function(r)
+                            function()
                             {
                                 // 10s timeout.
                                 return ic.stringToProxy("test@TestAdapter5").ice_locatorCacheTimeout(10).ice_ping();
                             }
                         ).then(
-                            function(r)
+                            function()
                             {
                                 // 10s timeout.
                                 return ic.stringToProxy("test3").ice_locatorCacheTimeout(10).ice_ping();
                             }
                         ).then(
-                            function(r)
+                            function()
                             {
                                 return locator.getRequestCount();
                             }
                         ).then(
-                            function(r, newCount)
+                            function(newCount)
                             {
                                 test(count = newCount);
                                 setTimeout(
@@ -1005,13 +1004,13 @@
                         
                         // 1s timeout.
                         ic.stringToProxy("test@TestAdapter5").ice_locatorCacheTimeout(1).ice_ping().then(
-                            function(r)
+                            function()
                             {
                                 // 1s timeout.
                                 return ic.stringToProxy("test3").ice_locatorCacheTimeout(1).ice_ping();
                             }
                         ).then(
-                            function(r)
+                            function()
                             {
                                 p1.succeed();
                             }
@@ -1031,9 +1030,8 @@
                         var f1 = function()
                         {
                             ic.stringToProxy("test@TestAdapter5").ice_locatorCacheTimeout(1).ice_ping().then(
-                                function(r)
+                                function()
                                 {
-                                    console("1) setTimeout f1");
                                     setTimeout(function(){ f1(); }, 10000);
                                 },
                                 function(ex)
@@ -1067,7 +1065,7 @@
                         var f1 = function()
                         {
                             ic.stringToProxy("test3").ice_locatorCacheTimeout(1).ice_ping().then(
-                                function(r)
+                                function()
                                 {
                                     setTimeout(function(){ f1(); }, 10000);
                                 },
@@ -1118,108 +1116,108 @@
                 return obj.getReplicatedHello();
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 hello = o;
                 return obj.shutdown();
             }
         ).then(
-            function(r)
+            function()
             {
                 return manager.startServer();
             }
         ).then(
-            function(r)
+            function()
             {
                 return hello.sayHello();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing object migration...");
                 return Test.HelloPrx.checkedCast(communicator.stringToProxy("hello"));
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 hello = o;
                 return obj.migrateHello();
             }
         ).then(
-            function(r)
+            function()
             {
                 return hello.sayHello();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj.migrateHello();
             }
         ).then(
-            function(r)
+            function()
             {
                 return hello.sayHello();
             }
         ).then(
-            function(r)
+            function()
             {
                 return obj.migrateHello();
             }
         ).then(
-            function(r)
+            function()
             {
                 return hello.sayHello();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing locator encoding resolution... ");
                 return Test.HelloPrx.checkedCast(communicator.stringToProxy("hello"));
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 return locator.getRequestCount();
             }
         ).then(
-            function(r, count)
+            function(count)
             {
                 var p = new Promise();
                 
                 var prx = communicator.stringToProxy("test@TestAdapter").ice_encodingVersion(
                                                                                         Ice.Encoding_1_1);
                 return prx.ice_ping().then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         test(count == newCount);
                         return communicator.stringToProxy("test@TestAdapter10").ice_encodingVersion(
                                                                             Ice.Encoding_1_0).ice_ping();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         test(++count == newCount);
                         return communicator.stringToProxy("test -e 1.0@TestAdapter10-2").ice_ping();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return locator.getRequestCount();
                     }
                 ).then(
-                    function(r, newCount)
+                    function(newCount)
                     {
                         test(++count == newCount);
                         p.succeed();
@@ -1241,7 +1239,7 @@
                 return obj.shutdown();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing whether server is gone... ");
@@ -1280,7 +1278,7 @@
                 manager.shutdown();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
             }

@@ -44,7 +44,7 @@
                 return Test.TestIntfPrx.checkedCast(base);
             }
         ).then(
-            function(asyncResult, obj)
+            function(obj)
             {
                 prx = obj;
                 test(prx !== null);

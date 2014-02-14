@@ -36,7 +36,7 @@
                 function()
                 {
                     return thrower.supportsUndeclaredExceptions().then(
-                        function(r, v)
+                        function(v)
                         {
                             if(v)
                             {
@@ -74,7 +74,7 @@
                 function()
                 {
                     return thrower.supportsAssertException().then(
-                        function(asyncResult, v)
+                        function(v)
                         {
                             if(v)
                             {
@@ -120,7 +120,7 @@
             {
                 out.write("testing servant registration exceptions... ");
                 return communicator.createObjectAdapter("").then(
-                    function(r, adapter)
+                    function(adapter)
                     {
                         var obj = new EmptyI();
                         adapter.add(obj, communicator.stringToIdentity("x"));
@@ -153,7 +153,7 @@
             {
                 out.write("testing servant locator registration exceptions... ");
                 return communicator.createObjectAdapter("").then(
-                    function(r, adapter)
+                    function(adapter)
                     {
                         var loc = new ServantLocatorI();
                         adapter.addServantLocator(loc, "x");
@@ -196,7 +196,7 @@
                 return Test.ThrowerPrx.checkedCast(base);
             }
             ).then(
-            function(asyncResult, obj)
+            function(obj)
             {
                 thrower = obj;
                 test(thrower !== null);
@@ -387,7 +387,7 @@
                 return thrower.throwAfterResponse();
             }
         ).then(
-            function(asyncResult)
+            function()
             {
                 return thrower.throwAfterException();
             }

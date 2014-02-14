@@ -96,7 +96,7 @@
             if(this._noConfig)
             {
                 this._reference = this._instance.referenceFactory().createFromString("dummy -t", "");
-                promise.succeed(promise, this);
+                promise.succeed(this, promise);
                 return;
             }
 
@@ -239,7 +239,7 @@
                         ).then(
                             function()
                             {
-                                promise.succeed(promise, self);
+                                promise.succeed(self, promise);
                             },
                             function(ex)
                             {
@@ -254,7 +254,7 @@
                     {
                         throw new Ice.FeatureNotSupportedException("object adapter endpoints not supported");
                     }
-                    promise.succeed(promise, this);
+                    promise.succeed(this, promise);
                 }
             }
             catch(ex)

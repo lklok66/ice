@@ -33,7 +33,7 @@ function sayHello()
             // the checkedCast success.
             //
             return Demo.HelloPrx.checkedCast(proxy).then(
-                function(r, hello)
+                function(hello)
                 {
                     return hello.sayHello();
                 });

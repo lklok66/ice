@@ -39,7 +39,7 @@
                 return Test.TestIntfPrx.checkedCast(base);
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 proxy = obj;
                 test(proxy !== null);
@@ -137,56 +137,56 @@
                 return proxy.opByte(Test.ByteEnum.benum1);
             }
         ).then(
-            function(asyncResult, r, b1)
+            function(r, b1)
             {
                 test(r === b1);
                 test(r === Test.ByteEnum.benum1);
                 return proxy.opByte(Test.ByteEnum.benum11);
             }
         ).then(
-            function(asyncResult, r, b11)
+            function(r, b11)
             {
                 test(r === b11);
                 test(r === Test.ByteEnum.benum11);
                 return proxy.opShort(Test.ShortEnum.senum1);
             }
         ).then(
-            function(asyncResult, r, s1)
+            function(r, s1)
             {
                 test(r === s1);
                 test(r === Test.ShortEnum.senum1);
                 return proxy.opShort(Test.ShortEnum.senum11);
             }
         ).then(
-            function(asyncResult, r, s11)
+            function(r, s11)
             {
                 test(r === s11);
                 test(r === Test.ShortEnum.senum11);
                 return proxy.opInt(Test.IntEnum.ienum1);
             }
         ).then(
-            function(asyncResult, r, i1)
+            function(r, i1)
             {
                 test(r === i1);
                 test(r === Test.IntEnum.ienum1);
                 return proxy.opInt(Test.IntEnum.ienum11);
             }
         ).then(
-            function(asyncResult, r, i11)
+            function(r, i11)
             {
                 test(r === i11);
                 test(r === Test.IntEnum.ienum11);
                 return proxy.opInt(Test.IntEnum.ienum12);
             }
         ).then(
-            function(asyncResult, r, i12)
+            function(r, i12)
             {
                 test(r === i12);
                 test(r === Test.IntEnum.ienum12);
                 return proxy.opSimple(Test.SimpleEnum.green);
             }
         ).then(
-            function(asyncResult, r, g)
+            function(r, g)
             {
                 test(r === g);
                 test(r === Test.SimpleEnum.green);

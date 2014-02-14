@@ -83,9 +83,9 @@ var signin = function()
             return RouterPrx.checkedCast(communicator.getDefaultRouter());
         }
     ).then(
-        function(r, rr)
+        function(r)
         {
-            router = rr;
+            router = r;
 
             //
             // Create a session with the Glacier2 router.
@@ -93,7 +93,7 @@ var signin = function()
             return router.createSession($("#username").val(), $("#password").val());
         }
     ).then(
-        function(r, session)
+        function(session)
         {
             run(communicator, router, ChatSessionPrx.uncheckedCast(session));
         }

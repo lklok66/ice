@@ -181,7 +181,7 @@
             else if(this._connection !== null)
             {
                 Debug.assert(this._initialized);
-                r.succeed(r, this._connection);
+                r.succeed(this._connection, r);
             }
             else
             {
@@ -360,9 +360,11 @@
             }
             this._proxy = null; // Break cyclic reference count.
 
+            var p;
             for(var i = 0; i < this._pendingPromises.length; ++i)
             {
-                this._pendingPromises[i].succeed(this._pendingPromises[i], this._connection);
+                p = this._pendingPromises[i];
+                p.succeed(this._connection, p);
             }
             this._pendingPromises = [];
         },

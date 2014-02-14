@@ -37,7 +37,7 @@
             if(communicator)
             {
                 communicator.destroy().then(
-                    function(asyncResult)
+                    function()
                     {
                         communicator = Ice.initialize(initData);
                         com = Test.RemoteCommunicatorPrx.uncheckedCast(communicator.stringToProxy("communicator:default -p 12010"));
@@ -76,7 +76,7 @@
                         args.forEach(
                             function(r)
                             {
-                                test = r[1];
+                                test = r[0];
                                 endpoints = endpoints.concat(test.ice_getEndpoints());
                             });
                         adapters.forEach(
@@ -122,7 +122,7 @@
             {
                 var adapter = adapters.shift();
                 communicator.deactivateObjectAdapter(adapter).then(
-                    function(asyncResult)
+                    function()
                     {
                         if(adapters.length > 0)
                         {
@@ -169,7 +169,7 @@
                                 names.map(function(name) { return com.createObjectAdapter(name, "default"); })).then(
                             function()
                             {
-                                adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[1]; });
+                                adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[0]; });
                                 var count = 20;
                                 var adapterCount = adapters.length;
                                 var proxies = new Array(10);
@@ -233,7 +233,7 @@
                                                 function(proxy){
                                                     var p = new Promise();
                                                     proxy.ice_ping().then(
-                                                        function(asyncResult){
+                                                        function(){
                                                             p.succeed();
                                                         },
                                                         function(ex){
@@ -253,7 +253,7 @@
                                             {
                                                 adapter = adapters.shift();
                                                 adapter.getTestIntf().then(
-                                                    function(asyncResult, prx)
+                                                    function(prx)
                                                     {
                                                         return prx.ice_getConnection();
                                                     },
@@ -262,7 +262,7 @@
                                                         throw ex;
                                                     }
                                                 ).then(
-                                                    function(asyncResult, conn)
+                                                    function(conn)
                                                     {
                                                         return conn.close(false);
                                                     },
@@ -397,7 +397,7 @@
                         return com.createObjectAdapter("Adapter", "default");
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         adapter = obj;
                         return Promise.all(
@@ -407,8 +407,8 @@
                 ).then(
                     function(r1, r2)
                     {
-                        test1 = r1[1];
-                        test2 = r2[1];
+                        test1 = r1[0];
+                        test2 = r2[0];
                         
                         return Promise.all(
                             test1.ice_getConnection(),
@@ -417,8 +417,8 @@
                 ).then(
                     function(r1, r2)
                     {
-                        conn1 = r1[1];
-                        conn2 = r2[1];
+                        conn1 = r1[0];
+                        conn2 = r2[0];
                         test(conn1 === conn2);
                         return Promise.all(
                             test1.ice_ping(),
@@ -430,7 +430,7 @@
                         return com.deactivateObjectAdapter(adapter);
                     }
                 ).then(
-                    function(asyncResult)
+                    function()
                     {
                         test3 = Test.TestIntfPrx.uncheckedCast(test1);
                         
@@ -441,8 +441,8 @@
                 ).then(
                     function(r1, r2)
                     {
-                        conn3 = r1[1];
-                        conn1 = r2[1];
+                        conn3 = r1[0];
+                        conn1 = r2[0];
                         test(conn3 === conn1);
                         
                         return Promise.all(
@@ -453,8 +453,8 @@
                 ).then(
                     function(r1, r2)
                     {
-                        conn3 = r1[1];
-                        conn2 = r2[1];
+                        conn3 = r1[0];
+                        conn2 = r2[0];
                         test(conn3 === conn2);
                         return test3.ice_ping();
                     }
@@ -487,9 +487,9 @@
                     //
                     function(r1, r2, r3)
                     {
-                        adapters.push(r1[1]);
-                        adapters.push(r2[1]);
-                        adapters.push(r3[1]);
+                        adapters.push(r1[0]);
+                        adapters.push(r2[0]);
+                        adapters.push(r3[0]);
                         var p = new Promise();
                         var f1 = function(names)
                         {
@@ -519,7 +519,7 @@
                             ).then(
                                 function(r1, r2)
                                 {
-                                    test(r1[1] === r2[1]);
+                                    test(r1[0] === r2[0]);
                                     return Promise.all(
                                         test2.ice_getConnection(),
                                         test3.ice_getConnection());
@@ -527,11 +527,11 @@
                             ).then(
                                 function(r1, r2)
                                 {
-                                    test(r1[1] === r2[1]);
+                                    test(r1[0] === r2[0]);
                                     return test1.getAdapterName();
                                 }
                             ).then(
-                                function(asyncResult, name)
+                                function(name)
                                 {
                                     if(names.indexOf(name) !== -1)
                                     {
@@ -540,7 +540,7 @@
                                     return test1.ice_getConnection();
                                 }
                             ).then(
-                                function(asyncResult, conn)
+                                function(conn)
                                 {
                                     return conn.close(false);
                                 }
@@ -582,7 +582,7 @@
                         {
                             var adapter = adapters.shift();
                             adapter.getTestIntf().then(
-                                function(asyncResult, test)
+                                function(test)
                                 {
                                     return test.ice_ping();
                                 }
@@ -625,7 +625,7 @@
                                 var f1 = function()
                                 {
                                     test1.getAdapterName().then(
-                                        function(asyncResult, name)
+                                        function(name)
                                         {
                                             test(adapterName === name);
                                             i++;
@@ -648,7 +648,7 @@
                                 };
                                 
                                 test1.getAdapterName().then(
-                                    function(asyncResult, name)
+                                    function(name)
                                     {
                                         adapterName = name;
                                         f1();
@@ -671,12 +671,12 @@
                         {
                             var adapter = adapters.shift();
                             adapter.getTestIntf().then(
-                                function(asyncResult, test)
+                                function(test)
                                 {
                                     return test.ice_getConnection();
                                 }
                             ).then(
-                                function(asyncResult, conn)
+                                function(conn)
                                 {
                                     conn.close(false);
                                 }
@@ -713,7 +713,7 @@
                         return com.deactivateObjectAdapter(adapters[0]);
                     }
                 ).then(
-                    function(asyncResult)
+                    function()
                     {
                         var p = new Promise();
                         var f1 = function(names)
@@ -742,13 +742,13 @@
                                     var conn1, conn2;
                                     
                                     test1.ice_getConnection().then(
-                                        function(asyncResult, conn)
+                                        function(conn)
                                         {
                                             conn1 = conn
                                             return test2.ice_getConnection();
                                         }
                                     ).then(
-                                        function(asyncResult, conn)
+                                        function(conn)
                                         {
                                             conn2 = conn;
                                             test(conn1 === conn2);
@@ -769,13 +769,13 @@
                                     var p = new Promise();
                                     var conn1, conn2;
                                     test2.ice_getConnection().then(
-                                        function(asyncResult, conn)
+                                        function(conn)
                                         {
                                             conn1 = conn
                                             return test3.ice_getConnection();
                                         }
                                     ).then(
-                                        function(asyncResult, conn)
+                                        function(conn)
                                         {
                                             conn2 = conn;
                                             test(conn1 === conn2);
@@ -794,7 +794,7 @@
                                     return test1.getAdapterName();
                                 }
                             ).then(
-                                function(asyncResult, name)
+                                function(name)
                                 {
                                     if(names.indexOf(name) !== -1)
                                     {
@@ -803,7 +803,7 @@
                                     return test1.ice_getConnection();
                                 }
                             ).then(
-                                function(asyncResult, conn)
+                                function(conn)
                                 {
                                     return conn.close(false);
                                 }
@@ -837,7 +837,7 @@
                             return com.deactivateObjectAdapter(adapters[2]);
                     }
                 ).then(
-                    function(asyncResult)
+                    function()
                     {
                         return createTestIntfPrx(adapters);
                     }
@@ -847,7 +847,7 @@
                         return prx.getAdapterName();
                     }
                 ).then(
-                    function(asyncResult, name)
+                    function(name)
                     {
                         test(name == "Adapter12");
                         return deactivate(com, adapters);
@@ -885,7 +885,7 @@
                 ).then(
                     function()
                     {
-                        adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[1]; });
+                        adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[0]; });
                         return createTestIntfPrx(adapters);
                     }
                 ).then(
@@ -898,7 +898,7 @@
                         var f1 = function()
                         {
                             prx.getAdapterName().then(
-                                function(asyncResult, name)
+                                function(name)
                                 {
                                     if(names.indexOf(name) !== -1)
                                     {
@@ -907,7 +907,7 @@
                                     return prx.ice_getConnection();
                                 }
                             ).then(
-                                function(asyncResult, conn)
+                                function(conn)
                                 {
                                     return conn.close(false);
                                 }
@@ -948,7 +948,7 @@
                         var f1 = function()
                         {
                             prx.getAdapterName().then(
-                                function(asyncResult, name)
+                                function(name)
                                 {
                                     if(names.indexOf(name) !== -1)
                                     {
@@ -957,7 +957,7 @@
                                     return prx.ice_getConnection();
                                 }
                             ).then(
-                                function(asyncResult, conn)
+                                function(conn)
                                 {
                                     return conn.close(false);
                                 }
@@ -1007,7 +1007,7 @@
                 ).then(
                     function()
                     {
-                        adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[1]; });
+                        adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[0]; });
                         return createTestIntfPrx(adapters);
                     }
                 ).then(
@@ -1022,7 +1022,7 @@
                         var f1 = function(i, idx, names)
                         {
                             prx.getAdapterName().then(
-                                function(asyncResult, name)
+                                function(name)
                                 {
                                     test(name === names[0]);
                                 }
@@ -1093,18 +1093,18 @@
                         var f1 = function(i, names)
                         {
                             com.createObjectAdapter(names[0], endpoints[j--].toString()).then(
-                                function(asyncResult, obj)
+                                function(obj)
                                 {
                                     return obj.getTestIntf();
                                 }
                             ).then(
-                                function(asyncResult, obj)
+                                function(obj)
                                 {
                                     prx = obj;
                                     var f2 = function(i, names)
                                     {
                                         prx.getAdapterName().then(
-                                            function(asyncResult, name)
+                                            function(name)
                                             {
                                                 test(name === names[0]);
                                                 if(i < nRetry)
@@ -1158,19 +1158,19 @@
                         return com.createObjectAdapter("Adapter41", "default");
                     }
                 ).then(
-                    function(asyncResult, adapter)
+                    function(adapter)
                     {
                         var p = new Promise();
                         var f1 = function()
                         {
                             adapter.getTestIntf().then(
-                                function(asyncResult, obj)
+                                function(obj)
                                 {
                                     test1 = Test.TestIntfPrx.uncheckedCast(obj.ice_connectionCached(false));
                                     return adapter.getTestIntf()
                                 }
                             ).then(
-                                function(asyncResult, obj)
+                                function(obj)
                                 {
                                     test2 = Test.TestIntfPrx.uncheckedCast(obj.ice_connectionCached(false));
                                     test(!test1.ice_isConnectionCached());
@@ -1182,16 +1182,16 @@
                             ).then(
                                 function(r1, r2)
                                 {
-                                    test(r1[1] == r2[1]);
+                                    test(r1[0] == r2[0]);
                                     return test1.ice_ping();
                                 }
                             ).then(
-                                function(asyncResult)
+                                function()
                                 {
                                     return com.deactivateObjectAdapter(adapter);
                                 }
                             ).then(
-                                function(asyncResult)
+                                function()
                                 {
                                     var test3 = Test.TestIntfPrx.uncheckedCast(test1);
                                     return Promise.all(test3.ice_getConnection(),
@@ -1234,12 +1234,12 @@
                 ).then(
                     function()
                     {
-                        adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[1]; });
+                        adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[0]; });
                         
                         var f2 = function(p, prx)
                         {
                             prx.getAdapterName().then(
-                                function(asyncResult, name)
+                                function(name)
                                 {
                                     if(names.indexOf(name) !== -1)
                                     {
@@ -1345,7 +1345,7 @@
                 ).then(
                     function()
                     {
-                        adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[1]; });
+                        adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[0]; });
                         return createTestIntfPrx(adapters);
                     }
                 ).then(
@@ -1362,7 +1362,7 @@
                         var f1 = function(i, idx, names)
                         {
                             prx.getAdapterName().then(
-                                function(asyncResult, name)
+                                function(name)
                                 {
                                     test(name === names[0]);
                                 }
@@ -1438,7 +1438,7 @@
                                     var f2 = function(i, names)
                                     {
                                         prx.getAdapterName().then(
-                                            function(asyncResult, name)
+                                            function(name)
                                             {
                                                 test(name === names[0]);
                                                 if(i < nRetry)

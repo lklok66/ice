@@ -42,7 +42,7 @@
                 return Test.RetryPrx.checkedCast(base1);
             }
         ).then(
-                function(asyncResult, obj)
+                function(obj)
                 {
                     retry1 = obj;
                     test(retry1 !== null);
@@ -50,7 +50,7 @@
                     return Test.RetryPrx.checkedCast(base2);
                 }
             ).then(
-                function(asyncResult, obj)
+                function(obj)
                 {
                     retry2 = obj;
                     test(retry2 !== null);
@@ -60,7 +60,7 @@
                     return retry1.op(false);
                 }
             ).then(
-                function(asyncResult)
+                function()
                 {
                     out.writeLine("ok");
                     out.write("calling operation to kill connection with second proxy... ");
@@ -80,7 +80,7 @@
                     return retry1.op(false);
                 }
             ).then(
-                function(asyncResult)
+                function()
                 {
                     out.writeLine("ok");
                     return retry1.shutdown();

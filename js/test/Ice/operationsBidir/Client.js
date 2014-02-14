@@ -46,7 +46,7 @@
 
                 var adapter;
                 communicator.createObjectAdapter("").then(
-                    function(r, o)
+                    function(o)
                     {
                         adapter = o;
 
@@ -61,32 +61,32 @@
                         return adapter.activate();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return base.ice_getConnection();
                     }
                 ).then(
-                    function(r, conn)
+                    function(conn)
                     {
                         conn.setAdapter(adapter);
                         return Test.MyClassPrx.checkedCast(base);
                     }
                 ).then(
-                    function(r, prx)
+                    function(prx)
                     {
                         cl = prx;
                         return Test.MyDerivedClassPrx.checkedCast(cl);
                     }
                 ).then(
-                    function(r, prx)
+                    function(prx)
                     {
                         derived = prx;
-                        return Twoways.run(communicator, out, cl, Test);
+                        return Twoways.run(communicator, cl, Test);
                     }
                 ).then(
                     function()
                     {
-                        return Twoways.run(communicator, out, derived, Test);
+                        return Twoways.run(communicator, derived, Test);
                     }
                 ).then(
                     function()
@@ -94,7 +94,7 @@
                         out.writeLine("ok");
 
                         out.write("testing oneway operations... ");
-                        return Oneways.run(communicator, out, cl);
+                        return Oneways.run(communicator, cl);
                     }
                 ).then(
                     function()
@@ -102,7 +102,7 @@
                         out.writeLine("ok");
 
                         out.write("testing batch oneway operations... ");
-                        return BatchOneways.run(communicator, out, cl);
+                        return BatchOneways.run(communicator, cl);
                     }
                 ).then(
                     function()
@@ -162,7 +162,7 @@
                             var ref = "__echo:default -p 12010";
                             var base = c.stringToProxy(ref);
                             return global.Test.EchoPrx.checkedCast(base);
-                        }).then(function(r, prx){
+                        }).then(function(prx){
                             return prx.shutdown();
                         }).then(function(){
                             return c.destroy();

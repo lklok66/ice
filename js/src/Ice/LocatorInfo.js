@@ -562,7 +562,7 @@
             {
                 var self = this;
                 this._locatorInfo.getLocator().findObjectById(this._ref.getIdentity()).then(
-                    function(asyncResult, proxy)
+                    function(proxy)
                     {
                         self.response(proxy);
                     }).exception(
@@ -590,7 +590,7 @@
             {
                 var self = this;
                 this._locatorInfo.getLocator().findAdapterById(this._ref.getAdapterId()).then(
-                    function(asyncResult, proxy)
+                    function(proxy)
                     {
                         self.response(proxy);
                     }).exception(

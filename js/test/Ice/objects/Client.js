@@ -212,7 +212,7 @@
                 return Test.InitialPrx.checkedCast(base);
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 initial = obj;
                 test(initial !== null);
@@ -226,7 +226,7 @@
                 return initial.getB1();
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 b1 = obj;
                 test(b1 !== null);
@@ -235,7 +235,7 @@
                 return initial.getB2();
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 b2 = obj;
                 test(b2 != null);
@@ -244,7 +244,7 @@
                 return initial.getC();
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 c = obj;
                 test(c !== null);
@@ -253,7 +253,7 @@
                 return initial.getD();
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 d = obj;
                 test(d !== null);
@@ -294,7 +294,7 @@
                 return initial.getAll();
             }
         ).then(
-            function(r, b1, b2, c, d)
+            function(b1, b2, c, d)
             {
                 test(b1);
                 test(b2);
@@ -333,13 +333,13 @@
                 return initial.getE();
             }
         ).then(
-            function(r, e)
+            function(e)
             {
                 test(e.checkValues());
                 return initial.getF();
             }
         ).then(
-            function(r, f)
+            function(f)
             {
                 test(f.checkValues());
                 test(f.e2.checkValues());
@@ -348,21 +348,21 @@
                 return initial.getI();
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 i = obj;
                 test(i);
                 return initial.getJ();
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 j = obj;
                 test(j);
                 return initial.getH();
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 h = obj;
                 test(h);
@@ -370,29 +370,29 @@
                 return initial.setI(i);
             }
         ).then(
-            function(r)
+            function()
             {
                 return initial.setI(j);
             }
         ).then(
-            function(r)
+            function()
             {
                 return initial.setI(h);
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("testing sequences... ");
                 return initial.opBaseSeq([]);
             }
         ).then(
-            function(r, retS, outS)
+            function(retS, outS)
             {
                 return initial.opBaseSeq([new Test.Base(new Test.S(), "")]);
             }
         ).then(
-            function(r, retS, outS)
+            function(retS, outS)
             {
                 test(retS.length === 1 && outS.length === 1);
                 out.writeLine("ok");
@@ -401,7 +401,7 @@
                 return initial.getCompact();
             }
         ).then(
-            function(r, compact)
+            function(compact)
             {
                 test(compact !== null);
                 out.writeLine("ok");
@@ -414,7 +414,7 @@
                 return uoet.op();
             }
         ).then(
-            function(r)
+            function()
             {
                 test(false);
             },

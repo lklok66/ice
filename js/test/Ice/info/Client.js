@@ -63,13 +63,13 @@
                 return Test.TestIntfPrx.checkedCast(base);
             }
         ).then(
-            function(asyncResult, obj)
+            function(obj)
             {
                 testIntf = obj;
                 return base.ice_getConnection();
             }
         ).then(
-            function(asyncResult, conn)
+            function(conn)
             {
                 ipinfo = conn.getEndpoint().getInfo();
                 test(ipinfo.port == 12010);
@@ -79,7 +79,7 @@
                 return testIntf.getEndpointInfoAsContext();
             }
         ).then(
-            function(asyncResult, ctx)
+            function(ctx)
             {
                 test(ctx.get("host") == ipinfo.host);
                 test(ctx.get("compress") == "false");
@@ -89,7 +89,7 @@
                 return base.ice_getConnection();
             }
         ).then(
-            function(asyncResult, conn)
+            function(conn)
             {
                 info = conn.getInfo();
                 test(!info.incoming);
@@ -106,7 +106,7 @@
                 return testIntf.getConnectionInfoAsContext();
             }
         ).then(
-            function(asyncResult, ctx)
+            function(ctx)
             {
                 test(ctx.get("incoming") == "true");
                 test(ctx.get("adapterName") == "TestAdapter");

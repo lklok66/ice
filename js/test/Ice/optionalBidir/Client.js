@@ -57,7 +57,7 @@
 
                 var adapter;
                 communicator.createObjectAdapter("").then(
-                    function(r, o)
+                    function(o)
                     {
                         adapter = o;
 
@@ -72,19 +72,19 @@
                         return adapter.activate();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return base.ice_getConnection();
                     }
                 ).then(
-                    function(r, conn)
+                    function(conn)
                     {
                         conn.setAdapter(adapter);
                         out.write("testing checked cast... ");
                         return Test.InitialPrx.checkedCast(base);
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         initial = obj;
                         test(initial !== null);
@@ -95,19 +95,19 @@
                         return initial.pingPong(new Test.OneOptional());
                     }
                 ).then(
-                    function(asyncResult, oo4)
+                    function(oo4)
                     {
                         test(oo4.a === undefined);
                         return initial.pingPong(oo1);
                     }
                 ).then(
-                    function(asyncResult, oo5)
+                    function(oo5)
                     {
                         test(oo5.a === oo1.a);
                         return initial.pingPong(new Test.MultiOptional());
                     }
                 ).then(
-                    function(asyncResult, mo4)
+                    function(mo4)
                     {
                         test(mo4.a === undefined);
                         test(mo4.b === undefined);
@@ -191,7 +191,7 @@
                         return initial.pingPong(mo1);
                     }
                 ).then(
-                    function(asyncResult, mo5)
+                    function(mo5)
                     {
                         test(mo1.a == mo5.a);
                         test(mo1.b == mo5.b);
@@ -245,7 +245,7 @@
                         return initial.pingPong(mo6);
                     }
                 ).then(
-                    function(asyncResult, mo7)
+                    function(mo7)
                     {
                         test(mo7.a === undefined);
                         test(mo7.b == mo1.b);
@@ -302,7 +302,7 @@
                         return initial.pingPong(mo8);
                     }
                 ).then(
-                    function(asyncResult, mo9)
+                    function(mo9)
                     {
                         test(mo9.a == mo1.a);
                         test(mo9.b === undefined);
@@ -348,23 +348,23 @@
                         var f1 = function()
                         {
                             initial.sendOptionalClass(true, oo).then(
-                                function(asyncResult)
+                                function()
                                 {
                                     return initial2.sendOptionalClass(true, oo);
                                 }
                             ).then(
-                                function(asyncResult)
+                                function()
                                 {
                                     return initial.returnOptionalClass(true);
                                 }
                             ).then(
-                                function(asyncResult, oo1)
+                                function(oo1)
                                 {
                                     test(oo1 !== undefined && oo1.a == 53);
                                     return initial2.returnOptionalClass(true);
                                 }
                             ).then(
-                                function(asyncResult, oo1)
+                                function(oo1)
                                 {
                                     test(oo1 === undefined);
                                     p.succeed();
@@ -406,7 +406,7 @@
                         return initial.pingPong(mc);
                     }
                 ).then(
-                    function(asyncResult, mc)
+                    function(mc)
                     {
                         test(mc.bs.length == 1000);
                         test(mc.shs.length == 300);
@@ -418,7 +418,7 @@
                         return initial.pingPong(new Test.B());
                     }
                 ).then(
-                    function(asyncResult, b)
+                    function(b)
                     {
                         test(b.ma === undefined);
                         test(b.mb === undefined);
@@ -432,7 +432,7 @@
                         return initial.pingPong(b);
                     }
                 ).then(
-                    function(asyncResult, b)
+                    function(b)
                     {
                         test(b.ma == 10);
                         test(b.mb == 11);
@@ -448,7 +448,7 @@
                         return initial.pingPong(f);
                     }
                 ).then(
-                    function(asyncResult, f)
+                    function(f)
                     {
                         test(f.ae === f.af);
 
@@ -458,7 +458,7 @@
                         return initial.pingPong(new Test.WD());
                     }
                 ).then(
-                    function(asyncResult, wd)
+                    function(wd)
                     {
                         test(wd.a == 5);
                         test(wd.s == "test");
@@ -467,7 +467,7 @@
                         return initial.pingPong(wd);
                     }
                 ).then(
-                    function(asyncResult, wd)
+                    function(wd)
                     {
                         test(wd.a === undefined);
                         test(wd.s === undefined);
@@ -478,154 +478,154 @@
                         return initial.opByte(); // same as initial.opByte(undefined);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
                         return initial.opByte(56);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === 56);
                         test(p2 === 56);
                         return initial.opBool();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
                         return initial.opBool(true);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === true);
                         test(p2 === true);
                         return initial.opShort();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
                         return initial.opShort(56);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === 56);
                         test(p2 === 56);
                         return initial.opInt();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
                         return initial.opInt(56);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === 56);
                         test(p2 === 56);
                         return initial.opLong();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
                         return initial.opLong(new Ice.Long(0, 56));
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1.equals(new Ice.Long(0, 56)));
                         test(p2.equals(new Ice.Long(0, 56)));
                         return initial.opFloat();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
                         return initial.opFloat(1.0);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === 1.0);
                         test(p2 === 1.0);
                         return initial.opDouble();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
                         return initial.opDouble(1.0);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === 1.0);
                         test(p2 === 1.0);
                         return initial.opString();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
                         return initial.opString("test");
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === "test");
                         test(p2 === "test");
                         return initial.opMyEnum();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
                         return initial.opMyEnum(Test.MyEnum.MyEnumMember);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === Test.MyEnum.MyEnumMember);
                         test(p2 === Test.MyEnum.MyEnumMember);
                         return initial.opSmallStruct();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
                         return initial.opSmallStruct(new Test.SmallStruct(56));
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1.equals(new Test.SmallStruct(56)));
                         test(p2.equals(new Test.SmallStruct(56)));
                         return initial.opFixedStruct();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
                         return initial.opFixedStruct(new Test.FixedStruct(56));
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1.equals(new Test.FixedStruct(56)));
                         test(p2.equals(new Test.FixedStruct(56)));
@@ -633,35 +633,35 @@
                         return initial.opVarStruct();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
                         return initial.opVarStruct(new Test.VarStruct("test"));
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1.equals(new Test.VarStruct("test")));
                         test(p2.equals(new Test.VarStruct("test")));
                         return initial.opOneOptional();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
                         return initial.opOneOptional(new Test.OneOptional(58));
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === p2);
                         test(p2.a === 58);
                         return initial.opOneOptionalProxy();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -669,7 +669,7 @@
                             Test.OneOptionalPrx.uncheckedCast(communicator.stringToProxy("test")));
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         var p3 = Test.OneOptionalPrx.uncheckedCast(communicator.stringToProxy("test"));
                         test(p1.equals(p3));
@@ -677,7 +677,7 @@
                         return initial.opByteSeq();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -686,7 +686,7 @@
                         return initial.opByteSeq(Ice.Buffer.createNative(data));
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1.length === 100)
                         test(p2.length === 100);
@@ -698,7 +698,7 @@
                         return initial.opBoolSeq();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -707,7 +707,7 @@
                         return initial.opBoolSeq(data);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1.length === 100)
                         test(p2.length === 100);
@@ -719,7 +719,7 @@
                         return initial.opShortSeq();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -728,7 +728,7 @@
                         return initial.opShortSeq(data);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1.length === 100)
                         test(p2.length === 100);
@@ -740,7 +740,7 @@
                         return initial.opIntSeq();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -749,7 +749,7 @@
                         return initial.opIntSeq(data);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1.length === 100)
                         test(p2.length === 100);
@@ -761,7 +761,7 @@
                         return initial.opLongSeq();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -770,7 +770,7 @@
                         return initial.opLongSeq(data);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1.length === 100)
                         test(p2.length === 100);
@@ -782,7 +782,7 @@
                         return initial.opFloatSeq();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -791,7 +791,7 @@
                         return initial.opFloatSeq(data);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1.length === 100)
                         test(p2.length === 100);
@@ -803,7 +803,7 @@
                         return initial.opDoubleSeq();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -812,7 +812,7 @@
                         return initial.opDoubleSeq(data);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1.length === 100)
                         test(p2.length === 100);
@@ -824,7 +824,7 @@
                         return initial.opStringSeq();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -833,7 +833,7 @@
                         return initial.opStringSeq(data);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1.length === 100)
                         test(p2.length === 100);
@@ -845,7 +845,7 @@
                         return initial.opSmallStructSeq();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -854,7 +854,7 @@
                         return initial.opSmallStructSeq(data);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         var s = new Test.SmallStruct();
                         test(p1.length === 100)
@@ -867,7 +867,7 @@
                         return initial.opFixedStructSeq();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -876,7 +876,7 @@
                         return initial.opFixedStructSeq(data);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         var s = new Test.FixedStruct();
                         test(p1.length === 100)
@@ -889,7 +889,7 @@
                         return initial.opVarStructSeq();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -898,7 +898,7 @@
                         return initial.opVarStructSeq(data);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         var s = new Test.VarStruct("");
                         test(p1.length === 100)
@@ -911,7 +911,7 @@
                         return initial.opIntIntDict();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -921,13 +921,13 @@
                         return initial.opIntIntDict(data);
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1.equals(p2));
                         return initial.opStringIntDict();
                     }
                 ).then(
-                    function(asyncResult, p1, p2)
+                    function(p1, p2)
                     {
                         test(p1 === undefined);
                         test(p2 === undefined);
@@ -1043,7 +1043,7 @@
                             var ref = "__echo:default -p 12010";
                             var base = c.stringToProxy(ref);
                             return global.Test.EchoPrx.checkedCast(base);
-                        }).then(function(r, prx){
+                        }).then(function(prx){
                             return prx.shutdown();
                         }).then(function(){
                             return c.destroy();

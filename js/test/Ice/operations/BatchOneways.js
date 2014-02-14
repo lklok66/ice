@@ -45,12 +45,12 @@
                 return p.opByteSOneway(bs1);
             }
         ).then(
-            function(r)
+            function()
             {
                 return p.opByteSOneway(bs2);
             }
         ).then(
-            function(r)
+            function()
             {
                 return p.opByteSOneway(bs3);
             }
@@ -77,7 +77,7 @@
                         return batch.ice_getConnection();
                     }
                 ).then(
-                    function(r, con)
+                    function(con)
                     {
                         return con.flushBatchRequests();
                     }
@@ -100,17 +100,17 @@
                 return batch.ice_flushBatchRequests();
             }
         ).then(
-            function(r)
+            function()
             {
                 return batch.ice_getConnection();
             }
         ).then(
-            function(r, con)
+            function(con)
             {
                 return con.close(false);
             }
         ).then(
-            function(r)
+            function()
             {
                 return Promise.all(batch.ice_ping(), batch2.ice_ping());
             }
@@ -128,7 +128,7 @@
                 return batch3.ice_flushBatchRequests();
             }
         ).then(
-            function(r)
+            function()
             {
                 // Make sure that a bogus batch request doesn't cause troubles to other ones.
                 return Promise.all(batch3.ice_ping(), batch.ice_ping());

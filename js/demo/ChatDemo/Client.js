@@ -116,14 +116,14 @@ var signin = function()
             // the Glacier2 server is available.
             //
             return RouterPrx.checkedCast(communicator.getDefaultRouter()).then(
-                function(r, router)
+                function(router)
                 {
                     //
                     // Create a session with the Glacier2 router.
                     //
                     return router.createSession(
                         $("#username").val(), $("#password").val()).then(
-                            function(r, session)
+                            function(session)
                             {
                                 run(router, ChatSessionPrx.uncheckedCast(session));
                             });
@@ -249,7 +249,7 @@ var run = function(router, session)
                                 else
                                 {
                                     session.send(msg).then(
-                                        function(r, timestamp)
+                                        function(timestamp)
                                         {
                                             writeLine(formatDate(timestamp.toNumber()) + " - <" + 
                                                     username + "> - " + msg);

@@ -562,7 +562,7 @@
         this._log.write("testing checked cast... ");
         var self = this;
         Test.MyClassPrx.checkedCast(base).then(
-            function(r, prx)
+            function(prx)
             {
                 self.cast1(base, prx);
             }).exception(
@@ -579,7 +579,7 @@
         this.test(cl !== null);
         var self = this;
         Test.MyDerivedClassPrx.checkedCast(cl).then(
-            function(r, prx)
+            function(prx)
             {
                 self.cast2(base, cl, prx);
             }).exception(
@@ -601,7 +601,7 @@
 
         var self = this;
         cl.getContext().then(
-            function(r, c)
+            function(c)
             {
                 self.gotContext1(base, c);
             }).exception(
@@ -621,7 +621,7 @@
 
         var self = this;
         Test.MyClassPrx.checkedCast(base, undefined, c).then(
-            function(r, prx)
+            function(prx)
             {
                 self.cast3(base, prx, c);
             }).exception(
@@ -635,7 +635,7 @@
     {
         var self = this;
         cl.getContext().then(
-            function(r, c2)
+            function(c2)
             {
                 self.gotContext2(c, c2);
             }).exception(
@@ -1025,7 +1025,7 @@
         var derived = Test.MyDerivedClassPrx.uncheckedCast(base);
         var self = this;
         derived.echo(p1).then(
-            function(r, p2)
+            function(p2)
             {
                 self.echo1(p2, ssl, derived);
             }).exception(

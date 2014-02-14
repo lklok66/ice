@@ -89,7 +89,7 @@
                 return Glacier2.RouterPrx.checkedCast(routerBase);
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 router = o;
                 test(router !== null);
@@ -103,7 +103,7 @@
                 return router.getSessionTimeout();
             }
         ).then(
-            function(r, timeout)
+            function(timeout)
             {
                 test(timeout.low === 30);
                 out.writeLine("ok");
@@ -145,7 +145,7 @@
                 return router.createSession("userid", "abc123");
             }
         ).then(
-            function(r, s)
+            function(s)
             {
                 session = s;
                 out.writeLine("ok");
@@ -164,7 +164,7 @@
                 return base.ice_ping();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 
@@ -172,7 +172,7 @@
                 return Test.CallbackPrx.checkedCast(base);
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 twoway = o;
                 test(twoway !== null);
@@ -182,20 +182,20 @@
                 return communicator.createObjectAdapterWithRouter("CallbackReceiverAdapter", router);
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 adapter = o;
                 return adapter.activate();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 out.write("getting category from router... ");
                 return router.getCategoryForClient();
             }
         ).then(
-            function(r, c)
+            function(c)
             {
                 category = c;
                 out.writeLine("ok");
@@ -224,7 +224,7 @@
                 return oneway.initiateCallback(onewayR, context);
             }
         ).then(
-            function(r)
+            function()
             {
                 return callbackReceiverImpl.callbackOK();
             }
@@ -238,7 +238,7 @@
                 return twoway.initiateCallback(twowayR, context);
             }
         ).then(
-            function(r)
+            function()
             {
                 return callbackReceiverImpl.callbackOK();
             }
@@ -326,7 +326,7 @@
                 // started with --Ice.Warn.Connections.
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 
@@ -334,7 +334,7 @@
                 return router.destroySession();
             }
         ).then(
-            function(r)
+            function()
             {
                 out.writeLine("ok");
                 
@@ -360,7 +360,7 @@
                 return Ice.ProcessPrx.checkedCast(processBase);
             }
         ).then(
-            function(r, o)
+            function(o)
             {
                 process = o;
                 test(process !== null);
@@ -370,7 +370,7 @@
                 return process.shutdown();
             }
         ).then(
-            function(r)
+            function()
             {
                 return process.ice_ping();
             }

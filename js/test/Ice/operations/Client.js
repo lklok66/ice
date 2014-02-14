@@ -37,13 +37,13 @@
                 return Test.MyClassPrx.checkedCast(base);
             }
         ).then(
-            function(r, prx)
+            function(prx)
             {
                 cl = prx;
                 return Test.MyDerivedClassPrx.checkedCast(cl);
             }
         ).then(
-            function(r, prx)
+            function(prx)
             {
                 derived = prx;
                 return Twoways.run(communicator, cl);

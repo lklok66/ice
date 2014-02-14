@@ -19,7 +19,7 @@
         }
     };
 
-    var run = function(communicator, log, p)
+    var run = function(communicator, p)
     {
         var promise = new Ice.Promise();
 
@@ -31,7 +31,7 @@
                 p = p.ice_oneway();
 
                 p.ice_ping().then(
-                    function(r)
+                    function()
                     {
                         try
                         {
@@ -64,17 +64,17 @@
                         return p.opVoid();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return p.opIdempotent();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return p.opNonmutating();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         try
                         {

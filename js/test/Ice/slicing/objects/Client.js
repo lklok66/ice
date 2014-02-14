@@ -72,7 +72,7 @@
                 return Test.TestIntfPrx.checkedCast(base);
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 prx = obj;
                 test(prx != null);
@@ -82,7 +82,7 @@
                 return prx.SBaseAsObject();
             }
         ).then(
-            function(r, sb)
+            function(sb)
             {
                 test(sb !== null);
                 test(sb.ice_id() == "::Test::SBase");
@@ -92,7 +92,7 @@
                 return prx.SBaseAsSBase();
             }
         ).then(
-            function(r, sb)
+            function(sb)
             {
                 test(sb.sb == "SBase.sb");
                 out.writeLine("ok");
@@ -100,7 +100,7 @@
                 return prx.SBSKnownDerivedAsSBase();
             }
         ).then(
-            function(r, sb)
+            function(sb)
             {
                 test(sb !== null);
                 test(sb.sb == "SBSKnownDerived.sb");
@@ -110,7 +110,7 @@
                 return prx.SBSKnownDerivedAsSBSKnownDerived();
             }
         ).then(
-            function(r, sb)
+            function(sb)
             {
                 test(sb.sbskd == "SBSKnownDerived.sbskd");
                 out.writeLine("ok");
@@ -118,14 +118,14 @@
                 return prx.SBSUnknownDerivedAsSBase();
             }
         ).then(
-            function(r, sb)
+            function(sb)
             {
                 test(sb.sb == "SBSUnknownDerived.sb");
                 var p = new Promise();
                 if(prx.ice_getEncodingVersion().equals(Ice.Encoding_1_0))
                 {
                     return prx.SBSUnknownDerivedAsSBaseCompact().then(
-                        function(r, sb)
+                        function(sb)
                         {
                             test(sb.sb == "SBSUnknownDerived.sb");
                         },
@@ -153,7 +153,7 @@
                 return prx.SUnknownAsObject();
             }
         ).then(
-            function(r, obj)
+            function(obj)
             {
                 test(!prx.ice_getEncodingVersion().equals(Ice.Encoding_1_0));
                 test(obj instanceof Ice.UnknownSlicedObject);
@@ -173,7 +173,7 @@
                 return prx.oneElementCycle();
             }
         ).then(
-            function(r, b)
+            function(b)
             {
                 test(b !== null);
                 test(b.ice_id() == "::Test::B");
@@ -184,7 +184,7 @@
                 return prx.twoElementCycle();
             }
         ).then(
-            function(r, b1)
+            function(b1)
             {
                 test(b1 !== null);
                 test(b1.ice_id() == "::Test::B");
@@ -201,7 +201,7 @@
                 return prx.D1AsD1();
             }
         ).then(
-            function(r, d1)
+            function(d1)
             {
                 test(d1 !== null);
                 test(d1.ice_id() == "::Test::D1");
@@ -220,7 +220,7 @@
                 return prx.D2AsB();
             }
         ).then(
-            function(r, b2)
+            function(b2)
             {
                 test(b2 != null);
                 test(b2.ice_id() == "::Test::B");
@@ -241,7 +241,7 @@
                 return prx.paramTest1();
             }
         ).then(
-            function(r, b1, b2)
+            function(b1, b2)
             {
                 test(b1 !== null);
                 test(b1.ice_id() == "::Test::D1");
@@ -260,7 +260,7 @@
                 return prx.paramTest2();
             }
         ).then(
-            function(r, b2, b1)
+            function(b2, b1)
             {
                 test(b1 !== null);
                 test(b1.ice_id() == "::Test::D1");
@@ -279,7 +279,7 @@
                 return prx.returnTest1();
             }
         ).then(
-            function(r, r, p1, p2)
+            function(r, p1, p2)
             {
                 test(r === p1);
                 out.writeLine("ok");
@@ -287,7 +287,7 @@
                 return prx.returnTest2();
             }
         ).then(
-            function(r, r, p1, p2)
+            function(r, p1, p2)
             {
                 test(r == p1);
                 out.writeLine("ok");
@@ -305,7 +305,7 @@
                 d1.pd1 = d3;
                 
                 return prx.returnTest3(d1, d3).then(
-                    function(r, b1)
+                    function(b1)
                     {
                         test(b1 !== null);
                         test(b1.sb == "D1.sb");
@@ -346,7 +346,7 @@
                 d1.pd1 = d3;
                 
                 return prx.returnTest3(d3, d1).then(
-                    function(r, b1)
+                    function(b1)
                     {
                         test(b1 !== null);
                         test(b1.sb == "D3.sb");
@@ -377,7 +377,7 @@
                 return prx.paramTest3();
             }
         ).then(
-            function(r, ret, p1, p2)
+            function(ret, p1, p2)
             {
                 test(p1 !== null);
                 test(p1.sb == "D2.sb (p1 1)");
@@ -399,7 +399,7 @@
                 return prx.paramTest4();
             }
         ).then(
-            function(r, ret, b)
+            function(ret, b)
             {
                 test(b !== null);
                 test(b.sb == "D4.sb (1)");
@@ -431,7 +431,7 @@
                 return prx.returnTest3(d3, b2);
             }
         ).then(
-            function(r, ret)
+            function(ret)
             {
                 test(ret !== null);
                 test(ret.ice_id() == "::Test::B");
@@ -461,7 +461,7 @@
                 return prx.returnTest3(d3, d12);
             }
         ).then(
-            function(r, ret)
+            function(ret)
             {
                 test(ret !== null);
                 test(ret.ice_id() == "::Test::B");
@@ -520,7 +520,7 @@
                 return prx.sequenceTest(ss1, ss2);
             }
         ).then(
-            function(r, ss)
+            function(ss)
             {
                 test(ss.c1 !== null);
                 var ss1b = ss.c1.s[0];
@@ -565,7 +565,7 @@
                 return prx.dictionaryTest(bin);
             }
         ).then(
-            function(r, ret, boutH)
+            function(ret, boutH)
             {
                 var i;
                 test(boutH.size === 10);
@@ -669,7 +669,7 @@
                 return prx.useForward();
             }
         ).then(
-            function(r, f)
+            function(f)
             {
                 test(f !== null);
                 out.writeLine("ok");
@@ -696,7 +696,7 @@
                 return prx.exchangePBase(pd);
             }
         ).then(
-            function(r, r)
+            function(r)
             {
                 var p2 = r;
                 test(p2.pi === 3);
@@ -713,7 +713,7 @@
                 return prx.exchangePBase(pu);
             }
         ).then(
-            function(r, r)
+            function(r)
             {
                 test(!(r instanceof Test.PCUnknown));
                 test(r.pi == 3);
@@ -729,7 +729,7 @@
                 return prx.exchangePBase(pcd);
             }
         ).then(
-            function(r, r)
+            function(r)
             {
                 if(prx.ice_getEncodingVersion().equals(Ice.Encoding_1_0))
                 {
@@ -753,7 +753,7 @@
                 return prx.exchangePBase(pcd);
             }
         ).then(
-            function(r, r)
+            function(r)
             {
                 if(prx.ice_getEncodingVersion().equals(Ice.Encoding_1_0))
                 {
@@ -792,7 +792,7 @@
                 return prx.exchangePBase(pcd);
             }
         ).then(
-            function(r, r)
+            function(r)
             {
                 if(prx.ice_getEncodingVersion().equals(Ice.Encoding_1_0))
                 {
@@ -823,7 +823,7 @@
                 return prx.PBSUnknownAsPreserved();
             }
         ).then(
-            function(r, p)
+            function(p)
             {
                 return prx.checkPBSUnknown(p).then(
                     function(r)
