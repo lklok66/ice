@@ -15,18 +15,27 @@
     require("Test");
     var Test = global.Test;
     var Promise = Ice.Promise;
-    
-    var test = function(b)
-    {
-        if(!b)
-        {
-            throw new Error("test failed");
-        }
-    };
 
     var run = function(out, id)
     {
-        return Promise.try(
+        var p = new Ice.Promise();
+        var test = function(b)
+        {
+            if(!b)
+            {
+                try
+                {
+                    throw new Error("test failed");
+                }
+                catch(err)
+                {
+                    p.fail(err);
+                    throw err;
+                }
+            }
+        };
+        
+        Promise.try(
             function()
             {
                 out.write("testing default values... ");
@@ -155,7 +164,18 @@
                 test(v.zeroDotD === 0);
                 
                 out.writeLine("ok");
-            });
+            }
+        ).then(
+            function()
+            {
+                p.succeed();
+            },
+            function(ex)
+            {
+                p.fail(ex);
+            }
+        );
+        return p;
     };
     global.__test__ = run;
 }(typeof (global) === "undefined" ? window : global));

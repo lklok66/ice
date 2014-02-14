@@ -956,5 +956,6 @@
                     });
             });
     };
+    global.__clientAllTests__ = allTests;
     global.__test__ = run;
 }(typeof (global) === "undefined" ? window : global));

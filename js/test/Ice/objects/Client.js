@@ -15,15 +15,7 @@
     require("Test");
     var Test = global.Test;
     var Promise = Ice.Promise;
-
-    var test = function(b)
-    {
-        if(!b)
-        {
-            throw new Error("test failed");
-        }
-    };
-
+    
     var BI = function()
     {
         Test.B.call(this);
@@ -189,7 +181,24 @@
     {
         var factory, ref, base, initial, b1, b2, c, d, i, j, h;
         
-        return Promise.try(
+        var p = new Ice.Promise();
+        var test = function(b)
+        {
+            if(!b)
+            {
+                try
+                {
+                    throw new Error("test failed");
+                }
+                catch(err)
+                {
+                    p.fail(err);
+                    throw err;
+                }
+            }
+        };
+        
+        Promise.try(
             function()
             {
                 var factory = new MyObjectFactory();
@@ -426,7 +435,17 @@
                 out.writeLine("ok");
                 return initial.shutdown();
             }
+        ).then(
+            function()
+            {
+                p.succeed();
+            },
+            function(ex)
+            {
+                p.fail(ex);
+            }
         );
+        return p;
     };
 
     var run = function(out, id)

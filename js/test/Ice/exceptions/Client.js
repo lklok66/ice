@@ -16,18 +16,25 @@
     var Test = global.Test;
     var Promise = Ice.Promise;
 
-    var test = function(b)
-    {
-        if(!b)
-        {
-            throw new Error("test failed");
-        }
-    };
-
     var allTests = function(out, communicator)
     {
-        var p = new Promise();
-
+        var p = new Ice.Promise();
+        var test = function(b)
+        {
+            if(!b)
+            {
+                try
+                {
+                    throw new Error("test failed");
+                }
+                catch(err)
+                {
+                    p.fail(err);
+                    throw err;
+                }
+            }
+        };
+        
         var failCB = function(){ test(false); };
 
         var supportsUndeclaredExceptions = function(thrower)
@@ -93,7 +100,7 @@
         };
 
         var base, ref, thrower;
-        return Promise.try(
+        Promise.try(
             function()
             {
                 out.write("testing object adapter registration exceptions... ");
@@ -399,7 +406,17 @@
                 out.writeLine("ok");
                 return thrower.shutdown();
             }
+        ).then(
+            function()
+            {
+                p.succeed();
+            },
+            function(ex)
+            {
+                p.fail(ex);
+            }
         );
+        return p;
     };
 
     var EmptyI = function()

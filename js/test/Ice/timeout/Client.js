@@ -15,32 +15,30 @@
     require("Test");
     var Test = global.Test;
     var Promise = Ice.Promise;
-
-    var test = function(b)
-    {
-        if(!b)
-        {
-            throw new Error("test failed");
-        }
-    };
     
-    var delay = function(msec)
-    {
-        var p = new Promise();
-        setTimeout(
-            function()
-            {
-                p.succeed();
-            }, msec);
-        return p;
-    }
-
     var allTests = function(out, communicator)
     {
         var failCB = function() { test(false); };
         var ref, obj, mult, timeout, to, connection, comm, now;
+        
+        var p = new Promise();
+        var test = function(b)
+        {
+            if(!b)
+            {
+                try
+                {
+                    throw new Error("test failed");
+                }
+                catch(err)
+                {
+                    p.fail(err);
+                    throw err;
+                }
+            }
+        };
 
-        return Promise.try(
+        Promise.try(
             function()
             {
                 ref = "timeout:default -p 12010";
@@ -222,9 +220,8 @@
                 {
                     test(false);
                 }
-                return delay(500);
             }
-        ).then(
+        ).delay(500).then(
             function()
             {
                 try
@@ -395,7 +392,13 @@
                 out.writeLine("ok");
                 return timeout.shutdown();
             }
+        ).then(
+            function()
+            {
+                p.succeed();
+            }
         );
+        return p;
     };
 
     var run = function(out, id)

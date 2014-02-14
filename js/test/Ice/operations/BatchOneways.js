@@ -11,19 +11,28 @@
     var Ice = global.Ice;
     var Test = global.Test;
 
-    var test = function(b)
-    {
-        if(!b)
-        {
-            throw new Error("test failed");
-        }
-    };
-
-    var run = function(communicator, p)
+    var run = function(communicator, prx)
     {
         var Promise = Ice.Promise;
         var bs1, bs2, bs3, batch, batch2, batch3;
-        return Promise.try(
+        var p = new Promise();
+        var test = function(b)
+        {
+            if(!b)
+            {
+                try
+                {
+                    throw new Error("test failed");
+                }
+                catch(err)
+                {
+                    p.fail(err);
+                    throw err;
+                }
+            }
+        };
+        
+        Promise.try(
             function()
             {
                 bs1 = Ice.Buffer.createNative(new Array(10 * 1024));
@@ -42,17 +51,17 @@
                     bs3[i] = 0;
                 }
 
-                return p.opByteSOneway(bs1);
+                return prx.opByteSOneway(bs1);
             }
         ).then(
             function()
             {
-                return p.opByteSOneway(bs2);
+                return prx.opByteSOneway(bs2);
             }
         ).then(
             function()
             {
-                return p.opByteSOneway(bs3);
+                return prx.opByteSOneway(bs3);
             }
         ).then(
             function()
@@ -63,7 +72,7 @@
             {
                 test(ex instanceof Ice.MemoryLimitException);
 
-                batch = p.ice_batchOneway();
+                batch = prx.ice_batchOneway();
                 
                 var all = [];
                 for(var i = 0; i < 30; ++i)
@@ -71,7 +80,7 @@
                     all[i] = batch.opByteSOneway(bs1);
                 }
                 
-                return Promise.all.apply(Promise, all).then(
+                return Promise.all(all).then(
                     function()
                     {
                         return batch.ice_getConnection();
@@ -84,13 +93,13 @@
                 ).then(
                     function()
                     {
-                        return p;
+                        return prx;
                     });
             }
         ).then(
-            function(p)
+            function(prx)
             {
-                batch2 = p.ice_batchOneway();
+                batch2 = prx.ice_batchOneway();
 
                 return Promise.all(batch.ice_ping(), batch2.ice_ping());
             }
@@ -119,7 +128,6 @@
             {
                 var identity = communicator.stringToIdentity("invalid");
                 batch3 = batch.ice_identity(identity);
-                
                 return batch3.ice_ping();
             }
         ).then(
@@ -138,7 +146,16 @@
             {
                 return batch.ice_flushBatchRequests();
             }
-        );
+        ).then(
+            function()
+            {
+                p.succeed();
+            },
+            function(ex)
+            {
+                p.fail(ex);
+            });
+        return p;
     };
 
     global.BatchOneways = { run: run };

@@ -15,24 +15,33 @@
     require("Test");
     var Test = global.Test;
     var Promise = Ice.Promise;
-
-    var test = function(b)
-    {
-        if(!b)
-        {
-            throw new Error("test failed");
-        }
-    };
-
+    
     var allTests = function(out, communicator)
     {
         var failCB = function() { test(false); }
+        
+        var p = new Ice.Promise();
+        var test = function(b)
+        {
+            if(!b)
+            {
+                try
+                {
+                    throw new Error("test failed");
+                }
+                catch(err)
+                {
+                    p.fail(err);
+                    throw err;
+                }
+            }
+        };
         
         var manager, locator, anotherLocator, registry, base, base2, base3, 
             base4, base5, base6, bases, obj, obj2, obj3, 
             obj4, obj5, obj6, hello, anotherRouter, router;
 
-        return Promise.try(
+        Promise.try(
             function()
             {
                 manager = Test.ServerManagerPrx.uncheckedCast(
@@ -1282,7 +1291,17 @@
             {
                 out.writeLine("ok");
             }
+        ).then(
+            function()
+            {
+                p.succeed();
+            },
+            function(ex)
+            {
+                p.fail(ex);
+            }
         );
+        return p;
     };
 
     var run = function(out, id)

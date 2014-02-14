@@ -15,14 +15,6 @@
     require("Test");
     var Test = global.Test;
     var Promise = Ice.Promise;
-    
-    var test = function(b)
-    {
-        if(!b)
-        {
-            throw new Error("test failed");
-        }
-    };
 
     var allTests = function(out, communicator)
     {
@@ -30,7 +22,24 @@
         
         var defaultHost, info, ipinfo, p1, endps, opaqueEndpoint, ipEndpoint, base, testIntf;
         
-        return Promise.try(
+        var p = new Ice.Promise();
+        var test = function(b)
+        {
+            if(!b)
+            {
+                try
+                {
+                    throw new Error("test failed");
+                }
+                catch(err)
+                {
+                    p.fail(err);
+                    throw err;
+                }
+            }
+        };
+        
+        Promise.try(
             function()
             {
                 defaultHost = communicator.getProperties().getProperty("Ice.Default.Host");
@@ -121,7 +130,17 @@
                 out.writeLine("ok");
                 return testIntf.shutdown();
             }
+        ).then(
+            function()
+            {
+                p.succeed();
+            },
+            function(ex)
+            {
+                p.fail(ex);
+            }
         );
+        return p;
     };
 
     var run = function(out, id)

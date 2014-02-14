@@ -11,18 +11,27 @@
     var Ice = global.Ice;
     var Test = global.Test;
 
-    var test = function(b)
+    var run = function(communicator, prx)
     {
-        if(!b)
+        var p = new Ice.Promise();
+        var test = function(b)
         {
-            throw new Error("test failed");
-        }
-    };
-
-    var run = function(communicator, p)
-    {
+            if(!b)
+            {
+                try
+                {
+                    throw new Error("test failed");
+                }
+                catch(err)
+                {
+                    p.fail(err);
+                    throw err;
+                }
+            }
+        };
+        
         var si1, si2, ctx, combined;
-        return Ice.Promise.try(
+        Ice.Promise.try(
             function()
             {
                 ctx = new Ice.Context();
@@ -30,42 +39,42 @@
                 ctx.set("two", "TWO");
                 ctx.set("three", "THREE");
 
-                return p.ice_ping();
+                return prx.ice_ping();
             }
         ).then(
             function()
             {
-                return p.ice_isA(Test.MyClass.ice_staticId());
+                return prx.ice_isA(Test.MyClass.ice_staticId());
             }
         ).then(
             function(b)
             {
                 test(b);
-                return p.ice_id();
+                return prx.ice_id();
             }
         ).then(
             function(id)
             {
                 test(id === Test.MyDerivedClass.ice_staticId());
-                return p.ice_ids();
+                return prx.ice_ids();
             }
         ).then(
             function(ids)
             {
                 test(ids.length === 3);
-                return p.opVoid();
+                return prx.opVoid();
             }
         ).then(
             function()
             {
-                return p.opByte(0xff, 0x0f);
+                return prx.opByte(0xff, 0x0f);
             }
         ).then(
             function(retval, p3)
             {
                 test(p3 === 0xf0);
                 test(retval === 0xff);
-                return p.opBool(true, false);
+                return prx.opBool(true, false);
             }
         ).then(
             function(retval, p3)
@@ -73,7 +82,7 @@
                 test(p3);
                 test(!retval);
                 var lo = new Ice.Long(0, 12);
-                return p.opShortIntLong(10, 11, lo);
+                return prx.opShortIntLong(10, 11, lo);
             }
         ).then(
             function(retval, s, i, l)
@@ -83,7 +92,7 @@
                 test(i === 11);
                 test(l.equals(lo));
                 test(retval.equals(lo));
-                return p.opFloatDouble(3.14, 1.1E10);
+                return prx.opFloatDouble(3.14, 1.1E10);
             }
         ).then(
             function(retval, f, d)
@@ -91,21 +100,21 @@
                 test((f - 3.14) <= 0.01);
                 test(d == 1.1E10);
                 test(retval == 1.1E10);
-                return p.opString("hello", "world");
+                return prx.opString("hello", "world");
             }
         ).then(
             function(retval, p3)
             {
                 test(p3 === "world hello");
                 test(retval === "hello world");
-                return p.opMyEnum(Test.MyEnum.enum2);
+                return prx.opMyEnum(Test.MyEnum.enum2);
             }
         ).then(
             function(retval, p2)
             {
                 test(p2 === Test.MyEnum.enum2);
                 test(retval === Test.MyEnum.enum3);
-                return p.opMyClass(p);
+                return prx.opMyClass(prx);
             }
         ).then(
             function(retval, p2, p3)
@@ -115,7 +124,7 @@
                 test(retval.ice_getIdentity().equals(communicator.stringToIdentity("test")));
 
                 si1 = new Test.Structure();
-                si1.p = p;
+                si1.p = prx;
                 si1.e = Test.MyEnum.enum3;
                 si1.s = new Test.AnotherStruct();
                 si1.s.s = "abc";
@@ -124,7 +133,7 @@
                 si2.e = Test.MyEnum.enum2;
                 si2.s = new Test.AnotherStruct();
                 si2.s.s = "def";
-                return p.opStruct(si1, si2);
+                return prx.opStruct(si1, si2);
             }
         ).then(
             function(retval, p3)
@@ -138,7 +147,7 @@
 
                 var bsi1 = Ice.Buffer.createNative([ 0x01, 0x11, 0x12, 0x22 ]);
                 var bsi2 = Ice.Buffer.createNative([ 0xf1, 0xf2, 0xf3, 0xf4 ]);
-                return p.opByteS(bsi1, bsi2);
+                return prx.opByteS(bsi1, bsi2);
             }
         ).then(
             function(retval, p3)
@@ -160,7 +169,7 @@
 
                 var bsi1 = [ true, true, false ];
                 var bsi2 = [ false ];
-                return p.opBoolS(bsi1, bsi2);
+                return prx.opBoolS(bsi1, bsi2);
             }
         ).then(
             function(retval, p3)
@@ -181,7 +190,7 @@
                 var l2 = new Ice.Long(0, 30);
                 var l3 = new Ice.Long(0, 20);
                 var lsi = [ l1, l2, l3 ];
-                return p.opShortIntLongS(ssi, isi, lsi);
+                return prx.opShortIntLongS(ssi, isi, lsi);
             }
         ).then(
             function(retval, sso, iso, lso)
@@ -212,7 +221,7 @@
 
                 var fsi = [ 3.14, 1.11 ];
                 var dsi = [ 1.1E10, 1.2E10, 1.3E10 ];
-                return p.opFloatDoubleS(fsi, dsi);
+                return prx.opFloatDoubleS(fsi, dsi);
             }
         ).then(
             function(retval, fso, dso)
@@ -232,7 +241,7 @@
                 test((retval[4] - 1.11) <= 0.01);
                 var ssi1 = [ "abc", "de", "fghi" ];
                 var ssi2 = [ "xyz" ];
-                return p.opStringS(ssi1, ssi2);
+                return prx.opStringS(ssi1, ssi2);
             }
         ).then(
             function(retval, sso)
@@ -257,7 +266,7 @@
                         Ice.Buffer.createNative([ 0x0e ]),
                         Ice.Buffer.createNative([ 0xf2, 0xf1 ])
                     ];
-                return p.opByteSS(bsi1, bsi2);
+                return prx.opByteSS(bsi1, bsi2);
             }
         ).then(
             function(retval, bso)
@@ -292,7 +301,7 @@
                     [
                         [ 1.1E10, 1.2E10, 1.3E10 ]
                     ];
-                return p.opFloatDoubleSS(fsi, dsi);
+                return prx.opFloatDoubleSS(fsi, dsi);
             }
         ).then(
             function(retval, fso, dso)
@@ -329,7 +338,7 @@
                         [ ],
                         [ "xyz" ]
                     ];
-                return p.opStringSS(ssi1, ssi2);
+                return prx.opStringSS(ssi1, ssi2);
             }
         ).then(
             function(retval, sso)
@@ -372,7 +381,7 @@
                     ],
                     []
                 ];
-                return p.opStringSSS(sssi1, sssi2);
+                return prx.opStringSSS(sssi1, sssi2);
             }
         ).then(
             function(retval, ssso)
@@ -418,7 +427,7 @@
                 di2.set(11, false);
                 di2.set(101, true);
 
-                return p.opByteBoolD(di1, di2);
+                return prx.opByteBoolD(di1, di2);
             }
         ).then(
             function(retval, p3)
@@ -441,7 +450,7 @@
                 di2.set(111, -100);
                 di2.set(1101, 0);
 
-                return p.opShortIntD(di1, di2);
+                return prx.opShortIntD(di1, di2);
             }
         ).then(
             function(retval, p3)
@@ -464,7 +473,7 @@
                 di2.set(new Ice.Long(0, 999999120), -100.4);
                 di2.set(new Ice.Long(0, 999999130), 0.5);
 
-                return p.opLongFloatD(di1, di2);
+                return prx.opLongFloatD(di1, di2);
             }
         ).then(
             function(retval, p3)
@@ -488,7 +497,7 @@
                 di2.set("FOO", "abc -100.4");
                 di2.set("BAR", "abc 0.5");
 
-                return p.opStringStringD(di1, di2);
+                return prx.opStringStringD(di1, di2);
             }
         ).then(
             function(retval, p3)
@@ -511,7 +520,7 @@
                 di2.set("qwerty", Test.MyEnum.enum3);
                 di2.set("Hello!!", Test.MyEnum.enum2);
 
-                return p.opStringMyEnumD(di1, di2);
+                return prx.opStringMyEnumD(di1, di2);
             }
         ).then(
             function(retval, p3)
@@ -532,7 +541,7 @@
                 di2.set(Test.MyEnum.enum2, "Hello!!");
                 di2.set(Test.MyEnum.enum3, "qwerty");
 
-                return p.opMyEnumStringD(di1, di2);
+                return prx.opMyEnumStringD(di1, di2);
             }
         ).then(
             function(retval, p3)
@@ -557,7 +566,7 @@
                 di2.set(s22, Test.MyEnum.enum3);
                 di2.set(s23, Test.MyEnum.enum2);
 
-                return p.opMyStructMyEnumD(di1, di2);
+                return prx.opMyStructMyEnumD(di1, di2);
             }
         ).then(
             function(retval, p3)
@@ -589,7 +598,7 @@
                             s.push(i);
                         }
 
-                        return p.opIntS(s).then(
+                        return prx.opIntS(s).then(
                             function(retval)
                             {
                                 test(retval.length === len);
@@ -607,21 +616,21 @@
         ).then(
             function()
             {
-                test(p.ice_getContext().size === 0);
+                test(prx.ice_getContext().size === 0);
 
-                return p.opContext();
+                return prx.opContext();
             }
         ).then(
             function(c)
             {
                 test(!c.equals(ctx));
-                return p.opContext(ctx);
+                return prx.opContext(ctx);
             }
         ).then(
             function(c)
             {
                 test(c.equals(ctx));
-                return Test.MyClassPrx.checkedCast(p.ice_context(ctx));
+                return Test.MyClassPrx.checkedCast(prx.ice_context(ctx));
             }
         ).then(
             function(p2)
@@ -710,29 +719,39 @@
                     ds[i] = d;
                 }
 
-                return p.opDoubleMarshaling(d, ds);
+                return prx.opDoubleMarshaling(d, ds);
             }
         ).then(
             function()
             {
-                return p.opIdempotent();
+                return prx.opIdempotent();
             }
         ).then(
             function()
             {
-                return p.opNonmutating();
+                return prx.opNonmutating();
             }
         ).then(
             function()
             {
-                return Test.MyDerivedClassPrx.checkedCast(p);
+                return Test.MyDerivedClassPrx.checkedCast(prx);
             }
         ).then(
             function(d)
             {
                 return d.opDerived();
             }
+        ).then(
+            function()
+            {
+                p.succeed();
+            },
+            function()
+            {
+                p.fail(ex);
+            }
         );
+        return p;
     };
 
     global.Twoways = { run: run };

@@ -16,22 +16,30 @@
     var Test = global.Test;
     var Promise = Ice.Promise;
     var ArrayUtil = Ice.ArrayUtil;
-    
-    var test = function(b)
-    {
-        if(!b)
-        {
-            throw new Error("test failed");
-        }
-    };
 
     var allTests = function(out, communicator)
     {
         var failCB = function(){ test(false); };
+        var p = new Promise();
+        var test = function(b)
+        {
+            if(!b)
+            {
+                try
+                {
+                    throw new Error("test failed");
+                }
+                catch(err)
+                {
+                    p.fail(err);
+                    throw err;
+                }
+            }
+        };
         
         var ref, base, prx;
         
-        return Promise.try(
+        Promise.try(
             function()
             {
                 out.write("testing stringToProxy... ");
@@ -248,7 +256,12 @@
                 out.writeLine("ok");
                 return prx.shutdown();
             }
-        );
+        ).then(
+            function()
+            {
+                p.succeed();
+            });
+        return p;
     };
 
     var run = function(out, id)
