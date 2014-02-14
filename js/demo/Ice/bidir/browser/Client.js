@@ -1,3 +1,12 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2013 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
+
 (function(){
 
 var Promise = Ice.Promise;
@@ -83,7 +92,7 @@ var stop = function()
 $("#start").click(
     function()
     {
-        if(!isConnected())
+        if(isDisconnected())
         {
             setState(State.Connecting);
             Promise.try(
@@ -144,6 +153,11 @@ var State = {
 var isConnected = function()
 {
     return state == State.Connected;
+};
+
+var isDisconnected = function()
+{
+    return state == State.Disconnected;
 };
 
 var writeLine = function(msg)

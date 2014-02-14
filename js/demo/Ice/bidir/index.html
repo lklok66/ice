@@ -76,9 +76,7 @@
     <script src="../../../config/foundation/js/jquery.spin.js"></script>
     <script type="application/javascript">
         $(document).foundation();
-        $(document).ready(function(){
-            $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
-        });
+        $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
         $("#progress .icon").spin("small");
     </script>
     <script src="../../../lib/Ice.js"></script>
@@ -90,7 +88,7 @@
             // Load completed
             //
             function(){
-                SyntaxHighlighter.dedfaults.toolbar = false;
+                SyntaxHighlighter.defaults.toolbar = false;
                 SyntaxHighlighter.highlight();
                 $("#viewSource").removeClass("disabled");
                 $("#viewSource").click(
