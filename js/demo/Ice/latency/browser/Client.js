@@ -56,69 +56,19 @@ function run()
                     total = new Date().getTime() - start;
                     writeLine("time for " + repetitions + " pings: " + total + "ms");
                     writeLine("time per ping: " + (total / repetitions) + "ms");
-                    setState(State.Finish);
+                    setState(State.Idle);
                 });
         });
 }
 
 //
-// Asynchronous loop, each call to the given function returns a
-// promise that when fulfilled runs the next iteration.
-//    
-function loop(fn, repetitions)
-{
-    var i = 0;
-    var next = function() 
-    {
-        if(i++ < repetitions)
-        {
-            return fn.call().then(next);
-        }
-    };
-    return next();
-}
-
-//
-// Handle the client state.
-//
-var State = { Finish:0, Running: 1 };
-
-var state = State.Finish;
-
-function setState(s, ex)
-{
-    if(s != state)
-    {
-        switch(s)
-        {
-            case State.Running:
-            {
-                $("#console").val("");
-                $("#run").addClass("disabled");
-                $("#progress").show();
-                $("body").addClass("waiting");
-                break;
-            }
-            case State.Finish:
-            {
-                $("#run").removeClass("disabled");
-                $("#progress").hide();
-                $("body").removeClass("waiting");
-                break;
-            }
-        }
-        state = s;
-    }
-}
-
-//
-// Run buttton envent handler.
+// Run buttton event handler.
 //
 $("#run").click(
     function()
     {
         //
-        // Run the throughput loop if not already running.
+        // Run the latency loop if not already running.
         //
         if(state !== State.Running)
         {
@@ -138,12 +88,29 @@ $("#run").click(
             ).finally(
                 function()
                 {
-                    setState(State.Finish);
+                    setState(State.Idle);
                 }
             );
         }
         return false;
     });
+
+//
+// Asynchronous loop, each call to the given function returns a
+// promise that when fulfilled runs the next iteration.
+//    
+function loop(fn, repetitions)
+{
+    var i = 0;
+    var next = function() 
+    {
+        if(i++ < repetitions)
+        {
+            return fn.call().then(next);
+        }
+    };
+    return next();
+}
 
 //
 // Helper function to write the output.
@@ -153,5 +120,43 @@ function writeLine(msg)
     $("#console").val($("#console").val() + msg + "\n");
     $("#console").scrollTop($("#console").get(0).scrollHeight);
 }
+
+//
+// Handle the client state.
+//
+var State = { 
+    Idle:0, 
+    Running: 1 
+};
+
+var state;
+
+function setState(s, ex)
+{
+    if(s != state)
+    {
+        switch(s)
+        {
+            case State.Running:
+            {
+                $("#console").val("");
+                $("#run").addClass("disabled");
+                $("#progress").show();
+                $("body").addClass("waiting");
+                break;
+            }
+            case State.Idle:
+            {
+                $("#run").removeClass("disabled");
+                $("#progress").hide();
+                $("body").removeClass("waiting");
+                break;
+            }
+        }
+        state = s;
+    }
+}
+
+setState(State.Idle);
 
 }());

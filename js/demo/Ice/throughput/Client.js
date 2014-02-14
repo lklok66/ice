@@ -37,6 +37,23 @@ function menu()
 };
 
 //
+// Asynchronous loop, each call to the given function returns a
+// promise that when fulfilled runs the next iteration.
+//    
+function loop(fn, repetitions)
+{
+    var i = 0;
+    var next = function() 
+    {
+        if(i++ < repetitions)
+        {
+            return fn.call().then(next);
+        }
+    };
+    return next();
+}
+
+//
 // Initialize sequences.
 //
 var byteSeq = new Buffer(Demo.ByteSeqSize);
@@ -95,13 +112,13 @@ Ice.Promise.try(
                 var oneway = twoway.ice_oneway();
                 menu();
                 process.stdout.write("==> ");
-                var loop = new Ice.Promise();
+                var keyLoop = new Ice.Promise();
                 
                 function processKey(key)
                 {
                     if(key == "x")
                     {
-                        loop.succeed();
+                        keyLoop.succeed();
                         return;
                     }
                     
@@ -111,6 +128,7 @@ Ice.Promise.try(
                     if(key == "1" || key == "2" || key == "3" || key == "4")
                     {
                         currentType = key;
+
                         //
                         // Select the sequence data type to use by this test.
                         //
@@ -266,64 +284,23 @@ Ice.Promise.try(
                         }
                         console.log("...");
                         
-                        //
-                        // Promise used to wait for the completion of all
-                        // operations.
-                        //
-                        var p = new Ice.Promise();
-                        var count = 0;
-                        var start;
-                        
-                        var args = [];
-                        if(key != "r")
-                        {
-                            args.push(seq);
-                        }
-                        
-                        //
-                        // The success callback wait for the completion of
-                        // all operations and then call the succeed method.
-                        //
-                        var succeedCB = function(r)
-                        {
-                            if(++count == repetitions)
+                        var start = new Date().getTime();
+                        var args = key != "r" ? [seq] : [];
+                        return loop(
+                            function() 
                             {
-                                p.succeed();
-                            }
-                        };
-                        
-                        //
-                        // If there is an exception we call fail and we are
-                        // done.
-                        //
-                        var exceptionCB = function(ex)
-                        {
-                            p.fail(ex);
-                        };
-                        
-                        setTimeout(
-                            function()
-                            {
-                                start = new Date().getTime();
-                                //
-                                // Invoke the test operation in a loop with the 
-                                // required arguments.
-                                //
-                                for(var i = 0; i < repetitions; ++i)
-                                {
-                                    operation.apply(proxy, args).then(succeedCB, exceptionCB);
-                                }
-                            });
-                        
-                        return p.then(
+                                return operation.apply(proxy, args);
+                            },
+                            repetitions
+                        ).then(
                             function()
                             {
                                 //
                                 // Write the results.
                                 //
                                 var total = new Date().getTime() - start;
-                                console.log("time for " + repetitions + " sequences: " + total  + "ms");
-                                console.log("time per sequence: " + total / repetitions + "ms");
+                                console.log("time for " + repetitions + " sequences: " + total  + " ms");
+                                console.log("time per sequence: " + total / repetitions + " ms");
                                 
                                 var mbit = repetitions * seqSize * wireSize * 8.0 / total / 1000.0;
                                 if(key == "e")
@@ -382,7 +359,7 @@ Ice.Promise.try(
                                      // Once we're done, print the prompt
                                      promise.then(function() 
                                                   {
-                                                      if(!loop.completed())
+                                                      if(!keyLoop.completed())
                                                       {
                                                           process.stdout.write("==> ");
                                                           process.stdin.resume();
@@ -391,7 +368,7 @@ Ice.Promise.try(
                                      data = [];
                                  });
 
-                return loop;
+                return keyLoop;
             });
     }
 ).finally(

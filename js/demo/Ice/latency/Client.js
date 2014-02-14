@@ -14,7 +14,24 @@ require("Latency");
 
 var communicator;
 
-Promise.try(
+//
+// Asynchronous loop, each call to the given function returns a
+// promise that when fulfilled runs the next iteration.
+//    
+function loop(fn, repetitions)
+{
+    var i = 0;
+    var next = function() 
+    {
+        if(i++ < repetitions)
+        {
+            return fn.call().then(next);
+        }
+    };
+    return next();
+}
+
+Ice.Promise.try(
     function()
     {
         //
@@ -22,64 +39,33 @@ Promise.try(
         // ping object.
         //
         communicator = Ice.initialize();
-        var start, total, repetitions = 100000;
+        var repetitions = 10000;
         var proxy = communicator.stringToProxy("ping:default -p 10000");
         
         //
         // Down-cast the proxy to the Demo.Ping interface.
         //
-        Demo.PingPrx.checkedCast(proxy).then(
+        return Demo.PingPrx.checkedCast(proxy).then(
             function(r, obj)
             {
-                //
-                // Promise used to wait for the completion of
-                // the ping calls.
-                //
-                var p = new Ice.Promise();
                 console.log("pinging server " + repetitions + " times (this may take a while)");
-                var j = 0;
-                //
-                // The success callback waits until all calls
-                // completed and then call succeed on the 
-                // promise.
-                //
-                var succeedCB = function()
-                {
-                    j++;
-                    if(j == repetitions)
-                    {
-                        p.succeed();
-                    }
-                };
-                
-                //
-                // If an invocation fails, report that error 
-                // and we are done.
-                //
-                var exceptionCB = function(ex)
-                {
-                    p.fail(ex);
-                };
-                
-                //
-                // Invoke ice_ping repetitions times.
-                //
                 start = new Date().getTime();
-                for(var i = 0; i < repetitions; ++i)
-                {
-                    obj.ice_ping().then(succeedCB).exception(exceptionCB);
-                }
-                return p;
-            }
-        ).then(
-            function()
-            {
-                //
-                // Write the results.
-                //
-                total = new Date().getTime() - start;
-                console.log("time for " + repetitions + " pings: " + total + "ms");
-                console.log("time per ping: " + (total / repetitions) + "ms");
+                return loop(
+                    function() 
+                    {
+                        return obj.ice_ping();
+                    },
+                    repetitions
+                ).then(
+                    function()
+                    {
+                        //
+                        // Write the results.
+                        //
+                        total = new Date().getTime() - start;
+                        console.log("time for " + repetitions + " pings: " + total + "ms");
+                        console.log("time per ping: " + (total / repetitions) + "ms");
+                    });
             });
     }
 ).finally(
@@ -102,5 +88,4 @@ Promise.try(
         console.log(ex.toString());
         process.exit(1);
     });
-
 }());
