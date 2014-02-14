@@ -125,6 +125,35 @@
                 });
             return p;
         },
+        delay: function(ms)
+        {
+            var p = new Promise();
+            
+            var self = this;
+            
+            var delayHandler = function(promise, method)
+            {
+                return function()
+                {
+                    var args = arguments;
+                    setTimeout(
+                        function()
+                        {
+                            method.apply(promise, args);
+                        },
+                        ms);
+                };
+            };
+            
+            setTimeout(
+                function()
+                {
+                    self.then(delayHandler(p, p.succeed),
+                              delayHandler(p, p.fail));
+                });
+            
+            return p;
+        },
         resolve: function()
         {
             if(this.__state === State.Pending)
@@ -234,6 +263,21 @@
     Promise.try = function(onResponse)
     {
         return new Promise().succeed().then(onResponse);
+    };
+    
+    Promise.delay = function(ms)
+    {
+        if(arguments.length > 1)
+        {
+            var p = new Promise();
+            var args = Array.prototype.slice.call(arguments);
+            ms = args.pop();
+            return p.succeed.apply(p, args).delay(ms);
+        }
+        else
+        {
+            return new Promise().succeed().delay(ms);
+        }
     };
 
     Ice.Promise = Promise;

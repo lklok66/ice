@@ -129,8 +129,6 @@ var signin = function()
 
 var run = function(communicator, router, session)
 {
-    var refreshSession;
-
     //
     // The chat promise is used to wait for the completion of chating
     // state. The completion could happen because the user sign out,
@@ -157,16 +155,26 @@ var run = function(communicator, router, session)
             var adapter = adapterArgs[1];
             
             //
-            // Setup an interval call to router refreshSession 
-            // to keep the session alive.
+            // Call refreshSession in a loop to keep the 
+            // session alive.
             //
-            refreshSession = setInterval(
-                function(){
-                    router.refreshSession().exception(
-                        function(ex){
-                            chat.fail(ex);
-                        });
-                }, (timeout.toNumber() * 500));
+            var refreshSession = function()
+            {
+                router.refreshSession().exception(
+                    function(ex)
+                    {
+                        p.fail(ex);
+                    }
+                ).delay(timeout.toNumber() * 500).then(
+                    function()
+                    {
+                        if(!p.completed())
+                        {
+                            refreshSession();
+                        }
+                    });
+            };
+            refreshSession();
             
             //
             // Create the ChatCallback servant and add it to the 
@@ -252,10 +260,8 @@ var run = function(communicator, router, session)
             $("#output").val("");
             
             //
-            // Clear the refresh interval and destroy
-            // the session.
+            // Destroy the session.
             //
-            clearInterval(refreshSession);
             return router.destroySession();
         }
     ).then(

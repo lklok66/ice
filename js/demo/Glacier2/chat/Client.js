@@ -114,7 +114,6 @@ Ice.Promise.try(
         function runWithSession(router, session)
         {
             var p = new Ice.Promise();
-            var refreshSession;
 
             //
             // Get the session timeout, the router client category and
@@ -135,16 +134,26 @@ Ice.Promise.try(
                     var adapter = adapterA[0];
                     
                     //
-                    // Setup an interval call to refreshSession to keep
-                    // the session alive.
+                    // Call refreshSession in a loop to keep the 
+                    // session alive.
                     //
-                    refreshSession = setInterval(
-                        function(){
-                            router.refreshSession().exception(
-                                function(ex){
-                                    p.fail(ex);
-                                });
-                        }, (timeout.toNumber() * 500));
+                    var refreshSession = function()
+                    {
+                        router.refreshSession().exception(
+                            function(ex)
+                            {
+                                p.fail(ex);
+                            }
+                        ).delay(timeout.toNumber() * 500).then(
+                            function()
+                            {
+                                if(!p.completed())
+                                {
+                                    refreshSession();
+                                }
+                            });
+                    };
+                    refreshSession();
                     
                     //
                     // Create the ChatCallback servant and add it to the ObjectAdapter.
@@ -207,11 +216,6 @@ Ice.Promise.try(
                 function(ex)
                 {
                     p.fail(ex);
-                }
-            ).finally(
-                function()
-                {
-                    clearInterval(refreshSession);
                 });
             return p;
         }
