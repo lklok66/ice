@@ -11,7 +11,7 @@
 # The "root directory" for runpath embedded in executables. Can be unset
 # to avoid adding a runpath to Ice executables.
 #
-#embedded_runpath_prefix  ?= /opt/IceWS-$(VERSION_MAJOR).$(VERSION_MINOR)
+#embedded_runpath_prefix  ?= /opt/IceJS-$(VERSION_MAJOR).$(VERSION_MINOR)
 
 #
 # Define OPTIMIZE as yes if you want to build with
@@ -91,15 +91,16 @@ ifeq ($(mkshlib),)
     $(error You need to define mkshlib in Make.rules.$(UNAME)) 
 endif
 
-SLICEPARSERLIB	= $(ice_cpp_dir)/$(libsubdir)$(cpp11suffix)/$(call mklibfilename,Slice,$(ICE_VERSION))
+SLICEPARSERLIB	= $(ice_cpp_dir)/$(libsubdir)$(cpp11suffix)/$(call mklibfilename,Slice,$(VERSION))
 SLICE2CPP	= $(ice_cpp_dir)/$(binsubdir)$(cpp11suffix)/slice2cpp
+SLICE2JS	= $(ice_cpp_dir)/$(binsubdir)$(cpp11suffix)/slice2js
 RPATH_DIR	= $(ice_dir)/$(libsubdir)$(cpp11suffix)
 
 EVERYTHING		= all clean
 EVERYTHING_EXCEPT_ALL   = clean
 
 .SUFFIXES:
-.SUFFIXES:		.cpp .c .o
+.SUFFIXES:		.cpp .c .o .js
 
 .cpp.o:
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
@@ -124,6 +125,14 @@ EVERYTHING_EXCEPT_ALL   = clean
 	echo '#include <IceUtil/Config.h>' > $@
 	cat lex.yy.c >> $@
 	rm -f lex.yy.c
+
+%.js: $(SDIR)/%.ice $(SLICE2JS) $(SLICEPARSERLIB)
+	rm -f $(*F).js
+	$(SLICE2JS) $(SLICE2JSFLAGS) $<
+
+%.js: %.ice $(SLICE2JS) $(SLICEPARSERLIB)
+	rm -f $(*F).js
+	$(SLICE2JS) $(SLICE2JSFLAGS) $<
 
 all:: $(SRCS) $(TARGETS)
 

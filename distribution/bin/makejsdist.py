@@ -19,6 +19,7 @@ import FixUtil
 #
 excludeFiles = [ \
     "allDemos.py",
+    "expect.py",
     "/config/IceDevKey.snk",
     "/config/makedepend-winrt.py",
     "/certs/cakey.pem",
