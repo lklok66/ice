@@ -1,7 +1,7 @@
 Introduction
 ------------
 
-This folder contains sample programs for IceWS. To build and run the
+This folder contains sample programs for IceJS. To build and run the
 demos, follow the instructions below.
 
 
@@ -27,15 +27,15 @@ Solution Explorer window and select "Build".
 2. Running the Demos
 ======================================================================
 
-Add the "bin" directory of the IceWS binary distribution to your PATH.
+Add the "bin" directory of the IceJS binary distribution to your PATH.
 
 For x86 builds:
 
-> set PATH=<dir>\IceWS-0.1.0\bin;%PATH%
+> set PATH=<dir>\IceJS-0.1.0\bin;%PATH%
 
 For x64 builds:
 
-> set PATH=<dir>\IceWS-0.1.0\bin\x64;%PATH%
+> set PATH=<dir>\IceJS-0.1.0\bin\x64;%PATH%
 
 To run a demo, open a command window and change to the desired demo
 subdirectory. Review the README file if one is present. Type 'server'

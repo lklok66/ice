@@ -1,7 +1,7 @@
 Introduction
 ------------
 
-This folder contains sample programs for IceWS. To build and run the
+This folder contains sample programs for IceJS. To build and run the
 demos, follow the instructions below.
 
 
@@ -9,7 +9,7 @@ demos, follow the instructions below.
 1. Building the Demos
 ======================================================================
 
-This section describes how to build the demos included in the IceWS
+This section describes how to build the demos included in the IceJS
 demo distribution.
 
 
@@ -37,7 +37,7 @@ To build the demos you need to:
 
   - Build the demos. For example:
 
-    cd IceWS-0.1.0-demos/demo
+    cd IceJS-0.1.0-demos/demo
     make
 
 

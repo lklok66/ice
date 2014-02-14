@@ -1,15 +1,15 @@
 #!/bin/sh
 
 #
-# This script uninstalls all IceWS 0.1.0 packages currently installed on this system.
+# This script uninstalls all IceJS 0.1.0 packages currently installed on this system.
 #
 
 showHelp ()
 {
-    echo "IceWS 0.1.0 uninstall script"
-    echo "Copyright (c) 2003-2013 ZeroC, Inc. All rights reserved."
+    echo "IceJS 0.1.0 uninstall script"
+    echo "Copyright (c) 2003-2014 ZeroC, Inc. All rights reserved."
     echo "usage: "
-    echo "  \"sudo $0\" -- uninstall all IceWS 0.1.0 packages installed on this system."
+    echo "  \"sudo $0\" -- uninstall all IceJS 0.1.0 packages installed on this system."
 }
 
 #
@@ -52,14 +52,14 @@ uninstallPackage ()
 
 
             #
-            # Remove IceWS contents installation directory
+            # Remove IceJS contents installation directory
             #
-            if [[ -d "$BASE_PATH/IceWS-$VERSION" ]]; then
-                rm -rf "$BASE_PATH/IceWS-$VERSION"
+            if [[ -d "$BASE_PATH/IceJS-$VERSION" ]]; then
+                rm -rf "$BASE_PATH/IceJS-$VERSION"
             fi
 
-            if [[ "$BASE_PATH/IceWS-$VERSION_MM" ]]; then
-                rm -f "$BASE_PATH/IceWS-$VERSION_MM"
+            if [[ "$BASE_PATH/IceJS-$VERSION_MM" ]]; then
+                rm -f "$BASE_PATH/IceJS-$VERSION_MM"
             fi
         fi
 
@@ -124,7 +124,7 @@ answer=""
 
 while [[ $ok -eq 0 ]]
 do
-    echo "Uninstall all IceWS 0.1.0 packages installed on this sytem? Yes/No"
+    echo "Uninstall all IceJS 0.1.0 packages installed on this sytem? Yes/No"
     read -p "$*" answer
     if [[ ! "$answer" ]]; then
         answer="no"
@@ -154,4 +154,4 @@ fi
 
 uninstallPackage "com.zeroc.icews.pkg"
 
-echo "IceWS 0.1.0 uninstallation completed successfully"
+echo "IceJS 0.1.0 uninstallation completed successfully"
