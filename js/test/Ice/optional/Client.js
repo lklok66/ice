@@ -13,25 +13,33 @@
     var Ice = global.Ice;
 
     require("Test");
-    var Test = global.Test;
     var Promise = Ice.Promise;
     var ArrayUtil = Ice.ArrayUtil;
 
-    var test = function(b)
-    {
-        if(!b)
-        {
-            throw new Error("test failed");
-        }
-    };
-
-    var allTests = function(out, communicator)
+    var allTests = function(out, communicator, Test)
     {
         var failCB = function(){ test(false); };
         
         var ref, base, mo1, mo6, mo8, oo1, initial, initial2;
 
-        return Promise.try(
+        var p = new Ice.Promise();
+        var test = function(b)
+        {
+            if(!b)
+            {
+                try
+                {
+                    throw new Error("test failed");
+                }
+                catch(err)
+                {
+                    p.fail(err);
+                    throw err;
+                }
+            }
+        };
+
+        Promise.try(
             function()
             {
                 out.write("testing stringToProxy... ");
@@ -937,16 +945,28 @@
                 out.writeLine("ok");
                 return initial.shutdown();
             }
+        ).then(
+            function()
+            {
+                p.succeed();
+            },
+            function(ex)
+            {
+                p.fail(ex);
+            }
         );
+
+        return p;
     };
 
     var run = function(out, id)
     {
+        var Test = global.Test;
         return Promise.try(
             function()
             {
                 var c = Ice.initialize(id);
-                return allTests(out, c).finally(
+                return allTests(out, c, Test).finally(
                     function()
                     {
                         if(c)
