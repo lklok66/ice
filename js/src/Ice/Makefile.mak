@@ -147,7 +147,7 @@ ServantLocator.js:
 ObjectFactory.js:
 	
 
-SLICE2JSFLAGS	= $(SLICE2JSFLAGS) --include-dir Ice --ice -I"$(slicedir)"
+SLICE2JSFLAGS	= $(SLICE2JSFLAGS) --ice -I"$(slicedir)"
 
 # IceWS slice files
 browser\EndpointInfo.js: "$(SLICE2JS)" "$(SLICEPARSERLIB)"
