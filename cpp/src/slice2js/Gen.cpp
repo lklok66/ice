@@ -469,7 +469,7 @@ Slice::JsVisitor::writeConstantValue(const string& scope, const TypePtr& type, c
             // JavaScript doesn't support 64 bit integer so long types are written as 
             // two 32 bit words hi, low wrapped in the Ice.Long class.
             //
-            // If slice2js runs in a big edian machine we need to swap the words, we do not
+            // If slice2js runs in a big endian machine we need to swap the words, we do not
             // need to swap the word bytes as we just write each word as a number to the
             // output file.
             //
@@ -1422,25 +1422,23 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
 
         for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
         {
-            const bool isProtected = p->hasMetaData("protected") || (*q)->hasMetaData("protected");
             const string m = fixId((*q)->name());
-            const string memberName = isProtected ? "_" + (*q)->name() : m;
             if((*q)->optional())
             {
                 if((*q)->defaultValueType())
                 {
-                    _out << nl << "this." << memberName << " = " << m << " !== undefined ? " << m << " : ";
+                    _out << nl << "this." << m << " = " << m << " !== undefined ? " << m << " : ";
                     writeConstantValue(scope, (*q)->type(), (*q)->defaultValueType(), (*q)->defaultValue());
                     _out << ';';
                 }
                 else
                 {
-                    _out << nl << "this." << memberName << " = " << m << ';';
+                    _out << nl << "this." << m << " = " << m << ';';
                 }
             }
             else
             {
-                _out << nl << "this." << memberName << " = " << m << " !== undefined ? " << m << " : ";
+                _out << nl << "this." << m << " = " << m << " !== undefined ? " << m << " : ";
                 if((*q)->defaultValueType())
                 {
                     writeConstantValue(scope, (*q)->type(), (*q)->defaultValueType(), (*q)->defaultValue());
