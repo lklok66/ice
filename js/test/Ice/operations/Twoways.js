@@ -9,7 +9,7 @@
 
 (function(global){
     var Ice = global.Ice;
-
+    
     var run = function(communicator, prx, Test, bidir)
     {
         var p = new Ice.Promise();
@@ -649,7 +649,7 @@
                 test(c.equals(ctx));
                 if(!bidir)
                 {
-                    return Promise.try(
+                    return Ice.Promise.try(
                         function()
                         {
                             test(c.equals(ctx));
