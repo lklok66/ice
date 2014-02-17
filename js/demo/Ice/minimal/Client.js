@@ -27,7 +27,7 @@ Ice.Promise.try(
         // Down-cast the proxy to the hello object interface.
         //
         return Demo.HelloPrx.checkedCast(proxy).then(
-            function(r, hello)
+            function(hello)
             {
                 //
                 // Invoke the sayHello method.

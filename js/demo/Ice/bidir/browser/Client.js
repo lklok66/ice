@@ -49,13 +49,13 @@ var start = function()
     // Down-cast the proxy to the Demo.CallbackSender interface.
     //
     return CallbackSenderPrx.checkedCast(proxy).then(
-        function(r, server)
+        function(server)
         {
             //
             // Create the client object adapter.
             //
             return communicator.createObjectAdapter("").then(
-                function(r, adapter)
+                function(adapter)
                 {
                     //
                     // Create a callback receiver servant and add it to

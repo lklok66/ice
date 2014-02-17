@@ -16,544 +16,406 @@
     var Test = global.Test;
     var Promise = Ice.Promise;
 
-    var test = function(b)
-    {
-        if(!b)
-        {
-            throw new Error("test failed");
-        }
-    };
-
     var allTests = function(out, communicator)
     {
-        var p = new Promise();
-
+        var p = new Ice.Promise();
+        var test = function(b)
+        {
+            if(!b)
+            {
+                try
+                {
+                    throw new Error("test failed");
+                }
+                catch(err)
+                {
+                    p.fail(err);
+                    throw err;
+                }
+            }
+        };
+        
         var failCB = function(){ test(false); };
 
         var supportsUndeclaredExceptions = function(thrower)
         {
-            var p = new Promise();
-            setTimeout(function(){
-                thrower.supportsUndeclaredExceptions().then(
-                    function(asyncResult, v)
-                    {
-                        if(v)
+            return Promise.try(
+                function()
+                {
+                    return thrower.supportsUndeclaredExceptions().then(
+                        function(v)
                         {
-                            out.write("catching unknown user exception... ");
-                            thrower.throwUndeclaredA(1).then(
-                                failCB,
-                                function(ex)
-                                {
-                                    if(!(ex instanceof Ice.UnknownUserException))
+                            if(v)
+                            {
+                                out.write("catching unknown user exception... ");
+                                return thrower.throwUndeclaredA(1).then(
+                                    failCB,
+                                    function(ex)
                                     {
-                                        throw ex;
+                                        test(ex instanceof Ice.UnknownUserException);
+                                        return thrower.throwUndeclaredB(1, 2);
                                     }
-                                    return thrower.throwUndeclaredB(1, 2);
-                                }
-                            ).then(
-                                failCB,
-                                function(ex)
-                                {
-                                    if(!(ex instanceof Ice.UnknownUserException))
+                                ).then(
+                                    failCB,
+                                    function(ex)
                                     {
-                                        throw ex;
+                                        test(ex instanceof Ice.UnknownUserException);
+                                        return thrower.throwUndeclaredC(1, 2, 3);
                                     }
-                                    return thrower.throwUndeclaredC(1, 2, 3);
-                                }
-                            ).then(
-                                failCB,
-                                function(ex)
-                                {
-                                    if(!(ex instanceof Ice.UnknownUserException))
+                                ).then(
+                                    failCB,
+                                    function(ex)
                                     {
-                                        throw ex;
+                                        test(ex instanceof Ice.UnknownUserException);
+                                        out.writeLine("ok");
                                     }
-                                    out.writeLine("ok");
-                                    p.succeed();
-                                }
-                            ).exception(
-                                function(ex)
-                                {
-                                    p.fail(ex)
-                                }
-                            );
-                        }
-                        else
-                        {
-                            p.succeed();
-                        }
-                    });
-            });
-            return p;
+                                );
+                            }
+                        });
+                });
         };
 
         var supportsAssertException = function(thrower)
         {
-            var p = new Promise();
-            setTimeout(function(){
-                thrower.supportsAssertException().then(
-                    function(asyncResult, v)
-                    {
-                        if(v)
+            return Promise.try(
+                function()
+                {
+                    return thrower.supportsAssertException().then(
+                        function(v)
                         {
-                            out.write("testing assert in the server... ");
-                            thrower.throwAssertException().then(
-                                failCB,
-                                function(ex)
-                                {
-                                    if(!(ex instanceof Ice.ConnectionLostException))
+                            if(v)
+                            {
+                                out.write("testing assert in the server... ");
+                                return thrower.throwAssertException().then(
+                                    failCB,
+                                    function(ex)
                                     {
-                                        throw ex;
+                                        test(ex instanceof Ice.ConnectionLostException);
+                                        out.writeLine("ok");
                                     }
-                                    out.writeLine("ok");
-                                    p.succeed();
-                                }
-                            ).exception(
-                                function(ex)
-                                {
-                                    p.fail(ex)
-                                }
-                            );
-                        }
-                        else
-                        {
-                            p.succeed();
-                        }
-                    });
-            });
-            return p;
+                                );
+                            }
+                        });
+                });
         };
 
         var base, ref, thrower;
-        setTimeout(function(){
-            try
+        Promise.try(
+            function()
             {
-                
                 out.write("testing object adapter registration exceptions... ");
-
-                Promise.try(
-                    function()
+                return communicator.createObjectAdapter("TestAdapter0").then(
+                    failCB,
+                    function(ex)
                     {
-                        return communicator.createObjectAdapter("TestAdapter0").then(
-                            function()
-                            {
-                                test(false);
-                            },
-                            function(ex)
-                            {
-                                test(ex instanceof Ice.InitializationException); // Expected
-                            })
-                    }
-                ).then(
-                    function()
+                        test(ex instanceof Ice.InitializationException); // Expected
+                    });
+            }
+        ).then(
+            function()
+            {
+                return communicator.createObjectAdapterWithEndpoints("TestAdapter0", "default").then(
+                    failCB,
+                    function(ex)
                     {
-
-                        return communicator.createObjectAdapterWithEndpoints("TestAdapter0", "default").then(
-                            failCB,
-                            function(ex)
-                            {
-                                test(ex instanceof Ice.FeatureNotSupportedException); // Expected
-                                out.writeLine("ok");
-                            });
-                    }
-                ).then(
-                    function()
+                        test(ex instanceof Ice.FeatureNotSupportedException); // Expected
+                        out.writeLine("ok");
+                    });
+            }
+        ).then(
+            function()
+            {
+                out.write("testing servant registration exceptions... ");
+                return communicator.createObjectAdapter("").then(
+                    function(adapter)
                     {
-                        out.write("testing servant registration exceptions... ");
-                        return communicator.createObjectAdapter("").then(
-                            function(r, adapter)
-                            {
-                                var obj = new EmptyI();
-                                adapter.add(obj, communicator.stringToIdentity("x"));
-                                try
-                                {
-                                    adapter.add(obj, communicator.stringToIdentity("x"));
-                                    test(false);
-                                }
-                                catch(ex)
-                                {
-                                    test(ex instanceof Ice.AlreadyRegisteredException);
-                                }
-
-                                adapter.remove(communicator.stringToIdentity("x"));
-                                try
-                                {
-                                    adapter.remove(communicator.stringToIdentity("x"));
-                                    test(false);
-                                }
-                                catch(ex)
-                                {
-                                    test(ex instanceof Ice.NotRegisteredException);
-                                }
-                                adapter.deactivate();
-                                out.writeLine("ok");
-                            });
-                    }
-                ).then(
-                    function()
-                    {
-                        out.write("testing servant locator registration exceptions... ");
-                        return communicator.createObjectAdapter("").then(
-                            function(r, adapter)
-                            {
-                                var loc = new ServantLocatorI();
-                                adapter.addServantLocator(loc, "x");
-                                try
-                                {
-                                    adapter.addServantLocator(loc, "x");
-                                    test(false);
-                                }
-                                catch(ex)
-                                {
-                                    test(ex instanceof Ice.AlreadyRegisteredException);
-                                }
-                                adapter.deactivate();
-                                out.writeLine("ok");
-                            });
-                    }
-                ).then(
-                    function()
-                    {
-                        out.write("testing object factory registration exception... ");
-                        var of = new ObjectFactoryI();
-                        communicator.addObjectFactory(of, "::x");
+                        var obj = new EmptyI();
+                        adapter.add(obj, communicator.stringToIdentity("x"));
                         try
                         {
-                            communicator.addObjectFactory(of, "::x");
+                            adapter.add(obj, communicator.stringToIdentity("x"));
                             test(false);
                         }
                         catch(ex)
                         {
                             test(ex instanceof Ice.AlreadyRegisteredException);
                         }
-                        out.writeLine("ok");
 
-                        out.write("testing stringToProxy... ");
-                        ref = "thrower:default -p 12010";
-                        base = communicator.stringToProxy(ref);
-                        test(base !== null);
+                        adapter.remove(communicator.stringToIdentity("x"));
+                        try
+                        {
+                            adapter.remove(communicator.stringToIdentity("x"));
+                            test(false);
+                        }
+                        catch(ex)
+                        {
+                            test(ex instanceof Ice.NotRegisteredException);
+                        }
+                        adapter.deactivate();
                         out.writeLine("ok");
-                        out.write("testing checked cast... ");
-                        return Test.ThrowerPrx.checkedCast(base);
-                    }
-                  ).then(
-                    function(asyncResult, obj)
-                    {
-                        thrower = obj;
-                        test(thrower !== null);
-                        test(thrower.equals(base));
-                        out.writeLine("ok");
-                        out.write("catching exact types... ");
-                        return thrower.throwAasA(1);
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(ex instanceof Test.A)
-                        {
-                            test(ex.aMem === 1);
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                        return thrower.throwAorDasAorD(1);
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(ex instanceof Test.A)
-                        {
-                            test(ex.aMem === 1);
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                        return thrower.throwAorDasAorD(-1);
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(ex instanceof Test.D)
-                        {
-                            test(ex.dMem === -1);
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                        return thrower.throwBasB(1, 2);
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(ex instanceof Test.B)
-                        {
-                            test(ex.aMem == 1);
-                            test(ex.bMem == 2);
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                        return thrower.throwCasC(1, 2, 3);
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(ex instanceof Test.C)
-                        {
-                            test(ex.aMem == 1);
-                            test(ex.bMem == 2);
-                            test(ex.cMem == 3);
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                        out.writeLine("ok");
-                        out.write("catching base types... ");
-                        return thrower.throwBasB(1, 2);
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(ex instanceof Test.A)
-                        {
-                            test(ex.aMem == 1);
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                        return thrower.throwCasC(1, 2, 3);
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(ex instanceof Test.B)
-                        {
-                            test(ex.aMem == 1);
-                            test(ex.bMem == 2);
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                        out.writeLine("ok");
-                        out.write("catching derived types... ");
-                        return thrower.throwBasA(1, 2);
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(ex instanceof Test.B)
-                        {
-                            test(ex.aMem == 1);
-                            test(ex.bMem == 2);
-                            return thrower.throwCasA(1, 2, 3);
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(ex instanceof Test.C)
-                        {
-                            test(ex.aMem == 1);
-                            test(ex.bMem == 2);
-                            test(ex.cMem == 3);
-                            return thrower.throwCasB(1, 2, 3);
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(ex instanceof Test.C)
-                        {
-                            test(ex.aMem == 1);
-                            test(ex.bMem == 2);
-                            test(ex.cMem == 3);
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                        out.writeLine("ok");
-                        return supportsUndeclaredExceptions(thrower);
-                    }
-                ).then(
-                    function()
-                    {
-                        return supportsAssertException(thrower);
-                    }
-                ).then(
-                    function()
-                    {
-                        out.write("testing memory limit marshal exception...");
-                        return thrower.throwMemoryLimitException(null);
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(!(ex instanceof Ice.UnknownLocalException))
-                        {
-                            throw ex;
-                        }
-                        var data = new Array(20 * 1024);
-                        return thrower.throwMemoryLimitException(data);
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(!(ex instanceof Ice.MemoryLimitException))
-                        {
-                            throw ex;
-                        }
-                        out.writeLine("ok");
-                        out.write("catching object not exist exception... ");
-                        var id = communicator.stringToIdentity("does not exist");
-                        var thrower2 = Test.ThrowerPrx.uncheckedCast(thrower.ice_identity(id));
-                        return thrower2.ice_ping();
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(ex instanceof Ice.ObjectNotExistException)
-                        {
-                            test(ex.id.equals(communicator.stringToIdentity("does not exist")));
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                        out.writeLine("ok");
-                        out.write("catching facet not exist exception... ");
-                        var thrower2 = Test.ThrowerPrx.uncheckedCast(thrower, "no such facet");
-                        return thrower2.ice_ping();
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(ex instanceof Ice.FacetNotExistException)
-                        {
-                            test(ex.facet == "no such facet");
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                        out.writeLine("ok");
-                        out.write("catching operation not exist exception... ");
-                        var thrower2 = Test.WrongOperationPrx.uncheckedCast(thrower);
-                        return thrower2.noSuchOperation();
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(ex instanceof Ice.OperationNotExistException)
-                        {
-                            test(ex.operation == "noSuchOperation");
-                        }
-                        else
-                        {
-                            throw ex;
-                        }
-                        out.writeLine("ok");
-                        out.write("catching unknown local exception... ");
-                        return thrower.throwLocalException();
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(!(ex instanceof Ice.UnknownLocalException))
-                        {
-                            throw ex;
-                        }
-                        return thrower.throwLocalExceptionIdempotent();
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(!(ex instanceof Ice.UnknownLocalException) &&
-                        !(ex instanceof Ice.OperationNotExistException))
-                        {
-                            throw ex;
-                        }
-                        out.writeLine("ok");
-                        out.write("catching unknown non-Ice exception... ");
-                        return thrower.throwNonIceException();
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(!(ex instanceof Ice.UnknownException))
-                        {
-                            throw ex;
-                        }
-                        out.writeLine("ok");
-                        out.write("testing asynchronous exceptions... ");
-                        return thrower.throwAfterResponse();
-                    }
-                ).then(
-                    function(asyncResult)
-                    {
-                        return thrower.throwAfterException();
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        if(!(ex instanceof Test.A))
-                        {
-                            throw ex;
-                        }
-                        out.writeLine("ok");
-                        return thrower.shutdown();
-                    }
-                ).then(
-                    function()
-                    {
-                        p.succeed();
-                    }
-                ).exception(
-                    function(ex)
-                    {
-                        p.fail(ex);
-                    }
-                );
+                    });
             }
-            catch(ex)
+        ).then(
+            function()
+            {
+                out.write("testing servant locator registration exceptions... ");
+                return communicator.createObjectAdapter("").then(
+                    function(adapter)
+                    {
+                        var loc = new ServantLocatorI();
+                        adapter.addServantLocator(loc, "x");
+                        try
+                        {
+                            adapter.addServantLocator(loc, "x");
+                            test(false);
+                        }
+                        catch(ex)
+                        {
+                            test(ex instanceof Ice.AlreadyRegisteredException);
+                        }
+                        adapter.deactivate();
+                        out.writeLine("ok");
+                    });
+            }
+        ).then(
+            function()
+            {
+                out.write("testing object factory registration exception... ");
+                var of = new ObjectFactoryI();
+                communicator.addObjectFactory(of, "::x");
+                try
+                {
+                    communicator.addObjectFactory(of, "::x");
+                    test(false);
+                }
+                catch(ex)
+                {
+                    test(ex instanceof Ice.AlreadyRegisteredException);
+                }
+                out.writeLine("ok");
+
+                out.write("testing stringToProxy... ");
+                ref = "thrower:default -p 12010";
+                base = communicator.stringToProxy(ref);
+                test(base !== null);
+                out.writeLine("ok");
+                out.write("testing checked cast... ");
+                return Test.ThrowerPrx.checkedCast(base);
+            }
+            ).then(
+            function(obj)
+            {
+                thrower = obj;
+                test(thrower !== null);
+                test(thrower.equals(base));
+                out.writeLine("ok");
+                out.write("catching exact types... ");
+                return thrower.throwAasA(1);
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Test.A);
+                test(ex.aMem === 1);
+                return thrower.throwAorDasAorD(1);
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Test.A);
+                test(ex.aMem === 1);
+                return thrower.throwAorDasAorD(-1);
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Test.D);
+                test(ex.dMem === -1);
+                return thrower.throwBasB(1, 2);
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Test.B);
+                test(ex.aMem == 1);
+                test(ex.bMem == 2);
+                return thrower.throwCasC(1, 2, 3);
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Test.C);
+                test(ex.aMem == 1);
+                test(ex.bMem == 2);
+                test(ex.cMem == 3);
+                out.writeLine("ok");
+                out.write("catching base types... ");
+                return thrower.throwBasB(1, 2);
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Test.A);
+                test(ex.aMem == 1);
+                return thrower.throwCasC(1, 2, 3);
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Test.B);
+                test(ex.aMem == 1);
+                test(ex.bMem == 2);
+                out.writeLine("ok");
+                out.write("catching derived types... ");
+                return thrower.throwBasA(1, 2);
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Test.B);
+                test(ex.aMem == 1);
+                test(ex.bMem == 2);
+                return thrower.throwCasA(1, 2, 3);
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Test.C);
+                test(ex.aMem == 1);
+                test(ex.bMem == 2);
+                test(ex.cMem == 3);
+                return thrower.throwCasB(1, 2, 3);
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Test.C);
+                test(ex.aMem == 1);
+                test(ex.bMem == 2);
+                test(ex.cMem == 3);
+                out.writeLine("ok");
+                return supportsUndeclaredExceptions(thrower);
+            }
+        ).then(
+            function()
+            {
+                return supportsAssertException(thrower);
+            }
+        ).then(
+            function()
+            {
+                out.write("testing memory limit marshal exception...");
+                return thrower.throwMemoryLimitException(null);
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Ice.UnknownLocalException);
+                return thrower.throwMemoryLimitException(new Array(20 * 1024));
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Ice.MemoryLimitException);
+                out.writeLine("ok");
+                out.write("catching object not exist exception... ");
+                var id = communicator.stringToIdentity("does not exist");
+                var thrower2 = Test.ThrowerPrx.uncheckedCast(thrower.ice_identity(id));
+                return thrower2.ice_ping();
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Ice.ObjectNotExistException);
+                test(ex.id.equals(communicator.stringToIdentity("does not exist")));
+                out.writeLine("ok");
+                out.write("catching facet not exist exception... ");
+                var thrower2 = Test.ThrowerPrx.uncheckedCast(thrower, "no such facet");
+                return thrower2.ice_ping();
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Ice.FacetNotExistException);
+                test(ex.facet == "no such facet");
+                out.writeLine("ok");
+                out.write("catching operation not exist exception... ");
+                var thrower2 = Test.WrongOperationPrx.uncheckedCast(thrower);
+                return thrower2.noSuchOperation();
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Ice.OperationNotExistException);
+                test(ex.operation == "noSuchOperation");
+                out.writeLine("ok");
+                out.write("catching unknown local exception... ");
+                return thrower.throwLocalException();
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Ice.UnknownLocalException);
+                return thrower.throwLocalExceptionIdempotent();
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Ice.UnknownLocalException ||
+                     ex instanceof Ice.OperationNotExistException);
+                out.writeLine("ok");
+                out.write("catching unknown non-Ice exception... ");
+                return thrower.throwNonIceException();
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Ice.UnknownException);
+                out.writeLine("ok");
+                out.write("testing asynchronous exceptions... ");
+                return thrower.throwAfterResponse();
+            }
+        ).then(
+            function()
+            {
+                return thrower.throwAfterException();
+            }
+        ).then(
+            failCB,
+            function(ex)
+            {
+                test(ex instanceof Test.A);
+                out.writeLine("ok");
+                return thrower.shutdown();
+            }
+        ).then(
+            function()
+            {
+                p.succeed();
+            },
+            function(ex)
             {
                 p.fail(ex);
             }
-        });
+        );
         return p;
     };
 
@@ -596,29 +458,17 @@
 
     var run = function(out, id)
     {
-        var p = new Ice.Promise();
-        setTimeout(
+        return Promise.try(
             function()
             {
-                var c = null;
-                try
-                {
-                    id.properties.setProperty("Ice.MessageSizeMax", "10");
-                    c = Ice.initialize(id);
-                    allTests(out, c).then(function(){
-                            return c.destroy();
-                        }).then(function(){
-                            p.succeed();
-                        }).exception(function(ex){
-                            p.fail(ex);
-                        });
-                }
-                catch(ex)
-                {
-                    p.fail(ex);
-                }
+                id.properties.setProperty("Ice.MessageSizeMax", "10");
+                var c = Ice.initialize(id);
+                return allTests(out, c).finally(
+                    function()
+                    {
+                        return c.destroy();
+                    });
             });
-        return p;
     };
     global.__test__ = run;
 }(typeof (global) === "undefined" ? window : global));

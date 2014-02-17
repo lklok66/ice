@@ -30,7 +30,7 @@ INSTALL_SRCS	:= Glacier2.js $(GEN_SRCS)
 
 include $(top_srcdir)/config/Make.rules
 
-SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --include-dir Glacier2 --ice -I$(slicedir)
+SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --ice -I$(slicedir)
 
 lint:: $(INSTALL_SRCS)
 	jshint $(LINTFLAGS) $(INSTALL_SRCS)

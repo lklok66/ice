@@ -16,128 +16,121 @@
     var Test = global.Test;
     var Promise = Ice.Promise;
 
-    var test = function(b)
-    {
-        if(!b)
-        {
-            throw new Error("test failed");
-        }
-    };
-
     var allTests = function(out, communicator)
     {
+        var ref, base1, base2, retry1, retry2;
+        
         var p = new Promise();
-
-        var failCB = function() { test(false); };
-
-        setTimeout(function(){
-            try
+        var test = function(b)
+        {
+            if(!b)
+            {
+                try
+                {
+                    throw new Error("test failed");
+                }
+                catch(err)
+                {
+                    p.fail(err);
+                    throw err;
+                }
+            }
+        };
+        
+        Promise.try(
+            function()
             {
                 out.write("testing stringToProxy... ");
-                var ref = "retry:default -p 12010";
-                var base1 = communicator.stringToProxy(ref);
+                ref = "retry:default -p 12010";
+                base1 = communicator.stringToProxy(ref);
                 test(base1 !== null);
-                var base2 = communicator.stringToProxy(ref);
+                base2 = communicator.stringToProxy(ref);
                 test(base2 !== null);
                 out.writeLine("ok");
-
-                var retry1, retry2;
                 out.write("testing checked cast... ");
-                Test.RetryPrx.checkedCast(base1).then(
-                    function(asyncResult, obj)
-                    {
-                        retry1 = obj;
-                        test(retry1 !== null);
-                        test(retry1.equals(base1));
-                        return Test.RetryPrx.checkedCast(base2);
-                    }
-                ).then(
-                    function(asyncResult, obj)
-                    {
-                        retry2 = obj;
-                        test(retry2 !== null);
-                        test(retry2.equals(base2));
-                        out.writeLine("ok");
-                        out.write("calling regular operation with first proxy... ");
-                        return retry1.op(false);
-                    }
-                ).then(
-                    function(asyncResult)
-                    {
-                        out.writeLine("ok");
-                        out.write("calling operation to kill connection with second proxy... ");
-                        return retry2.op(true);
-                    }
-                ).then(
-                    failCB,
-                    function(ex)
-                    {
-                        test((typeof(window) === undefined && ex instanceof Ice.ConnectionLostException) ||
-                                (typeof(window) !== undefined && ex instanceof Ice.SocketException));
-                        out.writeLine("ok");
-                        out.write("calling regular operation with first proxy again... ");
-                        return retry1.op(false);
-                    }
-                ).then(
-                    function(asyncResult)
-                    {
-                        out.writeLine("ok");
-                        return retry1.shutdown();
-                    }
-                ).then(
-                    function(asyncResult)
-                    {
-                        p.succeed();
-                    }
-                ).exception(
-                    function(ex)
-                    {
-                        p.fail(ex);
-                    }
-                );
+                return Test.RetryPrx.checkedCast(base1);
             }
-            catch(ex)
+        ).then(
+            function(obj)
+            {
+                retry1 = obj;
+                test(retry1 !== null);
+                test(retry1.equals(base1));
+                return Test.RetryPrx.checkedCast(base2);
+            }
+        ).then(
+            function(obj)
+            {
+                retry2 = obj;
+                test(retry2 !== null);
+                test(retry2.equals(base2));
+                out.writeLine("ok");
+                out.write("calling regular operation with first proxy... ");
+                return retry1.op(false);
+            }
+        ).then(
+            function()
+            {
+                out.writeLine("ok");
+                out.write("calling operation to kill connection with second proxy... ");
+                return retry2.op(true);
+            }
+        ).then(
+            function()
+            {
+                test(false);
+            },
+            function(ex)
+            {
+                test((typeof(window) === undefined && ex instanceof Ice.ConnectionLostException) ||
+                        (typeof(window) !== undefined && ex instanceof Ice.SocketException));
+                out.writeLine("ok");
+                out.write("calling regular operation with first proxy again... ");
+                return retry1.op(false);
+            }
+        ).then(
+            function()
+            {
+                out.writeLine("ok");
+                return retry1.shutdown();
+            }
+        ).then(
+            function()
+            {
+                p.succeed();
+            },
+            function(ex)
             {
                 p.fail(ex);
             }
-        });
+        );
         return p;
     };
 
     var run = function(out, id)
     {
-        var p = new Ice.Promise();
-        setTimeout(
+        return Promise.try(
             function()
             {
-                var c = null;
-                try
-                {
-                    //
-                    // For this test, we want to disable retries.
-                    //
-                    id.properties.setProperty("Ice.RetryIntervals", "-1");
+                //
+                // For this test, we want to disable retries.
+                //
+                id.properties.setProperty("Ice.RetryIntervals", "-1");
 
-                    //
-                    // We don't want connection warnings because of the timeout
-                    //
-                    id.properties.setProperty("Ice.Warn.Connections", "0");
-
-                    c = Ice.initialize(id);
-                    allTests(out, c).then(function(){
+                //
+                // We don't want connection warnings because of the timeout
+                //
+                id.properties.setProperty("Ice.Warn.Connections", "0");
+                var c = Ice.initialize(id);
+                return allTests(out, c).finally(
+                    function()
+                    {
+                        if(c)
+                        {
                             return c.destroy();
-                        }).then(function(){
-                            p.succeed();
-                        }).exception(function(ex){
-                            p.fail(ex);
-                        });
-                }
-                catch(ex)
-                {
-                    p.fail(ex);
-                }
+                        }
+                    });
             });
-        return p;
     };
     global.__test__ = run;
 }(typeof (global) === "undefined" ? window : global));

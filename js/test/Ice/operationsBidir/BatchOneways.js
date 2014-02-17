@@ -21,7 +21,7 @@
         }
     };
 
-    var run = function(communicator, log, p)
+    var run = function(communicator, p)
     {
         var promise = new Promise();
 
@@ -53,18 +53,18 @@
                 var base = communicator.stringToProxy(ref);
 
                 Test.EchoPrx.checkedCast(base).then(
-                    function(r, prx)
+                    function(prx)
                     {
                         echo = prx;
                         return p.opByteSOneway(bs1);
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return p.opByteSOneway(bs2);
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return p.opByteSOneway(bs3);
                     }
@@ -77,7 +77,7 @@
                         return echo.startBatch();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         batch = p.ice_batchOneway();
 
@@ -95,17 +95,17 @@
                                 return batch.ice_getConnection();
                             }
                         ).then(
-                            function(r, con)
+                            function(con)
                             {
                                 return con.flushBatchRequests();
                             }
                         ).then(
-                            function(r)
+                            function()
                             {
                                 return echo.flushBatch();
                             }
                         ).then(
-                            function(r)
+                            function()
                             {
                                 promise1.succeed(p);
                             }
@@ -118,12 +118,12 @@
                         return promise1;
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return echo.startBatch();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         batch2 = p.ice_batchOneway();
 
@@ -135,60 +135,60 @@
                         return batch.ice_flushBatchRequests();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return echo.flushBatch();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return echo.startBatch();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return Promise.all(batch.ice_ping(), batch2.ice_ping());
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         var identity = communicator.stringToIdentity("invalid");
                         batch3 = batch.ice_identity(identity);
                         return batch3.ice_ping();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return batch3.ice_flushBatchRequests();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return echo.flushBatch();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return echo.startBatch();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         // Make sure that a bogus batch request doesn't cause troubles to other ones.
                         return Promise.all(batch3.ice_ping(), batch.ice_ping());
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return batch.ice_flushBatchRequests();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return echo.flushBatch();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         promise.succeed();
                     }

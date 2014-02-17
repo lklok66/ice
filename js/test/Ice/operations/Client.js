@@ -25,108 +25,77 @@
 
     var allTests = function(out, communicator)
     {
-        var p = new Promise();
-
-        var failCB = function() { test(false); };
-
-        setTimeout(function(){
-            try
+        var ref, base, cl, derived;
+        
+        return Promise.try(
+            function()
             {
                 out.write("testing twoway operations... ");
-                var ref = "test:default -p 12010";
-                var base = communicator.stringToProxy(ref);
-                var cl, derived;
-                Test.MyClassPrx.checkedCast(base).then(
-                    function(r, prx)
-                    {
-                        cl = prx;
-                        return Test.MyDerivedClassPrx.checkedCast(cl);
-                    }
-                ).then(
-                    function(r, prx)
-                    {
-                        derived = prx;
-                        return Twoways.run(communicator, out, cl);
-                    }
-                ).then(
-                    function()
-                    {
-                        return Twoways.run(communicator, out, derived);
-                    }
-                ).then(
-                    function()
-                    {
-                        out.writeLine("ok");
-
-                        out.write("testing oneway operations... ");
-                        return Oneways.run(communicator, out, cl);
-                    }
-                ).then(
-                    function()
-                    {
-                        out.writeLine("ok");
-
-                        out.write("testing batch oneway operations... ");
-                        return BatchOneways.run(communicator, out, cl);
-                    }
-                ).then(
-                    function()
-                    {
-                        out.writeLine("ok");
-
-                        return cl.shutdown();
-                    }
-                ).then(
-                    function()
-                    {
-                        p.succeed();
-                    }
-                ).exception(
-                    function(ex)
-                    {
-                        p.fail(ex);
-                    }
-                );
+                ref = "test:default -p 12010";
+                base = communicator.stringToProxy(ref);
+                cl, derived;
+                return Test.MyClassPrx.checkedCast(base);
             }
-            catch(ex)
+        ).then(
+            function(prx)
             {
-                p.fail(ex);
+                cl = prx;
+                return Test.MyDerivedClassPrx.checkedCast(cl);
             }
-        });
-
-        return p;
+        ).then(
+            function(prx)
+            {
+                derived = prx;
+                return Twoways.run(communicator, cl);
+            }
+        ).then(
+            function()
+            {
+                return Twoways.run(communicator, derived);
+            }
+        ).then(
+            function()
+            {
+                out.writeLine("ok");
+                out.write("testing oneway operations... ");
+                return Oneways.run(communicator, cl);
+            }
+        ).then(
+            function()
+            {
+                out.writeLine("ok");
+                out.write("testing batch oneway operations... ");
+                return BatchOneways.run(communicator, cl);
+            }
+        ).then(
+            function()
+            {
+                out.writeLine("ok");
+                return cl.shutdown();
+            });
     };
 
     var run = function(out, id)
     {
-        var p = new Ice.Promise();
-        setTimeout(
+        return Promise.try(
             function()
             {
-                var c = null;
-                try
-                {
-                    //
-                    // We must set MessageSizeMax to an explicit value,
-                    // because we run tests to check whether
-                    // Ice.MemoryLimitException is raised as expected.
-                    //
-                    id.properties.setProperty("Ice.MessageSizeMax", "100");
-                    c = Ice.initialize(id);
-                    allTests(out, c).then(function(){
+                //
+                // We must set MessageSizeMax to an explicit value,
+                // because we run tests to check whether
+                // Ice.MemoryLimitException is raised as expected.
+                //
+                id.properties.setProperty("Ice.MessageSizeMax", "100");
+                var c = Ice.initialize(id);
+                return allTests(out, c).finally(
+                    function()
+                    {
+                        if(c)
+                        {
                             return c.destroy();
-                        }).then(function(){
-                            p.succeed();
-                        }).exception(function(ex){
-                            p.fail(ex);
-                        });
-                }
-                catch(ex)
-                {
-                    p.fail(ex);
-                }
+                        }
+                    });
             });
-        return p;
     };
     global.__test__ = run;
 }(typeof (global) === "undefined" ? window : global));

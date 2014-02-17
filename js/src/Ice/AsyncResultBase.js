@@ -35,20 +35,6 @@
                 this._adapter = adapter;
             }
         },
-        //
-        // Intercept the call to fail() so that we can attach a reference to "this"
-        // to the exception.
-        //
-        fail: function()
-        {
-            var args = arguments;
-            if(args.length > 0 && args[0] instanceof Error)
-            {
-                var self = this;
-                args[0].ice_getAsyncResult = function() { return self; };
-            }
-            Promise.prototype.fail.apply(this, args);
-        },
         __exception: function(ex)
         {
             this.fail(ex);

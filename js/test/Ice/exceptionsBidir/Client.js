@@ -41,7 +41,7 @@
             var p = new Promise();
             setTimeout(function(){
                 thrower.supportsUndeclaredExceptions().then(
-                    function(asyncResult, v)
+                    function(v)
                     {
                         if(v)
                         {
@@ -98,7 +98,7 @@
             var p = new Promise();
             setTimeout(function(){
                 thrower.supportsAssertException().then(
-                    function(asyncResult, v)
+                    function(v)
                     {
                         if(v)
                         {
@@ -145,7 +145,7 @@
                 var thrower;
 
                 communicator.createObjectAdapter("").then(
-                    function(asyncResult, a)
+                    function(a)
                     {
                         adapter = a;
                         if(amd)
@@ -160,22 +160,22 @@
                         return adapter.activate();
                     }
                 ).then(
-                    function(asyncResult)
+                    function()
                     {
                         return base.ice_getConnection();
                     }
                 ).then(
-                    function(asyncResult, conn)
+                    function(conn)
                     {
                         conn.setAdapter(adapter);
                         out.write("testing checked cast... ");
                         return Test.ThrowerPrx.checkedCast(base);
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         thrower = obj;
-                        test(thrower !== null);
+                        test(thrower);
                         test(thrower.equals(base));
                         out.writeLine("ok");
                         out.write("catching exact types... ");
@@ -457,7 +457,7 @@
                         return thrower.throwAfterResponse();
                     }
                 ).then(
-                    function(asyncResult)
+                    function()
                     {
                         return thrower.throwAfterException();
                     }
@@ -518,7 +518,7 @@
                             var ref = "__echo:default -p 12010";
                             var base = c.stringToProxy(ref);
                             return global.Test.EchoPrx.checkedCast(base);
-                        }).then(function(r, prx){
+                        }).then(function(prx){
                             return prx.shutdown();
                         }).then(function(){
                             return c.destroy();

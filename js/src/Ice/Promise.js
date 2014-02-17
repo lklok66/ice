@@ -125,6 +125,35 @@
                 });
             return p;
         },
+        delay: function(ms)
+        {
+            var p = new Promise();
+            
+            var self = this;
+            
+            var delayHandler = function(promise, method)
+            {
+                return function()
+                {
+                    var args = arguments;
+                    setTimeout(
+                        function()
+                        {
+                            method.apply(promise, args);
+                        },
+                        ms);
+                };
+            };
+            
+            setTimeout(
+                function()
+                {
+                    self.then(delayHandler(p, p.succeed),
+                              delayHandler(p, p.fail));
+                });
+            
+            return p;
+        },
         resolve: function()
         {
             if(this.__state === State.Pending)
@@ -187,11 +216,21 @@
     //
     Promise.all = function()
     {
+        // If only one argument is provided, check if the argument is an array
+        if(arguments.length === 1 && arguments[0] instanceof Array)
+        {
+            return Promise.all.apply(this, arguments[0]);
+        }
+
         var promise = new Promise();
         var promises = Array.prototype.slice.call(arguments);
         var results = new Array(arguments.length);
 
         var pending = promises.length;
+        if(pending === 0)
+        {
+            promise.succeed.apply(promise, results);
+        }
         for(var i = 0; i < promises.length; ++i)
         {
             //
@@ -224,6 +263,21 @@
     Promise.try = function(onResponse)
     {
         return new Promise().succeed().then(onResponse);
+    };
+    
+    Promise.delay = function(ms)
+    {
+        if(arguments.length > 1)
+        {
+            var p = new Promise();
+            var args = Array.prototype.slice.call(arguments);
+            ms = args.pop();
+            return p.succeed.apply(p, args).delay(ms);
+        }
+        else
+        {
+            return new Promise().succeed().delay(ms);
+        }
     };
 
     Ice.Promise = Promise;

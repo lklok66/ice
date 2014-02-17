@@ -29,12 +29,12 @@
         var test = global.__test__;
         
         test({write: write, writeLine: writeLine}, id).exception(
-            function(ex)
+            function(ex, r)
             {
                 console.log(ex.toString());
-                if(typeof ex.ice_getAsyncResult === "function")
+                if(r instanceof Ice.AsyncResult)
                 {
-                    console.log("\nexception occurred in call to " + ex.ice_getAsyncResult().operation);
+                    console.log("\nexception occurred in call to " + r.operation);
                 }
                 if(ex.stack)
                 {

@@ -39,7 +39,7 @@ function menu()
 //
 // Asynchronous loop, each call to the given function returns a
 // promise that when fulfilled runs the next iteration.
-//    
+//
 function loop(fn, repetitions)
 {
     var i = 0;
@@ -107,7 +107,7 @@ Ice.Promise.try(
         // Down-cast the proxy to the Demo.Throughput interface.
         //
         return Demo.ThroughputPrx.checkedCast(proxy).then(
-            function(r, twoway)
+            function(twoway)
             {
                 var oneway = twoway.ice_oneway();
                 menu();

@@ -656,9 +656,9 @@
                     //
                     // The results array holds the out parameters in the following format:
                     //
-                    // (asyncResult[, retval[, out1[, out2 ...]]])
+                    // [retval, out1, out2, ..., asyncResult]
                     //
-                    var results = [asyncResult];
+                    var results = [];
 
                     var is = asyncResult.__startReadParams();
 
@@ -667,7 +667,7 @@
                     {
                         retvalInfo = op.returns;
                     }
-                    unmarshalParams(is, retvalInfo, op.outParams, op.outParamsOpt, op.returnsClasses, results, 1);
+                    unmarshalParams(is, retvalInfo, op.outParams, op.outParamsOpt, op.returnsClasses, results, 0);
 
                     asyncResult.__endReadParams();
 
@@ -679,7 +679,7 @@
                     //
                     if(op.returnsClasses || op.outParamsOpt.length > 0)
                     {
-                        var offset = 1; // Skip asyncResult in results.
+                        var offset = 0; // Skip asyncResult in results.
                         if(op.returns && op.returns.isObject && results[op.returns.pos + offset] !== undefined)
                         {
                             results[op.returns.pos + offset] = results[op.returns.pos + offset].value;
@@ -696,7 +696,7 @@
                             }
                         }
                     }
-
+                    results.push(asyncResult);
                     return results;
                 };
             }

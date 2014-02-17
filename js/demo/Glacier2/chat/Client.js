@@ -51,8 +51,7 @@ Ice.Promise.try(
         //
         var id = new Ice.InitializationData();
         id.properties = Ice.createProperties();
-        id.properties.setProperty("Ice.Default.Router", 
-                                  "DemoGlacier2/router:tcp -p 4063 -h localhost");
+        id.properties.setProperty("Ice.Default.Router", "DemoGlacier2/router:tcp -p 4063 -h localhost");
         communicator = Ice.initialize(id);
         
         function createSession()
@@ -65,43 +64,49 @@ Ice.Promise.try(
                     // interface to ensure Glacier2 server is available.
                     //
                     var router = communicator.getDefaultRouter();
+                    var id;
+
                     return Glacier2.RouterPrx.checkedCast(router).then(
-                        function(r, router)
+                        function(proxy)
                         {
-                            console.log("This demo accepts any user-id / password combination.\n");
+                            router = proxy;
+                            console.log("This demo accepts any user-id / password combination.");
                             process.stdout.write("user id: ");
-                            return getline().then(
-                                function(id)
-                                {
-                                    process.stdout.write("password: ");
-                                    return getline().then(
-                                        function(pw)
-                                        {
-                                            return router.createSession(id, pw);
-                                        });
-                                }
-                            ).then(
-                                function(r, session)
-                                {
-                                    return runWithSession(router, Demo.ChatSessionPrx.uncheckedCast(session));
-                                },
-                                function(ex)
-                                {
-                                    if(ex instanceof Glacier2.PermissionDeniedExceptionx)
-                                    {
-                                        console.log("permission denied:\n" << ex.reason);
-                                        return createSession();
-                                    }
-                                    else if(ex instanceof Glacier2.CannotCreateSessionException)
-                                    {
-                                        console.log("cannot create session:\n" << ex.reason);
-                                        return createSession();
-                                    }
-                                    else
-                                    {
-                                        throw ex;
-                                    }
-                                });
+                            return getline();
+                        }
+                    ).then(
+                        function(str)
+                        {
+                            id = str;
+                            process.stdout.write("password: ");
+                            return getline();
+                        }
+                    ).then(
+                        function(password)
+                        {
+                            return router.createSession(id, password);
+                        }
+                    ).then(
+                        function(session)
+                        {
+                            return runWithSession(router, Demo.ChatSessionPrx.uncheckedCast(session));
+                        },
+                        function(ex)
+                        {
+                            if(ex instanceof Glacier2.PermissionDeniedException)
+                            {
+                                console.log("permission denied:\n" + ex.reason);
+                                return createSession();
+                            }
+                            else if(ex instanceof Glacier2.CannotCreateSessionException)
+                            {
+                                console.log("cannot create session:\n" + ex.reason);
+                                return createSession();
+                            }
+                            else
+                            {
+                                throw ex;
+                            }
                         });
                 });
         };
@@ -109,7 +114,7 @@ Ice.Promise.try(
         function runWithSession(router, session)
         {
             var p = new Ice.Promise();
-            var refreshSession;
+
             //
             // Get the session timeout, the router client category and
             // create the client object adapter.
@@ -122,34 +127,39 @@ Ice.Promise.try(
                 router.getCategoryForClient(),
                 communicator.createObjectAdapterWithRouter("", router)
             ).then(
-                function()
+                function(timeoutA, categoryA, adapterA)
                 {
-                    var timeout = arguments[0][1];
-                    var category = arguments[1][1];
-                    var adapter = arguments[2][1];
+                    var timeout = timeoutA[0];
+                    var category = categoryA[0];
+                    var adapter = adapterA[0];
                     
                     //
-                    // Setup an interval call to refreshSession to keep
-                    // the session alive.
+                    // Call refreshSession in a loop to keep the 
+                    // session alive.
                     //
-                    refreshSession = setInterval(
-                        function(){
-                            router.refreshSession().exception(
-                                function(ex){
-                                    p.fail(ex);
-                                });
-                        }, (timeout.toNumber() * 500));
+                    var refreshSession = function()
+                    {
+                        router.refreshSession().exception(
+                            function(ex)
+                            {
+                                p.fail(ex);
+                            }
+                        ).delay(timeout.toNumber() * 500).then(
+                            function()
+                            {
+                                if(!p.completed())
+                                {
+                                    refreshSession();
+                                }
+                            });
+                    };
+                    refreshSession();
                     
                     //
                     // Create the ChatCallback servant and add it to the ObjectAdapter.
                     //
                     var callback = Demo.ChatCallbackPrx.uncheckedCast(
                         adapter.add(new ChatCallbackI(), new Ice.Identity("callback", category)));
-                    
-                    //
-                    // Activate the client object adater before set the session callback.
-                    //
-                    adapter.activate();
                     
                     //
                     // Set the chat session callback.
@@ -206,11 +216,6 @@ Ice.Promise.try(
                 function(ex)
                 {
                     p.fail(ex);
-                }
-            ).finally(
-                function()
-                {
-                    clearInterval(refreshSession);
                 });
             return p;
         }

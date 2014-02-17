@@ -10,98 +10,98 @@
 (function(global){
     var Ice = global.Ice;
     var Test = global.Test;
-
-    var test = function(b)
+    
+    var run = function(communicator, prx)
     {
-        if(!b)
+        var p = new Ice.Promise();
+        var test = function(b)
         {
-            throw new Error("test failed");
-        }
-    };
-
-    var run = function(communicator, log, p)
-    {
-        var promise = new Ice.Promise();
-
-        var failCB = function() { test(false); };
-
-        setTimeout(function(){
-            try
+            if(!b)
             {
-                p = p.ice_oneway();
-
-                p.ice_ping().then(
-                    function(r)
-                    {
-                        try
-                        {
-                            p.ice_isA(Test.MyClass.ice_staticId());
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            // Expected: twoway proxy required
-                        }
-                        try
-                        {
-                            p.ice_id();
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            // Expected: twoway proxy required
-                        }
-                        try
-                        {
-                            p.ice_ids();
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            // Expected: twoway proxy required
-                        }
-
-                        return p.opVoid();
-                    }
-                ).then(
-                    function(r)
-                    {
-                        return p.opIdempotent();
-                    }
-                ).then(
-                    function(r)
-                    {
-                        return p.opNonmutating();
-                    }
-                ).then(
-                    function(r)
-                    {
-                        try
-                        {
-                            p.opByte(0xff, 0x0f);
-                            test(false);
-                        }
-                        catch(ex)
-                        {
-                            // Expected: twoway proxy required
-                        }
-
-                        promise.succeed();
-                    }
-                ).exception(
-                    function(ex)
-                    {
-                        promise.fail(ex);
-                    }
-                );
+                try
+                {
+                    throw new Error("test failed");
+                }
+                catch(err)
+                {
+                    p.fail(err);
+                    throw err;
+                }
             }
-            catch(ex)
+        };
+        
+        Ice.Promise.try(
+            function()
             {
-                promise.fail(ex);
+                prx = prx.ice_oneway();
+                return prx.ice_ping();
             }
-        });
-
-        return promise;
+        ).then(
+            function()
+            {
+                try
+                {
+                    prx.ice_isA(Test.MyClass.ice_staticId());
+                    test(false);
+                }
+                catch(ex)
+                {
+                    // Expected: twoway proxy required
+                }
+                try
+                {
+                    prx.ice_id();
+                    test(false);
+                }
+                catch(ex)
+                {
+                    // Expected: twoway proxy required
+                }
+                try
+                {
+                    prx.ice_ids();
+                    test(false);
+                }
+                catch(ex)
+                {
+                    // Expected: twoway proxy required
+                }
+                
+                return prx.opVoid();
+            }
+        ).then(
+            function()
+            {
+                return prx.opIdempotent();
+            }
+        ).then(
+            function()
+            {
+                return prx.opNonmutating();
+            }
+        ).then(
+            function()
+            {
+                try
+                {
+                    prx.opByte(0xff, 0x0f);
+                    test(false);
+                }
+                catch(ex)
+                {
+                    // Expected: twoway proxy required
+                }
+            }
+        ).then(
+            function()
+            {
+                p.succeed();
+            },
+            function(ex)
+            {
+                p.fail(ex);
+            });
+        return p;
     };
 
     global.Oneways = { run: run };

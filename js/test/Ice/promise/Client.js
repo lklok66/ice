@@ -503,6 +503,53 @@
                                 test(r3[1] === 2048);
                                 test(r3[2] === 4096);
                                 
+                                promise.succeed();
+                            },
+                            function()
+                            {
+                                promise.fail();
+                                test(false);
+                            }
+                        );
+                        
+                        //
+                        // Now resolve the promise in the reverse order, all succeed callback
+                        // will get the result in the right order.
+                        //
+                        promise3.succeed(1024, 2048, 4096);
+                        promise2.succeed(1024, 2048);
+                        promise1.succeed(1024);
+                    }
+                );
+            })
+        .then(
+            function()
+            {
+                return deferred(
+                    function(promise)
+                    {
+                        //
+                        // Now try the same using an array of promises
+                        //
+                        var promise1 = new Promise();
+                        var promise2 = new Promise();
+                        var promise3 = new Promise();
+                        
+                        Promise.all([promise1, promise2, promise3]).then(
+                            function(r1, r2, r3)
+                            {
+                                test(r1.length === 1);
+                                test(r1[0] === 1024);
+                                
+                                test(r2.length === 2);
+                                test(r2[0] === 1024);
+                                test(r2[1] === 2048);
+                                
+                                test(r3.length === 3);
+                                test(r3[0] === 1024);
+                                test(r3[1] === 2048);
+                                test(r3[2] === 4096);
+                                
                                 out.writeLine("ok");
                                 promise.succeed();
                             },
@@ -535,6 +582,39 @@
                         var promise3 = new Promise();
                         
                         Promise.all(promise1, promise2, promise3).then(
+                            function(r1, r2, r3)
+                            {
+                                promise.fail(new Error());
+                            },
+                            function(e)
+                            {
+                                test(e === "promise.fail");
+                                promise.succeed();
+                            }
+                        );
+                        
+                        //
+                        // Now resolve the promise in the reverse order.
+                        //
+                        promise3.succeed(1024, 2048, 4096);
+                        promise2.succeed(1024, 2048);
+                        promise1.fail("promise.fail");
+                    }
+                );
+            })
+        .then(
+            function()
+            {
+                return deferred(
+                    function(promise)
+                    {
+                        //
+                        // Same as before but using an array of promises.
+                        var promise1 = new Promise();
+                        var promise2 = new Promise();
+                        var promise3 = new Promise();
+                        
+                        Promise.all([promise1, promise2, promise3]).then(
                             function(r1, r2, r3)
                             {
                                 promise.fail(new Error());
@@ -738,6 +818,79 @@
                                 promise.fail(new Error("test failed"));
                             }
                         );
+                    }
+                );
+            })
+        .then(
+            function()
+            {
+                return deferred(
+                    function(promise)
+                    {
+                        out.write("Test promise delay... ");
+                        
+                        var p = new Promise();
+                        
+                        var start = Date.now();
+                        
+                        p = p.succeed(10).delay(500).then(
+                            function(i)
+                            {
+                                test(i == 10);
+                                test(Date.now() - start >= 500);
+                            }
+                        ).exception(
+                            function(ex)
+                            {
+                                promise.fail(ex);
+                            });
+                        
+                        //
+                        // Now test the static version.
+                        //
+                        p = p.then(
+                            function()
+                            {
+                                start = Date.now();
+                                return Promise.delay(10, 500).then(
+                                    function(i)
+                                    {
+                                        test(i == 10);
+                                        test(Date.now() - start >= 500);
+                                    }
+                                ).exception(
+                                    function(ex)
+                                    {
+                                        promise.fail(ex);
+                                    });
+                            });
+                        
+                        //
+                        // Same but with fail
+                        //
+                        p.then(
+                            function()
+                            {
+                                f = new Promise();
+                                start = Date.now();
+                                return f.fail("failed").delay(500).then(
+                                    function(i)
+                                    {
+                                        test(false);
+                                    },
+                                    function(ex)
+                                    {
+                                        test(ex == "failed");
+                                        test(Date.now() - start >= 500);
+                                        out.writeLine("ok");
+                                        promise.succeed();
+                                    }
+                                ).exception(
+                                    function(ex)
+                                    {
+                                        promise.fail(ex);
+                                    });
+                            });
                     }
                 );
             })

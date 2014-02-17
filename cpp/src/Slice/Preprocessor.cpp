@@ -558,6 +558,18 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
             }
             break;
         }
+        case JS:
+        {
+            //
+            // Change .o[bj] suffix to .js suffix.
+            //
+            string::size_type pos;
+            if((pos = result.find(suffix)) != string::npos)
+            {
+                result.replace(pos, suffix.size() - 1, ".js");
+            }
+            break;
+        }
         case Python:
         {
             //

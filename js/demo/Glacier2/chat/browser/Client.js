@@ -30,14 +30,19 @@ var ChatCallbackI = Ice.Class(Demo.ChatCallback, {
 //
 // Chat client state
 //
-var State = {Disconnected: 0, Connecting: 1, Connected:2 };
+var State = { 
+    Disconnected: 0,
+    Connecting: 1, 
+    Connected:2 
+};
 
-var communicator;
-var hasError = false;
 var state = State.Disconnected;
+var hasError = false;
 
 var signin = function()
 {
+    var communicator;
+    var router;
     Promise.try(
         function()
         {
@@ -61,33 +66,36 @@ var signin = function()
             // Start animating the loading progress bar.
             //
             startProgress();
+
             //
             // Initialize the communicator with Ice.Default.Router property
             // set to the chat demo Glacier2 router.
             //
             var id = new Ice.InitializationData();
             id.properties = Ice.createProperties();
-            id.properties.setProperty("Ice.Default.Router", 
-                                "DemoGlacier2/router:ws -p 4063 -h localhost");
+            id.properties.setProperty("Ice.Default.Router", "DemoGlacier2/router:ws -p 4063 -h localhost");
             communicator = Ice.initialize(id);
             
             //
             // Get a proxy to the Glacier2 router, using checkedCast to ensure
             // the Glacier2 server is available.
             //
-            return RouterPrx.checkedCast(communicator.getDefaultRouter()).then(
-                function(r, router)
-                {
-                    //
-                    // Create a session with the Glacier2 router.
-                    //
-                    return router.createSession(
-                        $("#username").val(), $("#password").val()).then(
-                            function(r, session)
-                            {
-                                run(router, ChatSessionPrx.uncheckedCast(session));
-                            });
-                });
+            return RouterPrx.checkedCast(communicator.getDefaultRouter());
+        }
+    ).then(
+        function(r)
+        {
+            router = r;
+
+            //
+            // Create a session with the Glacier2 router.
+            //
+            return router.createSession($("#username").val(), $("#password").val());
+        }
+    ).then(
+        function(session)
+        {
+            run(communicator, router, ChatSessionPrx.uncheckedCast(session));
         }
     ).exception(
         function(ex)
@@ -111,18 +119,23 @@ var signin = function()
             {
                 error(ex.toString());
             }
+
+            if(communicator)
+            {
+                communicator.destroy();
+            }
         });
 };
 
-var run = function(router, session)
+var run = function(communicator, router, session)
 {
-    var refreshSession;
     //
     // The chat promise is used to wait for the completion of chating
     // state. The completion could happen because the user sign out,
     // or because there is an exception.
     //
     var chat = new Promise();
+
     //
     // Get the session timeout, the router client category and
     // create the client object adapter.
@@ -135,38 +148,41 @@ var run = function(router, session)
         router.getCategoryForClient(),
         communicator.createObjectAdapterWithRouter("", router)
     ).then(
-        function()
+        function(timeoutArgs, categoryArgs, adapterArgs)
         {
-            var timeout = arguments[0][1];
-            var category = arguments[1][1];
-            var adapter = arguments[2][1];
+            var timeout = timeoutArgs[1];
+            var category = categoryArgs[1];
+            var adapter = adapterArgs[1];
             
             //
-            // Setup an interval call to router refreshSession 
-            // to keep the session alive.
+            // Call refreshSession in a loop to keep the 
+            // session alive.
             //
-            refreshSession = setInterval(
-                function(){
-                    router.refreshSession().exception(
-                        function(ex){
-                            chat.fail(ex);
-                        });
-                }, (timeout.toNumber() * 500));
+            var refreshSession = function()
+            {
+                router.refreshSession().exception(
+                    function(ex)
+                    {
+                        p.fail(ex);
+                    }
+                ).delay(timeout.toNumber() * 500).then(
+                    function()
+                    {
+                        if(!p.completed())
+                        {
+                            refreshSession();
+                        }
+                    });
+            };
+            refreshSession();
             
             //
             // Create the ChatCallback servant and add it to the 
             // ObjectAdapter.
             //
-            var callback = ChatCallbackPrx.uncheckedCast(
-                adapter.add(new ChatCallbackI(), 
-                            new Ice.Identity("callback", category)));
+            var callback = ChatCallbackPrx.uncheckedCast(adapter.add(new ChatCallbackI(), 
+                                                                     new Ice.Identity("callback", category)));
             
-            //
-            // Activate the client object adater before set the session
-            // callback.
-            //
-            adapter.activate();
-
             //
             // Set the chat session callback.
             //
@@ -188,9 +204,10 @@ var run = function(router, session)
             $("#loading .meter").css("width", "0%");
             state = State.Connected;
             $("#input").focus();
+
             //
-            // Process input events in the input texbox until
-            // chat promise is completed.
+            // Process input events in the input texbox until chat
+            // promise is completed.
             //
             $("#input").keypress(
                 function(e)
@@ -207,7 +224,8 @@ var run = function(router, session)
                             var msg = $(this).val();
                             $(this).val("");
                             session.say(msg).exception(
-                                function(ex){
+                                function(ex)
+                                {
                                     chat.fail(ex);
                                 });
                             return false;
@@ -220,10 +238,12 @@ var run = function(router, session)
             // promise.
             //
             $("#signout").click(
-                function(){
+                function()
+                {
                     chat.succeed();
                     return false;
-                });
+                }
+            );
             
             return chat;
         }
@@ -240,10 +260,8 @@ var run = function(router, session)
             $("#output").val("");
             
             //
-            // Clear the refresh interval and destroy
-            // the session.
+            // Destroy the session.
             //
-            clearInterval(refreshSession);
             return router.destroySession();
         }
     ).then(
@@ -253,9 +271,7 @@ var run = function(router, session)
             // Destroy the communicator and go back to the 
             // disconnected state.
             //
-            var c = communicator;
-            communicator = null;
-            c.destroy().finally(
+            communicator.destroy().finally(
                 function()
                 {
                     transition("#chat-form", "#signin-form").finally(
@@ -273,6 +289,7 @@ var run = function(router, session)
             // Handle any exceptions occurred while running.
             //
             error(ex);
+            communicator.destroy();
         });
 };
 
@@ -288,30 +305,16 @@ var error = function(message)
     $("#signin-alert span").text(message);
     
     //
-    // First destroy the communicator if needed then do
-    // the screen transition.
+    // Transition the screen
     //
-    Promise.try(
+    transition(current, "#signin-alert").then(
         function()
         {
-            if(communicator)
-            {
-                var c = communicator;
-                communicator = null;
-                return c.destroy();
-            }
+            $("#loading .meter").css("width", "0%");
+            $("#signin-form").css("display", "block").animo({ animation: "flipInX", keep: true });
+            state = State.Disconnected;
         }
-    ).finally(
-        function()
-        {
-            transition(current, "#signin-alert").then(
-                function(){
-                    $("#loading .meter").css("width", "0%");
-                    $("#signin-form").css("display", "block")
-                        .animo({ animation: "flipInX", keep: true });
-                    state = State.Disconnected;
-                });
-        });
+    );
 };
 
 //
@@ -330,9 +333,11 @@ var transition = function(from, to)
             $(from).css("display", "none");
             if(to)
             {
-                $(to).css("display", "block")
-                    .animo({ animation: "flipInX", keep: true },
-                        function(){ p.succeed(); });
+                $(to).css("display", "block").animo({ animation: "flipInX", keep: true },
+                                                    function()
+                                                    { 
+                                                        p.succeed(); 
+                                                    });
             }
             else
             {
@@ -345,24 +350,21 @@ var transition = function(from, to)
 //
 // Event handler for Sign in button
 //
-$("#signin").click(function(){
-    signin();
-    return false;
-});
-
+$("#signin").click(function()
+                   {
+                       signin();
+                       return false;
+                   });
+    
 //
 // Dismiss error message on click.
 //
-$("#signin-alert").click(function(){
-    transition("#signin-alert");
-    hasError = false;
-    return false;
-});
-
-//
-// Set default height of output textarea
-//
-$("#output").height(300);
+$("#signin-alert").click(function()
+                         {
+                             transition("#signin-alert");
+                             hasError = false;
+                             return false;
+                         });
 
 //
 // Animate the loading progress bar.

@@ -32,7 +32,7 @@ INSTALL_SRCS	= Glacier2.js $(GEN_SRCS)
 
 !include $(top_srcdir)\config\Make.rules.mak
 
-SLICE2JSFLAGS	= $(SLICE2JSFLAGS) --include-dir Ice --ice -I"$(slicedir)"
+SLICE2JSFLAGS	= $(SLICE2JSFLAGS) --ice -I"$(slicedir)"
 
 !if "$(OPTIMIZE)" == "yes"
 install:: all

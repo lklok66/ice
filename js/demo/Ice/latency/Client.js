@@ -46,7 +46,7 @@ Ice.Promise.try(
         // Down-cast the proxy to the Demo.Ping interface.
         //
         return Demo.PingPrx.checkedCast(proxy).then(
-            function(r, obj)
+            function(obj)
             {
                 console.log("pinging server " + repetitions + " times (this may take a while)");
                 start = new Date().getTime();

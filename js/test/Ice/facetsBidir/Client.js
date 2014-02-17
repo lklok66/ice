@@ -70,7 +70,7 @@
 
                 out.write("testing facet registration exceptions... ");
                 communicator.createObjectAdapter("").then(
-                    function(r, o)
+                    function(o)
                     {
                         adapter = o;
                         var obj = new EmptyI();
@@ -134,7 +134,7 @@
                         return communicator.createObjectAdapter("");
                     }
                 ).then(
-                    function(r, o)
+                    function(o)
                     {
                         adapter = o;
                         var di = new DI();
@@ -147,68 +147,68 @@
                         return adapter.activate();
                     }
                 ).then(
-                    function(r)
+                    function()
                     {
                         return prx.ice_getConnection();
                     }
                 ).then(
-                    function(r, conn)
+                    function(conn)
                     {
                         conn.setAdapter(adapter);
                         out.write("testing checked cast... ");
                         return Ice.ObjectPrx.checkedCast(db);
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         prx = obj;
                         test(prx.ice_getFacet().length == 0);
                         return Ice.ObjectPrx.checkedCast(db, "facetABCD");
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         prx = obj;
                         test(prx.ice_getFacet() == "facetABCD");
                         return Ice.ObjectPrx.checkedCast(prx);
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         prx2 = obj;
                         test(prx2.ice_getFacet() == "facetABCD");
                         return Ice.ObjectPrx.checkedCast(prx, "");
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         prx3 = obj;
                         test(prx3.ice_getFacet().length === 0);
                         return Test.DPrx.checkedCast(db);
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         d = obj;
                         test(d.ice_getFacet().length === 0);
                         return Test.DPrx.checkedCast(db, "facetABCD");
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         df = obj;
                         test(df.ice_getFacet() == "facetABCD");
                         return Test.DPrx.checkedCast(df);
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         df2 = obj;
                         test(df2.ice_getFacet() == "facetABCD");
                         return Test.DPrx.checkedCast(df, "");
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         df3 = obj;
                         test(df3.ice_getFacet().length === 0);
@@ -217,7 +217,7 @@
                         return Test.DPrx.checkedCast(db);
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         d = obj;
                         test(d !== null);
@@ -232,16 +232,16 @@
                 ).then(
                     function(r1, r2, r3, r4)
                     {
-                        test(r1[1] == "A");
-                        test(r2[1] == "B");
-                        test(r3[1] == "C");
-                        test(r4[1] == "D");
+                        test(r1[0] == "A");
+                        test(r2[0] == "B");
+                        test(r3[0] == "C");
+                        test(r4[0] == "D");
                         out.writeLine("ok");
                         out.write("testing facets A, B, C, and D... ");
                         return Test.DPrx.checkedCast(d, "facetABCD");
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         df = obj;
                         test(df !== null);
@@ -255,16 +255,16 @@
                 ).then(
                     function(r1, r2, r3, r4)
                     {
-                        test(r1[1] == "A");
-                        test(r2[1] == "B");
-                        test(r3[1] == "C");
-                        test(r4[1] == "D");
+                        test(r1[0] == "A");
+                        test(r2[0] == "B");
+                        test(r3[0] == "C");
+                        test(r4[0] == "D");
                         out.writeLine("ok");
                         out.write("testing facets E and F... ");
                         return Test.FPrx.checkedCast(d, "facetEF");
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         ff = obj;
                         test(ff !== null);
@@ -276,21 +276,21 @@
                 ).then(
                     function(r1, r2)
                     {
-                        test(r1[1] == "E");
-                        test(r2[1] == "F");
+                        test(r1[0] == "E");
+                        test(r2[0] == "F");
                         out.writeLine("ok");
                         out.write("testing facet G... ");
                         return Test.GPrx.checkedCast(ff, "facetGH");
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         gf = obj;
                         test(gf !== null);
                         return gf.callG();
                     }
                 ).then(
-                    function(asyncResult, v)
+                    function(v)
                     {
                         test(v == "G");
                         out.writeLine("ok");
@@ -298,7 +298,7 @@
                         return Test.HPrx.checkedCast(gf);
                     }
                 ).then(
-                    function(asyncResult, obj)
+                    function(obj)
                     {
                         hf = obj;
                         test(hf !== null);
@@ -310,8 +310,8 @@
                 ).then(
                     function(r1, r2)
                     {
-                        test(r1[1] == "G");
-                        test(r2[1] == "H");
+                        test(r1[0] == "G");
+                        test(r2[0] == "H");
                         out.writeLine("ok");
                         return gf.shutdown();
                     }
@@ -353,7 +353,7 @@
                             var ref = "__echo:default -p 12010";
                             var base = c.stringToProxy(ref);
                             return global.Test.EchoPrx.checkedCast(base);
-                        }).then(function(r, prx){
+                        }).then(function(prx){
                             return prx.shutdown();
                         }).then(function(){
                             return c.destroy();

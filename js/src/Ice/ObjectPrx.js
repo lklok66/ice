@@ -524,7 +524,7 @@
                 {
                     try
                     {
-                        var results = [__res];
+                        var results = [];
                         if((__r._state & AsyncResult.OK) === 0)
                         {
                             results.push(false);
@@ -537,6 +537,7 @@
                         {
                             results.push(__res._is.readEncaps(null));
                         }
+                        results.push(__res);
                         __res.succeed.apply(__res, results);
                     }
                     catch(ex)
@@ -799,17 +800,17 @@
                     {
                         if(ex instanceof __uex[i])
                         {
-                            __r.fail(ex);
+                            __r.fail(ex, __r);
                             return false;
                         }
                     }
                 }
-                __r.fail(new Ice.UnknownUserException(ex.ice_name()));
+                __r.fail(new Ice.UnknownUserException(ex.ice_name()), __r);
                 return false;
             }
             else
             {
-                __r.fail(ex);
+                __r.fail(ex, __r);
                 return false;
             }
         }
@@ -819,7 +820,7 @@
 
     ObjectPrx.__dispatchLocalException = function(__r, __ex)
     {
-        __r.fail(__ex);
+        __r.fail(__ex, __r);
     };
 
     ObjectPrx.ice_staticId = Ice.Object.ice_staticId;
@@ -831,7 +832,7 @@
         if(prx === undefined || prx === null)
         {
             __r = new AsyncResultBase(null, "checkedCast", null, null, null);
-            __r.succeed(__r, null);
+            __r.succeed(null, __r);
         }
         else
         {
@@ -846,17 +847,17 @@
             prx.ice_isA(this.ice_staticId(), ctx).then(
                 function(__res, __ret)
                 {
-                    __r.succeed(__r, __ret ? __h : null);
+                    __r.succeed(__ret ? __h : null, __r);
                 }).exception(
                     function(__ex)
                     {
                         if(__ex instanceof Ice.FacetNotExistException)
                         {
-                            __r.succeed(__r, null);
+                            __r.succeed(null, __r);
                         }
                         else
                         {
-                            __r.fail(__ex);
+                            __r.fail(__ex, __r);
                         }
                     });
         }
