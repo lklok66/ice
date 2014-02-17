@@ -500,557 +500,75 @@ Slice::JsVisitor::writeConstantValue(const string& scope, const TypePtr& type, c
     }
 }
 
-string
-Slice::JsVisitor::toJsIdent(const string& s)
-{
-    string::size_type pos = s.find('#');
-    if(pos == string::npos)
-    {
-        return s;
-    }
-
-    string result = s;
-    if(pos == 0)
-    {
-        return result.erase(0, 1);
-    }
-
-    result[pos] = '.';
-    return result;
-}
-
-string
-Slice::JsVisitor::editMarkup(const string& s)
-{
-    // TODO
-
-    //
-    // Strip HTML markup and javadoc links--VS doesn't display them.
-    //
-    string result = s;
-    string::size_type pos = 0;
-    do
-    {
-        pos = result.find('<', pos);
-        if(pos != string::npos)
-        {
-            string::size_type endpos = result.find('>', pos);
-            if(endpos == string::npos)
-            {
-                break;
-            }
-            result.erase(pos, endpos - pos + 1);
-        }
-    }
-    while(pos != string::npos);
-
-    const string link = "{@link";
-    pos = 0;
-    do
-    {
-        pos = result.find(link, pos);
-        if(pos != string::npos)
-        {
-            result.erase(pos, link.size() + 1); // erase following white space too
-            string::size_type endpos = result.find('}', pos);
-            if(endpos != string::npos)
-            {
-                string ident = result.substr(pos, endpos - pos);
-                result.erase(pos, endpos - pos + 1);
-                result.insert(pos, toJsIdent(ident));
-            }
-        }
-    }
-    while(pos != string::npos);
-
-    //
-    // Strip @see sections because VS does not display them.
-    //
-    static const string seeTag = "@see";
-    pos = 0;
-    do
-    {
-        //
-        // Look for the next @ and delete up to that, or
-        // to the end of the string, if not found.
-        //
-        pos = result.find(seeTag, pos);
-        if(pos != string::npos)
-        {
-            string::size_type next = result.find('@', pos + seeTag.size());
-            if(next != string::npos)
-            {
-                result.erase(pos, next - pos);
-            }
-            else
-            {
-                result.erase(pos, string::npos);
-            }
-        }
-    } while(pos != string::npos);
-
-    //
-    // Replace @param, @return, and @throws with corresponding <param>, <returns>, and <exception> tags.
-    //
-    static const string paramTag = "@param";
-    pos = 0;
-    do
-    {
-        pos = result.find(paramTag, pos);
-        if(pos != string::npos)
-        {
-            result.erase(pos, paramTag.size() + 1);
-
-            string::size_type startIdent = result.find_first_not_of(" \t", pos);
-            if(startIdent != string::npos)
-            {
-                string::size_type endIdent = result.find_first_of(" \t", startIdent);
-                if(endIdent != string::npos)
-                {
-                    string ident = result.substr(startIdent, endIdent - startIdent);
-                    string::size_type endComment = result.find_first_of("@<", endIdent);
-                    string comment = result.substr(endIdent + 1,
-                                                   endComment == string::npos ? endComment : endComment - endIdent - 1);
-                    result.erase(startIdent, endComment == string::npos ? string::npos : endComment - startIdent);
-                    string newComment = "<param name=\"" + ident + "\">" + comment + "</param>\n";
-                    result.insert(startIdent, newComment);
-                    pos = startIdent + newComment.size();
-                }
-            }
-            else
-            {
-               pos += paramTag.size();
-            }
-        }
-    } while(pos != string::npos);
-
-    static const string returnTag = "@return";
-    pos = result.find(returnTag);
-    if(pos != string::npos)
-    {
-        result.erase(pos, returnTag.size() + 1);
-        string::size_type endComment = result.find_first_of("@<", pos);
-        string comment = result.substr(pos, endComment == string::npos ? endComment : endComment - pos);
-        result.erase(pos, endComment == string::npos ? string::npos : endComment - pos);
-        string newComment = "<returns>" + comment + "</returns>\n";
-        result.insert(pos, newComment);
-        pos = pos + newComment.size();
-    }
-
-    static const string throwsTag = "@throws";
-    pos = 0;
-    do
-    {
-        pos = result.find(throwsTag, pos);
-        if(pos != string::npos)
-        {
-            result.erase(pos, throwsTag.size() + 1);
-
-            string::size_type startIdent = result.find_first_not_of(" \t", pos);
-            if(startIdent != string::npos)
-            {
-                string::size_type endIdent = result.find_first_of(" \t", startIdent);
-                if(endIdent != string::npos)
-                {
-                    string ident = result.substr(startIdent, endIdent - startIdent);
-                    string::size_type endComment = result.find_first_of("@<", endIdent);
-                    string comment = result.substr(endIdent + 1,
-                                                   endComment == string::npos ? endComment : endComment - endIdent - 1);
-                    result.erase(startIdent, endComment == string::npos ? string::npos : endComment - startIdent);
-                    string newComment = "<exception name=\"" + ident + "\">" + comment + "</exception>\n";
-                    result.insert(startIdent, newComment);
-                    pos = startIdent + newComment.size();
-                }
-            }
-            else
-            {
-               pos += throwsTag.size();
-            }
-        }
-    } while(pos != string::npos);
-
-    return result;
-}
-
 StringList
-Slice::JsVisitor::splitIntoLines(const string& comment)
+Slice::JsVisitor::splitComment(const ContainedPtr& p)
 {
-    string s = editMarkup(comment);
     StringList result;
+
+    string comment = p->comment();
     string::size_type pos = 0;
     string::size_type nextPos;
-    while((nextPos = s.find_first_of('\n', pos)) != string::npos)
+    while((nextPos = comment.find_first_of('\n', pos)) != string::npos)
     {
-        result.push_back(string(s, pos, nextPos - pos));
+        result.push_back(string(comment, pos, nextPos - pos));
         pos = nextPos + 1;
     }
-    string lastLine = string(s, pos);
+    string lastLine = string(comment, pos);
     if(lastLine.find_first_not_of(" \t\n\r") != string::npos)
     {
         result.push_back(lastLine);
     }
+
     return result;
-}
-
-void
-Slice::JsVisitor::splitComment(const ContainedPtr& p, StringList& summaryLines, StringList& remarksLines)
-{
-    string s = p->comment();
-    string summary;
-    unsigned int i;
-    for(i = 0; i < s.size(); ++i)
-    {
-        if(s[i] == '.' && (i + 1 >= s.size() || isspace(static_cast<unsigned char>(s[i + 1]))))
-        {
-            summary += '.';
-            ++i;
-            break;
-        }
-        else
-        {
-            summary += s[i];
-        }
-    }
-    summaryLines = splitIntoLines(summary);
-
-    if(!summaryLines.empty())
-    {
-        remarksLines = splitIntoLines(trim(s.substr(i)));
-    }
 }
 
 void
 Slice::JsVisitor::writeDocComment(const ContainedPtr& p, const string& deprecateReason, const string& extraParam)
 {
-    // TODO
-
-    StringList summaryLines;
-    StringList remarksLines;
-    splitComment(p, summaryLines, remarksLines);
-
-    if(summaryLines.empty())
+    StringList lines = splitComment(p);
+    if(lines.empty())
     {
         if(!deprecateReason.empty())
         {
-            _out << nl << "///";
-            _out << nl << "/// <summary>" << deprecateReason << "</summary>";
-            _out << nl << "///";
+            _out << nl << "/**";
+            _out << nl << " * @deprecated " << deprecateReason;
+            _out << nl << " **/";
         }
         return;
     }
 
-    _out << nl << "/// <summary>";
+    _out << nl << "/**";
 
-    for(StringList::const_iterator i = summaryLines.begin(); i != summaryLines.end(); ++i)
+    bool doneExtraParam = false;
+    for(StringList::const_iterator i = lines.begin(); i != lines.end(); ++i)
     {
-        _out << nl << "/// " << *i;
-    }
-
-    //
-    // We generate everything into the summary tag (despite what the MSDN doc says) because
-    // Visual Studio only shows the <summary> text and omits the <remarks> text.
-    //
-
-    if(!deprecateReason.empty())
-    {
-        _out << nl << "///";
-        _out << nl << "/// <para>" << deprecateReason << "</para>";
-        _out << nl << "///";
-    }
-
-    bool summaryClosed = false;
-
-    if(!remarksLines.empty())
-    {
-        for(StringList::const_iterator i = remarksLines.begin(); i != remarksLines.end(); ++i)
+        //
+        // @param must precede @return, so emit any extra parameter
+        // when @return is seen.
+        //
+        if(i->find("@return") != string::npos && !extraParam.empty())
         {
-            //
-            // The first param, returns, or exception tag ends the description.
-            //
-            static const string paramTag = "<param";
-            static const string returnsTag = "<returns";
-            static const string exceptionTag = "<exception";
-
-            if(!summaryClosed &&
-               (i->find(paramTag) != string::npos ||
-                i->find(returnsTag) != string::npos ||
-                i->find(exceptionTag) != string::npos))
-            {
-                _out << nl << "/// </summary>";
-                _out << nl << "/// " << *i;
-                summaryClosed = true;
-            }
-            else
-            {
-                _out << nl << "/// " << *i;
-            }
+            _out << nl << " * " << extraParam;
+            doneExtraParam = true;
         }
+        _out << nl << " * " << *i;
     }
 
-    if(!summaryClosed)
+    if(!doneExtraParam && !extraParam.empty())
     {
-        _out << nl << "/// </summary>";
-    }
-
-    if(!extraParam.empty())
-    {
-        _out << nl << "/// " << extraParam;
-    }
-
-    _out << nl;
-}
-
-void
-Slice::JsVisitor::writeDocCommentOp(const OperationPtr& p)
-{
-    ContainerPtr container = p->container();
-    ContainedPtr contained = ContainedPtr::dynamicCast(container);
-    string deprecateReason = getDeprecateReason(p, contained, "operation");
-
-    StringList summaryLines;
-    StringList remarksLines;
-    splitComment(p, summaryLines, remarksLines);
-
-    if(summaryLines.empty())
-    {
-        if(!deprecateReason.empty())
-        {
-            _out << nl << "///";
-            _out << nl << "/// <summary>" << deprecateReason << "</summary>";
-            _out << nl << "///";
-        }
-        return;
-    }
-
-    _out << nl << "/// <summary>";
-
-    //
-    // Output the leading comment block up until the first <param>, <returns>, or <exception> tag.
-    //
-    for(StringList::const_iterator i = summaryLines.begin(); i != summaryLines.end(); ++i)
-    {
-        _out << nl << "/// " << *i;
-    }
-
-    bool done = false;
-    for(StringList::const_iterator i = remarksLines.begin(); i != remarksLines.end() && !done; ++i)
-    {
-        if(i->find("<param") != string::npos ||
-           i->find("<returns") != string::npos ||
-           i->find("<exception") != string::npos)
-        {
-            done = true;
-        }
-        else
-        {
-            _out << nl << "/// " << *i;
-        }
+        //
+        // Above code doesn't emit the comment for the extra parameter
+        // if the operation returns a void or doesn't have an @return.
+        //
+        _out << nl << " * " << extraParam;
     }
 
     if(!deprecateReason.empty())
     {
-        _out << nl << "/// <para>" << deprecateReason << "</para>";
+        _out << nl << " * @deprecated " << deprecateReason;
     }
 
-    _out << nl << "/// </summary>";
-}
-
-void
-Slice::JsVisitor::writeDocCommentAsync(const OperationPtr& p, ParamDir paramType, const string& extraParam, bool newAMI)
-{
-    // TODO: this needs fixing for newAMI == true
-    ContainerPtr container = p->container();
-    ClassDefPtr contained = ClassDefPtr::dynamicCast(container);
-    string deprecateReason = getDeprecateReason(p, contained, "operation");
-
-    StringList summaryLines;
-    StringList remarksLines;
-    splitComment(p, summaryLines, remarksLines);
-
-    if(summaryLines.empty() && deprecateReason.empty())
-    {
-        return;
-    }
-
-    if(paramType == OutParam)
-    {
-        if(!newAMI)
-        {
-            _out << nl << "/// <summary>";
-            _out << nl << "/// ice_response indicates that";
-            _out << nl << "/// the operation completed successfully.";
-            _out << nl << "/// </summary>";
-        }
-
-        //
-        // Find the comment for the return value (if any) and rewrite that as a <param> comment.
-        //
-        static const string returnsTag = "<returns>";
-        bool doneReturn = false;
-        bool foundReturn = false;
-        for(StringList::const_iterator i = remarksLines.begin(); i != remarksLines.end() && !doneReturn; ++i)
-        {
-            if(!foundReturn)
-            {
-                string::size_type pos = i->find(returnsTag);
-                if(pos != string::npos)
-                {
-                    pos += returnsTag.size();
-                    foundReturn = true;
-                    string::size_type endpos = i->find('<', pos);
-                    if(endpos != string::npos)
-                    {
-                        _out << nl << "/// <param name=\"ret__\">(return value) " << i->substr(pos, endpos - pos);
-                    }
-                    else
-                    {
-                        _out << nl << "/// <param name=\"ret__\">(return value) " << i->substr(pos);
-                    }
-                }
-            }
-            else
-            {
-                string::size_type pos = i->find('<');
-                if(pos != string::npos)
-                {
-                    _out << nl << "/// " << i->substr(0, pos) << "</param>";
-                    doneReturn = true;
-                }
-                else
-                {
-                    _out << nl << "/// " << *i;
-                }
-            }
-        }
-        if(foundReturn && !doneReturn)
-        {
-            _out << "</param>";
-        }
-    }
-    else
-    {
-        //
-        // Output the leading comment block up until the first tag.
-        //
-        _out << nl << "/// <summary>";
-        for(StringList::const_iterator i = summaryLines.begin(); i != summaryLines.end(); ++i)
-        {
-            _out << nl << "/// " << *i;
-        }
-
-        bool done = false;
-        for(StringList::const_iterator i = remarksLines.begin(); i != remarksLines.end() && !done; ++i)
-        {
-            string::size_type pos = i->find('<');
-            done = true;
-            if(pos != string::npos)
-            {
-                if(pos != 0)
-                {
-                    _out << nl << "/// " << i->substr(0, pos);
-                }
-            }
-            else
-            {
-                _out << nl << "/// " << *i;
-            }
-        }
-        _out << nl << "/// </summary>";
-    }
-
-    //
-    // Write the comments for the parameters.
-    //
-    writeDocCommentParam(p, paramType, newAMI);
-
-    if(!extraParam.empty())
-    {
-        _out << nl << "/// " << extraParam;
-    }
-
-    if(paramType == InParam)
-    {
-        if(!deprecateReason.empty())
-        {
-            _out << nl << "/// <para>" << deprecateReason << "</para>";
-        }
-    }
-}
-
-void
-Slice::JsVisitor::writeDocCommentParam(const OperationPtr& p, ParamDir paramType, bool newAMI)
-{
-    //
-    // Collect the names of the in- or -out parameters to be documented.
-    //
-    ParamDeclList tmp = p->parameters();
-    vector<string> params;
-    for(ParamDeclList::const_iterator q = tmp.begin(); q != tmp.end(); ++q)
-    {
-        if((*q)->isOutParam() && paramType == OutParam)
-        {
-            params.push_back((*q)->name());
-        }
-        else if(!(*q)->isOutParam() && paramType == InParam)
-        {
-            params.push_back((*q)->name());
-        }
-    }
-
-    //
-    // Print a comment for the callback parameter.
-    //
-    if(paramType == InParam && !newAMI)
-    {
-        _out << nl << "/// <param name=\"cb__\">The callback object for the operation.</param>";
-    }
-
-    //
-    // Print the comments for all the parameters that appear in the parameter list.
-    //
-    StringList summaryLines;
-    StringList remarksLines;
-    splitComment(p, summaryLines, remarksLines);
-
-    const string paramTag = "<param";
-    StringList::const_iterator i = remarksLines.begin();
-    while(i != remarksLines.end())
-    {
-        string line = *i++;
-        if(line.find(paramTag) != string::npos)
-        {
-            string::size_type paramNamePos = line.find('"', paramTag.length());
-            if(paramNamePos != string::npos)
-            {
-                string::size_type paramNameEndPos = line.find('"', paramNamePos + 1);
-                string paramName = line.substr(paramNamePos + 1, paramNameEndPos - paramNamePos - 1);
-                if(std::find(params.begin(), params.end(), paramName) != params.end())
-                {
-                    _out << nl << "/// " << line;
-                    StringList::const_iterator j;
-                    if (i == remarksLines.end())
-                    {
-                        break;
-                    }
-                    j = i++;
-                    while(j != remarksLines.end())
-                    {
-                        string::size_type endpos = j->find('>');
-                        if(endpos == string::npos)
-                        {
-                            i = j;
-                            _out << nl << "/// " << *j++;
-                        }
-                        else
-                        {
-                            _out << nl << "/// " << *j++;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    _out << nl << " **/";
 }
 
 Slice::Gen::Gen(const string& base, const vector<string>& includePaths, const string& dir) :
