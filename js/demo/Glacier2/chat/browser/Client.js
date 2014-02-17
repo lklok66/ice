@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2013 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2014 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -150,9 +150,9 @@ var run = function(communicator, router, session)
     ).then(
         function(timeoutArgs, categoryArgs, adapterArgs)
         {
-            var timeout = timeoutArgs[1];
-            var category = categoryArgs[1];
-            var adapter = adapterArgs[1];
+            var timeout = timeoutArgs[0];
+            var category = categoryArgs[0];
+            var adapter = adapterArgs[0];
             
             //
             // Call refreshSession in a loop to keep the 

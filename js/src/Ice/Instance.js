@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2013 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2014 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -406,15 +406,10 @@
                 {
                     if(ex instanceof Ice.LocalException)
                     {
-                        this.destroy().then(
-                            function()
-                            {
-                                promise.fail(ex);
-                            }).exception(
-                                function(e)
-                                {
-                                    promise.fail(ex);
-                                });
+                        this.destroy().finally(function()
+                                               {
+                                                   promise.fail(ex);
+                                               });
                     }
                     else
                     {
@@ -448,176 +443,129 @@
                 return promise;
             }
 
-            try
-            {
-                //
-                // We cannot set state to StateDestroyed otherwise instance
-                // methods called during the destroy process (such as
-                // outgoingConnectionFactory() from
-                // ObjectAdapterI::deactivate() will cause an exception.
-                //
-                this._state = StateDestroyInProgress;
-
-                if(this._objectAdapterFactory)
+            //
+            // We cannot set state to StateDestroyed otherwise instance
+            // methods called during the destroy process (such as
+            // outgoingConnectionFactory() from
+            // ObjectAdapterI::deactivate() will cause an exception.
+            //
+            this._state = StateDestroyInProgress;
+            
+            var self = this;
+            Ice.Promise.try(
+                function()
                 {
-                    var self = this;
-                    this._objectAdapterFactory.shutdown().then(
-                        function(r)
+                    if(self._objectAdapterFactory)
+                    {
+                        return self._objectAdapterFactory.shutdown();
+                    }
+                }
+            ).then(
+                function()
+                {
+                    if(self._outgoingConnectionFactory !== null)
+                    {
+                        self._outgoingConnectionFactory.destroy();
+                    }
+
+                    if(self._objectAdapterFactory !== null)
+                    {
+                        return self._objectAdapterFactory.destroy();
+                    }
+                }
+            ).then(
+                function()
+                {
+                    if(self._outgoingConnectionFactory !== null)
+                    {
+                        return self._outgoingConnectionFactory.waitUntilFinished();
+                    }
+                }
+            ).then(
+                function()
+                {
+                    if(self._retryQueue)
+                    {
+                        self._retryQueue.destroy();
+                    }
+
+                    self._objectAdapterFactory = null;
+                    self._outgoingConnectionFactory = null;
+                    self._retryQueue = null;
+
+                    if(self._connectionMonitor)
+                    {
+                        self._connectionMonitor.destroy();
+                        self._connectionMonitor = null;
+                    }
+
+                    if(self._timer)
+                    {
+                        self._timer.destroy();
+                        self._timer = null;
+                    }
+
+                    if(self._servantFactoryManager)
+                    {
+                        self._servantFactoryManager.destroy();
+                        self._servantFactoryManager = null;
+                    }
+
+                    if(self._referenceFactory)
+                    {
+                        //self._referenceFactory.destroy(); // No destroy function defined.
+                        self._referenceFactory = null;
+                    }
+
+                    // self._proxyFactory.destroy(); // No destroy function defined.
+                    self._proxyFactory = null;
+
+                    if(self._routerManager)
+                    {
+                        self._routerManager.destroy();
+                        self._routerManager = null;
+                    }
+
+                    if(self._locatorManager)
+                    {
+                        self._locatorManager.destroy();
+                        self._locatorManager = null;
+                    }
+
+                    if(self._endpointFactoryManager)
+                    {
+                        self._endpointFactoryManager.destroy();
+                        self._endpointFactoryManager = null;
+                    }
+
+                    self._state = StateDestroyed;
+
+                    if(self._initData.properties.getPropertyAsInt("Ice.Warn.UnusedProperties") > 0)
+                    {
+                        var unusedProperties = self._initData.properties.getUnusedProperties();
+                        if(unusedProperties.length > 0)
                         {
-                            self.objectAdapterFactoryShutdown(promise);
-                        }).exception(
-                            function(ex)
+                            var message = [];
+                            message.push("The following properties were set but never read:");
+                            for(var i = 0; i < unusedProperties.length; ++i)
                             {
-                                promise.fail(ex);
-                            });
-                }
-                else
-                {
-                    this.objectAdapterFactoryShutdown(promise);
-                }
-            }
-            catch(ex)
-            {
-                promise.fail(ex);
-            }
+                                message.push("\n    ");
+                                message.push(unusedProperties[i]);
+                            }
+                            self._initData.logger.warning(message.join(""));
+                        }
+                    }
 
+                    promise.succeed(promise);
+                }
+            ).exception(
+                function(ex)
+                {
+                    promise.fail(ex);
+                }
+            );
             return promise;
         },
-        objectAdapterFactoryShutdown: function(promise)
-        {
-            try
-            {
-                if(this._outgoingConnectionFactory !== null)
-                {
-                    this._outgoingConnectionFactory.destroy();
-                }
-
-                if(this._objectAdapterFactory !== null)
-                {
-                    var self = this;
-                    this._objectAdapterFactory.destroy().then(
-                        function()
-                        {
-                            self.objectAdapterFactoryDestroyed(promise);
-                        }).exception(
-                            function(ex)
-                            {
-                                promise.fail(ex);
-                            });
-                }
-                else
-                {
-                    this.objectAdapterFactoryDestroyed(promise);
-                }
-            }
-            catch(ex)
-            {
-                promise.fail(ex);
-            }
-        },
-        objectAdapterFactoryDestroyed: function(promise)
-        {
-            try
-            {
-                if(this._outgoingConnectionFactory !== null)
-                {
-                    var self = this;
-                    this._outgoingConnectionFactory.waitUntilFinished().then(
-                        function()
-                        {
-                            self.outgoingConnectionFactoryFinished(promise);
-                        }).exception(
-                            function(ex)
-                            {
-                                promise.fail(ex);
-                            });
-                }
-                else
-                {
-                    this.outgoingConnectionFactoryFinished(promise);
-                }
-            }
-            catch(ex)
-            {
-                promise.fail(ex);
-            }
-        },
-        outgoingConnectionFactoryFinished: function(promise)
-        {
-            if(this._retryQueue)
-            {
-                this._retryQueue.destroy();
-            }
-
-            this._objectAdapterFactory = null;
-            this._outgoingConnectionFactory = null;
-            this._retryQueue = null;
-
-            if(this._connectionMonitor)
-            {
-                this._connectionMonitor.destroy();
-                this._connectionMonitor = null;
-            }
-
-            if(this._timer)
-            {
-                this._timer.destroy();
-                this._timer = null;
-            }
-
-            if(this._servantFactoryManager)
-            {
-                this._servantFactoryManager.destroy();
-                this._servantFactoryManager = null;
-            }
-
-            if(this._referenceFactory)
-            {
-                //this._referenceFactory.destroy(); // No destroy function defined.
-                this._referenceFactory = null;
-            }
-
-            // this._proxyFactory.destroy(); // No destroy function defined.
-            this._proxyFactory = null;
-
-            if(this._routerManager)
-            {
-                this._routerManager.destroy();
-                this._routerManager = null;
-            }
-
-            if(this._locatorManager)
-            {
-                this._locatorManager.destroy();
-                this._locatorManager = null;
-            }
-
-            if(this._endpointFactoryManager)
-            {
-                this._endpointFactoryManager.destroy();
-                this._endpointFactoryManager = null;
-            }
-
-            this._state = StateDestroyed;
-
-            if(this._initData.properties.getPropertyAsInt("Ice.Warn.UnusedProperties") > 0)
-            {
-                var unusedProperties = this._initData.properties.getUnusedProperties();
-                if(unusedProperties.length > 0)
-                {
-                    var message = [];
-                    message.push("The following properties were set but never read:");
-                    for(var i = 0; i < unusedProperties.length; ++i)
-                    {
-                        message.push("\n    ");
-                        message.push(unusedProperties[i]);
-                    }
-                    this._initData.logger.warning(message.join(""));
-                }
-            }
-
-            promise.succeed(promise);
-        }
     });
     
     Ice.Instance = Instance;

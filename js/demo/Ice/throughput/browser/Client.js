@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2013 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2014 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -60,7 +60,7 @@ function run()
     // Down-cast the proxy to the Demo.Throughput interface.
     //
     return ThroughputPrx.checkedCast(proxy).then(
-        function(r, twoway)
+        function(twoway)
         {
             oneway = twoway.ice_oneway();
             
