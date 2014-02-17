@@ -9,21 +9,20 @@
 
 (function(global){
     var require = typeof(module) !== "undefined" ? module.require : function(){};
+    
     require("Ice/Ice");
-    var Ice = global.Ice;
-
     require("Test");
-    var Test = global.Test;
-    var Promise = Ice.Promise;
-
     require("Twoways");
     require("Oneways");
     require("BatchOneways");
+    
+    var Ice = global.Ice;
+    var Promise = Ice.Promise;
     var Twoways = global.Twoways;
     var Oneways = global.Oneways;
     var BatchOneways = global.BatchOneways;
 
-    var allTests = function(out, communicator)
+    var allTests = function(out, communicator, Test, bidir)
     {
         var ref, base, cl, derived;
         
@@ -33,7 +32,6 @@
                 out.write("testing twoway operations... ");
                 ref = "test:default -p 12010";
                 base = communicator.stringToProxy(ref);
-                cl, derived;
                 return Test.MyClassPrx.checkedCast(base);
             }
         ).then(
@@ -46,32 +44,32 @@
             function(prx)
             {
                 derived = prx;
-                return Twoways.run(communicator, cl);
+                return Twoways.run(communicator, cl, Test, bidir);
             }
         ).then(
             function()
             {
-                return Twoways.run(communicator, derived);
+                return Twoways.run(communicator, derived, Test, bidir);
             }
         ).then(
             function()
             {
                 out.writeLine("ok");
                 out.write("testing oneway operations... ");
-                return Oneways.run(communicator, cl);
+                return Oneways.run(communicator, cl, Test, bidir);
             }
         ).then(
             function()
             {
                 out.writeLine("ok");
                 out.write("testing batch oneway operations... ");
-                return BatchOneways.run(communicator, cl);
+                return BatchOneways.run(communicator, cl, Test, bidir);
             }
         ).then(
             function()
             {
                 out.writeLine("ok");
-                return cl.shutdown();
+                return cl;
             });
     };
 
@@ -87,7 +85,12 @@
                 //
                 id.properties.setProperty("Ice.MessageSizeMax", "100");
                 var c = Ice.initialize(id);
-                return allTests(out, c).finally(
+                return allTests(out, c, global.Test, false).then(
+                    function(cl)
+                    {
+                        return cl.shutdown();
+                    }
+                ).finally(
                     function()
                     {
                         if(c)
@@ -98,4 +101,6 @@
             });
     };
     global.__test__ = run;
+    global.__clientAllTests__ = allTests;
+    
 }(typeof (global) === "undefined" ? window : global));

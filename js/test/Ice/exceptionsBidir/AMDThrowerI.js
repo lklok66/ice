@@ -62,7 +62,7 @@
 
         throwBasA_async: function(cb, a, b, current)
         {
-            this.throwBasB(cb, a, b, current);
+            this.throwBasB_async(cb, a, b, current);
         },
 
         throwBasB_async: function(cb, a, b, current)
@@ -75,12 +75,12 @@
 
         throwCasA_async: function(cb, a, b, c, current)
         {
-            this.throwCasC(cb, a, b, c, current);
+            this.throwCasC_async(cb, a, b, c, current);
         },
 
         throwCasB_async: function(cb, a, b, c, current)
         {
-            this.throwCasC(cb, a, b, c, current);
+            this.throwCasC_async(cb, a, b, c, current);
         },
 
         throwCasC_async: function(cb, a, b, c, current)

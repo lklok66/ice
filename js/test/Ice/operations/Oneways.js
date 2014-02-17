@@ -9,9 +9,8 @@
 
 (function(global){
     var Ice = global.Ice;
-    var Test = global.Test;
     
-    var run = function(communicator, prx)
+    var run = function(communicator, prx, Test, bidir)
     {
         var p = new Ice.Promise();
         var test = function(b)
