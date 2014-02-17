@@ -54,7 +54,7 @@ function run()
     // Create a proxy to the throughput object.
     //
     var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
-    var proxy = communicator.stringToProxy("throughput:ws -h " + hostname + " -p 10000");
+    var proxy = communicator.stringToProxy("throughput:ws -h " + hostname + " -p 10002");
     
     //
     // Down-cast the proxy to the Demo.Throughput interface.
