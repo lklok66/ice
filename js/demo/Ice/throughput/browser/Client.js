@@ -60,7 +60,7 @@ function run()
     // Down-cast the proxy to the Demo.Throughput interface.
     //
     return ThroughputPrx.checkedCast(proxy).then(
-        function(r, twoway)
+        function(twoway)
         {
             oneway = twoway.ice_oneway();
             

@@ -240,20 +240,32 @@
             /*jshint -W083 */
             (function(j)
             {
-                promises[j].then(
-                    function()
-                    {
-                        results[j] = arguments;
-                        pending--;
-                        if(pending === 0)
+                if(promises[j] && typeof promises[j].then == "function")
+                {
+                    promises[j].then(
+                        function()
                         {
-                            promise.succeed.apply(promise, results);
-                        }
-                    },
-                    function()
+                            results[j] = arguments;
+                            pending--;
+                            if(pending === 0)
+                            {
+                                promise.succeed.apply(promise, results);
+                            }
+                        },
+                        function()
+                        {
+                            promise.fail.apply(promise, arguments);
+                        });
+                }
+                else
+                {
+                    results[j] = promises[j];
+                    pending--;
+                    if(pending === 0)
                     {
-                        promise.fail.apply(promise, arguments);
-                    });
+                        promise.succeed.apply(promise, results);
+                    }
+                }
             }(i));
             /*jshint +W083 */
         }

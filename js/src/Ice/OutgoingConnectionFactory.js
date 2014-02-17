@@ -60,14 +60,10 @@
                 return;
             }
 
-            for(var e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
-            {
-                var connectionList = e.value;
-                for(var i = 0; i < connectionList.length; ++i)
-                {
-                    connectionList[i].destroy(ConnectionI.CommunicatorDestroyed);
-                }
-            }
+            this._connectionsByEndpoint.forEach(function(connection)
+                                                {
+                                                    connection.destroy(ConnectionI.CommunicatorDestroyed);
+                                                });
 
             this._destroyed = true;
             this._communicator = null;
@@ -113,76 +109,60 @@
         },
         setRouterInfo: function(routerInfo)
         {
-            var promise = new Promise();
-
-            if(this._destroyed)
-            {
-                promise.fail(new Ice.CommunicatorDestroyedException());
-                return promise;
-            }
-
-            Debug.assert(routerInfo !== null);
-
             var self = this;
-            routerInfo.getClientEndpoints().then(
+            return Ice.Promise.try(
+                function()
+                {
+                    if(self._destroyed)
+                    {
+                        throw new Ice.CommunicatorDestroyedException();
+                    }
+                    return routerInfo.getClientEndpoints();
+                }
+            ).then(
                 function(endpoints)
                 {
-                    self.gotClientEndpoints(endpoints, routerInfo, promise);
-                }).exception(
-                    function(ex)
+                    //
+                    // Search for connections to the router's client proxy
+                    // endpoints, and update the object adapter for such
+                    // connections, so that callbacks from the router can be
+                    // received over such connections.
+                    //
+                    var adapter = routerInfo.getAdapter();
+                    var defaultsAndOverrides = self._instance.defaultsAndOverrides();
+                    for(var i = 0; i < endpoints.length; ++i)
                     {
-                        promise.fail(ex);
-                    });
+                        var endpoint = endpoints[i];
 
-            return promise;
-        },
-        gotClientEndpoints: function(endpoints, routerInfo, promise)
-        {
-            //
-            // Search for connections to the router's client proxy
-            // endpoints, and update the object adapter for such
-            // connections, so that callbacks from the router can be
-            // received over such connections.
-            //
-            var adapter = routerInfo.getAdapter();
-            var defaultsAndOverrides = this._instance.defaultsAndOverrides();
-            for(var i = 0; i < endpoints.length; ++i)
-            {
-                var endpoint = endpoints[i];
-
-                //
-                // Modify endpoints with overrides.
-                //
-                if(defaultsAndOverrides.overrideTimeout)
-                {
-                    endpoint = endpoint.changeTimeout(defaultsAndOverrides.overrideTimeoutValue);
-                }
-
-                //
-                // The Connection object does not take the compression flag of
-                // endpoints into account, but instead gets the information
-                // about whether messages should be compressed or not from
-                // other sources. In order to allow connection sharing for
-                // endpoints that differ in the value of the compression flag
-                // only, we always set the compression flag to false here in
-                // this connection factory.
-                //
-                endpoint = endpoint.changeCompress(false);
-
-                for(var e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
-                {
-                    var connectionList = e.value;
-                    for(var j = 0; j < connectionList.length; ++j)
-                    {
-                        if(connectionList[j].endpoint().equals(endpoint))
+                        //
+                        // Modify endpoints with overrides.
+                        //
+                        if(defaultsAndOverrides.overrideTimeout)
                         {
-                            connectionList[j].setAdapter(adapter);
+                            endpoint = endpoint.changeTimeout(defaultsAndOverrides.overrideTimeoutValue);
                         }
+
+                        //
+                        // The Connection object does not take the compression flag of
+                        // endpoints into account, but instead gets the information
+                        // about whether messages should be compressed or not from
+                        // other sources. In order to allow connection sharing for
+                        // endpoints that differ in the value of the compression flag
+                        // only, we always set the compression flag to false here in
+                        // this connection factory.
+                        //
+                        endpoint = endpoint.changeCompress(false);
+
+                        self._connectionsByEndpoint.forEach(function(connection)
+                                                            {
+                                                                if(connection.endpoint().equals(endpoint))
+                                                                {
+                                                                    connection.setAdapter(adapter);
+                                                                }
+                                                            });
                     }
                 }
-            }
-
-            promise.succeed();
+            );
         },
         removeAdapter: function(adapter)
         {
@@ -190,78 +170,53 @@
             {
                 return;
             }
-
-            for(var e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
-            {
-                var connectionList = e.value;
-                for(var i = 0; i < connectionList.length; ++i)
-                {
-                    if(connectionList[i].getAdapter() === adapter)
-                    {
-                        connectionList[i].setAdapter(null);
-                    }
-                }
-            }
+            this._connectionsByEndpoint.forEach(function(connection)
+                                                {
+                                                    if(connection.getAdapter() === adapter)
+                                                    {
+                                                        connection.setAdapter(null);
+                                                    }
+                                                });
         },
         flushAsyncBatchRequests: function()
         {
             var promise = new AsyncResultBase(this._communicator, "flushBatchRequests", null, null, null);
-
-            var c = [], e, i;
-            if(!this._destroyed)
+            if(this._destroyed)
             {
-                for(e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
-                {
-                    var connectionList = e.value;
-                    for(i = 0; i < connectionList.length; ++i)
+                promise.succeed();
+                return;
+            }
+
+            Promise.all(
+                this._connectionsByEndpoint.map(
+                    function(connection)
                     {
-                        if(connectionList[i].isActiveOrHolding())
+                        if(connection.isActiveOrHolding())
                         {
-                            c.push(connectionList[i]);
+                            return connection.flushBatchRequests().exception(
+                                function(ex)
+                                {
+                                    if(ex instanceof Ice.LocalException)
+                                    {
+                                        // Ignore
+                                    }
+                                    else
+                                    {
+                                        throw ex;
+                                    }
+                                });
                         }
-                    }
+                    })
+            ).then(
+                function()
+                {
+                    promise.succeed(promise);
+                },
+                function(ex)
+                {
+                    promise.fail(ex, promise);
                 }
-            }
-
-            var count = c.length;
-            if(count > 0)
-            {
-                var successCB = function(r)
-                {
-                    if(--count === 0)
-                    {
-                        promise.succeed(promise);
-                    }
-                };
-                var exceptionCB = function(ex)
-                {
-                    if(ex instanceof Ice.LocalException)
-                    {
-                        //
-                        // Ignore errors
-                        //
-
-                        if(--count === 0)
-                        {
-                            promise.succeed(promise);
-                        }
-                    }
-                    else
-                    {
-                        promise.fail(ex);
-                    }
-                };
-                
-                for(i = 0; i < c.length; ++i)
-                {
-                    c[i].flushBatchRequests().then(successCB).exception(exceptionCB);
-                }
-            }
-            else
-            {
-                promise.succeed(promise);
-            }
-
+            );
             return promise;
         },
         applyOverrides: function(endpts)
@@ -727,86 +682,52 @@
             //
             // Can't continue until the factory is destroyed and there are no pending connections.
             //
-            if(this._waitPromise === null || !this._destroyed || this._pending.size > 0 || this._pendingConnectCount > 0)
+            if(!this._waitPromise || !this._destroyed || this._pending.size > 0 || this._pendingConnectCount > 0)
             {
                 return;
             }
-
-            var connectionList;
-            var e;
-            //
-            // Count the number of connections.
-            //
-            var size = 0;
-            for(e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
-            {
-                connectionList = e.value;
-                size += connectionList.length;
-            }
-
-            //
-            // Now we wait until the destruction of each connection is finished.
-            //
-            if(size > 0)
-            {
-                var self = this;
-                var counter = 0;
-
-                var successCB = function()
+            
+            var self = this;
+            Promise.all(
+                self._connectionsByEndpoint.map(
+                    function(connection)
                     {
-                        if(++counter === size)
-                        {
-                            self.connectionsFinished();
-                        }
-                    };
-
-                var exceptionCB = function(ex)
-                    {
-                        Debug.assert(false);
-                    };
-
-                for(e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
-                {
-                    connectionList = e.value;
-                    for(var i = 0; i < connectionList.length; ++i)
-                    {
-                        connectionList[i].waitUntilFinished().then(successCB).exception(exceptionCB);
+                        return connection.waitUntilFinished().exception(function(ex)
+                                                                        {
+                                                                            Debug.assert(false);
+                                                                        });
                     }
-                }
-            }
-            else
-            {
-                this.connectionsFinished();
-            }
-        },
-        connectionsFinished: function()
-        {
-            // Ensure all the connections are finished and reapable at this point.
-            var cons = this._reaper.swapConnections();
-            if(cons !== null)
-            {
-                var arr = [];
-                for(var e = this._connectionsByEndpoint.entries; e !== null; e = e.next)
+                )
+            ).then(
+                function()
                 {
-                    var connectionList = e.value;
-                    for(var i = 0; i < connectionList.length; ++i)
+                    var cons = self._reaper.swapConnections();
+                    if(cons !== null)
                     {
-                        if(arr.indexOf(connectionList[i]) === -1)
+                        var arr = [];
+                        for(var e = self._connectionsByEndpoint.entries; e !== null; e = e.next)
                         {
-                            arr.push(connectionList[i]);
+                            var connectionList = e.value;
+                            for(var i = 0; i < connectionList.length; ++i)
+                            {
+                                if(arr.indexOf(connectionList[i]) === -1)
+                                {
+                                    arr.push(connectionList[i]);
+                                }
+                            }
                         }
+                        Debug.assert(cons.length === arr.length);
+                        self._connectionsByEndpoint.clear();
                     }
+                    else
+                    {
+                        Debug.assert(self._connectionsByEndpoint.size === 0);
+                    }
+                    
+                    Debug.assert(self._waitPromise !== null);
+                    self._waitPromise.succeed();
                 }
-                Debug.assert(cons.length === arr.length);
-                this._connectionsByEndpoint.clear();
-            }
-            else
-            {
-                Debug.assert(this._connectionsByEndpoint.size === 0);
-            }
-
-            Debug.assert(this._waitPromise !== null);
-            this._waitPromise.succeed();
+            );
         }
     });
     
@@ -844,6 +765,22 @@
             if(list.length === 0)
             {
                 this.delete(key);
+            }
+        },
+        map: function(fn)
+        {
+            var arr = [];
+            this.forEach(function(c) { arr.push(fn(c)); });
+            return arr;
+        },
+        forEach: function(fn)
+        {
+            for(var e = this._head; e !== null; e = e._next)
+            {
+                for(var i = 0; i < e.value.length; ++i)
+                {
+                    fn(e.value[i]);
+                }
             }
         }
     });
@@ -1011,11 +948,11 @@
                     function()
                     {
                         self.connectionStartCompleted(connection);
-                    }).exception(
-                        function(ex)
-                        {
-                            self.connectionStartFailed(connection, ex);
-                        });
+                    },
+                    function(ex)
+                    {
+                        self.connectionStartFailed(connection, ex);
+                    });
             }
             catch(ex)
             {
@@ -1023,23 +960,5 @@
             }
         }
     });
-    
-    var ConnectionsFinished = Class({
-        __init__: function(size, complete, cbContext)
-        {
-            this._size = size;
-            this._complete = complete;
-            this._cbContext = cbContext;
-            this._count = 0;
-        },
-        finished: function()
-        {
-            Debug.assert(this._count < this._size);
-            ++this._count;
-            if(this._count === this._size)
-            {
-                this._complete.call(this._cbContext === undefined ? this._complete : this._cbContext);
-            }
-        }
-    });
+
 }(typeof (global) === "undefined" ? window : global));
