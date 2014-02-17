@@ -511,6 +511,7 @@ for d in ["", "cpp"]:
     copyMatchingFiles(os.path.join(d, "config"), os.path.join(demoDir, "config"), demoConfigFiles)
 
 copy(os.path.join(distFilesDir, "src", "js", "Make.rules"), os.path.join(demoDir, "config"), False)
+copy(os.path.join(distFilesDir, "src", "js", "Make.common.rules"), os.path.join(demoDir, "config"), False)
 
 # Consolidate demoscript and demo distribution with files from each language mapping
 for d in os.listdir('.'):

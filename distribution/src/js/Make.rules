@@ -91,9 +91,9 @@ ifeq ($(mkshlib),)
     $(error You need to define mkshlib in Make.rules.$(UNAME)) 
 endif
 
-SLICEPARSERLIB	= $(ice_cpp_dir)/$(libsubdir)$(cpp11suffix)/$(call mklibfilename,Slice,$(VERSION))
 SLICE2CPP	= $(ice_cpp_dir)/$(binsubdir)$(cpp11suffix)/slice2cpp
-SLICE2JS	= $(ice_cpp_dir)/$(binsubdir)$(cpp11suffix)/slice2js
+SLICEPARSERLIB	= $(ice_js_dir)/$(libsubdir)$(cpp11suffix)/$(call mklibfilename,Slice,$(VERSION))
+SLICE2JS	= $(ice_js_dir)/$(binsubdir)$(cpp11suffix)/slice2js
 RPATH_DIR	= $(ice_dir)/$(libsubdir)$(cpp11suffix)
 
 EVERYTHING		= all clean
