@@ -49,60 +49,55 @@
                     function(conn)
                     {
                         conn.setAdapter(adapter);
+                        return __clientAllTests__(out, communicator, Test);
                     });
-            }
-        ).then(
-            function()
-            {
-                return __clientAllTests__(out, communicator, Test);
             }
         );
     };
 
     var run = function(out, id)
     {
+         var communicator;
         return Promise.try(
             function()
             {
-                var communicator = Ice.initialize(id);
+                communicator = Ice.initialize(id);
                 out.writeLine("testing bidir callbacks with synchronous dispatch...");
-                return allTests(out, communicator, false).then(
-                    function()
-                    {
-                        return communicator.destroy();
-                    }
-                ).then(
-                    function()
-                    {
-                        communicator = Ice.initialize(id);
-                        out.writeLine("testing bidir callbacks with asynchronous dispatch...");
-                        return allTests(out, communicator, true);
-                    }
-                ).then(
-                    function()
-                    {
-                        return communicator.destroy();
-                    }
-                ).then(
-                    function()
-                    {
-                        communicator = Ice.initialize(id);
-                        var base = communicator.stringToProxy("__echo:default -p 12010");
-                        return global.Test.EchoPrx.checkedCast(base);
-                    }
-                ).then(
-                    function(prx)
-                    {
-                        return prx.shutdown();
-                    }
-                ).finally(
-                    function()
-                    {
-                        if(communicator)
-                        {
-                            return communicator.destroy();
-                        }
-                    });
+                return allTests(out, communicator, false);
+            }
+        ).then(
+            function()
+            {
+                return communicator.destroy();
+            }
+        ).then(
+            function()
+            {
+                communicator = Ice.initialize(id);
+                out.writeLine("testing bidir callbacks with asynchronous dispatch...");
+                return allTests(out, communicator, true);
+            }
+        ).then(
+            function()
+            {
+                return communicator.destroy();
+            }
+        ).then(
+            function()
+            {
+                communicator = Ice.initialize(id);
+                var base = communicator.stringToProxy("__echo:default -p 12010");
+                return global.Test.EchoPrx.checkedCast(base);
+            }
+        ).then(
+            function(prx)
+            {
+                return prx.shutdown();
+            }
+        ).finally(
+            function()
+            {
+                return communicator.destroy();
             });
     };
     global.__test__ = run;

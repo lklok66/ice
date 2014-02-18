@@ -10,14 +10,50 @@
 (function(global){
     var require = typeof(module) !== "undefined" ? module.require : function(){};
     require("Ice/Ice");
-    var Ice = global.Ice;
-
     require("Test");
-    var Test = global.Test;
+    
+    var Ice = global.Ice;
     var Promise = Ice.Promise;
 
-    var allTests = function(out, communicator)
+    var allTests = function(out, communicator, Test)
     {
+        var EmptyI = function()
+        {
+        };
+
+        EmptyI.prototype = new Test.Empty();
+        EmptyI.prototype.constructor = EmptyI;
+
+        var ServantLocatorI = function()
+        {
+        };
+
+        ServantLocatorI.prototype.locate = function(curr, cookie)
+        {
+            return null;
+        };
+
+        ServantLocatorI.prototype.finished = function(curr, servant, cookie)
+        {
+        };
+
+        ServantLocatorI.prototype.deactivate = function(category)
+        {
+        };
+
+        var ObjectFactoryI = function()
+        {
+        };
+
+        ObjectFactoryI.prototype.create = function(type)
+        {
+            return null;
+        };
+
+        ObjectFactoryI.prototype.destroy = function()
+        {
+        };
+        
         var p = new Ice.Promise();
         var test = function(b)
         {
@@ -419,43 +455,6 @@
         return p;
     };
 
-    var EmptyI = function()
-    {
-    };
-
-    EmptyI.prototype = new Test.Empty();
-    EmptyI.prototype.constructor = EmptyI;
-
-    var ServantLocatorI = function()
-    {
-    };
-
-    ServantLocatorI.prototype.locate = function(curr, cookie)
-    {
-        return null;
-    };
-
-    ServantLocatorI.prototype.finished = function(curr, servant, cookie)
-    {
-    };
-
-    ServantLocatorI.prototype.deactivate = function(category)
-    {
-    };
-
-    var ObjectFactoryI = function()
-    {
-    };
-
-    ObjectFactoryI.prototype.create = function(type)
-    {
-        return null;
-    };
-
-    ObjectFactoryI.prototype.destroy = function()
-    {
-    };
-
     var run = function(out, id)
     {
         return Promise.try(
@@ -463,7 +462,7 @@
             {
                 id.properties.setProperty("Ice.MessageSizeMax", "10");
                 var c = Ice.initialize(id);
-                return allTests(out, c).finally(
+                return allTests(out, c, global.Test).finally(
                     function()
                     {
                         return c.destroy();
@@ -471,4 +470,6 @@
             });
     };
     global.__test__ = run;
+    global.__clientAllTests__ = allTests;
+    
 }(typeof (global) === "undefined" ? window : global));

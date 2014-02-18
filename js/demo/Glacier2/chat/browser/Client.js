@@ -73,7 +73,7 @@ var signin = function()
             //
             var id = new Ice.InitializationData();
             id.properties = Ice.createProperties();
-            id.properties.setProperty("Ice.Default.Router", "DemoGlacier2/router:ws -p 4063 -h localhost");
+            id.properties.setProperty("Ice.Default.Router", "DemoGlacier2/router:ws -p 5063 -h localhost");
             communicator = Ice.initialize(id);
             
             //

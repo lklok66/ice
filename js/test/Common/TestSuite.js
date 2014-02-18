@@ -57,7 +57,7 @@ $(document).foundation();
                         {
                             $("#run").removeClass("disabled");
                         }).exception(
-                            function(ex)
+                            function(ex, r)
                             {
                                 out.writeLine("");
                                 if(r instanceof Ice.AsyncResult)

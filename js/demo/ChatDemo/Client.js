@@ -17,7 +17,7 @@ var ChatSessionPrx = Chat.ChatSessionPrx;
 //
 // Chat client state
 //
-var State = {Disconnected: 0, Connecting: 1, Connected:2};
+var State = {Disconnected: 0, Connecting: 1, Connected: 2};
 var maxMessageSize = 1024;
 var communicator;
 var username;
@@ -25,14 +25,14 @@ var state;
 var hasError = false;
 
 //
-// Default hostname same as the web server.
+// Default hostname is the same as the web server.
 //
 $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
 
 //
-// Servant that implements the ChatCallback interface,
-// the message operation just writes the received data
-// to output textarea.
+// Servant that implements the ChatCallback interface.
+// The message operation just writes the received data
+// to the output textarea.
 //
 var ChatCallbackI = Ice.Class(Chat.ChatRoomCallback, {
     init: function(users)
@@ -47,7 +47,7 @@ var ChatCallbackI = Ice.Class(Chat.ChatRoomCallback, {
     {
         if(name != username)
         {
-            writeLine(formatDate(timestamp.toNumber()) + " - <" + name + "> - " + unscapeHtml(message));
+            writeLine(formatDate(timestamp.toNumber()) + " - <" + name + "> - " + unescapeHtml(message));
         }
     },
     join: function(timestamp, name)
@@ -102,17 +102,17 @@ var signin = function()
         function()
         {
             //
-            // Initialize the communicator with Ice.Default.Router property
+            // Initialize the communicator with the Ice.Default.Router property
             // set to the chat demo Glacier2 router.
             //
             var id = new Ice.InitializationData();
             id.properties = Ice.createProperties();
-            id.properties.setProperty("Ice.Default.Router", 
+            id.properties.setProperty("Ice.Default.Router",
                                       "Glacier2/router:ws -p 4063 -h " + hostname());
             communicator = Ice.initialize(id);
-            
+
             //
-            // Get a proxy to the Glacier2 router, using checkedCast to ensure
+            // Get a proxy to the Glacier2 router using checkedCast to ensure
             // the Glacier2 server is available.
             //
             return RouterPrx.checkedCast(communicator.getDefaultRouter()).then(
@@ -133,7 +133,7 @@ var signin = function()
         function(ex)
         {
             //
-            // Handle any exceptions occurred during session creation.
+            // Handle any exceptions that occurred during session creation.
             //
             if(ex instanceof Glacier2.PermissionDeniedException)
             {
@@ -158,13 +158,13 @@ var run = function(router, session)
 {
     assert(state === State.Connecting);
     //
-    // The chat promise is used to wait for the completion of chating
-    // state. The completion could happen because the user sign out,
+    // The chat promise is used to wait for the completion of chatting
+    // state. The completion could happen because the user signed out,
     // or because there is an exception.
     //
     var chat = new Promise();
     //
-    // Get the session timeout, the router client category and
+    // Get the session timeout and the router client category, then
     // create the client object adapter.
     //
     // Use Ice.Promise.all to wait for the completion of all the
@@ -177,12 +177,15 @@ var run = function(router, session)
     ).then(
         function()
         {
-            var timeout = arguments[0][1];
-            var category = arguments[1][1];
-            var adapter = arguments[2][1];
-            
             //
-            // Call refreshSession in a loop to keep the 
+            // The results of each promise are provided in an array.
+            //
+            var timeout = arguments[0][0];
+            var category = arguments[1][0];
+            var adapter = arguments[2][0];
+
+            //
+            // Call refreshSession in a loop to keep the
             // session alive.
             //
             var refreshSession = function()
@@ -202,18 +205,18 @@ var run = function(router, session)
                     });
             };
             refreshSession();
-            
+
             //
-            // Create the ChatCallback servant and add it to the 
+            // Create the ChatCallback servant and add it to the
             // ObjectAdapter.
             //
             var callback = ChatRoomCallbackPrx.uncheckedCast(
-                adapter.add(new ChatCallbackI(), 
+                adapter.add(new ChatCallbackI(),
                             new Ice.Identity("callback", category)));
-            
+
             //
-            // Activate the client object adater before set the session
-            // callback.
+            // Activate the client object adapter before setting the
+            // session callback.
             //
             adapter.activate();
 
@@ -231,8 +234,8 @@ var run = function(router, session)
         function()
         {
             //
-            // Process input events in the input texbox until
-            // chat promise is completed.
+            // Process input events in the input textbox until
+            // the chat promise is completed.
             //
             $("#input").keypress(
                 function(e)
@@ -240,9 +243,9 @@ var run = function(router, session)
                     if(!chat.completed())
                     {
                         //
-                        // When enter key is pressed we send a new
-                        // message using session say operation and
-                        // reset the textbox contents.
+                        // When enter key is pressed, we send a new message
+                        // using the session's say operation and then reset
+                        // the textbox contents.
                         //
                         if(e.which === 13)
                         {
@@ -260,7 +263,7 @@ var run = function(router, session)
                                     session.send(msg).then(
                                         function(timestamp)
                                         {
-                                            writeLine(formatDate(timestamp.toNumber()) + " - <" + 
+                                            writeLine(formatDate(timestamp.toNumber()) + " - <" +
                                                     username + "> - " + msg);
                                         },
                                         function(ex)
@@ -280,31 +283,29 @@ var run = function(router, session)
                         }
                     }
                 });
-            
+
             //
-            // Exit the chat loop accepting the chat
-            // promise.
+            // Exit the chat loop accepting the chat promise.
             //
             $("#signout").click(
                 function(){
                     chat.succeed();
                     return false;
                 });
-            
+
             return chat;
         }
     ).finally(
         function()
         {
             //
-            // Reset the input text box and chat output
-            // textarea.
+            // Reset the input text box and chat output textarea.
             //
             $("#input").val("");
             $("#input").off("keypress");
             $("#signout").off("click");
             $("#output").val("");
-            
+
             //
             // Destroy the session.
             //
@@ -319,22 +320,22 @@ var run = function(router, session)
         function(ex)
         {
             //
-            // Handle any exceptions occurred while running.
+            // Handle any exceptions that occurred while running.
             //
             setState(State.Disconnected, ex.toString());
         });
 };
 
 //
-// Do a transition from "from" screen to "to" screen, return
-// a promise that allows to wait for the transition 
-// completion. If to scree is undefined just animate out the
+// Do a transition from "from" screen to "to" screen. Return
+// a promise that allows us to wait for the transition to
+// complete. If to screen is undefined just animate out the
 // from screen.
 //
 var transition = function(from, to)
 {
     var p = new Ice.Promise();
-    
+
     $(from).animo({ animation: "flipOutX", keep: true },
         function()
         {
@@ -403,7 +404,7 @@ $("#signin-alert").click(
     });
 
 //
-// Switch the state a return a promise that is fulfilled
+// Switch the state and return a promise that is fulfilled
 // when state change completes.
 //
 function setState(newState, error)
@@ -413,14 +414,14 @@ function setState(newState, error)
     {
         case State.Disconnected:
         {
-            assert(state === undefined || 
-                   state === State.Connecting || 
+            assert(state === undefined ||
+                   state === State.Connecting ||
                    state === State.Connected);
 
             $("#users a").off("click");
             $("#users").html("");
             $(window).off("beforeunload");
-            
+
             //
             // First destroy the communicator if needed then do
             // the screen transition.
@@ -465,7 +466,7 @@ function setState(newState, error)
                         function(e)
                         {
                             //
-                            // When enter key is pressed in the username input
+                            // After enter key is pressed in the username input,
                             // switch password to focus input.
                             //
                             if(e.which === 13)
@@ -474,13 +475,13 @@ function setState(newState, error)
                                 return false;
                             }
                         });
-                    
+
                     $("#username").focus();
                     $("#username").keypress(
                         function(e)
                         {
                             //
-                            // When enter key is pressed in the username input
+                            // After enter key is pressed in the username input,
                             // switch password to focus input.
                             //
                             if(e.which === 13)
@@ -494,7 +495,7 @@ function setState(newState, error)
                         function(e)
                         {
                             //
-                            // When enter key is pressed in the password input
+                            // After enter key is pressed in the password input,
                             // sign-in.
                             //
                             if(e.which === 13)
@@ -508,7 +509,7 @@ function setState(newState, error)
                         signin();
                         return false;
                     });
-                    
+
                     state = State.Disconnected;
                 });
         }
@@ -516,14 +517,14 @@ function setState(newState, error)
         {
             assert(state === State.Disconnected);
             username = formatUsername($("#username").val());
-            
+
             //
             // Remove the signin form event handlers.
             //
             $("#username").off("keypress");
             $("#password").off("keypress");
             $("#signin").off("click");
-            
+
             //
             // Dismiss any previous error message.
             //
@@ -531,17 +532,17 @@ function setState(newState, error)
             {
                 $("#signin-alert").click();
             }
-            
+
             //
-            // Setup a before unload handler to prevent accidentally navigate 
+            // Setup a before unload handler to prevent accidentally navigating
             // away from the page while the user is connected to the chat server.
             //
-            $(window).on("beforeunload", 
+            $(window).on("beforeunload",
                 function()
                 {
                     return "If you navigate away from this page, the current chat session will be lost.";
                 });
-            
+
             //
             // Transition to loading screen
             //
@@ -584,8 +585,8 @@ function formatDate(timestamp)
 
 function formatUsername(s)
 {
-    return s.length < 2 ? 
-        s.toUpperCase() : 
+    return s.length < 2 ?
+        s.toUpperCase() :
         s.substring(0, 1).toUpperCase() + s.substring(1, s.length).toLowerCase();
 }
 
@@ -609,9 +610,8 @@ var entities = [
     {entity: /&lt;/g, value: "<"},
     {entity: /&gt;/g, value: ">"},
     {entity: /&amp;/g, value: "&"}];
-    
 
-function unscapeHtml(msg)
+function unescapeHtml(msg)
 {
     var e;
     for(var i = 0; i < entities.length; ++i)

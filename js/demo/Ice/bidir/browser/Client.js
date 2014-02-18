@@ -43,7 +43,7 @@ var start = function()
     // Create a proxy to the sender object.
     //
     var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
-    var proxy = communicator.stringToProxy("sender:ws -p 10000 -h " + hostname);
+    var proxy = communicator.stringToProxy("sender:ws -p 10002 -h " + hostname);
     
     //
     // Down-cast the proxy to the Demo.CallbackSender interface.

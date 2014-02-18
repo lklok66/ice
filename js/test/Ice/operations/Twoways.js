@@ -9,9 +9,8 @@
 
 (function(global){
     var Ice = global.Ice;
-    var Test = global.Test;
-
-    var run = function(communicator, prx)
+    
+    var run = function(communicator, prx, Test, bidir)
     {
         var p = new Ice.Promise();
         var test = function(b)
@@ -645,69 +644,72 @@
                 return r.proxy.opContext(ctx);
             }
         ).then(
-            function(c)
-            {
-                test(c.equals(ctx));
-
-                //
-                // Test implicit context propagation
-                //
-
-                var initData = new Ice.InitializationData();
-                initData.properties = communicator.getProperties().clone();
-                initData.properties.setProperty("Ice.ImplicitContext", "Shared");
-
-                var ic = Ice.initialize(initData);
-
-                var p3 = Test.MyClassPrx.uncheckedCast(ic.stringToProxy("test:default -p 12010"));
-                ic.getImplicitContext().setContext(ctx);
-                test(ic.getImplicitContext().getContext().equals(ctx));
-
-                return p3.opContext();
-            }
-        ).then(
             function(c, r)
             {
                 test(c.equals(ctx));
+                if(!bidir)
+                {
+                    return Ice.Promise.try(
+                        function()
+                        {
+                            test(c.equals(ctx));
 
-                r.communicator.getImplicitContext().put("zero", "ZERO");
-                return r.proxy.opContext();
-            }
-        ).then(
-            function(c, r)
-            {
-                test(c.equals(r.communicator.getImplicitContext().getContext()));
+                            //
+                            // Test implicit context propagation
+                            //
 
-                ctx = r.communicator.getImplicitContext().getContext();
+                            var initData = new Ice.InitializationData();
+                            initData.properties = communicator.getProperties().clone();
+                            initData.properties.setProperty("Ice.ImplicitContext", "Shared");
+                            var ic = Ice.initialize(initData);
+                            var p3 = Test.MyClassPrx.uncheckedCast(ic.stringToProxy("test:default -p 12010"));
+                            ic.getImplicitContext().setContext(ctx);
+                            test(ic.getImplicitContext().getContext().equals(ctx));
+                            return p3.opContext();
+                        }
+                    ).then(
+                        function(c, r)
+                        {
+                            r.communicator.getImplicitContext().put("zero", "ZERO");
+                            return r.proxy.opContext();
+                        }
+                    ).then(
+                        function(c, r)
+                        {
+                            test(c.equals(r.communicator.getImplicitContext().getContext()));
 
-                var prxContext = new Ice.Context();
-                prxContext.set("one", "UN");
-                prxContext.set("four", "QUATRE");
+                            ctx = r.communicator.getImplicitContext().getContext();
 
-                combined = new Ice.Context(ctx);
-                combined.merge(prxContext);
-                test(combined.get("one") === "UN");
+                            var prxContext = new Ice.Context();
+                            prxContext.set("one", "UN");
+                            prxContext.set("four", "QUATRE");
 
-                var p3 = Test.MyClassPrx.uncheckedCast(r.proxy.ice_context(prxContext));
+                            combined = new Ice.Context(ctx);
+                            combined.merge(prxContext);
+                            test(combined.get("one") === "UN");
 
-                r.communicator.getImplicitContext().setContext(null);
+                            var p3 = Test.MyClassPrx.uncheckedCast(r.proxy.ice_context(prxContext));
 
-                return p3.opContext();
-            }
-        ).then(
-            function(c, r)
-            {
-                test(c.equals(r.proxy.ice_getContext()));
-                r.communicator.getImplicitContext().setContext(ctx);
+                            r.communicator.getImplicitContext().setContext(null);
 
-                return r.proxy.opContext();
-            }
-        ).then(
-            function(c, r)
-            {
-                test(c.equals(combined));
+                            return p3.opContext();
+                        }
+                    ).then(
+                        function(c, r)
+                        {
+                            test(c.equals(r.proxy.ice_getContext()));
+                            r.communicator.getImplicitContext().setContext(ctx);
 
-                return r.communicator.destroy();
+                            return r.proxy.opContext();
+                        }
+                    ).then(
+                        function(c, r)
+                        {
+                            test(c.equals(combined));
+
+                            return r.communicator.destroy();
+                        });
+                }
             }
         ).then(
             function()
@@ -746,7 +748,7 @@
             {
                 p.succeed();
             },
-            function()
+            function(ex)
             {
                 p.fail(ex);
             }

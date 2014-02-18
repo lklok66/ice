@@ -20,7 +20,7 @@ var batch = 0;
 function createProxy()
 {
     var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
-    var proxy = communicator.stringToProxy("hello:ws -h " + hostname + " -p 10000:wss -h " + hostname + " -p 10001");
+    var proxy = communicator.stringToProxy("hello:ws -h " + hostname + " -p 10002:wss -h " + hostname + " -p 10003");
 
     //
     // Set or clear the timeout.
