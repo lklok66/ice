@@ -139,8 +139,7 @@ Ice.Promise.try(
                 // keys we print the prompt and resume the standard input.
                 //
                 process.stdin.resume();
-                var promise = new Ice.Promise();
-                promise.succeed();
+                var promise = new Ice.Promise().succeed();
                 process.stdin.on("data", 
                                  function(buffer)
                                  {
@@ -183,11 +182,14 @@ Ice.Promise.try(
             return communicator.destroy();
         }
     }
-).exception(
+).then(
+    function()
+    {
+        process.exit(0);
+    },
     function(ex)
     {
         console.log(ex.toString());
         process.exit(1);
     });
-
 }());
