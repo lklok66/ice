@@ -869,6 +869,9 @@ def getCommandLineProperties(exe, config):
         if winrt:
             sslenv["certsdir"] = quoteArgument(os.path.abspath(os.path.join(toplevel, "certs", "winrt")))
             sslenv["verifyPeer"] = "0"
+        elif config.protocol == "wss":
+            sslenv["certsdir"] = quoteArgument(os.path.abspath(os.path.join(toplevel, "certs", "wss")))
+            sslenv["verifyPeer"] = "0"
         else:
             sslenv["certsdir"] = quoteArgument(os.path.abspath(os.path.join(toplevel, "certs")))
             sslenv["verifyPeer"] = "2"

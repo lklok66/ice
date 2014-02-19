@@ -99,7 +99,6 @@
                 test(ib2 !== ic);
                 out.writeLine("ok");
                 out.write("invoking proxy operations on class hierarchy... ");
-
                 return Promise.all(
                     ca.caop(ca), // r1
                     ca.caop(cb), // r2

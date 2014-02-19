@@ -435,7 +435,7 @@
                                                              protocol + " " + str + "'");
                     }
 
-                    host = argument;
+                    resource = argument;
                     break;
                 }
 

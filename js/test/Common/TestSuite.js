@@ -65,6 +65,10 @@ $(document).foundation();
                                     out.writeLine("exception occurred in call to " + r.operation);
                                 }
                                 out.writeLine(ex.toString());
+                                if(ex.stack)
+                                {
+                                    out.writeLine(ex.stack);
+                                }
                                 $("#run").removeClass("disabled");
                             }
                         );

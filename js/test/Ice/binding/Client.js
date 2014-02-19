@@ -32,7 +32,8 @@
                             function()
                             {
                                 communicator = Ice.initialize(initData);
-                                com = Test.RemoteCommunicatorPrx.uncheckedCast(communicator.stringToProxy("communicator:default -p 12010"));
+                                com = Test.RemoteCommunicatorPrx.uncheckedCast(
+                                    communicator.stringToProxy("communicator:default -p 12010"));
                             });
                     }
                     else
@@ -47,9 +48,8 @@
             var endpoints = [];
             var closePromises = [];
             var test = null;
-            var promises = adapters.map(function(adapter){ return adapter.getTestIntf(); });
             
-            return Promise.all(promises).then(
+            return Promise.all(adapters.map(function(adapter){ return adapter.getTestIntf(); })).then(
                 function()
                 {
                     var args = Array.prototype.slice.call(arguments);
@@ -120,8 +120,7 @@
             }
         };
         
-        var ref, adapter, test1, test2, test3, conn1, conn2, conn3,
-            adapters, names, prx;
+        var ref, adapter, test1, test2, test3, conn1, conn2, conn3, adapters, names, prx;
                 
         var multipleRandomEndpoints = function()
         {
@@ -287,9 +286,7 @@
             function(obj)
             {
                 adapter = obj;
-                return Promise.all(
-                    adapter.getTestIntf(),
-                    adapter.getTestIntf());
+                return Promise.all(adapter.getTestIntf(), adapter.getTestIntf());
             }
         ).then(
             function(r1, r2)
@@ -297,9 +294,7 @@
                 test1 = r1[0];
                 test2 = r2[0];
                 
-                return Promise.all(
-                    test1.ice_getConnection(),
-                    test2.ice_getConnection());
+                return Promise.all(test1.ice_getConnection(), test2.ice_getConnection());
             }
         ).then(
             function(r1, r2)
@@ -307,9 +302,7 @@
                 conn1 = r1[0];
                 conn2 = r2[0];
                 test(conn1 === conn2);
-                return Promise.all(
-                    test1.ice_ping(),
-                    test2.ice_ping());
+                return Promise.all(test1.ice_ping(), test2.ice_ping());
             }
         ).then(
             function(r1, r2)
@@ -320,10 +313,7 @@
             function()
             {
                 test3 = Test.TestIntfPrx.uncheckedCast(test1);
-                
-                return Promise.all(
-                    test3.ice_getConnection(),
-                    test1.ice_getConnection());
+                return Promise.all(test3.ice_getConnection(), test1.ice_getConnection());
             }
         ).then(
             function(r1, r2)
@@ -331,11 +321,7 @@
                 conn3 = r1[0];
                 conn1 = r2[0];
                 test(conn3 === conn1);
-                
-                return Promise.all(
-                    test3.ice_getConnection(),
-                    test2.ice_getConnection());
-                
+                return Promise.all(test3.ice_getConnection(), test2.ice_getConnection());
             }
         ).then(
             function(r1, r2)
@@ -678,8 +664,7 @@
             {
                 out.write("testing random endpoint selection... ");
                 names = ["Adapter21", "Adapter22", "Adapter23"];
-                return Promise.all.apply(Promise, 
-                        names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
+                return Promise.all(names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
             }
         ).then(
             function()
@@ -729,8 +714,7 @@
             function(obj)
             {
                 prx = obj;
-                prx = Test.TestIntfPrx.uncheckedCast(
-                                            prx.ice_endpointSelection(Ice.EndpointSelectionType.Random));
+                prx = Test.TestIntfPrx.uncheckedCast(prx.ice_endpointSelection(Ice.EndpointSelectionType.Random));
                 test(prx.ice_getEndpointSelection() === Ice.EndpointSelectionType.Random);
                 names = ["Adapter21", "Adapter22", "Adapter23"];
                 var f1 = function()
@@ -781,8 +765,7 @@
             {
                 out.write("testing ordered endpoint selection... ");
                 names = ["Adapter31", "Adapter32", "Adapter33"];
-                return Promise.all.apply(Promise, 
-                        names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
+                return Promise.all(names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
             }
         ).then(
             function()
@@ -794,8 +777,7 @@
             function(obj)
             {
                 prx = obj;
-                prx = Test.TestIntfPrx.uncheckedCast(
-                                            prx.ice_endpointSelection(Ice.EndpointSelectionType.Ordered));
+                prx = Test.TestIntfPrx.uncheckedCast(prx.ice_endpointSelection(Ice.EndpointSelectionType.Ordered));
                 test(prx.ice_getEndpointSelection() === Ice.EndpointSelectionType.Ordered);
                 var i, nRetry = 5;
                 var f1 = function(i, idx, names)
@@ -963,8 +945,7 @@
             {
                 out.write("testing per request binding with multiple endpoints... ");
                 names = ["Adapter51", "Adapter52", "Adapter53"];
-                return Promise.all.apply(Promise, 
-                        names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
+                return Promise.all(names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
             }
         ).then(
             function()
@@ -1042,11 +1023,10 @@
             {
                 out.write("testing per request binding and ordered endpoint selection... ");
                 names = ["Adapter61", "Adapter62", "Adapter63"];
-                return Promise.all.apply(Promise, 
-                        names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
+                return Promise.all(names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
             }
         ).then(
-            function()
+            function(a)
             {
                 adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[0]; });
                 return createTestIntfPrx(adapters);
@@ -1055,8 +1035,7 @@
             function(obj)
             {
                 prx = obj;
-                prx = Test.TestIntfPrx.uncheckedCast(
-                                            prx.ice_endpointSelection(Ice.EndpointSelectionType.Ordered));
+                prx = Test.TestIntfPrx.uncheckedCast(prx.ice_endpointSelection(Ice.EndpointSelectionType.Ordered));
                 test(prx.ice_getEndpointSelection() == Ice.EndpointSelectionType.Ordered);
                 prx = Test.TestIntfPrx.uncheckedCast(prx.ice_connectionCached(false));
                 test(!prx.ice_isConnectionCached());
@@ -1106,7 +1085,7 @@
             function(ex)
             {
                 test((typeof(window) == 'undefined' && ex instanceof Ice.ConnectionRefusedException) ||
-                        (typeof(window) != 'undefined' && ex instanceof Ice.ConnectFailedException));
+                     (typeof(window) != 'undefined' && ex instanceof Ice.ConnectFailedException));
                 return prx.ice_getEndpoints();
             }
         ).then(
