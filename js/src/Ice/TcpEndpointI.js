@@ -204,17 +204,6 @@
 
             return TcpTransceiver.createOutgoing(this._instance, new Address(this._host, this._port));
         },
-        //
-        // Check whether the endpoint is equivalent to another one.
-        //
-        equivalent: function(endpoint)
-        {
-            if(!(endpoint instanceof TcpEndpointI))
-            {
-                return false;
-            }
-            return endpoint._host === this._host && endpoint._port === this._port;
-        },
         hashCode: function()
         {
             return this._hashCode;

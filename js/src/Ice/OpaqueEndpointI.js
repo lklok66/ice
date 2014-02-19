@@ -156,13 +156,6 @@
         {
             return null;
         },
-        //
-        // Check whether the endpoint is equivalent to another one.
-        //
-        equivalent: function(endpoint)
-        {
-            return false;
-        },
         hashCode: function()
         {
             return this._hashCode;

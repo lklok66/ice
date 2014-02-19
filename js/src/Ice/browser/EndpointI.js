@@ -215,19 +215,6 @@
 
             return Transceiver.createOutgoing(this._instance, this._secure, new Address(this._host, this._port), this._resource);
         },
-        //
-        // Check whether the endpoint is equivalent to another one.
-        //
-        equivalent: function(endpoint)
-        {
-            if(!(endpoint instanceof EndpointI))
-            {
-                return false;
-            }
-            // TODO should we also include _resource here?
-            return endpoint._host === this._host && 
-                    endpoint._port === this._port;
-        },
         hashCode: function()
         {
             return this._hashCode;
