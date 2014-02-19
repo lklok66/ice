@@ -44,49 +44,88 @@ FileServant.prototype.processRequest = function(req, res)
 {
     var filePath = path.resolve(path.join(this._basePath, url.parse(req.url).path));
 
-    fs.stat(filePath, 
-            function(err, stats)
-            {
-                if(err)
+    var ext = path.extname(filePath).slice(1);
+    
+    //
+    // When the browser ask for a .js file and it has support for gzip content
+    // check if a gzip version (.js.gz) of the file exists and use that instead.
+    //
+    if(ext == "js" && req.headers["accept-encoding"].indexOf("gzip") !== -1)
+    {
+        fs.stat(filePath + ".gz",
+                function(err, stats)
                 {
-                    if(err.code === 'ENOENT')
+                    if(err || !stats.isFile())
                     {
-                        res.writeHead(404);
-                        res.end("404 Page Not Found");
+                        fs.stat(filePath,
+                                function(err, stats)
+                                {
+                                    doRequest(err, stats, filePath);
+                                });
                     }
                     else
                     {
-                        res.writeHead(500);
-                        res.end("500 Internal Server Error");
+                        doRequest(err, stats, filePath + ".gz");
                     }
+                });
+    }
+    else
+    {
+        fs.stat(filePath,
+                    function(err, stats)
+                    {
+                        doRequest(err, stats, filePath);
+                    });
+    }
+    
+    var doRequest = function(err, stats, filePath)
+    {
+        if(err)
+        {
+            if(err.code === 'ENOENT')
+            {
+                res.writeHead(404);
+                res.end("404 Page Not Found");
+            }
+            else
+            {
+                res.writeHead(500);
+                res.end("500 Internal Server Error");
+            }
+        }
+        else
+        {
+            if(!stats.isFile())
+            {
+                res.writeHead(403);
+                res.end("403 Forbiden");
+            }
+            else
+            {
+                
+                var headers = 
+                {
+                    "Content-Type": MimeTypes[ext] || "text/plain",
+                    "Content-Length": stats.size
+                };
+                
+                if(path.extname(filePath).slice(1) == "gz")
+                {
+                    headers["Content-Encoding"] = "gzip";
+                }
+                
+                res.writeHead(200, headers);
+                if(req.method === 'HEAD')
+                {
+                    res.end();
                 }
                 else
                 {
-                    if(!stats.isFile())
-                    {
-                        res.writeHead(403);
-                        res.end("403 Forbiden");
-                    }
-                    else
-                    {
-                        var ext = path.extname(filePath).slice(1);
-                        var headers = 
-                        {
-                            "Content-Type": MimeTypes[ext] ? MimeTypes[ext] : "text/plain",
-                            "Content-Length": stats.size
-                        };
-                        res.writeHead(200, headers);
-                        if(req.method === 'HEAD')
-                        {
-                            res.end();
-                        }
-                        else
-                        {
-                            fs.createReadStream(filePath, { 'bufferSize': 4 * 1024 }).pipe(res);
-                        }
-                    }
+                    fs.createReadStream(filePath, { 'bufferSize': 4 * 1024 }).pipe(res);
                 }
-            });
+            }
+        }
+    }
 };
 
 var HttpServer = function(host, ports)
@@ -119,7 +158,7 @@ HttpServer.prototype.start = function()
         });
     }
     
-    var self = this;    
+    var self = this;
     [httpServer, httpsServer].forEach(function(server)
                     {
                         server.on("request", function(req, res)
