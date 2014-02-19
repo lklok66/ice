@@ -17,7 +17,7 @@ var path = require("path");
 var httpProxy = null;
 try
 {
-    httpProxy = require('http-proxy');
+    httpProxy = require("http-proxy");
 }
 catch(e)
 {
@@ -29,6 +29,7 @@ var MimeTypes =
 {
     css: "text/css",
     html: "text/html",
+    ico: "image/x-icon",
     jpeg: "image/jpeg",
     jpg: "image/jpeg",
     js: "text/javascript",
@@ -42,7 +43,7 @@ var FileServant = function(basePath)
 
 FileServant.prototype.processRequest = function(req, res)
 {
-    var filePath = path.resolve(path.join(this._basePath, url.parse(req.url).path));
+    var filePath = path.resolve(path.join(this._basePath, req.url.path));
 
     var ext = path.extname(filePath).slice(1);
     
@@ -82,15 +83,17 @@ FileServant.prototype.processRequest = function(req, res)
     {
         if(err)
         {
-            if(err.code === 'ENOENT')
+            if(err.code === "ENOENT")
             {
                 res.writeHead(404);
                 res.end("404 Page Not Found");
+                console.log("HTTP/404 (Page Not Found) " + req.method + " " + req.url.path);
             }
             else
             {
                 res.writeHead(500);
                 res.end("500 Internal Server Error");
+                console.log("HTTP/500 (Internal Server Error) " + req.method + " " + req.url.path);
             }
         }
         else
@@ -99,14 +102,25 @@ FileServant.prototype.processRequest = function(req, res)
             {
                 res.writeHead(403);
                 res.end("403 Forbiden");
+                console.log("HTTP/403 (Forbiden) " + req.method + " " + req.url.path);
             }
             else
             {
+                //
+                // Create a md5 using the stats attributes
+                // to be used as Etag header.
+                //
+                var hash = crypto.createHash("md5");
+                hash.update(stats.ino.toString());
+                hash.update(stats.mtime.toString());
+                hash.update(stats.size.toString());
                 
                 var headers = 
                 {
                     "Content-Type": MimeTypes[ext] || "text/plain",
-                    "Content-Length": stats.size
+                    "Content-Length": stats.size,
+                    "Last-Modified": new Date(stats.mtime).toUTCString(),
+                    "Etag": hash.digest("hex")
                 };
                 
                 if(path.extname(filePath).slice(1) == "gz")
@@ -114,14 +128,45 @@ FileServant.prototype.processRequest = function(req, res)
                     headers["Content-Encoding"] = "gzip";
                 }
                 
-                res.writeHead(200, headers);
-                if(req.method === 'HEAD')
+                //
+                // Check for conditional request headers, if-modified-since
+                // and if-none-match.
+                //
+                var modified = true;
+                if(Date.parse(req.headers["if-modified-since"]) == stats.mtime.getTime())
                 {
+                    modified = false;
+                }
+                else if(req.headers["if-none-match"] !== undefined)
+                {
+                    modified = req.headers["if-none-match"].split(" ").every(
+                        function(element, index, array)
+                        {
+                            return element !== headers["Etag"];
+                        });
+                }
+
+                //
+                // Not Modified
+                //
+                if(!modified)
+                {
+                    res.writeHead(304, headers);
                     res.end();
+                    console.log("HTTP/304 (Not Modified) " + req.method + " " + req.url.path);
                 }
                 else
                 {
-                    fs.createReadStream(filePath, { 'bufferSize': 4 * 1024 }).pipe(res);
+                    res.writeHead(200, headers);
+                    if(req.method === "HEAD")
+                    {
+                        res.end();
+                    }
+                    else
+                    {
+                        fs.createReadStream(filePath, { "bufferSize": 4 * 1024 }).pipe(res);
+                    }
+                    console.log("HTTP/200 (Ok) " + req.method + " " + req.url.path);
                 }
             }
         }
@@ -223,7 +268,6 @@ HttpServer.prototype.processRequest = function(req, res)
     var endCB = function()
     {
         req.url = url.parse(req.url);
-        console.log(req.url.path);
         defaultController.processRequest(req, res);
     };
     
