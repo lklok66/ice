@@ -77,9 +77,17 @@
         $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
         $("#progress").spin("small");
     </script>
+    
+    <!-- Scripts used during development, for optimized builds comment the following scripts
+         and use browser/Client.min.js bellow -->
     <script src="../../../lib/Ice.js"></script>
     <script src="Hello.js"></script>
     <script src="browser/Client.js"></script>
+    
+    <!-- Uncomment the following line to use use a minimized version of the 
+         Client that include Ice library and the Hello client. -->
+    <!--<script src="browser/Client.min.js"></script>-->
+    
     <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shCore.js"></script>
     <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shBrushJScript.js"></script>
     <script type="application/javascript">
