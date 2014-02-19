@@ -15,7 +15,14 @@
         #progress .icon { margin-left:10px; margin-top: 5px; }
         #progress .text { margin-left:25px; }
         .waiting * { cursor: wait !important; }
+        body { height:100%;}
+        #footer {width:100%; height:80px; position:fixed; bottom:0px; background:#333333; color:#ffffff; padding:25px 25px 25px 25px;}
+        #footer * {color:#858585;}
+        #footer .logo{ float:left;}
+        #footer .copyright{ float:right;}
+        #body {padding:10px; padding-bottom:80px;   /* Height of the footer */}
     </style>
+    <link rel="icon" type="image/x-icon" href="/config/favicon.ico">
   </head>
   <body>
     <nav class="top-bar" data-topbar>
@@ -29,11 +36,12 @@
             <!-- Right Nav Section -->
             <ul class="right">
                 <li class="divider"></li>
-                <li><a href="#" id="viewSource" class="disabled">View Source</a></li>
+                <li><a href="#" id="viewReadme">Readme</a></li>
+                <li><a href="#" id="viewSource" class="disabled">Source</a></li>
             </ul>
         </section>
     </nav>
-    <section role="main">
+    <section role="main" id="body">
         <ul class="breadcrumbs">
             <li><a href="../../../index.html">Ice</a></li>
             <li><a href="../../index.html">Demos</a></li>
@@ -66,9 +74,33 @@
             </div>
         </div>
     </section>
+    <div id="readme-modal" class="reveal-modal medium" data-reveal>
+        <h4>Bidir Demo Readme</h4>
+        <hr/>
+        <p>This demo shows how to use bidirectional connections for callbacks.</p>
+        <p>This is typically used if the server cannot open a connection to the
+           client to send callbacks, for example, because firewalls block
+           incoming connections to the client.</p>
+
+        <p>First follow the instructions from the C++ Ice bidir demo README to
+           start the server.</p>
+
+        <p>Then you can use the <strong>Start</strong> and <strong>Stop</strong> buttons to add or remove a callback to
+           the server respectively.</p>
+
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
     <div id="source-modal" class="reveal-modal" data-reveal>
         <pre id="source" class="brush: js;"></pre>
         <a class="close-reveal-modal">&#215;</a>
+    </div>
+    <div id="footer">
+        <div class="logo">
+            <h4><strong>ZeroC</strong></h4>
+        </div>
+        <div class="copyright">
+            <h6>© 2014 ZeroC, Inc. All rights reserved.</h6>
+        </div>
     </div>
     <script src="../../../config/foundation/js/jquery.js"></script>
     <script src="../../../config/foundation/js/foundation.min.js"></script>
@@ -83,6 +115,12 @@
     <script src="Callback.js"></script>
     <script src="browser/Client.js"></script>
     <script type="application/javascript">
+        $("#viewReadme").click(
+            function()
+            {
+                $("#readme-modal").foundation("reveal", "open");
+                return false;
+            });
         $("#source").load("browser/Client.js",
             //
             // Load completed

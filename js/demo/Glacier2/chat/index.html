@@ -12,6 +12,12 @@
     <style type="text/css">
         #source { max-height:500px; overflow:auto; }
         #output { height: 300px; }
+        body { height:100%;}
+        #footer {width:100%; height:80px; position:fixed; bottom:0px; background:#333333; color:#ffffff; padding:25px 25px 25px 25px;}
+        #footer * {color:#858585;}
+        #footer .logo{ float:left;}
+        #footer .copyright{ float:right;}
+        #body {padding:10px; padding-bottom:80px;   /* Height of the footer */}
     </style>
   </head>
   <body>
@@ -26,11 +32,12 @@
             <!-- Right Nav Section -->
             <ul class="right">
                 <li class="divider"></li>
-                <li><a href="#" id="viewSource" class="disabled">View Source</a></li>
+                <li><a href="#" id="viewReadme">Readme</a></li>
+                <li><a href="#" id="viewSource">Source</a></li>
             </ul>
         </section>
     </nav>
-    <section role="main">
+    <section role="main" id="body">
         <ul class="breadcrumbs">
             <li><a href="../../../index.html">Ice</a></li>
             <li><a href="../../index.html">Demos</a></li>
@@ -111,11 +118,31 @@
             </div>
         </div>
     </section>
+    <div id="readme-modal" class="reveal-modal medium" data-reveal>
+        <h4>Chat Demo Readme</h4>
+        <hr/>
+        <p>This example demonstrates the use of a Glacier2 session to create a
+           very simple chat client.</p>
+        
+        <p>First follow the instructions from the C++ Glacier2 chat demo README to
+           start the server.</p>
+        <div class="panel callout radius">
+            <p>You can sign in using any username and password.</p>
+        </div>
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
     <div id="source-modal" class="reveal-modal" data-reveal>
         <pre id="source" class="brush: js;"></pre>
         <a class="close-reveal-modal">&#215;</a>
     </div>
-    
+    <div id="footer">
+        <div class="logo">
+            <h4><strong>ZeroC</strong></h4>
+        </div>
+        <div class="copyright">
+            <h6>© 2014 ZeroC, Inc. All rights reserved.</h6>
+        </div>
+    </div>
     <script src="../../../config/foundation/js/jquery.js"></script>
     <script src="../../../config/foundation/js/foundation.min.js"></script>
     <script src="../../../config/foundation/js/animo.js"></script>
@@ -130,6 +157,13 @@
     </script>
     <script src="browser/Client.js"></script>
     <script type="application/javascript">
+        $("#viewReadme").click(
+            function()
+            {
+                $("#readme-modal").foundation("reveal", "open");
+                return false;
+            });
+            
         $("#source").load("browser/Client.js",
             //
             // Load completed

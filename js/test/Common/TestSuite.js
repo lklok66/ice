@@ -75,4 +75,11 @@ $(document).foundation();
                     return false;
                 }
             });
+            
+            $("#viewReadme").click(
+            function()
+            {
+                $("#readme-modal").foundation("reveal", "open");
+                return false;
+            });
         });
