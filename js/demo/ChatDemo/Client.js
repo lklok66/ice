@@ -215,12 +215,6 @@ var run = function(router, session)
                             new Ice.Identity("callback", category)));
 
             //
-            // Activate the client object adapter before setting the
-            // session callback.
-            //
-            adapter.activate();
-
-            //
             // Set the chat session callback.
             //
             return session.setCallback(callback);
@@ -466,8 +460,8 @@ function setState(newState, error)
                         function(e)
                         {
                             //
-                            // After enter key is pressed in the username input,
-                            // switch password to focus input.
+                            // After enter key is pressed in the hostname input,
+                            // switch focus to username input.
                             //
                             if(e.which === 13)
                             {
@@ -482,7 +476,7 @@ function setState(newState, error)
                         {
                             //
                             // After enter key is pressed in the username input,
-                            // switch password to focus input.
+                            // switch focus to password input.
                             //
                             if(e.which === 13)
                             {

@@ -27,7 +27,8 @@ demos = [
     "Ice/hello",
     "Ice/latency",
     "Ice/minimal",
-    "Ice/throughput"
+    "Ice/throughput",
+    "Glacier2/chat"
 ]
 
 if __name__ == "__main__":

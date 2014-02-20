@@ -40,18 +40,9 @@ protected:
     std::string getValue(const std::string&, const TypePtr&);
 
     void writeConstantValue(const std::string&, const TypePtr&, const SyntaxTreeBasePtr&, const std::string&);
-
-    std::string toJsIdent(const std::string&);
-    std::string editMarkup(const std::string&);
-    StringList splitIntoLines(const std::string&);
-    void splitComment(const ContainedPtr&, StringList&, StringList&);
-    StringList getSummary(const ContainedPtr&);
+    
+    static StringList splitComment(const ContainedPtr&);
     void writeDocComment(const ContainedPtr&, const std::string&, const std::string& = "");
-    void writeDocCommentOp(const OperationPtr&);
-
-    enum ParamDir { InParam, OutParam };
-    void writeDocCommentAsync(const OperationPtr&, ParamDir, const std::string& = "", bool = false);
-    void writeDocCommentParam(const OperationPtr&, ParamDir, bool = false);
 
     ::IceUtilInternal::Output& _out;
 };

@@ -8,35 +8,46 @@
     <script src="../../../config/foundation/js/modernizr.js"></script>
     <link type="text/css" rel="stylesheet" href="../../../config/syntaxhighlighter/styles/shCoreDefault.css"/>
     <style type="text/css">
-        #source { max-height:500px; overflow:auto; }
+        #source-modal{ max-height:500px; overflow:auto; }
         #progress .icon { margin-left:10px; margin-top: 5px; }
         #progress .text { margin-left:25px; }
         #output { height: 150px; }
         .waiting * { cursor: wait !important; }
+        body { height:100%;}
+        #header {width:100%; position:fixed; top:0px; height: 100px; z-index: 10;}
+        #footer {width:100%; height:80px; position:fixed; bottom:0px; background:#333333; color:#ffffff; padding:25px 25px 25px 25px;}
+        #footer * {color:#858585;}
+        #footer .logo{ float:left;}
+        #footer .copyright{ float:right;}
+        #body {padding:10px; padding-top:100px; padding-bottom:80px;   /* Height of the footer */}
     </style>
+    <link rel="icon" type="image/x-icon" href="/config/favicon.ico">
   </head>
   <body>
-    <nav class="top-bar" data-topbar>
-        <ul class="title-area">
-            <li class="name">
-                <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
-            </li>
-            <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
-        </ul>
-        <section class="top-bar-section">
-            <!-- Right Nav Section -->
-            <ul class="right">
-                <li class="divider"></li>
-                <li><a href="#" id="viewSource" class="disabled">View Source</a></li>
+    <div id="header">
+        <nav class="top-bar" data-topbar>
+            <ul class="title-area">
+                <li class="name">
+                    <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
+                </li>
+                <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
             </ul>
-        </section>
-    </nav>
-    <section role="main">
+            <section class="top-bar-section">
+                <!-- Right Nav Section -->
+                <ul class="right">
+                    <li class="divider"></li>
+                    <li><a href="#" id="viewReadme">Readme</a></li>
+                    <li><a href="#" id="viewSource">Source</a></li>
+                </ul>
+            </section>
+        </nav>
         <ul class="breadcrumbs">
             <li><a href="../../../index.html">Ice</a></li>
             <li><a href="../../index.html">Demos</a></li>
             <li class="current"><a href="#">Minimal</a></li>
         </ul>
+    </div>
+    <section role="main" id="body">
         <div class="row">
             <div class="large-12 medium-12 columns">
                 <form>
@@ -64,9 +75,60 @@
             </div>
         </div>
     </section>
-    <div id="source-modal" class="reveal-modal" data-reveal>
-        <pre id="source" class="brush: js;"></pre>
+    <div id="readme-modal" class="reveal-modal" data-reveal>
+        <h4>Minimal Demo Readme</h4>
+        <hr/>
+        <p>This demo is a minimal Ice "hello world" application. Each time the
+        client is run a "sayHello" invocation is sent to the server.</p>
+
+        <p>First follow the instructions from the C++ Ice minimal demo README to
+        start the server with Web Socket protocol enabled.</p>
+        
+        <p>To run the client click the <strong>"Hello World!"</strong> button.</p>
+        
+        <p>When the demo is build with optimizations enabled it creates a minified
+        script <code>browser/Client.min.js</code> that includes:
+        </p>
+        <ul>
+            <li>Ice.js (The Ice run-time library)</li>
+            <li>Hello.js (The generated code for this demo)</li>
+            <li>browser/Client.js (The demo source)</li>
+        </ul>
+        <p>to use the minified version you should edit the <code>demo/Ice/minimal/index.html</code>
+        file and comment out the non optimized scripts:</p>
+        <pre>
+    &lt;!-- Scripts used during development, for optimized builds 
+    comment out the following scripts and use browser/Client.min.js below --&gt;
+    &lt;script src="../../../lib/Ice.js"&gt;&lt;/script&gt;
+    &lt;script src="Hello.js"&gt;&lt;/script&gt;
+    &lt;script src="browser/Client.js"&gt;&lt;/script&gt;
+        </pre>
+        <p>Then uncomment the script tag for the minified version</p>
+        <pre>
+    &lt;!-- Uncomment the following line to use use a minimized version of the 
+         Client that include Ice library and the Hello client. --&gt;
+    &lt;!--&lt;script src="browser/Client.min.js"&gt;&lt;/script&gt;--&gt;
+        </pre>
+        <div class="panel callout radius">
+            <p>Note that this demo hardwires port 10000. If port 10000 is not
+            available on your machine, you need to edit both client and server
+            to use a free port.</p>
+        </div>
         <a class="close-reveal-modal">&#215;</a>
+    </div>
+    <div id="source-modal" class="reveal-modal" data-reveal>
+        <div class="contents">
+            <pre id="source" class="brush: js;"></pre>
+        </div>
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
+    <div id="footer">
+        <div class="logo">
+            <h4><strong>ZeroC</strong></h4>
+        </div>
+        <div class="copyright">
+            <h6>© 2014 ZeroC, Inc. All rights reserved.</h6>
+        </div>
     </div>
     <script src="../../../config/foundation/js/jquery.js"></script>
     <script src="../../../config/foundation/js/foundation.min.js"></script>
@@ -77,17 +139,31 @@
         $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
         $("#progress").spin("small");
     </script>
+    
+    <!-- Scripts used during development, for optimized builds
+         comment the following scripts and use browser/Client.min.js below -->
     <script src="../../../lib/Ice.js"></script>
     <script src="Hello.js"></script>
     <script src="browser/Client.js"></script>
+    
+    <!-- Uncomment the following line to use use a minimized version of the 
+         Client that include Ice library and the Hello client. -->
+    <!--<script src="browser/Client.min.js"></script>-->
+    
     <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shCore.js"></script>
     <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shBrushJScript.js"></script>
     <script type="application/javascript">
+        $("#viewReadme").click(
+            function()
+            {
+                $("#readme-modal").foundation("reveal", "open");
+                return false;
+            });
+            
         $("#source").load("browser/Client.js",
             function(){
                 SyntaxHighlighter.defaults.toolbar = false;
                 SyntaxHighlighter.highlight();
-                $("#viewSource").removeClass("disabled");
                 $("#viewSource").click(
                     function()
                     {

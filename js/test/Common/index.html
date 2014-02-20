@@ -5,26 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Test Suite | Ice for JavaScript</title>
     <style type="text/css">
-        #wss
-        {
-            margin-top:10px;
-        }
+        #wss, #loop{ margin-top:10px;}
+        body { height:100%;}
+        #header {width:100%; position:fixed; top:0px; height: 100px; z-index: 10;}
+        #footer {width:100%; height:80px; position:fixed; bottom:0px; background:#333333; color:#ffffff; padding:25px 25px 25px 25px;}
+        #footer * {color:#858585;}
+        #footer .logo{ float:left;}
+        #footer .copyright{ float:right;}
+        #body {padding:10px; padding-top: 100px; padding-bottom:80px;   /* Height of the footer */}
     </style>
+    <link rel="icon" type="image/x-icon" href="/config/favicon.ico">
   </head>
   <body>
-    
-    <nav class="top-bar" data-topbar>
-        <ul class="title-area">
-            <li class="name">
-                <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
-            </li>
-        </ul>
-    </nav>
-    <ul class="breadcrumbs">
+    <div id="header">
+        <nav class="top-bar" data-topbar>
+            <ul class="title-area">
+                <li class="name">
+                    <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
+                </li>
+                <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
+            </ul>
+            <section class="top-bar-section">
+                <!-- Right Nav Section -->
+                <ul class="right">
+                    <li class="divider"></li>
+                    <li><a href="#" id="viewReadme">Readme</a></li>
+                </ul>
+            </section>
+        </nav>
+        <ul class="breadcrumbs">
             <li><a href="../../../index.html">Ice</a></li>
             <li class="current"><a href="#">Test</a></li>
         </ul>
-    <section role="main">
+    </div>
+    <section role="main" id="body">
         <div class="row">
             <div class="large-12 medium-12 columns">
                 <a id="select-test" href="#" data-dropdown="drop" class="button dropdown large">...</a><br>
@@ -40,10 +54,21 @@
                     </div>
                     <div class="row">
                         <div class="small-3 columns">
-                            <label class="right inline" for="wss">WSS:</label>
+                            <label class="right inline">Protocol:</label>
                         </div>
                         <div class="small-9 columns">
-                            <input id="wss" type="checkbox">
+                            <select id="protocol">
+                                <option value="ws">WS</option>
+                                <option value="wss">WSS</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="small-3 columns">
+                            <label class="right inline" for="loop">Loop:</label>
+                        </div>
+                        <div class="small-9 columns">
+                            <input id="loop" type="checkbox">
                         </div>
                     </div>
                     <a href="#" class="button" id="run">Run</a>
@@ -52,100 +77,125 @@
             </div>
         </div>
     </section>
+    <div id="readme-modal" class="reveal-modal medium" data-reveal>
+        <h4>Test Suite Readme</h4>
+        <hr/>
+        <p>TODO</p>
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
+    <div id="footer">
+        <div class="logo">
+            <h4><strong>ZeroC</strong></h4>
+        </div>
+        <div class="copyright">
+            <h6>© 2014 ZeroC, Inc. All rights reserved.</h6>
+        </div>
+    </div>
     <script type="text/javascript">
         var TestCases = {
-                "Ice/binding": ["Test.js", "Client.js"],
-                "Ice/defaultValue": ["Test.js", "Client.js"],
-                "Ice/enums": ["Test.js", "Client.js"],
-                "Ice/exceptions": ["Test.js", "Client.js"],
-                "Ice/exceptionsBidir": ["Test.js", "TestAMD.js", "ThrowerI.js", "AMDThrowerI.js",
-                                        "../exceptions/Client.js", "Client.js"],
-                "Ice/facets": ["Test.js", "Client.js"],
-                "Ice/facetsBidir": ["Test.js", "TestI.js", "../facets/Client.js", "Client.js"],
-                "Ice/info": ["Test.js", "Client.js"],
-                "Ice/inheritance": ["Test.js", "Client.js"],
-                "Ice/inheritanceBidir": ["Test.js", "InitialI.js", "../inheritance/Client.js", "Client.js"],
-                "Ice/operations": ["Test.js", "Twoways.js", "Oneways.js", "BatchOneways.js", "Client.js"],
-                "Ice/operationsBidir": ["Test.js", "TestAMD.js", "../operations/Twoways.js", "../operations/Oneways.js", 
-                                        "../operations/BatchOneways.js", "MyDerivedClassI.js", "AMDMyDerivedClassI.js", 
-                                        "../operations/Client.js", "Client.js"],
-                "Ice/objects": ["Test.js", "Client.js"],
-                "Ice/optional": ["Test.js", "Client.js"],
-                "Ice/optionalBidir": ["Test.js", "TestAMD.js", "InitialI.js", "AMDInitialI.js", 
-                                      "../optional/Client.js", "Client.js"],
-                "Ice/promise": ["Client.js"],
-                "Ice/proxy": ["Test.js", "Client.js"],
-                "Ice/retry": ["Test.js", "Client.js"],
-                "Ice/slicing/exceptions": ["Test.js", "Client.js"],
-                "Ice/slicing/objects": ["Test.js", "Client.js"],
-                "Ice/timeout": ["Test.js", "Client.js"]
-            };
-            
-            var current;
-            var basePath = "../../";
-            for(name in TestCases)
+            "Ice/binding": ["Test.js", "Client.js"],
+            "Ice/defaultValue": ["Test.js", "Client.js"],
+            "Ice/enums": ["Test.js", "Client.js"],
+            "Ice/exceptions": ["Test.js", "Client.js"],
+            "Ice/exceptionsBidir": ["Test.js", "TestAMD.js", "ThrowerI.js", "AMDThrowerI.js",
+                                    "../exceptions/Client.js", "Client.js"],
+            "Ice/facets": ["Test.js", "Client.js"],
+            "Ice/facetsBidir": ["Test.js", "TestI.js", "../facets/Client.js", "Client.js"],
+            "Ice/info": ["Test.js", "Client.js"],
+            "Ice/inheritance": ["Test.js", "Client.js"],
+            "Ice/inheritanceBidir": ["Test.js", "InitialI.js", "../inheritance/Client.js", "Client.js"],
+            "Ice/operations": ["Test.js", "Twoways.js", "Oneways.js", "BatchOneways.js", "Client.js"],
+            "Ice/operationsBidir": ["Test.js", "TestAMD.js", "../operations/Twoways.js", "../operations/Oneways.js", 
+                                    "../operations/BatchOneways.js", "MyDerivedClassI.js", "AMDMyDerivedClassI.js", 
+                                    "../operations/Client.js", "Client.js"],
+            "Ice/objects": ["Test.js", "Client.js"],
+            "Ice/optional": ["Test.js", "Client.js"],
+            "Ice/optionalBidir": ["Test.js", "TestAMD.js", "InitialI.js", "AMDInitialI.js", 
+                                    "../optional/Client.js", "Client.js"],
+            "Ice/promise": ["Client.js"],
+            "Ice/proxy": ["Test.js", "Client.js"],
+            "Ice/retry": ["Test.js", "Client.js"],
+            "Ice/slicing/exceptions": ["Test.js", "Client.js"],
+            "Ice/slicing/objects": ["Test.js", "Client.js"],
+            "Ice/timeout": ["Test.js", "Client.js"]
+        };
+        
+        var current, next;
+        var basePath = "../../";
+        for(name in TestCases)
+        {
+            if(current)
             {
-                if(document.location.pathname.indexOf(name) !== -1)
-                {
-                    current = name;
-                    if(name.split("/").length === 3)
-                    {
-                        basePath = "../../../";
-                    }
-                }
+                next = name;
+                break;
             }
             
-            scripts = [
-                basePath + "../config/foundation/js/modernizr.js",
-                basePath + "../config/foundation/js/jquery.js",
-                basePath + "../config/foundation/js/foundation.min.js",
-                basePath + "../lib/Ice.js"
-            ];
-            
-            TestCases[current].forEach(
-                function(script)
-                {
-                    scripts.push(script);
-                });
-            scripts.push(basePath + "Common/TestSuite.js");
-            
-            var head = document.getElementsByTagName("head")[0];
-            
-            var link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = basePath + "../config/foundation/css/foundation.css";
-            head.appendChild(link);
-            
-            function loadScript()
+            if(document.location.pathname.indexOf(name + "/index.html") !== -1)
             {
-                if(scripts.length > 0)
+                current = name;
+                if(name.split("/").length === 3)
                 {
-                    var script = document.createElement("script");
-                        script.type = "text/javascript";
-                        script.src = scripts.shift();
-                        script.onload = function()
+                    basePath = "../../../";
+                }
+            }
+        }
+        if(!next)
+        {
+            next = "Ice/binding";
+        }
+        
+        scripts = [
+            basePath + "../config/foundation/js/modernizr.js",
+            basePath + "../config/foundation/js/jquery.js",
+            basePath + "../config/foundation/js/foundation.min.js",
+            basePath + "../lib/Ice.js"
+        ];
+        
+        TestCases[current].forEach(
+            function(script)
+            {
+                scripts.push(script);
+            });
+        scripts.push(basePath + "Common/Controller.js");
+        scripts.push(basePath + "Common/TestSuite.js");
+        
+        var head = document.getElementsByTagName("head")[0];
+        
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = basePath + "../config/foundation/css/foundation.css";
+        head.appendChild(link);
+        
+        function loadScript()
+        {
+            if(scripts.length > 0)
+            {
+                var script = document.createElement("script");
+                    script.type = "text/javascript";
+                    script.src = scripts.shift();
+                    script.onload = function()
+                    {
+                        loadScript();
+                    };
+                    
+                    //
+                    // There isn't onload event in IE
+                    //
+                    script.onreadystatechange = function ()
+                    {
+                        if(this.readyState == 'complete')
                         {
                             loadScript();
-                        };
-                        
-                        //
-                        // There isn't onload event in IE
-                        //
-                        script.onreadystatechange = function ()
-                        {
-                            if(this.readyState == 'complete')
-                            {
-                                loadScript();
-                            }
-                        };
-                        head.appendChild(script);
-                }
-                else
-                {
-                    $("#select-test").text(current);
-                }
+                        }
+                    };
+                    head.appendChild(script);
             }
-            loadScript();
+            else
+            {
+                $("#select-test").text(current);
+            }
+        }
+        loadScript();
     </script>
   </body>
 </html>

@@ -20,7 +20,9 @@ var batch = 0;
 function createProxy()
 {
     var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
-    var proxy = communicator.stringToProxy("hello:ws -h " + hostname + " -p 10002:wss -h " + hostname + " -p 10003");
+    var proxy = communicator.stringToProxy("hello" + 
+                                           ":ws -h " + hostname + " -p 8080 -r /demows" + 
+                                           ":wss -h " + hostname + " -p 9090 -r /demowss");
 
     //
     // Set or clear the timeout.
@@ -46,7 +48,7 @@ function createProxy()
     }
     else if(mode == "oneway-secure")
     {
-        return oneway.ice_oneway().ice_secure(true);
+        proxy = proxy.ice_oneway().ice_secure(true);
     }
     else if(mode == "oneway-batch")
     {

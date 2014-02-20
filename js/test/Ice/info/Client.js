@@ -90,7 +90,10 @@
         ).then(
             function(ctx)
             {
-                test(ctx.get("host") == ipinfo.host);
+                if(typeof(window) == "undefined")
+                {
+                    test(ctx.get("host") == ipinfo.host);
+                }
                 test(ctx.get("compress") == "false");
                 test(parseInt(ctx.get("port")) > 0);
                 out.writeLine("ok");
@@ -123,8 +126,8 @@
                 {
                     test(ctx.get("remoteAddress") == info.localAddress);
                     test(ctx.get("remotePort") == info.localPort);
+                    test(ctx.get("localAddress") == info.remoteAddress);
                 }
-                test(ctx.get("localAddress") == info.remoteAddress);
                 test(ctx.get("localPort") == info.remotePort);
 
                 out.writeLine("ok");
@@ -160,4 +163,5 @@
             });
     };
     global.__test__ = run;
+    global.__runServer__ = true;
 }(typeof (global) === "undefined" ? window : global));

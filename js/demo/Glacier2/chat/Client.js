@@ -212,6 +212,14 @@ Ice.Promise.try(
                     //
                     return chat();
                 }
+            ).finally(
+                function()
+                {
+                    //
+                    // Destroy the session.
+                    //
+                    return router.destroySession();
+                }
             ).exception(
                 function(ex)
                 {
@@ -232,7 +240,11 @@ Ice.Promise.try(
             return communicator.destroy();
         }
     }
-).exception(
+).then(
+    function()
+    {
+        process.exit(0);
+    },
     function(ex)
     {
         //

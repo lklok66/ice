@@ -736,6 +736,7 @@ wsConfigTree = {
 wsConfigTree["py"] = wsConfigTree["cpp"]
 wsConfigTree["rb"] = wsConfigTree["cpp"]
 wsConfigTree["php"] = wsConfigTree["cpp"]
+wsConfigTree["js"] = wsConfigTree["cpp"]
 
 def getDefaultMapping():
     """Try and guess the language mapping out of the current path"""
@@ -868,6 +869,9 @@ def getCommandLineProperties(exe, config):
         sslenv["icesslcs"] = quoteArgument("\\\"" + os.path.join(getIceDir("cs"), "Assemblies", "IceSSL.dll") + "\\\"")
         if winrt:
             sslenv["certsdir"] = quoteArgument(os.path.abspath(os.path.join(toplevel, "certs", "winrt")))
+            sslenv["verifyPeer"] = "0"
+        elif config.protocol == "wss":
+            sslenv["certsdir"] = quoteArgument(os.path.abspath(os.path.join(toplevel, "certs", "wss")))
             sslenv["verifyPeer"] = "0"
         else:
             sslenv["certsdir"] = quoteArgument(os.path.abspath(os.path.join(toplevel, "certs")))

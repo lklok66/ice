@@ -15,8 +15,6 @@
     var Test = global.Test;
     var Promise = Ice.Promise;
     
-    var defaultProtocol = Ice.TcpEndpointFactory !== undefined ? "tcp" : "ws";
-
     function allTests(communicator, out)
     {
         var p = new Ice.Promise();
@@ -36,8 +34,10 @@
             }
         };
         
-        var ref, base, prx, cl, derived, cl10, cl20, cl13;
-        
+        var ref, base, prx, cl, derived, cl10, cl20, cl13, port;
+
+        var defaultProtocol = communicator.getProperties().getPropertyWithDefault("Ice.Default.Protocol", "tcp");
+
         return Promise.try(
             function()
             {
@@ -913,10 +913,9 @@
                             // be sent over the wire and returned by the server without
                             // losing the opaque endpoints.
                             //
-                            var ref = "test:default -p 12010";
+                            var ref = "test -e 1.0:default -p 12010";
                             var base = communicator.stringToProxy(ref);
                             var derived = Test.MyDerivedClassPrx.uncheckedCast(base);
-                            var self = this;
                             return derived.echo(p1);
                         }
                     ).then(
@@ -958,4 +957,5 @@
             });
     };
     global.__test__ = run;
+    global.__runServer__ = true;
 }(typeof (global) === "undefined" ? window : global));
