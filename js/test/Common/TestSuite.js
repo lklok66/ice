@@ -8,7 +8,6 @@
 // **********************************************************************
 
 var communicator = Ice.initialize();
-var controller = Test.ControllerPrx.uncheckedCast(communicator.stringToProxy("controller:ws -h localhost -p 12009"));
 
 $(document).foundation();
     $(document).ready(
@@ -59,6 +58,9 @@ $(document).foundation();
                     id.properties.setProperty("Ice.Default.Host", defaultHost);
                     id.properties.setProperty("Ice.Default.Protocol", protocol);
 
+                    var str = "controller:ws -h " + defaultHost + " -p 12009";
+                    var controller = Test.ControllerPrx.uncheckedCast(communicator.stringToProxy(str));
+                    
                     var p;
                     var server;
                     if(typeof(__runServer__) !== "undefined" || typeof(__runEchoServer__) !== "undefined")

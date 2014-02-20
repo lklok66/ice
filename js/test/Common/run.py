@@ -28,16 +28,24 @@ class ServerI(Test.Server):
         self.name = name
         self.process = process
 
-    def waitTestSuccess(self, current=None):
+    def waitTestSuccess(self, current):
         sys.stdout.write("waiting for " + self.name + " to terminate... ")
         sys.stdout.flush()
         self.process.waitTestSuccess()
+        try:
+            current.adapter.remove(current.id)
+        except:
+            pass
         print("ok")
 
-    def terminate(self, current=None):
+    def terminate(self, current):
         sys.stdout.write("terminating " + self.name + "... ")
         sys.stdout.flush()
         self.process.terminate()
+        try:
+            current.adapter.remove(current.id)
+        except:
+            pass
         print("ok")
 
 class ControllerI(Test.Controller):
