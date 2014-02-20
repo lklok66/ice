@@ -53,7 +53,8 @@ $(document).foundation();
                     $("#console").val("");
                     $(this).addClass("disabled");
                     $("#protocol").prop("disabled", "disabled");
-                    defaultHost = $("#default-host").val() ? $("#default-host").val() : $("#default-host").attr("placeholder");
+                    defaultHost = $("#default-host").val() ? $("#default-host").val() : 
+                        $("#default-host").attr("placeholder");
                     
                     protocol = $("#protocol").val();
                     var id = new Ice.InitializationData();
@@ -77,7 +78,7 @@ $(document).foundation();
                             srv = current
                         }
                         out.write("starting " + srv + " server... ");
-                        p = controller.runServer("cpp", srv, protocol).then(
+                        p = controller.runServer("cpp", srv, protocol, defaultHost).then(
                             function(proxy)
                             {
                                 out.writeLine("ok");
