@@ -43,7 +43,7 @@ var FileServant = function(basePath)
 
 FileServant.prototype.processRequest = function(req, res)
 {
-    var filePath = path.resolve(path.join(this._basePath, req.url.path));
+    var filePath = path.resolve(path.join(this._basePath, req.url.pathname));
 
     var ext = path.extname(filePath).slice(1);
     
@@ -87,13 +87,13 @@ FileServant.prototype.processRequest = function(req, res)
             {
                 res.writeHead(404);
                 res.end("404 Page Not Found");
-                console.log("HTTP/404 (Page Not Found) " + req.method + " " + req.url.path);
+                console.log("HTTP/404 (Page Not Found) " + req.method + " " + req.url.pathname);
             }
             else
             {
                 res.writeHead(500);
                 res.end("500 Internal Server Error");
-                console.log("HTTP/500 (Internal Server Error) " + req.method + " " + req.url.path);
+                console.log("HTTP/500 (Internal Server Error) " + req.method + " " + req.url.pathname);
             }
         }
         else
@@ -102,7 +102,7 @@ FileServant.prototype.processRequest = function(req, res)
             {
                 res.writeHead(403);
                 res.end("403 Forbiden");
-                console.log("HTTP/403 (Forbiden) " + req.method + " " + req.url.path);
+                console.log("HTTP/403 (Forbiden) " + req.method + " " + req.url.pathname);
             }
             else
             {
@@ -153,7 +153,7 @@ FileServant.prototype.processRequest = function(req, res)
                 {
                     res.writeHead(304, headers);
                     res.end();
-                    console.log("HTTP/304 (Not Modified) " + req.method + " " + req.url.path);
+                    console.log("HTTP/304 (Not Modified) " + req.method + " " + req.url.pathname);
                 }
                 else
                 {
@@ -166,7 +166,7 @@ FileServant.prototype.processRequest = function(req, res)
                     {
                         fs.createReadStream(filePath, { "bufferSize": 4 * 1024 }).pipe(res);
                     }
-                    console.log("HTTP/200 (Ok) " + req.method + " " + req.url.path);
+                    console.log("HTTP/200 (Ok) " + req.method + " " + req.url.pathname);
                 }
             }
         }

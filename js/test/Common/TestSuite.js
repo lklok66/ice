@@ -45,14 +45,17 @@ $(document).foundation();
                 }
             };
             
+            var protocol;
+            
             $("#run").click(function(){
                 if(!$(this).hasClass("disabled"))
                 {
                     $("#console").val("");
                     $(this).addClass("disabled");
+                    $("#protocol").prop("disabled", "disabled");
                     defaultHost = $("#default-host").val() ? $("#default-host").val() : $("#default-host").attr("placeholder");
                     
-                    var protocol = $("#wss").is(":checked") ? "wss" : "ws";
+                    protocol = $("#protocol").val() ? "wss" : "ws";
                     var id = new Ice.InitializationData();
                     id.properties = Ice.createProperties();
                     id.properties.setProperty("Ice.Default.Host", defaultHost);
@@ -86,7 +89,7 @@ $(document).foundation();
                                 out.writeLine("failed! (" + ex.ice_name() + ")");
                                 return __test__(out, id);
                             }
-                        ).then(                
+                        ).then(
                             function()
                             {
                                 if(server)
@@ -110,10 +113,30 @@ $(document).foundation();
                         p = __test__(out, id);
                     }
                     
-                    return p.then(
+                    return p.finally(
                         function()
                         {
+                            $("#protocol").prop("disabled", false);
                             $("#run").removeClass("disabled");
+                        }
+                    ).then(
+                        function()
+                        {
+                            if($("#loop").is(":checked"))
+                            {
+                                var location = document.location;
+                                var href = location.protocol + "//" + location.hostname;
+                                if(protocol == "wss")
+                                {
+                                    href += ":9090";
+                                }
+                                else
+                                {
+                                    href += ":8080";
+                                }
+                                href += location.pathname.replace(current, next) + "?loop=true";
+                                document.location.assign(href);
+                            }
                         }
                     ).exception(
                         function(ex, r)
@@ -128,17 +151,65 @@ $(document).foundation();
                             {
                                 out.writeLine(ex.stack);
                             }
-                            $("#run").removeClass("disabled");
-                        }
-                    );
-                    return false;
+                        });
                 }
+                return false;
             });
             
             $("#viewReadme").click(
-            function()
-            {
-                $("#readme-modal").foundation("reveal", "open");
-                return false;
-            });
+                function()
+                {
+                    $("#readme-modal").foundation("reveal", "open");
+                    return false;
+                });
+            
+            //
+            // Check if we should start the test loop=true
+            //
+            (function(){
+                
+                var href = document.location.href;
+                var i = href.indexOf("?");
+                var autoStart = i !== -1 && href.substr(i).indexOf("loop=true") !== -1;
+                
+                if(document.location.protocol.indexOf("https") != -1)
+                {
+                    $("#protocol").val("wss");
+                }
+                else
+                {
+                    $("#protocol").val("ws");
+                }
+                
+                if(autoStart)
+                {
+                    $("#loop").prop("checked", true);
+                    $("#run").click();
+                }
+            }());
+            
+            //
+            // Protocol
+            //
+            $("#protocol").on("change", 
+                            function(e)
+                            {
+                                var newProtocol = $(this).val();
+                                if(protocol !== newProtocol)
+                                {
+                                    var href = document.location.href;
+                                    var http;
+                                    if(newProtocol == "http")
+                                    {
+                                        href = href.replace("https", "http");
+                                        href = href.replace("9090", "8080");
+                                    }
+                                    else
+                                    {
+                                        href = href.replace("http", "https");
+                                        href = href.replace("8080", "9090");
+                                    }
+                                    document.location.assign(href);
+                                }
+                            });
         });
