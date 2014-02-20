@@ -55,7 +55,7 @@ $(document).foundation();
                     $("#protocol").prop("disabled", "disabled");
                     defaultHost = $("#default-host").val() ? $("#default-host").val() : $("#default-host").attr("placeholder");
                     
-                    protocol = $("#protocol").val() ? "wss" : "ws";
+                    protocol = $("#protocol").val();
                     var id = new Ice.InitializationData();
                     id.properties = Ice.createProperties();
                     id.properties.setProperty("Ice.Default.Host", defaultHost);
