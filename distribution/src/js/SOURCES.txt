@@ -4,7 +4,7 @@ Source Code
 The source distribution of IceJS used to build this distribution can
 be downloaded at no cost from
 
-  http://www.zeroc.com/labs/icews/download.html
+  http://www.zeroc.com/labs/icejs/download.html
 
 The source distributions of bzip2/libbzip2 and OpenSSL used to build
 this distribution can be downloaded at no cost from
