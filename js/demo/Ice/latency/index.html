@@ -40,22 +40,6 @@
         <div class="row">
             <div class="large-12 medium-12 columns">
                 <form>
-                    <div class="row">
-                        <div class="small-3 columns">
-                            <label class="right inline" for="hostname">Hostname:</label>
-                        </div>
-                        <div class="small-9 columns">
-                            <input type="text" id="hostname"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-3 columns">
-                            <label class="right inline" for="wss">WSS:</label>
-                        </div>
-                        <div class="small-9 columns">
-                            <input id="wss" type="checkbox">
-                        </div>
-                    </div>
                     <a href="#" class="button small" id="run">Run</a>
                     <div class="row">
                       <div class="small-12 columns">
@@ -85,6 +69,10 @@
 
         <p>Then you can use the <strong>Run</strong> to run this client.</p>
 
+        <div class="panel callout radius">
+            <p>The client is configured to use WSS secure endpoints when the page
+               is load from HTTPS and WS unsecure endpoints when load from HTTP.</p>
+        </div>
         <a class="close-reveal-modal">&#215;</a>
     </div>
     

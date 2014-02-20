@@ -67,7 +67,7 @@ var signin = function()
             //
             startProgress();
             
-            var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
+            var hostname = document.location.hostname || "127.0.0.1";
             //
             // If the demo is access vi https use a secure (WSS) endpoint, otherwise
             // use a non secure (WS) endpoint.

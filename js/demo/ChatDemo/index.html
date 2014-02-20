@@ -42,14 +42,6 @@
                 <form>
                     <div class="row">
                         <div class="small-4 medium-3 columns">
-                            <label class="right inline" for="hostname">Hostname:</label>
-                        </div>
-                        <div class="small-8 medium-9 columns">
-                            <input type="text" id="hostname"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-4 medium-3 columns">
                             <label class="right inline" for="username">Username:</label>
                         </div>
                         <div class="small-8 medium-9 columns">
@@ -133,17 +125,38 @@
     <div id="readme-modal" class="reveal-modal" data-reveal>
         <h4>Chat Demo Readme</h4>
         <hr/>
-        <p>This demo is a poll client for the 
-            <a href="http://www.zeroc.com/chat/index.html">ZeroC's Chat Demo application</a>.</p>
-
-        <div class="panel callout radius">
-            <p>You can use the <a href="https://demo.zeroc.com/chat/jsclient/index.html" target="_blank">Live Client</a> 
+        <p>This demo implements a push client for the 
+            <a href="http://www.zeroc.com/chat/index.html">ZeroC's Chat Demo Application</a>. You can use the 
+            <a href="https://demo.zeroc.com/chat/jsclient/index.html" target="_blank">Live Client</a> 
             if you don't want to setup your own server.</p>
-        </div>
-        <p>First follow the instructions from the 
-            <a href="http://www.zeroc.com/chat/download.html">Chat Demo Distribution</a> README to
-            start the server.</p>
+        </p>
         
+        <p>To setup the server follow the instructions from the 
+            <a href="http://www.zeroc.com/chat/download.html">Chat Demo Distribution</a>.</p>
+            
+        <p>You will need to update the Glacier2 configuration to include WSS endpoints. Edit <code>ChatDemo-1.4.0/config/config.glacier2router</code>
+        and update the <code>Glacier2.Client.Endpoints</code> property with the value show below:</p>
+        <p>
+        <code style="color:#858585;font-weight:normal;font-size:80%;">
+        Glacier2.Client.Endpoints=ssl -p 4064 -t 10000 -h 127.0.0.1:tcp -p 4502 -t 10000 -h 127.0.0.1:wss -p 5064 -t 10000 -h 127.0.0.1
+        </code>
+        </p>
+        <p>You also need to enable the Web Sockets transport plugin, add the following lines to <code>ChatDemo-1.4.0/config/config.glacier2router</code>:</p>
+        <p>
+        <code style="color:#858585;font-weight:normal;font-size:80%;">
+        Ice.Plugin.IceWS=IceWS:createIceWS
+        </code>
+        </p>
+        
+        <p>After those modifications to the Glacier2 router configuration you can start the Chat Demo 
+           server and Glacier2 router as documented in the Chat Demo Distribution. For run the Glacier2 
+           with the new configuration you must configure your enviroment to run IceWS applications 
+           as documented in the <strong>Ice For JavaScript</strong> <a href="#TODO">Release Notes</a>.</p>
+        
+        <p>Once you have configured and started the Chat Demo server and router, 
+           you can sign-in the chat using the sign-in form bellow.</p>
+        
+        <h4>Using the minified scripts</h4>
         <p>When the demo is build with optimizations enabled it creates a minified
         script <code>browser/Client.min.js</code> that includes:
         </p>

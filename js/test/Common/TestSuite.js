@@ -53,8 +53,7 @@ $(document).foundation();
                     $("#console").val("");
                     $(this).addClass("disabled");
                     $("#protocol").prop("disabled", "disabled");
-                    defaultHost = $("#default-host").val() ? $("#default-host").val() : 
-                        $("#default-host").attr("placeholder");
+                    var defaultHost = document.location.hostname || "127.0.0.1";;
                     
                     protocol = $("#protocol").val();
                     var id = new Ice.InitializationData();

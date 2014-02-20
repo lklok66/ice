@@ -15,21 +15,22 @@ TARGETS	= common.min.js common.min.js.gz common.css common.css.gz
 
 CLOSUREFLAGS	= $(CLOSUREFLAGS) --warning_level QUIET
 
-SCRIPTS = foundation\js\jquery.js \
+SCRIPTS = foundation\js\modernizr.js \
+	foundation\js\jquery.js \
 	foundation\js\foundation.min.js \
 	foundation\js\jquery.nouislider.js \
 	foundation\js\animo.js \
 	foundation\js\spin.min.js \
 	foundation\js\jquery.spin.js \
-	foundation\js\common.js \
 	syntaxhighlighter\scripts\shCore.js \
-	syntaxhighlighter\scripts\shBrushJScript.js
+	syntaxhighlighter\scripts\shBrushJScript.js \
+	foundation\js\common.js
 	
-STYLE_SHEETS = foundation\css\jquery.nouislider.css \
-	foundation\css\foundation.css \
-	syntaxhighlighter\styles\shCoreDefault.css \
+STYLE_SHEETS = foundation\css\foundation.min.css \
 	foundation\css\animate.css \
-	foundation\css\demo.css 
+	foundation\css\demo.css \
+	foundation\css\jquery.nouislider.css \
+	syntaxhighlighter\styles\shCoreDefault.css
 	
 common.min.js common.min.js.gz: $(SCRIPTS)
 	-del /q common.min.js common.min.js.gz
