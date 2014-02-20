@@ -19,7 +19,6 @@ import FixUtil
 #
 excludeFiles = [ \
     "allDemos.py",
-    "expect.py",
     "/config/IceDevKey.snk",
     "/config/makedepend-winrt.py",
     "/certs/cakey.pem",
@@ -31,7 +30,7 @@ excludeFiles = [ \
     "/php",
     "/vsaddin",
     "/scripts/IceGridAdmin.py",
-    "/scripts/IceStormAdmin.py",
+    "/scripts/IceStormUtil.py",
     "/demoscript",
     "/exclude.py",
     "/protobuf",
@@ -145,6 +144,8 @@ excludeFiles = [ \
     "/cpp/demo/Glacier2/winrt",
     "/cpp/demo/IceGrid",
     "/cpp/demo/IceUtil",
+    "/cpp/**/expect.py",
+    "/js/**/expect.py",
 ]
 
 #
