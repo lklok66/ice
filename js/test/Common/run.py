@@ -49,7 +49,18 @@ class ServerI(Test.Server):
         print("ok")
 
 class ControllerI(Test.Controller):
-    def runServer(self, lang, name, protocol, current=None):
+    def __init__(self):
+        self.currentServer = None
+
+    def runServer(self, lang, name, protocol, host, current):
+
+        # If server is still running, terminate it
+        if self.currentServer:
+            try:
+                self.currentServer.terminate()
+            except:
+                pass
+            self.currentServer = None
 
         pwd = os.getcwd()
         try:
@@ -66,13 +77,15 @@ class ControllerI(Test.Controller):
             sys.stdout.flush()
             serverCfg = TestUtil.DriverConfig("server")
             serverCfg.protocol = protocol
+            serverCfg.host = host
             server = TestUtil.getCommandLine(server, serverCfg)
             serverProc = TestUtil.spawnServer(server, env = serverenv, lang=serverCfg.lang, mx=serverCfg.mx)
             print("ok")
         finally:
             os.chdir(pwd)
         
-        return Test.ServerPrx.uncheckedCast(current.adapter.addWithUUID(ServerI(serverDesc, serverProc)))
+        self.currentServer = Test.ServerPrx.uncheckedCast(current.adapter.addWithUUID(ServerI(serverDesc, serverProc)))
+        return self.currentServer
 
 class Server(Ice.Application):
     def run(self, args):
@@ -93,6 +106,7 @@ app = Server()
 initData = Ice.InitializationData()
 initData.properties = Ice.createProperties();
 initData.properties.setProperty("Ice.Default.Protocol", "ws")
+initData.properties.setProperty("Ice.ThreadPool.Server.SizeMax", "10")
 initData.properties.setProperty("Ice.Plugin.IceWS", "IceWS:createIceWS")
 initData.properties.setProperty("ControllerAdapter.Endpoints", "default -p 12009")
 sys.exit(app.main(sys.argv, initData=initData))

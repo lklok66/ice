@@ -2004,7 +2004,7 @@
         {
             if(this.adopt)
             {
-                var stream = new BasicStream(this.stream.instance(), Protocol.currentProtocolEncoding);
+                var stream = new BasicStream(this.stream.instance, Protocol.currentProtocolEncoding);
                 stream.swap(this.stream);
                 this.stream = stream;
                 this.adopt = false;
