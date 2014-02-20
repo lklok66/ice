@@ -381,6 +381,7 @@ def createSourceDist(platform, destDir):
             if fnmatch.fnmatch(f, "*.icejs"):
                 os.rename(filepath, os.path.join(root, f.replace(".icejs", "")))
                 filepath = os.path.join(root, f.replace(".icejs", ""))
+		f = f.replace(".icejs", "")
             if f == "Grammar.cpp":
                 checkBisonVersion(filepath)
             if f == "Scanner.cpp":
