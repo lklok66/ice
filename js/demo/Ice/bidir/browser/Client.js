@@ -106,7 +106,7 @@ $("#start").click(
             ).exception(
                 function(ex)
                 {
-                    $("#console").val(ex.toString());
+                    $("#output").val(ex.toString());
                     setState(State.Disconnected);
                 }
             );
@@ -128,7 +128,7 @@ $("#stop").click(
             ).exception(
                 function(ex)
                 {
-                    $("#console").val(ex.toString());
+                    $("#output").val(ex.toString());
                 }
             ).finally(
                 function()
@@ -162,8 +162,8 @@ var isDisconnected = function()
 
 var writeLine = function(msg)
 {
-    $("#console").val($("#console").val() + msg + "\n");
-    $("#console").scrollTop($("#console").get(0).scrollHeight);
+    $("#output").val($("#output").val() + msg + "\n");
+    $("#output").scrollTop($("#output").get(0).scrollHeight);
 }
 
 var state;
@@ -187,7 +187,7 @@ var setState = function(s)
         }
         case State.Connecting:
         {
-            $("#console").val("");
+            $("#output").val("");
             $("#start").addClass("disabled");
 
             $("#progress .message").text("Connecting...");

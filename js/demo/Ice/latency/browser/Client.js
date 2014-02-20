@@ -82,8 +82,7 @@ $("#run").click(
             ).exception(
                 function(ex)
                 {
-                    console.log(ex.stack);
-                    $("#console").val(ex.toString());
+                    $("#output").val(ex.toString());
                 }
             ).finally(
                 function()
@@ -117,8 +116,8 @@ function loop(fn, repetitions)
 //
 function writeLine(msg)
 {
-    $("#console").val($("#console").val() + msg + "\n");
-    $("#console").scrollTop($("#console").get(0).scrollHeight);
+    $("#output").val($("#output").val() + msg + "\n");
+    $("#output").scrollTop($("#output").get(0).scrollHeight);
 }
 
 //
@@ -139,7 +138,7 @@ function setState(s, ex)
         {
             case State.Running:
             {
-                $("#console").val("");
+                $("#output").val("");
                 $("#run").addClass("disabled");
                 $("#progress").show();
                 $("body").addClass("waiting");

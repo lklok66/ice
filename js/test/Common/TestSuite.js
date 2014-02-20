@@ -169,6 +169,11 @@ $(document).foundation();
             //
             (function(){
                 
+                if(basePath == "../../../")
+                {
+                    $(".title-area a").attr("href", "../../../../index.html");
+                    $(".breadcrumbs li:first a").attr("href", "../../../../index.html");
+                }
                 var href = document.location.href;
                 var i = href.indexOf("?");
                 var autoStart = i !== -1 && href.substr(i).indexOf("loop=true") !== -1;
@@ -199,7 +204,6 @@ $(document).foundation();
                                 if(protocol !== newProtocol)
                                 {
                                     var href = document.location.href;
-                                    var http;
                                     if(newProtocol == "ws")
                                     {
                                         href = href.replace("https", "http");
