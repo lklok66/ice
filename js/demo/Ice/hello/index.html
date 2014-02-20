@@ -20,37 +20,40 @@
         #output { height: 150px; }
         .waiting * { cursor: wait !important; }
         body { height:100%;}
+        #header {width:100%; position:fixed; top:0px; height: 100px; z-index: 10;}
         #footer {width:100%; height:80px; position:fixed; bottom:0px; background:#333333; color:#ffffff; padding:25px 25px 25px 25px;}
         #footer * {color:#858585;}
         #footer .logo{ float:left;}
         #footer .copyright{ float:right;}
-        #body {padding:10px; padding-bottom:80px;   /* Height of the footer */}
+        #body {padding:10px; padding-top: 100px; padding-bottom:80px;   /* Height of the footer */}
     </style>
     <link rel="icon" type="image/x-icon" href="/config/favicon.ico">
   </head>
   <body>
-    <nav class="top-bar" data-topbar>
-        <ul class="title-area">
-            <li class="name">
-                <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
-            </li>
-            <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
-        </ul>
-        <section class="top-bar-section">
-            <!-- Right Nav Section -->
-            <ul class="right">
-                <li class="divider"></li>
-                <li><a href="#" id="viewReadme">Readme</a></li>
-                <li><a href="#" id="viewSource">Source</a></li>
+    <div id="header">
+        <nav class="top-bar" data-topbar>
+            <ul class="title-area">
+                <li class="name">
+                    <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
+                </li>
+                <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
             </ul>
-        </section>
-    </nav>
-    <section role="main" id="body">
+            <section class="top-bar-section">
+                <!-- Right Nav Section -->
+                <ul class="right">
+                    <li class="divider"></li>
+                    <li><a href="#" id="viewReadme">Readme</a></li>
+                    <li><a href="#" id="viewSource">Source</a></li>
+                </ul>
+            </section>
+        </nav>
         <ul class="breadcrumbs">
             <li><a href="../../../index.html">Ice</a></li>
             <li><a href="../../index.html">Demos</a></li>
             <li class="current"><a href="#">Hello</a></li>
         </ul>
+    </div>
+    <section role="main" id="body">
         <div class="row">
             <div class="large-12 medium-12 columns">
                 <form>

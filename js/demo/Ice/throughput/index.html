@@ -16,91 +16,96 @@
         #progress .text { margin-left:25px; }
         .waiting * { cursor: wait !important; }
         body { height:100%;}
+        #header {width:100%; position:fixed; top:0px; height: 100px; z-index: 10;}
         #footer {width:100%; height:80px; position:fixed; bottom:0px; background:#333333; color:#ffffff; padding:25px 25px 25px 25px;}
         #footer * {color:#858585;}
         #footer .logo{ float:left;}
         #footer .copyright{ float:right;}
-        #body {padding:10px; padding-bottom:80px;   /* Height of the footer */}
+        #body {padding:10px; padding-top: 100px; padding-bottom:80px;   /* Height of the footer */}
     </style>
     <link rel="icon" type="image/x-icon" href="/config/favicon.ico">
   </head>
   <body>
-    <nav class="top-bar" data-topbar>
-        <ul class="title-area">
-            <li class="name">
-                <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
-            </li>
-            <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
-        </ul>
-        <section class="top-bar-section">
-            <!-- Right Nav Section -->
-            <ul class="right">
-                <li class="divider"></li>
-                <li><a href="#" id="viewReadme">Readme</a></li>
-                <li><a href="#" id="viewSource">Source</a></li>
+    <div id="header">
+        <nav class="top-bar" data-topbar>
+            <ul class="title-area">
+                <li class="name">
+                    <h1><a href="../../../index.html">Ice for JavaScript</a></h1>
+                </li>
+                <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
             </ul>
-        </section>
-    </nav>
-    <section role="main" id="body">
+            <section class="top-bar-section">
+                <!-- Right Nav Section -->
+                <ul class="right">
+                    <li class="divider"></li>
+                    <li><a href="#" id="viewReadme">Readme</a></li>
+                    <li><a href="#" id="viewSource">Source</a></li>
+                </ul>
+            </section>
+        </nav>
         <ul class="breadcrumbs">
             <li><a href="../../../index.html">Ice</a></li>
             <li><a href="../../index.html">Demos</a></li>
             <li class="current"><a href="#">Throughput</a></li>
         </ul>
-        <div class="large-12 medium-12 columns">
-            <form>
-                <div class="row">
-                    <div class="small-3 columns">
-                        <label class="right inline" for="hostname">Hostname:</label>
+    </div>
+    <section role="main" id="body">
+        <div class="row">
+            <div class="large-12 medium-12 columns">
+                <form>
+                    <div class="row">
+                        <div class="small-3 columns">
+                            <label class="right inline" for="hostname">Hostname:</label>
+                        </div>
+                        <div class="small-9 columns">
+                            <input type="text" id="hostname"/>
+                        </div>
                     </div>
-                    <div class="small-9 columns">
-                        <input type="text" id="hostname"/>
+                    <div class="row">
+                        <div class="small-3 columns">
+                            <label class="right inline" for="mode">Data:</label>
+                        </div>
+                        <div class="small-9 columns">
+                            <select id="data">
+                                <option value="byte-seq">sequence of bytes (default)</option>
+                                <option value="string-seq">sequence of strings ("hello")</option>
+                                <option value="struct-seq">sequence of structs with a string ("hello") and a double</option>
+                                <option value="fixed-seq">sequence of structs with two ints and a double</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="small-3 columns">
-                        <label class="right inline" for="mode">Data:</label>
+                    <div class="row">
+                        <div class="small-3 columns">
+                            <label class="right inline" for="mode">Test:</label>
+                        </div>
+                        <div class="small-9 columns">
+                            <select id="test">
+                                <option value="twoway">Send sequence as twoway</option>
+                                <option value="oneway">Send sequence as oneway</option>
+                                <option value="receive">Receive sequence</option>
+                                <option value="echo">Echo (send and receive) sequence</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="small-9 columns">
-                        <select id="data">
-                            <option value="byte-seq">sequence of bytes (default)</option>
-                            <option value="string-seq">sequence of strings ("hello")</option>
-                            <option value="struct-seq">sequence of structs with a string ("hello") and a double</option>
-                            <option value="fixed-seq">sequence of structs with two ints and a double</option>
-                        </select>
+                    <div class="row">
+                        <div class="small-12 columns">
+                            <a href="#" class="button small" id="run">Run</a>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="small-3 columns">
-                        <label class="right inline" for="mode">Test:</label>
+                    <div class="row">
+                        <div class="small-12 columns">
+                            <textarea id="console" class="disabled" readonly></textarea>
+                        </div>
                     </div>
-                    <div class="small-9 columns">
-                        <select id="test">
-                            <option value="twoway">Send sequence as twoway</option>
-                            <option value="oneway">Send sequence as oneway</option>
-                            <option value="receive">Receive sequence</option>
-                            <option value="echo">Echo (send and receive) sequence</option>
-                        </select>
+                    <div id="progress" class="row hide">
+                      <div class="small-12 columns left">
+                        <div class="inline left icon"></div>
+                        <div class="text">Running...</div>
+                      </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="small-12 columns">
-                        <a href="#" class="button small" id="run">Run</a>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="small-12 columns">
-                        <textarea id="console" class="disabled" readonly></textarea>
-                    </div>
-                </div>
-                <div id="progress" class="row hide">
-                  <div class="small-12 columns left">
-                    <div class="inline left icon"></div>
-                    <div class="text">Running...</div>
-                  </div>
-                </div>
-            </form>
-        </div>
+                </form>
+            </div>
+         </div>
     </section>
     <div id="readme-modal" class="reveal-modal medium" data-reveal>
         <h4>Throughput Demo Readme</h4>
@@ -164,7 +169,6 @@
             function(){
                 SyntaxHighlighter.defaults.toolbar = false;
                 SyntaxHighlighter.highlight();
-                $("#viewSource").removeClass("disabled");
                 $("#viewSource").click(
                     function()
                     {
