@@ -736,6 +736,7 @@ wsConfigTree = {
 wsConfigTree["py"] = wsConfigTree["cpp"]
 wsConfigTree["rb"] = wsConfigTree["cpp"]
 wsConfigTree["php"] = wsConfigTree["cpp"]
+wsConfigTree["js"] = wsConfigTree["cpp"]
 
 def getDefaultMapping():
     """Try and guess the language mapping out of the current path"""

@@ -876,4 +876,5 @@
     };
     
     global.__test__ = run;
+    global.__runServer__ = true;
 }(typeof (global) === "undefined" ? window : global));

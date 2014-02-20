@@ -174,4 +174,5 @@
             });
     };
     global.__test__ = run;
+    global.__runEchoServer__ = true;
 }(typeof (global) === "undefined" ? window : global));

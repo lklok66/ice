@@ -471,5 +471,6 @@
     };
     global.__test__ = run;
     global.__clientAllTests__ = allTests;
+    global.__runServer__ = true;
     
 }(typeof (global) === "undefined" ? window : global));

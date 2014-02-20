@@ -7,6 +7,9 @@
 //
 // **********************************************************************
 
+var communicator = Ice.initialize();
+var controller = Test.ControllerPrx.uncheckedCast(communicator.stringToProxy("controller:ws -h localhost -p 12009"));
+
 $(document).foundation();
     $(document).ready(
         function(){
@@ -23,6 +26,10 @@ $(document).foundation();
             if(document.location.protocol == "https:")
             {
                 $("#wss").prop("checked", true);
+            }
+            else
+            {
+                $("#wss").prop("disabled", true);
             }
 
             var out = 
@@ -46,32 +53,82 @@ $(document).foundation();
                     $(this).addClass("disabled");
                     defaultHost = $("#default-host").val() ? $("#default-host").val() : $("#default-host").attr("placeholder");
                     
-                    var secure = $("#wss").is(":checked");
+                    var protocol = $("#wss").is(":checked") ? "wss" : "ws";
                     var id = new Ice.InitializationData();
                     id.properties = Ice.createProperties();
                     id.properties.setProperty("Ice.Default.Host", defaultHost);
-                    id.properties.setProperty("Ice.Default.Protocol", secure ? "wss" : "ws");
+                    id.properties.setProperty("Ice.Default.Protocol", protocol);
+
+                    var p;
+                    var server;
+                    if(typeof(__runServer__) !== "undefined" || typeof(__runEchoServer__) !== "undefined")
+                    {
+                        if(typeof(__runEchoServer__) !== "undefined")
+                        {
+                            srv = "Ice/echo"
+                        }
+                        else
+                        {
+                            srv = current
+                        }
+                        out.write("starting " + srv + " server... ");
+                        p = controller.runServer("cpp", srv, protocol).then(
+                            function(proxy)
+                            {
+                                out.writeLine("ok");
+                                server = proxy;
+                                return __test__(out, id);
+                            },
+                            function(ex)
+                            {
+                                out.writeLine("failed! (" + ex.ice_name() + ")");
+                                return __test__(out, id);
+                            }
+                        ).then(                
+                            function()
+                            {
+                                if(server)
+                                {
+                                    server.waitTestSuccess();
+                                }
+                            }
+                        ).exception(
+                            function(ex)
+                            {
+                                if(server)
+                                {
+                                    server.terminate();
+                                }
+                                throw ex;
+                            }
+                        );
+                    }
+                    else
+                    {
+                        p = __test__(out, id);
+                    }
                     
-                    __test__(out, id).then(
+                    return p.then(
                         function()
                         {
                             $("#run").removeClass("disabled");
-                        }).exception(
-                            function(ex, r)
+                        }
+                    ).exception(
+                        function(ex, r)
+                        {
+                            out.writeLine("");
+                            if(r instanceof Ice.AsyncResult)
                             {
-                                out.writeLine("");
-                                if(r instanceof Ice.AsyncResult)
-                                {
-                                    out.writeLine("exception occurred in call to " + r.operation);
-                                }
-                                out.writeLine(ex.toString());
-                                if(ex.stack)
-                                {
-                                    out.writeLine(ex.stack);
-                                }
-                                $("#run").removeClass("disabled");
+                                out.writeLine("exception occurred in call to " + r.operation);
                             }
-                        );
+                            out.writeLine(ex.toString());
+                            if(ex.stack)
+                            {
+                                out.writeLine(ex.stack);
+                            }
+                            $("#run").removeClass("disabled");
+                        }
+                    );
                     return false;
                 }
             });
