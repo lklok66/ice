@@ -35,11 +35,15 @@ To build the demos you need to:
     a 64-bit Ice installation (on Mac OS X, set CXXARCHFLAGS to build
     32-bit and 64-bit FAT binaries).
 
-  - Build the demos. For example:
+  - Build the C++ demos. For example:
 
     cd IceJS-0.1.0-demos/demo
     make
 
+  - Build the Javascript demos. For example:
+
+    cd IceJS-0.1.0-demos/demojs
+    make
 
 ======================================================================
 2. Running the Ice Demos

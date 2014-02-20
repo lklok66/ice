@@ -9,7 +9,10 @@ demos, follow the instructions below.
 1. Building the Demos
 ======================================================================
 
-The demos are in the demo directory.
+C++ Demos
+---------
+
+The C++ demos are in the demo directory.
 
 Note that the Visual Studio project files require the Ice Visual
 Studio Add-In, installed as part of the installation of the Ice binary
@@ -21,6 +24,22 @@ demo\demo.sln.
 Select your target configuration: Debug or Release, Win32 or x64 (on
 supported x64 platforms). Right click on the desired demo in the
 Solution Explorer window and select "Build".
+
+
+Javascript Demos
+----------------
+
+The Javascript demos are in the demojs directory.
+
+Open a commmand prompt and cd to the demojs directory.
+
+Set ICE_JS_HOME environment variable to IceJS installation directory.
+
+> set ICE_JS_HOME=<dir>\IceJS-0.1.0
+
+Run the build batch file.
+
+> build.bat
 
 
 ======================================================================

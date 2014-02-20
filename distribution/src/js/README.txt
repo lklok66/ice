@@ -40,7 +40,7 @@ traffic or web socket traffic to the appropriate back-end servers.
 
 You can find more information on the WebSocket transport at
 
-  http://www.zeroc.com/labs/icews/index.html
+  http://www.zeroc.com/labs/icejs/index.html
 
 
 Using this distribution
@@ -60,13 +60,13 @@ Note that this distribution only includes binaries for Visual Studio
 2012.
 
 To use the IceWS transport, you will need to update your environment
-to first look for libraries from the bin directory of your IceWS
+to first look for libraries from the bin directory of your IceJS
 installation.
 
 You can set the PATH environment variable:
 
-  > set PATH=<IceWS installation directory>\bin;%PATH%
+  > set PATH=<IceJS installation directory>\bin;%PATH%
 
 Or for 64-bit applications:
 
-  > set PATH=<IceWS installation directory>\bin\x64;%PATH%
+  > set PATH=<IceJS installation directory>\bin\x64;%PATH%
