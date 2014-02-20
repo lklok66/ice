@@ -946,46 +946,6 @@ class Darwin(Platform):
         copy(os.path.join(distDir, "src", "mac", package, "uninstall.sh"), os.path.join(buildRootDir, "installer"))
         print("ok")
 
-        #
-        # Ensure the IceGridAdmin pkg isn't relocated. PackageMaker enable relocation
-        # in applications when you edit the installer pmdoc file, and this cause the 
-        # IceGrid Admin application bundle to be installed in unexpected location.
-        # 
-        # We expand the pkg using pkgutil and ensure the following xml fragment
-        # ins't present in Distribution file. We remove that if necessary and 
-        # recreate the package with pkguil.
-        #
-        # <pkg-ref id="com.zeroc.icegridadmin.pkg">
-        #  <relocate search-id="pkmktoken2">
-        #    <bundle id="com.zeroc.IceGridGUI"/>
-        #  </relocate>
-        # </pkg-ref>
-        #
-        os.system("pkgutil --expand " + pkg + " " + os.path.join(buildRootDir, "installer", "tmp"))
-        new = open(os.path.join(buildRootDir, "installer", "tmp", "Distribution.new"), "w")
-        old = open(os.path.join(buildRootDir, "installer", "tmp", "Distribution"), "r")
-
-        match = False
-        for line in old:
-            
-            if line.strip() == '<pkg-ref id="com.zeroc.icegridadmin.pkg">':
-                match = True
-                continue
-
-            if match:
-                if line.strip() == "</pkg-ref>":
-                    match = False
-                continue
-            
-            new.write(line)
-        old.close()
-        new.close()
-        os.remove(os.path.join(buildRootDir, "installer", "tmp", "Distribution"))
-        os.rename(os.path.join(buildRootDir, "installer", "tmp", "Distribution.new"), 
-                  os.path.join(buildRootDir, "installer", "tmp", "Distribution"))
-        os.system("pkgutil --flatten " + os.path.join(buildRootDir, "installer", "tmp") + " " + pkg)
-        shutil.rmtree(os.path.join(buildRootDir, "installer", "tmp"))
-
         volname = package + "-" + version
         sys.stdout.write( "Building disk image... " + volname + " ")
         sys.stdout.flush()

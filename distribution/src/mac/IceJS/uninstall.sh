@@ -44,7 +44,7 @@ uninstallPackage ()
             fi
         done
 
-        if [[ "$PACKAGE" == "com.zeroc.icews.pkg" ]]; then
+        if [[ "$PACKAGE" == "com.zeroc.icejs.pkg" ]]; then
             BASE_PATH=$(dirname "$VOLUME$LOCATION")
             VERSION_MAJOR=${VERSION:0:1}
             VERSION_MINOR=${VERSION:2:1}
@@ -152,6 +152,6 @@ if [[ "$confirmed" == "no" ]]; then
     exit 0
 fi
 
-uninstallPackage "com.zeroc.icews.pkg"
+uninstallPackage "com.zeroc.icejs.pkg"
 
 echo "IceJS 0.1.0 uninstallation completed successfully"
