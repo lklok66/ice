@@ -199,7 +199,7 @@ $(document).foundation();
                                 {
                                     var href = document.location.href;
                                     var http;
-                                    if(newProtocol == "http")
+                                    if(newProtocol == "ws")
                                     {
                                         href = href.replace("https", "http");
                                         href = href.replace("9090", "8080");
