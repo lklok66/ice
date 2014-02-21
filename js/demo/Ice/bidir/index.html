@@ -71,8 +71,26 @@
     </div>
     <!-- Modal dialog to show the client source code -->
     <div id="source-modal" class="reveal-modal" data-reveal>
-        <pre id="source" class="brush: js;" data="browser/Client.js"></pre>
         <a class="close-reveal-modal">&#215;</a>
+        <dl class="tabs" data-tab>
+            <dd class="active"><a href="#panel2-1">Slice</a></dd>
+            <dd><a href="#panel2-2">JavaScript</a></dd>
+            <dd><a href="#panel2-3">HTML</a></dd>
+        </dl>
+        <div class="tabs-content">
+            <div class="content active" id="panel2-1">
+                <h6>File: demo/Ice/bidir/Callback.ice</h6>
+                <pre class="source" data="Callback.ice"></code></pre>
+            </div>
+            <div class="content" id="panel2-2">
+                <h6>File: demo/Ice/bidir/browser/Client.js</h6>
+                <pre class="source" data="browser/Client.js"></pre>
+            </div>
+            <div class="content" id="panel2-3">
+                <h6>File: demo/Ice/bidir/index.html</h6>
+                <pre class="source" data="index.html"></pre>
+            </div>
+        </div>
     </div>
     <!-- Footer section -->
     <section role="footer" id="footer">

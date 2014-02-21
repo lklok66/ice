@@ -7,7 +7,7 @@ $("#delay").noUiSlider({range: [0, 2500], start: 0, handles: 1});
 $("#progress .icon").spin("small");
 
 //
-// Show demo/test README.
+// Show demo/test README modal dialog.
 //
 $("#viewReadme").click(
     function()
@@ -17,20 +17,27 @@ $("#viewReadme").click(
     });
 
 //
-// Show demo source code.
+// Load the source code and highlight it.
 //
-$("#source").load($("#source").attr("data"),
-    //
-    // Load completed
-    //
-    function(){
-        SyntaxHighlighter.defaults.toolbar = false;
-        SyntaxHighlighter.highlight();
-        $("#viewSource").click(
-            function()
+$(".source").each(
+    function(i, e)
+    {
+        var file = $(e).attr("data");
+        $.get(file,
+            function(data)
             {
-                $("#source-modal").foundation("reveal", "open");
-                return false;
+                $(e).html($("<div/>").text(data).html());
+                hljs.highlightBlock(e);
             });
+    });
+
+//
+// Show source code modal dialog.
+//
+$("#viewSource").click(
+    function()
+    {
+        $("#source-modal").foundation("reveal", "open");
+        return false;
     });
 }());

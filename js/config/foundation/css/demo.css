@@ -3,7 +3,6 @@
 
 #wss { margin-top:10px; }
 
-#source{ max-height:500px; overflow:auto; }
 #progress .icon { margin-left:10px; margin-top: 5px; }
 #progress .text { margin-left:25px; }
 
@@ -20,3 +19,8 @@ body { height:100%;}
 #console { height: 150px; }
 
 #chat-form #output { height: 300px; } 
+
+#source-modal .tabs-content{ max-height:500px; overflow:hidden; }
+#source-modal .content{ max-height:500px; overflow:auto; width:100%; }
+
+.pricing-table .description { min-height: 100px;}

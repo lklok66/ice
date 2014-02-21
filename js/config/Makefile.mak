@@ -22,15 +22,14 @@ SCRIPTS = foundation\js\modernizr.js \
 	foundation\js\animo.js \
 	foundation\js\spin.min.js \
 	foundation\js\jquery.spin.js \
-	syntaxhighlighter\scripts\shCore.js \
-	syntaxhighlighter\scripts\shBrushJScript.js \
+	highlight\highlight.pack.js \
 	foundation\js\common.js
 	
 STYLE_SHEETS = foundation\css\foundation.min.css \
 	foundation\css\animate.css \
 	foundation\css\demo.css \
+	highlight\styles\vs.css \
 	foundation\css\jquery.nouislider.css \
-	syntaxhighlighter\styles\shCoreDefault.css
 	
 common.min.js common.min.js.gz: $(SCRIPTS)
 	-del /q common.min.js common.min.js.gz
