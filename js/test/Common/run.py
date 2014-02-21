@@ -96,7 +96,7 @@ class ControllerI(Test.Controller):
 class Server(Ice.Application):
     def run(self, args):
         jsDir = os.path.join(TestUtil.toplevel, "js")
-        httpServer = Expect.Expect("node " + os.path.join(jsDir, "test", "Common", "HttpServer.js"), startReader=True,
+        httpServer = Expect.Expect("node " + os.path.join(jsDir, "bin", "HttpServer.js"), startReader=True,
                                    cwd=jsDir)
         httpServer.trace()
         adapter = self.communicator().createObjectAdapter("ControllerAdapter")
