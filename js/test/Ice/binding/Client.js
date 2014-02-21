@@ -476,9 +476,14 @@
             function()
             {
                 //
-                // Skip this test with IE it open too many connections IE doesn't allow more than 6 connections.
+                // Skip this test with IE it open too many connections IE doesn't allow more 
+                // than 6 connections. Firefox has a configuration that causes failed connections
+                // to be delayed on retry (network.websocket.delay-failed-reconnects=true by 
+                // default), so we prefer to also disable this test with Firefox.
                 //
-                if(typeof(navigator) !== "undefined" && navigator.userAgent.indexOf("MSIE") !== -1)
+                if(typeof(navigator) !== "undefined" && 
+                   (navigator.userAgent.indexOf("MSIE") !== -1 || 
+                    navigator.userAgent.indexOf("Firefox") !== -1))
                 {
                     return;
                 }
