@@ -34,7 +34,6 @@
             <li class="current"><a href="#">Latency</a></li>
         </ul>
     </section>
-    
     <!-- Main section that contains the user interface -->
     <section role="main" id="body">
         <div class="row">
@@ -56,7 +55,6 @@
             </div>
         </div>
     </section>
-    
     <!-- Modal dialog to show the client README -->
     <div id="readme-modal" class="reveal-modal medium" data-reveal>
         <h4>Latency Demo Readme</h4>
@@ -75,13 +73,29 @@
         </div>
         <a class="close-reveal-modal">&#215;</a>
     </div>
-    
     <!-- Modal dialog to show the client source code -->
     <div id="source-modal" class="reveal-modal" data-reveal>
-        <pre id="source" class="brush: js;" data="browser/Client.js"></pre>
         <a class="close-reveal-modal">&#215;</a>
+        <dl class="tabs" data-tab>
+            <dd class="active"><a href="#panel2-1">Slice</a></dd>
+            <dd><a href="#panel2-2">JavaScript</a></dd>
+            <dd><a href="#panel2-3">HTML</a></dd>
+        </dl>
+        <div class="tabs-content">
+            <div class="content active" id="panel2-1">
+                <h6>File: demo/Ice/latency/Latency.ice</h6>
+                <pre class="source" data="Latency.ice"></code></pre>
+            </div>
+            <div class="content" id="panel2-2">
+                <h6>File: demo/Ice/latency/browser/Client.js</h6>
+                <pre class="source" data="browser/Client.js"></pre>
+            </div>
+            <div class="content" id="panel2-3">
+                <h6>File: demo/Ice/latency/index.html</h6>
+                <pre class="source" data="index.html"></pre>
+            </div>
+        </div>
     </div>
-    
     <!-- Footer section -->
     <section id="footer">
         <div class="logo">
@@ -91,7 +105,6 @@
             <h6>© 2014 ZeroC, Inc. All rights reserved.</h6>
         </div>
     </section>
-
     <!-- Bundle with all the scripts used to build the user interface,
          see config/Makefile in your distribution for details -->
     <script type="text/javascript" src="../../../config/common.min.js"></script>
