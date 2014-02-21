@@ -193,7 +193,16 @@ var proxies = {};
 
 HttpServer.prototype.start = function()
 {
-    var baseDir = path.join(__dirname, "../../certs/wss");
+    var baseDir;
+    if(!["../../certs/wss", "../certs/wss"].some(
+        function(p)
+        {
+            return fs.existsSync(baseDir = path.join(__dirname, p));
+        }))
+    {
+        console.log("Cannot find wss certificates directory")
+        process.exit(1);
+    }
     var options = {
         passphrase: "password",
         key: fs.readFileSync(path.join(baseDir, "s_rsa1024_priv.pem")),
