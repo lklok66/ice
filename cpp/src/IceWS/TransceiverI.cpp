@@ -1418,8 +1418,12 @@ IceWS::TransceiverI::preWrite(Buffer& buf)
 bool
 IceWS::TransceiverI::postWrite(Buffer& buf)
 {
-    if(_state > StateOpened && _writeState == WriteStateControlFrame)
+    if(_state > StateOpened)
     {
+      if(_writeState != WriteStateControlFrame)
+	{
+	  return false;
+	}
         if(_writeBuffer.i == _writeBuffer.b.end())
         {
             if(_state == StatePingPending)
