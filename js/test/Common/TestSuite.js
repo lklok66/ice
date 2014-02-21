@@ -61,7 +61,15 @@ $(document).foundation();
                     id.properties.setProperty("Ice.Default.Host", defaultHost);
                     id.properties.setProperty("Ice.Default.Protocol", protocol);
 
-                    var str = "controller:ws -h " + defaultHost + " -p 12009";
+                    var str;
+                    if(protocol == "ws")
+                    {
+                        str = "controller:ws -h " + defaultHost + " -p 12009";
+                    }
+                    else
+                    {
+                        str = "controller:wss -h " + defaultHost + " -p 12008";
+                    }
                     var controller = Test.ControllerPrx.uncheckedCast(communicator.stringToProxy(str));
                     
                     var p;

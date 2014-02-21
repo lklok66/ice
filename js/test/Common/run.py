@@ -96,7 +96,8 @@ class ControllerI(Test.Controller):
 class Server(Ice.Application):
     def run(self, args):
         jsDir = os.path.join(TestUtil.toplevel, "js")
-        httpServer = Expect.Expect("node " + os.path.join(jsDir, "test", "Common", "HttpServer.js"), startReader=True, cwd=jsDir)
+        httpServer = Expect.Expect("node " + os.path.join(jsDir, "test", "Common", "HttpServer.js"), startReader=True,
+                                   cwd=jsDir)
         httpServer.trace()
         adapter = self.communicator().createObjectAdapter("ControllerAdapter")
         adapter.add(ControllerI(), self.communicator().stringToIdentity("controller"))
@@ -111,8 +112,13 @@ app = Server()
 
 initData = Ice.InitializationData()
 initData.properties = Ice.createProperties();
-initData.properties.setProperty("Ice.Default.Protocol", "ws")
-initData.properties.setProperty("Ice.ThreadPool.Server.SizeMax", "10")
+initData.properties.setProperty("Ice.Plugin.IceSSL", "IceSSL:createIceSSL")
+initData.properties.setProperty("IceSSL.DefaultDir", os.path.join(TestUtil.toplevel, "certs/wss"));
+initData.properties.setProperty("IceSSL.CertAuthFile", "cacert.pem");
+initData.properties.setProperty("IceSSL.CertFile", "s_rsa1024_pub.pem");
+initData.properties.setProperty("IceSSL.KeyFile", "s_rsa1024_priv.pem");
+initData.properties.setProperty("IceSSL.VerifyPeer", "0");
 initData.properties.setProperty("Ice.Plugin.IceWS", "IceWS:createIceWS")
-initData.properties.setProperty("ControllerAdapter.Endpoints", "default -p 12009")
+initData.properties.setProperty("Ice.ThreadPool.Server.SizeMax", "10")
+initData.properties.setProperty("ControllerAdapter.Endpoints", "ws -p 12009:wss -p 12008")
 sys.exit(app.main(sys.argv, initData=initData))
