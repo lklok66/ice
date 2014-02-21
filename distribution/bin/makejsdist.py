@@ -223,8 +223,8 @@ demoCertsFiles = [ \
     "*.jks", \
     "*.pem", \
     "*.pfx", \
-    "makewinrtcerts.py", \
-    "winrt", \
+    "makewsscerts.py", \
+    "wss", \
 ]
 
 #
@@ -500,15 +500,66 @@ createSourceDist("Windows", distDir)
 
 
 #
+# We need to build bin dist before we create the demo distribution
+# to JS libraries from bin dist and include then in demo distribution.
+#
+p = subprocess.Popen("python " + os.path.join(os.path.dirname(__file__), "makejsbindist.py"), 
+    shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE,
+    stderr = subprocess.STDOUT, bufsize = 0)
+
+matchBinArchive = re.compile("IceJS-" + version + "-bin-(.*)\.tar\.gz")
+
+while(True):
+    line = p.stdout.readline()
+    if p.poll() is not None and not line:
+        # The process terminated
+        break
+                
+    if type(line) != str:
+        line = line.decode()
+    sys.stdout.write(line)
+    
+    m = matchBinArchive.search(line)
+    if m != None:
+        binArchive = "IceJS-%s-bin-%s.tar.gz" % (version, m.group(1))
+
+if p.poll() != 0:
+    print("makebindist.py failed")
+    sys.exit(1)
+
+
+#
 # Consolidate demo, demo scripts distributions.
 #
 print "Consolidating demo distribution...",
+os.mkdir(os.path.join(demoDir, "lib"))
+os.chdir(os.path.join(demoDir, "lib"))
+
+for ext in ["js", "js.gz"]:
+    command = "tar --wildcards -zxf ../../../%s IceJS-%s/lib/*.%s --strip-components 2" % (binArchive, version, ext)
+    if os.system(command) != 0:
+        print("Error executing command `%s'" % command)
+        sys.exit(1)
+
+os.mkdir(os.path.join(demoDir, "assets"))
+copyMatchingFiles(os.path.join(srcDir, "js", "assets"), os.path.join(demoDir, "assets"), ["common.*", "favicon.ico"])
+os.chdir(os.path.join(demoDir, "assets"))
+
+for f in ["common.css", "common.min.js"]:
+    command = "gzip -c9 %s > %s.gz" % (f, f)
+    if os.system(command) != 0:
+        print("Error executing command `%s'" % command)
+        sys.exit(1)
+
 os.chdir(srcDir)
 sys.stdout.flush()
 
 # Unix demo distribution
 copy("ICE_LICENSE", demoDir)
+copy(os.path.join("js", "bin"), os.path.join(demoDir, "bin"))
 copy(os.path.join(distFilesDir, "src", "js", "README.DEMOS"), demoDir)
+
+copy(os.path.join(distFilesDir, "src", "js", "demo.index.html"), os.path.join(demoDir, "index.html"))
 
 copyMatchingFiles(os.path.join("certs"), os.path.join(demoDir, "certs"), demoCertsFiles)
 for d in ["", "cpp"]:
