@@ -19,7 +19,7 @@ var batch = 0;
 //
 function createProxy()
 {
-    var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
+    var hostname = document.location.hostname || "127.0.0.1";
     var proxy = communicator.stringToProxy("hello" + 
                                            ":ws -h " + hostname + " -p 8080 -r /demows" + 
                                            ":wss -h " + hostname + " -p 9090 -r /demowss");

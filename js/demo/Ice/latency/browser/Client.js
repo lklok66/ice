@@ -24,13 +24,11 @@ function run()
     //
     // Create a proxy to the  ping object.
     //
-    var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
-    var proxy = communicator.stringToProxy("ping:ws -h " + hostname + " -p 10002:wss -h " + hostname + " -p 10003")
-    if($("#wss").is(":checked"))
-    {
-        proxy = proxy.ice_secure(true);
-    }
-
+    var hostname = document.location.hostname || "127.0.0.1";
+    var secure = document.location.protocol.indexOf("https") != -1;
+    var ref = secure ? "ping:wss -h " + hostname + " -p 10003" : "ping:ws -h " + hostname + " -p 10002";
+    var proxy = communicator.stringToProxy(ref);
+    
     var repetitions = 1000;
     
     //
@@ -82,8 +80,7 @@ $("#run").click(
             ).exception(
                 function(ex)
                 {
-                    console.log(ex.stack);
-                    $("#console").val(ex.toString());
+                    $("#output").val(ex.toString());
                 }
             ).finally(
                 function()
@@ -117,8 +114,8 @@ function loop(fn, repetitions)
 //
 function writeLine(msg)
 {
-    $("#console").val($("#console").val() + msg + "\n");
-    $("#console").scrollTop($("#console").get(0).scrollHeight);
+    $("#output").val($("#output").val() + msg + "\n");
+    $("#output").scrollTop($("#output").get(0).scrollHeight);
 }
 
 //
@@ -139,7 +136,7 @@ function setState(s, ex)
         {
             case State.Running:
             {
-                $("#console").val("");
+                $("#output").val("");
                 $("#run").addClass("disabled");
                 $("#progress").show();
                 $("body").addClass("waiting");

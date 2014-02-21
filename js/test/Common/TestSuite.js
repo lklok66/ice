@@ -53,8 +53,7 @@ $(document).foundation();
                     $("#console").val("");
                     $(this).addClass("disabled");
                     $("#protocol").prop("disabled", "disabled");
-                    defaultHost = $("#default-host").val() ? $("#default-host").val() : 
-                        $("#default-host").attr("placeholder");
+                    var defaultHost = document.location.hostname || "127.0.0.1";;
                     
                     protocol = $("#protocol").val();
                     var id = new Ice.InitializationData();
@@ -169,6 +168,11 @@ $(document).foundation();
             //
             (function(){
                 
+                if(basePath == "../../../")
+                {
+                    $(".title-area a").attr("href", "../../../../index.html");
+                    $(".breadcrumbs li:first a").attr("href", "../../../../index.html");
+                }
                 var href = document.location.href;
                 var i = href.indexOf("?");
                 var autoStart = i !== -1 && href.substr(i).indexOf("loop=true") !== -1;
@@ -199,7 +203,6 @@ $(document).foundation();
                                 if(protocol !== newProtocol)
                                 {
                                     var href = document.location.href;
-                                    var http;
                                     if(newProtocol == "ws")
                                     {
                                         href = href.replace("https", "http");

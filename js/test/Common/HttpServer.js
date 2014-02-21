@@ -48,10 +48,10 @@ FileServant.prototype.processRequest = function(req, res)
     var ext = path.extname(filePath).slice(1);
     
     //
-    // When the browser ask for a .js file and it has support for gzip content
-    // check if a gzip version (.js.gz) of the file exists and use that instead.
+    // When the browser ask for a .js or .css file and it has support for gzip content
+    // check if a gzip version (.js.gz or .css.gz) of the file exists and use that instead.
     //
-    if(ext == "js" && req.headers["accept-encoding"].indexOf("gzip") !== -1)
+    if((ext == "js" || ext == "css") && req.headers["accept-encoding"].indexOf("gzip") !== -1)
     {
         fs.stat(filePath + ".gz",
                 function(err, stats)
@@ -179,6 +179,18 @@ var HttpServer = function(host, ports)
     this._ports = ports;
 };
 
+//
+// Proxy configuration for the different demos.
+//
+var proxyConfig = [
+    {resource: "/demows", target: "http://localhost:10002", protocol: "ws"},
+    {resource: "/demowss", target: "https://localhost:10003", protocol: "wss"},
+    {resource: "/chatws", target: "http://localhost:5063", protocol: "ws"},
+    {resource: "/chatwss", target: "https://localhost:5064", protocol: "wss"}
+];
+
+var proxies = {};
+
 HttpServer.prototype.start = function()
 {
     var baseDir = path.join(__dirname, "../../../certs/wss");
@@ -193,14 +205,13 @@ HttpServer.prototype.start = function()
 
     if(httpProxy)
     {
-        var proxyWS = httpProxy.createProxyServer({ 
-            target : "http://localhost:10002",
-            secure : false,
-        });
-        var proxyWSS = httpProxy.createProxyServer({
-            target : "https://localhost:10003",
-            secure : false,
-        });
+        proxyConfig.forEach(
+            function(conf)
+            {
+                proxies[conf.resource] = {
+                    server: httpProxy.createProxyServer({target : conf.target, secure : false}),
+                    protocol: conf.protocol };
+            });
     }
     
     var self = this;
@@ -214,40 +225,28 @@ HttpServer.prototype.start = function()
 
     if(httpProxy)
     {
-        httpServer.on("upgrade", function(req, socket, head)
-                      {
-                          if(req.url == "/demows")
-                          {
-                              proxyWS.ws(req, socket, head, function (err) 
-                                         {
-                                             socket.end();
-                                         });
-                          }
-                          else
-                          {
-                              socket.end();
-                          }
-                      });
-        httpsServer.on("upgrade", function(req, socket, head)
-                       {
-                           var errCB = function (err) 
-                           {
-                               socket.end();
-                           }
-
-                           if(req.url == "/demows")
-                           {
-                               proxyWS.ws(req, socket, head, errCB);
-                           }
-                           else if(req.url == "/demowss")
-                           {
-                               proxyWSS.ws(req, socket, head, errCB);
-                           }
-                           else
-                           {
-                               socket.end();
-                           }
-                       });
+        function requestCB(protocols)
+        {
+            return function(req, socket, head)
+            {
+                var errCB = function(err)
+                {
+                    socket.end();
+                };
+                var proxy = proxies[req.url];
+                if(proxy && protocols.indexOf(proxy.protocol) !== -1)
+                {
+                    proxy.server.ws(req, socket, head, errCB);
+                }
+                else
+                {
+                    socket.end();
+                }
+            };
+        }
+        
+        httpServer.on("upgrade", requestCB(["ws"]));
+        httpsServer.on("upgrade", requestCB(["ws", "wss"]));
     }
 
     httpServer.listen(8080, this._host);
@@ -259,8 +258,9 @@ var defaultController = new FileServant(path.join(__dirname, "../.."));
 
 HttpServer.prototype.processRequest = function(req, res)
 {
-    var self = this;
-    
+    //
+    // Dummy data callback required so request end event is emitted.
+    //
     var dataCB = function(data)
     {
     };

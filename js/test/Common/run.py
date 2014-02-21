@@ -29,9 +29,12 @@ class ServerI(Test.Server):
         self.process = process
 
     def waitTestSuccess(self, current):
+        if not self.process:
+            return
         sys.stdout.write("waiting for " + self.name + " to terminate... ")
         sys.stdout.flush()
         self.process.waitTestSuccess()
+        self.process = None
         try:
             current.adapter.remove(current.id)
         except:
@@ -39,9 +42,12 @@ class ServerI(Test.Server):
         print("ok")
 
     def terminate(self, current):
+        if not self.process:
+            return
         sys.stdout.write("terminating " + self.name + "... ")
         sys.stdout.flush()
         self.process.terminate()
+        self.process = None
         try:
             current.adapter.remove(current.id)
         except:

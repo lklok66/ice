@@ -16,6 +16,20 @@
     var Test = global.Test;
     var Promise = Ice.Promise;
     var ArrayUtil = Ice.ArrayUtil;
+
+    var forEach = function(array, fn)
+    {
+        if(array.length === 0)
+        {
+            return new Promise.succeed();
+        }
+        var p = null;
+        array.forEach(function(e) 
+                      {
+                          p = p ? p.then(fn(e)) : fn(e);
+                      });
+        return p;
+    }
     
     var communicator;
     var com;
@@ -47,41 +61,21 @@
         {
             var endpoints = [];
             var closePromises = [];
-            var test = null;
+            var p = null;
             
             return Promise.all(adapters.map(function(adapter){ return adapter.getTestIntf(); })).then(
                 function()
                 {
-                    var args = Array.prototype.slice.call(arguments);
-                    args.forEach(
+                    var results = Array.prototype.slice.call(arguments);
+                    results.forEach(
                         function(r)
                         {
-                            test = r[0];
-                            endpoints = endpoints.concat(test.ice_getEndpoints());
-                        });
-                    adapters.forEach(
-                        function(adapter)
-                        {
-                            var conn = adapter.ice_getCachedConnection();
-                            if(conn != null)
-                            {
-                                closePromises.push(conn.close(false));
-                            }
-                        });
-                    
-                    test = test.ice_endpoints(endpoints);
-                    if(closePromises.length > 0)
-                    {
-                        return Promise.all(closePromises).then(
-                            function()
-                            {
-                                return Test.TestIntfPrx.uncheckedCast(test);
-                            });
-                    }
-                    else
-                    {
-                        return Test.TestIntfPrx.uncheckedCast(test);
-                    }
+                            p = r[0];
+                            test(p);
+                            endpoints = endpoints.concat(p.ice_getEndpoints());
+                        }
+                    );
+                    return Test.TestIntfPrx.uncheckedCast(p.ice_endpoints(endpoints));
                 });
         };
         
@@ -121,146 +115,7 @@
         };
         
         var ref, adapter, test1, test2, test3, conn1, conn2, conn3, adapters, names, prx;
-                
-        var multipleRandomEndpoints = function()
-        {
-            out.write("testing binding with multiple random endpoints... ");
-            names = ["AdapterRandom11", "AdapterRandom12", "AdapterRandom13", "AdapterRandom14", "AdapterRandom15"];
-            var all = Promise.all(names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
-            
-            return all.then(
-                function()
-                {
-                    adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[0]; });
-                    var count = 20;
-                    var adapterCount = adapters.length;
-                    var proxies = new Array(10);
-                    var nextInt = function(n) { return Math.floor((Math.random() * n)); };
 
-                    var f1 = function(count, adapterCount, proxies)
-                    {
-                        var p1 = count === 10 ? com.deactivateObjectAdapter(adapters[2]) : new Promise().succeed();
-                        return p1.then(
-                            function()
-                            {
-                                if(count === 10)
-                                {
-                                    adapterCount--;
-                                }
-                                
-                                var f2 = function(i)
-                                {
-                                    var adpts = new Array(nextInt(adapters.length) + 1);
-                                    for(var j = 0; j < adpts.length; ++j)
-                                    {
-                                        adpts[j] = adapters[nextInt(adapters.length)];
-                                    }
-                                    
-                                    return createTestIntfPrx(adpts).then(
-                                        function(prx)
-                                        {
-                                            proxies[i] = prx;
-                                            if(i < 10)
-                                            {
-                                                return f2(++i);
-                                            }
-                                            else
-                                            {
-                                                return proxies;
-                                            }
-                                        });
-                                };
-                            
-                                return f2(0);
-                            }
-                        ).then(
-                            function(proxies)
-                            {
-                                proxies.forEach(
-                                    function(p)
-                                    {
-                                        p.getAdapterName();
-                                    });
-                                
-                                var allPing = proxies.map(
-                                    function(proxy)
-                                    {
-                                        return proxy.ice_ping().exception(
-                                            function(ex)
-                                            {
-                                                test(ex instanceof Ice.LocalException);
-                                            });
-                                    });
-                                
-                                var f3 = function(adapters)
-                                {
-                                    adapter = adapters.shift();
-                                    return adapter.getTestIntf().then(
-                                        function(prx)
-                                        {
-                                            return prx.ice_getConnection();
-                                        }
-                                    ).then(
-                                        function(conn)
-                                        {
-                                            return conn.close(false);
-                                        },
-                                        function(ex)
-                                        {
-                                            // Expected if adapter is down.
-                                            test(ex instanceof Ice.LocalException);
-                                        }
-                                    ).then(
-                                        function()
-                                        {
-                                            if(adapters.length > 0)
-                                            {
-                                                return f3(adapters);
-                                            }
-                                        });
-                                };
-                                
-                                return Promise.all(allPing).then(
-                                    function()
-                                    {
-                                        var connections = [];
-                                        proxies.forEach(
-                                            function(p){
-                                                var conn = p.ice_getCachedConnection();
-                                                if(conn !== null)
-                                                {
-                                                    if(connections.indexOf(conn) !== -1)
-                                                    {
-                                                        connections.push(conn);
-                                                    }
-                                                }
-                                            });
-                                        test(connections.length <= adapters.length);
-                                    }
-                                ).then(
-                                    function()
-                                    {
-                                        return f3(ArrayUtil.clone(adapters));
-                                    });
-                            }
-                        ).then(
-                            function()
-                            {
-                                if(count > 0)
-                                {
-                                    return f1(--count, adapterCount, proxies);
-                                }
-                            });
-                    };
-                    return f1(count, adapterCount, proxies);
-            }).then(
-                function()
-                {
-                    out.writeLine("ok");
-                }
-            );
-        };
-        
         Promise.try(
             function()
             {
@@ -388,17 +243,13 @@
                         function(obj)
                         {
                             test3 = obj;
-                            return Promise.all(
-                                test1.ice_getConnection(),
-                                test2.ice_getConnection());
+                            return Promise.all(test1.ice_getConnection(), test2.ice_getConnection());
                         }
                     ).then(
                         function(r1, r2)
                         {
                             test(r1[0] === r2[0]);
-                            return Promise.all(
-                                test2.ice_getConnection(),
-                                test3.ice_getConnection());
+                            return Promise.all(test2.ice_getConnection(), test3.ice_getConnection());
                         }
                     ).then(
                         function(r1, r2)
@@ -439,25 +290,14 @@
                 // Ensure that the proxy correctly caches the connection (we
                 // always send the request over the same connection.)
                 //
-                var f1 = function(adapters)
-                {
-                    var adapter = adapters.shift();
-                    adapter.getTestIntf().then(
-                        function(test)
-                        {
-                            return test.ice_ping();
-                        }
-                    ).then(
-                        function()
-                        {
-                            if(adapters.length > 0)
-                            {
-                                return f1(adapters);
-                            }
-                        }
-                    );
-                }
-                return f1(ArrayUtil.clone(adapters))
+                return Promise.all(adapters.map(function(adapter) 
+                                                {
+                                                    return adapter.getTestIntf().then(
+                                                        function(p)
+                                                        {
+                                                            return p.ice_ping();
+                                                        });
+                                                }));
             }
         ).then(
             function()
@@ -499,30 +339,19 @@
         ).then(
             function()
             {
-                var f1 = function(adapters)
-                {
-                    var adapter = adapters.shift();
-                    adapter.getTestIntf().then(
-                        function(test)
-                        {
-                            return test.ice_getConnection();
-                        }
-                    ).then(
-                        function(conn)
-                        {
-                            return conn.close(false);
-                        }
-                    ).then(
-                        function()
-                        {
-                            if(adapters.length > 0)
-                            {
-                                return f1(adapters);
-                            }
-                        }
-                    );
-                }
-                return f1(ArrayUtil.clone(adapters))
+                return Promise.all(adapters.map(function(adapter) 
+                                                {
+                                                    return adapter.getTestIntf().then(
+                                                        function(p)
+                                                        {
+                                                            return p.ice_getConnection();
+                                                        }).then(
+                                                            function(c)
+                                                            {
+                                                                return c.close(false);
+                                                            }
+                                                        );
+                                                }));
             }
         ).then(
             function()
@@ -649,10 +478,149 @@
                 //
                 // Skip this test with IE it open too many connections IE doesn't allow more than 6 connections.
                 //
-                if(typeof(navigator) === "undefined" || navigator.userAgent.indexOf("MSIE") === -1)
+                if(typeof(navigator) !== "undefined" && navigator.userAgent.indexOf("MSIE") !== -1)
                 {
-                    return multipleRandomEndpoints();
+                    return;
                 }
+
+                out.write("testing binding with multiple random endpoints... ");
+                names = ["AdapterRandom11", "AdapterRandom12", "AdapterRandom13", "AdapterRandom14", "AdapterRandom15"];
+
+                return Promise.all(
+                    names.map(function(name) 
+                              {
+                                  return com.createObjectAdapter(name, "default"); 
+                              })
+                ).then(
+                    function()
+                    {
+                        adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[0]; });
+                        var count = 20;
+                        var adapterCount = adapters.length;
+                        var proxies = new Array(10);
+                        var nextInt = function(n) { return Math.floor((Math.random() * n)); };
+
+                        var f1 = function(count, adapterCount, proxies)
+                        {
+                            var p1 = count === 10 ? com.deactivateObjectAdapter(adapters[2]) : new Promise().succeed();
+                            return p1.then(
+                                function()
+                                {
+                                    if(count === 10)
+                                    {
+                                        adapterCount--;
+                                    }
+
+                                    var f2 = function(i)
+                                    {
+                                        var adpts = new Array(nextInt(adapters.length) + 1);
+                                        for(var j = 0; j < adpts.length; ++j)
+                                        {
+                                            adpts[j] = adapters[nextInt(adapters.length)];
+                                        }
+                                        
+                                        return createTestIntfPrx(adpts).then(
+                                            function(prx)
+                                            {
+                                                proxies[i] = prx;
+                                                if(i < 10)
+                                                {
+                                                    return f2(++i);
+                                                }
+                                                else
+                                                {
+                                                    return proxies;
+                                                }
+                                            });
+                                    };
+                                    
+                                    return f2(0);
+                                }
+                            ).then(
+                                function(proxies)
+                                {
+                                    return Ice.Promise.try(
+                                        function()
+                                        {
+                                            return forEach(proxies, 
+                                                           function(p)
+                                                           {
+                                                               p.getAdapterName();
+                                                           });
+                                        }
+                                    ).then(
+                                        function()
+                                        {
+                                            return forEach(proxies,                                    
+                                                           function(proxy)
+                                                           {
+                                                               return proxy.ice_ping().exception(
+                                                                   function(ex)
+                                                                   {
+                                                                       test(ex instanceof Ice.LocalException);
+                                                                   });
+                                                           });
+                                        }
+                                    ).then(
+                                        function()
+                                        {
+                                            var connections = [];
+                                            proxies.forEach(
+                                                function(p)
+                                                {
+                                                    var conn = p.ice_getCachedConnection();
+                                                    if(conn !== null)
+                                                    {
+                                                        if(connections.indexOf(conn) !== -1)
+                                                        {
+                                                            connections.push(conn);
+                                                        }
+                                                    }
+                                                });
+                                            test(connections.length <= adapters.length);
+
+                                            return Promise.all(adapters.map(
+                                                function(adapter) 
+                                                {
+                                                    return adapter.getTestIntf().then(
+                                                        function(p)
+                                                        {
+                                                            return p.ice_getConnection();
+                                                        }).then(
+                                                            function(c)
+                                                            {
+                                                                return c.close(false);
+                                                            },
+                                                            function(ex)
+                                                            {
+                                                                // Expected if adapter is down.
+                                                                test(ex instanceof Ice.LocalException);
+                                                            }
+                                                        );
+                                                }));
+                                        }
+                                    );
+                                }
+                            ).then(
+                                function()
+                                {
+                                    if(count > 0)
+                                    {
+                                        return f1(--count, adapterCount, proxies);
+                                    }
+                                });
+                        };
+                        return f1(count, adapterCount, proxies);
+                    }).then(
+                        function()
+                        {
+                            out.writeLine("ok");
+                        },
+                        function(ex)
+                        {
+                            out.writeLine("failed! " + ex.stack);
+                        }
+                    );
             }
         ).then(
             function()
@@ -671,6 +639,11 @@
             {
                 adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[0]; });
                 return createTestIntfPrx(adapters);
+            },
+            function(ex)
+            {
+                console.log(ex.toString());
+                test(false);
             }
         ).then(
             function(prx)
@@ -748,6 +721,10 @@
                     );
                 };
                 return f1();
+            },
+            function(ex)
+            {
+                test(false);
             }
         ).then(
             function()

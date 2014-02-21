@@ -4,29 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bidir Demo | Ice for JavaScript</title>
-    <link rel="stylesheet" href="../../../config/foundation/css/foundation.css" />
-    <script src="../../../config/foundation/js/modernizr.js"></script>
-    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shCore.js"></script>
-    <script type="text/javascript" src="../../../config/syntaxhighlighter/scripts/shBrushJScript.js"></script>
-    <link type="text/css" rel="stylesheet" href="../../../config/syntaxhighlighter/styles/shCoreDefault.css"/>
-    <style type="text/css">
-        #source { max-height:500px; overflow:auto; }
-        #console { height: 150px; }
-        #progress .icon { margin-left:10px; margin-top: 5px; }
-        #progress .text { margin-left:25px; }
-        .waiting * { cursor: wait !important; }
-        body { height:100%;}
-        #header {width:100%; position:fixed; top:0px; height: 100px; z-index: 10;}
-        #footer {width:100%; height:80px; position:fixed; bottom:0px; background:#333333; color:#ffffff; padding:25px 25px 25px 25px;}
-        #footer * {color:#858585;}
-        #footer .logo{ float:left;}
-        #footer .copyright{ float:right;}
-        #body {padding:10px; padding-top: 100px; padding-bottom:80px;   /* Height of the footer */}
-    </style>
-    <link rel="icon" type="image/x-icon" href="/config/favicon.ico">
+    <!-- Bundle with all the stylesheets used to build the user interface,
+         see config/Makefile in your distribution for details -->
+    <link rel="stylesheet" type="text/css" href="../../../config/common.css" />
+    <link rel="icon" type="image/x-icon" href="../../../config/favicon.ico">
   </head>
   <body>
-    <div id="header">
+    <!-- Header section that contains title and navigation bar -->
+    <section role="header" id="header">
         <nav class="top-bar" data-topbar>
             <ul class="title-area">
                 <li class="name">
@@ -48,35 +33,26 @@
             <li><a href="../../index.html">Demos</a></li>
             <li class="current"><a href="#">Bidir</a></li>
         </ul>
-    </div>
+    </section>
+    <!-- Main section that contains the user interface -->
     <section role="main" id="body">
         <div class="row">
             <div class="large-12 medium-12 columns">
                 <form>
-                    <br/>
-                    <div class="row">
-                        <div class="small-3 columns">
-                            <label class="right inline" for="hostname">Hostname:</label>
-                        </div>
-                        <div class="small-9 columns">
-                            <input type="text" id="hostname"/>
-                        </div>
+                    <a href="#" class="button small" id="start">Start</a>
+                    <a href="#" class="button small disabled" id="stop">Stop</a>
+                    <textarea id="output" class="disabled" readonly></textarea>
+                    <div id="progress" class="row hide">
+                    <div class="small-12 columns left">
+                        <div class="inline left icon"></div>
+                        <div class="text"></div>
+                    </div>
                     </div>
                 </form>
-                <a href="#" class="button small" id="start">Start</a>
-                <a href="#" class="button small disabled" id="stop">Stop</a>
-                <form>
-                    <textarea id="console" class="disabled" readonly></textarea>
-                </form>
-                <div id="progress" class="row hide">
-                  <div class="small-12 columns left">
-                    <div class="inline left icon"></div>
-                    <div class="text"></div>
-                  </div>
-                </div>
             </div>
         </div>
     </section>
+    <!-- Modal dialog to show the client README -->
     <div id="readme-modal" class="reveal-modal medium" data-reveal>
         <h4>Bidir Demo Readme</h4>
         <hr/>
@@ -93,52 +69,28 @@
 
         <a class="close-reveal-modal">&#215;</a>
     </div>
+    <!-- Modal dialog to show the client source code -->
     <div id="source-modal" class="reveal-modal" data-reveal>
-        <pre id="source" class="brush: js;"></pre>
+        <pre id="source" class="brush: js;" data="browser/Client.js"></pre>
         <a class="close-reveal-modal">&#215;</a>
     </div>
-    <div id="footer">
+    <!-- Footer section -->
+    <section role="footer" id="footer">
         <div class="logo">
             <h4><strong>ZeroC</strong></h4>
         </div>
         <div class="copyright">
             <h6>© 2014 ZeroC, Inc. All rights reserved.</h6>
         </div>
-    </div>
-    <script src="../../../config/foundation/js/jquery.js"></script>
-    <script src="../../../config/foundation/js/foundation.min.js"></script>
-    <script src="../../../config/foundation/js/spin.min.js"></script>
-    <script src="../../../config/foundation/js/jquery.spin.js"></script>
-    <script type="application/javascript">
-        $(document).foundation();
-        $("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
-        $("#progress .icon").spin("small");
-    </script>
-    <script src="../../../lib/Ice.js"></script>
-    <script src="Callback.js"></script>
-    <script src="browser/Client.js"></script>
-    <script type="application/javascript">
-        $("#viewReadme").click(
-            function()
-            {
-                $("#readme-modal").foundation("reveal", "open");
-                return false;
-            });
-        $("#source").load("browser/Client.js",
-            //
-            // Load completed
-            //
-            function(){
-                SyntaxHighlighter.defaults.toolbar = false;
-                SyntaxHighlighter.highlight();
-                $("#viewSource").removeClass("disabled");
-                $("#viewSource").click(
-                    function()
-                    {
-                        $("#source-modal").foundation("reveal", "open");
-                        return false;
-                    });
-            });
-    </script>
+    </section>
+    <!-- Bundle with all the scripts used to build the user interface,
+         see config/Makefile in your distribution for details -->
+    <script type="text/javascript" src="../../../config/common.min.js"></script>
+    <!-- Ice.js (Ice run-time library) -->
+    <script type="text/javascript" src="../../../lib/Ice.js"></script>
+    <!-- Callback.js (Demo generated code) -->
+    <script type="text/javascript" src="Callback.js"></script>
+    <!-- browser/Client.js (Bidir Demo Application) -->
+    <script type="text/javascript" src="browser/Client.js"></script>
   </body>
 </html>

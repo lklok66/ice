@@ -53,7 +53,7 @@ function run()
     //
     // Create a proxy to the throughput object.
     //
-    var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
+    var hostname = document.location.hostname || "127.0.0.1";
     var proxy = communicator.stringToProxy("throughput:ws -h " + hostname + " -p 10002");
     
     //
@@ -259,8 +259,7 @@ $("#run").click(
             ).exception(
                 function(ex)
                 {
-                    console.log(ex.stack);
-                    $("#console").val(ex.toString());
+                    $("#output").val(ex.toString());
                 }
             ).finally(
                 function()
@@ -294,13 +293,13 @@ function loop(fn, repetitions)
 //
 function write(msg)
 {
-    $("#console").val($("#console").val() + msg);
+    $("#output").val($("#output").val() + msg);
 }
 
 function writeLine(msg)
 {
     write(msg + "\n");
-    $("#console").scrollTop($("#console").get(0).scrollHeight);
+    $("#output").scrollTop($("#output").get(0).scrollHeight);
 }
 
 //
@@ -320,7 +319,7 @@ function setState(s, ex)
         {
             case State.Running:
             {
-                $("#console").val("");
+                $("#output").val("");
                 $("#run").addClass("disabled");
                 $("#progress").show();
                 $("body").addClass("waiting");

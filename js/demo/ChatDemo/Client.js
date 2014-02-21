@@ -24,10 +24,7 @@ var username;
 var state;
 var hasError = false;
 
-//
-// Default hostname is the same as the web server.
-//
-$("#hostname").attr("placeholder", document.location.hostname || "127.0.0.1");
+var hostname = document.location.hostname || "127.0.0.1";
 
 //
 // Servant that implements the ChatCallback interface.
@@ -108,7 +105,7 @@ var signin = function()
             var id = new Ice.InitializationData();
             id.properties = Ice.createProperties();
             id.properties.setProperty("Ice.Default.Router",
-                                      "Glacier2/router:ws -p 4063 -h " + hostname());
+                                      "Glacier2/router:wss -p 9090 -h " + hostname + " -r /chatwss");
             communicator = Ice.initialize(id);
 
             //
@@ -456,20 +453,6 @@ function setState(newState, error)
             ).then(
                 function()
                 {
-                    $("#hostname").keypress(
-                        function(e)
-                        {
-                            //
-                            // After enter key is pressed in the hostname input,
-                            // switch focus to username input.
-                            //
-                            if(e.which === 13)
-                            {
-                                $("#username").focus();
-                                return false;
-                            }
-                        });
-
                     $("#username").focus();
                     $("#username").keypress(
                         function(e)
@@ -582,14 +565,6 @@ function formatUsername(s)
     return s.length < 2 ?
         s.toUpperCase() :
         s.substring(0, 1).toUpperCase() + s.substring(1, s.length).toLowerCase();
-}
-
-//
-// Helper method to get the hostname.
-//
-function hostname()
-{
-    return $("#hostname").val() || $("#hostname").attr("placeholder");
 }
 
 function writeLine(s)

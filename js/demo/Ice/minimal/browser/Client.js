@@ -24,7 +24,7 @@ function sayHello()
             //
             // Create a proxy for the hello object
             //
-            var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
+            var hostname = document.location.hostname || "127.0.0.1";
             var proxy = communicator.stringToProxy("hello:ws -h " + hostname + " -p 10000");
             
             //

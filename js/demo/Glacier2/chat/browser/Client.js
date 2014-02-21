@@ -66,6 +66,20 @@ var signin = function()
             // Start animating the loading progress bar.
             //
             startProgress();
+            
+            var hostname = document.location.hostname || "127.0.0.1";
+            //
+            // If the demo is access vi https use a secure (WSS) endpoint, otherwise
+            // use a non secure (WS) endpoint.
+            //
+            // The web server will act as a reverse proxy for Web Socket connetions, that
+            // facilitates the setup of WSS with self signed certificates. Where Firefox
+            // and Internet Exlorer certificate exceptions are only valid for the same
+            // port and host.
+            //
+            var secure = document.location.protocol.indexOf("https") != -1;
+            var router = secure ? "DemoGlacier2/router:wss -p 9090 -h " + hostname + " -r /chatwss" :
+                                  "DemoGlacier2/router:ws -p 8080 -h " + hostname + " -r /chatws";
 
             //
             // Initialize the communicator with Ice.Default.Router property
@@ -73,7 +87,7 @@ var signin = function()
             //
             var id = new Ice.InitializationData();
             id.properties = Ice.createProperties();
-            id.properties.setProperty("Ice.Default.Router", "DemoGlacier2/router:ws -p 5063 -h localhost");
+            id.properties.setProperty("Ice.Default.Router", router);
             communicator = Ice.initialize(id);
             
             //
