@@ -193,7 +193,7 @@ var proxies = {};
 
 HttpServer.prototype.start = function()
 {
-    var baseDir = path.join(__dirname, "../../../certs/wss");
+    var baseDir = path.join(__dirname, "../../certs/wss");
     var options = {
         passphrase: "password",
         key: fs.readFileSync(path.join(baseDir, "s_rsa1024_priv.pem")),
@@ -254,7 +254,7 @@ HttpServer.prototype.start = function()
     console.log("listening on ports 8080 (http) and 9090 (https)...");
 };
 
-var defaultController = new FileServant(path.join(__dirname, "../.."));
+var defaultController = new FileServant(path.join(__dirname, ".."));
 
 HttpServer.prototype.processRequest = function(req, res)
 {
