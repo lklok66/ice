@@ -11,7 +11,7 @@ top_srcdir	= .
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= src test config demo
+SUBDIRS		= src assets test demo
 
 INSTALL_SUBDIRS	= $(install_bindir) $(install_libdir) $(install_moduledir)
 

@@ -14,7 +14,7 @@
         #footer .copyright{ float:right;}
         #body {padding:10px; padding-top: 100px; padding-bottom:80px;   /* Height of the footer */}
     </style>
-    <link rel="icon" type="image/x-icon" href="/config/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
   </head>
   <body>
     <div id="header">
@@ -137,9 +137,7 @@
         }
         
         scripts = [
-            basePath + "../config/foundation/js/modernizr.js",
-            basePath + "../config/foundation/js/jquery.js",
-            basePath + "../config/foundation/js/foundation.min.js",
+            basePath + "../assets/common.min.js",
             basePath + "../lib/Ice.js"
         ];
         
@@ -155,7 +153,7 @@
         
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = basePath + "../config/foundation/css/foundation.css";
+        link.href = basePath + "../assets/foundation/css/foundation.css";
         head.appendChild(link);
         
         function loadScript()
