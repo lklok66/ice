@@ -211,8 +211,10 @@ excludeUnixFiles = [ \
 # source distribution config directory.
 #
 demoConfigFiles = [ \
-    "Make.*", \
-    "common.xml", \
+    "Make.common.rules", \
+    "Make.rules", \
+    "Make.rules.Darwin", \
+    "Make.rules.Linux" \
 ]
 
 #
