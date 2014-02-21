@@ -42,7 +42,7 @@ var start = function()
     //
     // Create a proxy to the sender object.
     //
-    var hostname = $("#hostname").val() || $("#hostname").attr("placeholder");
+    var hostname = document.location.hostname || "127.0.0.1";
     var proxy = communicator.stringToProxy("sender:ws -p 10002 -h " + hostname);
     
     //
