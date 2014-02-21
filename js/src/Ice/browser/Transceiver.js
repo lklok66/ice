@@ -161,8 +161,14 @@
         {
             var remaining = byteBuffer.remaining;
             Debug.assert(remaining > 0);
-
-            if(this._fd.bufferedAmount === 0)
+            Debug.assert(this._fd);
+            
+            //
+            // Delay the send if more than 1KB is already queued for
+            // sending on the socket. If less, we consider that it's
+            // fine to push more data on the socket.
+            //
+            if(this._fd.bufferedAmount < 1024)
             {
                 //
                 // Create a slice of the source buffer representing the remaining data to be written.
@@ -181,16 +187,18 @@
                 var transceiver = this;
                 var writtenCB = function()
                 {
-                    if(transceiver._fd.bufferedAmount === 0)
+                    if(transceiver._fd)
                     {
-                        transceiver._bytesWrittenCallback();
-                    }
-                    else
-                    {
-                        setTimeout(writtenCB, 50);
+                        if(transceiver._fd.bufferedAmount === 0)
+                        {
+                            transceiver._bytesWrittenCallback();
+                        }
+                        else
+                        {
+                            setTimeout(writtenCB, 50);
+                        }
                     }
                 };
-
                 setTimeout(writtenCB, 50);
                 return false;
             }
