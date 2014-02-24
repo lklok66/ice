@@ -20,6 +20,7 @@ keepGoing = False               # Set to True to have the tests continue on fail
 ipv6 = False                    # Default to use IPv4 only
 socksProxy = False              # Use SOCKS proxy running on localhost
 iceHome = None                  # Binary distribution to use (None to use binaries from source distribution)
+iceJsHome = None                # IceJS binary distribution to use
 x64 = False                     # Binary distribution is 64-bit
 cpp11 = False                   # Binary distribution is c++ 11
 
@@ -1701,13 +1702,13 @@ def getTestEnv(lang, testdir):
 
     if lang == "rb":
         addPathToEnv("RUBYLIB", os.path.join(getIceDir("rb", testdir), "ruby"), env)
-        
+    
     if lang == "js":
-        if iceHome == None:
+        if iceJsHome == None:
             addPathToEnv("NODE_PATH", os.path.join(getIceDir("js", testdir), "src"), env)
             addPathToEnv("NODE_PATH", os.path.join(testdir), env)
         else:
-            addPathToEnv("NODE_PATH", os.path.join(iceHome, "node_modules"), env)
+            addPathToEnv("NODE_PATH", os.path.join(iceJsHome, "node_modules"), env)
             addPathToEnv("NODE_PATH", os.path.join(testdir), env)
 
     return env;
@@ -1825,6 +1826,7 @@ def processCmdLine():
 
     global serverOnly
     global winrt
+    global iceJsHome
     for o, a in opts:
         if o == "--ice-home":
             global iceHome
@@ -1941,6 +1943,11 @@ def processCmdLine():
             iceHome = os.environ["ICE_HOME"]
         elif isLinux():
             iceHome = "/usr"
+            
+    # Only use binary distribution from ICE_JS_HOME environment variable if USE_BIN_DIST=yes
+    if not iceJsHome and os.environ.get("USE_BIN_DIST", "no") == "yes":
+        if os.environ.get("USE_BIN_DIST", "") != "":
+            iceJsHome = os.environ["ICE_JS_HOME"]
 
     if not x64:
         x64 = isWin32() and os.environ.get("PLATFORM", "").upper() == "X64" or os.environ.get("LP64", "") == "yes"
