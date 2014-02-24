@@ -22,11 +22,18 @@ $("#viewReadme").click(
 $(".source").each(
     function(i, e)
     {
-        var file = $(e).attr("data");
-        $.get(file,
+        $.ajax(
+            {
+                url: $(e).attr("data"), 
+                //
+                // Use text data type to avoid problems interpreting the data.
+                //
+                dataType: "text"
+            }
+        ).done(
             function(data)
             {
-                $(e).html($("<div/>").text(data).html());
+                $(e).text(data);
                 hljs.highlightBlock(e);
             });
     });
