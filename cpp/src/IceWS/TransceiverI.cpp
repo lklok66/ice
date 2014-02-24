@@ -1367,6 +1367,7 @@ IceWS::TransceiverI::preWrite(Buffer& buf)
         }
         else
         {
+            assert(_state != StateClosed);
             return false; // Nothing to write in this state
         }
 
@@ -1437,11 +1438,9 @@ IceWS::TransceiverI::postWrite(Buffer& buf)
                     out << "sent " << protocol() << " connection pong frame\n" << toString();
                 }
             }
-            else
+            else if((_state == StateClosingRequestPending && !_closingInitiator) ||
+                    (_state == StateClosingResponsePending && _closingInitiator))
             {
-                assert((_state == StateClosingRequestPending && !_closingInitiator) ||
-                       (_state == StateClosingResponsePending && _closingInitiator));
-                
                 if(_instance->traceLevel() >= 2)
                 {
                     Trace out(_instance->logger(), _instance->traceCategory());
@@ -1460,6 +1459,10 @@ IceWS::TransceiverI::postWrite(Buffer& buf)
                     ex.error = 0;
                     throw ex;
                 }
+            }
+            else if(_state == StateClosed)
+            {
+                return false;
             }
 
             _state = _nextState;

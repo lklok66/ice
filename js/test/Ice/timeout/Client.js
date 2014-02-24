@@ -166,7 +166,8 @@
         ).then(
             function()
             {
-                to = Test.TimeoutPrx.uncheckedCast(obj.ice_timeout(1500 * mult));
+                // NOTE: 30s timeout is necessary for Firefox/IE on Windows
+                to = Test.TimeoutPrx.uncheckedCast(obj.ice_timeout(30000 * mult));
                 return to.holdAdapter(500 * mult);
             }
         ).then(

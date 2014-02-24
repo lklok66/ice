@@ -180,6 +180,12 @@
                 //
                 byteBuffer.position = byteBuffer.position + remaining;
                 this._fd.send(slice);
+                if(remaining > 0 && this._traceLevels.network >= 3)
+                {
+                    var msg = "sent " + remaining + " of " + remaining + " bytes via " + this.type() + "\n" +
+                        this._desc;
+                    this._logger.trace(this._traceLevels.networkCat, msg);
+                }
                 return true;
             }
             else
@@ -223,7 +229,8 @@
                     avail = byteBuffer.remaining;
                 }
                 
-                new Uint8Array(byteBuffer.b).set(new Uint8Array(this._readBuffers[0], this._readPosition, avail), byteBuffer.position);
+                new Uint8Array(byteBuffer.b).set(new Uint8Array(this._readBuffers[0], this._readPosition, avail), 
+                                                 byteBuffer.position);
                 
                 byteBuffer.position += avail;
                 this._readPosition += avail;
