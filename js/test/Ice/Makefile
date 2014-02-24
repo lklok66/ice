@@ -16,7 +16,6 @@ SUBDIRS		= binding \
 		enums \
 		exceptions \
 		exceptionsBidir \
-		info \
 		facets \
 		facetsBidir \
 		inheritance \
