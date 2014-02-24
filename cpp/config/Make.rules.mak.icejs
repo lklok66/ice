@@ -80,7 +80,7 @@ SETARGV			= setargv.obj
 #
 !include        $(top_srcdir)/config/Make.rules.msvc
 
-libsuff			= $(x64suffix)
+libsuff                 = \vc110$(x64suffix)
 
 !if "$(ice_src_dist)" != ""
 !if "$(THIRDPARTY_HOME)" != ""

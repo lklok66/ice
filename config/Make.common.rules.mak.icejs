@@ -109,7 +109,13 @@ ice_cpp_dir = $(ice_dir)\cpp
 !error slice_translator must be defined
 !endif
 
-!if "$(ICE_HOME)" != ""
+!if "$(ICE_JS_HOME)" != "" && "$(slice_translator)" == "slice2js.exe"
+!if !exist ("$(ICE_JS_HOME)\bin$(x64suffix)\$(slice_translator)")
+!error Unable to find $(slice_translator) in $(ICE_JS_HOME)\bin$(x64suffix), please verify ICE_JS_HOME is properly configured and IceJS is correctly installed.
+!endif
+ice_js_dir = $(ICE_JS_HOME)
+ice_dir = $(ICE_HOME)
+!elseif "$(ICE_HOME)" != ""
 !if !exist ("$(ICE_HOME)\bin$(x64suffix)\$(slice_translator)")
 !error Unable to find $(slice_translator) in $(ICE_HOME)\bin$(x64suffix), please verify ICE_HOME is properly configured and Ice is correctly installed.
 !endif
@@ -120,11 +126,6 @@ ice_dir = $(top_srcdir)
 ice_dir = $(ice_bin_dist_dir)
 !endif
 
-!if "$(ice_dir)" == ""
-!error Unable to find a valid Ice distribution, please verify ICE_HOME is properly configured and Ice is correctly installed.
-!endif
-ice_bin_dist = 1
-ice_cpp_dir = $(ice_dir)
 !endif
 
 #
