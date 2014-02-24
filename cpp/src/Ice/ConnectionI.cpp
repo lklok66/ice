@@ -200,8 +200,10 @@ Ice::ConnectionI::Observer::finishWrite(const Buffer& buf)
     {
         return;
     }
-    assert(buf.i >= _writeStreamPos);
-    _observer->sentBytes(static_cast<int>(buf.i - _writeStreamPos));
+    if(buf.i > _writeStreamPos)
+    {
+        _observer->sentBytes(static_cast<int>(buf.i - _writeStreamPos));
+    }
     _writeStreamPos = 0;
 }
 
@@ -1353,9 +1355,8 @@ Ice::ConnectionI::message(ThreadPoolCurrent& current)
                     _observer.startWrite(_writeStream);
                 }
                 writeOp = _transceiver->write(_writeStream);
-                if(_observer && !(writeOp & SocketOperationWrite) && !_writeStream.b.empty())
+                if(_observer && !(writeOp & SocketOperationWrite))
                 {
-                    assert(_writeStream.i == _writeStream.b.end());
                     _observer.finishWrite(_writeStream);
                 }
             }
@@ -2441,6 +2442,13 @@ Ice::ConnectionI::sendNextMessage(vector<SentCallback>& callbacks)
 {
     if(_sendStreams.empty())
     {
+        return SocketOperationNone;
+    }
+    else if(_state == StateClosingPending && _writeStream.i == _writeStream.b.begin())
+    {
+        // Message wasn't sent, empty the _writeStream, we're not going to send more data.
+        OutgoingMessage* message = &_sendStreams.front();
+        _writeStream.swap(*message->stream);
         return SocketOperationNone;
     }
 
