@@ -1490,9 +1490,12 @@ IceWS::TransceiverI::postWrite(Buffer& buf)
         {
             return true;
         }
-        return false;
     }
-    return true;
+    else if(_state == StateOpened)
+    {
+        return true;
+    }
+    return false;
 }
 
 bool
