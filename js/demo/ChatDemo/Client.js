@@ -190,12 +190,12 @@ var run = function(router, session)
                 router.refreshSession().exception(
                     function(ex)
                     {
-                        p.fail(ex);
+                        chat.fail(ex);
                     }
                 ).delay(timeout.toNumber() * 500).then(
                     function()
                     {
-                        if(!p.completed())
+                        if(!chat.completed())
                         {
                             refreshSession();
                         }
@@ -247,7 +247,7 @@ var run = function(router, session)
                                 if(msg.length > maxMessageSize)
                                 {
                                     writeLine("<system-message> - Message length exceeded, " +
-                                            "maximum length is " + maxMessageSize + " characters.");
+                                              "maximum length is " + maxMessageSize + " characters.");
                                 }
                                 else
                                 {
