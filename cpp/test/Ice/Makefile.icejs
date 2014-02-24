@@ -36,7 +36,6 @@ SUBDIRS		= proxy \
 		  servantLocator \
 		  interceptor \
 		  stringConverter \
-		  background \
 		  udp \
 		  defaultServant \
 		  defaultValue \
