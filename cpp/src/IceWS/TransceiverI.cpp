@@ -471,7 +471,6 @@ IceWS::TransceiverI::write(Buffer& buf)
     {
         return SocketOperationRead;
     }
-
     return SocketOperationNone;
 }
 
@@ -1418,12 +1417,8 @@ IceWS::TransceiverI::preWrite(Buffer& buf)
 bool
 IceWS::TransceiverI::postWrite(Buffer& buf)
 {
-    if(_state > StateOpened)
+    if(_state > StateOpened && _writeState == WriteStateControlFrame)
     {
-      if(_writeState != WriteStateControlFrame)
-	{
-	  return false;
-	}
         if(_writeBuffer.i == _writeBuffer.b.end())
         {
             if(_state == StatePingPending)
@@ -1484,11 +1479,13 @@ IceWS::TransceiverI::postWrite(Buffer& buf)
             buf.i = buf.b.begin() + _writePayloadLength;
         }
     }
-
+    
     if(buf.b.empty() || buf.i == buf.b.end())
     {
         _writeState = WriteStateHeader;
-        if((_state == StateClosingRequestPending && !_closingInitiator) ||
+        if(_state == StatePingPending ||
+           _state == StatePongPending ||
+           (_state == StateClosingRequestPending && !_closingInitiator) ||
            (_state == StateClosingResponsePending && _closingInitiator)) 
         {
             return true;
