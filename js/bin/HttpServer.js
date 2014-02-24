@@ -36,15 +36,43 @@ var MimeTypes =
     png: "image/png",
 };
 
+var iceJsHome;
+if(process.env.ICE_JS_HOME &&
+   process.env.USE_BIN_DIST && 
+   process.env.USE_BIN_DIST == "yes")
+{
+    iceJsHome = process.env.ICE_JS_HOME;
+    console.log("ICE_JS_HOME and USE_BIN_DIST are set using Ice libraries from `" + iceJsHome + "'");
+}
+
 var FileServant = function(basePath)
 {
     this._basePath = path.resolve(basePath);
 };
 
+var libraries = ["/lib/Ice.js", "/lib/Ice.min.js", 
+                 "/lib/Glacier2.js", "/lib/Glacier2.min.js",
+                 "/lib/IceStorm.js", "/lib/IceStorm.min.js",, 
+                 "/lib/IceGrid.js", "/lib/IceGrid.min.js",]
+
 FileServant.prototype.processRequest = function(req, res)
 {
-    var filePath = path.resolve(path.join(this._basePath, req.url.pathname));
-
+    console.log(req.url.pathname);
+    
+    var filePath;
+    //
+    // If ICE_JS_HOME and USE_BIN_DIST are set resolve Ice libraries paths into
+    // ICE_JS_HOME.
+    //
+    if(iceJsHome && libraries.indexOf(req.url.pathname) !== -1)
+    {
+        filePath = path.join(iceJsHome, req.url.pathname);
+        console.log(req.url.pathname + " -> " + filePath);
+    }
+    else
+    {
+        filePath = path.resolve(path.join(this._basePath, req.url.pathname));
+    }
     var ext = path.extname(filePath).slice(1);
     
     //

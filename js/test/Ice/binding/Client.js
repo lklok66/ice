@@ -1003,111 +1003,126 @@
         ).then(
             function()
             {
+                console.log(navigator.userAgent);
+                if(typeof(navigator) !== "undefined" && navigator.userAgent.indexOf("Firefox") !== -1)
+                {
+                    //
+                    // Firefox adds a delay on websocket failed reconnects that causes this test to take too 
+                    // much time to complete.
+                    //
+                    // You can set network.websocket.delay-failed-reconnects to false in Firefox about:config
+                    // to disable this behaviour
+                    //
+                    return;
+                }
                 out.write("testing per request binding and ordered endpoint selection... ");
                 names = ["Adapter61", "Adapter62", "Adapter63"];
-                return Promise.all(names.map(function(name) { return com.createObjectAdapter(name, "default"); }));
-            }
-        ).then(
-            function(a)
-            {
-                adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[0]; });
-                return createTestIntfPrx(adapters);
-            }
-        ).then(
-            function(obj)
-            {
-                prx = obj;
-                prx = Test.TestIntfPrx.uncheckedCast(prx.ice_endpointSelection(Ice.EndpointSelectionType.Ordered));
-                test(prx.ice_getEndpointSelection() == Ice.EndpointSelectionType.Ordered);
-                prx = Test.TestIntfPrx.uncheckedCast(prx.ice_connectionCached(false));
-                test(!prx.ice_isConnectionCached());
-                var nRetry = 5;
-                var f1 = function(i, idx, names)
-                {
-                    return prx.getAdapterName().then(
-                        function(name)
+                return Promise.all(names.map(function(name) { return com.createObjectAdapter(name, "default"); })).then(
+                    function(a)
+                    {
+                        adapters = Array.prototype.slice.call(arguments).map(function(r) { return r[0]; });
+                        return createTestIntfPrx(adapters);
+                    }
+                ).then(
+                    function(obj)
+                    {
+                        prx = obj;
+                        prx = Test.TestIntfPrx.uncheckedCast(prx.ice_endpointSelection(Ice.EndpointSelectionType.Ordered));
+                        test(prx.ice_getEndpointSelection() == Ice.EndpointSelectionType.Ordered);
+                        prx = Test.TestIntfPrx.uncheckedCast(prx.ice_connectionCached(false));
+                        test(!prx.ice_isConnectionCached());
+                        var nRetry = 5;
+                        var f1 = function(i, idx, names)
                         {
-                            test(name === names[0]);
-                        }
-                    ).then(
-                        function()
-                        {
-                            if(i < nRetry)
-                            {
-                                return f1(++i, idx, names);
-                            }
-                            else
-                            {
-                                return com.deactivateObjectAdapter(adapters[idx]).then(
-                                    function()
+                            return prx.getAdapterName().then(
+                                function(name)
+                                {
+                                    test(name === names[0]);
+                                }
+                            ).then(
+                                function()
+                                {
+                                    if(i < nRetry)
                                     {
-                                        if(names.length > 1)
-                                        {
-                                            names.shift()
-                                            return f1(0, ++idx, names);
-                                        }
+                                        return f1(++i, idx, names);
                                     }
-                                );
-                            }
-                        });
-                };
-                
-                return f1(0, 0, ArrayUtil.clone(names));
-            }
-        ).then(
-            function()
-            {
-                return prx.getAdapterName();
-            }
-        ).then(
-            function()
-            {
-                test(false);
-            },
-            function(ex)
-            {
-                test((typeof(window) == 'undefined' && ex instanceof Ice.ConnectionRefusedException) ||
-                     (typeof(window) != 'undefined' && ex instanceof Ice.ConnectFailedException));
-                return prx.ice_getEndpoints();
-            }
-        ).then(
-            function(endpoints)
-            {
-                var nRetry = 5;
-                var j = 2;
-                var f1 = function(i, names)
-                {
-                    return com.createObjectAdapter(names[0], endpoints[j--].toString()).then(
-                        function()
-                        {
-                            var f2 = function(i, names)
-                            {
-                                return prx.getAdapterName().then(
-                                    function(name)
+                                    else
                                     {
-                                        test(name === names[0]);
-                                        if(i < nRetry)
-                                        {
-                                            return f2(++i, names);
-                                        }
-                                        else if(names.length > 1)
-                                        {
-                                            names.shift();
-                                            return f1(0, names);
-                                        }
+                                        return com.deactivateObjectAdapter(adapters[idx]).then(
+                                            function()
+                                            {
+                                                if(names.length > 1)
+                                                {
+                                                    names.shift()
+                                                    return f1(0, ++idx, names);
+                                                }
+                                            }
+                                        );
                                     }
-                                );
-                            };
-                            return f2(0, names);
-                        }
-                    );
-                };
-                return f1(0, ["Adapter66", "Adapter65", "Adapter64"]);
+                                });
+                        };
+                        
+                        return f1(0, 0, ArrayUtil.clone(names));
+                    }
+                ).then(
+                    function()
+                    {
+                        return prx.getAdapterName();
+                    }
+                ).then(
+                    function()
+                    {
+                        test(false);
+                    },
+                    function(ex)
+                    {
+                        test((typeof(window) == 'undefined' && ex instanceof Ice.ConnectionRefusedException) ||
+                            (typeof(window) != 'undefined' && ex instanceof Ice.ConnectFailedException));
+                        return prx.ice_getEndpoints();
+                    }
+                ).then(
+                    function(endpoints)
+                    {
+                        var nRetry = 5;
+                        var j = 2;
+                        var f1 = function(i, names)
+                        {
+                            return com.createObjectAdapter(names[0], endpoints[j--].toString()).then(
+                                function()
+                                {
+                                    var f2 = function(i, names)
+                                    {
+                                        return prx.getAdapterName().then(
+                                            function(name)
+                                            {
+                                                test(name === names[0]);
+                                                if(i < nRetry)
+                                                {
+                                                    return f2(++i, names);
+                                                }
+                                                else if(names.length > 1)
+                                                {
+                                                    names.shift();
+                                                    return f1(0, names);
+                                                }
+                                            }
+                                        );
+                                    };
+                                    return f2(0, names);
+                                }
+                            );
+                        };
+                        return f1(0, ["Adapter66", "Adapter65", "Adapter64"]);
+                    }
+                ).then(
+                    function()
+                    {
+                        out.writeLine("ok");
+                    });
             }
         ).then(
             function()
             {
-                out.writeLine("ok");
                 return com.shutdown();
             }
         ).then(
