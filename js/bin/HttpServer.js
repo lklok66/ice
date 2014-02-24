@@ -21,7 +21,7 @@ try
 }
 catch(e)
 {
-    console.warn("Warning: couldn't find http-proxy module, it's necessary to run the hello demo,\n" +
+    console.warn("Warning: couldn't find http-proxy module, it's necessary to run the demos,\n" +
                  "you can run the following command to install it: npm install http-proxy\n");
 }
 
@@ -45,20 +45,20 @@ if(process.env.ICE_JS_HOME &&
     console.log("ICE_JS_HOME and USE_BIN_DIST are set using Ice libraries from `" + iceJsHome + "'");
 }
 
-var FileServant = function(basePath)
-{
-    this._basePath = path.resolve(basePath);
-};
-
 var libraries = ["/lib/Ice.js", "/lib/Ice.min.js", 
                  "/lib/Glacier2.js", "/lib/Glacier2.min.js",
-                 "/lib/IceStorm.js", "/lib/IceStorm.min.js",, 
-                 "/lib/IceGrid.js", "/lib/IceGrid.min.js",]
+                 "/lib/IceStorm.js", "/lib/IceStorm.min.js",
+                 "/lib/IceGrid.js", "/lib/IceGrid.min.js",];
 
-FileServant.prototype.processRequest = function(req, res)
+var HttpServer = function(host, ports)
 {
-    console.log(req.url.pathname);
-    
+    this._host = host;
+    this._ports = ports;
+    this._basePath = path.resolve(path.join(__dirname, ".."));
+};
+
+HttpServer.prototype.processRequest = function(req, res)
+{
     var filePath;
     //
     // If ICE_JS_HOME and USE_BIN_DIST are set resolve Ice libraries paths into
@@ -201,12 +201,6 @@ FileServant.prototype.processRequest = function(req, res)
     }
 };
 
-var HttpServer = function(host, ports)
-{
-    this._host = host;
-    this._ports = ports;
-};
-
 //
 // Proxy configuration for the different demos.
 //
@@ -256,7 +250,21 @@ HttpServer.prototype.start = function()
                     {
                         server.on("request", function(req, res)
                                   {
-                                      self.processRequest(req, res);
+                                        //
+                                        // Dummy data callback required so request end event is emitted.
+                                        //
+                                        var dataCB = function(data)
+                                        {
+                                        };
+                                        
+                                        var endCB = function()
+                                        {
+                                            req.url = url.parse(req.url);
+                                            self.processRequest(req, res);
+                                        };
+                                        
+                                        req.on("data", dataCB);
+                                        req.on("end", endCB);
                                   });
                     });
 
@@ -291,26 +299,7 @@ HttpServer.prototype.start = function()
     console.log("listening on ports 8080 (http) and 9090 (https)...");
 };
 
-var defaultController = new FileServant(path.join(__dirname, ".."));
 
-HttpServer.prototype.processRequest = function(req, res)
-{
-    //
-    // Dummy data callback required so request end event is emitted.
-    //
-    var dataCB = function(data)
-    {
-    };
-    
-    var endCB = function()
-    {
-        req.url = url.parse(req.url);
-        defaultController.processRequest(req, res);
-    };
-    
-    req.on("data", dataCB);
-    req.on("end", endCB);
-};
 
 var server = new HttpServer("0.0.0.0", [8080, 9090]);
 server.start();
