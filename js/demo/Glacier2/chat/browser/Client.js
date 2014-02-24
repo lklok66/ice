@@ -177,12 +177,12 @@ var run = function(communicator, router, session)
                 router.refreshSession().exception(
                     function(ex)
                     {
-                        p.fail(ex);
+                        chat.fail(ex);
                     }
                 ).delay(timeout.toNumber() * 500).then(
                     function()
                     {
-                        if(!p.completed())
+                        if(!chat.completed())
                         {
                             refreshSession();
                         }
