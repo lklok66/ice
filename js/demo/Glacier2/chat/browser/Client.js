@@ -52,7 +52,7 @@ var signin = function()
             //
             if(hasError)
             {
-                $("#signin-alert").click();
+                dismissError();
             }
             //
             // Transition to loading screen
@@ -371,14 +371,14 @@ $("#signin").click(function()
                    });
     
 //
-// Dismiss error message on click.
+// Dismiss error message.
 //
-$("#signin-alert").click(function()
-                         {
-                             transition("#signin-alert");
-                             hasError = false;
-                             return false;
-                         });
+function dismissError()
+{
+    transition("#signin-alert");
+    hasError = false;
+    return false;
+};
 
 //
 // Animate the loading progress bar.

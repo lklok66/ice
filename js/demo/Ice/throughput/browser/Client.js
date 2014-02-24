@@ -54,7 +54,11 @@ function run()
     // Create a proxy to the throughput object.
     //
     var hostname = document.location.hostname || "127.0.0.1";
-    var proxy = communicator.stringToProxy("throughput:ws -h " + hostname + " -p 10002");
+    var secure = document.location.protocol.indexOf("https") != -1;
+    var ref = secure ? 
+        "throughput:wss -h " + hostname + " -p 9090 -r /demowss" :
+        "throughput:ws -h " + hostname + " -p 8080 -r /demows";
+    var proxy = communicator.stringToProxy(ref);
     
     //
     // Down-cast the proxy to the Demo.Throughput interface.
