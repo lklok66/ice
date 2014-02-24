@@ -90,8 +90,8 @@ ifdef ice_src_dist
         SLICEPARSERLIB 	= $(ice_cpp_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
     endif
 else
-    SLICE2JS 		= $(ice_dir)/$(binsubdir)/slice2js
-    SLICEPARSERLIB 	= $(ice_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
+    SLICE2JS 		= $(ice_js_dir)/$(binsubdir)/slice2js
+    SLICEPARSERLIB 	= $(ice_js_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
 endif
 
 all:: $(TARGETS)

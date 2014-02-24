@@ -1703,8 +1703,12 @@ def getTestEnv(lang, testdir):
         addPathToEnv("RUBYLIB", os.path.join(getIceDir("rb", testdir), "ruby"), env)
         
     if lang == "js":
-        addPathToEnv("NODE_PATH", os.path.join(getIceDir("js", testdir), "src"), env)
-        addPathToEnv("NODE_PATH", os.path.join(testdir), env)
+        if iceHome == None:
+            addPathToEnv("NODE_PATH", os.path.join(getIceDir("js", testdir), "src"), env)
+            addPathToEnv("NODE_PATH", os.path.join(testdir), env)
+        else:
+            addPathToEnv("NODE_PATH", os.path.join(iceHome, "node_modules"), env)
+            addPathToEnv("NODE_PATH", os.path.join(testdir), env)
 
     return env;
 
