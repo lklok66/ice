@@ -1003,7 +1003,6 @@
         ).then(
             function()
             {
-                console.log(navigator.userAgent);
                 if(typeof(navigator) !== "undefined" && navigator.userAgent.indexOf("Firefox") !== -1)
                 {
                     //
