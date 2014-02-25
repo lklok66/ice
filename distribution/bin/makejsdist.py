@@ -526,7 +526,7 @@ sys.stdout.flush()
 # Unix demo distribution
 copy("ICE_LICENSE", demoDir)
 copy(os.path.join("js", "bin"), os.path.join(demoDir, "bin"))
-copy(os.path.join(distFilesDir, "src", "js", "README.DEMOS"), demoDir)
+copy(os.path.join(distFilesDir, "src", "js", "README.DEMOS"), os.path.join(demoDir, "README"))
 
 copy(os.path.join(distFilesDir, "src", "js", "demo.index.html"), os.path.join(demoDir, "index.html"))
 

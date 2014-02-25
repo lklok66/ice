@@ -22,50 +22,18 @@ available for customers who wish to use Ice in proprietary products.
 Please contact sales@zeroc.com for more information on licensing Ice.
 
 
-Ice for WebSocket transport
----------------------------
+Getting Started with Ice for JavaScript
+---------------------------------------
 
-This distribution includes patched Ice and IceSSL libraries as well as
-the Ice for WebSocket (IceWS) transport plug-in.
+Please visit the 'Using the Binary Distribution' section in the Ice
+for JavaScript 0.1.0 release notes:
 
-This transport is intended to be used in environments where only
-connections to the HTTP or HTTPS ports are allowed.
-
-It can also be used to simplify the firewall setup on the server side
-by only allowing traffic to the HTTP or HTTPS ports. A reversed HTTP
-proxy can be used to forward either the HTTP traffic or web socket
-traffic to the appropriate back-end servers.
-
-You can find more information on the WebSocket transport at
-
-  http://www.zeroc.com/labs/icejs/index.htm
+http://doc.zeroc.com/display/Rel/Ice+for+JavaScript+0.1.0+Release+Notes
 
 
-Using this distribution
------------------------
+Documentation
+-------------
 
-Follow the instructions from the Ice release notes to build and run
-your application:
+The full documentation for Ice is available online:
 
-  http://doc.zeroc.com/display/Ice/Release+Notes
-
-Since the patched Ice and IceSSL libraries from this distribution are
-binary-compatible with Ice 3.5.1, you can continue building your
-application as usual and only update your run-time configuration to
-look for the patched libraries from the IceJS distribution.
-
-To use the IceWS transport, you will need to update your environment
-(or your application's embedded library search path) to first look for
-libraries from the lib directory of your IceJS installation.
-
-On Linux, you can set the LD_LIBRARY_PATH environment variable:
-
-  $ export LD_LIBRARY_PATH=<IceJS installation directory>/lib:$LD_LIBRARY_PATH
-
-On OS X, you can set the DYLD_LIBRARY_PATH environment variable:
-
-  $ export DYLD_LIBRARY_PATH=<IceJS installation directory>/lib:$DYLD_LIBRARY_PATH
-
-If using the C++11 libraries on OS X:
-
-  $ export DYLD_LIBRARY_PATH=<IceJS installation directory>/lib/c++11:$DYLD_LIBRARY_PATH
+http://doc.zeroc.com/display/Ice/Home
