@@ -40,7 +40,7 @@ var iceJsHome;
 if(process.env.ICE_JS_HOME)
 {
     iceJsHome = process.env.ICE_JS_HOME;
-    if(!fs.statSync(path.join(iceJsHome, "lib", "Ice.js").isFile()))
+    if(!fs.statSync(path.join(iceJsHome, "lib", "Ice.js")).isFile())
     {
         console.log("error Unable to find Ice.js in " + path.join(iceJsHome, "lib") + 
                     ", please verify ICE_JS_HOME is properly configured and IceJS is correctly installed");
