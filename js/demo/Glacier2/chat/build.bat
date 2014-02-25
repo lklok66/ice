@@ -8,9 +8,10 @@ REM ICE_LICENSE file included in this distribution.
 REM
 REM **********************************************************************
 
-REM .bat wrapper for buidling javascript demos. Assumes ICE_JS_HOME is set.
+REM .bat wrapper for buidling javascript demos. Assumes ICE_JS_HOME and
+REM ICE_HOME are set.
 
 @echo Building %~dp0
 
-@echo "%ICE_JS_HOME%\bin\slice2js" -I"%ICE_JS_HOME%\slice" Chat.ice
-"%ICE_JS_HOME%\bin\slice2js" -I"%ICE_JS_HOME%\slice" Chat.ice
+@echo "%ICE_JS_HOME%\bin\slice2js" -I"%ICE_HOME%\slice" Chat.ice
+"%ICE_JS_HOME%\bin\slice2js" -I"%ICE_HOME%\slice" Chat.ice

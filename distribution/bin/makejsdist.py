@@ -503,64 +503,12 @@ createSourceDist("UNIX", distDir)
 fixGitAttributes(True, True, excludeFiles + excludeUnixFiles)
 createSourceDist("Windows", distDir)
 
-
-print "Archiving Souce Distributions..."
-sys.stdout.flush()
-os.chdir(distDir)
-for d in [srcDir, distFilesDir]:
-    tarArchive(d, verbose)
-
-for (dir, archiveDir) in [(winDistFilesDir, "distfiles-" + version)]:
-    zipArchive(dir, verbose, archiveDir)
-os.rename(os.path.join(distDir, "distfiles.zip"), os.path.join(distDir, "distfiles-" + version + ".zip"))
-
-for (dir, archiveDir) in [(winSrcDir, "IceJS-" + version)]:
-    zipArchive(dir, verbose, archiveDir)
-os.rename(os.path.join(distDir, "IceJS.zip"), os.path.join(distDir, "IceJS-" + version + ".zip"))
-
-#
-# We need to build bin dist before we create the demo distribution
-# to JS libraries from bin dist and include then in demo distribution.
-#
-#
-os.chdir(distDir)
-p = subprocess.Popen("python " + os.path.join(baseDir, "distribution", "bin", "makejsbindist.py"), 
-    shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE,
-    stderr = subprocess.STDOUT, bufsize = 100)
-
-matchBinArchive = re.compile("IceJS-" + version + "-bin-(.*)\.tar\.gz")
-
-while(True):
-    line = p.stdout.readline()
-    if p.poll() is not None and not line:
-        # The process terminated
-        break
-                
-    if type(line) != str:
-        line = line.decode()
-    sys.stdout.write(line)
-    sys.stdout.flush()
-
-    m = matchBinArchive.search(line)
-    if m != None:
-        binArchive = "IceJS-%s-bin-%s.tar.gz" % (version, m.group(1))
-
-if p.poll() != 0:
-    print("makebindist.py failed")
-    sys.exit(1)
-
 #
 # Consolidate demo, demo scripts distributions.
 #
 print "Consolidating demo distribution...",
 os.mkdir(os.path.join(demoDir, "lib"))
 os.chdir(os.path.join(demoDir, "lib"))
-
-for ext in ["js", "js.gz"]:
-    command = "tar --wildcards -zxf %s/%s IceJS-%s/lib/*.%s --strip-components 2" % (distDir, binArchive, version, ext)
-    if os.system(command) != 0:
-        print("Error executing command `%s'" % command)
-        sys.exit(1)
 
 os.mkdir(os.path.join(demoDir, "assets"))
 copyMatchingFiles(os.path.join(srcDir, "js", "assets"), os.path.join(demoDir, "assets"), ["common.*", "favicon.ico"])
@@ -662,10 +610,19 @@ print "ok"
 #
 # Everything should be clean now, we can create the source distributions archives
 # 
-print "Archiving Demo Distributions..."
+print "Archiving Souce Distributions..."
 sys.stdout.flush()
 os.chdir(distDir)
-tarArchive(demoDir, verbose)
+for d in [srcDir, demoDir, distFilesDir]:
+    tarArchive(d, verbose)
+
+for (dir, archiveDir) in [(winDistFilesDir, "distfiles-" + version)]:
+    zipArchive(dir, verbose, archiveDir)
+os.rename(os.path.join(distDir, "distfiles.zip"), os.path.join(distDir, "distfiles-" + version + ".zip"))
+
+for (dir, archiveDir) in [(winSrcDir, "IceJS-" + version)]:
+    zipArchive(dir, verbose, archiveDir)
+os.rename(os.path.join(distDir, "IceJS.zip"), os.path.join(distDir, "IceJS-" + version + ".zip"))
 
 for (dir, archiveDir) in [(winDemoDir, "IceJS-" + version + "-demos")]:
     zipArchive(dir, verbose, archiveDir)

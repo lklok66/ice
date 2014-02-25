@@ -420,18 +420,6 @@ install-common::
 	    $(call mkdir,$(prefix), -p) ; \
 	fi
 
-	@if test ! -d $(DESTDIR)$(install_slicedir) ; \
-	then \
-	    echo "Creating $(DESTDIR)$(install_slicedir)..." ; \
-	    $(call mkdir, $(DESTDIR)$(install_slicedir), -p) ; \
-	    cd $(top_srcdir)/../slice ; \
-	    for subdir in * ; \
-	    do \
-	        echo "Copying slice/$$subdir to $(DESTDIR)$(install_slicedir)..." ; \
-	        cp -fpr $$subdir $(DESTDIR)$(install_slicedir) ; \
-	    done ; \
-	    fi
-
 	@if test ! -f $(DESTDIR)$(prefix)/ICE_LICENSE$(TEXT_EXTENSION) ; \
 	then \
 	    $(call installdata,$(top_srcdir)/../ICE_LICENSE$(TEXT_EXTENSION),$(DESTDIR)$(prefix)) ; \
