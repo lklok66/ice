@@ -528,7 +528,7 @@ sys.stdout.flush()
 
 # Unix demo distribution
 copy("ICE_LICENSE", demoDir)
-copy(os.path.join(distFilesDir, "src", "js", "README.DEMOS"), demoDir)
+copy(os.path.join(distFilesDir, "src", "js", "README.DEMOS"), os.path.join(demoDir, "README"))
 
 copyMatchingFiles(os.path.join("certs"), os.path.join(demoDir, "certs"), demoCertsFiles)
 for d in ["", "cpp"]:

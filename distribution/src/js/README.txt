@@ -22,51 +22,18 @@ available for customers who wish to use Ice in proprietary products.
 Please contact sales@zeroc.com for more information on licensing Ice.
 
 
-Ice for WebSocket transport
----------------------------
+Getting Started with Ice for JavaScript
+---------------------------------------
 
-This distribution includes patched Ice and IceSSL libraries as well as
-the Ice for WebSocket (IceWS) transport plug-in for Visual Studio
-2012. The Ice and IceSSL libraries are binary-compatible with Ice
-3.5.1.
+Please visit the 'Using the Binary Distribution' section in the Ice
+for JavaScript 0.1.0 release notes:
 
-The WebSocket transport is intended to be used in environments where
-only connections to the HTTP or HTTPS ports are allowed.
-
-It can also be used to simplify the firewall setup and deployment on
-the server side where a web infrastructure already exists. For
-example, a reversed HTTP proxy can be used to forward either the HTTP
-traffic or web socket traffic to the appropriate back-end servers.
-
-You can find more information on the WebSocket transport at
-
-  http://www.zeroc.com/labs/icejs/index.html
+http://doc.zeroc.com/display/Rel/Ice+for+JavaScript+0.1.0+Release+Notes
 
 
-Using this distribution
------------------------
+Documentation
+-------------
 
-Follow the instructions from the Ice release notes to build and run
-your application:
+The full documentation for Ice is available online:
 
-  http://doc.zeroc.com/display/Ice/Release+Notes
-
-Since the patched Ice and IceSSL libraries from this distribution are
-binary-compatible with Ice 3.5.1, you can continue building your
-application as usual and only update your run-time configuration to
-look for the patched libraries from the IceWS distribution.
-
-Note that this distribution only includes binaries for Visual Studio
-2012.
-
-To use the IceWS transport, you will need to update your environment
-to first look for libraries from the bin directory of your IceJS
-installation.
-
-You can set the PATH environment variable:
-
-  > set PATH=<IceJS installation directory>\bin;%PATH%
-
-Or for 64-bit applications:
-
-  > set PATH=<IceJS installation directory>\bin\x64;%PATH%
+http://doc.zeroc.com/display/Ice/Home
