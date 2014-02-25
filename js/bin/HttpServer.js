@@ -37,12 +37,16 @@ var MimeTypes =
 };
 
 var iceJsHome;
-if(process.env.ICE_JS_HOME &&
-   process.env.USE_BIN_DIST && 
-   process.env.USE_BIN_DIST == "yes")
+if(process.env.ICE_JS_HOME)
 {
     iceJsHome = process.env.ICE_JS_HOME;
-    console.log("ICE_JS_HOME and USE_BIN_DIST are set using Ice libraries from `" + iceJsHome + "'");
+    if(!fs.statSync(path.join(iceJsHome, "lib", "Ice.js").isFile())
+    {
+        console.log("error Unable to find Ice.js in " + path.join(iceJsHome, "lib") + 
+                    ", please verify ICE_JS_HOME is properly configured and IceJS is correctly installed);
+        process.exit(1);
+    }
+    console.log("ICE_JS_HOME has been set, using Ice libraries from " + path.join(iceJsHome, "lib"));
 }
 
 var libraries = ["/lib/Ice.js", "/lib/Ice.min.js", 
@@ -61,8 +65,7 @@ HttpServer.prototype.processRequest = function(req, res)
 {
     var filePath;
     //
-    // If ICE_JS_HOME and USE_BIN_DIST are set resolve Ice libraries paths into
-    // ICE_JS_HOME.
+    // If ICE_JS_HOME has been set resolve Ice libraries paths into ICE_JS_HOME.
     //
     if(iceJsHome && libraries.indexOf(req.url.pathname) !== -1)
     {
