@@ -214,6 +214,7 @@ excludeUnixFiles = [ \
 #
 demoConfigFiles = [ \
     "Make.common.rules", \
+    "Make.common.rules.js", \
     "Make.rules", \
     "Make.rules.Darwin", \
     "Make.rules.Linux" \
@@ -535,6 +536,7 @@ for d in ["", "cpp"]:
     copyMatchingFiles(os.path.join(d, "config"), os.path.join(demoDir, "config"), demoConfigFiles)
 
 copy(os.path.join(distFilesDir, "src", "js", "Make.rules"), os.path.join(demoDir, "config"), False)
+copy(os.path.join(distFilesDir, "src", "js", "Make.rules.js"), os.path.join(demoDir, "config"), False)
 copy(os.path.join(distFilesDir, "src", "js", "Make.common.rules"), os.path.join(demoDir, "config"), False)
 
 # Consolidate demoscript and demo distribution with files from each language mapping
@@ -547,6 +549,14 @@ for root, dirnames, filesnames in os.walk(demoDir):
     for f in filesnames:
         if fnmatch.fnmatch(f, "config*"):
             substitute(os.path.join(root, f), configSubstituteExprs)
+            
+makeSubstituteExprs = [(re.compile(re.escape("Make.rules")), "Make.rules.js")]
+
+for root, dirnames, filesnames in os.walk(os.path.join(demoDir, "demojs")):
+    for f in filesnames:
+        if fnmatch.fnmatch(f, "Make*"):
+            substitute(os.path.join(root, f), makeSubstituteExprs)
+
 
 # Windows demo distribution
 copy(os.path.join(winDistFilesDir, "src", "js", "README.DEMOS.txt"), os.path.join(winDemoDir, "README.txt"))
