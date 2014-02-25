@@ -321,6 +321,8 @@ if not skipBuild:
                     env["RELEASEPDBS"] = "yes"
                     if conf == "release":
                         env["OPTIMIZE"] = "yes"
+                    else:
+                        env["OPTIMIZE"] = "no"
 
                     os.chdir(os.path.join(sourceDir, lang))
 
@@ -331,9 +333,12 @@ if not skipBuild:
 
                     vcvars = getVcVarsAll(compiler)
 
-                    if lang in ["cpp", "js"] and compiler == "VC110":
-                        command = "\"%s\" %s  && nmake /f Makefile.mak install" % (vcvars, arch)
-                        executeCommand(command, env)
+                    if lang == "cpp":
+                        os.chdir(os.path.join(sourceDir, "cpp", "src"))
+                        executeCommand("\"%s\" %s  && nmake /f Makefile.mak" % (vcvars, arch), env)
+                    os.chdir(os.path.join(sourceDir, lang))
+                    executeCommand("\"%s\" %s  && nmake /f Makefile.mak install" % (vcvars, arch), env)
+
 
 
     compiler = "VC110"
@@ -369,17 +374,17 @@ if not skipBuild:
         env["OPTIMIZE"] = "yes"
     env["ALTERNATE_LIBSUFFIX"] = "JS"
 
-    os.chdir(os.path.join(sourceDir, lang))
-
-    command = None
     rules = "Make.rules.mak"
 
     setMakefileOption(os.path.join(sourceDir, lang, "config", rules), "prefix", installDir)
 
     vcvars = getVcVarsAll("VC110")
 
-    command = "\"%s\" %s  && nmake /f Makefile.mak install" % (vcvars, arch)
-    executeCommand(command, env)
+    os.chdir(os.path.join(sourceDir, lang, "src"))
+    executeCommand("\"%s\" %s  && nmake /f Makefile.mak" % (vcvars, arch), env)
+
+    os.chdir(os.path.join(sourceDir, lang))
+    executeCommand("\"%s\" %s  && nmake /f Makefile.mak install" % (vcvars, arch), env)
 	
 #
 # Filter files, list of files that must not be included.
