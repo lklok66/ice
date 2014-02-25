@@ -57,7 +57,7 @@ SLICE2CPPFLAGS		= $(ICECPPFLAGS)
 LDFLAGS			= $(LDFLAGS) $(PRELIBPATH)"$(ice_dir)\lib$(libsuff)"
 LDFLAGS			= $(LDFLAGS) $(LDPLATFORMFLAGS) $(CXXFLAGS)
 
-SLICE2CPP		= $(ice_cpp_dir)\bin$(x64suffix)\slice2cpp.exe
+SLICE2CPP		= $(ice_dir)\bin$(x64suffix)\slice2cpp.exe
 SLICEPARSERLIB		= $(SLICE2CPP)
 
 MT 			= mt.exe

@@ -507,28 +507,28 @@ createSourceDist("Windows", distDir)
 # Consolidate demo, demo scripts distributions.
 #
 print "Consolidating demo distribution...",
-os.mkdir(os.path.join(demoDir, "lib"))
-os.chdir(os.path.join(demoDir, "lib"))
+for d in [demoDir, winDemoDir]:
+    
+    os.mkdir(os.path.join(d, "assets"))
+    copyMatchingFiles(os.path.join(srcDir, "js", "assets"), os.path.join(d, "assets"), ["common.*", "favicon.ico"])
+    os.chdir(os.path.join(d, "assets"))
+    
+    copy(os.path.join(srcDir, "js", "bin"), os.path.join(d, "bin"))
+    
+    copy(os.path.join(distFilesDir, "src", "js", "demo.index.html"), os.path.join(d, "index.html"))
 
-os.mkdir(os.path.join(demoDir, "assets"))
-copyMatchingFiles(os.path.join(srcDir, "js", "assets"), os.path.join(demoDir, "assets"), ["common.*", "favicon.ico"])
-os.chdir(os.path.join(demoDir, "assets"))
-
-for f in ["common.css", "common.min.js"]:
-    command = "gzip -c9 %s > %s.gz" % (f, f)
-    if os.system(command) != 0:
-        print("Error executing command `%s'" % command)
-        sys.exit(1)
+    for f in ["common.css", "common.min.js"]:
+        command = "gzip -c9 %s > %s.gz" % (f, f)
+        if os.system(command) != 0:
+            print("Error executing command `%s'" % command)
+            sys.exit(1)
 
 os.chdir(srcDir)
 sys.stdout.flush()
 
 # Unix demo distribution
 copy("ICE_LICENSE", demoDir)
-copy(os.path.join("js", "bin"), os.path.join(demoDir, "bin"))
 copy(os.path.join(distFilesDir, "src", "js", "README.DEMOS"), demoDir)
-
-copy(os.path.join(distFilesDir, "src", "js", "demo.index.html"), os.path.join(demoDir, "index.html"))
 
 copyMatchingFiles(os.path.join("certs"), os.path.join(demoDir, "certs"), demoCertsFiles)
 for d in ["", "cpp"]:
@@ -589,7 +589,7 @@ for root, dirnames, filesnames in os.walk(winDemoDir):
             if fnmatch.fnmatch(f, m):
                 rmFiles.append(os.path.join(root[len(winDemoDir) + 1:], f))
         
-for d in ["democs", "demovb"]:
+for d in ["demojs"]:
     for root, dirnames, filesnames in os.walk(os.path.join(winDemoDir, d)):
         for f in filesnames:
             for m in [ "Makefile.mak", ".depend.mak" ]:

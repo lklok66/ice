@@ -469,14 +469,18 @@ for root, dirnames, filesnames in os.walk(winDemoDir):
             if fnmatch.fnmatch(f, m):
                 rmFiles.append(os.path.join(root[len(winDemoDir) + 1:], f))
         
-for d in ["democs", "demovb"]:
-    for root, dirnames, filesnames in os.walk(os.path.join(winDemoDir, d)):
-        for f in filesnames:
-            for m in [ "Makefile.mak", ".depend.mak" ]:
-                if fnmatch.fnmatch(f, m):
-                    rmFiles.append(os.path.join(root[len(winDemoDir) + 1:], f))
 
-for f in rmFiles: remove(os.path.join(winDemoDir, f))
+for root, dirnames, filesnames in os.walk(os.path.join(winDemoDir, "demojs")):
+    print "walk: " + os.path.join(winDemoDir, "demojs")
+    for f in filesnames:
+        print ("f: " + f)
+        for m in [ "Makefile.mak", ".depend.mak" ]:
+            if fnmatch.fnmatch(f, m):
+                rmFiles.append(os.path.join(root[len(winDemoDir) + 1:], f))
+
+for f in rmFiles: 
+    print ("f: " + f)
+    remove(os.path.join(winDemoDir, f))
 
 print "ok"
 
