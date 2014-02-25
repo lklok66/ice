@@ -26,7 +26,9 @@ function run()
     //
     var hostname = document.location.hostname || "127.0.0.1";
     var secure = document.location.protocol.indexOf("https") != -1;
-    var ref = secure ? "ping:wss -h " + hostname + " -p 10003" : "ping:ws -h " + hostname + " -p 10002";
+    var ref = secure ? 
+        "ping:wss -h " + hostname + " -p 9090 -r /demowss" :
+        "ping:ws -h " + hostname + " -p 8080 -r /demows";
     var proxy = communicator.stringToProxy(ref);
     
     var repetitions = 1000;

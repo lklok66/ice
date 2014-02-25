@@ -386,13 +386,12 @@ var stopProgress = function(completed)
 //
 // Dismiss error message on click.
 //
-$("#signin-alert").click(
-    function()
-    {
-        transition("#signin-alert");
-        hasError = false;
-        return false;
-    });
+function dismissError()
+{
+    transition("#signin-alert");
+    hasError = false;
+    return false;
+}
 
 //
 // Switch the state and return a promise that is fulfilled
@@ -507,7 +506,7 @@ function setState(newState, error)
             //
             if(hasError)
             {
-                $("#signin-alert").click();
+                dismissError();
             }
 
             //
