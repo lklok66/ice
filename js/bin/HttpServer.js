@@ -61,7 +61,8 @@ if(srcDist && !process.env.ICE_JS_HOME)
 //
 if(!srcDist && !process.env.ICE_JS_HOME)
 {
-    console.error("ICE_JS_HOME environment variable must be set, and point to the IceJS installation directory.");
+    console.error("ICE_JS_HOME environment variable must be set, and point to the Ice for " +
+                  "JavaScript installation directory.");
     process.exit(1);
 }
 
@@ -74,7 +75,8 @@ if(process.env.ICE_JS_HOME)
     if(!fs.statSync(path.join(iceJsHome, "lib", iceJs)).isFile())
     {
         console.error("error Unable to find " + iceJs + " in " + path.join(iceJsHome, "lib") + 
-                      ", please verify ICE_JS_HOME is properly configured and IceJS is correctly installed");
+                      ", please verify ICE_JS_HOME is properly configured and Ice for JavaScript " +
+                      "is correctly installed");
         process.exit(1);
     }
     console.log("ICE_JS_HOME has been set, using Ice libraries from " + path.join(iceJsHome, "lib"));
