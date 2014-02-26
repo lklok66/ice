@@ -85,13 +85,15 @@ HttpServer.prototype.processRequest = function(req, res)
         {
             filePath = filePath.replace(".js", ".min.js");
         }
-
-        console.log(req.url.pathname + " -> " + filePath);
     }
-    else
+
+    if(!filePath)
     {
         filePath = path.resolve(path.join(this._basePath, req.url.pathname));
     }
+    
+    console.log(req.url.pathname + " -> " + filePath);
+    
     var ext = path.extname(filePath).slice(1);
     
     //
