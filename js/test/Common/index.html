@@ -4,17 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Test Suite | Ice for JavaScript</title>
-    <style type="text/css">
-        #wss, #loop{ margin-top:10px;}
-        body { height:100%;}
-        #header {width:100%; position:fixed; top:0px; height: 100px; z-index: 10;}
-        #footer {width:100%; height:80px; position:fixed; bottom:0px; background:#333333; color:#ffffff; padding:25px 25px 25px 25px;}
-        #footer * {color:#858585;}
-        #footer .logo{ float:left;}
-        #footer .copyright{ float:right;}
-        #body {padding:10px; padding-top: 100px; padding-bottom:80px;   /* Height of the footer */}
-    </style>
-    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico"/>
   </head>
   <body>
     <div id="header">
@@ -41,9 +31,16 @@
     <section role="main" id="body">
         <div class="row">
             <div class="large-12 medium-12 columns">
-                <a id="select-test" href="#" data-dropdown="drop" class="button dropdown large">...</a><br>
-                <ul id="drop" data-dropdown-content class="f-dropdown tests"></ul>
                 <form>
+                    <div class="row">
+                        <div class="small-3 columns">
+                            <label class="right inline">Test:</label>
+                        </div>
+                        <div class="small-9 columns">
+                            <select id="test">
+                            </select>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="small-3 columns">
                             <label class="right inline">Protocol:</label>
@@ -60,7 +57,7 @@
                             <label class="right inline" for="loop">Loop:</label>
                         </div>
                         <div class="small-9 columns">
-                            <input id="loop" type="checkbox">
+                            <input id="loop" type="checkbox"/>
                         </div>
                     </div>
                     <a href="#" class="button" id="run">Run</a>
@@ -69,11 +66,13 @@
             </div>
         </div>
     </section>
-    <div id="readme-modal" class="reveal-modal medium" data-reveal>
+    <!-- Modal dialog to show the client README -->
+    <div id="readme-modal" class="reveal-modal" data-reveal>
+        <a class="close-reveal-modal">&#215;</a>
         <h4>Test Suite Readme</h4>
         <hr/>
-        <p>TODO</p>
-        <a class="close-reveal-modal">&#215;</a>
+        <p>For instructions on how-to run this test suite refer to the IceJS 
+            <a href="http://doc.zeroc.com/display/Rel/Ice+for+JavaScript+0.1.0+Release+Notes">release notes</a>.</p>
     </div>
     <div id="footer">
         <div class="logo">
@@ -152,7 +151,7 @@
         
         var link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = basePath + "../assets/foundation/css/foundation.css";
+        link.href = basePath + "../assets/common.css";
         head.appendChild(link);
         
         function loadScript()
@@ -170,18 +169,14 @@
                     //
                     // There isn't onload event in IE
                     //
-                    script.onreadystatechange = function ()
+                    script.onreadystatechange = function()
                     {
-                        if(this.readyState == 'complete')
+                        if(this.readyState == "complete")
                         {
                             loadScript();
                         }
                     };
                     head.appendChild(script);
-            }
-            else
-            {
-                $("#select-test").text(current);
             }
         }
         loadScript();

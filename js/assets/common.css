@@ -2853,8 +2853,7 @@ Visual Studio-like style based on original C# coloring by Jason Diamond <jason@d
 // *********************************************************************/
 .noUiSlider{ margin-top:7px; }
 
-#wss { margin-top:10px; }
-
+#wss, #loop{ margin-top:10px;}
 #progress .icon { margin-left:10px; margin-top: 5px; }
 #progress .text { margin-left:25px; }
 
