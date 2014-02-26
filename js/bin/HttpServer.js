@@ -97,32 +97,27 @@ var HttpServer = function(host, ports)
 HttpServer.prototype.processRequest = function(req, res)
 {
     var filePath;
+    
+    var iceLib = libraries.indexOf(req.url.pathname) !== -1;
     //
     // If ICE_JS_HOME has been set resolve Ice libraries paths into ICE_JS_HOME.
     //
-    if(libraries.indexOf(req.url.pathname) !== -1)
+    if(iceJsHome && iceLib)
     {
-        //
-        // If ICE_JS_HOME has been set resolve Ice libraries paths into ICE_JS_HOME.
-        //
-        if(iceJsHome)
-        {
-            filePath = path.join(iceJsHome, req.url.pathname);
-        }
-
-        //
-        // If OPTIMIZE is set resolve Ice libraries to the corresponding minified 
-        // versions.
-        //
-        if(process.env.OPTIMIZE == "yes" && filePath.substr(-7) !== ".min.js")
-        {
-            filePath = filePath.replace(".js", ".min.js");
-        }
+        filePath = path.join(iceJsHome, req.url.pathname);
     }
-
-    if(!filePath)
+    else
     {
         filePath = path.resolve(path.join(this._basePath, req.url.pathname));
+    }
+
+    //
+    // If OPTIMIZE is set resolve Ice libraries to the corresponding minified 
+    // versions.
+    //
+    if(process.env.OPTIMIZE == "yes" && iceLib && filePath.substr(-7) !== ".min.js")
+    {
+        filePath = filePath.replace(".js", ".min.js");
     }
     
     var ext = path.extname(filePath).slice(1);
