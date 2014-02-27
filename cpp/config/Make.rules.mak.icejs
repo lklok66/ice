@@ -181,7 +181,7 @@ LDFLAGS                 = $(LDFLAGS) $(PRELIBPATH)"$(SDK_LIBRARY_PATH)"
 LDFLAGS                 = $(LDFLAGS) $(LDPLATFORMFLAGS) $(CXXFLAGS)
 
 !if "$(ice_src_dist)" != ""
-SLICEPARSERLIB          = $(libdir)\slice$(LIBSUFFIX).lib
+SLICEPARSERLIB          = $(libdir)\slice$(ALTERNATE_LIBSUFFIX)$(LIBSUFFIX).lib
 SLICE2CPP               = $(bindir)\slice2cpp.exe
 SLICE2FREEZE            = $(bindir)\slice2freeze.exe
 !else
