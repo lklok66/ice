@@ -15,7 +15,7 @@ TARGETS = Chat.js ChatSession.js
 TARGETS = $(TARGETS) Client.min.js Client.min.js.gz
 !endif
 
-!include $(top_srcdir)\config\Make.rules.mak
+!include $(top_srcdir)\config\Make.rules.mak.js
 
 SLICE2JSFLAGS	= $(SLICE2JSFLAGS) -I"$(slicedir)" -I.
 

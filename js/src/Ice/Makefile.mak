@@ -133,7 +133,7 @@ SDIR		= $(slicedir)\Ice
 SRCS		= $(BROWSER_SRCS) $(GEN_SRCS) $(COMMON_SRCS)
 INSTALL_SRCS	= $(NODEJS_SRCS) $(GEN_SRCS) $(COMMON_SRCS)
 
-!include $(top_srcdir)\config\Make.rules.mak
+!include $(top_srcdir)\config\Make.rules.mak.js
 
 # Prevent generation of these files from .ice files
 Communicator.js:

@@ -22,7 +22,7 @@ GEN_SRCS = $(patsubst $(SDIR)/%.ice, %.js, $(SLICES))
 SRCS		:= $(GEN_SRCS)
 INSTALL_SRCS	:= IceMX.js $(GEN_SRCS)
 
-include $(top_srcdir)/config/Make.rules
+include $(top_srcdir)/config/Make.rules.js
 
 SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) --ice -I$(slicedir)
 

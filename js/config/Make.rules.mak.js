@@ -11,7 +11,7 @@
 # Select an installation base directory. The directory will be created
 # if it does not exist.
 #
-prefix			= C:\IceJS-$(VERSION)
+prefix			= C:\IceJS-$(ICEJS_VERSION)
 
 #
 # Define to yes for an optimized build.
@@ -68,18 +68,10 @@ SLICEPARSERLIB          = $(ice_cpp_dir)\lib\slice.lib
 SLICEPARSERLIB          = $(ice_cpp_dir)\lib\sliced.lib
 !endif
 !else
-SLICE2JS                = $(ice_cpp_dir)\bin$(x64suffix)\slice2js.exe
-SLICEPARSERLIB          = $(ice_cpp_dir)\lib$(x64suffix)\slice.lib
-!if !exist ("$(SLICEPARSERLIB)")
-SLICEPARSERLIB          = $(ice_cpp_dir)\lib$(x64suffix)\sliced.lib
-!endif
+SLICE2JS                = $(ice_js_dir)\bin$(x64suffix)\slice2js.exe
 !endif
 !else
-SLICE2JS                = $(ice_dir)\bin$(x64suffix)\slice2js.exe
-SLICEPARSERLIB          = $(ice_dir)\lib$(x64suffix)\slice.lib
-!if !exist ("$(SLICEPARSERLIB)")
-SLICEPARSERLIB          = $(ice_dir)\lib$(x64suffix)\sliced.lib
-!endif
+SLICE2JS                = $(ice_js_dir)\bin$(x64suffix)\slice2js.exe
 !endif
 
 EVERYTHING		= all clean install lint

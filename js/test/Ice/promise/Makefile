@@ -11,5 +11,5 @@ top_srcdir	= ../../..
 
 TARGETS = index.html
 
-include $(top_srcdir)/config/Make.rules
+include $(top_srcdir)/config/Make.rules.js
 
