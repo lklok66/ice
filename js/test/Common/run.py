@@ -26,7 +26,12 @@ import TestUtil
 if os.environ.get("RUNNING_TEST_CONTROLLER_WITH_ENV", "") == "":
     env = TestUtil.getTestEnv("cpp", os.getcwd())
     env["RUNNING_TEST_CONTROLLER_WITH_ENV"] = "yes"
-    sys.exit(os.spawnvpe(os.P_WAIT, sys.executable, [sys.executable, "run.py"], env))
+    try:
+        p = TestUtil.spawnClient(sys.executable + " run.py", env = env)
+        p.waitTestSuccess()
+    except:
+        pass
+    sys.exit(0)
 
 import Ice, Expect
 Ice.loadSlice(os.path.join(TestUtil.toplevel, "js", "test", "Common", "Controller.ice"))
