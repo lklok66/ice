@@ -161,24 +161,18 @@
                 var script = document.createElement("script");
                     script.type = "text/javascript";
                     script.src = scripts.shift();
-                    if(navigator.userAgent.indexOf("MSIE") !== -1)
+
+                var loaded = false;
+
+                script.onload = script.onreadystatechange = function()
+                {
+                    if(!loaded && (!this.readyState || this.readyState == "complete" || this.readyState == "loaded"))
                     {
-                        script.onload = function()
-                        {
-                            loadScript();
-                        };
+                        loaded = true;
+                        loadScript();
                     }
-                    else
-                    {
-                        script.onreadystatechange = function()
-                        {
-                            if(this.readyState == "complete" || this.readyState == "loaded")
-                            {
-                                loadScript();
-                            }
-                        };
-                    }
-                    head.appendChild(script);
+                };
+                head.appendChild(script);
             }
         }
         loadScript();
