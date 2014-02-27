@@ -114,13 +114,8 @@ endif
 	rm -f $(*F).js
 	$(SLICE2JS) $(SLICE2JSFLAGS) $<
 
-ifeq ($(OPTIMIZE),yes)
-index.html: $(GEN_SRCS) $(top_srcdir)/test/Common/index.html
-	sed s/Ice\.js/Ice\.min\.js/g $(top_srcdir)/test/Common/index.html > index.html
-else
 index.html: $(GEN_SRCS) $(top_srcdir)/test/Common/index.html
 	cp $(top_srcdir)/test/Common/index.html .
-endif
 
 $(libdir)/$(LIBNAME).js $(libdir)/$(LIBNAME).js.gz: $(SRCS)
 	@rm -f $(libdir)/$(LIBNAME).js $(libdir)/$(LIBNAME).js.gz
