@@ -327,7 +327,7 @@ if not skipBuild:
                     os.chdir(os.path.join(sourceDir, lang))
 
                     command = None
-                    rules = "Make.rules.mak"
+                    rules = "Make.rules.mak" if lang == "cpp" else "Make.rules.mak.js"
 
                     setMakefileOption(os.path.join(sourceDir, lang, "config", rules), "prefix", installDir)
 
