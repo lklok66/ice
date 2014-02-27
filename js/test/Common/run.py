@@ -8,7 +8,7 @@
 #
 # **********************************************************************
 
-import os, sys
+import os, sys, threading, subprocess
 
 path = [ ".", "..", "../..", "../../..", "../../../.." ]
 head = os.path.dirname(sys.argv[0])
@@ -26,12 +26,7 @@ import TestUtil
 if os.environ.get("RUNNING_TEST_CONTROLLER_WITH_ENV", "") == "":
     env = TestUtil.getTestEnv("cpp", os.getcwd())
     env["RUNNING_TEST_CONTROLLER_WITH_ENV"] = "yes"
-    try:
-        p = TestUtil.spawnClient(sys.executable + " run.py", env = env)
-        p.waitTestSuccess()
-    except:
-        pass
-    sys.exit(0)
+    sys.exit(os.spawnve(os.P_WAIT, sys.executable, [sys.executable, "run.py"], env))
 
 import Ice, Expect
 Ice.loadSlice(os.path.join(TestUtil.toplevel, "js", "test", "Common", "Controller.ice"))
@@ -107,17 +102,54 @@ class ControllerI(Test.Controller):
         self.currentServer = Test.ServerPrx.uncheckedCast(current.adapter.addWithUUID(ServerI(serverDesc, serverProc)))
         return self.currentServer
 
+class Reader(threading.Thread):
+    def __init__(self, p):
+        self.p = p
+        threading.Thread.__init__(self)
+
+    def run(self):
+        while True:
+            line = self.p.stdout.readline()
+            if self.p.poll() is not None and not line:
+                #process terminated
+                return self.p.poll()
+            if type(line) != str:
+                line = line.decode()
+            sys.stdout.write(line)
+            sys.stdout.flush()
+            
 class Server(Ice.Application):
     def run(self, args):
         jsDir = os.path.join(TestUtil.toplevel, "js")
-        httpServer = Expect.Expect("node " + os.path.join(jsDir, "bin", "HttpServer.js"), startReader=True, cwd=jsDir)
-        httpServer.trace()
+        httpServer = subprocess.Popen("node " + os.path.join(jsDir, "bin", "HttpServer.js"), shell = True, stdin = subprocess.PIPE,
+                                      stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = 0)
+        #
+        # Wait for the HttpServer to start
+        #
+        while True:
+            line = httpServer.stdout.readline()
+            if httpServer.poll() is not None and not line:
+                #process terminated
+                return httpServer.poll()
+            if type(line) != str:
+                line = line.decode()
+            sys.stdout.write(line)
+            sys.stdout.flush()
+            if line.find("listening on ports 8080 (http) and 9090 (https)...") != -1:
+                break
+
+        reader = Reader(httpServer)
+        reader.start()
+        
         adapter = self.communicator().createObjectAdapter("ControllerAdapter")
         adapter.add(ControllerI(), self.communicator().stringToIdentity("controller"))
         adapter.activate()
         self.communicator().waitForShutdown()
 
-        httpServer.terminate()
+        if httpServer.poll() is None:
+            httpServer.terminate()
+        
+        reader.join()
         return 0
         
 app = Server()
