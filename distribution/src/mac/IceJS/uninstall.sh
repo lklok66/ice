@@ -6,10 +6,10 @@
 
 showHelp ()
 {
-    echo "IceJS 0.1.0 uninstall script"
+    echo "Ice for JavaScript 0.1.0 uninstall script"
     echo "Copyright (c) 2003-2014 ZeroC, Inc. All rights reserved."
     echo "usage: "
-    echo "  \"sudo $0\" -- uninstall all IceJS 0.1.0 packages installed on this system."
+    echo "  \"sudo $0\" -- uninstall all Ice for JavaScript 0.1.0 packages installed on this system."
 }
 
 #
@@ -124,7 +124,7 @@ answer=""
 
 while [[ $ok -eq 0 ]]
 do
-    echo "Uninstall all IceJS 0.1.0 packages installed on this sytem? Yes/No"
+    echo "Uninstall all Ice for JavaScript 0.1.0 packages installed on this sytem? Yes/No"
     read -p "$*" answer
     if [[ ! "$answer" ]]; then
         answer="no"
@@ -154,4 +154,4 @@ fi
 
 uninstallPackage "com.zeroc.icejs.pkg"
 
-echo "IceJS 0.1.0 uninstallation completed successfully"
+echo "Ice for JavaScript 0.1.0 uninstallation completed successfully"
