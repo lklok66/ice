@@ -12,12 +12,18 @@
 # ----------------------------------------------------------------------
 
 SHELL			= /bin/sh
-VERSION_MAJOR   	= 3
-VERSION_MINOR   	= 5
-VERSION_PATCH           = 1
-VERSION			= 3.5.1
+
+# Used for the embedded run path
+VERSION_MAJOR           = 0
+VERSION_MINOR           = 1
+
+# Used for the library versionning
+VERSION                 = 3.5.1js
 SHORT_VERSION           = 3.5
-SOVERSION		= 35
+SOVERSION               = 35
+
+ICE_VERSION             = 3.5.1
+ICEJS_VERSION           = 0.1.0
 
 INSTALL			= cp -fp
 INSTALL_PROGRAM		= ${INSTALL}
@@ -122,50 +128,42 @@ ifndef ice_bin_dist
         # build the Python language mapping using the translators from the distribution specified
         # by ICE_HOME.
         #
-	ifneq ($(ICE_HOME),)
-	    ifdef slice_translator
-		ifneq ($(shell test -f $(ICE_HOME)/$(binsubdir)/$(slice_translator) && echo 0), 0)
-$(error Unable to find $(slice_translator) in $(ICE_HOME)/$(binsubdir), please verify ICE_HOME is properly configured and Ice is correctly installed.)
+	ifneq ($(ice_language),js)
+	    ifneq ($(ICE_HOME),)
+		ifdef slice_translator
+		    ifneq ($(shell test -f $(ICE_HOME)/$(binsubdir)/$(slice_translator) && echo 0), 0)
+    $(error Unable to find $(slice_translator) in $(ICE_HOME)/$(binsubdir), please verify ICE_HOME is properly configured and Ice is correctly installed.)
+		    endif
+		    ifeq ($(shell test -f $(ice_dir)/cpp/bin/$(slice_translator) && echo 0), 0)
+    $(warning Found $(slice_translator) in both ICE_HOME/bin and $(ice_dir)/cpp/bin, ICE_HOME/bin/$(slice_translator) will be used!)
+		    endif
+		    ice_cpp_dir = $(ICE_HOME)
+		else
+    $(warning Ignoring ICE_HOME environment variable to build current source tree.)
+		    ice_cpp_dir = $(ice_dir)/cpp
 		endif
-		ifeq ($(shell test -f $(ice_dir)/cpp/bin/$(slice_translator) && echo 0), 0)
-$(warning Found $(slice_translator) in both ICE_HOME/bin and $(ice_dir)/cpp/bin, ICE_HOME/bin/$(slice_translator) will be used!)
-		endif
-		ice_cpp_dir = $(ICE_HOME)
 	    else
-$(warning Ignoring ICE_HOME environment variable to build current source tree.)
 		ice_cpp_dir = $(ice_dir)/cpp
 	    endif
 	else
-	    ice_cpp_dir = $(ice_dir)/cpp
-	endif
-
-    endif
-    ifeq ($(shell test -d $(top_srcdir)/ice/$(ice_language) && echo 0),0)
-        ice_dir = $(top_srcdir)/ice
-        ice_src_dist = 1
-
-        #
-        # When building a source distribution, if ICE_HOME is specified, it takes precedence over 
-        # the source tree for building the language mappings. For example, this can be used to 
-        # build the Python language mapping using the translators from the distribution specified
-        # by ICE_HOME.
-        #
-	ifneq ($(ICE_HOME),)
-	    ifdef slice_translator
-		ifneq ($(shell test -f $(ICE_HOME)/$(binsubdir)$(cpp11suffix)/$(slice_translator) && echo 0), 0)
-$(error Unable to find $(slice_translator) in $(ICE_HOME)/$(binsubdir)$(cpp11suffix), please verify ICE_HOME is properly configured and Ice is correctly installed.)
+	    ifneq ($(ICE_JS_HOME),)
+		ifdef slice_translator
+		    ifneq ($(shell test -f $(ICE_JS_HOME)/$(binsubdir)/$(slice_translator) && echo 0), 0)
+    $(error Unable to find $(slice_translator) in $(ICE_JS_HOME)/$(binsubdir), please verify ICE_JS_HOME is properly configured and Ice is correctly installed.)
+		    endif
+		    ifeq ($(shell test -f $(ice_dir)/cpp/bin/$(slice_translator) && echo 0), 0)
+    $(warning Found $(slice_translator) in both ICE_JS_HOME/bin and $(ice_dir)/cpp/bin, ICE_JS_HOME/bin/$(slice_translator) will be used!)
+		    endif
+		    ice_cpp_dir = $(ICE_JS_HOME)
+		else
+    $(warning Ignoring ICE_JS_HOME environment variable to build current source tree.)
+		    ice_cpp_dir = $(ice_dir)/cpp
 		endif
-		ifeq ($(shell test -f $(ice_dir)/cpp/bin$(cpp11suffix)/$(slice_translator) && echo 0), 0)
-$(warning Found $(slice_translator) in both ICE_HOME/bin and $(ice_dir)/cpp/bin, ICE_HOME/bin/$(slice_translator) will be used!)
-		endif
-		ice_cpp_dir = $(ICE_HOME)
 	    else
-$(warning Ignoring ICE_HOME environment variable to build current source tree.)
 		ice_cpp_dir = $(ice_dir)/cpp
 	    endif
-	else
-	    ice_cpp_dir = $(ice_dir)/cpp
 	endif
+
     endif
 endif
 
@@ -179,36 +177,73 @@ $(error slice_translator must be defined)
     endif
 
     ifneq ($(ICE_HOME),)
-        ifneq ($(shell test -f $(ICE_HOME)/$(binsubdir)$(cpp11suffix)/$(slice_translator) && echo 0), 0)
-$(error Unable to find $(slice_translator) in $(ICE_HOME)/$(binsubdir)$(cpp11suffix), please verify ICE_HOME is properly configured and Ice is correctly installed.)
-        endif
-        ice_dir = $(ICE_HOME)
+	ifneq ($(shell test -f $(ICE_HOME)/$(binsubdir)$(cpp11suffix)/slice2cpp && echo 0), 0)
+$(error Unable to find slice2cpp in $(ICE_HOME)/$(binsubdir)$(cpp11suffix), please verify ICE_HOME is properly configured and Ice is correctly installed.)
+	endif
+	ice_dir = $(ICE_HOME)
     else
-        ifeq ($(shell test -f $(top_srcdir)/bin/$(slice_translator) && echo 0), 0)
-            ice_dir = $(top_srcdir)
-        else 
-	        ifeq ($(shell test -f /usr/bin/$(slice_translator) && echo 0), 0)
-                ice_dir = /usr
-                ifeq ($(shell test -f /opt/Ice-$(VERSION)/bin/$(slice_translator) && echo 0), 0)
-                   $(warning Found $(slice_translator) in both /usr/bin and /opt/Ice-$(VERSION)/bin, /usr/bin/$(slice_translator) will be used!)
-                endif
-                ifeq ($(shell test -f /Library/Developer/Ice-$(VERSION)/bin/$(slice_translator) && echo 0), 0)
-                   $(warning Found $(slice_translator) in both /usr/bin and /Library/Developer/Ice-$(VERSION)/bin, /usr/bin/$(slice_translator) will be used!)
-                endif
-            else
-                ifeq ($(shell test -f /opt/Ice-$(VERSION)/$(binsubdir)/$(slice_translator) && echo 0), 0)
-                    ice_dir = /opt/Ice-$(VERSION)
-                else
-                    ifeq ($(shell test -f /Library/Developer/Ice-$(VERSION)/$(binsubdir)/$(slice_translator) && echo 0), 0)
-                        ice_dir = /Library/Developer/Ice-$(VERSION)
-                    endif
-                endif
-            endif
-        endif
+	ifeq ($(shell test -f $(top_srcdir)/bin/slice2cpp && echo 0), 0)
+	    ice_dir = $(top_srcdir)
+	else 
+	    ifeq ($(shell test -f /usr/bin/slice2cpp && echo 0), 0)
+		ice_dir = /usr
+		ifeq ($(shell test -f /opt/Ice-$(ICE_VERSION)/bin/slice2cpp && echo 0), 0)
+		   $(warning Found slice2cpp in both /usr/bin and /opt/Ice-$(ICE_VERSION)/bin, /usr/bin/slice2cpp will be used!)
+		endif
+		ifeq ($(shell test -f /Library/Developer/Ice-$(ICE_VERSION)/bin/slice2cpp && echo 0), 0)
+		   $(warning Found slice2cpp in both /usr/bin and /Library/Developer/Ice-$(ICE_VERSION)/bin, /usr/bin/slice2cpp will be used!)
+		endif
+	    else
+		ifeq ($(shell test -f /opt/Ice-$(ICE_VERSION)/$(binsubdir)/slice2cpp && echo 0), 0)
+		    ice_dir = /opt/Ice-$(ICE_VERSION)
+		else
+		    ifeq ($(shell test -f /Library/Developer/Ice-$(ICE_VERSION)/$(binsubdir)/slice2cpp && echo 0), 0)
+			ice_dir = /Library/Developer/Ice-$(ICE_VERSION)
+		    endif
+		endif
+	    endif
+	endif
     endif
-
     ifndef ice_dir
 $(error Unable to find a valid Ice distribution, please verify ICE_HOME is properly configured and Ice is correctly installed.)
+    endif
+
+    ifneq ($(ICE_JS_HOME),)
+	ifneq ($(shell test -f $(ICE_JS_HOME)/$(binsubdir)$(cpp11suffix)/slice2js && echo 0), 0)
+$(error Unable to find slice2js in $(ICE_JS_HOME)/$(binsubdir)$(cpp11suffix), please verify ICE_JS_HOME is properly configured and Ice is correctly installed.)
+	endif
+	ice_js_dir = $(ICE_JS_HOME)
+    else
+	ifeq ($(shell test -f $(top_srcdir)/bin/slice2js && echo 0), 0)
+	    ice_js_dir = $(top_srcdir)
+	else 
+		ifeq ($(shell test -f /usr/bin/slice2js && echo 0), 0)
+		ice_js_dir = /usr
+		ifeq ($(shell test -f /opt/IceJS-$(ICEJS_VERSION)/bin/slice2js && echo 0), 0)
+		   $(warning Found slice2js in both /usr/bin and /opt/IceJS-$(ICEJS_VERSION)/bin, /usr/bin/slice2js will be used!)
+		endif
+		ifeq ($(shell test -f /Library/Developer/IceJS-$(ICEJS_VERSION)/bin/slice2js && echo 0), 0)
+		   $(warning Found slice2js in both /usr/bin and /Library/Developer/IceJS-$(ICEJS_VERSION)/bin, /usr/bin/slice2js will be used!)
+		endif
+	    else
+		ifeq ($(shell test -f /opt/IceJS-$(ICEJS_VERSION)/$(binsubdir)/slice2js && echo 0), 0)
+		    ice_js_dir = /opt/IceJS-$(ICEJS_VERSION)
+		else
+		    ifeq ($(shell test -f /Library/Developer/IceJS-$(ICEJS_VERSION)/$(binsubdir)/slice2js && echo 0), 0)
+			ice_js_dir = /Library/Developer/IceJS-$(ICEJS_VERSION)
+		    endif
+		endif
+	    endif
+	endif
+    endif
+    ifndef ice_js_dir
+$(error Unable to find a valid IceJS distribution, please verify ICE_JS_HOME is properly configured and IceJS is correctly installed.)
+    endif
+
+    ifeq ($(slice_translator),slice2js)
+	ice_translator_dir = $(ice_js_dir)
+    else
+	ice_translator_dir = $(ice_dir)
     endif
     ice_bin_dist = 1
     ice_cpp_dir = $(ice_dir)
@@ -239,13 +274,13 @@ endif
 # Set slicedir to the path of the directory containing the Slice files.
 #
 ifeq ($(ice_dir), /usr)
-    slicedir = /usr/share/Ice-$(VERSION)/slice
+    slicedir = /usr/share/Ice-$(ICE_VERSION)/slice
 else
     slicedir = $(ice_dir)/slice
 endif
 
 ifeq ($(prefix), /usr)
-    install_slicedir = /usr/share/Ice-$(VERSION)/slice
+    install_slicedir = /usr/share/Ice-$(ICE_VERSION)/slice
 else
     install_slicedir = $(prefix)/slice
 endif
@@ -253,15 +288,15 @@ endif
 #
 # Set environment variables for the Slice translator.
 #
-ifneq ($(ice_dir), /usr)
+ifneq ($(ice_translator_dir), /usr)
     ifdef ice_src_dist
 	ifeq ($(ice_cpp_dir), $(ice_dir)/cpp)
 	    ice_lib_dir = $(ice_cpp_dir)/lib
 	else
-    	ice_lib_dir = $(ice_cpp_dir)/$(libsubdir)
+	ice_lib_dir = $(ice_cpp_dir)/$(libsubdir)
 	endif
     else
-        ice_lib_dir = $(ice_dir)/$(libsubdir)
+        ice_lib_dir = $(ice_translator_dir)/$(libsubdir)
     endif
 
     ifeq ($(UNAME),Linux)
@@ -401,16 +436,11 @@ install-common::
 	fi
 
 	@if test ! -f $(DESTDIR)$(prefix)/LICENSE$(TEXT_EXTENSION) ; \
-    then \
-        $(call installdata,$(top_srcdir)/../LICENSE$(TEXT_EXTENSION),$(DESTDIR)$(prefix)) ; \
-    fi
-
-	@if test ! -f $(DESTDIR)$(prefix)/CHANGES$(TEXT_EXTENSION) ; \
 	then \
-		$(call installdata,$(top_srcdir)/../CHANGES$(TEXT_EXTENSION),$(DESTDIR)$(prefix)) ; \
+            $(call installdata,$(top_srcdir)/../LICENSE$(TEXT_EXTENSION),$(DESTDIR)$(prefix)) ; \
 	fi
 
 	@if test ! -f $(DESTDIR)$(prefix)/RELEASE_NOTES$(TEXT_EXTENSION) ; \
 	then \
-		$(call installdata,$(top_srcdir)/../RELEASE_NOTES$(TEXT_EXTENSION),$(DESTDIR)$(prefix)) ; \
+	    $(call installdata,$(top_srcdir)/../RELEASE_NOTES$(TEXT_EXTENSION),$(DESTDIR)$(prefix)) ; \
 	fi

@@ -9,7 +9,7 @@
 
 top_srcdir	= ..
 
-include $(top_srcdir)/config/Make.rules
+include $(top_srcdir)/config/Make.rules.js
 
 SUBDIRS		= Ice Glacier2 ChatDemo
 

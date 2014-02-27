@@ -13,4 +13,4 @@ TARGETS = index.html
 
 SRCS = Client.js
 
-!include $(top_srcdir)\config\Make.rules.mak
+!include $(top_srcdir)\config\Make.rules.mak.js

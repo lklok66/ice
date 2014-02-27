@@ -92,14 +92,13 @@ ifeq ($(mkshlib),)
 endif
 
 SLICE2CPP	= $(ice_cpp_dir)/$(binsubdir)$(cpp11suffix)/slice2cpp
-SLICEPARSERLIB	= $(ice_cpp_dir)/$(libsubdir)$(cpp11suffix)/$(call mklibfilename,Slice,$(VERSION))
 RPATH_DIR	= $(ice_dir)/$(libsubdir)$(cpp11suffix)
 
 EVERYTHING		= all clean
 EVERYTHING_EXCEPT_ALL   = clean
 
 .SUFFIXES:
-.SUFFIXES:		.cpp .c .o .js
+.SUFFIXES:		.cpp .c .o
 
 .cpp.o:
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
@@ -124,14 +123,6 @@ EVERYTHING_EXCEPT_ALL   = clean
 	echo '#include <IceUtil/Config.h>' > $@
 	cat lex.yy.c >> $@
 	rm -f lex.yy.c
-
-%.js: $(SDIR)/%.ice $(SLICE2JS) $(SLICEPARSERLIB)
-	rm -f $(*F).js
-	$(SLICE2JS) $(SLICE2JSFLAGS) $<
-
-%.js: %.ice $(SLICE2JS) $(SLICEPARSERLIB)
-	rm -f $(*F).js
-	$(SLICE2JS) $(SLICE2JSFLAGS) $<
 
 all:: $(SRCS) $(TARGETS)
 

@@ -30,7 +30,7 @@ SDIR		= $(slicedir)\Glacier2
 SRCS		= $(GEN_SRCS)
 INSTALL_SRCS	= Glacier2.js $(GEN_SRCS)
 
-!include $(top_srcdir)\config\Make.rules.mak
+!include $(top_srcdir)\config\Make.rules.mak.js
 
 SLICE2JSFLAGS	= $(SLICE2JSFLAGS) --ice -I"$(slicedir)"
 

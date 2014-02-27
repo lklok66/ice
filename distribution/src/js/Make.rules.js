@@ -8,12 +8,6 @@
 # **********************************************************************
 
 #
-# Select an installation base directory. The directory will be created
-# if it does not exist.
-#
-prefix                  ?= /opt/IceJS-$(ICEJS_VERSION)
-
-#
 # Define to yes for an optimized build.
 #
 OPTIMIZE ?= no
@@ -40,13 +34,14 @@ LINTFLAGS = --verbose
 #
 # Common definitions
 #
-ice_language     = cpp
+ice_language     = js
 slice_translator = slice2js
 ice_require_cpp  = 1
 
-include $(top_srcdir)/config/Make.common.rules.js
+include $(top_srcdir)/config/Make.common.rules
 
 includedir		= $(ice_dir)/include
+libdir			= $(ice_js_dir)/lib
 
 #
 # Platform specific definitions
@@ -66,17 +61,12 @@ endif
 
 
 SLICE2JS	= $(ice_js_dir)/$(binsubdir)$(cpp11suffix)/slice2js
-SLICEPARSERLIB	= $(SLICE2JS)
 
 EVERYTHING		= all clean
 EVERYTHING_EXCEPT_ALL   = clean
 
 .SUFFIXES:
 .SUFFIXES:		.js
-
-%.js: $(SDIR)/%.ice $(SLICE2JS) $(SLICEPARSERLIB)
-	rm -f $(*F).js
-	$(SLICE2JS) $(SLICE2JSFLAGS) $<
 
 %.js: %.ice $(SLICE2JS) $(SLICEPARSERLIB)
 	rm -f $(*F).js

@@ -9,7 +9,7 @@
 
 top_srcdir	= .
 
-!include $(top_srcdir)\config\Make.rules.mak
+!include $(top_srcdir)\config\Make.rules.mak.js
 
 SUBDIRS		= src assets test demo
 

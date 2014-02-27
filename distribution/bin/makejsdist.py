@@ -51,7 +51,6 @@ excludeFiles = [ \
     "/slice/IcePatch2",
     "/vb",
     "/CHANGES",
-    "/RELEASE_NOTES",
     "/allTests.py",
     "/allDemos.py",
     "/Makefile",
@@ -214,8 +213,6 @@ excludeUnixFiles = [ \
 #
 demoConfigFiles = [ \
     "Make.common.rules", \
-    "Make.common.rules.js", \
-    "Make.rules", \
     "Make.rules.Darwin", \
     "Make.rules.Linux" \
 ]
@@ -294,7 +291,7 @@ os.chdir(gitRepoDir)
 #
 # Get Ice versions.
 #
-config = open(os.path.join("config", "Make.common.rules.icejs"), "r")
+config = open(os.path.join("config", "Make.common.rules"), "r")
 version = re.search("ICEJS_VERSION\s*=\s*([0-9\.b]*)", config.read()).group(1)
 mmversion = re.search("([0-9]+\.[0-9b]+)[\.0-9]*", version).group(1)
 libversion = mmversion.replace('.', '')
@@ -537,7 +534,6 @@ for d in ["", "cpp"]:
 
 copy(os.path.join(distFilesDir, "src", "js", "Make.rules"), os.path.join(demoDir, "config"), False)
 copy(os.path.join(distFilesDir, "src", "js", "Make.rules.js"), os.path.join(demoDir, "config"), False)
-copy(os.path.join(distFilesDir, "src", "js", "Make.common.rules"), os.path.join(demoDir, "config"), False)
 
 # Consolidate demoscript and demo distribution with files from each language mapping
 for d in os.listdir('.'):
@@ -550,14 +546,6 @@ for root, dirnames, filesnames in os.walk(demoDir):
         if fnmatch.fnmatch(f, "config*"):
             substitute(os.path.join(root, f), configSubstituteExprs)
             
-makeSubstituteExprs = [(re.compile(re.escape("Make.rules")), "Make.rules.js")]
-
-for root, dirnames, filesnames in os.walk(os.path.join(demoDir, "demojs")):
-    for f in filesnames:
-        if fnmatch.fnmatch(f, "Make*"):
-            substitute(os.path.join(root, f), makeSubstituteExprs)
-
-
 # Windows demo distribution
 copy(os.path.join(winDistFilesDir, "src", "js", "README.DEMOS.txt"), os.path.join(winDemoDir, "README.txt"))
 
@@ -615,7 +603,7 @@ print "ok"
 # Copy CHANGES and RELEASE_NOTES
 #
 #copy(os.path.join(srcDir, "CHANGES"), os.path.join(distDir, "IceJS-" + version + "-CHANGES"))
-#copy(os.path.join(srcDir, "RELEASE_NOTES"), os.path.join(distDir, "IceJS-" + version + "-RELEASE_NOTES"))
+copy(os.path.join(srcDir, "RELEASE_NOTES"), os.path.join(distDir, "IceJS-" + version + "-RELEASE_NOTES"))
 
 #
 # Everything should be clean now, we can create the source distributions archives

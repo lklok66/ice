@@ -15,7 +15,7 @@ ifeq ($(OPTIMIZE),yes)
 TARGETS	:= $(TARGETS) Client.min.js Client.min.js.gz
 endif
 
-include $(top_srcdir)/config/Make.rules
+include $(top_srcdir)/config/Make.rules.js
 
 SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) -I$(slicedir) -I.
 

@@ -18,8 +18,17 @@ path = [os.path.abspath(p) for p in path if os.path.exists(os.path.join(p, "scri
 if len(path) == 0:
     raise RuntimeError("can't find toplevel directory!")
 sys.path.append(os.path.join(path[0], "scripts"))
-import TestUtil, Ice, Expect
+import TestUtil
 
+#
+# Run the script with the environment correctly set.
+#
+if os.environ.get("RUNNING_TEST_CONTROLLER_WITH_ENV", "") == "":
+    env = TestUtil.getTestEnv("cpp", os.getcwd())
+    env["RUNNING_TEST_CONTROLLER_WITH_ENV"] = "yes"
+    sys.exit(os.spawnvpe(os.P_WAIT, sys.executable, [sys.executable, "run.py"], env))
+
+import Ice, Expect
 Ice.loadSlice(os.path.join(TestUtil.toplevel, "js", "test", "Common", "Controller.ice"))
 import Test
 
@@ -96,8 +105,7 @@ class ControllerI(Test.Controller):
 class Server(Ice.Application):
     def run(self, args):
         jsDir = os.path.join(TestUtil.toplevel, "js")
-        httpServer = Expect.Expect("node " + os.path.join(jsDir, "bin", "HttpServer.js"), startReader=True,
-                                   cwd=jsDir)
+        httpServer = Expect.Expect("node " + os.path.join(jsDir, "bin", "HttpServer.js"), startReader=True, cwd=jsDir)
         httpServer.trace()
         adapter = self.communicator().createObjectAdapter("ControllerAdapter")
         adapter.add(ControllerI(), self.communicator().stringToIdentity("controller"))
@@ -107,9 +115,7 @@ class Server(Ice.Application):
         httpServer.terminate()
         return 0
         
-sys.stdout.flush()
 app = Server()
-
 initData = Ice.InitializationData()
 initData.properties = Ice.createProperties();
 initData.properties.setProperty("Ice.Plugin.IceSSL", "IceSSL:createIceSSL")

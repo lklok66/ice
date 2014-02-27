@@ -11,6 +11,6 @@ top_srcdir	= ..\..
 
 TARGETS = Controller.js
 
-!include $(top_srcdir)\config\Make.rules.mak
+!include $(top_srcdir)\config\Make.rules.mak.js
 
 SLICE2JSFLAGS	= $(SLICE2JSFLAGS) -I"$(slicedir)"

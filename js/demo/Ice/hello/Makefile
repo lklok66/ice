@@ -11,6 +11,6 @@ top_srcdir	= ../../..
 
 TARGETS = Hello.js
 
-include $(top_srcdir)/config/Make.rules
+include $(top_srcdir)/config/Make.rules.js
 
 SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) -I$(slicedir)

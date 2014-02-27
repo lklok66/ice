@@ -210,10 +210,8 @@ def fixMakefileForFile(path):
     (dir,file) = os.path.split(path)
     (base,ext) = os.path.splitext(file)
     # File the makefile file from the same directory as the file.
-    if os.path.exists(os.path.join(dir, "Makefile")):
-        fixMakefile(os.path.join(dir, "Makefile"), base, ext)
-    if os.path.exists(os.path.join(dir, "Makefile.mak")):
-        fixMakefile(os.path.join(dir, "Makefile.mak"), base, ext)
+    for f in glob.glob(os.path.join(dir, "Makefile*")):
+        fixMakefile(f, base, ext)
 
 #
 # Comment out rules in a Makefile.

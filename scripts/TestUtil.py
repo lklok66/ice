@@ -1662,6 +1662,12 @@ def getTestEnv(lang, testdir):
 
     addLdPath(libDir, env)
 
+    if iceJsHome:
+        libDir = os.path.join(iceJsHome, "lib")
+        if isDarwin() and cpp11:
+            libDir = os.path.join(libDir, "c++11")
+        addLdPath(libDir, env)
+
     if lang == "javae":
         javaDir = os.path.join(getIceDir("javae", testdir), "jdk", "lib")
         addClasspath(os.path.join(javaDir, "IceE.jar"), env)
@@ -1946,7 +1952,7 @@ def processCmdLine():
             
     # Only use binary distribution from ICE_JS_HOME environment variable if USE_BIN_DIST=yes
     if not iceJsHome and os.environ.get("USE_BIN_DIST", "no") == "yes":
-        if os.environ.get("USE_BIN_DIST", "") != "":
+        if os.environ.get("ICE_JS_HOME", "") != "":
             iceJsHome = os.environ["ICE_JS_HOME"]
 
     if not x64:

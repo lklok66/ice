@@ -11,12 +11,13 @@
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
 
-SHELL			= /bin/sh
-VERSION			= 3.5.1
-INTVERSION		= 3.5.1
+VERSION			= 3.5.1js
 SHORT_VERSION           = 3.5
-PATCH_VERSION           = 1
+PATCH_VERSION           = 1js
 SOVERSION		= 35
+
+ICE_VERSION             = 3.5.1
+ICEJS_VERSION           = 0.1.0
 
 OBJEXT			= .obj
 
@@ -70,6 +71,8 @@ ice_bin_dist_dir = $(PROGRAMFILES)\ZeroC\Ice-$(VERSION)
 ice_dir = $(top_srcdir)\..
 ice_src_dist = 1
 
+!if "$(ice_language)" != "js"
+
 #
 # When building a source distribution, if ICE_HOME is specified, it takes precedence over 
 # the source tree for building the language mappings. For example, this can be used to 
@@ -97,6 +100,31 @@ ice_cpp_dir = $(ice_dir)\cpp
 
 !endif
 
+!else # ice_langage == js
+
+!if "$(ICE_JS_HOME)" != ""
+
+!if "$(slice_translator)" != ""
+!if !exist ("$(ICE_JS_HOME)\bin$(x64suffix)\$(slice_translator)")
+!error Unable to find $(slice_translator) in $(ICE_JS_HOME)\bin$(x64suffix), please verify ICE_JS_HOME is properly configured and Ice is correctly installed.
+!endif
+!if exist ($(ice_dir)\cpp\bin\$(slice_translator))
+!message Found $(slice_translator) in both ICE_JS_HOME\bin and $(ice_dir)\cpp\bin, ICE_JS_HOME\bin\$(slice_translator) will be used!
+!endif
+ice_cpp_dir = $(ICE_JS_HOME)
+!else
+!message Ignoring ICE_JS_HOME environment variable to build current source tree.
+ice_cpp_dir = $(ice_dir)\cpp
+!endif
+
+!else
+
+ice_cpp_dir = $(ice_dir)\cpp
+
+!endif
+
+!endif
+
 !endif
 
 #
@@ -104,24 +132,36 @@ ice_cpp_dir = $(ice_dir)\cpp
 #
 !if "$(ice_src_dist)" == ""
 
-!if "$(slice_translator)" == ""
-!error slice_translator must be defined
-!endif
-
 !if "$(ICE_HOME)" != ""
-!if !exist ("$(ICE_HOME)\bin$(x64suffix)\$(slice_translator)")
-!error Unable to find $(slice_translator) in $(ICE_HOME)\bin$(x64suffix), please verify ICE_HOME is properly configured and Ice is correctly installed.
+!if !exist ("$(ICE_HOME)\bin$(x64suffix)\slice2cpp.exe")
+!error Unable to find slice2cpp.exe in $(ICE_HOME)\bin$(x64suffix), please verify ICE_HOME is properly configured and Ice is correctly installed.
 !endif
 ice_dir = $(ICE_HOME)
-!elseif exist ($(top_srcdir)/bin/$(slice_translator))
+!elseif exist ($(top_srcdir)/bin/slice2cpp.exe)
 ice_dir = $(top_srcdir)
-!elseif exist ("$(ice_bin_dist_dir)\bin$(x64suffix)\$(slice_translator)")
+!elseif exist ("$(ice_bin_dist_dir)\bin$(x64suffix)\slice2cpp.exe")
 ice_dir = $(ice_bin_dist_dir)
 !endif
 
 !if "$(ice_dir)" == ""
 !error Unable to find a valid Ice distribution, please verify ICE_HOME is properly configured and Ice is correctly installed.
 !endif
+
+!if "$(ICE_JS_HOME)" != ""
+!if !exist ("$(ICE_JS_HOME)\bin$(x64suffix)\slice2js.exe")
+!error Unable to find slice2js.exe in $(ICE_JS_HOME)\bin$(x64suffix), please verify ICE_JS_HOME is properly configured and Ice is correctly installed.
+!endif
+ice_js_dir = $(ICE_JS_HOME)
+!elseif exist ($(top_srcdir)/bin/slice2js.exe)
+ice_js_dir = $(top_srcdir)
+!elseif exist ("$(ice_bin_dist_dir)\bin$(x64suffix)\slice2js.exe")
+ice_js_dir = $(ice_bin_dist_dir)
+!endif
+
+!if "$(ice_js_dir)" == ""
+!error Unable to find a valid IceJS distribution, please verify ICE_JS_HOME is properly configured and Ice is correctly installed.
+!endif
+
 ice_bin_dist = 1
 ice_cpp_dir = $(ice_dir)
 !endif

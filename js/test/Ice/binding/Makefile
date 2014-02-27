@@ -17,7 +17,7 @@ GEN_SRCS = $(patsubst %.ice, %.js, $(SLICES))
 
 SRCS = Client.js
 
-include $(top_srcdir)/config/Make.rules
+include $(top_srcdir)/config/Make.rules.js
 
 SLICE2JSFLAGS	:= $(SLICE2JSFLAGS) -I$(slicedir)
 

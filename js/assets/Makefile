@@ -11,7 +11,7 @@ top_srcdir	= ..
 
 TARGETS	= common.min.js common.min.js.gz common.css common.css.gz
 
-include $(top_srcdir)/config/Make.rules
+include $(top_srcdir)/config/Make.rules.js
 
 CLOSUREFLAGS := $(CLOSUREFLAGS) --warning_level QUIET
 

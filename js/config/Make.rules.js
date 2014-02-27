@@ -11,7 +11,7 @@
 # Select an installation base directory. The directory will be created
 # if it does not exist.
 #
-prefix			?= /opt/IceJS-$(VERSION)
+prefix			?= /opt/IceJS-$(ICEJS_VERSION)
 
 #
 # Define to yes for an optimized build.
@@ -86,12 +86,10 @@ ifdef ice_src_dist
         SLICE2JS 	= $(ice_cpp_dir)/bin/slice2js
         SLICEPARSERLIB 	= $(ice_cpp_dir)/lib/$(call mklibfilename,Slice,$(VERSION))
     else
-        SLICE2JS 	= $(ice_cpp_dir)/$(binsubdir)/slice2js
-        SLICEPARSERLIB 	= $(ice_cpp_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
+        SLICE2JS 	= $(ice_js_dir)/$(binsubdir)/slice2js
     endif
 else
-    SLICE2JS 		= $(ice_dir)/$(binsubdir)/slice2js
-    SLICEPARSERLIB 	= $(ice_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
+    SLICE2JS 		= $(ice_js_dir)/$(binsubdir)/slice2js
 endif
 
 all:: $(TARGETS)
