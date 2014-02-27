@@ -147,6 +147,8 @@ ice_dir = $(ice_bin_dist_dir)
 !error Unable to find a valid Ice distribution, please verify ICE_HOME is properly configured and Ice is correctly installed.
 !endif
 
+!if "$(ice_language)" == "js"
+
 !if "$(ICE_JS_HOME)" != ""
 !if !exist ("$(ICE_JS_HOME)\bin$(x64suffix)\slice2js.exe")
 !error Unable to find slice2js.exe in $(ICE_JS_HOME)\bin$(x64suffix), please verify ICE_JS_HOME is properly configured and Ice is correctly installed.
@@ -160,6 +162,8 @@ ice_js_dir = $(ice_bin_dist_dir)
 
 !if "$(ice_js_dir)" == ""
 !error Unable to find a valid IceJS distribution, please verify ICE_JS_HOME is properly configured and Ice is correctly installed.
+!endif
+
 !endif
 
 ice_bin_dist = 1
