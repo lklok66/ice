@@ -127,8 +127,7 @@
         <hr/>
         <p>This demo implements a push client for the 
             <a href="http://www.zeroc.com/chat/index.html">ZeroC's Chat Demo Application</a>. You can use the 
-            <a href="https://demo.zeroc.com/chat/jsclient/index.html" target="_blank">Live Client</a> 
-            if you don't want to setup your own server.</p>
+            <a href="#" class="chatbutton">Live Client</a> if you don't want to setup your own server.</p>
         </p>
         
         <p>To setup the server follow the instructions from the 
@@ -149,9 +148,12 @@
         </p>
         
         <p>After those modifications to the Glacier2 router configuration you can start the Chat Demo 
-           server and Glacier2 router as documented in the Chat Demo Distribution. For run the Glacier2 
-           with the new configuration you must configure your enviroment to run IceWS applications 
-           as documented in the <strong>Ice For JavaScript</strong> <a href="#TODO">Release Notes</a>.</p>
+           server and Glacier2 router as documented in the Chat Demo distribution.</p>
+        
+        <div class="panel callout radius">
+            <p>You must configure your environment to run IceWS applications as documented in Ice for JavaScript
+            <a href="http://doc.zeroc.com/display/Rel/Ice+for+JavaScript+0.1.0+Release+Notes">Release Notes</a>.</p>
+        </div>
         
         <p>Once you have configured and started the Chat Demo server and router, 
            you can sign-in the chat using the sign-in form bellow.</p>
@@ -203,9 +205,9 @@
         <div class="tabs-content">
             <div class="content active" id="panel2-1">
                 <h6>File: ChatDemo/Chat.ice</h6>
-                <pre class="source" data="Chat.ice"></code></pre>
+                <pre class="source language-c" data="Chat.ice"></pre>
                 <h6>File: ChatDemo/ChatSession.ice</h6>
-                <pre class="source" data="ChatSession.ice"></code></pre>
+                <pre class="source language-c" data="ChatSession.ice"></pre>
             </div>
             <div class="content" id="panel2-2">
                 <h6>File: ChatDemo/Client.js</h6>
@@ -230,7 +232,7 @@
          see assets/Makefile in your distribution for details -->
     <script type="text/javascript" src="../../../assets/common.min.js"></script>
     <!-- Scripts used during development, for optimized builds
-         comment the following scripts and uncomment browser/Client.min.js 
+         comment the following scripts and uncomment Client.min.js 
          below -->
     <!-- Ice.js (Ice run-time library) -->
     <script type="text/javascript" src="../../../lib/Ice.js"></script>
@@ -245,6 +247,17 @@
     <!-- Uncomment the following script to use a minified version of the 
          scripts that includes: (the Ice and Glacier2 run-time libraries, 
          the generated code and the demo application). -->
-    <!--<script type="text/javascript" src="browser/Client.min.js"></script>-->
+    <!--<script type="text/javascript" src="Client.min.js"></script>-->
+    
+    <script type="text/javascript">
+        $(".chatbutton").click(
+            function(e)
+            {
+                window.open("https://demo.zeroc.com/chat/js/index.html", "ChatDemo", 
+                            "width=800,height=600,location=no,directories=no,status=yes," +
+                            "menubar=no,scrollbars=yes,resizable=yes,toolbar=no");
+                return false;
+            });
+    </script>
   </body>
 </html>

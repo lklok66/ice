@@ -12,24 +12,14 @@ var communicator = Ice.initialize();
 $(document).foundation();
     $(document).ready(
         function(){
-        
-            $("#default-host").attr("placeholder", document.location.hostname || "127.0.0.1");
-            
             $("#console").height(120);
+            $("#protocol").val(document.location.protocol == "https:" ? "wss" : "ws");
+            for(var name in TestCases)
+            {
+                $("#test").append("<option value=\"" + basePath + name + "/index.html\">" + name + "</option>");
+            }
+            $("#test").val(basePath + current + "/index.html");
             
-            for(name in TestCases)
-            {
-                $(".tests").append("<li><a href=\"" + basePath + name + "/index.html\">" + name + "</a></li>");
-            }
-            
-            if(document.location.protocol == "https:")
-            {
-                $("#wss").prop("checked", true);
-            }
-            else
-            {
-                $("#wss").prop("disabled", true);
-            }
 
             var out = 
             {
@@ -52,6 +42,7 @@ $(document).foundation();
                 {
                     $("#console").val("");
                     $(this).addClass("disabled");
+                    $("#test").prop("disabled", "disabled");
                     $("#protocol").prop("disabled", "disabled");
                     var defaultHost = document.location.hostname || "127.0.0.1";;
                     
@@ -124,6 +115,7 @@ $(document).foundation();
                     return p.finally(
                         function()
                         {
+                            $("#test").prop("disabled", false);
                             $("#protocol").prop("disabled", false);
                             $("#run").removeClass("disabled");
                         }
@@ -164,16 +156,6 @@ $(document).foundation();
                 return false;
             });
             
-            $("#viewReadme").click(
-                function()
-                {
-                    $("#readme-modal").foundation("reveal", "open");
-                    return false;
-                });
-            
-            //
-            // Check if we should start the test loop=true
-            //
             (function(){
                 
                 if(basePath == "../../../")
@@ -181,19 +163,13 @@ $(document).foundation();
                     $(".title-area a").attr("href", "../../../../index.html");
                     $(".breadcrumbs li:first a").attr("href", "../../../../index.html");
                 }
+                
+                //
+                // Check if we should start the test loop=true
+                //
                 var href = document.location.href;
                 var i = href.indexOf("?");
                 var autoStart = i !== -1 && href.substr(i).indexOf("loop=true") !== -1;
-                
-                if(document.location.protocol.indexOf("https") != -1)
-                {
-                    $("#protocol").val("wss");
-                }
-                else
-                {
-                    $("#protocol").val("ws");
-                }
-                
                 if(autoStart)
                 {
                     $("#loop").prop("checked", true);
@@ -201,6 +177,15 @@ $(document).foundation();
                 }
             }());
             
+            //
+            // Test case
+            //
+            $("#test").on("change",
+                          function(e)
+                          {
+                              document.location.assign($(this).val());
+                              return false;
+                          });
             //
             // Protocol
             //
@@ -210,7 +195,7 @@ $(document).foundation();
                                 var newProtocol = $(this).val();
                                 if(protocol !== newProtocol)
                                 {
-                                    var href = document.location.href;
+                                    var href = document.location.protocol + "//" + document.location.host + document.location.pathname;
                                     if(newProtocol == "ws")
                                     {
                                         href = href.replace("https", "http");

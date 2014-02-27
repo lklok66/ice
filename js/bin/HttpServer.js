@@ -37,13 +37,71 @@ var MimeTypes =
 };
 
 var iceJsHome;
+
+var srcDist;
+try
+{
+    srcDist = fs.statSync(path.join(__dirname, "..", "lib")).isDirectory();
+}
+catch(e)
+{
+}
+
+var iceJs = process.env.OPTIMIZE == "yes" ? "Ice.min.js" : "Ice.js";
+
+//
+// If this is a source distribution and ICE_JS_HOME isn't set ensure 
+// that Ice libraries has been build.
+//
+if(srcDist && !process.env.ICE_JS_HOME)
+{
+    var build;
+    try
+    {
+        build = fs.statSync(path.join(__dirname, "..", "lib", iceJs)).isFile()
+    }
+    catch(e)
+    {
+    }
+    
+    if(!build)
+    {
+        console.error("error Unable to find " + iceJs + " in " + path.join(__dirname, "..", "lib") + ", please verify " +
+                      "that the sources has been build or configure ICE_JS_HOME to use a binary distribution.");
+        process.exit(1);
+    }
+}
+
+//
+// If this is a demo distribution ensure that ICE_JS_HOME is set.
+//
+if(!srcDist && !process.env.ICE_JS_HOME)
+{
+    console.error("ICE_JS_HOME environment variable must be set, and point to the Ice for " +
+                  "JavaScript installation directory.");
+    process.exit(1);
+}
+
+//
+// If ICE_JS_HOME is set ensure that Ice libraries exists in that location.
+//
 if(process.env.ICE_JS_HOME)
 {
     iceJsHome = process.env.ICE_JS_HOME;
-    if(!fs.statSync(path.join(iceJsHome, "lib", "Ice.js")).isFile())
+    var iceJsHomeValid;
+    try
     {
-        console.log("error Unable to find Ice.js in " + path.join(iceJsHome, "lib") + 
-                    ", please verify ICE_JS_HOME is properly configured and IceJS is correctly installed");
+        iceJsHomeValid = fs.statSync(path.join(iceJsHome, "lib", iceJs)).isFile();
+    }
+    catch(e)
+    {
+    }
+    
+    if(!iceJsHomeValid)
+    {
+        console.error("error Unable to find " + iceJs + " in " + path.join(iceJsHome, "lib") + 
+                      ", please verify ICE_JS_HOME is properly configured and Ice for JavaScript " +
+                      "is correctly installed");
         process.exit(1);
     }
     console.log("ICE_JS_HOME has been set, using Ice libraries from " + path.join(iceJsHome, "lib"));
@@ -64,34 +122,29 @@ var HttpServer = function(host, ports)
 HttpServer.prototype.processRequest = function(req, res)
 {
     var filePath;
+    
+    var iceLib = libraries.indexOf(req.url.pathname) !== -1;
     //
     // If ICE_JS_HOME has been set resolve Ice libraries paths into ICE_JS_HOME.
     //
-    if(libraries.indexOf(req.url.pathname) !== -1)
+    if(iceJsHome && iceLib)
     {
-        //
-        // If ICE_JS_HOME has been set resolve Ice libraries paths into ICE_JS_HOME.
-        //
-        if(iceJsHome)
-        {
-            filePath = path.join(iceJsHome, req.url.pathname);
-        }
-
-        //
-        // If OPTIMIZE is set resolve Ice libraries to the corresponding minified 
-        // versions.
-        //
-        if(process.env.OPTIMIZE == "yes" && filePath.substr(-7) !== ".min.js")
-        {
-            filePath = filePath.replace(".js", ".min.js");
-        }
-
-        console.log(req.url.pathname + " -> " + filePath);
+        filePath = path.join(iceJsHome, req.url.pathname);
     }
     else
     {
         filePath = path.resolve(path.join(this._basePath, req.url.pathname));
     }
+
+    //
+    // If OPTIMIZE is set resolve Ice libraries to the corresponding minified 
+    // versions.
+    //
+    if(process.env.OPTIMIZE == "yes" && iceLib && filePath.substr(-7) !== ".min.js")
+    {
+        filePath = filePath.replace(".js", ".min.js");
+    }
+    
     var ext = path.extname(filePath).slice(1);
     
     //
@@ -134,13 +187,14 @@ HttpServer.prototype.processRequest = function(req, res)
             {
                 res.writeHead(404);
                 res.end("404 Page Not Found");
-                console.log("HTTP/404 (Page Not Found) " + req.method + " " + req.url.pathname);
+                console.log("HTTP/404 (Page Not Found)" + req.method + " " + req.url.pathname + " -> " + filePath);
             }
             else
             {
                 res.writeHead(500);
                 res.end("500 Internal Server Error");
-                console.log("HTTP/500 (Internal Server Error) " + req.method + " " + req.url.pathname);
+                console.log("HTTP/500 (Internal Server Error) " + req.method + " " + req.url.pathname + " -> " + 
+                            filePath);
             }
         }
         else
@@ -149,7 +203,7 @@ HttpServer.prototype.processRequest = function(req, res)
             {
                 res.writeHead(403);
                 res.end("403 Forbiden");
-                console.log("HTTP/403 (Forbiden) " + req.method + " " + req.url.pathname);
+                console.log("HTTP/403 (Forbiden) " + req.method + " " + req.url.pathname + " -> " + filePath);
             }
             else
             {
@@ -200,7 +254,7 @@ HttpServer.prototype.processRequest = function(req, res)
                 {
                     res.writeHead(304, headers);
                     res.end();
-                    console.log("HTTP/304 (Not Modified) " + req.method + " " + req.url.pathname);
+                    console.log("HTTP/304 (Not Modified) " + req.method + " " + req.url.pathname + " -> " + filePath);
                 }
                 else
                 {
@@ -213,7 +267,7 @@ HttpServer.prototype.processRequest = function(req, res)
                     {
                         fs.createReadStream(filePath, { "bufferSize": 4 * 1024 }).pipe(res);
                     }
-                    console.log("HTTP/200 (Ok) " + req.method + " " + req.url.pathname);
+                    console.log("HTTP/200 (Ok) " + req.method + " " + req.url.pathname + " -> " + filePath);
                 }
             }
         }
@@ -241,7 +295,7 @@ HttpServer.prototype.start = function()
             return fs.existsSync(baseDir = path.join(__dirname, p));
         }))
     {
-        console.log("Cannot find wss certificates directory")
+        console.error("Cannot find wss certificates directory")
         process.exit(1);
     }
     var options = {
