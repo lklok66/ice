@@ -38,7 +38,14 @@ var MimeTypes =
 
 var iceJsHome;
 
-var srcDist = fs.statSync(path.join(__dirname, "..", "lib")).isDirectory();
+var srcDist;
+try
+{
+    srcDist = fs.statSync(path.join(__dirname, "..", "lib")).isDirectory();
+}
+catch(e)
+{
+}
 
 var iceJs = process.env.OPTIMIZE == "yes" ? "Ice.min.js" : "Ice.js";
 
@@ -48,7 +55,16 @@ var iceJs = process.env.OPTIMIZE == "yes" ? "Ice.min.js" : "Ice.js";
 //
 if(srcDist && !process.env.ICE_JS_HOME)
 {
-    if(!fs.statSync(path.join(__dirname, "..", "lib", iceJs)).isFile())
+    var build;
+    try
+    {
+        build = fs.statSync(path.join(__dirname, "..", "lib", iceJs)).isFile()
+    }
+    catch(e)
+    {
+    }
+    
+    if(!build)
     {
         console.error("error Unable to find " + iceJs + " in " + path.join(__dirname, "..", "lib") + ", please verify " +
                       "that the sources has been build or configure ICE_JS_HOME to use a binary distribution.");
@@ -72,7 +88,16 @@ if(!srcDist && !process.env.ICE_JS_HOME)
 if(process.env.ICE_JS_HOME)
 {
     iceJsHome = process.env.ICE_JS_HOME;
-    if(!fs.statSync(path.join(iceJsHome, "lib", iceJs)).isFile())
+    var iceJsHomeValid;
+    try
+    {
+        iceJsHomeValid = fs.statSync(path.join(iceJsHome, "lib", iceJs)).isFile();
+    }
+    catch(e)
+    {
+    }
+    
+    if(!iceJsHomeValid)
     {
         console.error("error Unable to find " + iceJs + " in " + path.join(iceJsHome, "lib") + 
                       ", please verify ICE_JS_HOME is properly configured and Ice for JavaScript " +
