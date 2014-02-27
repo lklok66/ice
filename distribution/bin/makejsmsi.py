@@ -252,7 +252,7 @@ if not os.path.exists(demoArchive):
 # Windows build configurations by Compiler Arch 
 #
 builds = {
-    "VC110": {
+    "VC100": {
         "x86": {
             "release": ["cpp", "js"], 
             "debug": ["cpp", "js"]},
@@ -264,7 +264,7 @@ builds = {
             
 if not skipBuild:
     
-    for compiler in ["VC110"]:
+    for compiler in ["VC100"]:
     
         for arch in ["x86", "amd64"]:
             
@@ -341,7 +341,7 @@ if not skipBuild:
 
 
 
-    compiler = "VC110"
+    compiler = "VC100"
     arch = "x86"
     conf = "release"
     lang = "cpp"
@@ -378,7 +378,7 @@ if not skipBuild:
 
     setMakefileOption(os.path.join(sourceDir, lang, "config", rules), "prefix", installDir)
 
-    vcvars = getVcVarsAll("VC110")
+    vcvars = getVcVarsAll("VC100")
 
     os.chdir(os.path.join(sourceDir, lang, "src"))
     executeCommand("\"%s\" %s  && nmake /f Makefile.mak" % (vcvars, arch), env)
@@ -420,27 +420,26 @@ if os.path.exists(installerDir):
 os.makedirs(installerDir)
 
 for arch in ["x86", "amd64"]:
-    for compiler in ["VC110"]:
+    for compiler in ["VC100"]:
         for conf in ["release", "debug"]:
 
             buildDir = os.path.join(iceBuildHome, "build-%s-%s-%s" % (arch, compiler, conf))
             sourceDir = os.path.join(buildDir, "IceJS-%s-src" % version)
             installDir = os.path.join(buildDir, "IceJS-%s" % version)
 
-            if compiler == "VC110":
-                for d in ["bin", "lib", "node_modules"]:
-                    for root, dirnames, filenames in os.walk(os.path.join(installDir, d)):
-                        for f in filenames:
-                            if f in filterFiles:
-                                continue
-                            targetFile = relPath(installDir, installerDir, os.path.join(root, f))
-                            if not os.path.exists(targetFile):
-                                copy(os.path.join(root, f), targetFile, verbose = verbose)
+            for d in ["bin", "lib", "node_modules"]:
+                for root, dirnames, filenames in os.walk(os.path.join(installDir, d)):
+                    for f in filenames:
+                        if f in filterFiles:
+                            continue
+                        targetFile = relPath(installDir, installerDir, os.path.join(root, f))
+                        if not os.path.exists(targetFile):
+                            copy(os.path.join(root, f), targetFile, verbose = verbose)
 
-                for f in ["ICE_LICENSE.txt", "LICENSE.txt"]:
-                    targetFile = os.path.join(installerDir, f)
-                    if not os.path.exists(targetFile):
-                        copy(os.path.join(installDir, f), targetFile, verbose = verbose)
+            for f in ["ICE_LICENSE.txt", "LICENSE.txt"]:
+                targetFile = os.path.join(installerDir, f)
+                if not os.path.exists(targetFile):
+                    copy(os.path.join(installDir, f), targetFile, verbose = verbose)
 
 buildDir = os.path.join(iceBuildHome, "build-slice2js")
 binDir = os.path.join(buildDir, "IceJS-%s" % version, "bin")
@@ -458,7 +457,7 @@ for f in ["README.txt", "SOURCES.txt", "THIRD_PARTY_LICENSE.txt"]:
     copy(os.path.join(docsDir, f), os.path.join(installerDir, f), verbose = verbose)
 
 #
-# Copy VC110 thirdpary files
+# Copy VC100 thirdpary files
 #
 #files = ["bzip2.dll", "bzip2d.dll", "ssleay32.dll", "ssleay32.pdb", "libeay32.dll", "libeay32.pdb", "openssl.exe"]
 #
