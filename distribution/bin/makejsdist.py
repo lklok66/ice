@@ -507,6 +507,14 @@ createSourceDist("Windows", distDir)
 print "Consolidating demo distribution...",
 for d in [demoDir, winDemoDir]:
     
+    #
+    # Install node http-proxy in demo distribution directory.
+    #
+    os.chdir(d)
+    command = "npm install http-proxy"
+    if os.system(command) != 0:
+        print("Error executing command `%s'" % command)
+        
     os.mkdir(os.path.join(d, "assets"))
     copyMatchingFiles(os.path.join(srcDir, "js", "assets"), os.path.join(d, "assets"), ["common.*", "favicon.ico"])
     os.chdir(os.path.join(d, "assets"))
@@ -520,6 +528,7 @@ for d in [demoDir, winDemoDir]:
         if os.system(command) != 0:
             print("Error executing command `%s'" % command)
             sys.exit(1)
+    
 
 os.chdir(srcDir)
 sys.stdout.flush()
