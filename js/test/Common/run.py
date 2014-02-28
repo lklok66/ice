@@ -29,7 +29,7 @@ if os.environ.get("RUNNING_TEST_CONTROLLER_WITH_ENV", "") == "":
     sys.exit(os.spawnve(os.P_WAIT, sys.executable, [sys.executable, "run.py"], env))
 
 import Ice, Expect
-Ice.loadSlice(os.path.join(TestUtil.toplevel, "js", "test", "Common", "Controller.ice"))
+Ice.loadSlice("\"" + os.path.join(TestUtil.toplevel, "js", "test", "Common", "Controller.ice") + "\"")
 import Test
 
 class ServerI(Test.Server):
@@ -121,8 +121,9 @@ class Reader(threading.Thread):
 class Server(Ice.Application):
     def run(self, args):
         jsDir = os.path.join(TestUtil.toplevel, "js")
-        httpServer = subprocess.Popen("node " + os.path.join(jsDir, "bin", "HttpServer.js"), shell = True, stdin = subprocess.PIPE,
-                                      stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = 0)
+        httpServer = subprocess.Popen("node \"" + os.path.join(jsDir, "bin", "HttpServer.js") + "\"", shell = True,
+                                      stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, 
+                                      bufsize = 0)
         #
         # Wait for the HttpServer to start
         #
