@@ -1663,9 +1663,12 @@ def getTestEnv(lang, testdir):
     addLdPath(libDir, env)
 
     if iceJsHome:
-        libDir = os.path.join(iceJsHome, "lib")
-        if isDarwin() and cpp11:
-            libDir = os.path.join(libDir, "c++11")
+        if isWin32():
+            libDir = os.path.join(iceJsHome, "bin")
+        else:
+            libDir = os.path.join(iceJsHome, "lib")
+            if isDarwin() and cpp11:
+                libDir = os.path.join(libDir, "c++11")
         addLdPath(libDir, env)
 
     if lang == "javae":
