@@ -1665,6 +1665,8 @@ def getTestEnv(lang, testdir):
     if iceJsHome:
         if isWin32():
             libDir = os.path.join(iceJsHome, "bin")
+            if x64:
+                libDir = os.path.join(libDir, "x64")
         else:
             libDir = os.path.join(iceJsHome, "lib")
             if isDarwin() and cpp11:
