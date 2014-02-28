@@ -34,6 +34,12 @@ CLOSUREFLAGS 		= --language_in ECMASCRIPT5
 JSHINT_PATH 		= $(NODE_PATH)\jshint
 
 #
+# Define to the location of gnu gzip if you want to generate
+# gzip version of JavaScript libraries.
+#
+#GZIP_PATH		= "C:\Program Files (x86)\GnuWin32\bin\gzip.exe"
+
+#
 # jsHint flags
 #
 LINTFLAGS 		= --verbose
@@ -102,18 +108,29 @@ clean::
 index.html: $(GEN_SRCS) $(top_srcdir)\test\Common\index.html
 	copy $(top_srcdir)\test\Common\index.html .
 
-$(libdir)/$(LIBNAME).js $(libdir)/$(LIBNAME).js.gz: $(SRCS)
-	@del /q $(libdir)\$(LIBNAME).js $(libdir)\$(LIBNAME).js.gz
+$(libdir)/$(LIBNAME).js: $(SRCS)
+	@del /q $(libdir)\$(LIBNAME).js
 	node $(top_srcdir)\config\makebundle.js $(SRCS) > $(libdir)\$(LIBNAME).js
-	gzip -c9 $(libdir)\$(LIBNAME).js > $(libdir)\$(LIBNAME).js.gz
+
+!if "$(GZIP_PATH)" != ""
+$(libdir)/$(LIBNAME).js.gz: $(libdir)/$(LIBNAME).js
+	@del /q $(libdir)\$(LIBNAME).js.gz
+	$(GZIP_PATH) -c9 $(libdir)\$(LIBNAME).js > $(libdir)\$(LIBNAME).js.gz
+!endif
 
 !if "$(OPTIMIZE)" == "yes"
-$(libdir)/$(LIBNAME).min.js $(libdir)/$(LIBNAME).min.js.gz: $(libdir)/$(LIBNAME).js
-	@del /q $(libdir)\$(LIBNAME).min.js $(libdir)\$(LIBNAME).min.js.gz
+$(libdir)/$(LIBNAME).min.js: $(libdir)/$(LIBNAME).js
+	@del /q $(libdir)\$(LIBNAME).min.js
 	node $(top_srcdir)\config\makebundle.js $(SRCS) > $(libdir)\$(LIBNAME).tmp.js
 	java -jar $(CLOSURE_PATH)\compiler.jar $(CLOSUREFLAGS) --js $(libdir)\$(LIBNAME).js --js_output_file $(libdir)\$(LIBNAME).min.js
-	gzip -c9 $(libdir)\$(LIBNAME).min.js > $(libdir)\$(LIBNAME).min.js.gz
 	del /q $(libdir)\$(LIBNAME).tmp.js
+
+!if "$(GZIP_PATH)" != ""
+$(libdir)/$(LIBNAME).min.js.gz: $(libdir)/$(LIBNAME).min.js
+	@del /q $(libdir)\$(LIBNAME).min.js.gz
+	$(GZIP_PATH) -c9 $(libdir)\$(LIBNAME).min.js > $(libdir)\$(LIBNAME).min.js.gz
+!endif
+
 !endif
 
 !if "$(INSTALL_SRCS)" != ""
