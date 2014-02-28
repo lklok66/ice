@@ -495,7 +495,12 @@ if not skipInstaller:
         print("Advanced Installer executable not found in %s" % advancedInstaller)
         sys.exit(1)
 
-    env = os.environ.copy()    
+    env = os.environ.copy()
+    #
+    # Gzip location.
+    #
+    if env.get("GZIP_PATH") == None:
+        env["GZIP_PATH"] = "C:\Program Files (x86)\GnuWin32\bin\gzip.exe"
     env["ICE_BUILD_HOME"] = iceBuildHome
 
     paths = os.path.join(iceBuildHome, "installer", "paths.xml")
