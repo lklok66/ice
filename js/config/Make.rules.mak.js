@@ -68,7 +68,7 @@ SLICEPARSERLIB          = $(ice_cpp_dir)\lib\slice.lib
 SLICEPARSERLIB          = $(ice_cpp_dir)\lib\sliced.lib
 !endif
 !else
-SLICE2JS                = $(ice_js_dir)\bin$(x64suffix)\slice2js.exe
+SLICE2JS                = $(ice_cpp_dir)\bin$(x64suffix)\slice2js.exe
 SLICEPARSERLIB          = $(SLICE2JS)
 !endif
 !else

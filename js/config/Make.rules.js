@@ -86,7 +86,7 @@ ifdef ice_src_dist
         SLICE2JS 	= $(ice_cpp_dir)/bin/slice2js
         SLICEPARSERLIB 	= $(ice_cpp_dir)/lib/$(call mklibfilename,Slice,$(VERSION))
     else
-        SLICE2JS 	= $(ice_js_dir)/$(binsubdir)/slice2js
+        SLICE2JS 	= $(ice_cpp_dir)/$(binsubdir)/slice2js
     endif
 else
     SLICE2JS 		= $(ice_js_dir)/$(binsubdir)/slice2js
