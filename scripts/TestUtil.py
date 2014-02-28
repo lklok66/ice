@@ -1629,6 +1629,13 @@ def getTestEnv(lang, testdir):
     elif lang == "java":
         addClasspath(os.path.join(toplevel, "java", "lib", "IceTest.jar"), env)
 
+    if lang == "js":
+        if iceJsHome == None:
+            addPathToEnv("NODE_PATH", os.path.join(getIceDir("js", testdir), "src"), env)
+            addPathToEnv("NODE_PATH", os.path.join(testdir), env)
+        else:
+            addPathToEnv("NODE_PATH", os.path.join(iceJsHome, "node_modules"), env)
+            addPathToEnv("NODE_PATH", os.path.join(testdir), env)
     #
     # If Ice is installed from RPMs, just set the CLASSPATH for Java.
     #
@@ -1642,6 +1649,17 @@ def getTestEnv(lang, testdir):
             addClasspath(os.path.join(javaDir, "IceStorm.jar"), env)
             addClasspath(os.path.join(javaDir, "IceGrid.jar"), env)
             addClasspath(os.path.join(javaDir, "IcePatch2.jar"), env)
+            
+        if iceJsHome:
+            if isWin32():
+                libDir = os.path.join(iceJsHome, "bin")
+                if x64:
+                    libDir = os.path.join(libDir, "x64")
+            else:
+                libDir = os.path.join(iceJsHome, "lib")
+                if isDarwin() and cpp11:
+                    libDir = os.path.join(libDir, "c++11")
+            addLdPath(libDir, env)
         return env # That's it, we're done!
 
     if isWin32():
@@ -1713,14 +1731,6 @@ def getTestEnv(lang, testdir):
 
     if lang == "rb":
         addPathToEnv("RUBYLIB", os.path.join(getIceDir("rb", testdir), "ruby"), env)
-    
-    if lang == "js":
-        if iceJsHome == None:
-            addPathToEnv("NODE_PATH", os.path.join(getIceDir("js", testdir), "src"), env)
-            addPathToEnv("NODE_PATH", os.path.join(testdir), env)
-        else:
-            addPathToEnv("NODE_PATH", os.path.join(iceJsHome, "node_modules"), env)
-            addPathToEnv("NODE_PATH", os.path.join(testdir), env)
 
     return env;
 
