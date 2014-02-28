@@ -139,7 +139,7 @@ $(libdir)/$(LIBNAME).min.js: $(libdir)/$(LIBNAME).js
 
 !if "$(GZIP_PATH)" != ""
 $(libdir)/$(LIBNAME)$(jslibsuffix).gz: $(libdir)/$(LIBNAME)$(jslibsuffix)
-        @del /q $(libdir)\$(LIBNAME).min.js.gz
+        @del /q $(libdir)\$(LIBNAME)$(jslibsuffix).gz
         "$(GZIP_PATH)" -c9 $(libdir)\$(LIBNAME)$(jslibsuffix) > $(libdir)\$(LIBNAME)$(jslibsuffix).gz
 !endif
 
