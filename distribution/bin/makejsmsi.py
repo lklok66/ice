@@ -316,7 +316,11 @@ if not skipBuild:
                         continue
 
                     env = os.environ.copy()
-
+                    #
+                    # Gzip location.
+                    #
+                    if env.get("GZIP_PATH") == None:
+                        env["GZIP_PATH"] = "C:\\Program Files (x86)\\GnuWin32\\bin\\gzip.exe"
                     env["THIRDPARTY_HOME"] = thirdPartyHome
                     env["RELEASEPDBS"] = "yes"
                     if conf == "release":
@@ -496,11 +500,6 @@ if not skipInstaller:
         sys.exit(1)
 
     env = os.environ.copy()
-    #
-    # Gzip location.
-    #
-    if env.get("GZIP_PATH") == None:
-        env["GZIP_PATH"] = "C:\Program Files (x86)\GnuWin32\bin\gzip.exe"
     env["ICE_BUILD_HOME"] = iceBuildHome
 
     paths = os.path.join(iceBuildHome, "installer", "paths.xml")
