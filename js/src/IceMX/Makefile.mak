@@ -11,12 +11,6 @@ top_srcdir	= ..\..
 
 LIBNAME = IceMX
 
-!if "$(OPTIMIZE)" == "yes"
-TARGETS	= $(libdir)\$(LIBNAME).min.js $(libdir)\$(LIBNAME).min.js.gz
-!else
-TARGETS	= $(libdir)\$(LIBNAME).js $(libdir)\$(LIBNAME).js.gz
-!endif
-
 GEN_SRCS = Metrics.js
 
 SDIR		= $(slicedir)\Ice

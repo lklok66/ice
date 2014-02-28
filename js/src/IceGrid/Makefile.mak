@@ -11,12 +11,6 @@ top_srcdir	= ..\..
 
 LIBNAME = IceGrid
 
-!if "$(OPTIMIZE)" == "yes"
-TARGETS	= $(libdir)\$(LIBNAME).min.js $(libdir)\$(LIBNAME).min.js.gz
-!else
-TARGETS	= $(libdir)\$(LIBNAME).js $(libdir)\$(LIBNAME).js.gz
-!endif
-
 GEN_SRCS = Admin.js \
 	   Descriptor.js \
 	   Exception.js \
