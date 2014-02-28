@@ -129,25 +129,18 @@ $(libdir)/$(LIBNAME).js: $(SRCS)
 	@del /q $(libdir)\$(LIBNAME).js
 	node $(top_srcdir)\config\makebundle.js $(SRCS) > $(libdir)\$(LIBNAME).js
 
-!if "$(GZIP_PATH)" != ""
-$(libdir)/$(LIBNAME).js.gz: $(libdir)/$(LIBNAME).js
-	@del /q $(libdir)\$(LIBNAME).js.gz
-	$(GZIP_PATH) -c9 $(libdir)\$(LIBNAME).js > $(libdir)\$(LIBNAME).js.gz
-!endif
-
 !if "$(OPTIMIZE)" == "yes"
 $(libdir)/$(LIBNAME).min.js: $(libdir)/$(LIBNAME).js
 	@del /q $(libdir)\$(LIBNAME).min.js
 	node $(top_srcdir)\config\makebundle.js $(SRCS) > $(libdir)\$(LIBNAME).tmp.js
 	java -jar $(CLOSURE_PATH)\compiler.jar $(CLOSUREFLAGS) --js $(libdir)\$(LIBNAME).js --js_output_file $(libdir)\$(LIBNAME).min.js
 	del /q $(libdir)\$(LIBNAME).tmp.js
-
-!if "$(GZIP_PATH)" != ""
-$(libdir)/$(LIBNAME).min.js.gz: $(libdir)/$(LIBNAME).min.js
-	@del /q $(libdir)\$(LIBNAME).min.js.gz
-	"$(GZIP_PATH)" -c9 $(libdir)\$(LIBNAME).min.js > $(libdir)\$(LIBNAME).min.js.gz
 !endif
 
+!if "$(GZIP_PATH)" != ""
+$(libdir)/$(LIBNAME)$(jslibsuffix).gz: $(libdir)/$(LIBNAME)$(jslibsuffix)
+        @del /q $(libdir)\$(LIBNAME).min.js.gz
+        "$(GZIP_PATH)" -c9 $(libdir)\$(LIBNAME)$(jslibsuffix) > $(libdir)\$(LIBNAME)$(jslibsuffix).gz
 !endif
 
 !if "$(INSTALL_SRCS)" != ""
