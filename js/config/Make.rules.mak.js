@@ -82,6 +82,23 @@ SLICE2JS                = $(ice_js_dir)\bin$(x64suffix)\slice2js.exe
 SLICEPARSERLIB          = $(SLICE2JS)
 !endif
 
+!if "$(OPTIMIZE)" == "yes"
+jslibsuffix     = .min.js
+!else
+jslibsuffix     = .js
+!endif
+
+!if "$(LIBNAME)" != ""
+TARGETS = $(TARGETS) $(libdir)\$(LIBNAME)$(jslibsuffix)
+install:: all
+        copy $(libdir)\$(LIBNAME)$(jslibsuffix) $(install_libdir)
+!if "$(GZIP_PATH)" != ""
+TARGETS = $(TARGETS) $(libdir)\$(LIBNAME)$(jslibsuffix).gz
+install:: all
+        copy $(libdir)\$(LIBNAME)$(jslibsuffix).gz $(install_libdir)
+!endif
+!endif
+
 EVERYTHING		= all clean install lint
 
 .SUFFIXES:
@@ -128,7 +145,7 @@ $(libdir)/$(LIBNAME).min.js: $(libdir)/$(LIBNAME).js
 !if "$(GZIP_PATH)" != ""
 $(libdir)/$(LIBNAME).min.js.gz: $(libdir)/$(LIBNAME).min.js
 	@del /q $(libdir)\$(LIBNAME).min.js.gz
-	$(GZIP_PATH) -c9 $(libdir)\$(LIBNAME).min.js > $(libdir)\$(LIBNAME).min.js.gz
+	"$(GZIP_PATH)" -c9 $(libdir)\$(LIBNAME).min.js > $(libdir)\$(LIBNAME).min.js.gz
 !endif
 
 !endif

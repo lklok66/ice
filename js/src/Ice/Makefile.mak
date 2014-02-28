@@ -160,16 +160,6 @@ browser\ConnectionInfo.js: "$(SLICE2JS)" "$(SLICEPARSERLIB)"
 	"$(SLICE2JS)" $(SLICE2JSFLAGS) "$(slicedir)\IceWS\ConnectionInfo.ice"
 	move ConnectionInfo.js browser
 
-!if "$(OPTIMIZE)" == "yes"
-install:: all
-	copy $(libdir)\$(LIBNAME).min.js $(install_libdir)
-	copy $(libdir)\$(LIBNAME).min.js.gz $(install_libdir)
-!else
-install:: all
-	copy $(libdir)\$(LIBNAME).js $(install_libdir)
-	copy $(libdir)\$(LIBNAME).js.gz $(install_libdir)
-!endif
-
 MODULEDIR	= $(install_moduledir)\$(LIBNAME)
 
 install:: all

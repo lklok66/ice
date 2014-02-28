@@ -35,7 +35,7 @@ browser\Client.min.js: browser\Client.js Hello.js $(libdir)\Ice.min.js
 !if "$(GZIP_PATH)" != ""
 browser\Client.min.js.gz: browser\Client.min.js
 	@del /q Client.min.js.gz
-	$(GZIP_PATH) -c9 browser\Client.min.js > browser\Client.min.js.gz
+	"$(GZIP_PATH)" -c9 browser\Client.min.js > browser\Client.min.js.gz
 !endif
 
 !endif

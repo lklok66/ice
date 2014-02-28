@@ -11,12 +11,6 @@ top_srcdir	= ..\..
 
 LIBNAME = IceStorm
 
-!if "$(OPTIMIZE)" == "yes"
-TARGETS	= $(libdir)\$(LIBNAME).min.js $(libdir)\$(LIBNAME).min.js.gz
-!else
-TARGETS	= $(libdir)\$(LIBNAME).js $(libdir)\$(LIBNAME).js.gz
-!endif
-
 GEN_SRCS = IceStorm.js \
 	   Metrics.js
 
@@ -28,16 +22,6 @@ INSTALL_SRCS	= IceStorm.js $(GEN_SRCS)
 !include $(top_srcdir)\config\Make.rules.mak.js
 
 SLICE2JSFLAGS	= $(SLICE2JSFLAGS) --ice -I"$(slicedir)"
-
-!if "$(OPTIMIZE)" == "yes"
-install:: all
-        copy $(libdir)\$(LIBNAME).min.js $(install_libdir)
-        copy $(libdir)\$(LIBNAME).min.js.gz $(install_libdir)
-!else
-install:: all
-        copy $(libdir)\$(LIBNAME).js $(install_libdir)
-        copy $(libdir)\$(LIBNAME).js.gz $(install_libdir)
-!endif
 
 MODULEDIR       = $(install_moduledir)\$(LIBNAME)
 

@@ -9,7 +9,11 @@
 
 top_srcdir	= ..
 
-TARGETS	= common.min.js common.min.js.gz common.css common.css.gz
+TARGETS	= common.min.js common.css
+
+!if "$(GZIP_PATH)" != ""
+TARGETS = $(TARGETS) common.min.js.gz common.css.gz
+!endif
 
 !include $(top_srcdir)\config\Make.rules.mak.js
 
@@ -38,7 +42,7 @@ common.min.js: $(SCRIPTS)
 !if "$(GZIP_PATH)" != ""
 common.min.js.gz: common.min.js
 	@del /q common.min.js.gz
-	$(GZIP_PATH) -c9 common.min.js > common.min.js.gz
+	"$(GZIP_PATH)" -c9 common.min.js > common.min.js.gz
 !endif
 
 common.css: $(STYLE_SHEETS)
@@ -48,5 +52,5 @@ common.css: $(STYLE_SHEETS)
 !if "$(GZIP_PATH)" != ""
 common.css.gz: common.css
 	@del /q common.css.gz
-	$(GZIP_PATH) -c9 common.css > common.css.gz
+	"$(GZIP_PATH)" -c9 common.css > common.css.gz
 !endif

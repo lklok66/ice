@@ -28,16 +28,6 @@ INSTALL_SRCS	= IceMX.js $(GEN_SRCS)
 
 SLICE2JSFLAGS	= $(SLICE2JSFLAGS) --ice -I"$(slicedir)"
 
-!if "$(OPTIMIZE)" == "yes"
-install:: all
-        copy $(libdir)\$(LIBNAME).min.js $(install_libdir)
-        copy $(libdir)\$(LIBNAME).min.js.gz $(install_libdir)
-!else
-install:: all
-        copy $(libdir)\$(LIBNAME).js $(install_libdir)
-        copy $(libdir)\$(LIBNAME).js.gz $(install_libdir)
-!endif
-
 MODULEDIR       = $(install_moduledir)\$(LIBNAME)
 
 install:: all
