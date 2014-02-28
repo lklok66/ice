@@ -31,12 +31,22 @@ STYLE_SHEETS = foundation\css\foundation.min.css \
 	nouislider\5.0.0\minified\jquery.nouislider.min.css \
 	icejs.css
 	
-common.min.js common.min.js.gz: $(SCRIPTS)
-	-del /q common.min.js common.min.js.gz
+common.min.js: $(SCRIPTS)
+	-del /q common.min.js
 	java -jar $(CLOSURE_PATH)\compiler.jar $(CLOSUREFLAGS) --js $(SCRIPTS) --js_output_file common.min.js
-	gzip -c9 common.min.js > common.min.js.gz
 
-common.css common.css.gz: $(STYLE_SHEETS)
-	-del /q common.css common.css.gz
+!if "$(GZIP_PATH)" != ""
+common.min.js.gz: common.min.js
+	@del /q common.min.js.gz
+	$(GZIP_PATH) -c9 common.min.js > common.min.js.gz
+!endif
+
+common.css: $(STYLE_SHEETS)
+	-del /q common.css
 	node concat.js $(STYLE_SHEETS) > common.css
-	gzip -c9 common.css > common.css.gz
+
+!if "$(GZIP_PATH)" != ""
+common.css.gz: common.css
+	@del /q common.css.gz
+	$(GZIP_PATH) -c9 common.css > common.css.gz
+!endif
