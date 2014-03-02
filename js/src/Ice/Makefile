@@ -29,6 +29,7 @@ SLICES = $(SDIR)/BuiltinSequences.ice \
 	$(SDIR)/ProcessF.ice \
 	$(SDIR)/PropertiesAdmin.ice \
 	$(SDIR)/Router.ice \
+	$(SDIR)/SliceChecksumDict.ice \
 	$(SDIR)/Version.ice
 
 SDIR	= $(slicedir)/Ice
