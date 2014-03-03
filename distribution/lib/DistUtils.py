@@ -1139,7 +1139,8 @@ def getPlatform(thirdParties):
         if sysname == "Linux":
             p = subprocess.Popen("lsb_release -i", shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
             if(p.wait() != 0):
-                os.exists(1)
+                print("lsb_release failed:\n" + p.stdout.read().strip())
+                sys.exit(1)
             distribution = re.sub("Distributor ID:", "", p.stdout.readline().decode('UTF-8')).strip()
             if distribution.find("RedHat") != -1:
                 languages[sysname].remove("cs")
