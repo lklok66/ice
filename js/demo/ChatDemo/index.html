@@ -130,36 +130,38 @@
             <a href="#" class="chatbutton">Live Client</a> if you don't want to setup your own server.</p>
         </p>
         
-        <p>To setup the server follow the instructions from the 
+        <p>To set up the server follow the instructions from the 
             <a href="http://www.zeroc.com/chat/download.html">Chat Demo Distribution</a>.</p>
             
-        <p>You will need to update the Glacier2 configuration to include WSS endpoints. Edit <code>ChatDemo-1.4.0/config/config.glacier2router</code>
-        and update the <code>Glacier2.Client.Endpoints</code> property with the value show below:</p>
+        <p>You will need to update the Glacier2 configuration to include WSS endpoints.
+        Edit <code>ChatDemo-1.4.0/config/config.glacier2router</code>
+        and update the <code>Glacier2.Client.Endpoints</code> property with the value shown below:</p>
         <p>
         <code style="color:#858585;font-weight:normal;font-size:80%;">
         Glacier2.Client.Endpoints=ssl -p 4064 -t 10000 -h 127.0.0.1:tcp -p 4502 -t 10000 -h 127.0.0.1:wss -p 5064 -t 10000 -h 127.0.0.1
         </code>
         </p>
-        <p>You also need to enable the Web Sockets transport plugin, add the following lines to <code>ChatDemo-1.4.0/config/config.glacier2router</code>:</p>
+        <p>You also need to enable the Web Socket transport plug-in. Add the following lines
+        to <code>ChatDemo-1.4.0/config/config.glacier2router</code>:</p>
         <p>
         <code style="color:#858585;font-weight:normal;font-size:80%;">
         Ice.Plugin.IceWS=IceWS:createIceWS
         </code>
         </p>
         
-        <p>After those modifications to the Glacier2 router configuration you can start the Chat Demo 
+        <p>After making those modifications to the Glacier2 router configuration, you can start the Chat Demo 
            server and Glacier2 router as documented in the Chat Demo distribution.</p>
         
         <div class="panel callout radius">
-            <p>You must configure your environment to run IceWS applications as documented in Ice for JavaScript
+            <p>You must configure your environment to run IceWS applications as documented in the Ice for JavaScript
             <a href="http://doc.zeroc.com/display/Rel/Ice+for+JavaScript+0.1.0+Release+Notes">Release Notes</a>.</p>
         </div>
         
         <p>Once you have configured and started the Chat Demo server and router, 
-           you can sign-in the chat using the sign-in form bellow.</p>
+           you can log into the chat using the sign-in form below.</p>
         
         <h4>Using the minified scripts</h4>
-        <p>When the demo is build with optimizations enabled it creates a minified
+        <p>When the demo is built with optimizations enabled, it creates a minified
         script <code>browser/Client.min.js</code> that includes:
         </p>
         <ul>
@@ -168,8 +170,8 @@
             <li>Chat.js & ChatSession.js (The generated code for this demo)</li>
             <li>Client.js (The client application)</li>
         </ul>
-        <p>to use the minified version you should edit the <code>demo/ChatDemo/index.html</code>
-        file and comment out the non optimized scripts:</p>
+        <p>To use the minified version you should edit the <code>demo/ChatDemo/index.html</code>
+        file and comment out the non-optimized scripts:</p>
         <pre>
     &lt;!-- Scripts used during development, for optimized builds
          comment the following scripts and uncomment browser/Client.min.js 
@@ -188,8 +190,8 @@
         <p>Then uncomment the script tag for the minified version</p>
         <pre>
     &lt;!-- Uncomment the following script to use a minified version of the 
-         scripts that includes: (the Ice and Glacier2 run-time libraries, 
-         the generated code and the demo application). --&gt;
+         scripts that includes: the Ice and Glacier2 run-time libraries, 
+         the generated code and the demo application. --&gt;
     &lt;!--&lt;script src="Client.min.js"&gt;&lt;/script&gt;--&gt;
         </pre>
         <a class="close-reveal-modal">&#215;</a>
@@ -245,8 +247,8 @@
     <!-- Client.js (Chat Demo Application) -->
     <script type="text/javascript" src="Client.js"></script>
     <!-- Uncomment the following script to use a minified version of the 
-         scripts that includes: (the Ice and Glacier2 run-time libraries, 
-         the generated code and the demo application). -->
+         scripts that includes: the Ice and Glacier2 run-time libraries, 
+         the generated code and the demo application. -->
     <!--<script type="text/javascript" src="Client.min.js"></script>-->
     
     <script type="text/javascript">
