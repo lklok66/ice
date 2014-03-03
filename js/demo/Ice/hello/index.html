@@ -146,6 +146,7 @@
             </div>
         </div>
     </div>
+    <!-- Modal dialog with setup instructions -->
     <div id="setup-modal" class="reveal-modal" data-reveal>
         <p>
             <h3>The Ice for JavaScript demos require a web server. Please follow these steps to run the demo:</h3>
@@ -164,7 +165,7 @@
                 <li>Start the demo web server:<br/>
                     <pre>node bin/HttpServer.js</pre></li>
                 <li>Start the corresponding C++ Ice server (see the demo Readme)
-                <li>Now you can run the demo by navigating to <a class="demo" href=""></a></li>
+                <li>Now you can run the demo by navigating to <a class="go" href=""></a></li>
             </ul>
         </p>
     </div>
@@ -182,31 +183,7 @@
     <script type="text/javascript" src="../../../assets/common.min.js"></script>
     
     <script type="text/javascript">
-        $(document).ready(
-            function(){
-                console.log(document.location.protocol);
-                if(document.location.protocol === "file:")
-                {
-                    var paths = document.location.pathname.split("/");
-                    var i = paths.indexOf("demo");
-                    if(i == -1) // It's a demo distribution?
-                    {
-                        i = paths.indexOf("demojs");
-                    }
-                    paths = paths.slice(i);
-                    var href = "http://127.0.0.1:8080/" + paths.join("/");
-                    $("#setup-modal a.demo").text(href);
-                    $("#setup-modal a.demo").attr("href", href);
-                    $("#setup-modal").foundation({
-                        reveal:
-                        {
-                            close_on_background_click: false,
-                            close_on_esc: false
-                        }
-                    });
-                    $("#setup-modal").foundation("reveal", "open");
-                }
-            });
+        
     </script>
     
     <!-- Ice.js (Ice run-time library) -->
