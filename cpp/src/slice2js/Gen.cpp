@@ -618,9 +618,9 @@ Slice::Gen::generate(const UnitPtr& p)
         return;
     }
 
-    _out << nl << "(function(global)";
+    _out << nl << "(function(global, r)";
     _out << sb;
-    _out << nl << "var require = typeof(module) !== \"undefined\" ? module.require : function(){};";
+    _out << nl << "var require = typeof(r) === \"function\" ? r : function(){};";
 
     RequireVisitor requireVisitor(_out, _includePaths);
     p->visit(&requireVisitor, false);
@@ -636,7 +636,8 @@ Slice::Gen::generate(const UnitPtr& p)
     p->visit(&exportVisitor, false);
 
     _out << eb;
-    _out << nl << "(typeof (global) === \"undefined\" ? window : global));";
+    _out << nl << "(typeof (global) === \"undefined\" ? window : global, "
+         << "typeof (require) === \"undefined\" ? undefined : require));";
 }
 
 void
