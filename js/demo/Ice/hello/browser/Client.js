@@ -217,4 +217,49 @@ function setState(newState, ex)
 //
 setState(State.Idle);
 
+//
+// Extract the url GET variables and put then in _GET object.
+//
+var _GET = {};
+if(window.location.search.length > 1)
+{
+    window.location.search.substr(1).split("&").forEach(
+        function(pair)
+        {
+            pair = pair.split("=");
+            if(pair.length > 0)
+            {
+                _GET[decodeURIComponent(pair[0])] = pair.length > 1 ? decodeURIComponent(pair[1]) : "";
+            }
+        });
+}
+
+//
+// If the mode param is set, initialize the mode select box with that value.
+//
+if(_GET["mode"])
+{
+    $("#mode").val(_GET["mode"]);
+}
+
+//
+// If the user select a secure mode, ensure that the page is loaded throw HTTPS 
+// so the web server SSL certificate is obtained.
+//
+$("#mode").on("change", 
+    function(e)
+    {
+        var newMode = $(this).val();
+        
+        if(document.location.protocol === "http:" && 
+           (newMode === "twoway-secure" || newMode === "oneway-secure" || newMode === "oneway-batch-secure"))
+        {
+            var href = document.location.protocol + "//" + document.location.host + 
+                        document.location.pathname + "?mode=" + newMode;
+            href = href.replace("http", "https");
+            href = href.replace("8080", "9090");
+            document.location.assign(href);
+        }
+    });
+
 }());
