@@ -215,6 +215,7 @@ demoConfigFiles = [ \
     "Make.common.rules", \
     "Make.rules.Darwin", \
     "Make.rules.Linux" \
+    "build.js"
 ]
 
 #
@@ -564,6 +565,7 @@ os.mkdir(os.path.join(winDemoDir, "config"))
 
 copy(os.path.join(winSrcDir, "config", "Make.common.rules.mak"), os.path.join(winDemoDir, "config"), False)
 copy(os.path.join(winSrcDir, "cpp", "config", "Make.rules.msvc"), os.path.join(winDemoDir, "config"), False)
+copy(os.path.join(winSrcDir, "js", "config", "build.js"), os.path.join(winDemoDir, "config"))
 
 copy(os.path.join(winDistFilesDir, "src", "js", "Make.rules.mak"), os.path.join(winDemoDir, "config"), False)
 
