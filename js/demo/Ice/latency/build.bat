@@ -13,5 +13,5 @@ REM ICE_HOME are set.
 
 @echo Building %~dp0
 
-@echo "%ICE_JS_HOME%\bin\slice2js" -I"%ICE_HOME%\slice" Latency.ice
-"%ICE_JS_HOME%\bin\slice2js" -I"%ICE_HOME%\slice" Latency.ice
+@echo node build.js
+node build.js

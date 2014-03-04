@@ -13,7 +13,5 @@ REM ICE_HOME are set.
 
 @echo Building %~dp0
 
-@echo "%ICE_JS_HOME%\bin\slice2js" -I"%ICE_HOME%\slice" Chat.ice
-"%ICE_JS_HOME%\bin\slice2js" -I"%ICE_HOME%\slice" Chat.ice
-@echo "%ICE_JS_HOME%\bin\slice2js" -I"%ICE_HOME%\slice" -I. ChatSession.ice
-"%ICE_JS_HOME%\bin\slice2js" -I"%ICE_HOME%\slice" -I. ChatSession.ice
+@echo node build.js
+node build.js
