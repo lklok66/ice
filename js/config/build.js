@@ -1,3 +1,11 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2014 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
 
 var fs = require("fs");
 var path = require("path");
@@ -124,6 +132,7 @@ var binDir = iceHome ? path.join(iceJsHome, "bin") :
 
 module.exports.build = function(files, args)
 {
+    slice2js = path.join(binDir, slice2js);
     args = args || [];
     function buildFile(file)
     {
@@ -137,25 +146,9 @@ module.exports.build = function(files, args)
             });
         commandArgs.push(file);
         
-        var env = {};
-        for(var key in process.env)
-        {
-            env[key] = process.env[key];
-        }
-        
-        if(env["PATH"])
-        {
-            env["PATH"] = binDir + path.delimiter + env["PATH"];
-        }
-        else
-        {
-            env["PATH"] = binDir;
-        }
-        var options = {env: env};
-        
         console.log(slice2js + " " + commandArgs.join(" "));
         var spawn = require("child_process").spawn;
-        var build  = spawn(slice2js, commandArgs, options);
+        var build  = spawn(slice2js, commandArgs);
         
         build.stdout.on("data", function(data)
         {
