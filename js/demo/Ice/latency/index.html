@@ -69,7 +69,7 @@
 
         <div class="panel callout radius">
             <p>The client is configured to use WSS secure endpoints when the page
-               is load from HTTPS and WS unsecure endpoints when load from HTTP.</p>
+               is loaded over HTTPS and WS unsecure endpoints when loaded over HTTP.</p>
         </div>
         <a class="close-reveal-modal">&#215;</a>
     </div>
@@ -95,6 +95,29 @@
                 <pre class="source" data="index.html"></pre>
             </div>
         </div>
+    </div>
+    <!-- Modal dialog with setup instructions -->
+    <div id="setup-modal" class="reveal-modal" data-reveal>
+        <p>
+            <h3>The Ice for JavaScript demos require a web server. Please follow these steps to run the demo:</h3>
+            <hr/>
+            <ul>
+                <li>Install <a href="http://nodejs.org/" target="_blank">Node.js</a></li>
+                <li>Open a command window and change to the demo distribution directory:<br/>
+                    <pre>$ cd IceJS-0.1.0-demos</pre></li>
+                <li>Set the <tt>ICE_JS_HOME</tt> environment variable to point to your Ice for JavaScript
+                    installation directory.<br/>
+                     On Windows:<br/>
+                    <pre>set ICE_JS_HOME=C:\Program Files\ZeroC\IceJS-0.1.0</pre>
+                     On Linux and OS X:<br/>
+                    <pre>export ICE_JS_HOME=/opt/IceJS-0.1.0</pre>
+                </li>
+                <li>Start the demo web server:<br/>
+                    <pre>node bin/HttpServer.js</pre></li>
+                <li>Start the corresponding C++ Ice server (see the demo Readme)
+                <li>Now you can run the demo by navigating to <a class="go" href=""></a></li>
+            </ul>
+        </p>
     </div>
     <!-- Footer section -->
     <section id="footer">

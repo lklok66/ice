@@ -27,6 +27,7 @@ GEN_SRCS = BuiltinSequences.js \
 	   ProcessF.js \
 	   PropertiesAdmin.js \
 	   Router.js \
+	   SliceChecksumDict.js \
 	   Version.js
 
 COMMON_SRCS = \

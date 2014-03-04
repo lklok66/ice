@@ -56,4 +56,37 @@ $("#viewSource").click(
         $("#source-modal").foundation("reveal", "open");
         return false;
     });
+
+
+//
+// If the demo page was not load from a web server display
+// the setup-modal dialog.
+//
+if(document.location.protocol === "file:")
+{
+    var paths = document.location.pathname.split("/");
+    var i = paths.indexOf("demo");
+    if(i == -1) // It's a demo distribution?
+    {
+        i = paths.indexOf("demojs");
+    }
+    if(i == -1) // It's a test page?
+    {
+        i = paths.indexOf("test");
+    }
+    paths = paths.slice(i);
+    var href = "https://127.0.0.1:9090/" + paths.join("/");
+    $("#setup-modal a.go").text(href);
+    $("#setup-modal a.go").attr("href", href);
+    $("#setup-modal").foundation({
+        reveal:
+        {
+            close_on_background_click: false,
+            close_on_esc: false
+        }
+    });
+    $("#setup-modal").foundation("reveal", "open");
+}
+
+
 }());

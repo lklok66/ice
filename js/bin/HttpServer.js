@@ -36,8 +36,8 @@ var MimeTypes =
     png: "image/png",
 };
 
-var iceJsHome;
-
+var iceJsHome = process.env.ICE_JS_HOME;
+var useBinDist = process.env.USE_BIN_DIST && process.env.USE_BIN_DIST == "yes";
 var srcDist;
 try
 {
@@ -53,7 +53,7 @@ var iceJs = process.env.OPTIMIZE == "yes" ? "Ice.min.js" : "Ice.js";
 // If this is a source distribution and ICE_JS_HOME isn't set ensure 
 // that Ice libraries has been build.
 //
-if(srcDist && !process.env.ICE_JS_HOME)
+if(srcDist && !iceJsHome && !useBinDist)
 {
     var build;
     try
@@ -73,21 +73,53 @@ if(srcDist && !process.env.ICE_JS_HOME)
 }
 
 //
-// If this is a demo distribution ensure that ICE_JS_HOME is set.
+// If this is a demo distribution ensure that ICE_JS_HOME is set or install in a default location.
 //
-if(!srcDist && !process.env.ICE_JS_HOME)
+if(!srcDist || useBinDist)
 {
-    console.error("ICE_JS_HOME environment variable must be set, and point to the Ice for " +
-                  "JavaScript installation directory.");
-    process.exit(1);
+    //
+    // if ICE_JS_HOME is not set check if it is install in the default location.
+    //
+    if(!process.env.ICE_JS_HOME)
+    {
+        var dist = "IceJS-0.1.0";
+        [
+            "C:\\Program Files\\ZeroC",
+            "C:\\Program Files (x86)\\ZeroC",
+            "/Library/Developer",
+            "/opt"
+        ].some(
+            function(basePath)
+            {
+                try
+                {
+                    if(fs.statSync(path.join(basePath, dist, "lib", iceJs)).isFile())
+                    {
+                        iceJsHome = path.join(basePath, dist);
+                        return true;
+                    }
+                }
+                catch(e)
+                {
+                }
+                return false;
+            });
+    }
+
+    if(!iceJsHome)
+    {
+        console.error("error Ice for JavaScript not found in the default installation directories\n" +
+                      "ICE_JS_HOME environment variable must be set, and point to the Ice for\n" +
+                      "JavaScript installation directory.");
+        process.exit(1);
+    }
 }
 
 //
 // If ICE_JS_HOME is set ensure that Ice libraries exists in that location.
 //
-if(process.env.ICE_JS_HOME)
+if(iceJsHome)
 {
-    iceJsHome = process.env.ICE_JS_HOME;
     var iceJsHomeValid;
     try
     {
@@ -104,7 +136,7 @@ if(process.env.ICE_JS_HOME)
                       "is correctly installed");
         process.exit(1);
     }
-    console.log("ICE_JS_HOME has been set, using Ice libraries from " + path.join(iceJsHome, "lib"));
+    console.log("Using Ice libraries from " + path.join(iceJsHome, "lib"));
 }
 
 var libraries = ["/lib/Ice.js", "/lib/Ice.min.js", 
@@ -371,8 +403,6 @@ HttpServer.prototype.start = function()
     httpsServer.listen(9090, this._host);
     console.log("listening on ports 8080 (http) and 9090 (https)...");
 };
-
-
 
 var server = new HttpServer("0.0.0.0", [8080, 9090]);
 server.start();

@@ -71,8 +71,24 @@
         <a class="close-reveal-modal">&#215;</a>
         <h4>Test Suite Readme</h4>
         <hr/>
-        <p>For instructions on how-to run this test suite refer to the Ice for JavaScript 
+        <p>For instructions on how to run this test suite, please refer to the Ice for JavaScript 
             <a href="http://doc.zeroc.com/display/Rel/Ice+for+JavaScript+0.1.0+Release+Notes">Release Notes</a>.</p>
+    </div>
+    <!-- Modal dialog with setup instructions -->
+    <div id="setup-modal" class="reveal-modal" data-reveal>
+        <p>
+            <h3>The Ice for JavaScript tests require a web server. Please follow these steps to run the test suite:</h3>
+            <hr/>
+            <ul>
+                <li>To run the browser tests, you will need to run the test HTTP server with the 
+                    test/Common/run.py script. This script requires Ice for Python and the IceWS transport. 
+                    Follow the instructions from your Ice distribution to setup the environment for 
+                    Ice for Python.<br/>
+                    Run the following to start the HTTP server:
+                    <pre>python test/Common/run.py</pre></li>
+                <li>Now you can run the test by navigating to <a class="go" href=""></a></li>
+            </ul>
+        </p>
     </div>
     <div id="footer">
         <div class="logo">
