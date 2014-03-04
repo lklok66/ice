@@ -14,10 +14,15 @@ Ice.Warn.Connections=1
 # SSL Configuration
 #
 Ice.Plugin.IceSSL=IceSSL:createIceSSL
-IceSSL.DefaultDir=../../../../certs
+IceSSL.DefaultDir=../../../../certs/wss
 IceSSL.CertAuthFile=cacert.pem
 IceSSL.CertFile=s_rsa1024_pub.pem
 IceSSL.KeyFile=s_rsa1024_priv.pem
+
+#
+# For secure web sockets we need to disable VerifyPeer.
+#
+IceSSL.VerifyPeer=0
 
 #
 # IceMX configuration.

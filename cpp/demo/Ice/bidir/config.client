@@ -2,7 +2,7 @@
 # The client reads this property to create the reference to the
 # "CallbackSender" object in the server.
 #
-CallbackSender.Proxy=sender:default -h localhost -p 10000
+CallbackSender.Proxy=sender:ws -h localhost -p 10002
 
 #
 # Warn about connection exceptions
@@ -32,3 +32,7 @@ Ice.ACM.Client=0
 #
 #Ice.Trace.Protocol=1
 
+#
+# Websocket transport plugin
+#
+Ice.Plugin.IceWS=IceWS:createIceWS
