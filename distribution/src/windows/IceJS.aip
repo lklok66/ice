@@ -32,7 +32,7 @@
     <ROW Directory="APPDIR" Directory_Parent="TARGETDIR" DefaultDir="APPDIR:." IsPseudoRoot="1"/>
     <ROW Directory="DEMO_DIR" Directory_Parent="TARGETDIR" DefaultDir="DEMO_DIR" IsPseudoRoot="1"/>
     <ROW Directory="IceJS0.1.0_Dir" Directory_Parent="APPDIR" DefaultDir="ICEJS-~1.0|IceJS-0.1.0"/>
-    <ROW Directory="Ice_3.4.2_DIR" Directory_Parent="ZeroC_DIR" DefaultDir="IceWS0~1.0|IceWS 0.1.0"/>
+    <ROW Directory="Ice_3.4.2_DIR" Directory_Parent="ZeroC_DIR" DefaultDir="ICEFOR~1.0|Ice for JavaScript 0.1.0"/>
     <ROW Directory="PersonalFolder" Directory_Parent="TARGETDIR" DefaultDir="Person~1|PersonalFolder" IsPseudoRoot="1"/>
     <ROW Directory="ProgramMenuFolder" Directory_Parent="TARGETDIR" DefaultDir="Progra~1|ProgramMenuFolder" IsPseudoRoot="1"/>
     <ROW Directory="TARGETDIR" DefaultDir="SourceDir"/>
