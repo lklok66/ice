@@ -404,5 +404,46 @@ HttpServer.prototype.start = function()
     console.log("listening on ports 8080 (http) and 9090 (https)...");
 };
 
-var server = new HttpServer("0.0.0.0", [8080, 9090]);
-server.start();
+function startHttpServer()
+{
+    new HttpServer("0.0.0.0", [8080, 9090]).start();
+}
+
+//
+// Build Ice for JavaScript before the server starts.
+//
+var command = process.platform !== "win32" ? "make" : srcDist ? "nmake" : "build.bat";
+var args = [];
+if(process.platform === "win32" && srcDist)
+{
+    args ["/f", "Makefile.mak"];
+}
+var options = {cwd: srcDist ? path.join(__dirname, "..") : path.join(__dirname, "..", "demojs") };
+
+process.stdout.write("Building Ice for JavaScript... ");
+var spawn = require("child_process").spawn;
+var build  = spawn(command, args, options);
+    
+build.stdout.on("data", function(data)
+{
+    process.stdout.write(data);
+});
+
+build.stderr.on("data", function(data)
+{
+    process.stderr.write(data);
+});
+
+build.on("close", function(code)
+{
+    if(code == 0)
+    {
+        console.log("ok");
+        startHttpServer();
+    }
+    else
+    {
+        console.error("failed");
+        process.exit(1);
+    }
+});
