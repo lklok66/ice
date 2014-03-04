@@ -165,6 +165,12 @@
             </ul>
         </p>
     </div>
+    <div id="no-https-modal" class="reveal-modal" data-reveal>
+        <p>The Ice minimal demo use WS (non secure endpoints), this browser does not allow
+            to made WS connections from HTTPS pages, you can run the demo from HTTP page by
+            navigating to <a href=""></a>
+        </p>
+    </div>
     <!-- Footer section -->
     <section id="footer">
         <div class="logo">
@@ -190,5 +196,28 @@
          scripts that includes: (the Ice run-time library, the generated code
          and the demo application). -->
     <!--<script type="text/javascript" src="browser/Client.min.js"></script>-->
+    <script type="text/javascript">
+        //
+        // Firefox and IE we doesn't allow WS connections from 
+        // HTTPS pages.
+        //
+        if(document.location.protocol === "https:" &&
+        (navigator.userAgent.indexOf("MSIE") !== -1 || 
+            navigator.userAgent.indexOf("Firefox") !== -1 ||
+            navigator.userAgent.indexOf("Trident/7.0") !== -1))
+        {
+            var href = "http://" + document.location.hostname + ":8080" + document.location.pathname;
+            $("#no-https-modal a").attr("href", href);
+            $("#no-https-modal a").text(href);
+            $("#no-https-modal").foundation({
+                reveal:
+                {
+                    close_on_background_click: false,
+                    close_on_esc: false
+                }
+            });
+            $("#no-https-modal").foundation("reveal", "open");
+        }
+    </script>
   </body>
 </html>
