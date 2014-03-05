@@ -35,8 +35,8 @@ var slice2js = "slice2js.exe";
 var slice2cpp = "slice2cpp.exe";
 
 //
-// If this is a source distribution and ICE_HOME isn't set ensure 
-// that slice2js has been build.
+// If this is a source distribution and ICE_HOME isn't set, ensure 
+// that slice2js has been built.
 //
 if(srcDist && !useBinDist)
 {
@@ -51,8 +51,8 @@ if(srcDist && !useBinDist)
     
     if(!build)
     {
-        console.error("error Unable to find " + slice2js + " in " + path.join(__dirname, "..", "..", "cpp", "bin") + 
-                      ", please verify that the sources has been build or configure ICE_HOME to use a binary distribution.");
+        console.error("error: Unable to find " + slice2js + " in " + path.join(__dirname, "..", "..", "cpp", "bin") + 
+                      ", please verify that the sources have been built or configure ICE_HOME to use a binary distribution.");
         process.exit(1);
     }
 }
@@ -63,7 +63,7 @@ if(srcDist && !useBinDist)
 if(!srcDist || useBinDist)
 {
     //
-    // if ICE_HOME is not set check if it is install in the default location.
+    // If ICE_HOME is not set, check if it is installed in the default location.
     //
     if(!process.env.ICE_HOME)
     {
@@ -87,13 +87,13 @@ if(!srcDist || useBinDist)
 
     if(!iceHome)
     {
-        console.error("error Ice not found in the default installation directories ICE_HOME environment\n" +
-                      "variable must be set, and point to the Ice installation directory.");
+        console.error("error: Ice not found in the default installation directories. Set the ICE_HOME environment\n" +
+                      "variable to point to the Ice installation directory.");
         process.exit(1);
     }
     
     //
-    // if ICE_JS_HOME is not set check if it is install in the default location.
+    // If ICE_JS_HOME is not set, check if it is installed in the default location.
     //
     if(!process.env.ICE_JS_HOME)
     {
@@ -117,8 +117,8 @@ if(!srcDist || useBinDist)
 
     if(!iceJsHome)
     {
-        console.error("error Ice for JavaScript not found in the default installation directories ICE_JS_HOME environment\n" +
-                      "variable must be set, and point to the Ice for JavaScript installation directory.");
+        console.error("error: Ice for JavaScript not found in the default installation directories. Set the ICE_JS_HOME environment\n" +
+                      "variable to point to the Ice for JavaScript installation directory.");
         process.exit(1);
     }
 }
@@ -176,4 +176,4 @@ module.exports.build = function(files, args)
         });
     }
     buildFile(files.shift());
-}
+};

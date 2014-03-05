@@ -243,7 +243,7 @@ if(_GET["mode"])
 }
 
 //
-// If the user select a secure mode, ensure that the page is loaded throw HTTPS 
+// If the user selects a secure mode, ensure that the page is loaded over HTTPS 
 // so the web server SSL certificate is obtained.
 //
 $("#mode").on("change", 
