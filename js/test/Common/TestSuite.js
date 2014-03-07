@@ -112,7 +112,7 @@ $(document).foundation();
                         p = __test__(out, id);
                     }
                     
-                    return p.finally(
+                    p.finally(
                         function()
                         {
                             $("#test").prop("disabled", false);

@@ -483,6 +483,7 @@
                 //
                 if(typeof(navigator) !== "undefined" && 
                    (navigator.userAgent.indexOf("MSIE") !== -1 || 
+                    navigator.userAgent.indexOf("Trident/7.0") ||
                     navigator.userAgent.indexOf("Firefox") !== -1))
                 {
                     return;
@@ -1003,7 +1004,10 @@
         ).then(
             function()
             {
-                if(typeof(navigator) !== "undefined" && navigator.userAgent.indexOf("Firefox") !== -1)
+                if(typeof(navigator) !== "undefined" && 
+                   (navigator.userAgent.indexOf("Firefox") !== -1 ||
+                    navigator.userAgent.indexOf("MSIE") !== -1 ||
+                    navigator.userAgent.indexOf("Trident/7.0") !== -1))
                 {
                     //
                     // Firefox adds a delay on websocket failed reconnects that causes this test to take too 
