@@ -166,9 +166,9 @@
         </p>
     </div>
     <div id="no-https-modal" class="reveal-modal" data-reveal>
-        <p>The Ice minimal demo use WS (non secure endpoints), this browser does not allow
-            to made WS connections from HTTPS pages, you can run the demo from HTTP page by
-            navigating to <a href=""></a>
+        <p>This client uses a non-secure WebSocket connection, but your browser does not allow
+            the client to make a non-secure connection from a page loaded via HTTPS. You can run the
+            demo from an HTTP page by navigating to <a href=""></a>.
         </p>
     </div>
     <!-- Footer section -->
@@ -202,7 +202,7 @@
         // HTTPS pages.
         //
         if(document.location.protocol === "https:" &&
-        (navigator.userAgent.indexOf("MSIE") !== -1 || 
+           (navigator.userAgent.indexOf("MSIE") !== -1 || 
             navigator.userAgent.indexOf("Firefox") !== -1 ||
             navigator.userAgent.indexOf("Trident/7.0") !== -1))
         {
