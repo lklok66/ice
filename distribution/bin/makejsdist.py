@@ -437,6 +437,9 @@ def createSourceDist(platform, destDir):
     if os.path.exists(os.path.join("cpp", "Makefile.mak")):
         substitute(os.path.join("cpp", "Makefile.mak"), [(re.compile(regexpEscape("Makefile.mak.icejs")), 
                                                           "Makefile.mak")])
+                                                          
+                                                          
+    copy(os.path.join(distDir, "node_modules"), os.path.join("js", "node_modules"))
 
     os.chdir(current)
     print "ok"
@@ -508,6 +511,15 @@ def fixGitAttributes(checkout, autocrlf, excludes):
     newFile.close()
     oldFile.close()
     os.remove(origfile)
+    
+#
+# Install node http-proxy in demo distribution directory.
+#
+os.chdir(distDir)
+for m in ["http-proxy", "esprima"]:
+    command = ("npm install %s" % m)
+    if os.system(command) != 0:
+        print("Error executing command `%s'" % command)
 
 ###### UNIX distfiles 
 excludeForDistFiles = [ "fixCopyright.py", "fixVersion.py", "makedist.py" ]
@@ -531,15 +543,6 @@ createSourceDist("Windows", distDir)
 #
 print "Consolidating demo distribution...",
 for d in [demoDir, winDemoDir]:
-    
-    #
-    # Install node http-proxy in demo distribution directory.
-    #
-    os.chdir(d)
-    command = "npm install http-proxy"
-    if os.system(command) != 0:
-        print("Error executing command `%s'" % command)
-        
     os.mkdir(os.path.join(d, "assets"))
     copyMatchingFiles(os.path.join(srcDir, "js", "assets"), os.path.join(d, "assets"), ["common.*", "favicon.ico"])
     os.chdir(os.path.join(d, "assets"))
@@ -553,6 +556,8 @@ for d in [demoDir, winDemoDir]:
         if os.system(command) != 0:
             print("Error executing command `%s'" % command)
             sys.exit(1)
+            
+    copy(os.path.join(distDir, "node_modules", "http-proxy"), os.path.join(d, "node_modules", "http-proxy"))
     
 
 os.chdir(srcDir)
@@ -683,4 +688,5 @@ remove(demoDir)
 remove(winDemoDir)
 remove(distFilesDir)
 remove(winDistFilesDir)
+remove("node_modules")
 print "ok"
