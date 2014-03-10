@@ -74,6 +74,13 @@ if(document.location.protocol === "file:")
         i = paths.indexOf("test");
     }
     paths = paths.slice(i);
+    
+    var setupDialog = "<div id=\"setup-modal\" class=\"reveal-modal\" data-reveal>" +
+        "<p>The Ice for JavaScript demos require a web server. Please refer to the Ice for JavaScript " +
+        "<a href=\"http://doc.zeroc.com/display/Rel/Ice+for+JavaScript+0.1.0+Release+Notes\">release notes</a> "+
+        "for instructions.</p></div>";
+        
+    $("body").append(setupDialog);
     var href = "https://127.0.0.1:9090/" + paths.join("/");
     $("#setup-modal a.go").text(href);
     $("#setup-modal a.go").attr("href", href);
