@@ -98,13 +98,12 @@ if(document.location.protocol === "file:")
 //
 function checkGenerated(files)
 {
-    $("#build-required-modal").foundation({
-        reveal:
-        {
-            close_on_background_click: false,
-            close_on_esc: false
-        }
-    });
+    var dialog = "<div id=\"build-required-modal\" class=\"reveal-modal\" data-reveal>" +
+        "<p>Couldn't find generated file `%FILENAME%'. This is expected if you didn't build the JavaScript demos." +
+        "To build the demos refer to the instructions from the " +
+        "<a href=\"http://doc.zeroc.com/display/Rel/Ice+for+JavaScript+0.1.0+Release+Notes\">release notes</a>.</p>" +
+        "</div>";
+    
     var basePath = document.location.pathname;
     basePath = basePath.substr(0, basePath.lastIndexOf("/"));
     
@@ -127,6 +126,14 @@ function checkGenerated(files)
                     if(!error)
                     {
                         error = true;
+                        $("body").append(dialog.replace("%FILENAME%", f));
+                        $("#build-required-modal").foundation({
+                            reveal:
+                            {
+                                close_on_background_click: false,
+                                close_on_esc: false
+                            }
+                        });
                         $("#build-required-modal").foundation("reveal", "open");
                     }
                 });
