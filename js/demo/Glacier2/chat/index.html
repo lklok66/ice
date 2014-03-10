@@ -161,19 +161,40 @@
                 <li>Install <a href="http://nodejs.org/" target="_blank">Node.js</a></li>
                 <li>Open a command window and change to the demo distribution directory:<br/>
                     <pre>$ cd IceJS-0.1.0-demos</pre></li>
-                <li>Set the <tt>ICE_JS_HOME</tt> environment variable to point to your Ice for JavaScript
-                    installation directory.<br/>
-                     On Windows:<br/>
-                    <pre>set ICE_JS_HOME=C:\Program Files\ZeroC\IceJS-0.1.0</pre>
-                     On Linux and OS X:<br/>
-                    <pre>export ICE_JS_HOME=/opt/IceJS-0.1.0</pre>
-                </li>
                 <li>Start the demo web server:<br/>
                     <pre>node bin/HttpServer.js</pre></li>
                 <li>Start the corresponding C++ Ice server (see the demo Readme)
                 <li>Now you can run the demo by navigating to <a class="go" href=""></a></li>
             </ul>
+            <div class="panel callout radius">
+                <p>If Ice for JavaScript has not been installed in its default locations you
+                need to set <code>ICE_JS_HOME</code> to point to your Ice for JavaScript 
+                installation directory before you start the web server.</p>
+            </div>
         </p>
+    </div>
+    <div id="build-required-modal" class="reveal-modal" data-reveal>
+        <p>This client has not been build yet, you need to build the client before run it. You
+        can build the client using the following command:</p>
+        <ul>
+            <li>On Windows:<br/>
+<pre>cd Glacier2/chat
+node build.js</pre>
+            </li>
+            
+            <li>On Linux and OS X:<br/>
+<pre>cd Glacier2/chat
+make</pre>
+            </li>
+            <li>
+                Once you have build the client, reload this page to use it.
+            </li>
+        </ul>
+        <div class="panel callout radius">
+            <p>If Ice and Ice for JavaScript has not been installed in their default locations you
+            need to set <code>ICE_HOME</code> and <code>ICE_JS_HOME</code> to point to their respectively
+            installation directories.</p>
+        </div>
     </div>
     <!-- Footer section -->
     <section id="footer">
@@ -195,5 +216,11 @@
     <script type="text/javascript" src="Chat.js"></script>
     <!-- browser/Client.js (Chat Demo Application) -->
     <script type="text/javascript" src="browser/Client.js"></script>
+    <script type="text/javascript">
+        if(["http:", "https:"].indexOf(document.location.protocol) !== -1)
+        {
+            checkGenerated(["Chat.js"]);
+        }
+    </script>
   </body>
 </html>

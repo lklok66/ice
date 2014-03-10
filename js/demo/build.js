@@ -7,4 +7,4 @@
 //
 // **********************************************************************
 
-require ("../../../config/build").build(__dirname, ["Chat.ice"]);
+require("../config/build.js").buildDirectory(__dirname);

@@ -57,7 +57,6 @@ $("#viewSource").click(
         return false;
     });
 
-
 //
 // If the demo page was not load from a web server display
 // the setup-modal dialog.
@@ -90,3 +89,47 @@ if(document.location.protocol === "file:")
 
 
 }());
+
+
+//
+// Check if the corresponding generated files can be access, if they
+// cannot be access display the build-required-modal otherwhise do 
+// nothing.
+//
+function checkGenerated(files)
+{
+    $("#build-required-modal").foundation({
+        reveal:
+        {
+            close_on_background_click: false,
+            close_on_esc: false
+        }
+    });
+    var basePath = document.location.pathname;
+    basePath = basePath.substr(0, basePath.lastIndexOf("/"));
+    
+    var error = false;
+    files.forEach(
+        function(f)
+        {
+            $.ajax(
+                {
+                    headers: {method: "HEAD"}, 
+                    url: basePath + "/" + f,
+                    //
+                    // Use text data type to avoid problems interpreting the data.
+                    //
+                    dataType: "text"
+                }
+            ).fail(
+                function(err)
+                {
+                    if(!error)
+                    {
+                        error = true;
+                        $("#build-required-modal").foundation("reveal", "open");
+                    }
+                });
+        }
+    );
+}
