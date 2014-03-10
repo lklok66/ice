@@ -15,7 +15,7 @@ import Demo
 
 class ThroughputI(Demo.Throughput):
     def __init__(self):
-        warmup = False
+        self.warmup = False
         
         if sys.version_info[0] == 2:
             b = []
