@@ -1229,12 +1229,17 @@ IceWS::TransceiverI::preRead(Buffer& buf)
 
         if(_readState == ReadStatePayload)
         {
+            //
+            // This must be assigned before the check for the buffer. If the buffer is empty 
+            // or already read, postRead will return false.
+            //
+            _readStart = buf.i;
+
             if(buf.b.empty() || buf.i == buf.b.end())
             {
                 return false;
             }
-            _readStart = buf.i;
-        
+
             if(_readI < _readBuffer.i)
             {
                 size_t n = min(_readBuffer.i - _readI, buf.b.end() - buf.i);
@@ -1262,7 +1267,7 @@ IceWS::TransceiverI::postRead(Buffer& buf)
 
     if(_readStart == buf.i)
     {
-        return false; // Nothing was read.
+        return false; // Nothing was read or nothing to read.
     }
     assert(_readStart < buf.i);
 
