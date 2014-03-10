@@ -63,27 +63,12 @@ $("#viewSource").click(
 //
 if(document.location.protocol === "file:")
 {
-    var paths = document.location.pathname.split("/");
-    var i = paths.indexOf("demo");
-    if(i == -1) // It's a demo distribution?
-    {
-        i = paths.indexOf("demojs");
-    }
-    if(i == -1) // It's a test page?
-    {
-        i = paths.indexOf("test");
-    }
-    paths = paths.slice(i);
-    
     var setupDialog = "<div id=\"setup-modal\" class=\"reveal-modal\" data-reveal>" +
         "<p>The Ice for JavaScript demos require a web server. Please refer to the Ice for JavaScript " +
         "<a href=\"http://doc.zeroc.com/display/Rel/Ice+for+JavaScript+0.1.0+Release+Notes\">release notes</a> "+
         "for instructions.</p></div>";
-        
+    
     $("body").append(setupDialog);
-    var href = "https://127.0.0.1:9090/" + paths.join("/");
-    $("#setup-modal a.go").text(href);
-    $("#setup-modal a.go").attr("href", href);
     $("#setup-modal").foundation({
         reveal:
         {
@@ -96,7 +81,6 @@ if(document.location.protocol === "file:")
 
 
 }());
-
 
 //
 // Check if the corresponding generated files can be access, if they
@@ -144,6 +128,5 @@ function checkGenerated(files)
                         $("#build-required-modal").foundation("reveal", "open");
                     }
                 });
-        }
-    );
+        });
 }
