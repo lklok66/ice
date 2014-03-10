@@ -64,9 +64,9 @@ $("#viewSource").click(
 if(document.location.protocol === "file:")
 {
     var setupDialog = "<div id=\"setup-modal\" class=\"reveal-modal\" data-reveal>" +
-        "<p>The Ice for JavaScript demos require a web server. Please refer to the Ice for JavaScript " +
-        "<a href=\"http://doc.zeroc.com/display/Rel/Ice+for+JavaScript+0.1.0+Release+Notes\">release notes</a> "+
-        "for instructions.</p></div>";
+        "<p>The Ice for JavaScript demos require a web server. Please refer to the Sample Programs page from the " + 
+        "Ice for JavaScript <a href=\"http://doc.zeroc.com/display/Rel/Ice+for+JavaScript+0.1.0+Release+Notes\">" +
+        " release notes</a> for instructions on how to run the web server included with your distribution.</p></div>";
     
     $("body").append(setupDialog);
     $("#setup-modal").foundation({
@@ -90,9 +90,10 @@ if(document.location.protocol === "file:")
 function checkGenerated(files)
 {
     var dialog = "<div id=\"build-required-modal\" class=\"reveal-modal\" data-reveal>" +
-        "<p>Couldn't find generated file `%FILENAME%'. This is expected if you didn't build the JavaScript demos." +
-        "To build the demos refer to the instructions from the " +
-        "<a href=\"http://doc.zeroc.com/display/Rel/Ice+for+JavaScript+0.1.0+Release+Notes\">release notes</a>.</p>" +
+        "<p>Couldn't find generated file `%FILENAME%'. This is expected if you didn't build the JavaScript demos. " +
+        "Please refer to the Sample Programs page from the Ice for JavaScript " +
+        "<a href=\"http://doc.zeroc.com/display/Rel/Ice+for+JavaScript+0.1.0+Release+Notes\">release notes</a> " + 
+        "for instructions on how to build the demos.</p>" +
         "</div>";
     
     var basePath = document.location.pathname;
