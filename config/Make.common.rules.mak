@@ -47,6 +47,12 @@ ice_bin_dist_dir = $(PROGRAMFILES) (x86)\ZeroC\Ice-$(ICE_VERSION)
 ice_bin_dist_dir = $(PROGRAMFILES)\ZeroC\Ice-$(ICE_VERSION)
 !endif
 
+!if "$(PROCESSOR_ARCHITECTURE)" == "AMD64"
+ice_js_bin_dist_dir = $(PROGRAMFILES) (x86)\ZeroC\IceJS-$(ICEJS_VERSION)
+!else
+ice_js_bin_dist_dir = $(PROGRAMFILES)\ZeroC\IceJS-$(ICEJS_VERSION)
+!endif
+
 #
 # The following variables might also be defined:
 #
@@ -156,8 +162,8 @@ ice_dir = $(ice_bin_dist_dir)
 ice_js_dir = $(ICE_JS_HOME)
 !elseif exist ($(top_srcdir)/bin/slice2js.exe)
 ice_js_dir = $(top_srcdir)
-!elseif exist ("$(ice_bin_dist_dir)\bin$(x64suffix)\slice2js.exe")
-ice_js_dir = $(ice_bin_dist_dir)
+!elseif exist ("$(ice_js_bin_dist_dir)\bin$(x64suffix)\slice2js.exe")
+ice_js_dir = $(ice_js_bin_dist_dir)
 !endif
 
 !if "$(ice_js_dir)" == ""
