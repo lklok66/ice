@@ -54,7 +54,10 @@ includedir		= $(ice_dir)/include
 #
 include	 $(top_srcdir)/config/Make.rules.$(UNAME)
 
-runpath_libdir		:= $(ice_js_dir)/$(libsubdir)$(cpp11suffix)
+embedded_runpath_prefix := $(ice_js_dir)
+ifneq ($(embedded_runpath_prefix),)
+    runpath_libdir	:= $(embedded_runpath_prefix)/$(libsubdir)$(cpp11suffix)
+endif
 
 ICECPPFLAGS		= -I$(slicedir)
 
