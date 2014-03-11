@@ -9,9 +9,9 @@
 
 (function(){
 
-require("Ice/Ice");
-require("Glacier2/Glacier2");
-require("Chat");
+require("Ice");
+require("Glacier2");
+require("./Chat");
 
 //
 // Servant that implements the ChatCallback interface,

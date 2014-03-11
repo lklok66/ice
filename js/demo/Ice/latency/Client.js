@@ -9,8 +9,8 @@
 
 (function(){
 
-require("Ice/Ice");
-require("Latency");
+require("Ice");
+require("./Latency");
 
 var communicator;
 

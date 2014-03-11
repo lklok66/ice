@@ -9,8 +9,8 @@
 
 (function(){
     
-require("Ice/Ice");
-require("Hello");
+require("Ice");
+require("./Hello");
     
 var communicator;
  
