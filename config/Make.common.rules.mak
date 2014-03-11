@@ -42,9 +42,9 @@ ARCH			= x86
 !endif
 
 !if "$(PROCESSOR_ARCHITECTURE)" == "AMD64"
-ice_bin_dist_dir = $(PROGRAMFILES) (x86)\ZeroC\Ice-$(VERSION)
+ice_bin_dist_dir = $(PROGRAMFILES) (x86)\ZeroC\Ice-$(ICE_VERSION)
 !else
-ice_bin_dist_dir = $(PROGRAMFILES)\ZeroC\Ice-$(VERSION)
+ice_bin_dist_dir = $(PROGRAMFILES)\ZeroC\Ice-$(ICE_VERSION)
 !endif
 
 #
