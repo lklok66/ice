@@ -17,7 +17,7 @@ import FixUtil
 #
 # Files that will be excluded from all source distributions.
 #
-excludeFiles = [ \
+excludeFiles = [
     "allDemos.py",
     "/config/IceDevKey.snk",
     "/config/makedepend-winrt.py",
@@ -183,7 +183,7 @@ excludeFiles = [ \
 #
 # Windows files that will be excluded from Unix source distributions.
 # 
-excludeWindowsFiles = [ \
+excludeWindowsFiles = [
     "/vsaddin/",
     "build.bat",
     "*.rc",
@@ -214,11 +214,14 @@ excludeWindowsFiles = [ \
 # Don't remove C++ source Makefile from the Windows distribution since
 # the mingw build requires it.
 #
-excludeUnixFiles = [ \
+excludeUnixFiles = [
     "Makefile",
     "Makefile.icejs",
+    "Make.rules.js",
+    "Make.common.rules",
     "*.sln",
     "/cpp/config/Make.rules",
+    "/cpp/config/Makefile.mak",
     "/cpp/config/Make.rules.Linux",
     "/cpp/config/Make.rules.AIX",
     "/cpp/config/Make.rules.MINGW",
@@ -238,9 +241,9 @@ excludeUnixFiles = [ \
 # source distribution config directory.
 #
 demoConfigFiles = [ \
-    "Make.common.rules", \
-    "Make.rules.Darwin", \
-    "Make.rules.Linux" \
+    "Make.common.rules",
+    "Make.rules.Darwin",
+    "Make.rules.Linux",
     "build.js"
 ]
 
@@ -248,12 +251,12 @@ demoConfigFiles = [ \
 # Files from the top-level certs directory to include in the demo distribution certs
 # directory.
 #
-demoCertsFiles = [ \
-    "*.jks", \
-    "*.pem", \
-    "*.pfx", \
-    "makewsscerts.py", \
-    "wss", \
+demoCertsFiles = [
+    "*.jks",
+    "*.pem",
+    "*.pfx",
+    "makewsscerts.py",
+    "wss",
 ]
 
 #

@@ -161,7 +161,7 @@ ice_js_dir = $(ice_bin_dist_dir)
 !endif
 
 !if "$(ice_js_dir)" == ""
-!error Unable to find a valid IceJS distribution, please verify ICE_JS_HOME is properly configured and Ice is correctly installed.
+!error Unable to find a valid IceJS distribution, please verify ICE_JS_HOME is properly configured and IceJS is correctly installed.
 !endif
 
 !endif

@@ -208,38 +208,36 @@ $(error Unable to find slice2cpp in $(ICE_HOME)/$(binsubdir)$(cpp11suffix), plea
 $(error Unable to find a valid Ice distribution, please verify ICE_HOME is properly configured and Ice is correctly installed.)
     endif
 
-    ifeq ($(ice_language),js)
-	ifneq ($(ICE_JS_HOME),)
-	    ifneq ($(shell test -f $(ICE_JS_HOME)/$(binsubdir)$(cpp11suffix)/slice2js && echo 0), 0)
-    $(error Unable to find slice2js in $(ICE_JS_HOME)/$(binsubdir)$(cpp11suffix), please verify ICE_JS_HOME is properly configured and Ice is correctly installed.)
-	    endif
-	    ice_js_dir = $(ICE_JS_HOME)
-	else
-	    ifeq ($(shell test -f $(top_srcdir)/bin/slice2js && echo 0), 0)
-		ice_js_dir = $(top_srcdir)
-	    else 
-		    ifeq ($(shell test -f /usr/bin/slice2js && echo 0), 0)
-		    ice_js_dir = /usr
-		    ifeq ($(shell test -f /opt/IceJS-$(ICEJS_VERSION)/bin/slice2js && echo 0), 0)
-		       $(warning Found slice2js in both /usr/bin and /opt/IceJS-$(ICEJS_VERSION)/bin, /usr/bin/slice2js will be used!)
-		    endif
-		    ifeq ($(shell test -f /Library/Developer/IceJS-$(ICEJS_VERSION)/bin/slice2js && echo 0), 0)
-		       $(warning Found slice2js in both /usr/bin and /Library/Developer/IceJS-$(ICEJS_VERSION)/bin, /usr/bin/slice2js will be used!)
-		    endif
+    ifneq ($(ICE_JS_HOME),)
+	ifneq ($(shell test -f $(ICE_JS_HOME)/$(binsubdir)$(cpp11suffix)/slice2js && echo 0), 0)
+$(error Unable to find slice2js in $(ICE_JS_HOME)/$(binsubdir)$(cpp11suffix), please verify ICE_JS_HOME is properly configured and Ice is correctly installed.)
+	endif
+	ice_js_dir = $(ICE_JS_HOME)
+    else
+	ifeq ($(shell test -f $(top_srcdir)/bin/slice2js && echo 0), 0)
+	    ice_js_dir = $(top_srcdir)
+	else 
+		ifeq ($(shell test -f /usr/bin/slice2js && echo 0), 0)
+		ice_js_dir = /usr
+		ifeq ($(shell test -f /opt/IceJS-$(ICEJS_VERSION)/bin/slice2js && echo 0), 0)
+		   $(warning Found slice2js in both /usr/bin and /opt/IceJS-$(ICEJS_VERSION)/bin, /usr/bin/slice2js will be used!)
+		endif
+		ifeq ($(shell test -f /Library/Developer/IceJS-$(ICEJS_VERSION)/bin/slice2js && echo 0), 0)
+		   $(warning Found slice2js in both /usr/bin and /Library/Developer/IceJS-$(ICEJS_VERSION)/bin, /usr/bin/slice2js will be used!)
+		endif
+	    else
+		ifeq ($(shell test -f /opt/IceJS-$(ICEJS_VERSION)/$(binsubdir)/slice2js && echo 0), 0)
+		    ice_js_dir = /opt/IceJS-$(ICEJS_VERSION)
 		else
-		    ifeq ($(shell test -f /opt/IceJS-$(ICEJS_VERSION)/$(binsubdir)/slice2js && echo 0), 0)
-			ice_js_dir = /opt/IceJS-$(ICEJS_VERSION)
-		    else
-			ifeq ($(shell test -f /Library/Developer/IceJS-$(ICEJS_VERSION)/$(binsubdir)/slice2js && echo 0), 0)
-			    ice_js_dir = /Library/Developer/IceJS-$(ICEJS_VERSION)
-			endif
+		    ifeq ($(shell test -f /Library/Developer/IceJS-$(ICEJS_VERSION)/$(binsubdir)/slice2js && echo 0), 0)
+			ice_js_dir = /Library/Developer/IceJS-$(ICEJS_VERSION)
 		    endif
 		endif
 	    endif
 	endif
-	ifndef ice_js_dir
-    $(error Unable to find a valid IceJS distribution, please verify ICE_JS_HOME is properly configured and IceJS is correctly installed.)
-	endif
+    endif
+    ifndef ice_js_dir
+$(error Unable to find a valid IceJS distribution, please verify ICE_JS_HOME is properly configured and IceJS is correctly installed.)
     endif
 
     ifeq ($(slice_translator),slice2js)

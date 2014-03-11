@@ -8,12 +8,6 @@
 # **********************************************************************
 
 #
-# The "root directory" for runpath embedded in executables. Can be unset
-# to avoid adding a runpath to Ice executables.
-#
-#embedded_runpath_prefix  ?= /opt/IceJS-$(VERSION_MAJOR).$(VERSION_MINOR)
-
-#
 # Define OPTIMIZE as yes if you want to build with
 # optimization. Otherwise Ice is build with debug information.
 #
@@ -60,9 +54,7 @@ includedir		= $(ice_dir)/include
 #
 include	 $(top_srcdir)/config/Make.rules.$(UNAME)
 
-ifneq ($(embedded_runpath_prefix),)
-    runpath_libdir	:= $(embedded_runpath_prefix)/$(libsubdir)$(cpp11suffix)
-endif
+runpath_libdir		:= $(ice_js_dir)/$(libsubdir)$(cpp11suffix)
 
 ICECPPFLAGS		= -I$(slicedir)
 
@@ -92,7 +84,7 @@ ifeq ($(mkshlib),)
 endif
 
 SLICE2CPP	= $(ice_cpp_dir)/$(binsubdir)$(cpp11suffix)/slice2cpp
-RPATH_DIR	= $(ice_dir)/$(libsubdir)$(cpp11suffix)
+RPATH_DIR	= $(runpath_libdir)
 
 EVERYTHING		= all clean
 EVERYTHING_EXCEPT_ALL   = clean
