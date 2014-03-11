@@ -38,4 +38,6 @@ clean::
 	del /q $(NAME:.exe=.*)
 	del /q Slice2Cpp.res
 
+install:: all
+
 !include .depend.mak
