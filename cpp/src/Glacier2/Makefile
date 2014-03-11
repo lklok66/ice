@@ -44,6 +44,5 @@ $(ROUTER): $(OBJS)
 
 install:: all
 	$(call installprogram,$(ROUTER),$(DESTDIR)$(install_bindir))
-	$(call installdata,$(top_srcdir)/../man/man1/glacier2router.1,$(DESTDIR)$(install_mandir))
 
 include .depend
