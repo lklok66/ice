@@ -8,6 +8,15 @@
 # **********************************************************************
 
 #
+# The "root directory" for runpath embedded in executables.
+#	
+# If not set, it defaults to the IceJS installation directory set with
+# ICE_JS_HOME or the default installation directory if ICE_JS_HOME is
+# not set.
+#
+#embedded_runpath_prefix := /opt/IceJS-$(VERSION_MAJOR).$(VERSION_MINOR)
+
+#
 # Define OPTIMIZE as yes if you want to build with
 # optimization. Otherwise Ice is build with debug information.
 #
@@ -49,12 +58,15 @@ include $(top_srcdir)/config/Make.common.rules
 
 includedir		= $(ice_dir)/include
 
+ifeq ($(embedded_runpath_prefix),)
+    embedded_runpath_prefix := $(ice_js_dir)
+endif
+
 #
 # Platform specific definitions
 #
 include	 $(top_srcdir)/config/Make.rules.$(UNAME)
 
-embedded_runpath_prefix := $(ice_js_dir)
 ifneq ($(embedded_runpath_prefix),)
     runpath_libdir	:= $(embedded_runpath_prefix)/$(libsubdir)$(cpp11suffix)
 endif
