@@ -17,3 +17,8 @@ to use a free port.
 To run the server with web socket support:
 
 $ server --Ice.Default.Protocol=ws --Ice.Plugin.IceWS="IceWS:createIceWS"
+
+To run the client with web socket support:
+
+$ client --Ice.Default.Protocol=ws --Ice.Plugin.IceWS="IceWS:createIceWS"
+
