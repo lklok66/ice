@@ -105,8 +105,8 @@ function shutdown()
 
 //
 // Return an event handler suitable for "click" methods. The
-// event handler calls the given function, handles exception
-// and reset the state to Idle when the promise returned by
+// event handler calls the given function, handles exceptions
+// and resets the state to Idle when the promise returned by
 // the function is fulfilled.
 // 
 var performEventHandler = function(fn)
@@ -213,12 +213,12 @@ function setState(newState, ex)
 };
 
 //
-// Start in the iddle state
+// Start in the idle state
 //
 setState(State.Idle);
 
 //
-// Extract the url GET variables and put then in _GET object.
+// Extract the url GET variables and put them in the _GET object.
 //
 var _GET = {};
 if(window.location.search.length > 1)
