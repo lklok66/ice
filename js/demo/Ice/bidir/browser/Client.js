@@ -13,7 +13,7 @@ var Promise = Ice.Promise;
 var CallbackSenderPrx = Demo.CallbackSenderPrx;
 
 //
-// Define a servant class that implements Demo.CallbackReceiver
+// Define a servant class that implements the Demo.CallbackReceiver
 // interface.
 //
 var CallbackReceiverI = Ice.Class(Demo.CallbackReceiver, {
@@ -87,7 +87,7 @@ var stop = function()
 }
 
 //
-// Setup buttons click handlers
+// Setup button click handlers
 //
 $("#start").click(
     function()

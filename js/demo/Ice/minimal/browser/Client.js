@@ -30,7 +30,7 @@ function sayHello()
             //
             // Down-cast this proxy to the derived interface Demo::Hello
             // using checkedCast, and invoke the sayHello operation if 
-            // the checkedCast success.
+            // the checkedCast succeeds.
             //
             return Demo.HelloPrx.checkedCast(proxy).then(
                 function(hello)
@@ -42,7 +42,7 @@ function sayHello()
         function(ex)
         {
             //
-            // Handle any exceptions throw above.
+            // Handle any exceptions thrown above.
             //
             $("#output").val(ex.toString());
         }
@@ -120,7 +120,7 @@ function setState(newState)
 }
 
 //
-// Start in the iddle state
+// Start in the idle state
 //
 setState(State.Idle);
 

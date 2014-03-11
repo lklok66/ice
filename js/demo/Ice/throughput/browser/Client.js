@@ -77,8 +77,7 @@ function run()
             
             var data = $("#data").val();
             //
-            // Get the sequence data to use by
-            // this test.
+            // Get the sequence data
             //
             if(data == "byte-seq")
             {
@@ -117,7 +116,7 @@ function run()
             }
             
             //
-            // Get the proxy and operation to use by this test.
+            // Get the proxy and operation
             //
             var test = $("#test").val();
             if(test == "twoway" || test == "oneway")
@@ -212,7 +211,7 @@ function run()
             // Invoke the test operation in a loop with the required
             // arguments. 
             //
-            // We chain the promises, a test operation is called only
+            // We chain the promises. A test operation is called only
             // once the promise for the previous operation is
             // fulfilled.
             //
@@ -276,7 +275,7 @@ $("#run").click(
     });
 
 //
-// Asynchronous loop, each call to the given function returns a
+// Asynchronous loop: each call to the given function returns a
 // promise that when fulfilled runs the next iteration.
 //    
 function loop(fn, repetitions)

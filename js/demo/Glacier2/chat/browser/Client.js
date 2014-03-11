@@ -15,9 +15,9 @@ var ChatSessionPrx = Demo.ChatSessionPrx;
 var ChatCallbackPrx = Demo.ChatCallbackPrx;
 
 //
-// Servant that implements the ChatCallback interface,
-// the message operation just writes the received data
-// to output textarea.
+// Servant that implements the ChatCallback interface.
+// The message operation just writes the received data
+// to the output textarea.
 //
 var ChatCallbackI = Ice.Class(Demo.ChatCallback, {
     message: function(data)
@@ -30,10 +30,10 @@ var ChatCallbackI = Ice.Class(Demo.ChatCallback, {
 //
 // Chat client state
 //
-var State = { 
+var State = {
     Disconnected: 0,
-    Connecting: 1, 
-    Connected:2 
+    Connecting: 1,
+    Connected:2
 };
 
 var state = State.Disconnected;
@@ -66,15 +66,15 @@ var signin = function()
             // Start animating the loading progress bar.
             //
             startProgress();
-            
+
             var hostname = document.location.hostname || "127.0.0.1";
             //
-            // If the demo is access vi https use a secure (WSS) endpoint, otherwise
-            // use a non secure (WS) endpoint.
+            // If the demo is accessed vi https, use a secure (WSS) endpoint, otherwise
+            // use a non-secure (WS) endpoint.
             //
-            // The web server will act as a reverse proxy for Web Socket connetions, that
-            // facilitates the setup of WSS with self signed certificates. Where Firefox
-            // and Internet Exlorer certificate exceptions are only valid for the same
+            // The web server will act as a reverse proxy for WebSocket connections. This
+            // facilitates the setup of WSS with self-signed certificates because Firefox
+            // and Internet Explorer certificate exceptions are only valid for the same
             // port and host.
             //
             var secure = document.location.protocol.indexOf("https") != -1;
@@ -82,16 +82,16 @@ var signin = function()
                                   "DemoGlacier2/router:ws -p 8080 -h " + hostname + " -r /chatws";
 
             //
-            // Initialize the communicator with Ice.Default.Router property
+            // Initialize the communicator with the Ice.Default.Router property
             // set to the chat demo Glacier2 router.
             //
             var id = new Ice.InitializationData();
             id.properties = Ice.createProperties();
             id.properties.setProperty("Ice.Default.Router", router);
             communicator = Ice.initialize(id);
-            
+
             //
-            // Get a proxy to the Glacier2 router, using checkedCast to ensure
+            // Get a proxy to the Glacier2 router using checkedCast to ensure
             // the Glacier2 server is available.
             //
             return RouterPrx.checkedCast(communicator.getDefaultRouter());
@@ -115,7 +115,7 @@ var signin = function()
         function(ex)
         {
             //
-            // Handle any exceptions occurred during session creation.
+            // Handle any exceptions that occurred during session creation.
             //
             if(ex instanceof Glacier2.PermissionDeniedException)
             {
@@ -144,14 +144,14 @@ var signin = function()
 var run = function(communicator, router, session)
 {
     //
-    // The chat promise is used to wait for the completion of chating
-    // state. The completion could happen because the user sign out,
-    // or because there is an exception.
+    // The chat promise is used to wait for the completion of chatting
+    // state. The completion could happen because the user signed out,
+    // or because an exception was raised.
     //
     var chat = new Promise();
 
     //
-    // Get the session timeout, the router client category and
+    // Get the session timeout and the router client category, and
     // create the client object adapter.
     //
     // Use Ice.Promise.all to wait for the completion of all the
@@ -167,9 +167,9 @@ var run = function(communicator, router, session)
             var timeout = timeoutArgs[0];
             var category = categoryArgs[0];
             var adapter = adapterArgs[0];
-            
+
             //
-            // Call refreshSession in a loop to keep the 
+            // Call refreshSession in a loop to keep the
             // session alive.
             //
             var refreshSession = function()
@@ -189,14 +189,14 @@ var run = function(communicator, router, session)
                     });
             };
             refreshSession();
-            
+
             //
-            // Create the ChatCallback servant and add it to the 
+            // Create the ChatCallback servant and add it to the
             // ObjectAdapter.
             //
-            var callback = ChatCallbackPrx.uncheckedCast(adapter.add(new ChatCallbackI(), 
+            var callback = ChatCallbackPrx.uncheckedCast(adapter.add(new ChatCallbackI(),
                                                                      new Ice.Identity("callback", category)));
-            
+
             //
             // Set the chat session callback.
             //
@@ -220,7 +220,7 @@ var run = function(communicator, router, session)
             $("#input").focus();
 
             //
-            // Process input events in the input texbox until chat
+            // Process input events in the input textbox until the chat
             // promise is completed.
             //
             $("#input").keypress(
@@ -229,8 +229,8 @@ var run = function(communicator, router, session)
                     if(!chat.completed())
                     {
                         //
-                        // When enter key is pressed we send a new
-                        // message using session say operation and
+                        // When the enter key is pressed, we send a new
+                        // message using the session say operation and
                         // reset the textbox contents.
                         //
                         if(e.which === 13)
@@ -246,9 +246,9 @@ var run = function(communicator, router, session)
                         }
                     }
                 });
-            
+
             //
-            // Exit the chat loop accepting the chat
+            // Exit the chat loop by accepting the chat
             // promise.
             //
             $("#signout").click(
@@ -258,7 +258,7 @@ var run = function(communicator, router, session)
                     return false;
                 }
             );
-            
+
             return chat;
         }
     ).finally(
@@ -272,7 +272,7 @@ var run = function(communicator, router, session)
             $("#input").off("keypress");
             $("#signout").off("click");
             $("#output").val("");
-            
+
             //
             // Destroy the session.
             //
@@ -282,7 +282,7 @@ var run = function(communicator, router, session)
         function()
         {
             //
-            // Destroy the communicator and go back to the 
+            // Destroy the communicator and go back to the
             // disconnected state.
             //
             communicator.destroy().finally(
@@ -300,7 +300,7 @@ var run = function(communicator, router, session)
         function(ex)
         {
             //
-            // Handle any exceptions occurred while running.
+            // Handle any exceptions that occurred while running.
             //
             error(ex);
             communicator.destroy();
@@ -308,7 +308,7 @@ var run = function(communicator, router, session)
 };
 
 //
-// Switch to Disconnected state and display the error 
+// Switch to Disconnected state and display the error
 // message.
 //
 var error = function(message)
@@ -317,7 +317,7 @@ var error = function(message)
     hasError = true;
     var current = state === State.Connecting ? "#loading" : "#chat-form";
     $("#signin-alert span").text(message);
-    
+
     //
     // Transition the screen
     //
@@ -333,14 +333,14 @@ var error = function(message)
 
 //
 // Do a transition from "from" screen to "to" screen, return
-// a promise that allows to wait for the transition 
-// completion. If to scree is undefined just animate out the
+// a promise that allows us to wait for the transition
+// to complete. If to screen is undefined just animate out the
 // from screen.
 //
 var transition = function(from, to)
 {
     var p = new Ice.Promise();
-    
+
     $(from).animo({ animation: "flipOutX", keep: true },
         function()
         {
@@ -349,8 +349,8 @@ var transition = function(from, to)
             {
                 $(to).css("display", "block").animo({ animation: "flipInX", keep: true },
                                                     function()
-                                                    { 
-                                                        p.succeed(); 
+                                                    {
+                                                        p.succeed();
                                                     });
             }
             else
@@ -369,7 +369,7 @@ $("#signin").click(function()
                        signin();
                        return false;
                    });
-    
+
 //
 // Dismiss error message.
 //
@@ -395,7 +395,7 @@ var startProgress = function()
             {
                 w = w === 100 ? 0 : w + 5;
                 $("#loading .meter").css("width", w.toString() + "%");
-            }, 
+            },
             20);
     }
 };

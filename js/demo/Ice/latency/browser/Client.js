@@ -22,7 +22,7 @@ var communicator = Ice.initialize();
 function run()
 {
     //
-    // Create a proxy to the  ping object.
+    // Create a proxy to the ping object.
     //
     var hostname = document.location.hostname || "127.0.0.1";
     var secure = document.location.protocol.indexOf("https") != -1;
@@ -62,7 +62,7 @@ function run()
 }
 
 //
-// Run buttton event handler.
+// Run button event handler.
 //
 $("#run").click(
     function()
@@ -95,7 +95,7 @@ $("#run").click(
     });
 
 //
-// Asynchronous loop, each call to the given function returns a
+// Asynchronous loop: each call to the given function returns a
 // promise that when fulfilled runs the next iteration.
 //    
 function loop(fn, repetitions)
