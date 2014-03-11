@@ -30,26 +30,165 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiDirsComponent">
     <ROW Directory="APPDIR" Directory_Parent="TARGETDIR" DefaultDir="APPDIR:." IsPseudoRoot="1"/>
+    <ROW Directory="ChatDemo_Dir" Directory_Parent="demojs_Dir" DefaultDir="ChatDemo"/>
     <ROW Directory="DEMO_DIR" Directory_Parent="TARGETDIR" DefaultDir="DEMO_DIR" IsPseudoRoot="1"/>
+    <ROW Directory="Glacier2_1_Dir" Directory_Parent="demojs_Dir" DefaultDir="Glacier2"/>
+    <ROW Directory="Glacier2_2_Dir" Directory_Parent="node_modules_Dir" DefaultDir="Glacier2"/>
+    <ROW Directory="Glacier2_Dir" Directory_Parent="demo_Dir" DefaultDir="Glacier2"/>
+    <ROW Directory="IceGrid_Dir" Directory_Parent="node_modules_Dir" DefaultDir="IceGrid"/>
     <ROW Directory="IceJS0.1.0_Dir" Directory_Parent="APPDIR" DefaultDir="ICEJS-~1.0|IceJS-0.1.0"/>
+    <ROW Directory="IceMX_Dir" Directory_Parent="node_modules_Dir" DefaultDir="IceMX"/>
+    <ROW Directory="IceStorm_Dir" Directory_Parent="node_modules_Dir" DefaultDir="IceStorm"/>
+    <ROW Directory="Ice_1_Dir" Directory_Parent="demojs_Dir" DefaultDir="Ice"/>
+    <ROW Directory="Ice_2_Dir" Directory_Parent="demopy_Dir" DefaultDir="Ice"/>
     <ROW Directory="Ice_3.4.2_DIR" Directory_Parent="ZeroC_DIR" DefaultDir="ICEFOR~1.0|Ice for JavaScript 0.1.0"/>
+    <ROW Directory="Ice_3_Dir" Directory_Parent="node_modules_Dir" DefaultDir="Ice"/>
+    <ROW Directory="Ice_Dir" Directory_Parent="demo_Dir" DefaultDir="Ice"/>
     <ROW Directory="PersonalFolder" Directory_Parent="TARGETDIR" DefaultDir="Person~1|PersonalFolder" IsPseudoRoot="1"/>
     <ROW Directory="ProgramMenuFolder" Directory_Parent="TARGETDIR" DefaultDir="Progra~1|ProgramMenuFolder" IsPseudoRoot="1"/>
     <ROW Directory="TARGETDIR" DefaultDir="SourceDir"/>
     <ROW Directory="ZeroC_DIR" Directory_Parent="ProgramMenuFolder" DefaultDir="ZeroC"/>
+    <ROW Directory="assets_Dir" Directory_Parent="DEMO_DIR" DefaultDir="assets"/>
+    <ROW Directory="balancer_Dir" Directory_Parent="examples_Dir" DefaultDir="balancer"/>
+    <ROW Directory="benchmark_Dir" Directory_Parent="httpproxy_Dir" DefaultDir="BENCHM~1|benchmark"/>
+    <ROW Directory="benchmarks_Dir" Directory_Parent="eventemitter3_Dir" DefaultDir="BENCHM~1|benchmarks"/>
+    <ROW Directory="bidir_1_Dir" Directory_Parent="Ice_1_Dir" DefaultDir="bidir"/>
+    <ROW Directory="bidir_2_Dir" Directory_Parent="Ice_2_Dir" DefaultDir="bidir"/>
+    <ROW Directory="bidir_Dir" Directory_Parent="Ice_Dir" DefaultDir="bidir"/>
+    <ROW Directory="bin_1_Dir" Directory_Parent="DEMO_DIR" DefaultDir="bin"/>
     <ROW Directory="bin_Dir" Directory_Parent="IceJS0.1.0_Dir" DefaultDir="bin"/>
+    <ROW Directory="browser_1_Dir" Directory_Parent="bidir_1_Dir" DefaultDir="browser"/>
+    <ROW Directory="browser_2_Dir" Directory_Parent="hello_1_Dir" DefaultDir="browser"/>
+    <ROW Directory="browser_3_Dir" Directory_Parent="latency_1_Dir" DefaultDir="browser"/>
+    <ROW Directory="browser_4_Dir" Directory_Parent="minimal_1_Dir" DefaultDir="browser"/>
+    <ROW Directory="browser_5_Dir" Directory_Parent="throughput_1_Dir" DefaultDir="browser"/>
+    <ROW Directory="browser_Dir" Directory_Parent="chat_1_Dir" DefaultDir="browser"/>
+    <ROW Directory="certs_Dir" Directory_Parent="DEMO_DIR" DefaultDir="certs"/>
+    <ROW Directory="chat_1_Dir" Directory_Parent="Glacier2_1_Dir" DefaultDir="chat"/>
+    <ROW Directory="chat_Dir" Directory_Parent="Glacier2_Dir" DefaultDir="chat"/>
+    <ROW Directory="client_1_Dir" Directory_Parent="generated_1_Dir" DefaultDir="client"/>
+    <ROW Directory="client_2_Dir" Directory_Parent="generated_2_Dir" DefaultDir="client"/>
+    <ROW Directory="client_3_Dir" Directory_Parent="generated_3_Dir" DefaultDir="client"/>
+    <ROW Directory="client_4_Dir" Directory_Parent="generated_4_Dir" DefaultDir="client"/>
+    <ROW Directory="client_5_Dir" Directory_Parent="generated_5_Dir" DefaultDir="client"/>
+    <ROW Directory="client_Dir" Directory_Parent="generated_Dir" DefaultDir="client"/>
+    <ROW Directory="config_Dir" Directory_Parent="DEMO_DIR" DefaultDir="config"/>
+    <ROW Directory="demo_Dir" Directory_Parent="DEMO_DIR" DefaultDir="demo"/>
+    <ROW Directory="demojs_Dir" Directory_Parent="DEMO_DIR" DefaultDir="demojs"/>
+    <ROW Directory="demopy_Dir" Directory_Parent="DEMO_DIR" DefaultDir="demopy"/>
+    <ROW Directory="doc_Dir" Directory_Parent="httpproxy_Dir" DefaultDir="doc"/>
+    <ROW Directory="eventemitter3_Dir" Directory_Parent="node_modules_2_Dir" DefaultDir="EVENTE~1|eventemitter3"/>
+    <ROW Directory="examples_Dir" Directory_Parent="httpproxy_Dir" DefaultDir="examples"/>
+    <ROW Directory="fixtures_Dir" Directory_Parent="test_1_Dir" DefaultDir="fixtures"/>
+    <ROW Directory="generated_1_Dir" Directory_Parent="bidir_Dir" DefaultDir="GENERA~1|generated"/>
+    <ROW Directory="generated_2_Dir" Directory_Parent="hello_Dir" DefaultDir="GENERA~1|generated"/>
+    <ROW Directory="generated_3_Dir" Directory_Parent="latency_Dir" DefaultDir="GENERA~1|generated"/>
+    <ROW Directory="generated_4_Dir" Directory_Parent="minimal_Dir" DefaultDir="GENERA~1|generated"/>
+    <ROW Directory="generated_5_Dir" Directory_Parent="throughput_Dir" DefaultDir="GENERA~1|generated"/>
+    <ROW Directory="generated_Dir" Directory_Parent="chat_Dir" DefaultDir="GENERA~1|generated"/>
+    <ROW Directory="hello_1_Dir" Directory_Parent="Ice_1_Dir" DefaultDir="hello"/>
+    <ROW Directory="hello_2_Dir" Directory_Parent="Ice_2_Dir" DefaultDir="hello"/>
+    <ROW Directory="hello_Dir" Directory_Parent="Ice_Dir" DefaultDir="hello"/>
+    <ROW Directory="helpers_Dir" Directory_Parent="examples_Dir" DefaultDir="helpers"/>
+    <ROW Directory="http_Dir" Directory_Parent="examples_Dir" DefaultDir="http"/>
+    <ROW Directory="httpproxy_1_Dir" Directory_Parent="lib_1_Dir" DefaultDir="HTTP-P~1|http-proxy"/>
+    <ROW Directory="httpproxy_Dir" Directory_Parent="node_modules_1_Dir" DefaultDir="HTTP-P~1|http-proxy"/>
+    <ROW Directory="latency_1_Dir" Directory_Parent="Ice_1_Dir" DefaultDir="latency"/>
+    <ROW Directory="latency_2_Dir" Directory_Parent="Ice_2_Dir" DefaultDir="latency"/>
+    <ROW Directory="latency_Dir" Directory_Parent="Ice_Dir" DefaultDir="latency"/>
+    <ROW Directory="lib_1_Dir" Directory_Parent="httpproxy_Dir" DefaultDir="lib"/>
     <ROW Directory="lib_Dir" Directory_Parent="IceJS0.1.0_Dir" DefaultDir="lib"/>
+    <ROW Directory="middleware_Dir" Directory_Parent="examples_Dir" DefaultDir="MIDDLE~1|middleware"/>
+    <ROW Directory="minimal_1_Dir" Directory_Parent="Ice_1_Dir" DefaultDir="minimal"/>
+    <ROW Directory="minimal_2_Dir" Directory_Parent="Ice_2_Dir" DefaultDir="minimal"/>
+    <ROW Directory="minimal_Dir" Directory_Parent="Ice_Dir" DefaultDir="minimal"/>
+    <ROW Directory="node_modules_1_Dir" Directory_Parent="DEMO_DIR" DefaultDir="NODE_M~1|node_modules"/>
+    <ROW Directory="node_modules_2_Dir" Directory_Parent="httpproxy_Dir" DefaultDir="NODE_M~1|node_modules"/>
     <ROW Directory="node_modules_Dir" Directory_Parent="IceJS0.1.0_Dir" DefaultDir="NODE_M~1|node_modules"/>
+    <ROW Directory="passes_Dir" Directory_Parent="httpproxy_1_Dir" DefaultDir="passes"/>
+    <ROW Directory="run_Dir" Directory_Parent="benchmarks_Dir" DefaultDir="run"/>
+    <ROW Directory="scripts_Dir" Directory_Parent="benchmark_Dir" DefaultDir="scripts"/>
+    <ROW Directory="server_1_Dir" Directory_Parent="generated_1_Dir" DefaultDir="server"/>
+    <ROW Directory="server_2_Dir" Directory_Parent="generated_2_Dir" DefaultDir="server"/>
+    <ROW Directory="server_3_Dir" Directory_Parent="generated_3_Dir" DefaultDir="server"/>
+    <ROW Directory="server_4_Dir" Directory_Parent="generated_4_Dir" DefaultDir="server"/>
+    <ROW Directory="server_5_Dir" Directory_Parent="generated_5_Dir" DefaultDir="server"/>
+    <ROW Directory="server_Dir" Directory_Parent="generated_Dir" DefaultDir="server"/>
+    <ROW Directory="test_1_Dir" Directory_Parent="httpproxy_Dir" DefaultDir="test"/>
+    <ROW Directory="test_Dir" Directory_Parent="eventemitter3_Dir" DefaultDir="test"/>
+    <ROW Directory="throughput_1_Dir" Directory_Parent="Ice_1_Dir" DefaultDir="THROUG~1|throughput"/>
+    <ROW Directory="throughput_2_Dir" Directory_Parent="Ice_2_Dir" DefaultDir="THROUG~1|throughput"/>
+    <ROW Directory="throughput_Dir" Directory_Parent="Ice_Dir" DefaultDir="THROUG~1|throughput"/>
+    <ROW Directory="websocket_Dir" Directory_Parent="examples_Dir" DefaultDir="WEBSOC~1|websocket"/>
+    <ROW Directory="wss_Dir" Directory_Parent="certs_Dir" DefaultDir="wss"/>
     <ROW Directory="x64_Dir" Directory_Parent="bin_Dir" DefaultDir="x64"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
-    <ROW Component="DEMO_DIR" ComponentId="{0D493035-E367-4CE8-B28E-1C6A0CF3F79F}" Directory_="DEMO_DIR" Attributes="0"/>
+    <ROW Component="Address.js" ComponentId="{8B6D022B-3179-4335-944B-CAB04489F1F4}" Directory_="Ice_3_Dir" Attributes="0" KeyPath="Address.js" Type="0"/>
+    <ROW Component="Admin.js" ComponentId="{DAD6C655-C115-42C9-B137-B5E2054A299C}" Directory_="IceGrid_Dir" Attributes="0" KeyPath="Admin.js" Type="0"/>
+    <ROW Component="Callback.ice" ComponentId="{2899CE64-C7F1-4B82-9802-EFECD6C3626F}" Directory_="bidir_2_Dir" Attributes="0" KeyPath="Callback.ice_2" Type="0"/>
+    <ROW Component="Client.js" ComponentId="{D153A18A-E383-45F2-982D-120153CFE977}" Directory_="browser_Dir" Attributes="0" KeyPath="Client.js_1" Type="0"/>
+    <ROW Component="Client.js_1" ComponentId="{B1D83EA4-C5D0-4282-8E3D-6F4022E42D32}" Directory_="browser_1_Dir" Attributes="0" KeyPath="Client.js_3" Type="0"/>
+    <ROW Component="Client.js_2" ComponentId="{993670C5-1432-42CB-A842-82CE48E44193}" Directory_="browser_2_Dir" Attributes="0" KeyPath="Client.js_5" Type="0"/>
+    <ROW Component="Client.js_3" ComponentId="{E3541804-5386-4C68-A33F-08F5250DAE79}" Directory_="browser_3_Dir" Attributes="0" KeyPath="Client.js_7" Type="0"/>
+    <ROW Component="Client.js_4" ComponentId="{3E302E99-02BD-4E17-A4C8-E5A92B623C0A}" Directory_="browser_4_Dir" Attributes="0" KeyPath="Client.js_9" Type="0"/>
+    <ROW Component="Client.js_5" ComponentId="{A88C9E93-0421-4AB0-A51A-8EA41DA15401}" Directory_="browser_5_Dir" Attributes="0" KeyPath="Client.js_11" Type="0"/>
+    <ROW Component="Client.py" ComponentId="{3FFBAF50-901B-4C83-ACBC-34F8CAF1250A}" Directory_="hello_2_Dir" Attributes="0" KeyPath="Client.py_1" Type="0"/>
+    <ROW Component="Client.py_1" ComponentId="{9CED8D3D-B516-4C9E-817E-8BAA3182B089}" Directory_="latency_2_Dir" Attributes="0" KeyPath="Client.py_2" Type="0"/>
+    <ROW Component="Client.py_2" ComponentId="{D19B288E-B34B-4799-9E0E-360A6E50C358}" Directory_="minimal_2_Dir" Attributes="0" KeyPath="Client.py_3" Type="0"/>
+    <ROW Component="Client.py_3" ComponentId="{5A26361E-D676-4CC6-9B50-648D25C35221}" Directory_="throughput_2_Dir" Attributes="0" KeyPath="Client.py_4" Type="0"/>
     <ROW Component="Glacier2.js" ComponentId="{682D1B43-CC2A-4003-AC7A-330FE205B24D}" Directory_="lib_Dir" Attributes="0" KeyPath="Glacier2.js" Type="0"/>
+    <ROW Component="Glacier2.js_1" ComponentId="{9CE7058E-FEC5-449A-8B4C-964E6E277529}" Directory_="Glacier2_2_Dir" Attributes="0" KeyPath="Glacier2.js_1" Type="0"/>
+    <ROW Component="HttpServer.js" ComponentId="{96C1D498-0CC5-4671-B6D0-BF4F424B6FD3}" Directory_="bin_1_Dir" Attributes="0" KeyPath="HttpServer.js" Type="0"/>
     <ROW Component="ICE_LICENSE.txt" ComponentId="{E2575A09-C8C7-4723-9DCB-56496E6EE884}" Directory_="IceJS0.1.0_Dir" Attributes="0" KeyPath="ICE_LICENSE.txt" Type="0"/>
+    <ROW Component="IceMX.js" ComponentId="{26108BCD-3E9E-4EAD-B6F3-B7707B75C3BF}" Directory_="IceMX_Dir" Attributes="0" KeyPath="IceMX.js_1" Type="0"/>
+    <ROW Component="IceStorm.js" ComponentId="{06D6CBD2-76EC-4CB7-979A-1BD4506B2862}" Directory_="IceStorm_Dir" Attributes="0" KeyPath="IceStorm.js_1" Type="0"/>
     <ROW Component="Ice_3.4.2" ComponentId="{5F1413CB-BC55-4D55-838E-BFCDBF003829}" Directory_="Ice_3.4.2_DIR" Attributes="4" KeyPath="Version"/>
     <ROW Component="InstallDir" ComponentId="{B6A18E8C-9FFD-438F-883C-4A1DE5DB65EF}" Directory_="APPDIR" Attributes="260" KeyPath="InstallDir"/>
     <ROW Component="InstallDir_2" ComponentId="{FDC00AD0-3E7B-4FB4-ABA6-A35486A00E78}" Directory_="APPDIR" Attributes="260" KeyPath="InstallDir_2"/>
+    <ROW Component="Makefile.mak" ComponentId="{5CB53830-2FB5-4DD5-9C89-ED57D903FDBA}" Directory_="Glacier2_Dir" Attributes="0" KeyPath="Makefile.mak_1" Type="0"/>
+    <ROW Component="Makefile.mak_1" ComponentId="{64BB95FB-585F-4C94-8BAF-86FFFA56F9D0}" Directory_="Ice_Dir" Attributes="0" KeyPath="Makefile.mak_5" Type="0"/>
+    <ROW Component="README.md" ComponentId="{4596C2C2-ABCF-4600-938F-C32D47C34931}" Directory_="benchmark_Dir" Attributes="0" KeyPath="README.md" Type="0"/>
     <ROW Component="README.txt_12" ComponentId="{395E0EDB-74A1-45C0-B4B9-61DFD137A127}" Directory_="IceJS0.1.0_Dir" Attributes="0" KeyPath="README.txt"/>
+    <ROW Component="agent2cert.pem" ComponentId="{9F3C25D3-EE33-4835-8747-76BA9E2F724F}" Directory_="fixtures_Dir" Attributes="0" KeyPath="agent2cert.pem" Type="0"/>
+    <ROW Component="basicproxy.js" ComponentId="{960A7E30-87C3-4984-89A0-1F1EF7AA8B89}" Directory_="http_Dir" Attributes="0" KeyPath="basicproxy.js" Type="0"/>
+    <ROW Component="bench.js" ComponentId="{7E481085-80A0-4F74-9620-FBBFD199683B}" Directory_="benchmarks_Dir" Attributes="0" KeyPath="bench.js" Type="0"/>
+    <ROW Component="bodyDecodermiddleware.js" ComponentId="{5C421E96-A585-4131-B14E-93A2CEE8D686}" Directory_="middleware_Dir" Attributes="0" KeyPath="bodyDecodermiddleware.js" Type="0"/>
+    <ROW Component="build.js" ComponentId="{B844A441-64C4-49E0-AE55-95C2BB9C9E1E}" Directory_="config_Dir" Attributes="0" KeyPath="build.js" Type="0"/>
+    <ROW Component="build.js_1" ComponentId="{11AC3D83-BAD3-4949-85AF-8EC101F48905}" Directory_="demojs_Dir" Attributes="0" KeyPath="build.js_1" Type="0"/>
+    <ROW Component="build.js_10" ComponentId="{E7CD0DED-BEE3-48E7-BA90-2D9ACE7D905F}" Directory_="throughput_1_Dir" Attributes="0" KeyPath="build.js_10" Type="0"/>
+    <ROW Component="build.js_2" ComponentId="{08CF7E3D-F32E-4B54-9771-F1B46288E496}" Directory_="ChatDemo_Dir" Attributes="0" KeyPath="build.js_2" Type="0"/>
+    <ROW Component="build.js_3" ComponentId="{09C293E2-1A83-42CF-ADE6-0DA0252EBD4F}" Directory_="Glacier2_1_Dir" Attributes="0" KeyPath="build.js_3" Type="0"/>
+    <ROW Component="build.js_4" ComponentId="{A4C33232-DB16-4739-B1B1-5725E95D6A8D}" Directory_="chat_1_Dir" Attributes="0" KeyPath="build.js_4" Type="0"/>
+    <ROW Component="build.js_5" ComponentId="{A7287AB1-B3EF-4E14-BA0D-386AA4BFB277}" Directory_="bidir_1_Dir" Attributes="0" KeyPath="build.js_5" Type="0"/>
+    <ROW Component="build.js_6" ComponentId="{4041CEAF-C90F-482C-852A-CBAC96544D7D}" Directory_="Ice_1_Dir" Attributes="0" KeyPath="build.js_6" Type="0"/>
+    <ROW Component="build.js_7" ComponentId="{5769CEB9-2845-4255-A610-E08296DB9108}" Directory_="hello_1_Dir" Attributes="0" KeyPath="build.js_7" Type="0"/>
+    <ROW Component="build.js_8" ComponentId="{2DC74E7D-DC20-4782-8F06-D401657238B9}" Directory_="latency_1_Dir" Attributes="0" KeyPath="build.js_8" Type="0"/>
+    <ROW Component="build.js_9" ComponentId="{03BA2493-86BE-48E8-85D6-9451192FED10}" Directory_="minimal_1_Dir" Attributes="0" KeyPath="build.js_9" Type="0"/>
+    <ROW Component="cacert.pem" ComponentId="{757C012A-CA42-40B0-923A-156214EC9CC0}" Directory_="certs_Dir" Attributes="0" KeyPath="cacert.pem" Type="0"/>
+    <ROW Component="cacert.pem_1" ComponentId="{3E9EEA0B-254B-4977-A6F1-4A4594A48295}" Directory_="wss_Dir" Attributes="0" KeyPath="cacert.pem_1" Type="0"/>
+    <ROW Component="client" ComponentId="{D456F7EA-8385-438A-A706-064049504621}" Directory_="client_Dir" Attributes="0"/>
+    <ROW Component="client_1" ComponentId="{74209558-929B-46D5-9641-5C30FB6D76E2}" Directory_="client_1_Dir" Attributes="0"/>
+    <ROW Component="client_2" ComponentId="{7D4BFEE5-84D0-42FA-BDBA-ADF07BFEFDE4}" Directory_="client_2_Dir" Attributes="0"/>
+    <ROW Component="client_3" ComponentId="{47B0FAAD-99E6-415A-889F-899ADA8F15B7}" Directory_="client_3_Dir" Attributes="0"/>
+    <ROW Component="client_4" ComponentId="{7AE01663-A7E2-42CF-9BCA-0A1EA489ADA2}" Directory_="client_4_Dir" Attributes="0"/>
+    <ROW Component="client_5" ComponentId="{C8D82F5E-9FEB-4010-BB73-BF82F3A5F4B3}" Directory_="client_5_Dir" Attributes="0"/>
+    <ROW Component="common.css" ComponentId="{9DCF9BF6-3F65-491C-B073-B7BC6341B5AA}" Directory_="assets_Dir" Attributes="0" KeyPath="common.css" Type="0"/>
+    <ROW Component="common.js" ComponentId="{DC2AE67A-B7E7-455A-A316-4E41B3948668}" Directory_="httpproxy_1_Dir" Attributes="0" KeyPath="common.js" Type="0"/>
+    <ROW Component="context.js" ComponentId="{533E6D03-AEA3-4EA3-8355-F6BC14AF5514}" Directory_="run_Dir" Attributes="0" KeyPath="context.js" Type="0"/>
+    <ROW Component="demo.sln" ComponentId="{FE72E2DA-39C2-4E0C-8041-D0120A3AED89}" Directory_="demo_Dir" Attributes="0" KeyPath="demo.sln" Type="0"/>
+    <ROW Component="depend.mak" ComponentId="{017F4A5F-08A3-4401-8931-425977EE916C}" Directory_="chat_Dir" Attributes="0" KeyPath="depend.mak" Type="0"/>
+    <ROW Component="depend.mak_1" ComponentId="{CED387DF-E666-402E-B041-0D2D8608359C}" Directory_="bidir_Dir" Attributes="0" KeyPath="depend.mak_1" Type="0"/>
+    <ROW Component="depend.mak_2" ComponentId="{D87FFC46-FC72-4160-BA0A-653E4C0E5450}" Directory_="hello_Dir" Attributes="0" KeyPath="depend.mak_2" Type="0"/>
+    <ROW Component="depend.mak_3" ComponentId="{539B915F-6661-4775-9F99-111712A7BFEF}" Directory_="latency_Dir" Attributes="0" KeyPath="depend.mak_3" Type="0"/>
+    <ROW Component="depend.mak_4" ComponentId="{6D8825A2-08D1-4CB5-BF2D-034DF157F2C9}" Directory_="minimal_Dir" Attributes="0" KeyPath="depend.mak_4" Type="0"/>
+    <ROW Component="depend.mak_5" ComponentId="{1768EFBD-373B-4657-AA42-5C16CE00CE1C}" Directory_="throughput_Dir" Attributes="0" KeyPath="depend.mak_5" Type="0"/>
+    <ROW Component="emitter.test.js" ComponentId="{24B94BED-4C97-4911-BC6A-A0F5C990BCCB}" Directory_="test_Dir" Attributes="0" KeyPath="emitter.test.js" Type="0"/>
+    <ROW Component="examplestest.js" ComponentId="{7224EC4B-36F9-4E0A-BF9D-E5839C23E5D3}" Directory_="test_1_Dir" Attributes="0" KeyPath="examplestest.js" Type="0"/>
+    <ROW Component="glacier2router.exe" ComponentId="{FFCA0D82-CC0F-42C0-9E3F-6B248A8EF564}" Directory_="bin_Dir" Attributes="0" KeyPath="glacier2router.exe"/>
+    <ROW Component="glacier2router.exe_1" ComponentId="{948D4A41-7F70-49E2-822D-9F3FEAEF4961}" Directory_="x64_Dir" Attributes="256" KeyPath="glacier2router.exe_1"/>
+    <ROW Component="hello.js" ComponentId="{3033CF28-B7E3-4601-930E-386DA5ADB77B}" Directory_="scripts_Dir" Attributes="0" KeyPath="hello.js" Type="0"/>
+    <ROW Component="httpproxy.js" ComponentId="{F2B8EB00-1BC2-4391-A7AD-2AE8EE6216A5}" Directory_="lib_1_Dir" Attributes="0" KeyPath="httpproxy.js" Type="0"/>
     <ROW Component="ice35.dll" ComponentId="{99BA5416-CBE0-4D13-9616-9DB43FC7978C}" Directory_="bin_Dir" Attributes="0" KeyPath="ice35.dll"/>
     <ROW Component="ice35.dll_1" ComponentId="{06E58D29-CBC4-4684-8144-809ADCAD8D0F}" Directory_="x64_Dir" Attributes="256" KeyPath="ice35.dll_1"/>
     <ROW Component="ice35d.dll" ComponentId="{5EABE95D-C848-4157-B3EE-E46320B3E933}" Directory_="bin_Dir" Attributes="0" KeyPath="ice35d.dll"/>
@@ -67,39 +206,377 @@
     <ROW Component="icews35.dll_1" ComponentId="{79B3B0E8-F941-4CD0-B5B4-CB72A5F6ABDA}" Directory_="x64_Dir" Attributes="256" KeyPath="icews35.dll_1"/>
     <ROW Component="icews35d.dll" ComponentId="{570AE948-2B5D-4CDF-A482-19A64B04CACB}" Directory_="bin_Dir" Attributes="0" KeyPath="icews35d.dll"/>
     <ROW Component="icews35d.dll_1" ComponentId="{60C5C038-45BD-44FF-941B-14370D05FCDC}" Directory_="x64_Dir" Attributes="256" KeyPath="icews35d.dll_1"/>
-    <ROW Component="node_modules" ComponentId="{56E7154D-DFCB-4A99-A416-5A4CC49D78F4}" Directory_="node_modules_Dir" Attributes="0"/>
+    <ROW Component="index.html" ComponentId="{15CBCB9F-2AA9-466C-95E8-F8243A2A8D24}" Directory_="DEMO_DIR" Attributes="0" KeyPath="index.html_8" Type="0"/>
+    <ROW Component="latentwebsocketproxy.js" ComponentId="{DE8311C3-19A5-4FF5-876C-F18CBD3527B2}" Directory_="websocket_Dir" Attributes="0" KeyPath="latentwebsocketproxy.js" Type="0"/>
+    <ROW Component="logo.png" ComponentId="{19EF5D01-10D7-42E3-8773-AD5C5BC82EA3}" Directory_="doc_Dir" Attributes="0" KeyPath="logo.png" Type="0"/>
+    <ROW Component="npmignore" ComponentId="{9FFE674D-DDA7-47F5-9AD3-934920C7EF69}" Directory_="httpproxy_Dir" Attributes="0" KeyPath="npmignore" Type="0"/>
+    <ROW Component="npmignore_1" ComponentId="{3A0088E2-373D-49B1-A1AF-4D6B89D126DE}" Directory_="eventemitter3_Dir" Attributes="0" KeyPath="npmignore_1" Type="0"/>
+    <ROW Component="package.json" ComponentId="{0478F90B-3288-4D15-99B5-DA7EA2C2D35F}" Directory_="examples_Dir" Attributes="0" KeyPath="package.json" Type="0"/>
+    <ROW Component="server" ComponentId="{372026AF-DA65-449A-865E-0EB4218B0892}" Directory_="server_Dir" Attributes="0"/>
+    <ROW Component="server_1" ComponentId="{FA9E82E1-3B03-41C5-95C5-5A69B08D0A23}" Directory_="server_1_Dir" Attributes="0"/>
+    <ROW Component="server_2" ComponentId="{65ECCADD-E8C7-4E9F-914C-11A6E5FA6286}" Directory_="server_2_Dir" Attributes="0"/>
+    <ROW Component="server_3" ComponentId="{27854669-337A-4B65-A0BF-52A53840E10B}" Directory_="server_3_Dir" Attributes="0"/>
+    <ROW Component="server_4" ComponentId="{E6A2EA69-B531-4342-80FF-993CCEDD30FD}" Directory_="server_4_Dir" Attributes="0"/>
+    <ROW Component="server_5" ComponentId="{8E580EC2-203B-4756-88DB-F5B816C59AB3}" Directory_="server_5_Dir" Attributes="0"/>
+    <ROW Component="simplebalancerwithwebsockets.js" ComponentId="{B8E71451-5FD5-4302-A5E2-8D5C0A22749F}" Directory_="balancer_Dir" Attributes="0" KeyPath="simplebalancerwithwebsockets.js" Type="0"/>
     <ROW Component="slice2js.exe" ComponentId="{D838039C-941B-4296-B7B2-D7A5D4A18804}" Directory_="bin_Dir" Attributes="0" KeyPath="slice2js.exe"/>
     <ROW Component="sliceJS35.dll" ComponentId="{A45E24C8-1575-4DF3-B506-AAB306F6732B}" Directory_="bin_Dir" Attributes="0" KeyPath="sliceJS35.dll"/>
+    <ROW Component="store.js" ComponentId="{4DB61326-4B97-4CD5-80A1-D06E4F6AE724}" Directory_="helpers_Dir" Attributes="0" KeyPath="store.js" Type="0"/>
+    <ROW Component="webincoming.js" ComponentId="{DFED04A4-06F5-4A15-A91D-2E77D2FE6647}" Directory_="passes_Dir" Attributes="0" KeyPath="webincoming.js" Type="0"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
-    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="3" Level="1" Directory_="APPDIR" Attributes="0" Components="DEMO_DIR Glacier2.js ICE_LICENSE.txt Ice_3.4.2 InstallDir InstallDir_2 README.txt_12 ice35.dll ice35.dll_1 ice35d.dll ice35d.dll_1 icessl35.dll icessl35.dll_1 icessl35d.dll icessl35d.dll_1 iceutil35.dll iceutil35.dll_1 iceutil35d.dll iceutil35d.dll_1 iceutilJS35.dll icews35.dll icews35.dll_1 icews35d.dll icews35d.dll_1 node_modules slice2js.exe sliceJS35.dll"/>
+    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="3" Level="1" Directory_="APPDIR" Attributes="0" Components="Address.js Admin.js Callback.ice Client.js Client.js_1 Client.js_2 Client.js_3 Client.js_4 Client.js_5 Client.py Client.py_1 Client.py_2 Client.py_3 Glacier2.js Glacier2.js_1 HttpServer.js ICE_LICENSE.txt IceMX.js IceStorm.js Ice_3.4.2 InstallDir InstallDir_2 Makefile.mak Makefile.mak_1 README.md README.txt_12 agent2cert.pem basicproxy.js bench.js bodyDecodermiddleware.js build.js build.js_1 build.js_10 build.js_2 build.js_3 build.js_4 build.js_5 build.js_6 build.js_7 build.js_8 build.js_9 cacert.pem cacert.pem_1 client client_1 client_2 client_3 client_4 client_5 common.css common.js context.js demo.sln depend.mak depend.mak_1 depend.mak_2 depend.mak_3 depend.mak_4 depend.mak_5 emitter.test.js examplestest.js glacier2router.exe glacier2router.exe_1 hello.js httpproxy.js ice35.dll ice35.dll_1 ice35d.dll ice35d.dll_1 icessl35.dll icessl35.dll_1 icessl35d.dll icessl35d.dll_1 iceutil35.dll iceutil35.dll_1 iceutil35d.dll iceutil35d.dll_1 iceutilJS35.dll icews35.dll icews35.dll_1 icews35d.dll icews35d.dll_1 index.html latentwebsocketproxy.js logo.png npmignore npmignore_1 package.json server server_1 server_2 server_3 server_4 server_5 simplebalancerwithwebsockets.js slice2js.exe sliceJS35.dll store.js webincoming.js"/>
     <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
+    <ROW File="Address.js" Component_="Address.js" FileName="Address.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Address.js" SelfReg="false" NextFile="ArrayUtil.js"/>
+    <ROW File="Admin.js" Component_="Admin.js" FileName="Admin.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceGrid\Admin.js" SelfReg="false" NextFile="Descriptor.js"/>
+    <ROW File="ArrayUtil.js" Component_="Address.js" FileName="ARRAYU~1.JS|ArrayUtil.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ArrayUtil.js" SelfReg="false" NextFile="AsyncResult.js"/>
+    <ROW File="AsyncResult.js" Component_="Address.js" FileName="ASYNCR~1.JS|AsyncResult.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\AsyncResult.js" SelfReg="false" NextFile="AsyncResultBase.js"/>
+    <ROW File="AsyncResultBase.js" Component_="Address.js" FileName="ASYNCR~2.JS|AsyncResultBase.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\AsyncResultBase.js" SelfReg="false" NextFile="AsyncStatus.js"/>
+    <ROW File="AsyncStatus.js" Component_="Address.js" FileName="ASYNCS~1.JS|AsyncStatus.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\AsyncStatus.js" SelfReg="false" NextFile="Base64.js"/>
+    <ROW File="Base64.js" Component_="Address.js" FileName="Base64.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Base64.js" SelfReg="false" NextFile="BasicStream.js"/>
+    <ROW File="BasicStream.js" Component_="Address.js" FileName="BASICS~1.JS|BasicStream.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\BasicStream.js" SelfReg="false" NextFile="BatchOutgoingAsync.js"/>
+    <ROW File="BatchOutgoingAsync.js" Component_="Address.js" FileName="BATCHO~1.JS|BatchOutgoingAsync.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\BatchOutgoingAsync.js" SelfReg="false" NextFile="Buffer.js"/>
+    <ROW File="Buffer.js" Component_="Address.js" FileName="Buffer.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Buffer.js" SelfReg="false" NextFile="BuiltinSequences.js"/>
+    <ROW File="BuiltinSequences.js" Component_="Address.js" FileName="BUILTI~1.JS|BuiltinSequences.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\BuiltinSequences.js" SelfReg="false" NextFile="Class.js"/>
+    <ROW File="CHANGELOG.md" Component_="npmignore" FileName="CHANGE~1.MD|CHANGELOG.md" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\CHANGELOG.md" SelfReg="false" NextFile="logo.png"/>
+    <ROW File="Callback.ice" Component_="depend.mak_1" FileName="Callback.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\Callback.ice" SelfReg="false" NextFile="CallbackI.cpp"/>
+    <ROW File="Callback.ice_1" Component_="build.js_5" FileName="Callback.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\bidir\Callback.ice" SelfReg="false" NextFile="Client.js_4"/>
+    <ROW File="Callback.ice_2" Component_="Callback.ice" FileName="Callback.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\bidir\Callback.ice" SelfReg="false" NextFile="Client.py"/>
+    <ROW File="CallbackI.cpp" Component_="depend.mak_1" FileName="CALLBA~1.CPP|CallbackI.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\CallbackI.cpp" SelfReg="false" NextFile="CallbackI.h"/>
+    <ROW File="CallbackI.h" Component_="depend.mak_1" FileName="CALLBA~1.H|CallbackI.h" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\CallbackI.h" SelfReg="false" NextFile="Client.cpp_1"/>
+    <ROW File="Chat.ice" Component_="depend.mak" FileName="Chat.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\Chat.ice" SelfReg="false" NextFile="ChatSessionI.cpp"/>
+    <ROW File="Chat.ice_1" Component_="build.js_2" FileName="Chat.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\ChatDemo\Chat.ice" SelfReg="false" NextFile="ChatSession.ice"/>
+    <ROW File="Chat.ice_2" Component_="build.js_4" FileName="Chat.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Glacier2\chat\Chat.ice" SelfReg="false" NextFile="Client.js_2"/>
+    <ROW File="ChatSession.ice" Component_="build.js_2" FileName="CHATSE~1.ICE|ChatSession.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\ChatDemo\ChatSession.ice" SelfReg="false" NextFile="Client.js"/>
+    <ROW File="ChatSessionI.cpp" Component_="depend.mak" FileName="CHATSE~1.CPP|ChatSessionI.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\ChatSessionI.cpp" SelfReg="false" NextFile="ChatSessionI.h"/>
+    <ROW File="ChatSessionI.h" Component_="depend.mak" FileName="CHATSE~1.H|ChatSessionI.h" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\ChatSessionI.h" SelfReg="false" NextFile="Client.cpp"/>
+    <ROW File="Class.js" Component_="Address.js" FileName="Class.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Class.js" SelfReg="false" NextFile="Communicator.js"/>
+    <ROW File="Client.cpp" Component_="depend.mak" FileName="Client.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\Client.cpp" SelfReg="false" NextFile="config.client"/>
+    <ROW File="Client.cpp_1" Component_="depend.mak_1" FileName="Client.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\Client.cpp" SelfReg="false" NextFile="config.client_1"/>
+    <ROW File="Client.cpp_2" Component_="depend.mak_2" FileName="Client.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\Client.cpp" SelfReg="false" NextFile="config.client_2"/>
+    <ROW File="Client.cpp_3" Component_="depend.mak_3" FileName="Client.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\latency\Client.cpp" SelfReg="false" NextFile="config.client_3"/>
+    <ROW File="Client.cpp_4" Component_="depend.mak_4" FileName="Client.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\minimal\Client.cpp" SelfReg="false" NextFile="Hello.ice_1"/>
+    <ROW File="Client.cpp_5" Component_="depend.mak_5" FileName="Client.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\Client.cpp" SelfReg="false" NextFile="config.client_4"/>
+    <ROW File="Client.js" Component_="build.js_2" FileName="Client.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\ChatDemo\Client.js" SelfReg="false" NextFile="index.html"/>
+    <ROW File="Client.js_1" Component_="Client.js" FileName="Client.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Glacier2\chat\browser\Client.js" SelfReg="false" NextFile="build.js_4"/>
+    <ROW File="Client.js_10" Component_="build.js_9" FileName="Client.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\minimal\Client.js" SelfReg="false" NextFile="Hello.ice_3"/>
+    <ROW File="Client.js_11" Component_="Client.js_5" FileName="Client.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\throughput\browser\Client.js" SelfReg="false" NextFile="build.js_10"/>
+    <ROW File="Client.js_12" Component_="build.js_10" FileName="Client.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\throughput\Client.js" SelfReg="false" NextFile="index.html_6"/>
+    <ROW File="Client.js_2" Component_="build.js_4" FileName="Client.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Glacier2\chat\Client.js" SelfReg="false" NextFile="index.html_1"/>
+    <ROW File="Client.js_3" Component_="Client.js_1" FileName="Client.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\bidir\browser\Client.js" SelfReg="false" NextFile="build.js_5"/>
+    <ROW File="Client.js_4" Component_="build.js_5" FileName="Client.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\bidir\Client.js" SelfReg="false" NextFile="index.html_2"/>
+    <ROW File="Client.js_5" Component_="Client.js_2" FileName="Client.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\hello\browser\Client.js" SelfReg="false" NextFile="build.js_7"/>
+    <ROW File="Client.js_6" Component_="build.js_7" FileName="Client.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\hello\Client.js" SelfReg="false" NextFile="Hello.ice_2"/>
+    <ROW File="Client.js_7" Component_="Client.js_3" FileName="Client.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\latency\browser\Client.js" SelfReg="false" NextFile="build.js_8"/>
+    <ROW File="Client.js_8" Component_="build.js_8" FileName="Client.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\latency\Client.js" SelfReg="false" NextFile="index.html_4"/>
+    <ROW File="Client.js_9" Component_="Client.js_4" FileName="Client.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\minimal\browser\Client.js" SelfReg="false" NextFile="build.js_9"/>
+    <ROW File="Client.py" Component_="Callback.ice" FileName="Client.py" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\bidir\Client.py" SelfReg="false" NextFile="config.client_5"/>
+    <ROW File="Client.py_1" Component_="Client.py" FileName="Client.py" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\hello\Client.py" SelfReg="false" NextFile="config.client_6"/>
+    <ROW File="Client.py_2" Component_="Client.py_1" FileName="Client.py" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\latency\Client.py" SelfReg="false" NextFile="config.client_7"/>
+    <ROW File="Client.py_3" Component_="Client.py_2" FileName="Client.py" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\minimal\Client.py" SelfReg="false" NextFile="Hello.ice_5"/>
+    <ROW File="Client.py_4" Component_="Client.py_3" FileName="Client.py" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\throughput\Client.py" SelfReg="false" NextFile="config.client_8"/>
+    <ROW File="Communicator.js" Component_="Address.js" FileName="COMMUN~1.JS|Communicator.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Communicator.js" SelfReg="false" NextFile="CompactIdRegistry.js"/>
+    <ROW File="CompactIdRegistry.js" Component_="Address.js" FileName="COMPAC~1.JS|CompactIdRegistry.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\CompactIdRegistry.js" SelfReg="false" NextFile="Connection.js"/>
+    <ROW File="ConnectRequestHandler.js" Component_="Address.js" FileName="CONNEC~8.JS|ConnectRequestHandler.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ConnectRequestHandler.js" SelfReg="false" NextFile="Current.js"/>
+    <ROW File="Connection.js" Component_="Address.js" FileName="CONNEC~1.JS|Connection.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Connection.js" SelfReg="false" NextFile="ConnectionBatchOutgoingAsync.js"/>
+    <ROW File="ConnectionBatchOutgoingAsync.js" Component_="Address.js" FileName="CONNEC~2.JS|ConnectionBatchOutgoingAsync.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ConnectionBatchOutgoingAsync.js" SelfReg="false" NextFile="ConnectionF.js"/>
+    <ROW File="ConnectionF.js" Component_="Address.js" FileName="CONNEC~3.JS|ConnectionF.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ConnectionF.js" SelfReg="false" NextFile="ConnectionI.js"/>
+    <ROW File="ConnectionI.js" Component_="Address.js" FileName="CONNEC~4.JS|ConnectionI.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ConnectionI.js" SelfReg="false" NextFile="ConnectionMonitor.js"/>
+    <ROW File="ConnectionMonitor.js" Component_="Address.js" FileName="CONNEC~5.JS|ConnectionMonitor.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ConnectionMonitor.js" SelfReg="false" NextFile="ConnectionReaper.js"/>
+    <ROW File="ConnectionReaper.js" Component_="Address.js" FileName="CONNEC~6.JS|ConnectionReaper.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ConnectionReaper.js" SelfReg="false" NextFile="ConnectionRequestHandler.js"/>
+    <ROW File="ConnectionRequestHandler.js" Component_="Address.js" FileName="CONNEC~7.JS|ConnectionRequestHandler.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ConnectionRequestHandler.js" SelfReg="false" NextFile="ConnectRequestHandler.js"/>
+    <ROW File="Current.js" Component_="Address.js" FileName="Current.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Current.js" SelfReg="false" NextFile="Debug.js"/>
+    <ROW File="Debug.js" Component_="Address.js" FileName="Debug.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Debug.js" SelfReg="false" NextFile="DefaultsAndOverrides.js"/>
+    <ROW File="DefaultsAndOverrides.js" Component_="Address.js" FileName="DEFAUL~1.JS|DefaultsAndOverrides.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\DefaultsAndOverrides.js" SelfReg="false" NextFile="DispatchStatus.js"/>
+    <ROW File="Descriptor.js" Component_="Admin.js" FileName="DESCRI~1.JS|Descriptor.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceGrid\Descriptor.js" SelfReg="false" NextFile="Exception.js_1"/>
+    <ROW File="DispatchStatus.js" Component_="Address.js" FileName="DISPAT~1.JS|DispatchStatus.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\DispatchStatus.js" SelfReg="false" NextFile="Endpoint.js"/>
+    <ROW File="Endpoint.js" Component_="Address.js" FileName="Endpoint.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Endpoint.js" SelfReg="false" NextFile="EndpointF.js"/>
+    <ROW File="EndpointF.js" Component_="Address.js" FileName="ENDPOI~1.JS|EndpointF.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\EndpointF.js" SelfReg="false" NextFile="EndpointFactoryManager.js"/>
+    <ROW File="EndpointFactoryManager.js" Component_="Address.js" FileName="ENDPOI~2.JS|EndpointFactoryManager.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\EndpointFactoryManager.js" SelfReg="false" NextFile="EndpointTypes.js"/>
+    <ROW File="EndpointTypes.js" Component_="Address.js" FileName="ENDPOI~3.JS|EndpointTypes.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\EndpointTypes.js" SelfReg="false" NextFile="EnumBase.js"/>
+    <ROW File="EnumBase.js" Component_="Address.js" FileName="EnumBase.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\EnumBase.js" SelfReg="false" NextFile="Exception.js"/>
+    <ROW File="ExUtil.js" Component_="Address.js" FileName="ExUtil.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ExUtil.js" SelfReg="false" NextFile="FormatType.js"/>
+    <ROW File="Exception.js" Component_="Address.js" FileName="EXCEPT~1.JS|Exception.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Exception.js" SelfReg="false" NextFile="ExUtil.js"/>
+    <ROW File="Exception.js_1" Component_="Admin.js" FileName="EXCEPT~1.JS|Exception.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceGrid\Exception.js" SelfReg="false" NextFile="FileParser.js"/>
+    <ROW File="FileParser.js" Component_="Admin.js" FileName="FILEPA~1.JS|FileParser.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceGrid\FileParser.js" SelfReg="false" NextFile="IceGrid.js_1"/>
+    <ROW File="FormatType.js" Component_="Address.js" FileName="FORMAT~1.JS|FormatType.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\FormatType.js" SelfReg="false" NextFile="HashMap.js"/>
+    <ROW File="Glacier2.chat.client.vcxproj" Component_="depend.mak" FileName="GLACIE~1.VCX|Glacier2.chat.client.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\Glacier2.chat.client.vcxproj" SelfReg="false" NextFile="Glacier2.chat.client.vcxproj.filters"/>
+    <ROW File="Glacier2.chat.client.vcxproj.filters" Component_="depend.mak" FileName="GLACIE~1.FIL|Glacier2.chat.client.vcxproj.filters" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\Glacier2.chat.client.vcxproj.filters" SelfReg="false" NextFile="Glacier2.chat.server.vcxproj"/>
+    <ROW File="Glacier2.chat.server.vcxproj" Component_="depend.mak" FileName="GLACIE~2.VCX|Glacier2.chat.server.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\Glacier2.chat.server.vcxproj" SelfReg="false" NextFile="Glacier2.chat.server.vcxproj.filters"/>
+    <ROW File="Glacier2.chat.server.vcxproj.filters" Component_="depend.mak" FileName="GLACIE~2.FIL|Glacier2.chat.server.vcxproj.filters" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\Glacier2.chat.server.vcxproj.filters" SelfReg="false" NextFile="Makefile.mak"/>
     <ROW File="Glacier2.js" Component_="Glacier2.js" FileName="Glacier2.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\Glacier2.js" SelfReg="false" NextFile="Glacier2.js.gz"/>
     <ROW File="Glacier2.js.gz" Component_="Glacier2.js" FileName="GLACIE~1.GZ|Glacier2.js.gz" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\Glacier2.js.gz" SelfReg="false" NextFile="Glacier2.min.js"/>
+    <ROW File="Glacier2.js_1" Component_="Glacier2.js_1" FileName="Glacier2.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Glacier2\Glacier2.js" SelfReg="false" NextFile="Metrics.js"/>
     <ROW File="Glacier2.min.js" Component_="Glacier2.js" FileName="GLACIE~1.JS|Glacier2.min.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\Glacier2.min.js" SelfReg="false" NextFile="Glacier2.min.js.gz"/>
     <ROW File="Glacier2.min.js.gz" Component_="Glacier2.js" FileName="GLACIE~2.GZ|Glacier2.min.js.gz" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\Glacier2.min.js.gz" SelfReg="false" NextFile="Ice.js"/>
+    <ROW File="HashMap.js" Component_="Address.js" FileName="HashMap.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\HashMap.js" SelfReg="false" NextFile="HashUtil.js"/>
+    <ROW File="HashUtil.js" Component_="Address.js" FileName="HashUtil.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\HashUtil.js" SelfReg="false" NextFile="Ice.js_1"/>
+    <ROW File="Hello.ice" Component_="depend.mak_2" FileName="Hello.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\Hello.ice" SelfReg="false" NextFile="HelloI.cpp"/>
+    <ROW File="Hello.ice_1" Component_="depend.mak_4" FileName="Hello.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\minimal\Hello.ice" SelfReg="false" NextFile="HelloI.cpp_1"/>
+    <ROW File="Hello.ice_2" Component_="build.js_7" FileName="Hello.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\hello\Hello.ice" SelfReg="false" NextFile="index.html_3"/>
+    <ROW File="Hello.ice_3" Component_="build.js_9" FileName="Hello.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\minimal\Hello.ice" SelfReg="false" NextFile="index.html_5"/>
+    <ROW File="Hello.ice_4" Component_="Client.py" FileName="Hello.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\hello\Hello.ice" SelfReg="false" NextFile="README.txt_19"/>
+    <ROW File="Hello.ice_5" Component_="Client.py_2" FileName="Hello.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\minimal\Hello.ice" SelfReg="false" NextFile="README.txt_21"/>
+    <ROW File="HelloI.cpp" Component_="depend.mak_2" FileName="HelloI.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\HelloI.cpp" SelfReg="false" NextFile="HelloI.h"/>
+    <ROW File="HelloI.cpp_1" Component_="depend.mak_4" FileName="HelloI.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\minimal\HelloI.cpp" SelfReg="false" NextFile="HelloI.h_1"/>
+    <ROW File="HelloI.h" Component_="depend.mak_2" FileName="HelloI.h" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\HelloI.h" SelfReg="false" NextFile="Ice.hello.client.vcxproj"/>
+    <ROW File="HelloI.h_1" Component_="depend.mak_4" FileName="HelloI.h" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\minimal\HelloI.h" SelfReg="false" NextFile="Ice.minimal.client.vcxproj"/>
+    <ROW File="HttpServer.js" Component_="HttpServer.js" FileName="HTTPSE~1.JS|HttpServer.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\bin\HttpServer.js" SelfReg="false" NextFile="cacert.pem"/>
     <ROW File="ICE_LICENSE.txt" Component_="ICE_LICENSE.txt" FileName="ICE_LI~1.TXT|ICE_LICENSE.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\ICE_LICENSE.txt" SelfReg="false" NextFile="LICENSE.txt"/>
+    <ROW File="Ice.bidir.client.vcxproj" Component_="depend.mak_1" FileName="ICEBID~1.VCX|Ice.bidir.client.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\Ice.bidir.client.vcxproj" SelfReg="false" NextFile="Ice.bidir.client.vcxproj.filters"/>
+    <ROW File="Ice.bidir.client.vcxproj.filters" Component_="depend.mak_1" FileName="ICEBID~1.FIL|Ice.bidir.client.vcxproj.filters" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\Ice.bidir.client.vcxproj.filters" SelfReg="false" NextFile="Ice.bidir.server.vcxproj"/>
+    <ROW File="Ice.bidir.server.vcxproj" Component_="depend.mak_1" FileName="ICEBID~2.VCX|Ice.bidir.server.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\Ice.bidir.server.vcxproj" SelfReg="false" NextFile="Ice.bidir.server.vcxproj.filters"/>
+    <ROW File="Ice.bidir.server.vcxproj.filters" Component_="depend.mak_1" FileName="ICEBID~2.FIL|Ice.bidir.server.vcxproj.filters" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\Ice.bidir.server.vcxproj.filters" SelfReg="false" NextFile="Makefile.mak_2"/>
+    <ROW File="Ice.hello.client.vcxproj" Component_="depend.mak_2" FileName="ICEHEL~1.VCX|Ice.hello.client.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\Ice.hello.client.vcxproj" SelfReg="false" NextFile="Ice.hello.client.vcxproj.filters"/>
+    <ROW File="Ice.hello.client.vcxproj.filters" Component_="depend.mak_2" FileName="ICEHEL~1.FIL|Ice.hello.client.vcxproj.filters" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\Ice.hello.client.vcxproj.filters" SelfReg="false" NextFile="Ice.hello.server.vcxproj"/>
+    <ROW File="Ice.hello.server.vcxproj" Component_="depend.mak_2" FileName="ICEHEL~2.VCX|Ice.hello.server.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\Ice.hello.server.vcxproj" SelfReg="false" NextFile="Ice.hello.server.vcxproj.filters"/>
+    <ROW File="Ice.hello.server.vcxproj.filters" Component_="depend.mak_2" FileName="ICEHEL~2.FIL|Ice.hello.server.vcxproj.filters" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\Ice.hello.server.vcxproj.filters" SelfReg="false" NextFile="Makefile.mak_3"/>
     <ROW File="Ice.js" Component_="Glacier2.js" FileName="Ice.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\Ice.js" SelfReg="false" NextFile="Ice.js.gz"/>
     <ROW File="Ice.js.gz" Component_="Glacier2.js" FileName="ICEJS~1.GZ|Ice.js.gz" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\Ice.js.gz" SelfReg="false" NextFile="Ice.min.js"/>
+    <ROW File="Ice.js_1" Component_="Address.js" FileName="Ice.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Ice.js" SelfReg="false" NextFile="Identity.js"/>
+    <ROW File="Ice.latency.client.vcxproj" Component_="depend.mak_3" FileName="ICELAT~1.VCX|Ice.latency.client.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\latency\Ice.latency.client.vcxproj" SelfReg="false" NextFile="Ice.latency.client.vcxproj.filters"/>
+    <ROW File="Ice.latency.client.vcxproj.filters" Component_="depend.mak_3" FileName="ICELAT~1.FIL|Ice.latency.client.vcxproj.filters" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\latency\Ice.latency.client.vcxproj.filters" SelfReg="false" NextFile="Ice.latency.server.vcxproj"/>
+    <ROW File="Ice.latency.server.vcxproj" Component_="depend.mak_3" FileName="ICELAT~2.VCX|Ice.latency.server.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\latency\Ice.latency.server.vcxproj" SelfReg="false" NextFile="Ice.latency.server.vcxproj.filters"/>
+    <ROW File="Ice.latency.server.vcxproj.filters" Component_="depend.mak_3" FileName="ICELAT~2.FIL|Ice.latency.server.vcxproj.filters" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\latency\Ice.latency.server.vcxproj.filters" SelfReg="false" NextFile="Latency.ice"/>
     <ROW File="Ice.min.js" Component_="Glacier2.js" FileName="ICEMIN~1.JS|Ice.min.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\Ice.min.js" SelfReg="false" NextFile="Ice.min.js.gz"/>
     <ROW File="Ice.min.js.gz" Component_="Glacier2.js" FileName="ICEMIN~1.GZ|Ice.min.js.gz" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\Ice.min.js.gz" SelfReg="false" NextFile="IceGrid.js"/>
+    <ROW File="Ice.minimal.client.vcxproj" Component_="depend.mak_4" FileName="ICEMIN~1.VCX|Ice.minimal.client.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\minimal\Ice.minimal.client.vcxproj" SelfReg="false" NextFile="Ice.minimal.client.vcxproj.filters"/>
+    <ROW File="Ice.minimal.client.vcxproj.filters" Component_="depend.mak_4" FileName="ICEMIN~1.FIL|Ice.minimal.client.vcxproj.filters" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\minimal\Ice.minimal.client.vcxproj.filters" SelfReg="false" NextFile="Ice.minimal.server.vcxproj"/>
+    <ROW File="Ice.minimal.server.vcxproj" Component_="depend.mak_4" FileName="ICEMIN~2.VCX|Ice.minimal.server.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\minimal\Ice.minimal.server.vcxproj" SelfReg="false" NextFile="Ice.minimal.server.vcxproj.filters"/>
+    <ROW File="Ice.minimal.server.vcxproj.filters" Component_="depend.mak_4" FileName="ICEMIN~2.FIL|Ice.minimal.server.vcxproj.filters" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\minimal\Ice.minimal.server.vcxproj.filters" SelfReg="false" NextFile="Makefile.mak_6"/>
+    <ROW File="Ice.throughput.client.vcxproj" Component_="depend.mak_5" FileName="ICETHR~1.VCX|Ice.throughput.client.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\Ice.throughput.client.vcxproj" SelfReg="false" NextFile="Ice.throughput.client.vcxproj.filters"/>
+    <ROW File="Ice.throughput.client.vcxproj.filters" Component_="depend.mak_5" FileName="ICETHR~1.FIL|Ice.throughput.client.vcxproj.filters" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\Ice.throughput.client.vcxproj.filters" SelfReg="false" NextFile="Ice.throughput.server.vcxproj"/>
+    <ROW File="Ice.throughput.server.vcxproj" Component_="depend.mak_5" FileName="ICETHR~2.VCX|Ice.throughput.server.vcxproj" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\Ice.throughput.server.vcxproj" SelfReg="false" NextFile="Ice.throughput.server.vcxproj.filters"/>
+    <ROW File="Ice.throughput.server.vcxproj.filters" Component_="depend.mak_5" FileName="ICETHR~2.FIL|Ice.throughput.server.vcxproj.filters" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\Ice.throughput.server.vcxproj.filters" SelfReg="false" NextFile="Makefile.mak_7"/>
     <ROW File="IceGrid.js" Component_="Glacier2.js" FileName="IceGrid.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\IceGrid.js" SelfReg="false" NextFile="IceGrid.js.gz"/>
     <ROW File="IceGrid.js.gz" Component_="Glacier2.js" FileName="ICEGRI~1.GZ|IceGrid.js.gz" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\IceGrid.js.gz" SelfReg="false" NextFile="IceGrid.min.js"/>
+    <ROW File="IceGrid.js_1" Component_="Admin.js" FileName="IceGrid.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceGrid\IceGrid.js" SelfReg="false" NextFile="Locator.js_1"/>
     <ROW File="IceGrid.min.js" Component_="Glacier2.js" FileName="ICEGRI~1.JS|IceGrid.min.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\IceGrid.min.js" SelfReg="false" NextFile="IceGrid.min.js.gz"/>
     <ROW File="IceGrid.min.js.gz" Component_="Glacier2.js" FileName="ICEGRI~2.GZ|IceGrid.min.js.gz" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\IceGrid.min.js.gz" SelfReg="false" NextFile="IceMX.js"/>
     <ROW File="IceMX.js" Component_="Glacier2.js" FileName="IceMX.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\IceMX.js" SelfReg="false" NextFile="IceMX.js.gz"/>
     <ROW File="IceMX.js.gz" Component_="Glacier2.js" FileName="ICEMXJ~1.GZ|IceMX.js.gz" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\IceMX.js.gz" SelfReg="false" NextFile="IceMX.min.js"/>
+    <ROW File="IceMX.js_1" Component_="IceMX.js" FileName="IceMX.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceMX\IceMX.js" SelfReg="false" NextFile="Metrics.js_2"/>
     <ROW File="IceMX.min.js" Component_="Glacier2.js" FileName="ICEMXM~1.JS|IceMX.min.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\IceMX.min.js" SelfReg="false" NextFile="IceMX.min.js.gz"/>
     <ROW File="IceMX.min.js.gz" Component_="Glacier2.js" FileName="ICEMXM~1.GZ|IceMX.min.js.gz" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\IceMX.min.js.gz" SelfReg="false" NextFile="IceStorm.js"/>
     <ROW File="IceStorm.js" Component_="Glacier2.js" FileName="IceStorm.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\IceStorm.js" SelfReg="false" NextFile="IceStorm.js.gz"/>
     <ROW File="IceStorm.js.gz" Component_="Glacier2.js" FileName="ICESTO~1.GZ|IceStorm.js.gz" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\IceStorm.js.gz" SelfReg="false" NextFile="IceStorm.min.js"/>
+    <ROW File="IceStorm.js_1" Component_="IceStorm.js" FileName="IceStorm.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceStorm\IceStorm.js" SelfReg="false" NextFile="Metrics.js_3"/>
     <ROW File="IceStorm.min.js" Component_="Glacier2.js" FileName="ICESTO~1.JS|IceStorm.min.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\IceStorm.min.js" SelfReg="false" NextFile="IceStorm.min.js.gz"/>
     <ROW File="IceStorm.min.js.gz" Component_="Glacier2.js" FileName="ICESTO~2.GZ|IceStorm.min.js.gz" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\lib\IceStorm.min.js.gz" SelfReg="false" NextFile="ice35.pdb"/>
+    <ROW File="Identity.js" Component_="Address.js" FileName="Identity.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Identity.js" SelfReg="false" NextFile="IdentityUtil.js"/>
+    <ROW File="IdentityUtil.js" Component_="Address.js" FileName="IDENTI~1.JS|IdentityUtil.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\IdentityUtil.js" SelfReg="false" NextFile="ImplicitContextI.js"/>
+    <ROW File="ImplicitContextI.js" Component_="Address.js" FileName="IMPLIC~1.JS|ImplicitContextI.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ImplicitContextI.js" SelfReg="false" NextFile="IncomingAsync.js"/>
+    <ROW File="IncomingAsync.js" Component_="Address.js" FileName="INCOMI~1.JS|IncomingAsync.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\IncomingAsync.js" SelfReg="false" NextFile="Initialize.js"/>
+    <ROW File="Initialize.js" Component_="Address.js" FileName="INITIA~1.JS|Initialize.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Initialize.js" SelfReg="false" NextFile="Instance.js"/>
+    <ROW File="Instance.js" Component_="Address.js" FileName="Instance.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Instance.js" SelfReg="false" NextFile="LocalException.js"/>
+    <ROW File="LICENSE" Component_="npmignore" FileName="LICENSE" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\LICENSE" SelfReg="false" NextFile="npmignore_1"/>
     <ROW File="LICENSE.txt" Component_="ICE_LICENSE.txt" FileName="LICENSE.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\LICENSE.txt" SelfReg="false" NextFile="SOURCES.txt"/>
+    <ROW File="Latency.ice" Component_="depend.mak_3" FileName="Latency.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\latency\Latency.ice" SelfReg="false" NextFile="Makefile.mak_4"/>
+    <ROW File="Latency.ice_1" Component_="build.js_8" FileName="Latency.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\latency\Latency.ice" SelfReg="false" NextFile="README.txt_13"/>
+    <ROW File="Latency.ice_2" Component_="Client.py_1" FileName="Latency.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\latency\Latency.ice" SelfReg="false" NextFile="README.txt_20"/>
+    <ROW File="LocalException.js" Component_="Address.js" FileName="LOCALE~1.JS|LocalException.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\LocalException.js" SelfReg="false" NextFile="LocalExceptionWrapper.js"/>
+    <ROW File="LocalExceptionWrapper.js" Component_="Address.js" FileName="LOCALE~2.JS|LocalExceptionWrapper.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\LocalExceptionWrapper.js" SelfReg="false" NextFile="Locator.js"/>
+    <ROW File="Locator.js" Component_="Address.js" FileName="Locator.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Locator.js" SelfReg="false" NextFile="LocatorInfo.js"/>
+    <ROW File="Locator.js_1" Component_="Admin.js" FileName="Locator.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceGrid\Locator.js" SelfReg="false" NextFile="Observer.js"/>
+    <ROW File="LocatorInfo.js" Component_="Address.js" FileName="LOCATO~1.JS|LocatorInfo.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\LocatorInfo.js" SelfReg="false" NextFile="LocatorManager.js"/>
+    <ROW File="LocatorManager.js" Component_="Address.js" FileName="LOCATO~2.JS|LocatorManager.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\LocatorManager.js" SelfReg="false" NextFile="LocatorTable.js"/>
+    <ROW File="LocatorTable.js" Component_="Address.js" FileName="LOCATO~3.JS|LocatorTable.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\LocatorTable.js" SelfReg="false" NextFile="Logger.js"/>
+    <ROW File="Logger.js" Component_="Address.js" FileName="Logger.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Logger.js" SelfReg="false" NextFile="Long.js"/>
+    <ROW File="Long.js" Component_="Address.js" FileName="Long.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Long.js" SelfReg="false" NextFile="Metrics.js_1"/>
+    <ROW File="Make.common.rules.mak" Component_="build.js" FileName="MAKECO~1.MAK|Make.common.rules.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\config\Make.common.rules.mak" SelfReg="false" NextFile="Make.rules.mak"/>
+    <ROW File="Make.rules.mak" Component_="build.js" FileName="MAKERU~1.MAK|Make.rules.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\config\Make.rules.mak" SelfReg="false" NextFile="Make.rules.msvc"/>
+    <ROW File="Make.rules.msvc" Component_="build.js" FileName="MAKERU~1.MSV|Make.rules.msvc" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\config\Make.rules.msvc" SelfReg="false" NextFile="demo.sln"/>
+    <ROW File="Makefile.mak" Component_="depend.mak" FileName="Makefile.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\Makefile.mak" SelfReg="false" NextFile="README.txt_1"/>
+    <ROW File="Makefile.mak_1" Component_="Makefile.mak" FileName="Makefile.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\Makefile.mak" SelfReg="false" NextFile="README.txt_2"/>
+    <ROW File="Makefile.mak_2" Component_="depend.mak_1" FileName="Makefile.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\Makefile.mak" SelfReg="false" NextFile="README.txt_3"/>
+    <ROW File="Makefile.mak_3" Component_="depend.mak_2" FileName="Makefile.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\Makefile.mak" SelfReg="false" NextFile="README.txt_4"/>
+    <ROW File="Makefile.mak_4" Component_="depend.mak_3" FileName="Makefile.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\latency\Makefile.mak" SelfReg="false" NextFile="README.txt_5"/>
+    <ROW File="Makefile.mak_5" Component_="Makefile.mak_1" FileName="Makefile.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\Makefile.mak" SelfReg="false" NextFile="depend.mak_4"/>
+    <ROW File="Makefile.mak_6" Component_="depend.mak_4" FileName="Makefile.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\minimal\Makefile.mak" SelfReg="false" NextFile="README.txt_6"/>
+    <ROW File="Makefile.mak_7" Component_="depend.mak_5" FileName="Makefile.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\Makefile.mak" SelfReg="false" NextFile="README.txt_7"/>
+    <ROW File="Makefile.mak_8" Component_="demo.sln" FileName="Makefile.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Makefile.mak" SelfReg="false" NextFile="README.txt_8"/>
+    <ROW File="Metrics.js" Component_="Glacier2.js_1" FileName="Metrics.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Glacier2\Metrics.js" SelfReg="false" NextFile="package.json_4"/>
+    <ROW File="Metrics.js_1" Component_="Address.js" FileName="Metrics.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Metrics.js" SelfReg="false" NextFile="Object.js"/>
+    <ROW File="Metrics.js_2" Component_="IceMX.js" FileName="Metrics.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceMX\Metrics.js" SelfReg="false" NextFile="package.json_7"/>
+    <ROW File="Metrics.js_3" Component_="IceStorm.js" FileName="Metrics.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceStorm\Metrics.js" SelfReg="false" NextFile="package.json_8"/>
+    <ROW File="Object.js" Component_="Address.js" FileName="Object.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Object.js" SelfReg="false" NextFile="ObjectAdapterF.js"/>
+    <ROW File="ObjectAdapterF.js" Component_="Address.js" FileName="OBJECT~1.JS|ObjectAdapterF.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ObjectAdapterF.js" SelfReg="false" NextFile="ObjectAdapterFactory.js"/>
+    <ROW File="ObjectAdapterFactory.js" Component_="Address.js" FileName="OBJECT~2.JS|ObjectAdapterFactory.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ObjectAdapterFactory.js" SelfReg="false" NextFile="ObjectAdapterI.js"/>
+    <ROW File="ObjectAdapterI.js" Component_="Address.js" FileName="OBJECT~3.JS|ObjectAdapterI.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ObjectAdapterI.js" SelfReg="false" NextFile="ObjectFactory.js"/>
+    <ROW File="ObjectFactory.js" Component_="Address.js" FileName="OBJECT~4.JS|ObjectFactory.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ObjectFactory.js" SelfReg="false" NextFile="ObjectFactoryManager.js"/>
+    <ROW File="ObjectFactoryManager.js" Component_="Address.js" FileName="OBJECT~5.JS|ObjectFactoryManager.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ObjectFactoryManager.js" SelfReg="false" NextFile="ObjectPrx.js"/>
+    <ROW File="ObjectPrx.js" Component_="Address.js" FileName="OBJECT~6.JS|ObjectPrx.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ObjectPrx.js" SelfReg="false" NextFile="OpaqueEndpointI.js"/>
+    <ROW File="Observer.js" Component_="Admin.js" FileName="Observer.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceGrid\Observer.js" SelfReg="false" NextFile="package.json_6"/>
+    <ROW File="OpaqueEndpointI.js" Component_="Address.js" FileName="OPAQUE~1.JS|OpaqueEndpointI.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\OpaqueEndpointI.js" SelfReg="false" NextFile="Operation.js"/>
+    <ROW File="Operation.js" Component_="Address.js" FileName="OPERAT~1.JS|Operation.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Operation.js" SelfReg="false" NextFile="OptionalFormat.js"/>
+    <ROW File="OptionalFormat.js" Component_="Address.js" FileName="OPTION~1.JS|OptionalFormat.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\OptionalFormat.js" SelfReg="false" NextFile="OutgoingAsync.js"/>
+    <ROW File="OutgoingAsync.js" Component_="Address.js" FileName="OUTGOI~1.JS|OutgoingAsync.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\OutgoingAsync.js" SelfReg="false" NextFile="OutgoingConnectionFactory.js"/>
+    <ROW File="OutgoingConnectionFactory.js" Component_="Address.js" FileName="OUTGOI~2.JS|OutgoingConnectionFactory.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\OutgoingConnectionFactory.js" SelfReg="false" NextFile="package.json_5"/>
+    <ROW File="PermissionsVerifier.js" Component_="Glacier2.js_1" FileName="PERMIS~1.JS|PermissionsVerifier.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Glacier2\PermissionsVerifier.js" SelfReg="false" NextFile="PermissionsVerifierF.js"/>
+    <ROW File="PermissionsVerifierF.js" Component_="Glacier2.js_1" FileName="PERMIS~2.JS|PermissionsVerifierF.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Glacier2\PermissionsVerifierF.js" SelfReg="false" NextFile="Router.js"/>
+    <ROW File="Process.js" Component_="Address.js" FileName="Process.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Process.js" SelfReg="false" NextFile="ProcessF.js"/>
+    <ROW File="ProcessF.js" Component_="Address.js" FileName="ProcessF.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ProcessF.js" SelfReg="false" NextFile="ProcessLogger.js"/>
+    <ROW File="ProcessLogger.js" Component_="Address.js" FileName="PROCES~1.JS|ProcessLogger.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ProcessLogger.js" SelfReg="false" NextFile="Promise.js"/>
+    <ROW File="Promise.js" Component_="Address.js" FileName="Promise.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Promise.js" SelfReg="false" NextFile="Properties.js"/>
+    <ROW File="Properties.js" Component_="Address.js" FileName="PROPER~1.JS|Properties.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Properties.js" SelfReg="false" NextFile="PropertiesAdmin.js"/>
+    <ROW File="PropertiesAdmin.js" Component_="Address.js" FileName="PROPER~2.JS|PropertiesAdmin.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\PropertiesAdmin.js" SelfReg="false" NextFile="Property.js"/>
+    <ROW File="Property.js" Component_="Address.js" FileName="Property.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Property.js" SelfReg="false" NextFile="PropertyNames.js"/>
+    <ROW File="PropertyNames.js" Component_="Address.js" FileName="PROPER~3.JS|PropertyNames.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\PropertyNames.js" SelfReg="false" NextFile="Protocol.js"/>
+    <ROW File="Protocol.js" Component_="Address.js" FileName="Protocol.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Protocol.js" SelfReg="false" NextFile="ProxyBatchOutgoingAsync.js"/>
+    <ROW File="ProxyBatchOutgoingAsync.js" Component_="Address.js" FileName="PROXYB~1.JS|ProxyBatchOutgoingAsync.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ProxyBatchOutgoingAsync.js" SelfReg="false" NextFile="ProxyFactory.js"/>
+    <ROW File="ProxyFactory.js" Component_="Address.js" FileName="PROXYF~1.JS|ProxyFactory.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ProxyFactory.js" SelfReg="false" NextFile="Reference.js"/>
+    <ROW File="Query.js" Component_="Admin.js" FileName="Query.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceGrid\Query.js" SelfReg="false" NextFile="Registry.js"/>
+    <ROW File="README.md" Component_="README.md" FileName="README.md" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\benchmark\README.md" SelfReg="false" NextFile="hello.js"/>
+    <ROW File="README.md_1" Component_="bench.js" FileName="README.md" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\benchmarks\README.md" SelfReg="false" NextFile="context.js"/>
+    <ROW File="README.md_2" Component_="npmignore_1" FileName="README.md" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\README.md" SelfReg="false" NextFile="emitter.test.js"/>
+    <ROW File="README.md_3" Component_="npmignore" FileName="README.md" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\README.md" SelfReg="false" NextFile="examplestest.js"/>
     <ROW File="README.txt" Component_="README.txt_12" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\README.txt" SelfReg="false" NextFile="ice35.dll"/>
-    <ROW File="SOURCES.txt" Component_="ICE_LICENSE.txt" FileName="SOURCES.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\SOURCES.txt" SelfReg="false"/>
+    <ROW File="README.txt_1" Component_="depend.mak" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\README.txt" SelfReg="false" NextFile="Server.cpp"/>
+    <ROW File="README.txt_10" Component_="build.js_3" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Glacier2\README.txt" SelfReg="false" NextFile="Client.js_3"/>
+    <ROW File="README.txt_11" Component_="build.js_5" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\bidir\README.txt" SelfReg="false" NextFile="build.js_6"/>
+    <ROW File="README.txt_12" Component_="build.js_7" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\hello\README.txt" SelfReg="false" NextFile="Client.js_7"/>
+    <ROW File="README.txt_13" Component_="build.js_8" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\latency\README.txt" SelfReg="false" NextFile="Client.js_9"/>
+    <ROW File="README.txt_14" Component_="build.js_9" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\minimal\README.txt" SelfReg="false" NextFile="README.txt_15"/>
+    <ROW File="README.txt_15" Component_="build.js_6" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\README.txt" SelfReg="false" NextFile="Client.js_11"/>
+    <ROW File="README.txt_16" Component_="build.js_10" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\throughput\README.txt" SelfReg="false" NextFile="Throughput.ice_1"/>
+    <ROW File="README.txt_17" Component_="build.js_1" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\README.txt" SelfReg="false" NextFile="Callback.ice_2"/>
+    <ROW File="README.txt_18" Component_="Callback.ice" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\bidir\README.txt" SelfReg="false" NextFile="Server.py"/>
+    <ROW File="README.txt_19" Component_="Client.py" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\hello\README.txt" SelfReg="false" NextFile="Server.py_1"/>
+    <ROW File="README.txt_2" Component_="Makefile.mak" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\README.txt" SelfReg="false" NextFile="depend.mak_1"/>
+    <ROW File="README.txt_20" Component_="Client.py_1" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\latency\README.txt" SelfReg="false" NextFile="Server.py_2"/>
+    <ROW File="README.txt_21" Component_="Client.py_2" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\minimal\README.txt" SelfReg="false" NextFile="Server.py_3"/>
+    <ROW File="README.txt_22" Component_="Client.py_3" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\throughput\README.txt" SelfReg="false" NextFile="Server.py_4"/>
+    <ROW File="README.txt_23" Component_="index.html" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\README.txt" SelfReg="false" NextFile="Glacier2.js_1"/>
+    <ROW File="README.txt_3" Component_="depend.mak_1" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\README.txt" SelfReg="false" NextFile="Server.cpp_1"/>
+    <ROW File="README.txt_4" Component_="depend.mak_2" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\README.txt" SelfReg="false" NextFile="Server.cpp_2"/>
+    <ROW File="README.txt_5" Component_="depend.mak_3" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\latency\README.txt" SelfReg="false" NextFile="Server.cpp_3"/>
+    <ROW File="README.txt_6" Component_="depend.mak_4" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\minimal\README.txt" SelfReg="false" NextFile="Server.cpp_4"/>
+    <ROW File="README.txt_7" Component_="depend.mak_5" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\README.txt" SelfReg="false" NextFile="Server.cpp_5"/>
+    <ROW File="README.txt_8" Component_="demo.sln" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\README.txt" SelfReg="false" NextFile="build.js_1"/>
+    <ROW File="README.txt_9" Component_="build.js_4" FileName="README.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Glacier2\chat\README.txt" SelfReg="false" NextFile="README.txt_10"/>
+    <ROW File="Reference.js" Component_="Address.js" FileName="REFERE~1.JS|Reference.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Reference.js" SelfReg="false" NextFile="ReferenceMode.js"/>
+    <ROW File="ReferenceMode.js" Component_="Address.js" FileName="REFERE~2.JS|ReferenceMode.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ReferenceMode.js" SelfReg="false" NextFile="RetryQueue.js"/>
+    <ROW File="Registry.js" Component_="Admin.js" FileName="Registry.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceGrid\Registry.js" SelfReg="false" NextFile="Session.js_1"/>
+    <ROW File="RetryQueue.js" Component_="Address.js" FileName="RETRYQ~1.JS|RetryQueue.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\RetryQueue.js" SelfReg="false" NextFile="Router.js_1"/>
+    <ROW File="Router.js" Component_="Glacier2.js_1" FileName="Router.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Glacier2\Router.js" SelfReg="false" NextFile="RouterF.js"/>
+    <ROW File="Router.js_1" Component_="Address.js" FileName="Router.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Router.js" SelfReg="false" NextFile="RouterInfo.js"/>
+    <ROW File="RouterF.js" Component_="Glacier2.js_1" FileName="RouterF.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Glacier2\RouterF.js" SelfReg="false" NextFile="Session.js"/>
+    <ROW File="RouterInfo.js" Component_="Address.js" FileName="ROUTER~1.JS|RouterInfo.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\RouterInfo.js" SelfReg="false" NextFile="RouterManager.js"/>
+    <ROW File="RouterManager.js" Component_="Address.js" FileName="ROUTER~2.JS|RouterManager.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\RouterManager.js" SelfReg="false" NextFile="ServantManager.js"/>
+    <ROW File="SOURCES.txt" Component_="ICE_LICENSE.txt" FileName="SOURCES.txt" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\SOURCES.txt" SelfReg="false" NextFile="common.css"/>
+    <ROW File="SSLInfo.js" Component_="Glacier2.js_1" FileName="SSLInfo.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Glacier2\SSLInfo.js" SelfReg="false" NextFile="Address.js"/>
+    <ROW File="ServantManager.js" Component_="Address.js" FileName="SERVAN~1.JS|ServantManager.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\ServantManager.js" SelfReg="false" NextFile="SliceChecksumDict.js"/>
+    <ROW File="Server.cpp" Component_="depend.mak" FileName="Server.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\Server.cpp" SelfReg="false" NextFile="Makefile.mak_1"/>
+    <ROW File="Server.cpp_1" Component_="depend.mak_1" FileName="Server.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\Server.cpp" SelfReg="false" NextFile="depend.mak_2"/>
+    <ROW File="Server.cpp_2" Component_="depend.mak_2" FileName="Server.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\Server.cpp" SelfReg="false" NextFile="depend.mak_3"/>
+    <ROW File="Server.cpp_3" Component_="depend.mak_3" FileName="Server.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\latency\Server.cpp" SelfReg="false" NextFile="Makefile.mak_5"/>
+    <ROW File="Server.cpp_4" Component_="depend.mak_4" FileName="Server.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\minimal\Server.cpp" SelfReg="false" NextFile="depend.mak_5"/>
+    <ROW File="Server.cpp_5" Component_="depend.mak_5" FileName="Server.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\Server.cpp" SelfReg="false" NextFile="Throughput.ice"/>
+    <ROW File="Server.py" Component_="Callback.ice" FileName="Server.py" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\bidir\Server.py" SelfReg="false" NextFile="Client.py_1"/>
+    <ROW File="Server.py_1" Component_="Client.py" FileName="Server.py" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\hello\Server.py" SelfReg="false" NextFile="Client.py_2"/>
+    <ROW File="Server.py_2" Component_="Client.py_1" FileName="Server.py" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\latency\Server.py" SelfReg="false" NextFile="Client.py_3"/>
+    <ROW File="Server.py_3" Component_="Client.py_2" FileName="Server.py" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\minimal\Server.py" SelfReg="false" NextFile="Client.py_4"/>
+    <ROW File="Server.py_4" Component_="Client.py_3" FileName="Server.py" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\throughput\Server.py" SelfReg="false" NextFile="Throughput.ice_2"/>
+    <ROW File="Session.js" Component_="Glacier2.js_1" FileName="Session.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Glacier2\Session.js" SelfReg="false" NextFile="SSLInfo.js"/>
+    <ROW File="Session.js_1" Component_="Admin.js" FileName="Session.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceGrid\Session.js" SelfReg="false" NextFile="UserAccountMapper.js"/>
+    <ROW File="SliceChecksumDict.js" Component_="Address.js" FileName="SLICEC~1.JS|SliceChecksumDict.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\SliceChecksumDict.js" SelfReg="false" NextFile="SocketOperation.js"/>
+    <ROW File="SocketOperation.js" Component_="Address.js" FileName="SOCKET~1.JS|SocketOperation.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\SocketOperation.js" SelfReg="false" NextFile="StreamHelpers.js"/>
+    <ROW File="StreamHelpers.js" Component_="Address.js" FileName="STREAM~1.JS|StreamHelpers.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\StreamHelpers.js" SelfReg="false" NextFile="StringUtil.js"/>
+    <ROW File="StringUtil.js" Component_="Address.js" FileName="STRING~1.JS|StringUtil.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\StringUtil.js" SelfReg="false" NextFile="Struct.js"/>
+    <ROW File="Struct.js" Component_="Address.js" FileName="Struct.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Struct.js" SelfReg="false" NextFile="TcpEndpointFactory.js"/>
+    <ROW File="TcpEndpointFactory.js" Component_="Address.js" FileName="TCPEND~1.JS|TcpEndpointFactory.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\TcpEndpointFactory.js" SelfReg="false" NextFile="TcpEndpointI.js"/>
+    <ROW File="TcpEndpointI.js" Component_="Address.js" FileName="TCPEND~2.JS|TcpEndpointI.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\TcpEndpointI.js" SelfReg="false" NextFile="TcpTransceiver.js"/>
+    <ROW File="TcpTransceiver.js" Component_="Address.js" FileName="TCPTRA~1.JS|TcpTransceiver.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\TcpTransceiver.js" SelfReg="false" NextFile="Timer.js"/>
+    <ROW File="Throughput.ice" Component_="depend.mak_5" FileName="THROUG~1.ICE|Throughput.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\Throughput.ice" SelfReg="false" NextFile="ThroughputI.cpp"/>
+    <ROW File="Throughput.ice_1" Component_="build.js_10" FileName="THROUG~1.ICE|Throughput.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\throughput\Throughput.ice" SelfReg="false" NextFile="index.html_7"/>
+    <ROW File="Throughput.ice_2" Component_="Client.py_3" FileName="THROUG~1.ICE|Throughput.ice" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\throughput\Throughput.ice" SelfReg="false" NextFile="index.html_8"/>
+    <ROW File="ThroughputI.cpp" Component_="depend.mak_5" FileName="THROUG~1.CPP|ThroughputI.cpp" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\ThroughputI.cpp" SelfReg="false" NextFile="ThroughputI.h"/>
+    <ROW File="ThroughputI.h" Component_="depend.mak_5" FileName="THROUG~1.H|ThroughputI.h" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\ThroughputI.h" SelfReg="false" NextFile="Makefile.mak_8"/>
+    <ROW File="Timer.js" Component_="Address.js" FileName="Timer.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Timer.js" SelfReg="false" NextFile="TraceLevels.js"/>
+    <ROW File="TraceLevels.js" Component_="Address.js" FileName="TRACEL~1.JS|TraceLevels.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\TraceLevels.js" SelfReg="false" NextFile="TraceUtil.js"/>
+    <ROW File="TraceUtil.js" Component_="Address.js" FileName="TRACEU~1.JS|TraceUtil.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\TraceUtil.js" SelfReg="false" NextFile="UnknownSlicedObject.js"/>
+    <ROW File="UPGRADING.md" Component_="npmignore" FileName="UPGRAD~1.MD|UPGRADING.md" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\UPGRADING.md" SelfReg="false" NextFile="README.txt_23"/>
+    <ROW File="UUID.js" Component_="Address.js" FileName="UUID.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\UUID.js" SelfReg="false" NextFile="Version.js"/>
+    <ROW File="UnknownSlicedObject.js" Component_="Address.js" FileName="UNKNOW~1.JS|UnknownSlicedObject.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\UnknownSlicedObject.js" SelfReg="false" NextFile="UUID.js"/>
+    <ROW File="UserAccountMapper.js" Component_="Admin.js" FileName="USERAC~1.JS|UserAccountMapper.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceGrid\UserAccountMapper.js" SelfReg="false" NextFile="IceMX.js_1"/>
+    <ROW File="Version.js" Component_="Address.js" FileName="Version.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\Version.js" SelfReg="false" NextFile="Admin.js"/>
+    <ROW File="agent2.cnf" Component_="agent2cert.pem" FileName="agent2.cnf" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\test\fixtures\agent2.cnf" SelfReg="false" NextFile="libhttpproxycommontest.js"/>
+    <ROW File="agent2cert.pem" Component_="agent2cert.pem" FileName="AGENT2~1.PEM|agent2-cert.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\test\fixtures\agent2-cert.pem" SelfReg="false" NextFile="agent2csr.pem"/>
+    <ROW File="agent2csr.pem" Component_="agent2cert.pem" FileName="AGENT2~2.PEM|agent2-csr.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\test\fixtures\agent2-csr.pem" SelfReg="false" NextFile="agent2key.pem"/>
+    <ROW File="agent2key.pem" Component_="agent2cert.pem" FileName="AGENT2~3.PEM|agent2-key.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\test\fixtures\agent2-key.pem" SelfReg="false" NextFile="agent2.cnf"/>
+    <ROW File="basicproxy.js" Component_="basicproxy.js" FileName="BASIC-~1.JS|basic-proxy.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\http\basic-proxy.js" SelfReg="false" NextFile="concurrentproxy.js"/>
+    <ROW File="bench.js" Component_="bench.js" FileName="bench.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\benchmarks\bench.js" SelfReg="false" NextFile="package.json_1"/>
+    <ROW File="bodyDecodermiddleware.js" Component_="bodyDecodermiddleware.js" FileName="BODYDE~1.JS|bodyDecoder-middleware.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\middleware\bodyDecoder-middleware.js" SelfReg="false" NextFile="gzipmiddleware.js"/>
+    <ROW File="build.js" Component_="build.js" FileName="build.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\config\build.js" SelfReg="false" NextFile="Make.common.rules.mak"/>
+    <ROW File="build.js_1" Component_="build.js_1" FileName="build.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\build.js" SelfReg="false" NextFile="build.js_2"/>
+    <ROW File="build.js_10" Component_="build.js_10" FileName="build.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\throughput\build.js" SelfReg="false" NextFile="Client.js_12"/>
+    <ROW File="build.js_2" Component_="build.js_2" FileName="build.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\ChatDemo\build.js" SelfReg="false" NextFile="Chat.ice_1"/>
+    <ROW File="build.js_3" Component_="build.js_3" FileName="build.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Glacier2\build.js" SelfReg="false" NextFile="Client.js_1"/>
+    <ROW File="build.js_4" Component_="build.js_4" FileName="build.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Glacier2\chat\build.js" SelfReg="false" NextFile="Chat.ice_2"/>
+    <ROW File="build.js_5" Component_="build.js_5" FileName="build.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\bidir\build.js" SelfReg="false" NextFile="Callback.ice_1"/>
+    <ROW File="build.js_6" Component_="build.js_6" FileName="build.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\build.js" SelfReg="false" NextFile="Client.js_5"/>
+    <ROW File="build.js_7" Component_="build.js_7" FileName="build.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\hello\build.js" SelfReg="false" NextFile="Client.js_6"/>
+    <ROW File="build.js_8" Component_="build.js_8" FileName="build.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\latency\build.js" SelfReg="false" NextFile="Client.js_8"/>
+    <ROW File="build.js_9" Component_="build.js_9" FileName="build.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\minimal\build.js" SelfReg="false" NextFile="Client.js_10"/>
+    <ROW File="c_rsa1024_priv.pem" Component_="cacert.pem" FileName="C_RSA1~1.PEM|c_rsa1024_priv.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\c_rsa1024_priv.pem" SelfReg="false" NextFile="c_rsa1024_pub.pem"/>
+    <ROW File="c_rsa1024_priv.pem_1" Component_="cacert.pem_1" FileName="C_RSA1~1.PEM|c_rsa1024_priv.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\wss\c_rsa1024_priv.pem" SelfReg="false" NextFile="c_rsa1024_pub.pem_1"/>
+    <ROW File="c_rsa1024_pub.pem" Component_="cacert.pem" FileName="C_RSA1~2.PEM|c_rsa1024_pub.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\c_rsa1024_pub.pem" SelfReg="false" NextFile="makewsscerts.py"/>
+    <ROW File="c_rsa1024_pub.pem_1" Component_="cacert.pem_1" FileName="C_RSA1~2.PEM|c_rsa1024_pub.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\wss\c_rsa1024_pub.pem" SelfReg="false" NextFile="s_rsa1024_priv.pem_1"/>
+    <ROW File="cacert.pem" Component_="cacert.pem" FileName="cacert.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\cacert.pem" SelfReg="false" NextFile="certs.jks"/>
+    <ROW File="cacert.pem_1" Component_="cacert.pem_1" FileName="cacert.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\wss\cacert.pem" SelfReg="false" NextFile="c_rsa1024_priv.pem_1"/>
+    <ROW File="certs.jks" Component_="cacert.pem" FileName="certs.jks" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\certs.jks" SelfReg="false" NextFile="client.jks"/>
+    <ROW File="client.jks" Component_="cacert.pem" FileName="client.jks" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\client.jks" SelfReg="false" NextFile="c_rsa1024_priv.pem"/>
+    <ROW File="common.css" Component_="common.css" FileName="common.css" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\assets\common.css" SelfReg="false" NextFile="common.css.gz"/>
+    <ROW File="common.css.gz" Component_="common.css" FileName="COMMON~1.GZ|common.css.gz" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\assets\common.css.gz" SelfReg="false" NextFile="common.min.js"/>
+    <ROW File="common.js" Component_="common.js" FileName="common.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\lib\http-proxy\common.js" SelfReg="false" NextFile="index.js_1"/>
+    <ROW File="common.min.js" Component_="common.css" FileName="COMMON~1.JS|common.min.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\assets\common.min.js" SelfReg="false" NextFile="common.min.js.gz"/>
+    <ROW File="common.min.js.gz" Component_="common.css" FileName="COMMON~2.GZ|common.min.js.gz" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\assets\common.min.js.gz" SelfReg="false" NextFile="favicon.ico"/>
+    <ROW File="component.json" Component_="npmignore_1" FileName="COMPON~1.JSO|component.json" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\component.json" SelfReg="false" NextFile="index.js_2"/>
+    <ROW File="concurrentproxy.js" Component_="basicproxy.js" FileName="CONCUR~1.JS|concurrent-proxy.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\http\concurrent-proxy.js" SelfReg="false" NextFile="customproxyerror.js"/>
+    <ROW File="config.client" Component_="depend.mak" FileName="CONFIG~1.CLI|config.client" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\config.client" SelfReg="false" NextFile="config.glacier2"/>
+    <ROW File="config.client_1" Component_="depend.mak_1" FileName="CONFIG~1.CLI|config.client" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\config.client" SelfReg="false" NextFile="config.server_1"/>
+    <ROW File="config.client_2" Component_="depend.mak_2" FileName="CONFIG~1.CLI|config.client" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\config.client" SelfReg="false" NextFile="config.server_2"/>
+    <ROW File="config.client_3" Component_="depend.mak_3" FileName="CONFIG~1.CLI|config.client" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\latency\config.client" SelfReg="false" NextFile="config.server_3"/>
+    <ROW File="config.client_4" Component_="depend.mak_5" FileName="CONFIG~1.CLI|config.client" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\config.client" SelfReg="false" NextFile="config.server_4"/>
+    <ROW File="config.client_5" Component_="Callback.ice" FileName="CONFIG~1.CLI|config.client" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\bidir\config.client" SelfReg="false" NextFile="config.server_5"/>
+    <ROW File="config.client_6" Component_="Client.py" FileName="CONFIG~1.CLI|config.client" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\hello\config.client" SelfReg="false" NextFile="config.server_6"/>
+    <ROW File="config.client_7" Component_="Client.py_1" FileName="CONFIG~1.CLI|config.client" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\latency\config.client" SelfReg="false" NextFile="config.server_7"/>
+    <ROW File="config.client_8" Component_="Client.py_3" FileName="CONFIG~1.CLI|config.client" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\throughput\config.client" SelfReg="false" NextFile="config.server_8"/>
+    <ROW File="config.glacier2" Component_="depend.mak" FileName="CONFIG~1.GLA|config.glacier2" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\config.glacier2" SelfReg="false" NextFile="config.server"/>
+    <ROW File="config.server" Component_="depend.mak" FileName="CONFIG~1.SER|config.server" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\config.server" SelfReg="false" NextFile="Glacier2.chat.client.vcxproj"/>
+    <ROW File="config.server_1" Component_="depend.mak_1" FileName="CONFIG~1.SER|config.server" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\config.server" SelfReg="false" NextFile="Ice.bidir.client.vcxproj"/>
+    <ROW File="config.server_2" Component_="depend.mak_2" FileName="CONFIG~1.SER|config.server" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\config.server" SelfReg="false" NextFile="Hello.ice"/>
+    <ROW File="config.server_3" Component_="depend.mak_3" FileName="CONFIG~1.SER|config.server" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\latency\config.server" SelfReg="false" NextFile="Ice.latency.client.vcxproj"/>
+    <ROW File="config.server_4" Component_="depend.mak_5" FileName="CONFIG~1.SER|config.server" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\config.server" SelfReg="false" NextFile="Ice.throughput.client.vcxproj"/>
+    <ROW File="config.server_5" Component_="Callback.ice" FileName="CONFIG~1.SER|config.server" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\bidir\config.server" SelfReg="false" NextFile="README.txt_18"/>
+    <ROW File="config.server_6" Component_="Client.py" FileName="CONFIG~1.SER|config.server" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\hello\config.server" SelfReg="false" NextFile="Hello.ice_4"/>
+    <ROW File="config.server_7" Component_="Client.py_1" FileName="CONFIG~1.SER|config.server" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\latency\config.server" SelfReg="false" NextFile="Latency.ice_2"/>
+    <ROW File="config.server_8" Component_="Client.py_3" FileName="CONFIG~1.SER|config.server" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demopy\Ice\throughput\config.server" SelfReg="false" NextFile="README.txt_22"/>
+    <ROW File="context.js" Component_="context.js" FileName="context.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\benchmarks\run\context.js" SelfReg="false" NextFile="emit.js"/>
+    <ROW File="customproxyerror.js" Component_="basicproxy.js" FileName="CUSTOM~1.JS|custom-proxy-error.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\http\custom-proxy-error.js" SelfReg="false" NextFile="errorhandling.js"/>
+    <ROW File="demo.sln" Component_="demo.sln" FileName="demo.sln" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\demo.sln" SelfReg="false" NextFile="depend.mak"/>
+    <ROW File="depend.mak" Component_="depend.mak" FileName="DEPEND~1.MAK|.depend.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Glacier2\chat\.depend.mak" SelfReg="false" NextFile="Chat.ice"/>
+    <ROW File="depend.mak_1" Component_="depend.mak_1" FileName="DEPEND~1.MAK|.depend.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\bidir\.depend.mak" SelfReg="false" NextFile="Callback.ice"/>
+    <ROW File="depend.mak_2" Component_="depend.mak_2" FileName="DEPEND~1.MAK|.depend.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\hello\.depend.mak" SelfReg="false" NextFile="Client.cpp_2"/>
+    <ROW File="depend.mak_3" Component_="depend.mak_3" FileName="DEPEND~1.MAK|.depend.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\latency\.depend.mak" SelfReg="false" NextFile="Client.cpp_3"/>
+    <ROW File="depend.mak_4" Component_="depend.mak_4" FileName="DEPEND~1.MAK|.depend.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\minimal\.depend.mak" SelfReg="false" NextFile="Client.cpp_4"/>
+    <ROW File="depend.mak_5" Component_="depend.mak_5" FileName="DEPEND~1.MAK|.depend.mak" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demo\Ice\throughput\.depend.mak" SelfReg="false" NextFile="Client.cpp_5"/>
+    <ROW File="emit.js" Component_="context.js" FileName="emit.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\benchmarks\run\emit.js" SelfReg="false" NextFile="init.js"/>
+    <ROW File="emitter.test.js" Component_="emitter.test.js" FileName="EMITTE~1.JS|emitter.test.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\test\emitter.test.js" SelfReg="false" NextFile="mocha.opts"/>
+    <ROW File="errorhandling.js" Component_="basicproxy.js" FileName="ERROR-~1.JS|error-handling.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\http\error-handling.js" SelfReg="false" NextFile="forwardandtargetproxy.js"/>
+    <ROW File="examplestest.js" Component_="examplestest.js" FileName="EXAMPL~1.JS|examples-test.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\test\examples-test.js" SelfReg="false" NextFile="agent2cert.pem"/>
+    <ROW File="favicon.ico" Component_="common.css" FileName="favicon.ico" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\assets\favicon.ico" SelfReg="false" NextFile="HttpServer.js"/>
+    <ROW File="forwardandtargetproxy.js" Component_="basicproxy.js" FileName="FORWAR~1.JS|forward-and-target-proxy.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\http\forward-and-target-proxy.js" SelfReg="false" NextFile="forwardproxy.js"/>
+    <ROW File="forwardproxy.js" Component_="basicproxy.js" FileName="FORWAR~2.JS|forward-proxy.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\http\forward-proxy.js" SelfReg="false" NextFile="latentproxy.js"/>
+    <ROW File="glacier2router.exe" Component_="glacier2router.exe" FileName="GLACIE~1.EXE|glacier2router.exe" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\glacier2router.exe" SelfReg="false" NextFile="glacier2router.pdb" DigSign="true"/>
+    <ROW File="glacier2router.exe_1" Component_="glacier2router.exe_1" FileName="GLACIE~1.EXE|glacier2router.exe" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\x64\glacier2router.exe" SelfReg="false" NextFile="glacier2router.pdb_1" DigSign="true"/>
+    <ROW File="glacier2router.pdb" Component_="glacier2router.exe" FileName="GLACIE~1.PDB|glacier2router.pdb" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\glacier2router.pdb" SelfReg="false" NextFile="glacier2router.exe_1"/>
+    <ROW File="glacier2router.pdb_1" Component_="glacier2router.exe_1" FileName="GLACIE~1.PDB|glacier2router.pdb" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\x64\glacier2router.pdb" SelfReg="false"/>
+    <ROW File="gzipmiddleware.js" Component_="bodyDecodermiddleware.js" FileName="GZIP-M~1.JS|gzip-middleware.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\middleware\gzip-middleware.js" SelfReg="false" NextFile="modifyResponsemiddleware.js"/>
+    <ROW File="hello.js" Component_="hello.js" FileName="hello.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\benchmark\scripts\hello.js" SelfReg="false" NextFile="proxy.js"/>
+    <ROW File="httpproxy.js" Component_="httpproxy.js" FileName="HTTP-P~1.JS|http-proxy.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\lib\http-proxy.js" SelfReg="false" NextFile="LICENSE"/>
     <ROW File="ice35.dll" Component_="ice35.dll" FileName="ice35.dll" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\ice35.dll" SelfReg="false" NextFile="ice35d.dll"/>
     <ROW File="ice35.dll_1" Component_="ice35.dll_1" FileName="ice35.dll" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\x64\ice35.dll" SelfReg="false" NextFile="ice35d.dll_1"/>
     <ROW File="ice35.pdb" Component_="ice35.dll" FileName="ice35.pdb" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\ice35.pdb" SelfReg="false" NextFile="ice35d.pdb"/>
@@ -133,8 +610,70 @@
     <ROW File="icews35d.dll_1" Component_="icews35d.dll_1" FileName="icews35d.dll" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\x64\icews35d.dll" SelfReg="false" NextFile="Glacier2.js"/>
     <ROW File="icews35d.pdb" Component_="icews35d.dll" FileName="icews35d.pdb" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\icews35d.pdb" SelfReg="false" NextFile="ice35.pdb_1"/>
     <ROW File="icews35d.pdb_1" Component_="icews35d.dll_1" FileName="icews35d.pdb" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\x64\icews35d.pdb" SelfReg="false" NextFile="iceutilJS35.dll"/>
+    <ROW File="index.html" Component_="build.js_2" FileName="INDEX~1.HTM|index.html" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\ChatDemo\index.html" SelfReg="false" NextFile="build.js_3"/>
+    <ROW File="index.html_1" Component_="build.js_4" FileName="INDEX~1.HTM|index.html" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Glacier2\chat\index.html" SelfReg="false" NextFile="README.txt_9"/>
+    <ROW File="index.html_2" Component_="build.js_5" FileName="INDEX~1.HTM|index.html" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\bidir\index.html" SelfReg="false" NextFile="README.txt_11"/>
+    <ROW File="index.html_3" Component_="build.js_7" FileName="INDEX~1.HTM|index.html" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\hello\index.html" SelfReg="false" NextFile="README.txt_12"/>
+    <ROW File="index.html_4" Component_="build.js_8" FileName="INDEX~1.HTM|index.html" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\latency\index.html" SelfReg="false" NextFile="Latency.ice_1"/>
+    <ROW File="index.html_5" Component_="build.js_9" FileName="INDEX~1.HTM|index.html" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\minimal\index.html" SelfReg="false" NextFile="README.txt_14"/>
+    <ROW File="index.html_6" Component_="build.js_10" FileName="INDEX~1.HTM|index.html" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\Ice\throughput\index.html" SelfReg="false" NextFile="README.txt_16"/>
+    <ROW File="index.html_7" Component_="build.js_1" FileName="INDEX~1.HTM|index.html" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\demojs\index.html" SelfReg="false" NextFile="README.txt_17"/>
+    <ROW File="index.html_8" Component_="index.html" FileName="INDEX~1.HTM|index.html" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\index.html" SelfReg="false" NextFile="npmignore"/>
+    <ROW File="index.js" Component_="npmignore" FileName="index.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\index.js" SelfReg="false" NextFile="common.js"/>
+    <ROW File="index.js_1" Component_="common.js" FileName="index.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\lib\http-proxy\index.js" SelfReg="false" NextFile="webincoming.js"/>
+    <ROW File="index.js_2" Component_="npmignore_1" FileName="index.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\index.js" SelfReg="false" NextFile="package.json_2"/>
+    <ROW File="init.js" Component_="context.js" FileName="init.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\benchmarks\run\init.js" SelfReg="false" NextFile="listeners.js"/>
+    <ROW File="latentproxy.js" Component_="basicproxy.js" FileName="LATENT~1.JS|latent-proxy.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\http\latent-proxy.js" SelfReg="false" NextFile="proxyhttptohttps.js"/>
+    <ROW File="latentwebsocketproxy.js" Component_="latentwebsocketproxy.js" FileName="LATENT~1.JS|latent-websocket-proxy.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\websocket\latent-websocket-proxy.js" SelfReg="false" NextFile="standalonewebsocketproxy.js"/>
+    <ROW File="libhttpproxycommontest.js" Component_="examplestest.js" FileName="LIB-HT~1.JS|lib-http-proxy-common-test.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\test\lib-http-proxy-common-test.js" SelfReg="false" NextFile="libhttpproxypasseswebincomingtest.js"/>
+    <ROW File="libhttpproxypasseswebincomingtest.js" Component_="examplestest.js" FileName="LIB-HT~2.JS|lib-http-proxy-passes-web-incoming-test.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\test\lib-http-proxy-passes-web-incoming-test.js" SelfReg="false" NextFile="libhttpproxypassesweboutgoingtest.js"/>
+    <ROW File="libhttpproxypassesweboutgoingtest.js" Component_="examplestest.js" FileName="LIB-HT~3.JS|lib-http-proxy-passes-web-outgoing-test.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\test\lib-http-proxy-passes-web-outgoing-test.js" SelfReg="false" NextFile="libhttpproxypasseswsincomingtest.js"/>
+    <ROW File="libhttpproxypasseswsincomingtest.js" Component_="examplestest.js" FileName="LIB-HT~4.JS|lib-http-proxy-passes-ws-incoming-test.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\test\lib-http-proxy-passes-ws-incoming-test.js" SelfReg="false" NextFile="libhttpproxytest.js"/>
+    <ROW File="libhttpproxytest.js" Component_="examplestest.js" FileName="LIB-HT~5.JS|lib-http-proxy-test.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\test\lib-http-proxy-test.js" SelfReg="false" NextFile="libhttpsproxytest.js"/>
+    <ROW File="libhttpsproxytest.js" Component_="examplestest.js" FileName="LIB-HT~6.JS|lib-https-proxy-test.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\test\lib-https-proxy-test.js" SelfReg="false" NextFile="UPGRADING.md"/>
+    <ROW File="listeners.js" Component_="context.js" FileName="LISTEN~1.JS|listeners.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\benchmarks\run\listeners.js" SelfReg="false" NextFile="listening.js"/>
+    <ROW File="listening.js" Component_="context.js" FileName="LISTEN~2.JS|listening.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\benchmarks\run\listening.js" SelfReg="false" NextFile="multipleemitters.js"/>
+    <ROW File="logo.png" Component_="logo.png" FileName="logo.png" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\doc\logo.png" SelfReg="false" NextFile="simplebalancerwithwebsockets.js"/>
+    <ROW File="makewsscerts.py" Component_="cacert.pem" FileName="MAKEWS~1.PY|makewsscerts.py" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\makewsscerts.py" SelfReg="false" NextFile="server.jks"/>
+    <ROW File="mocha.opts" Component_="emitter.test.js" FileName="MOCHA~1.OPT|mocha.opts" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\test\mocha.opts" SelfReg="false" NextFile="package.json_3"/>
+    <ROW File="modifyResponsemiddleware.js" Component_="bodyDecodermiddleware.js" FileName="MODIFY~1.JS|modifyResponse-middleware.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\middleware\modifyResponse-middleware.js" SelfReg="false" NextFile="package.json"/>
+    <ROW File="multipleemitters.js" Component_="context.js" FileName="MULTIP~1.JS|multiple-emitters.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\benchmarks\run\multiple-emitters.js" SelfReg="false" NextFile="once.js"/>
+    <ROW File="npmignore" Component_="npmignore" FileName="NPMIGN~1|.npmignore" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\.npmignore" SelfReg="false" NextFile="travis.yml"/>
+    <ROW File="npmignore_1" Component_="npmignore_1" FileName="NPMIGN~1|.npmignore" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\.npmignore" SelfReg="false" NextFile="bench.js"/>
+    <ROW File="once.js" Component_="context.js" FileName="once.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\benchmarks\run\once.js" SelfReg="false" NextFile="start"/>
+    <ROW File="package.json" Component_="package.json" FileName="PACKAG~1.JSO|package.json" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\package.json" SelfReg="false" NextFile="latentwebsocketproxy.js"/>
+    <ROW File="package.json_1" Component_="bench.js" FileName="PACKAG~1.JSO|package.json" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\benchmarks\package.json" SelfReg="false" NextFile="README.md_1"/>
+    <ROW File="package.json_2" Component_="npmignore_1" FileName="PACKAG~1.JSO|package.json" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\package.json" SelfReg="false" NextFile="README.md_2"/>
+    <ROW File="package.json_3" Component_="npmignore" FileName="PACKAG~1.JSO|package.json" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\package.json" SelfReg="false" NextFile="README.md_3"/>
+    <ROW File="package.json_4" Component_="Glacier2.js_1" FileName="PACKAG~1.JSO|package.json" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Glacier2\package.json" SelfReg="false" NextFile="PermissionsVerifier.js"/>
+    <ROW File="package.json_5" Component_="Address.js" FileName="PACKAG~1.JSO|package.json" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\Ice\package.json" SelfReg="false" NextFile="Process.js"/>
+    <ROW File="package.json_6" Component_="Admin.js" FileName="PACKAG~1.JSO|package.json" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceGrid\package.json" SelfReg="false" NextFile="Query.js"/>
+    <ROW File="package.json_7" Component_="IceMX.js" FileName="PACKAG~1.JSO|package.json" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceMX\package.json" SelfReg="false" NextFile="IceStorm.js_1"/>
+    <ROW File="package.json_8" Component_="IceStorm.js" FileName="PACKAG~1.JSO|package.json" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\node_modules\IceStorm\package.json" SelfReg="false" NextFile="glacier2router.exe"/>
+    <ROW File="proxy.js" Component_="hello.js" FileName="proxy.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\benchmark\scripts\proxy.js" SelfReg="false" NextFile="websocketsthroughput.js"/>
+    <ROW File="proxyhttpstohttp.js" Component_="basicproxy.js" FileName="PROXY-~2.JS|proxy-https-to-http.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\http\proxy-https-to-http.js" SelfReg="false" NextFile="proxyhttpstohttps.js"/>
+    <ROW File="proxyhttpstohttps.js" Component_="basicproxy.js" FileName="PROXY-~3.JS|proxy-https-to-https.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\http\proxy-https-to-https.js" SelfReg="false" NextFile="standaloneproxy.js"/>
+    <ROW File="proxyhttptohttps.js" Component_="basicproxy.js" FileName="PROXY-~1.JS|proxy-http-to-https.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\http\proxy-http-to-https.js" SelfReg="false" NextFile="proxyhttpstohttp.js"/>
+    <ROW File="s_rsa1024_priv.pem" Component_="cacert.pem" FileName="S_RSA1~1.PEM|s_rsa1024_priv.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\s_rsa1024_priv.pem" SelfReg="false" NextFile="s_rsa1024_pub.pem"/>
+    <ROW File="s_rsa1024_priv.pem_1" Component_="cacert.pem_1" FileName="S_RSA1~1.PEM|s_rsa1024_priv.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\wss\s_rsa1024_priv.pem" SelfReg="false" NextFile="s_rsa1024_pub.pem_1"/>
+    <ROW File="s_rsa1024_pub.pem" Component_="cacert.pem" FileName="S_RSA1~2.PEM|s_rsa1024_pub.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\s_rsa1024_pub.pem" SelfReg="false" NextFile="cacert.pem_1"/>
+    <ROW File="s_rsa1024_pub.pem_1" Component_="cacert.pem_1" FileName="S_RSA1~2.PEM|s_rsa1024_pub.pem" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\wss\s_rsa1024_pub.pem" SelfReg="false" NextFile="build.js"/>
+    <ROW File="server.jks" Component_="cacert.pem" FileName="server.jks" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\certs\server.jks" SelfReg="false" NextFile="s_rsa1024_priv.pem"/>
+    <ROW File="simplebalancer.js" Component_="simplebalancerwithwebsockets.js" FileName="SIMPLE~2.JS|simple-balancer.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\balancer\simple-balancer.js" SelfReg="false" NextFile="store.js"/>
+    <ROW File="simplebalancerwithwebsockets.js" Component_="simplebalancerwithwebsockets.js" FileName="SIMPLE~1.JS|simple-balancer-with-websockets.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\balancer\simple-balancer-with-websockets.js" SelfReg="false" NextFile="simplebalancer.js"/>
     <ROW File="slice2js.exe" Component_="slice2js.exe" FileName="slice2js.exe" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\slice2js.exe" SelfReg="false" NextFile="sliceJS35.dll" DigSign="true"/>
     <ROW File="sliceJS35.dll" Component_="sliceJS35.dll" FileName="SLICEJ~1.DLL|sliceJS35.dll" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0\bin\sliceJS35.dll" SelfReg="false" NextFile="ICE_LICENSE.txt"/>
+    <ROW File="standaloneproxy.js" Component_="basicproxy.js" FileName="STANDA~1.JS|standalone-proxy.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\http\standalone-proxy.js" SelfReg="false" NextFile="bodyDecodermiddleware.js"/>
+    <ROW File="standalonewebsocketproxy.js" Component_="latentwebsocketproxy.js" FileName="STANDA~1.JS|standalone-websocket-proxy.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\websocket\standalone-websocket-proxy.js" SelfReg="false" NextFile="websocketproxy.js"/>
+    <ROW File="start" Component_="bench.js" FileName="start" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\benchmarks\start" SelfReg="false" NextFile="template.js"/>
+    <ROW File="store.js" Component_="store.js" FileName="store.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\helpers\store.js" SelfReg="false" NextFile="basicproxy.js"/>
+    <ROW File="template.js" Component_="bench.js" FileName="template.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\node_modules\eventemitter3\benchmarks\template.js" SelfReg="false" NextFile="component.json"/>
+    <ROW File="travis.yml" Component_="npmignore" FileName="TRAVIS~1.YML|.travis.yml" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\.travis.yml" SelfReg="false" NextFile="README.md"/>
+    <ROW File="webincoming.js" Component_="webincoming.js" FileName="WEB-IN~1.JS|web-incoming.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\lib\http-proxy\passes\web-incoming.js" SelfReg="false" NextFile="weboutgoing.js"/>
+    <ROW File="weboutgoing.js" Component_="webincoming.js" FileName="WEB-OU~1.JS|web-outgoing.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\lib\http-proxy\passes\web-outgoing.js" SelfReg="false" NextFile="wsincoming.js"/>
+    <ROW File="websocketproxy.js" Component_="latentwebsocketproxy.js" FileName="WEBSOC~1.JS|websocket-proxy.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\examples\websocket\websocket-proxy.js" SelfReg="false" NextFile="index.js"/>
+    <ROW File="websocketsthroughput.js" Component_="hello.js" FileName="WEBSOC~1.JS|websockets-throughput.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\benchmark\scripts\websockets-throughput.js" SelfReg="false" NextFile="CHANGELOG.md"/>
+    <ROW File="wsincoming.js" Component_="webincoming.js" FileName="WS-INC~1.JS|ws-incoming.js" Attributes="0" SourcePath="..\..\..\installer\IceJS-0.1.0-demos\node_modules\http-proxy\lib\http-proxy\passes\ws-incoming.js" SelfReg="false" NextFile="httpproxy.js"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
     <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="1" PackageFolder="." Languages="en" InstallationType="4"/>
@@ -322,8 +861,18 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCreateFolderComponent">
     <ROW Directory_="Ice_3.4.2_DIR" Component_="Ice_3.4.2"/>
-    <ROW Directory_="DEMO_DIR" Component_="DEMO_DIR"/>
-    <ROW Directory_="node_modules_Dir" Component_="node_modules"/>
+    <ROW Directory_="client_Dir" Component_="client"/>
+    <ROW Directory_="server_Dir" Component_="server"/>
+    <ROW Directory_="client_1_Dir" Component_="client_1"/>
+    <ROW Directory_="server_1_Dir" Component_="server_1"/>
+    <ROW Directory_="client_2_Dir" Component_="client_2"/>
+    <ROW Directory_="server_2_Dir" Component_="server_2"/>
+    <ROW Directory_="client_3_Dir" Component_="client_3"/>
+    <ROW Directory_="server_3_Dir" Component_="server_3"/>
+    <ROW Directory_="client_4_Dir" Component_="client_4"/>
+    <ROW Directory_="server_4_Dir" Component_="server_4"/>
+    <ROW Directory_="client_5_Dir" Component_="client_5"/>
+    <ROW Directory_="server_5_Dir" Component_="server_5"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCustActComponent">
     <ROW Action="AI_DpiContentScale" Type="1" Source="aicustact.dll" Target="DpiContentScale"/>
