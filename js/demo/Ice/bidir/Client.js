@@ -9,8 +9,8 @@
 
 (function(){
 
-require("Ice/Ice");
-require("Callback");
+require("Ice");
+require("./Callback");
 
 var Demo = global.Demo;
 var CallbackSenderPrx = Demo.CallbackSenderPrx;

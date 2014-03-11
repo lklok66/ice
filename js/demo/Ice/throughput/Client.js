@@ -9,8 +9,8 @@
 
 (function(){
 
-require("Ice/Ice");
-require("Throughput");
+require("Ice");
+require("./Throughput");
 
 function menu()
 {
