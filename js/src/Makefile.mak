@@ -11,7 +11,7 @@ top_srcdir	= ..
 
 !include $(top_srcdir)\config\Make.rules.mak.js
 
-SUBDIRS		= Ice IceMX Glacier2 IceStorm IceGrid
+SUBDIRS		= Ice Glacier2 IceStorm IceGrid
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \

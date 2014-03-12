@@ -32,11 +32,17 @@
             var s = this.ice_name();
             for(var key in this)
             {
-                var value = this[key];
-                if(typeof value == "function" || key == "stack" || key.indexOf("_") === 0)
+                if(key == "stack" || key.indexOf("_") === 0)
                 {
                     continue;
                 }
+
+                var value = this[key];
+                if(typeof value == "function")
+                {
+                    continue;
+                }
+
                 s += "\n    " + key + ": \"" + value + "\"";
             }
             return s;
