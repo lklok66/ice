@@ -179,11 +179,11 @@ Selector::finish(EventHandler* handler)
 }
 
 EventHandler*
-Selector::getNextHandler(SocketOperation& status, int timeout)
+Selector::getNextHandler(SocketOperation& status, DWORD& count, int& error, int timeout)
 {
     ULONG_PTR key;
     LPOVERLAPPED ol;
-    DWORD count;
+    error = 0;
 
     if(!GetQueuedCompletionStatus(_handle, &count, &key, &ol, timeout > 0 ? timeout * 1000 : INFINITE))
     {
@@ -206,16 +206,14 @@ Selector::getNextHandler(SocketOperation& status, int timeout)
         }
         AsyncInfo* info = static_cast<AsyncInfo*>(ol);
         status = info->status;
-        info->count = SOCKET_ERROR;
-        info->error = WSAGetLastError();
+        count = SOCKET_ERROR;
+        error = WSAGetLastError();
         return reinterpret_cast<EventHandler*>(key);
     }
 
     assert(ol);
     AsyncInfo* info = static_cast<AsyncInfo*>(ol);
     status = info->status;
-    info->count = count;
-    info->error = 0;
     return reinterpret_cast<EventHandler*>(key);
 }
 
