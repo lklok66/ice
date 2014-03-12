@@ -1651,15 +1651,11 @@ def getTestEnv(lang, testdir):
             addClasspath(os.path.join(javaDir, "IcePatch2.jar"), env)
             
         if iceJsHome:
-            if isWin32():
-                libDir = os.path.join(iceJsHome, "bin")
-                if x64:
-                    libDir = os.path.join(libDir, "x64")
-            else:
-                libDir = os.path.join(iceJsHome, "lib")
-                if isDarwin() and cpp11:
-                    libDir = os.path.join(libDir, "c++11")
+            libDir = os.path.join(iceJsHome, "lib")
+            if x64:
+                libDir = libDir + "64"
             addLdPath(libDir, env)
+
         return env # That's it, we're done!
 
     if isWin32():
@@ -1667,16 +1663,16 @@ def getTestEnv(lang, testdir):
     else:
         libDir = os.path.join(getIceDir("cpp", testdir), "lib")
         if iceHome:
-          if x64:
-            if isSolaris():
-                if isSparc():
-                    libDir = os.path.join(libDir, "64")
-                else:
-                    libDir = os.path.join(libDir, "amd64")
-            elif not isDarwin():
-                libDir = libDir + "64"
-          if isDarwin() and cpp11:
-            libDir = os.path.join(libDir, "c++11")
+            if x64:
+                if isSolaris():
+                    if isSparc():
+                        libDir = os.path.join(libDir, "64")
+                    else:
+                        libDir = os.path.join(libDir, "amd64")
+                elif not isDarwin():
+                    libDir = libDir + "64"
+            if isDarwin() and cpp11:
+                libDir = os.path.join(libDir, "c++11")
 
     addLdPath(libDir, env)
 
@@ -1687,6 +1683,14 @@ def getTestEnv(lang, testdir):
                 libDir = os.path.join(libDir, "x64")
         else:
             libDir = os.path.join(iceJsHome, "lib")
+            if x64:
+                if isSolaris():
+                    if isSparc():
+                        libDir = os.path.join(libDir, "64")
+                    else:
+                        libDir = os.path.join(libDir, "amd64")
+                elif not isDarwin():
+                    libDir = libDir + "64"
             if isDarwin() and cpp11:
                 libDir = os.path.join(libDir, "c++11")
         addLdPath(libDir, env)
@@ -1972,8 +1976,15 @@ def processCmdLine():
 
     if not x64:
         x64 = isWin32() and os.environ.get("PLATFORM", "").upper() == "X64" or os.environ.get("LP64", "") == "yes"
+
     if iceHome:
         sys.stdout.write("*** using Ice installation from " + iceHome + " ")
+        if x64:
+            sys.stdout.write("(64bit) ")
+        sys.stdout.write("\n")
+
+    if iceJsHome:
+        sys.stdout.write("*** using IceJS installation from " + iceJsHome + " ")
         if x64:
             sys.stdout.write("(64bit) ")
         sys.stdout.write("\n")
