@@ -133,7 +133,7 @@ if forceclean or not os.path.exists(srcDir) or not os.path.exists(buildDir):
                         "where to download or copy the source distribution or hit enter to \n" + \
                         "download it from sun:/share/srcdists/" + version + ": ")
         if src == "":
-            src = "sun:/share/srcdists/" + version + "/Ice-" + version + ".tar.gz"
+            src = "sun:/share/srcdists/" + version + "/IceJS-" + version + ".tar.gz"
         elif not src.endswith("IceJS-" + version + ".tar.gz"):
             src = os.path.join(src, "IceJS-" + version + ".tar.gz")
 
@@ -141,23 +141,23 @@ if forceclean or not os.path.exists(srcDir) or not os.path.exists(buildDir):
             print sys.argv[0] + ": couldn't copy " + src
             sys.exit(1)
         
-    print "Unpacking ./Ice-" + version + ".tar.gz ...",
+    print "Unpacking ./IceJS-" + version + ".tar.gz ...",
     sys.stdout.flush()
     os.chdir(buildRootDir)
     if os.system("gunzip -c " + os.path.join(cwd, "IceJS-" + version + ".tar.gz") + " | tar x" + quiet + "f -"):
-        print sys.argv[0] + ": failed to unpack ./Ice-" + version + ".tar.gz"
+        print sys.argv[0] + ": failed to unpack ./IceJS-" + version + ".tar.gz"
         sys.exit(1)
     os.rename("IceJS-" + version, srcDir)
     
     if "cpp-64" in buildLanguages:
         if os.system("gunzip -c " + os.path.join(cwd, "IceJS-" + version + ".tar.gz") + " | tar x" + quiet + "f -"):
-            print sys.argv[0] + ": failed to unpack ./Ice-" + version + ".tar.gz"
+            print sys.argv[0] + ": failed to unpack ./IceJS-" + version + ".tar.gz"
             sys.exit(1)
         os.rename("IceJS-" + version, srcDir + "-64")
 
     if "cpp-11" in buildLanguages:
         if os.system("gunzip -c " + os.path.join(cwd, "IceJS-" + version + ".tar.gz") + " | tar x" + quiet + "f -"):
-            print sys.argv[0] + ": failed to unpack ./Ice-" + version + ".tar.gz"
+            print sys.argv[0] + ": failed to unpack ./IceJS-" + version + ".tar.gz"
             sys.exit(1)
         os.rename("IceJS-" + version, srcDir + "-11")
 
