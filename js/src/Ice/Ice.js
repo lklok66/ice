@@ -16,6 +16,7 @@
     require("Ice/Long");
     require("Ice/Logger");
     require("Ice/ObjectPrx");
+    require("Ice/Metrics");
     require("Ice/Properties");
     require("Ice/IdentityUtil");
     require("Ice/ProcessLogger");
