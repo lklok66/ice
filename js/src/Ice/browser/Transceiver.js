@@ -36,6 +36,8 @@
     var StateClosePending = 3;
     var StateClosed = 4;
 
+    var IsFirefox = navigator.userAgent.indexOf("Firefox") !== -1;
+    
     var Transceiver = Ice.Class({
         __init__: function(instance)
         {
@@ -143,7 +145,7 @@
             // To workaround this problem, we always wait for the socket to be connected 
             // or closed before closing the socket.
             //
-            if(this._fd.readyState === WebSocket.CONNECTING)
+            if(this._fd.readyState === WebSocket.CONNECTING && IsFirefox)
             {
                 this._state = StateClosePending;
                 return;
