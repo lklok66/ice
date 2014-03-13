@@ -79,8 +79,10 @@ $(document).foundation();
                         p = controller.runServer("cpp", srv, protocol, defaultHost).then(
                             function(proxy)
                             {
+                                var ref = proxy.ice_getIdentity().name + ":" + protocol + " -h " + defaultHost + 
+                                            " -p " + (protocol == "ws" ? "12009" : "12008");
                                 out.writeLine("ok");
-                                server = proxy;
+                                server = Test.ServerPrx.uncheckedCast(communicator.stringToProxy(ref));
                                 return __test__(out, id);
                             },
                             function(ex)
@@ -93,7 +95,7 @@ $(document).foundation();
                             {
                                 if(server)
                                 {
-                                    server.waitTestSuccess();
+                                    return server.waitTestSuccess();
                                 }
                             }
                         ).exception(
@@ -101,9 +103,20 @@ $(document).foundation();
                             {
                                 if(server)
                                 {
-                                    server.terminate();
+                                    return server.terminate().then(
+                                        function()
+                                        {
+                                            throw ex;
+                                        },
+                                        function()
+                                        {
+                                            throw ex;
+                                        });
                                 }
-                                throw ex;
+                                else
+                                {
+                                    throw ex;
+                                }
                             }
                         );
                     }
