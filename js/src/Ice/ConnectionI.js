@@ -161,7 +161,8 @@
 
             try
             {
-                if(this._state >= StateClosed) // The connection might already be closed if the communicator was destroyed.
+                // The connection might already be closed if the communicator was destroyed.
+                if(this._state >= StateClosed)
                 {
                     Debug.assert(this._exception !== null);
                     return new Promise().fail(this._exception);
@@ -170,11 +171,9 @@
                 this._startPromise = new Promise();
                 var self = this;
                 this._transceiver.setCallbacks(
-                    function() { self.transceiverConnected(); },
-                    function() { self.transceiverBytesAvailable(); },
-                    function() { self.transceiverBytesWritten(); },
-                    function() { self.transceiverClosed(); },
-                    function(ex) { self.transceiverError(ex); }
+                    function() { self.message(SocketOperation.Write); }, // connected callback
+                    function() { self.message(SocketOperation.Read); },  // read callback
+                    function() { self.message(SocketOperation.Write); }  // write callback
                 );
                 this.initialize();
             }
@@ -511,8 +510,8 @@
                         this._batchStream.pos = Protocol.headerSize;
                         this._batchStream.writeInt(this._batchRequestNum);
 
-                        this.sendMessage(OutgoingMessage.createForStream(this._batchStream,
-                                                                            this._batchRequestCompress, true));
+                        this.sendMessage(OutgoingMessage.createForStream(this._batchStream, this._batchRequestCompress, 
+                                                                         true));
                     }
                     catch(ex)
                     {
@@ -982,29 +981,6 @@
                 this.dispatch(info);
             }
             while(this._hasMoreData.value);
-        },
-        //
-        // Transceiver callbacks
-        //
-        transceiverConnected: function()
-        {
-            this.message(SocketOperation.Write);
-        },
-        transceiverBytesAvailable: function()
-        {
-            this.message(SocketOperation.Read);
-        },
-        transceiverBytesWritten: function()
-        {
-            this.message(SocketOperation.Write);
-        },
-        transceiverClosed: function()
-        {
-            this.setStateEx(StateClosed, new Ice.ConnectionLostException());
-        },
-        transceiverError: function(ex)
-        {
-            this.setStateEx(StateClosed, ex);
         },
         dispatch: function(info)
         {

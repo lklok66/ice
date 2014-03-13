@@ -23,7 +23,8 @@
     {
         var value;
         
-        this.defaultProtocol = properties.getPropertyWithDefault("Ice.Default.Protocol", Ice.TcpEndpointFactory !== undefined ? "tcp" : "ws");
+        this.defaultProtocol = properties.getPropertyWithDefault("Ice.Default.Protocol", 
+                                                                 Ice.TcpEndpointFactory !== undefined ? "tcp" : "ws");
 
         value = properties.getProperty("Ice.Default.Host");
         this.defaultHost = value.length > 0 ? value : null;
@@ -85,7 +86,7 @@
 
         this.defaultLocatorCacheTimeout = properties.getPropertyAsIntWithDefault("Ice.Default.LocatorCacheTimeout", -1);
 
-        this.defaultPreferSecure = false;
+        this.defaultPreferSecure = properties.getPropertyAsIntWithDefault("Ice.Default.PreferSecure", 0) > 0;
 
         value = properties.getPropertyWithDefault("Ice.Default.EncodingVersion",
                                                   Ice.encodingVersionToString(Protocol.currentEncoding));

@@ -795,14 +795,6 @@
             this._promise = new Promise();
             this._index = 0;
             this._current = null;
-
-            //
-            // Shuffle endpoints if endpoint selection type is Random.
-            //
-            if(this._selType === EndpointSelectionType.Random)
-            {
-                ArrayUtil.shuffle(this._endpoints);
-            }
         },
         //
         // Methods from ConnectionI_StartCallback
