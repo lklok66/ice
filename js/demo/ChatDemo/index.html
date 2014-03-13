@@ -11,7 +11,7 @@
   </head>
   <body>
     <!-- Header section that contains title and navigation bar -->
-    <section role="header" id="header">
+    <section id="header">
         <nav class="top-bar" data-topbar>
             <ul class="title-area">
                 <li class="name">
@@ -127,7 +127,7 @@
         <hr/>
         <p>This demo implements a push client for the 
             <a href="http://www.zeroc.com/chat/index.html">ZeroC's Chat Demo Application</a>. You can use the 
-            <a href="#" class="chatbutton">Live Client</a> if you don't want to setup your own server.</p>
+            <a href="#" class="chatbutton">Live Client</a> if you don't want to setup your own server.
         </p>
         
         <p>To set up the server follow the instructions from the 
@@ -200,6 +200,7 @@
     <div id="source-modal" class="reveal-modal" data-reveal>
         <a class="close-reveal-modal">&#215;</a>
         <dl class="tabs" data-tab>
+            <dt></dt>
             <dd class="active"><a href="#panel2-1">Slice</a></dd>
             <dd><a href="#panel2-2">JavaScript</a></dd>
             <dd><a href="#panel2-3">HTML</a></dd>
@@ -207,22 +208,22 @@
         <div class="tabs-content">
             <div class="content active" id="panel2-1">
                 <h6>File: ChatDemo/Chat.ice</h6>
-                <pre class="source language-c" data="Chat.ice"></pre>
+                <pre class="source language-c" data-code="Chat.ice"></pre>
                 <h6>File: ChatDemo/ChatSession.ice</h6>
-                <pre class="source language-c" data="ChatSession.ice"></pre>
+                <pre class="source language-c" data-code="ChatSession.ice"></pre>
             </div>
             <div class="content" id="panel2-2">
                 <h6>File: ChatDemo/Client.js</h6>
-                <pre class="source" data="Client.js"></pre>
+                <pre class="source" data-code="Client.js"></pre>
             </div>
             <div class="content" id="panel2-3">
                 <h6>File: ChatDemo/index.html</h6>
-                <pre class="source" data="index.html"></pre>
+                <pre class="source" data-code="index.html"></pre>
             </div>
         </div>
     </div>
     <!-- Footer section -->
-    <section role="footer" id="footer">
+    <section id="footer">
         <div class="logo">
             <h4><strong>ZeroC</strong></h4>
         </div>

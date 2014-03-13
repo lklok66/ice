@@ -33,7 +33,7 @@ $(".source").each(
     {
         $.ajax(
             {
-                url: $(e).attr("data"), 
+                url: $(e).attr("data-code"), 
                 //
                 // Use text data type to avoid problems interpreting the data.
                 //

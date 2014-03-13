@@ -11,7 +11,7 @@
   </head>
   <body>
     <!-- Header section that contains title and navigation bar -->
-    <section role="header" id="header">
+    <section id="header">
         <nav class="top-bar" data-topbar>
             <ul class="title-area">
                 <li class="name">
@@ -41,7 +41,7 @@
                 <form>
                     <div class="row">
                         <div class="small-3 columns">
-                            <label class="right inline" for="mode">Data:</label>
+                            <label class="right inline" for="data">Data:</label>
                         </div>
                         <div class="small-9 columns">
                             <select id="data">
@@ -54,7 +54,7 @@
                     </div>
                     <div class="row">
                         <div class="small-3 columns">
-                            <label class="right inline" for="mode">Test:</label>
+                            <label class="right inline" for="test">Test:</label>
                         </div>
                         <div class="small-9 columns">
                             <select id="test">
@@ -132,6 +132,7 @@
     <div id="source-modal" class="reveal-modal" data-reveal>
         <a class="close-reveal-modal">&#215;</a>
         <dl class="tabs" data-tab>
+            <dt></dt>
             <dd class="active"><a href="#panel2-1">Slice</a></dd>
             <dd><a href="#panel2-2">JavaScript</a></dd>
             <dd><a href="#panel2-3">HTML</a></dd>
@@ -139,20 +140,20 @@
         <div class="tabs-content">
             <div class="content active" id="panel2-1">
                 <h6>File: Ice/throughput/Throughput.ice</h6>
-                <pre class="source language-c" data="Throughput.ice"></pre>
+                <pre class="source language-c" data-code="Throughput.ice"></pre>
             </div>
             <div class="content" id="panel2-2">
                 <h6>File: Ice/throughput/browser/Client.js</h6>
-                <pre class="source" data="browser/Client.js"></pre>
+                <pre class="source" data-code="browser/Client.js"></pre>
             </div>
             <div class="content" id="panel2-3">
                 <h6>File: Ice/throughput/index.html</h6>
-                <pre class="source" data="index.html"></pre>
+                <pre class="source" data-code="index.html"></pre>
             </div>
         </div>
     </div>
     <!-- Footer section -->
-    <section role="footer" id="footer">
+    <section id="footer">
         <div class="logo">
             <h4><strong>ZeroC</strong></h4>
         </div>
