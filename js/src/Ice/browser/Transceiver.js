@@ -36,6 +36,8 @@
     var StateClosePending = 3;
     var StateClosed = 4;
 
+    var IsFirefox = navigator.userAgent.indexOf("Firefox") !== -1;
+    
     var Transceiver = Ice.Class({
         __init__: function(instance)
         {
@@ -84,6 +86,11 @@
             }
             catch(err)
             {
+                if(!this._exception)
+                {
+                    this._exception = translateError(this._state, err);
+                }
+
                 if(this._traceLevels.network >= 2)
                 {
                     var s = [];
@@ -91,7 +98,7 @@
                     s.push(fdToString(this._addr));
                     this._logger.trace(this._traceLevels.networkCat, s.join(""));
                 }
-                throw err;
+                throw this._exception;
             }
 
             Debug.assert(this._state === StateConnected);
@@ -123,6 +130,12 @@
         },
         close: function()
         {
+            if(this._fd === null)
+            {
+                Debug.assert(this._exception); // Websocket creation failed.
+                return;
+            }
+
             //
             // WORKAROUND: With Firefox, calling close() if the websocket isn't connected 
             // yet doesn't close the connection. The server doesn't receive any close frame
@@ -132,7 +145,7 @@
             // To workaround this problem, we always wait for the socket to be connected 
             // or closed before closing the socket.
             //
-            if(this._fd.readyState === WebSocket.CONNECTING)
+            if(this._fd.readyState === WebSocket.CONNECTING && IsFirefox)
             {
                 this._state = StateClosePending;
                 return;
@@ -152,7 +165,7 @@
             }
             catch(ex)
             {
-                throw translateError(ex);
+                throw translateError(this._state, ex);
             }
             finally
             {

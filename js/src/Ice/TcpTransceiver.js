@@ -98,19 +98,22 @@
                     this._state = StateConnected;
                 }
             }
-            catch(ex)
+            catch(err)
             {
-                if(ex instanceof LocalException)
+                if(!this._exception)
                 {
-                    if(this._traceLevels.network >= 2)
-                    {
-                        var s = [];
-                        s.push("failed to establish tcp connection\n");
-                        s.push(fdToString(this._fd, this._proxy, this._addr.host, this._addr.port));
-                        this._logger.trace(this._traceLevels.networkCat, s.join(""));
-                    }
+                    this._exception = translateError(this._state, err);
                 }
-                throw ex;
+
+                if(this._traceLevels.network >= 2)
+                {
+                    var s = [];
+                    s.push("failed to establish tcp connection\n");
+                    s.push(fdToString(this._fd, this._proxy, this._addr.host, this._addr.port));
+                    this._logger.trace(this._traceLevels.networkCat, s.join(""));
+                }
+
+                throw this._exception;
             }
 
             Debug.assert(this._state === StateConnected);
