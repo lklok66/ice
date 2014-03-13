@@ -2231,7 +2231,6 @@
                 };
                 endpoints.sort(compare);
             }
-
             return endpoints;
         },
         createConnection: function(allEndpoints)

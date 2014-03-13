@@ -33,8 +33,8 @@
     var StateNeedConnect = 0;
     var StateConnectPending = 1;
     var StateConnected = 2;
-    var StateClosed = 3;
-    var StateError = 4;
+    var StateClosePending = 3;
+    var StateClosed = 4;
 
     var Transceiver = Ice.Class({
         __init__: function(instance)
@@ -44,19 +44,11 @@
             this._readBuffers = [];
             this._readPosition = 0;
         },
-        setCallbacks: function(
-            connectedCallback,      // function(event)
-            bytesAvailableCallback, // function(event)
-            bytesWrittenCallback,   // function(event)
-            closedCallback,         // function(event)
-            errorCallback           // function(event)
-        )
+        setCallbacks: function(connectedCallback, bytesAvailableCallback, bytesWrittenCallback)
         {
             this._connectedCallback = connectedCallback;
             this._bytesAvailableCallback = bytesAvailableCallback;
             this._bytesWrittenCallback = bytesWrittenCallback;
-            this._closedCallback = closedCallback;
-            this._errorCallback = errorCallback;
         },
         //
         // Returns SocketOperation.None when initialization is complete.
@@ -65,19 +57,20 @@
         {
             try
             {
+                if(this._exception)
+                {
+                    throw this._exception;
+                }
+
                 if(this._state === StateNeedConnect)
                 {
                     this._state = StateConnectPending;
                     this._fd = new WebSocket(this._url, "ice.zeroc.com");
                     this._fd.binaryType = "arraybuffer";
                     var self = this;
-                    this._fd.onopen = function(e){ 
-                        self.socketConnected(e); };
-                    this._fd.onmessage = function(e) { 
-                        self.socketBytesAvailable(e.data); 
-                    };
-                    this._fd.onclose = function(e){
-                        self.socketClosed(e); };
+                    this._fd.onopen = function(e) { self.socketConnected(e); };
+                    this._fd.onmessage = function(e) { self.socketBytesAvailable(e.data); };
+                    this._fd.onclose = function(e) { self.socketClosed(e); };
                     return SocketOperation.Connect; // Waiting for connect to complete.
                 }
                 else if(this._state === StateConnectPending)
@@ -91,22 +84,22 @@
             }
             catch(err)
             {
-                var ex = translateError(this._state, err);
-                this._state = StateError;
-                if(ex instanceof LocalException)
+                if(this._traceLevels.network >= 2)
                 {
-                    if(this._traceLevels.network >= 2)
-                    {
-                        var s = [];
-                        s.push("failed to establish " + this.type() + " connection\n");
-                        s.push(fdToString(this._addr));
-                        this._logger.trace(this._traceLevels.networkCat, s.join(""));
-                    }
+                    var s = [];
+                    s.push("failed to establish " + this.type() + " connection\n");
+                    s.push(fdToString(this._addr));
+                    this._logger.trace(this._traceLevels.networkCat, s.join(""));
                 }
-                throw ex;
+                throw err;
             }
 
             Debug.assert(this._state === StateConnected);
+            if(this._traceLevels.network >= 1)
+            {
+                this._logger.trace(this._traceLevels.networkCat, this.type() + 
+                                   " connection established\n" + this._desc);
+            }
             return SocketOperation.None;
         },
         register: function()
@@ -115,7 +108,7 @@
             // Register the socket data listener.
             //
             this._registered = true;
-            if(this._hasBytesAvailable)
+            if(this._hasBytesAvailable || this._exception)
             {
                 this._bytesAvailableCallback();
                 this._hasBytesAvailable = false;
@@ -130,28 +123,40 @@
         },
         close: function()
         {
-            if(this._state < StateClosed)
+            //
+            // WORKAROUND: With Firefox, calling close() if the websocket isn't connected 
+            // yet doesn't close the connection. The server doesn't receive any close frame
+            // and the underlying socket isn't closed causing the server to hang on closing
+            // the connection until the browser exits.
+            //
+            // To workaround this problem, we always wait for the socket to be connected 
+            // or closed before closing the socket.
+            //
+            if(this._fd.readyState === WebSocket.CONNECTING)
             {
-                if(this._connected && this._traceLevels.network >= 1)
-                {
-                    this._logger.trace(this._traceLevels.networkCat, "closing " + this.type() + " connection\n" + this._desc);
-                }
-                Debug.assert(this._fd !== null);
-                try
-                {
-                    if(this._fd.readyState <= WebSocket.OPEN)
-                    {
-                        this._fd.close();
-                    }
-                }
-                catch(ex)
-                {
-                    throw translateError(ex);
-                }
-                finally
-                {
-                    this._fd = null;
-                }
+                this._state = StateClosePending;
+                return;
+            }
+            
+            if(this._state == StateConnected && this._traceLevels.network >= 1)
+            {
+                this._logger.trace(this._traceLevels.networkCat, "closing " + this.type() + " connection\n" + 
+                                   this._desc);
+            }
+
+            Debug.assert(this._fd !== null);
+            try
+            {
+                this._state = StateClosed;
+                this._fd.close();
+            }
+            catch(ex)
+            {
+                throw translateError(ex);
+            }
+            finally
+            {
+                this._fd = null;
             }
         },
         //
@@ -159,6 +164,11 @@
         //
         write: function(byteBuffer)
         {
+            if(this._exception)
+            {
+                throw this._exception;
+            }
+
             var remaining = byteBuffer.remaining;
             Debug.assert(remaining > 0);
             Debug.assert(this._fd);
@@ -182,8 +192,7 @@
                 this._fd.send(slice);
                 if(remaining > 0 && this._traceLevels.network >= 3)
                 {
-                    var msg = "sent " + remaining + " of " + remaining + " bytes via " + this.type() + "\n" +
-                        this._desc;
+                    var msg = "sent " + remaining + " of " + remaining + " bytes via " + this.type() + "\n" +this._desc;
                     this._logger.trace(this._traceLevels.networkCat, msg);
                 }
                 return true;
@@ -195,7 +204,7 @@
                 {
                     if(transceiver._fd)
                     {
-                        if(transceiver._fd.bufferedAmount === 0)
+                        if(transceiver._fd.bufferedAmount === 0 || this._exception)
                         {
                             transceiver._bytesWrittenCallback();
                         }
@@ -211,6 +220,11 @@
         },
         read: function(byteBuffer, moreData)
         {
+            if(this._exception)
+            {
+                throw this._exception;
+            }
+
             moreData.value = false;
 
             if(this._readBuffers.length === 0)
@@ -298,12 +312,10 @@
         },
         socketConnected: function(e)
         {
-            this._connected = true;
-            this._desc = fdToString(this._addr);
-
-            if(this._traceLevels.network >= 1)
+            if(this._state == StateClosePending)
             {
-                this._logger.trace(this._traceLevels.networkCat, this.type() + " connection established\n" + this._desc);
+                this.close();
+                return;
             }
 
             Debug.assert(this._connectedCallback !== null);
@@ -327,28 +339,27 @@
         },
         socketClosed: function(err)
         {
-            if(err.code === 1000) // CLOSE_NORMAL
+            if(this._state == StateClosePending)
             {
-                Debug.assert(this._closedCallback !== null);
-                this._closedCallback();
+                this.close();
+                return;
             }
-            else
+            
+            this._exception = translateError(this._state, err);
+            if(this._state < StateConnected)
             {
-                this._errorCallback(translateError(this._state, err));
+                this._connectedCallback();
+            }
+            else if(this._registered)
+            {
+                this._bytesAvailableCallback();
             }
         },
-        socketError: function(err)
-        {
-            Debug.assert(this._errorCallback !== null);
-            this._errorCallback(translateError(err));
-        }
     });
     
     function fdToString(address)
     {
-        var s = "local address = <not available>\n";
-        s += "remote address = " + address.host + ":" + address.port;
-        return s;
+        return "local address = <not available>\nremote address = " + address.host + ":" + address.port;
     }
 
     function translateError(state, err)
@@ -359,6 +370,10 @@
         }
         else
         {
+            if(err === 1000) // CLOSE_NORMAL
+            {
+                throw new Ice.ConnectionLostException();
+            }
             return new Ice.SocketException(err.code, err);
         }
     }
@@ -377,10 +392,10 @@
         transceiver._url = url;
         transceiver._fd = null;
         transceiver._addr = addr;
-        transceiver._connected = false;
         transceiver._desc = "remote address: " + addr.host + ":" + addr.port + " <not connected>";
         transceiver._state = StateNeedConnect;
         transceiver._secure = secure;
+        transceiver._exception = null;
         
         return transceiver;
     };

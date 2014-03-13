@@ -33,7 +33,6 @@
     var StateProxyConnectRequestPending = 3;
     var StateConnected = 4;
     var StateClosed = 5;
-    var StateError = 6;
 
     var TcpTransceiver = Ice.Class({
         __init__: function(instance)
@@ -43,19 +42,11 @@
             this._readBuffers = [];
             this._readPosition = 0;
         },
-        setCallbacks: function(
-            connectedCallback,      // function()
-            bytesAvailableCallback, // function()
-            bytesWrittenCallback,   // function()
-            closedCallback,         // function()
-            errorCallback           // function(ex)
-        )
+        setCallbacks: function(connectedCallback, bytesAvailableCallback, bytesWrittenCallback)
         {
             this._connectedCallback = connectedCallback;
             this._bytesAvailableCallback = bytesAvailableCallback;
             this._bytesWrittenCallback = bytesWrittenCallback;
-            this._closedCallback = closedCallback;
-            this._errorCallback = errorCallback;
 
             var self = this;
             this._fd.on("connect", function() { self.socketConnected(); });
@@ -70,6 +61,11 @@
         {
             try
             {
+                if(this._exception)
+                {
+                    throw this._exception;
+                }
+
                 if(this._state === StateNeedConnect)
                 {
                     this._state = StateConnectPending;
@@ -81,9 +77,7 @@
                     //
                     // Socket is connected.
                     //
-
                     this._desc = fdToString(this._fd, this._proxy, this._addr);
-
                     this._state = StateConnected;
                 }
                 else if(this._state === StateProxyConnectRequest)
@@ -130,15 +124,21 @@
         },
         register: function()
         {
+            this._registered = true;
             this._fd.resume();
+            if(this._exception)
+            {
+                this._bytesAvailableCallback();
+            }
         },
         unregister: function()
         {
+            this._registered = false;
             this._fd.pause();
         },
         close: function()
         {
-            if(this._connected && this._traceLevels.network >= 1)
+            if(this._state > StateConnectPending && this._traceLevels.network >= 1)
             {
                 this._logger.trace(this._traceLevels.networkCat, "closing " + this.type() + " connection\n" +
                                     this._desc);
@@ -163,6 +163,11 @@
         //
         write: function(byteBuffer)
         {
+            if(this._exception)
+            {
+                throw this._exception;
+            }
+
             var remaining = byteBuffer.remaining;
             Debug.assert(remaining > 0);
 
@@ -178,21 +183,27 @@
 
             var self = this;
 
-            var sync = this._fd.write(slice, null, function(){
+            var sync = true;
+            sync = this._fd.write(slice, null, function() {
+                if(self._traceLevels.network >= 3)
+                {
+                    var msg = "sent " + remaining + " bytes via " + self.type() + "\n" + self._desc;
+                    self._logger.trace(self._traceLevels.networkCat, msg);
+                }
                 if(!sync)
                 {
-                    self.socketBytesWritten(remaining);
                     self._bytesWrittenCallback();
                 }
             });
-            if(sync)
-            {
-                 self.socketBytesWritten(remaining);
-            }
             return sync;
         },
         read: function(byteBuffer, moreData)
         {
+            if(this._exception)
+            {
+                throw this._exception;
+            }
+
             moreData.value = false;
 
             if(this._readBuffers.length === 0)
@@ -276,21 +287,13 @@
         },
         socketConnected: function()
         {
-            this._connected = true;
-            this._desc = fdToString(this._fd, this._proxy, this._addr);
-
-            if(this._traceLevels.network >= 1)
-            {
-                this._logger.trace(this._traceLevels.networkCat, this.type() + " connection established\n" +
-                                    this._desc);
-            }
-
             Debug.assert(this._connectedCallback !== null);
             this._connectedCallback();
         },
         socketBytesAvailable: function(buf)
         {
             Debug.assert(this._bytesAvailableCallback !== null);
+
             //
             // TODO: Should we set a limit on how much data we can read?
             // We can call _fd.pause() to temporarily stop reading.
@@ -301,14 +304,6 @@
                 this._bytesAvailableCallback();
             }
         },
-        socketBytesWritten: function(n)
-        {
-            if(this._traceLevels.network >= 3)
-            {
-                var msg = "sent " + n + " bytes via " + this.type() + "\n" + this._desc;
-                this._logger.trace(this._traceLevels.networkCat, msg);
-            }
-        },
         socketClosed: function(err)
         {
             //
@@ -317,14 +312,20 @@
             //
             if(!err)
             {
-                Debug.assert(this._closedCallback !== null);
-                this._closedCallback();
+                this.socketError(null);
             }
         },
         socketError: function(err)
         {
-            Debug.assert(this._errorCallback !== null);
-            this._errorCallback(translateError(this._state, err));
+            this._exception = translateError(this._state, err)
+            if(this._state < StateConnected)
+            {
+                this._connectedCallback();
+            }
+            else if(this._registered)
+            {
+                this._bytesAvailableCallback();
+            }
         }
     });
     
@@ -340,7 +341,11 @@
 
     function translateError(state, err)
     {
-        if(state < StateConnected)
+        if(!err)
+        {
+            return new Ice.ConnectionLostException();
+        }
+        else if(state < StateConnected)
         {
             if(connectionRefused(err.code))
             {
@@ -392,9 +397,10 @@
 
         transceiver._fd = new net.Socket();
         transceiver._addr = addr;
-        transceiver._connected = false;
         transceiver._desc = "remote address: " + addr.host + ":" + addr.port + " <not connected>";
         transceiver._state = StateNeedConnect;
+        transceiver._registered = false;
+        transceiver._exception = null;
 
         return transceiver;
     };
@@ -405,9 +411,10 @@
 
         transceiver._fd = fd;
         transceiver._addr = null;
-        transceiver._connected = true;
         transceiver._desc = fdToString(fd);
         transceiver._state = StateConnected;
+        transceiver._registered = false;
+        transceiver._exception = null;
 
         return transceiver;
     };

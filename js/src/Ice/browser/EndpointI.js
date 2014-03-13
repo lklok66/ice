@@ -213,7 +213,8 @@
                     this._port);
             }
 
-            return Transceiver.createOutgoing(this._instance, this._secure, new Address(this._host, this._port), this._resource);
+            return Transceiver.createOutgoing(this._instance, this._secure, new Address(this._host, this._port), 
+                                              this._resource);
         },
         hashCode: function()
         {
