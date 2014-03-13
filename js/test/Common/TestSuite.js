@@ -103,9 +103,20 @@ $(document).foundation();
                             {
                                 if(server)
                                 {
-                                    server.terminate();
+                                    return server.terminate().then(
+                                        function()
+                                        {
+                                            throw ex;
+                                        },
+                                        function()
+                                        {
+                                            throw ex;
+                                        });
                                 }
-                                throw ex;
+                                else
+                                {
+                                    throw ex;
+                                }
                             }
                         );
                     }
